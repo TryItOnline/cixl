@@ -322,7 +322,7 @@ In the example below, ```foo``` manipulates the main stack through the passed in
 ### Embedding & Extending
 Everything about cixl has been designed from the ground up to support embedding in, and extending from C. The makefile contains a target named ```libcixl``` that will build a static library containing everything you need to get started. Adding a type and associated function is as simple as this:
 
-```
+```C
 #include <cixl/box.h>
 #include <cixl/cx.h>
 #include <cixl/error.h>
