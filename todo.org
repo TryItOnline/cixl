@@ -1,6 +1,3 @@
-* add times fn
-** 10 times {...}
-** call arg n times
 * add CX_TTYPE
 ** lookup types on parse
 ** change CX_ID where used as type

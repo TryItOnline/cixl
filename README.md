@@ -166,20 +166,6 @@ The ```if``` function may be used to branch on a boolean condition.
 ['not zero']
 ```
 
-### Loops
-The ```times``` function may be used to repeat an action N times.
-
-```
-> 10 times 42
-..
-[42 42 42 42 42 42 42 42 42 42]
-```
-
-```
-> 0, 42 times &++
-[42]
-```
-
 ### Lambdas
 Putting braces around a block of code defines a lambda, which is then pushed on the stack.
 
@@ -261,6 +247,20 @@ Several parameters may share the same type. An index may may be specified instea
 ..  _fib 0 1 $n;
 ..fib 50
 [12586269025]
+```
+
+### Loops
+The ```times``` function may be used to repeat an action N times.
+
+```
+> 10 times 42
+..
+[42 42 42 42 42 42 42 42 42 42]
+```
+
+```
+> 0, 42 times &++
+[42]
 ```
 
 ### Coroutines
