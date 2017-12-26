@@ -157,6 +157,28 @@ Variables in the parent scope may be referenced from within the scope, but varia
 [2 1]
 ```
 
+### Conditions
+The ```if``` function may be used to branch on a boolean condition.
+
+```
+> 42 ? if 'not zero' 'zero'
+..
+['not zero']
+```
+
+### Loops
+The ```times``` function may be used to repeat an action N times.
+
+```
+> 10 times 42
+..
+[42 42 42 42 42 42 42 42 42 42]
+```
+
+```
+> 0, 42 times &++
+[42]
+```
 
 ### Lambdas
 Putting braces around a block of code defines a lambda, which is then pushed on the stack.

@@ -239,10 +239,12 @@ static void clock_imp(struct cx_scope *scope) {
   struct cx_box x = *cx_ok(cx_pop(scope, false));
   cx_timer_t timer;
   cx_timer_reset(&timer);
-  cx_box_call(&x, scope);
+  bool ok = cx_box_call(&x, scope);
   cx_box_deinit(&x);
-  
-  cx_box_init(cx_push(scope), scope->cx->int_type)->as_int = cx_timer_ns(&timer);;
+
+  if (ok) {
+    cx_box_init(cx_push(scope), scope->cx->int_type)->as_int = cx_timer_ns(&timer);
+  }
 }
 
 static void test_imp(struct cx_scope *scope) {

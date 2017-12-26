@@ -52,6 +52,18 @@ static void div_imp(struct cx_scope *scope) {
   cx_box_init(cx_push(scope), scope->cx->int_type)->as_int = x.as_int / y.as_int;
 }
 
+static void times_imp(struct cx_scope *scope) {
+  struct cx_box
+    x = *cx_ok(cx_pop(scope, false)),
+    reps = *cx_ok(cx_pop(scope, false));
+
+  for (cx_int_t i = 0; i < reps.as_int; i++) {
+    if (!cx_box_call(&x, scope)) { break; }
+  }
+
+  cx_box_deinit(&x);
+}
+
 static bool equid_imp(struct cx_box *x, struct cx_box *y) {
   return x->as_int == y->as_int;
 }
@@ -78,7 +90,7 @@ struct cx_type *cx_init_int_type(struct cx *cx) {
   cx_add_func(cx, "*", cx_arg(t), cx_arg(t))->ptr = mul_imp;
   cx_add_func(cx, "/", cx_arg(t), cx_arg(t))->ptr = div_imp;
 
-  //cx_add_func(cx, "times", cx_arg(t), cx_arg(cx->any_type))->ptr = times_imp;
+  cx_add_func(cx, "times", cx_arg(t), cx_arg(cx->any_type))->ptr = times_imp;
 
   return t;
 }
