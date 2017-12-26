@@ -383,7 +383,7 @@ int main() {
 - There is no right way to do it
 - Obvious is overrated
 - Rules are for machines
-- Only fools predict the future
+- Only fools predict "the future"
 - Intuition goes with the flow
 - Namespaces are one honking great idea
 
