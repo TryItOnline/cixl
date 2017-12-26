@@ -74,15 +74,15 @@ ssize_t cx_eval_func(struct cx *cx, struct cx_vec *toks, ssize_t pc) {
     if ((pc = cx_eval_tok(cx, toks, pc)) == -1) { return -1; }
   }
 
-  struct cx_scope *scope = cx_scope(cx, 0);
+  struct cx_scope *s = cx_scope(cx, 0);
   
-  if (scope->stack.count < func->nargs) {
+  if (s->stack.count - s->cut_offs < func->nargs) {
     cx_error(cx, row, col, "Not enough args for func: '%s'", func->id);
     return -1;
   }
 
-  scope->cut_offs = 0;
-  return cx_funcall(func, scope, row, col) ? pc : -1;
+  s->cut_offs = 0;
+  return cx_funcall(func, s, row, col) ? pc : -1;
 }
 
 ssize_t cx_eval_group(struct cx *cx, struct cx_vec *toks, ssize_t pc) {

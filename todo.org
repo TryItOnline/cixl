@@ -1,9 +1,6 @@
 * add times fn
 ** 10 times {...}
-** call arg n times with i pushed
-* add clock fn
-** clock {...}
-** return duration for call in ns
+** call arg n times
 * add CX_TTYPE
 ** lookup types on parse
 ** change CX_ID where used as type
@@ -23,7 +20,3 @@
 * jit func tokens to imps
 ** add CX_TFUNC_IMP
 *** add func ref to imp struct
-
-func: _fib(a b n Int) $n ? if {$b, $a + $b, -- $n recall} $a;
-
-1000000000, clock {fib 50} /

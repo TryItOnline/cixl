@@ -64,6 +64,7 @@ struct cx_type *cx_init_int_type(struct cx *cx) {
   struct cx_type *t = cx_add_type(cx, "Int", cx->any_type, NULL);
   t->equid = equid_imp;
   t->fprint = fprint_imp;
+
   cx_add_func(cx, "?", cx_arg(t))->ptr = ok_imp;
   
   cx_add_func(cx, "<", cx_arg(t), cx_arg(t))->ptr = lt_imp;
@@ -76,6 +77,8 @@ struct cx_type *cx_init_int_type(struct cx *cx) {
   cx_add_func(cx, "-", cx_arg(t), cx_arg(t))->ptr = sub_imp;
   cx_add_func(cx, "*", cx_arg(t), cx_arg(t))->ptr = mul_imp;
   cx_add_func(cx, "/", cx_arg(t), cx_arg(t))->ptr = div_imp;
+
+  //cx_add_func(cx, "times", cx_arg(t), cx_arg(cx->any_type))->ptr = times_imp;
 
   return t;
 }

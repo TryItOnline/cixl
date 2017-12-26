@@ -300,7 +300,7 @@ struct cx *cx_init(struct cx *cx) {
 	      cx_arg(cx->bool_type),
 	      cx_arg(cx->any_type),
 	      cx_arg(cx->any_type))->ptr = if_imp;
-
+  
   cx_add_func(cx, "call", cx_arg(cx->any_type))->ptr = call_imp;
   cx_add_func(cx, "recall")->ptr = recall_imp;
 

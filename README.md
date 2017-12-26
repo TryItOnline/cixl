@@ -179,6 +179,15 @@ Lambdas inherit the defining scope.
 [42]
 ```
 
+And cut the stack implicity on entry.
+
+```
+> 7 {+ 35} call
+..
+Error in row 1, col 3:
+Not enough args for func: '+'
+```
+
 ### Functions
 The ```func:``` macro may be used to define named functions. Several implementations may be defined for the same name as long as they have the same arity and different argument types. Each function opens an implicit scope that is closed on exit.
 
