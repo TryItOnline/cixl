@@ -3,7 +3,10 @@
 ** change CX_ID where used as type
 * add forward scanning to recall
 ** convert to macro
+* add wrap macro for cx_add_type
+** pass NULL
 * change func imps to return bool
+* update readme
 * add Vect type
 ** add cx_vect struct with vec & nrefs
 ** add [] support
