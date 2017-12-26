@@ -15,6 +15,5 @@ add_executable(cixl ${sources} src/main.c)
 target_include_directories(cixl PUBLIC src/)
 
 install(FILES ${headers} DESTINATION include/cixl)
-
 install(FILES build/cixl DESTINATION bin)
 install(FILES build/libcixl.a DESTINATION lib)

@@ -1,7 +1,7 @@
 #include <string.h>
 
-#include "cixl/cx.h"
 #include "cixl/box.h"
+#include "cixl/cx.h"
 #include "cixl/error.h"
 #include "cixl/func.h"
 #include "cixl/str.h"
