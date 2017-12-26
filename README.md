@@ -370,6 +370,9 @@ int main() {
   cx_add_func(&cx, "?", cx_arg(t))->ptr = ok_imp;
 
   ...
+
+  cx_deinit(&cx);
+  return 0;
 }
 ```
 
