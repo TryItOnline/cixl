@@ -71,17 +71,17 @@ static void insert_delete_tests() {
   
   for (cx_int_t i = 0; i < CX_SET_TEST_MAX; i++) {
     void *p = cx_set_insert(&set, &i);
-    cx_ok(p);
+    cx_test(p);
     *(cx_int_t *)p = i;
   }
 
-  cx_ok(set.members.count == CX_SET_TEST_MAX);
+  cx_test(set.members.count == CX_SET_TEST_MAX);
     
   for (cx_int_t i = 0; i < CX_SET_TEST_MAX; i++) {
-    cx_ok(cx_set_delete(&set, &i));
+    cx_test(cx_set_delete(&set, &i));
   }
 
-  cx_ok(!set.members.count);
+  cx_test(!set.members.count);
   cx_set_deinit(&set);
 }
 

@@ -28,7 +28,7 @@ ssize_t cx_eval_id(struct cx *cx, struct cx_vec *toks, ssize_t pc) {
       struct cx_scope *s = cx_scope(cx, 0);
       struct cx_box *v = cx_get(s, id+1, false);
       if (!v) { return -1; }
-      cx_box_copy(cx_push(s), v);
+      cx_copy(cx_push(s), v);
     } else {
       cx_error(cx, t->row, t->col, "Unknown id: '%s'", id);
       return -1;
@@ -40,7 +40,7 @@ ssize_t cx_eval_id(struct cx *cx, struct cx_vec *toks, ssize_t pc) {
 
 ssize_t cx_eval_literal(struct cx *cx, struct cx_vec *toks, ssize_t pc) {
   struct cx_tok *t = cx_vec_get(toks, pc);
-  cx_box_copy(cx_push(cx_scope(cx, 0)), t->data);
+  cx_copy(cx_push(cx_scope(cx, 0)), t->data);
   return pc+1;
 }
 
@@ -95,7 +95,7 @@ ssize_t cx_eval_group(struct cx *cx, struct cx_vec *toks, ssize_t pc) {
 }
 
 ssize_t cx_eval_tok(struct cx *cx, struct cx_vec *toks, ssize_t pc) {
-  cx_ok(toks->count);
+  cx_test(toks->count);
   struct cx_tok *t = cx_vec_get(toks, pc);
   struct cx_scope *s = cx_scope(cx, 0);
 

@@ -18,24 +18,27 @@ struct cx_box *cx_box_deinit(struct cx_box *box) {
 }
 
 bool cx_eqval(struct cx_box *x, struct cx_box *y) {
-  if (!x->type->eqval) { return cx_equid(x, y); }
-  return cx_ok(x->type->eqval)(x, y);
+  return x->type->eqval ? x->type->eqval(x, y) : cx_equid(x, y);
 }
 
 bool cx_equid(struct cx_box *x, struct cx_box *y) {
-  return cx_ok(x->type->equid)(x, y);
+  return cx_test(x->type->equid)(x, y);
 }
 
-bool cx_box_call(struct cx_box *box, struct cx_scope *scope) {
+bool cx_ok(struct cx_box *x) {
+  return x->type->ok ? x->type->ok(x) : true;
+}
+
+bool cx_call(struct cx_box *box, struct cx_scope *scope) {
   if (!box->type->call) {
-    cx_box_copy(cx_push(scope), box);
+    cx_copy(cx_push(scope), box);
     return true;
   }
   
   return box->type->call(box, scope);
 }
 
-struct cx_box *cx_box_copy(struct cx_box *dst, struct cx_box *src) {
+struct cx_box *cx_copy(struct cx_box *dst, struct cx_box *src) {
   if (src->type->copy) {
     dst->type = src->type;
     src->type->copy(dst, src);
@@ -47,7 +50,7 @@ struct cx_box *cx_box_copy(struct cx_box *dst, struct cx_box *src) {
   return dst;
 }
 
-void cx_box_fprint(struct cx_box *box, FILE *out) {
-  cx_ok(box->type->fprint)(box, out);
+void cx_fprint(struct cx_box *box, FILE *out) {
+  cx_test(box->type->fprint)(box, out);
 }
 

@@ -59,7 +59,7 @@ static void fprint_imp(struct cx_box *value, FILE *out) {
 
 static void deinit_imp(struct cx_box *value) {
   struct cx_lambda *l = value->as_ptr;
-  cx_ok(l->nrefs > 0);
+  cx_test(l->nrefs > 0);
   l->nrefs--;
   if (!l->nrefs) { free(cx_lambda_deinit(l)); }
 }

@@ -21,7 +21,7 @@ struct cx_vec *cx_vec_deinit(struct cx_vec *vec) {
 }
 
 void cx_vec_grow(struct cx_vec *vec, size_t capac) {
-  cx_ok(capac > vec->capac);
+  cx_test(capac > vec->capac);
 
   if (vec->capac) {
     while (vec->capac < capac) { vec->capac *= CX_VEC_GROW_FACTOR; }
@@ -42,18 +42,18 @@ void *cx_vec_push(struct cx_vec *vec) {
 }
 
 void *cx_vec_peek(struct cx_vec *vec, size_t i) {
-  cx_ok(vec->count > i);
+  cx_test(vec->count > i);
   return cx_vec_get(vec, vec->count-i-1);
 }
 
 void *cx_vec_pop(struct cx_vec *vec) {
-  cx_ok(vec->count);
+  cx_test(vec->count);
   vec->count--;
   return cx_vec_get(vec, vec->count);
 }
 
 void *cx_vec_insert(struct cx_vec *vec, size_t i) {
-  cx_ok(i <= vec->count);
+  cx_test(i <= vec->count);
   if (vec->capac == vec->count) { cx_vec_grow(vec, vec->capac+1); }
   void *p = cx_vec_get(vec, i);
   
@@ -86,13 +86,13 @@ static void push_pop_tests() {
     *(int *)cx_vec_push(&vec) = i;
   }
 
-  cx_ok(vec.count == CX_VEC_TEST_MAX);
+  cx_test(vec.count == CX_VEC_TEST_MAX);
     
   for (int i = 0; i < CX_VEC_TEST_MAX; i++) {
     cx_vec_pop(&vec);
   }
 
-  cx_ok(!vec.count);
+  cx_test(!vec.count);
   cx_vec_deinit(&vec);
 }
 
@@ -107,7 +107,7 @@ static void do_tests() {
   int expected = 0;
     
   cx_do_vec(&vec, int, actual) {
-    cx_ok(*actual == expected++);
+    cx_test(*actual == expected++);
   }    
 
   cx_vec_deinit(&vec);

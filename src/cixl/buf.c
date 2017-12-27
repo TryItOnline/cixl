@@ -11,7 +11,7 @@ struct cx_buf *cx_buf_open(struct cx_buf *buf) {
 }
 
 struct cx_buf *cx_buf_close(struct cx_buf *buf) {
-  cx_ok(buf->stream);
+  cx_test(buf->stream);
   fclose(buf->stream);
   buf->stream = NULL;
   return buf;

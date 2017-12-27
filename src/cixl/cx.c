@@ -177,13 +177,13 @@ static bool func_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
 }
 
 static void dup_imp(struct cx_scope *scope) {
-  struct cx_box *vp = cx_ok(cx_peek(scope, false));
+  struct cx_box *vp = cx_test(cx_peek(scope, false));
   struct cx_box v = *vp;
-  cx_box_copy(cx_push(scope), &v);
+  cx_copy(cx_push(scope), &v);
 }
 
 static void zap_imp(struct cx_scope *scope) {
-  cx_box_deinit(cx_ok(cx_pop(scope, false)));
+  cx_box_deinit(cx_test(cx_pop(scope, false)));
 }
 
 static void cls_imp(struct cx_scope *scope) {
@@ -192,8 +192,8 @@ static void cls_imp(struct cx_scope *scope) {
 
 static void eqval_imp(struct cx_scope *scope) {
   struct cx_box
-    y = *cx_ok(cx_pop(scope, false)),
-    x = *cx_ok(cx_pop(scope, false));
+    y = *cx_test(cx_pop(scope, false)),
+    x = *cx_test(cx_pop(scope, false));
   
   cx_box_init(cx_push(scope), scope->cx->bool_type)->as_bool = cx_eqval(&x, &y);
   cx_box_deinit(&x);
@@ -202,29 +202,41 @@ static void eqval_imp(struct cx_scope *scope) {
 
 static void equid_imp(struct cx_scope *scope) {
   struct cx_box
-    y = *cx_ok(cx_pop(scope, false)),
-    x = *cx_ok(cx_pop(scope, false));
+    y = *cx_test(cx_pop(scope, false)),
+    x = *cx_test(cx_pop(scope, false));
   
   cx_box_init(cx_push(scope), scope->cx->bool_type)->as_bool = cx_equid(&x, &y);
   cx_box_deinit(&x);
   cx_box_deinit(&y);
 }
 
+static void ok_imp(struct cx_scope *scope) {
+  struct cx_box v = *cx_test(cx_pop(scope, false));
+  cx_box_init(cx_push(scope), scope->cx->bool_type)->as_bool = cx_ok(&v);
+  cx_box_deinit(&v);
+}
+
+static void not_imp(struct cx_scope *scope) {
+  struct cx_box v = *cx_test(cx_pop(scope, false));
+  cx_box_init(cx_push(scope), scope->cx->bool_type)->as_bool = !cx_ok(&v);
+  cx_box_deinit(&v);
+}
+
 static void if_imp(struct cx_scope *scope) {
   struct cx_box
-    y = *cx_ok(cx_pop(scope, false)),
-    x = *cx_ok(cx_pop(scope, false)),
-    cond = *cx_ok(cx_pop(scope, false));
+    y = *cx_test(cx_pop(scope, false)),
+    x = *cx_test(cx_pop(scope, false)),
+    c = *cx_test(cx_pop(scope, false));
   
-  cx_box_call(cond.as_bool ? &x : &y, scope);
+  cx_call(cx_ok(&c) ? &x : &y, scope);
   cx_box_deinit(&x);
   cx_box_deinit(&y);
 }
 
 static void call_imp(struct cx_scope *scope) {
-  struct cx_box x = *cx_ok(cx_pop(scope, false));
-  cx_box_call(&x, scope);
-  cx_box_deinit(&x);
+  struct cx_box v = *cx_test(cx_pop(scope, false));
+  cx_call(&v, scope);
+  cx_box_deinit(&v);
 }
 
 static void recall_imp(struct cx_scope *scope) {
@@ -244,11 +256,11 @@ static void recall_imp(struct cx_scope *scope) {
 }
 
 static void clock_imp(struct cx_scope *scope) {
-  struct cx_box x = *cx_ok(cx_pop(scope, false));
+  struct cx_box v = *cx_test(cx_pop(scope, false));
   cx_timer_t timer;
   cx_timer_reset(&timer);
-  bool ok = cx_box_call(&x, scope);
-  cx_box_deinit(&x);
+  bool ok = cx_call(&v, scope);
+  cx_box_deinit(&v);
 
   if (ok) {
     cx_box_init(cx_push(scope), scope->cx->int_type)->as_int = cx_timer_ns(&timer);
@@ -256,12 +268,14 @@ static void clock_imp(struct cx_scope *scope) {
 }
 
 static void test_imp(struct cx_scope *scope) {
-  struct cx_box x = *cx_ok(cx_pop(scope, false));
+  struct cx_box v = *cx_test(cx_pop(scope, false));
   struct cx *cx = scope->cx;
   
-  if (x.type != cx->bool_type || !x.as_bool) {
+  if (!cx_ok(&v)) {
     cx_error(cx, cx->row, cx->col, "Test failed");
   }
+
+  cx_box_deinit(&v);
 }
 
 struct cx *cx_init(struct cx *cx) {
@@ -308,8 +322,11 @@ struct cx *cx_init(struct cx *cx) {
   cx_add_func(cx, "=", cx_arg(cx->any_type), cx_narg(0))->ptr = eqval_imp;
   cx_add_func(cx, "==", cx_arg(cx->any_type), cx_narg(0))->ptr = equid_imp;
 
+  cx_add_func(cx, "?", cx_arg(cx->opt_type))->ptr = ok_imp;
+  cx_add_func(cx, "not", cx_arg(cx->opt_type))->ptr = not_imp;
+
   cx_add_func(cx, "if",
-	      cx_arg(cx->bool_type),
+	      cx_arg(cx->opt_type),
 	      cx_arg(cx->any_type),
 	      cx_arg(cx->any_type))->ptr = if_imp;
   
@@ -317,20 +334,20 @@ struct cx *cx_init(struct cx *cx) {
   cx_add_func(cx, "recall")->ptr = recall_imp;
 
   cx_add_func(cx, "clock", cx_arg(cx->any_type))->ptr = clock_imp;
-  cx_add_func(cx, "test", cx_arg(cx->bool_type))->ptr = test_imp;
+  cx_add_func(cx, "test", cx_arg(cx->opt_type))->ptr = test_imp;
   
   cx->main = cx_begin(cx, false);
   return cx;
 }
 
 void cx_init_math(struct cx *cx) {
-  cx_ok(cx_eval_str(cx,
-		    "func: _fib(a b n Int) "
-		    "$n ? if {$b, $a + $b, -- $n recall} $a;"));
+  cx_test(cx_eval_str(cx,
+		      "func: _fib(a b n Int) "
+		      "$n ? if {$b, $a + $b, -- $n recall} $a;"));
 
-  cx_ok(cx_eval_str(cx,
-		    "func: fib(n Int) "
-		    "_fib 0 1 $n;"));
+  cx_test(cx_eval_str(cx,
+		      "func: fib(n Int) "
+		      "_fib 0 1 $n;"));
 }
 
 struct cx *cx_deinit(struct cx *cx) {
@@ -355,7 +372,7 @@ struct cx *cx_deinit(struct cx *cx) {
 
 void cx_add_separators(struct cx *cx, const char *cs) {
   for (const char *c = cs; *c; c++) {
-    *(char *)cx_ok(cx_set_insert(&cx->separators, c)) = *c;
+    *(char *)cx_test(cx_set_insert(&cx->separators, c)) = *c;
   }
 }
 
@@ -364,7 +381,7 @@ bool cx_is_separator(struct cx *cx, char c) {
 }
 
 struct cx_type *cx_add_type(struct cx *cx, const char *id, ...) {
-  struct cx_type **t = cx_ok(cx_set_insert(&cx->types, &id));
+  struct cx_type **t = cx_test(cx_set_insert(&cx->types, &id));
 
   if (!t) {
     cx_error(cx, cx->row, cx->col, "Duplicate type: '%s'", id);
@@ -434,7 +451,7 @@ struct cx_func *cx_get_func(struct cx *cx, const char *id, bool silent) {
 
 
 struct cx_macro *cx_add_macro(struct cx *cx, const char *id, cx_macro_parse_t imp) {
-  struct cx_macro **m = cx_ok(cx_set_insert(&cx->macros, &id));
+  struct cx_macro **m = cx_test(cx_set_insert(&cx->macros, &id));
 
   if (!m) {
     cx_error(cx, cx->row, cx->col, "Duplicate macro: '%s'", id);

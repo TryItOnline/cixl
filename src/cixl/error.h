@@ -4,18 +4,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define cx_ok(cond) ({						\
-      typeof(cond) _cond = cond;				\
-								\
-      if (!_cond) {						\
-	fprintf(stderr,						\
-		"'%s' failed at line %d in %s\n",		\
-		#cond, __LINE__, __FILE__);			\
-	abort();						\
-      }								\
-								\
-      _cond;							\
-    })								\
+#define cx_test(cond) ({				\
+      typeof(cond) _cond = cond;			\
+							\
+      if (!_cond) {					\
+	fprintf(stderr,					\
+		"'%s' failed at line %d in %s\n",	\
+		#cond, __LINE__, __FILE__);		\
+	abort();					\
+      }							\
+							\
+      _cond;						\
+    })							\
 
 struct cx;
 

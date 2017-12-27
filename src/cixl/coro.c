@@ -91,7 +91,7 @@ static void fprint_imp(struct cx_box *value, FILE *out) {
 
 static void deinit_imp(struct cx_box *value) {
   struct cx_coro *coro = value->as_ptr;
-  cx_ok(coro->nrefs > 0);
+  cx_test(coro->nrefs > 0);
   coro->nrefs--;
   if (!coro->nrefs) { free(cx_coro_deinit(coro)); }
 }

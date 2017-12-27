@@ -32,7 +32,7 @@ struct cx_macro_eval *cx_macro_eval_ref(struct cx_macro_eval *eval) {
 }
 
 void cx_macro_eval_unref(struct cx_macro_eval *eval) {
-  cx_ok(eval->nrefs > 0);
+  cx_test(eval->nrefs > 0);
   eval->nrefs--;
 
   if (!eval->nrefs) {

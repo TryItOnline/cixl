@@ -63,7 +63,7 @@ void cx_tok_copy(struct cx_tok *dst, struct cx_tok *src) {
     dst->data = strdup(src->data);
     break;
   case CX_TLITERAL:
-    dst->data = cx_box_copy(malloc(sizeof(struct cx_box)), src->data);
+    dst->data = cx_copy(malloc(sizeof(struct cx_box)), src->data);
     break;
   case CX_TMACRO:
     dst->data = cx_macro_eval_ref(src->data);

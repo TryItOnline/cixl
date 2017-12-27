@@ -14,6 +14,7 @@ struct cx_type *cx_type_init(struct cx_type *type, const char *id) {
   
   type->eqval = NULL;
   type->equid = NULL;
+  type->ok = NULL;
   type->call = NULL;
   type->copy = NULL;
   type->fprint = NULL;
@@ -29,7 +30,7 @@ struct cx_type *cx_type_deinit(struct cx_type *type) {
 }
 
 void cx_type_add_parent(struct cx_type *type, struct cx_type *parent) {
-  *(struct cx_type **)cx_ok(cx_set_insert(&type->parents, parent)) = parent;
+  *(struct cx_type **)cx_test(cx_set_insert(&type->parents, parent)) = parent;
 }
 
 bool cx_type_is(struct cx_type *type, struct cx_type *parent) {
@@ -43,14 +44,14 @@ bool cx_type_is(struct cx_type *type, struct cx_type *parent) {
 }
 
 static void type_imp(struct cx_scope *scope) {
-  struct cx_box x = *cx_ok(cx_pop(scope, false));
-  cx_box_init(cx_push(scope), scope->cx->meta_type)->as_ptr = x.type;
+  struct cx_box v = *cx_test(cx_pop(scope, false));
+  cx_box_init(cx_push(scope), scope->cx->meta_type)->as_ptr = v.type;
 }
 
 static void is_imp(struct cx_scope *scope) {
   struct cx_type
-    *y = cx_ok(cx_pop(scope, false))->as_ptr,
-    *x = cx_ok(cx_pop(scope, false))->as_ptr;
+    *y = cx_test(cx_pop(scope, false))->as_ptr,
+    *x = cx_test(cx_pop(scope, false))->as_ptr;
 
   cx_box_init(cx_push(scope), scope->cx->bool_type)->as_bool = cx_type_is(x, y);
 }

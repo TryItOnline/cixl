@@ -26,7 +26,7 @@ struct cx_scope *cx_scope_ref(struct cx_scope *scope) {
 }
 
 void cx_scope_unref(struct cx_scope *scope) {
-  cx_ok(scope->nrefs > 0);
+  cx_test(scope->nrefs > 0);
   scope->nrefs--;
   
   if (!scope->nrefs) {
@@ -70,7 +70,7 @@ void cx_fprint_stack(struct cx_scope *scope, FILE *out) {
   
   cx_do_vec(&scope->stack, struct cx_box, b) {
     if (sep) { fputc(sep, out); }
-    cx_box_fprint(b, out);
+    cx_fprint(b, out);
     sep = ' ';
   }
 
