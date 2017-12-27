@@ -1,10 +1,8 @@
-* add cx_add_mixl_func(name, imp, args)
-** call add_func
-** eval imp to toks
-** move fib from repl to int.c
-* add int for fn
+* add Int 'for' fn
 ** like times but push number
 ** add to readme
+* add Str 'int' fn
+* add Int 'str' fn
 * add CX_TTYPE
 ** lookup types on parse
 ** change CX_ID where used as type
