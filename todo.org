@@ -50,5 +50,6 @@
 
 ```
 > 'foo' for &upcase
+..
 [\F \O \O]
 ```
