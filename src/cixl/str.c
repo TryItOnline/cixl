@@ -12,6 +12,49 @@ static void len_imp(struct cx_scope *scope) {
   cx_box_init(cx_push(scope), scope->cx->int_type)->as_int = strlen(v.as_ptr);
 }
 
+static void for_imp(struct cx_scope *scope) {
+  struct cx_box
+    act = *cx_test(cx_pop(scope, false)),
+    str = *cx_test(cx_pop(scope, false));
+
+  for (char *c = str.as_ptr; *c; c++) {
+    cx_box_init(cx_push(scope), scope->cx->char_type)->as_char = *c;
+    if (!cx_call(&act, scope)) { break; }
+  }
+
+  cx_box_deinit(&str);
+  cx_box_deinit(&act);
+}
+
+static void map_imp(struct cx_scope *scope) {
+  struct cx *cx = scope->cx;
+
+  struct cx_box
+    act = *cx_test(cx_pop(scope, false)),
+    str = *cx_test(cx_pop(scope, false));
+
+  for (char *c = str.as_ptr; *c; c++) {
+    cx_box_init(cx_push(scope), scope->cx->char_type)->as_char = *c;
+    if (!cx_call(&act, scope)) { break; }
+    struct cx_box *res = cx_pop(scope, true);
+
+    if (!res) {
+      cx_error(cx, cx->row, cx->col, "Missing result for '%c'", *c);
+      break;
+    }
+
+    if (res->type != cx->char_type) {
+      cx_error(cx, cx->row, cx->col, "Expected type Char, got %s", res->type->id);
+      break;
+    }
+
+    *c = res->as_char;
+  }
+
+  *cx_push(scope) = str;
+  cx_box_deinit(&act);
+}
+
 static bool equid_imp(struct cx_box *x, struct cx_box *y) {
   return x->as_ptr == y->as_ptr;
 }
@@ -47,6 +90,8 @@ struct cx_type *cx_init_str_type(struct cx *cx) {
   t->deinit = deinit_imp;
   
   cx_add_func(cx, "len", cx_arg(t))->ptr = len_imp;
+  cx_add_func(cx, "for", cx_arg(t), cx_arg(cx->any_type))->ptr = for_imp;
+  cx_add_func(cx, "map", cx_arg(t), cx_arg(cx->any_type))->ptr = map_imp;
 
   return t;
 }

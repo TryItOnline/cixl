@@ -48,11 +48,12 @@ static void str_tests() {
   cx_init(&cx);
 
   run(&cx, "'foo' test");
-  run(&cx, "'' ! test");
+  run(&cx, "''! test");
   run(&cx, "'foo' = 'foo' test");
   run(&cx, "'foo' = 'bar' ! test");
   run(&cx, "'foo' == 'foo' ! test");
-
+  run(&cx, "'foo' map &upper = 'FOO' test");
+  
   cx_deinit(&cx);
 }
 

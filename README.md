@@ -284,8 +284,22 @@ While the ```for``` loop repeats an action once for each value in a sequence, th
 [42 43 44 45 46 47 48 49 50 51]
 ```
 
+```
+> 'foo' for &upper
+..
+[\F \O \O]
+```
+
+Some types support mapping actions over their contents using ```map```. The value is modified in place and pushed on the stack again.
+
+```
+> 'foo' map &upper
+..
+['FOO']
+```
+
 ### Coroutines
-Coroutines allow stopping execution and resuming in the same scope later on. A coroutine context is returned on first ```yield```, ```call```-ing it resumes execution.
+Coroutines allow stopping execution and resuming in the same scope later on. A coroutine context is returned on first ```yield```, ```call```-ing it resumes execution from previous yield.
 
 ```
 > (1 2 yield 3)

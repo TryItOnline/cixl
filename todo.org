@@ -1,19 +1,24 @@
-* add str 'for'
-* add str 'map' 
 * bench fib
-* add forward scanning to recall
-** convert to macro
+* add trait: macro
+** create type and insert as parent for all args
 * add parse/eval
 ** add Toks type
 *** add call support
 *** add `...` parser support
 **** quote tokens and push Toks
+* add str 'map' 
+** add iter_type
+** return iter from map
+** add iterable_type
+*** derive int, str & iter
+* add forward scanning to recall
+** convert to macro
 * add fail func
 ** like test but just call error with message
-* add basic IO
-** add ask-func from main
+* add basic io
+** add ask fn from main
 *** read from stdin until newline with prompt
-** add say-func from main
+** add say fn from main
 *** write to stdout with newline
 * add str \n support
 * add str \' support
@@ -36,13 +41,7 @@
 *** add func ref to imp struct
 
 ```
-> 'foo' for &upper
+> 'foo' map &upper
 ..
-[\F \O \O]
-```
-
-```
-> 'FOO' map &lower
-..
-['foo']
+['FOO']
 ```
