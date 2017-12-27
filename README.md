@@ -187,15 +187,6 @@ Lambdas inherit the defining scope.
 [42]
 ```
 
-And cut the stack implicitly on entry.
-
-```
-> 7 {+ 35} call
-..
-Error in row 1, col 3:
-Not enough args for func: '+'
-```
-
 ### Functions
 The ```func:``` macro may be used to define named functions. Several implementations may be defined for the same name as long as they have the same arity and different argument types. Each function opens an implicit scope that is closed on exit.
 
@@ -250,7 +241,7 @@ Several parameters may share the same type. An index may may be specified instea
 ```
 
 ### Loops
-The ```times``` function may be used to repeat an action N times.
+The ```times``` loop may be used to repeat an action N times.
 
 ```
 > 10 times 42
@@ -261,6 +252,14 @@ The ```times``` function may be used to repeat an action N times.
 ```
 > 0, 42 times &++
 [42]
+```
+
+While the ```for``` loop repeats an action once with each value in a sequence pushed on the stack.
+
+```
+> 10 for {+ 42,}
+..
+[42 43 44 45 46 47 48 49 50 51]
 ```
 
 ### Coroutines

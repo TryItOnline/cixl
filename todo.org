@@ -1,11 +1,11 @@
-* add Int 'for' fn
-** like times but push number
-** add to readme
-* add Str 'int' fn
-* add Int 'str' fn
+* add loop tests
 * add CX_TTYPE
 ** lookup types on parse
 ** change CX_ID where used as type
+* add Char type
+** add str 'for'
+** add char 'upcase'
+** add str 'map' 
 * add forward scanning to recall
 ** convert to macro
 * add fail func
@@ -26,6 +26,8 @@
 *** add call support
 *** add `...` parser support
 *** quote tokens and push Toks
+* add Str 'int' fn
+* add Int 'str' fn
 * add Vect type
 ** add cx_vect struct with vec & nrefs
 ** add [] support
@@ -39,3 +41,8 @@
 * jit func tokens to imps
 ** add CX_TFUNC_IMP
 *** add func ref to imp struct
+
+```
+> 'foo' for &upcase
+[\F \O \O]
+```
