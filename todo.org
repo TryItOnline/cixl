@@ -1,8 +1,19 @@
+* add cx_add_mixl_func(name, imp, args)
+** call add_func
+** eval imp to toks
+** move fib from repl to int.c
 * add CX_TTYPE
 ** lookup types on parse
 ** change CX_ID where used as type
 * add forward scanning to recall
 ** convert to macro
+* add fail func
+** like test but just call error with message
+* extract cx from repl
+** add ask-func from main
+*** read from stdin until newline with prompt
+** add say-func from main
+*** write to stdout with newline
 * add wrap macro for cx_add_type
 ** pass NULL
 * change func imps to return bool
