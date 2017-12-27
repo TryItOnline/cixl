@@ -3,10 +3,10 @@
 ## cixl
 #### a minimal scripting language
 
-This project aims to produce a minimal scripting language, or DSL substrate; in C. In a way, it's Lua taken one step further down the path of simplicity. The implementation is a hybrid interpreter/vm design, designed to be as fast as possible without compromising on simplicity, transparency and flexibility.
+This project aims to produce a minimal scripting language in C. In a way, it's Lua taken one step further down the path of simplicity. The implementation is a hybrid interpreter/vm design, designed to be as fast as possible without compromising on simplicity, transparency and flexibility.
 
 ### Status
-Examples from this document should work in the most recent version and run clean in ```valgrind```, outside of that I can't really promise much at the moment. Current work is focused on tracing interactions between core features and filling in obvious gaps in functionality.
+Examples from this document should work in the most recent version and run clean in ```valgrind```, outside of that I can't really promise much at the moment. Current work is focused on tracing interactions between core features and filling obvious gaps in functionality.
 
 ### Getting Started
 To get started, you'll need a decent C compiler with GNU-extensions and CMake installed. A primitive REPL is included, the executable weighs in at 200k. It's highly recommended to run the REPL through ```rlwrap``` for a less nerve-wrecking editing experience.
