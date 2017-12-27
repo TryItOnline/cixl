@@ -384,7 +384,7 @@ int main() {
 - Rules are for machines
 - Only fools predict "the future"
 - Intuition goes with the flow
-- Namespaces are one honking great idea
+- Duality of syntax is one honking great idea
 
 ### License
 GPLv3
