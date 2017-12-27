@@ -11,6 +11,7 @@ int main() {
 
   struct cx cx;
   cx_init(&cx);
+  cx_init_math(&cx);
   cx_repl(&cx, stdin, stdout);
   cx_deinit(&cx);
   return 0;

@@ -317,14 +317,17 @@ struct cx *cx_init(struct cx *cx) {
   cx_add_func(cx, "test", cx_arg(cx->bool_type))->ptr = test_imp;
   
   cx->main = cx_begin(cx, false);
-
-  cx_ok(cx_add_mixl_func(cx, "_fib", "a b n Int",
-			 "$n ? if {$b, $a + $b, -- $n recall} $a"));
-
-  cx_ok(cx_add_mixl_func(cx, "fib", "n Int",
-			 "_fib 0 1 $n"));
-
   return cx;
+}
+
+void cx_init_math(struct cx *cx) {
+  cx_ok(cx_eval_str(cx,
+		    "func: _fib(a b n Int) "
+		    "$n ? if {$b, $a + $b, -- $n recall} $a;"));
+
+  cx_ok(cx_eval_str(cx,
+		    "func: fib(n Int) "
+		    "_fib 0 1 $n;"));
 }
 
 struct cx *cx_deinit(struct cx *cx) {

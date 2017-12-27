@@ -104,6 +104,7 @@ static void coro_tests() {
 static void math_tests() {
   struct cx cx;
   cx_init(&cx);
+  cx_init_math(&cx);
 
   run(&cx, "fib 50 = 12586269025 test");
 
