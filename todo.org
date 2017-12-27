@@ -7,6 +7,11 @@
 ** add str 'map' 
 * add forward scanning to recall
 ** convert to macro
+* add parse/eval
+** add Toks type
+*** add call support
+*** add `...` parser support
+**** quote tokens and push Toks
 * add fail func
 ** like test but just call error with message
 * add basic IO
@@ -20,11 +25,6 @@
 ** pass NULL
 * change func imps to return bool
 * update readme
-* add parse/eval
-** add Toks type
-*** add call support
-*** add `...` parser support
-**** quote tokens and push Toks
 * add Str 'int' fn
 * add Int 'str' fn
 * add Vect type

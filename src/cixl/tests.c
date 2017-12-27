@@ -24,8 +24,8 @@ static void type_tests() {
   cx_init(&cx);
 
   run(&cx, "42 type Int = test");
-  run(&cx, "Int is? A test");
-  run(&cx, "not (A is? Int) test");
+  run(&cx, "Int is A test");
+  run(&cx, "! (A is Int) test");
 
   cx_deinit(&cx);
 }
@@ -35,10 +35,10 @@ static void int_tests() {
   cx_init(&cx);
 
   run(&cx, "42 test");
-  run(&cx, "0 not test");
+  run(&cx, "0! test");
   run(&cx, "21 + 21 = 42 test");
   run(&cx, "7 + 14, 7 + 14 + = 42 test");
-  run(&cx, "1 = 2 not test");
+  run(&cx, "1 = 2! test");
 
   cx_deinit(&cx);
 }
@@ -48,10 +48,10 @@ static void str_tests() {
   cx_init(&cx);
 
   run(&cx, "'foo' test");
-  run(&cx, "'' not test");
+  run(&cx, "'' ! test");
   run(&cx, "'foo' = 'foo' test");
-  run(&cx, "'foo' = 'bar' not test");
-  run(&cx, "'foo' == 'foo' not test");
+  run(&cx, "'foo' = 'bar' ! test");
+  run(&cx, "'foo' == 'foo' ! test");
 
   cx_deinit(&cx);
 }

@@ -100,7 +100,7 @@ Capitalized names are treated as type references, the following types are define
 > type 42
 [Int]
 
-> is? A
+> is A
 [t]
 ```
 
@@ -168,11 +168,15 @@ Variables in the parent scope may be referenced from within the scope, but varia
 All types are useable as conditions; some are always true; integers test true for anything but zero; empty strings test false etc. The ```?``` operator may be used to transform any value to a condition.
 
 ```
-> 0 ?
+> 0?
 [f]
+```
 
-> cls 42 ?
-[t]
+The ```!``` operator negates any value.
+
+```
+> 42!
+[f]
 ```
 
 The ```if``` statement may be used to branch on a condition, it calls '?' implicitly so you can throw any value at it.
@@ -182,7 +186,7 @@ The ```if``` statement may be used to branch on a condition, it calls '?' implic
 ..
 ['not zero']
 
-> '' not if 'empty' 'not empty'
+> ''! if 'empty' 'not empty'
 ..
 ['empty']
 ```

@@ -23,7 +23,7 @@ static bool parse_id(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
     char c = fgetc(in);
     if (c == EOF) { goto exit; }
 
-    if (cx_is_separator(cx, c)) {
+    if (col != cx->col && cx_is_separator(cx, c)) {
       ok = ungetc(c, in) != EOF;
       goto exit;
     }
@@ -251,13 +251,8 @@ bool cx_parse_tok(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
 	  return parse_int(cx, in, out);
 	}
 	
-	if (isgraph(c)) {
-	  ungetc(c, in);
-	  return parse_id(cx, in, out, lookup);
-	}
-
-	cx_error(cx, row, col, "Unexpected char: '%c' (#%d)", c, c); 
-	return false;
+	ungetc(c, in);
+	return parse_id(cx, in, out, lookup);
       }
   }
 
