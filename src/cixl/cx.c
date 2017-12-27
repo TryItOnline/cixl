@@ -4,6 +4,7 @@
 
 #include "cixl/bool.h"
 #include "cixl/box.h"
+#include "cixl/char.h"
 #include "cixl/coro.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
@@ -310,6 +311,7 @@ struct cx *cx_init(struct cx *cx) {
   
   cx->bool_type = cx_init_bool_type(cx);
   cx->int_type = cx_init_int_type(cx);
+  cx->char_type = cx_init_char_type(cx);
   cx->str_type = cx_init_str_type(cx);
   cx->func_type = cx_init_func_type(cx);
   cx->lambda_type = cx_init_lambda_type(cx);

@@ -82,28 +82,6 @@ The ```,``` operator may be used to cut the stack into discrete pieces and force
 [3 7]
 ```
 
-### Types
-Capitalized names are treated as type references, the following types are defined out of the box:
-
-- A (Opt)
-- Bool (A)
-- Coro (A)
-- Func (A)
-- Int (A)
-- Lambda (A)
-- Nil (Opt)
-- Opt ()
-- Str (A)
-- Type (A)
-
-```
-> type 42
-[Int]
-
-> is A
-[t]
-```
-
 ### Variables
 Named variables may be defined once per scope using the ```let:``` macro.
 
@@ -362,6 +340,28 @@ In the example below, ```foo``` manipulates the main stack through the passed in
 [3 4]
 ````
 
+### Types
+Capitalized names are treated as type references, the following types are defined out of the box:
+
+- A (Opt)
+- Bool (A)
+- Coro (A)
+- Func (A)
+- Int (A)
+- Lambda (A)
+- Nil (Opt)
+- Opt ()
+- Str (A)
+- Type (A)
+
+```
+> type 42
+[Int]
+
+> is A
+[t]
+```
+
 ### Embedding & Extending
 Everything about cixl has been designed from the ground up to support embedding in, and extending from C. The makefile contains a target named ```libcixl``` that builds a static library containing everything you need to get started. Adding a type and associated function goes something like this:
 
@@ -429,6 +429,7 @@ int main() {
 - Terseness counts
 - There is no right way to do it
 - Obvious is overrated
+- Symmetry beats consistency
 - Rules are for machines
 - Only fools predict "the future"
 - Intuition goes with the flow

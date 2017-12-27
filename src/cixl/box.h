@@ -15,6 +15,7 @@ struct cx_box {
   
   union {
     bool as_bool;
+    char as_char;
     cx_int_t as_int;
     void *as_ptr;
   };

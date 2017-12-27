@@ -1,7 +1,6 @@
-* add Char type
-** add str 'for'
-** add char 'upcase'
-** add str 'map' 
+* add str 'for'
+* add str 'map' 
+* bench fib
 * add forward scanning to recall
 ** convert to macro
 * add parse/eval
@@ -37,7 +36,13 @@
 *** add func ref to imp struct
 
 ```
-> 'foo' for &upcase
+> 'foo' for &upper
 ..
 [\F \O \O]
+```
+
+```
+> 'FOO' map &lower
+..
+['foo']
 ```

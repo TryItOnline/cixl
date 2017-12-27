@@ -129,6 +129,21 @@ static bool parse_int(struct cx *cx, FILE *in, struct cx_vec *out) {
   }
 }
 
+static bool parse_char(struct cx *cx, FILE *in, struct cx_vec *out) {
+  char c = fgetc(in);
+
+  if (c == EOF) {
+    cx_error(cx, cx->row, cx->col, "Invalid char literal");
+    return false;
+  }
+  
+  struct cx_box *box = cx_box_new(cx->char_type);
+  box->as_char = c;
+  cx_tok_init(cx_vec_push(out), CX_TLITERAL, box, cx->row, cx->col);
+  cx->col++;
+  return true;
+}
+
 static bool parse_str(struct cx *cx, FILE *in, struct cx_vec *out) {
   struct cx_buf value;
   cx_buf_open(&value);
@@ -139,7 +154,7 @@ static bool parse_str(struct cx *cx, FILE *in, struct cx_vec *out) {
     char c = fgetc(in);
 
     if (c == EOF) {
-      cx_error(cx, row, col, "Unterminated Str");
+      cx_error(cx, row, col, "Unterminated str literal");
       goto exit;
     }
       
@@ -246,6 +261,8 @@ bool cx_parse_tok(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
       case '}':
 	cx_tok_init(cx_vec_push(out), CX_TUNLAMBDA, NULL, row, col);
 	return true;
+      case '\\':
+	return parse_char(cx, in, out);
       case '\'':
 	return parse_str(cx, in, out);
       default:
