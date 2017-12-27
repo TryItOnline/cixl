@@ -275,7 +275,7 @@ The ```times``` loop may be used to repeat an action N times.
 [42]
 ```
 
-While the ```for``` loop repeats an action once with each value in a sequence pushed on the stack.
+While the ```for``` loop repeats an action once for each value in a sequence, the current value is pushed on the stack before calling the action.
 
 ```
 > 10 for {+ 42,}
