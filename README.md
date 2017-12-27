@@ -243,7 +243,7 @@ Several parameters may share the same type. An index may may be specified instea
 ```
 
 ### Nil
-The nil value represents missing values. Since ```Nil``` isn't derived from ```A```, runaway nil values never get far before being trapped by a function call. ```Opt``` may be used instead where Nil values are expected.
+The ```_``` value may be used to represent missing values. Since ```Nil``` isn't derived from ```A```, runaway nil values never get far before being trapped by a function call; ```Opt``` may be used instead where Nil values are expected.
 
 ```
 > func: foo(x A);
