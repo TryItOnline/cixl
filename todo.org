@@ -2,6 +2,9 @@
 ** call add_func
 ** eval imp to toks
 ** move fib from repl to int.c
+* add int for fn
+** like times but push number
+** add to readme
 * add CX_TTYPE
 ** lookup types on parse
 ** change CX_ID where used as type
@@ -9,25 +12,32 @@
 ** convert to macro
 * add fail func
 ** like test but just call error with message
-* extract cx from repl
+* add basic IO
 ** add ask-func from main
 *** read from stdin until newline with prompt
 ** add say-func from main
 *** write to stdout with newline
+* add str \n support
+* add str \' support
 * add wrap macro for cx_add_type
 ** pass NULL
 * change func imps to return bool
 * update readme
+* add parse/eval
+** add Toks type
+*** add call support
+*** add `...` parser support
+*** quote tokens and push Toks
 * add Vect type
 ** add cx_vect struct with vec & nrefs
 ** add [] support
 ** add nrefs to Vect type like lambda
 ** add push fn
 ** add stash/splat funcs
-* add parse/eval
 * add Rat type
 * add Opt type
 ** add Vec pop fn
+* add str interpolation
 * jit func tokens to imps
 ** add CX_TFUNC_IMP
 *** add func ref to imp struct

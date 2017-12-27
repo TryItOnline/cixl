@@ -91,6 +91,6 @@ struct cx_type *cx_init_int_type(struct cx *cx) {
   cx_add_func(cx, "/", cx_arg(t), cx_arg(t))->ptr = div_imp;
 
   cx_add_func(cx, "times", cx_arg(t), cx_arg(cx->any_type))->ptr = times_imp;
-
+  
   return t;
 }

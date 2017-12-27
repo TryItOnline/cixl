@@ -1,3 +1,4 @@
+#include "cixl/cx.h"
 #include "cixl/repl.h"
 #include "cixl/set.h"
 #include "cixl/tests.h"
@@ -8,6 +9,9 @@ int main() {
   cx_set_tests();
   cx_tests();
 
-  cx_repl(stdin, stdout);
+  struct cx cx;
+  cx_init(&cx);
+  cx_repl(&cx, stdin, stdout);
+  cx_deinit(&cx);
   return 0;
 }

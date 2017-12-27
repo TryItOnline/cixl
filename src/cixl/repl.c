@@ -10,17 +10,11 @@
 #include "cixl/repl.h"
 #include "cixl/scope.h"
 
-void cx_repl(FILE *in, FILE *out) {
-  struct cx cx;
-  cx_init(&cx);
-
+void cx_repl(struct cx *cx, FILE *in, FILE *out) {
   fprintf(out, "cixl v%s, ", CX_VERSION);
 
-  if (cx_eval_str(&cx,
-		  "func: _fib(a b n Int) $n ? if {$b, $a + $b, -- $n recall} $a;"
-		  "func: fib(n Int) _fib 0 1 $n;"
-		  "1000000000, clock {fib 30 zap} /")) {
-    struct cx_box bmips = *cx_pop(cx.main, false);
+  if (cx_eval_str(cx, "1000000000, clock {fib 30 zap} /")) {
+    struct cx_box bmips = *cx_pop(cx->main, false);
     fprintf(out, "%zd bmips\n\n", bmips.as_int);
   } else {
     fputs("? bmips\n\n", out);
@@ -41,15 +35,15 @@ void cx_repl(FILE *in, FILE *out) {
     if (strcmp(line, "\n") == 0) {
       cx_buf_close(&body);
 
-      if (cx_eval_str(&cx, body.data)) {
-	cx_fprint_stack(cx_scope(&cx, 0), out);
+      if (cx_eval_str(cx, body.data)) {
+	cx_fprint_stack(cx_scope(cx, 0), out);
       } else {
-	cx_do_vec(&cx.errors, struct cx_error, e) {
+	cx_do_vec(&cx->errors, struct cx_error, e) {
 	  fprintf(out, "Error in row %d, col %d:\n%s\n", e->row, e->col, e->msg);
 	  cx_error_deinit(e);
 	}
 	
-	cx_vec_clear(&cx.errors);
+	cx_vec_clear(&cx->errors);
       }
 
       free(body.data);
@@ -62,5 +56,4 @@ void cx_repl(FILE *in, FILE *out) {
 
   cx_buf_close(&body);
   free(body.data);
-  cx_deinit(&cx);
 }

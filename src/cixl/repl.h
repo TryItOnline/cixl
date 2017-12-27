@@ -5,6 +5,8 @@
 
 #define CX_REPL_LINE_MAX 512
 
-void cx_repl(FILE *in, FILE *out);
+struct cx;
+
+void cx_repl(struct cx *cx, FILE *in, FILE *out);
 
 #endif

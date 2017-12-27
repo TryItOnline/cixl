@@ -13,7 +13,7 @@
 #include "cixl/parse.h"
 #include "cixl/vec.h"
 
-bool cx_parse_id(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
+static bool parse_id(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
   struct cx_buf id;
   cx_buf_open(&id);
   bool ok = true;
@@ -78,7 +78,7 @@ bool cx_parse_id(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
   }
 }
 
-bool cx_parse_int(struct cx *cx, FILE *in, struct cx_vec *out) {
+static bool parse_int(struct cx *cx, FILE *in, struct cx_vec *out) {
   struct cx_buf value;
   cx_buf_open(&value);
   int col = cx->col;
@@ -119,7 +119,7 @@ bool cx_parse_int(struct cx *cx, FILE *in, struct cx_vec *out) {
   }
 }
 
-bool cx_parse_str(struct cx *cx, FILE *in, struct cx_vec *out) {
+static bool parse_str(struct cx *cx, FILE *in, struct cx_vec *out) {
   struct cx_buf value;
   cx_buf_open(&value);
   int row = cx->row, col = cx->col;
@@ -154,7 +154,7 @@ bool cx_parse_str(struct cx *cx, FILE *in, struct cx_vec *out) {
   }
 }
 
-bool cx_parse_group(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
+static bool parse_group(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
   int row = cx->row, col = cx->col;
   struct cx_vec *body = cx_vec_init(malloc(sizeof(struct cx_vec)),
 				    sizeof(struct cx_tok));
@@ -176,7 +176,7 @@ bool cx_parse_group(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
   return true;
 }
 
-bool cx_parse_lambda(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
+static bool parse_lambda(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
   int row = cx->row, col = cx->col;
   struct cx_vec *body = cx_vec_new(sizeof(struct cx_tok));
   cx_tok_init(cx_vec_push(body), CX_TCUT, NULL, row, col);
@@ -228,26 +228,26 @@ bool cx_parse_tok(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
 	cx_tok_init(cx_vec_push(out), CX_TEND, NULL, row, col);
 	return true;
       case '(':
-	return cx_parse_group(cx, in, out, lookup);
+	return parse_group(cx, in, out, lookup);
       case ')':
 	cx_tok_init(cx_vec_push(out), CX_TUNGROUP, NULL, row, col);
 	return true;	
       case '{':
-	return cx_parse_lambda(cx, in, out, lookup);
+	return parse_lambda(cx, in, out, lookup);
       case '}':
 	cx_tok_init(cx_vec_push(out), CX_TUNLAMBDA, NULL, row, col);
 	return true;
       case '\'':
-	return cx_parse_str(cx, in, out);
+	return parse_str(cx, in, out);
       default:
 	if (isdigit(c)) {
 	  ungetc(c, in);
-	  return cx_parse_int(cx, in, out);
+	  return parse_int(cx, in, out);
 	}
 	
 	if (isgraph(c)) {
 	  ungetc(c, in);
-	  return cx_parse_id(cx, in, out, lookup);
+	  return parse_id(cx, in, out, lookup);
 	}
 
 	cx_error(cx, row, col, "Unexpected char: '%c' (#%d)", c, c); 
@@ -291,4 +291,14 @@ bool cx_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   }
 
   return cx->errors.count == 0;
+}
+
+bool cx_parse_str(struct cx *cx, const char *in, struct cx_vec *out) {
+  FILE *is = fmemopen ((void *)in, strlen(in), "r");
+  bool ok = false;
+  if (!cx_parse(cx, is, out)) { goto exit; }
+  ok = true;
+ exit:
+  fclose(is);
+  return ok;
 }

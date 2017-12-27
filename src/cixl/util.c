@@ -13,3 +13,11 @@ char *cx_vfmt(const char *spec, va_list args) {
   vsnprintf(out, len+1, spec, args);
   return out;
 }
+
+char *cx_fmt(const char *spec, ...) {
+  va_list args;
+  va_start(args, spec);
+  char *res = cx_vfmt(spec, args);
+  va_end(args);
+  return res;
+}

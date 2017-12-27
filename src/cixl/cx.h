@@ -54,6 +54,11 @@ struct cx_func_imp *_cx_add_func(struct cx *cx,
 				 int nargs,
 				 struct cx_func_arg *args);
 
+bool cx_add_mixl_func(struct cx *cx,
+		      const char *id,
+		      const char *args,
+		      const char *body);
+
 struct cx_func *cx_get_func(struct cx *cx, const char *id, bool silent);
 
 struct cx_scope *cx_scope(struct cx *cx, size_t i);

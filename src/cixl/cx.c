@@ -16,6 +16,7 @@
 #include "cixl/str.h"
 #include "cixl/timer.h"
 #include "cixl/type.h"
+#include "cixl/util.h"
 
 static const void *get_type_id(const void *value) {
   struct cx_type *const *type = value;
@@ -105,6 +106,7 @@ static bool func_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   
   if (!cx_parse_tok(cx, in, &toks, false)) {
     cx_error(cx, row, col, "Missing func id");
+    cx_do_vec(&toks, struct cx_tok, t) { cx_tok_deinit(t); }
     cx_vec_deinit(&toks);
     return false;
   }
@@ -114,6 +116,7 @@ static bool func_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   if (id.type != CX_TID) {
     cx_error(cx, row, col, "Invalid func id");
     cx_tok_deinit(&id);
+    cx_do_vec(&toks, struct cx_tok, t) { cx_tok_deinit(t); }
     cx_vec_deinit(&toks);
     return false;
   }
@@ -121,6 +124,7 @@ static bool func_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   if (!cx_parse_tok(cx, in, &toks, false)) {
     cx_error(cx, row, col, "Missing func args");
     cx_tok_deinit(&id);
+    cx_do_vec(&toks, struct cx_tok, t) { cx_tok_deinit(t); }
     cx_vec_deinit(&toks);
     return false;
   }
@@ -131,6 +135,7 @@ static bool func_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
     cx_error(cx, row, col, "Invalid func args");
     cx_tok_deinit(&id);
     cx_tok_deinit(&args);
+    cx_do_vec(&toks, struct cx_tok, t) { cx_tok_deinit(t); }
     cx_vec_deinit(&toks);
     return false;
   }
@@ -144,6 +149,7 @@ static bool func_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   if (!cx_eval_args(cx, args.data, &eval->toks, &func_args)) {
     cx_tok_deinit(&id);
     cx_tok_deinit(&args);
+    cx_do_vec(&toks, struct cx_tok, t) { cx_tok_deinit(t); }
     cx_vec_deinit(&toks);
     cx_vec_deinit(&func_args);
     return false;  
@@ -153,6 +159,7 @@ static bool func_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
 
   if (!cx_parse_end(cx, in, &toks)) {
     cx_tok_deinit(&id);
+    cx_do_vec(&toks, struct cx_tok, t) { cx_tok_deinit(t); }
     cx_vec_deinit(&toks);
     cx_vec_deinit(&func_args);
     return false;
@@ -310,6 +317,13 @@ struct cx *cx_init(struct cx *cx) {
   cx_add_func(cx, "test", cx_arg(cx->bool_type))->ptr = test_imp;
   
   cx->main = cx_begin(cx, false);
+
+  cx_ok(cx_add_mixl_func(cx, "_fib", "a b n Int",
+			 "$n ? if {$b, $a + $b, -- $n recall} $a"));
+
+  cx_ok(cx_add_mixl_func(cx, "fib", "n Int",
+			 "_fib 0 1 $n"));
+
   return cx;
 }
 
@@ -390,6 +404,16 @@ struct cx_func_imp *_cx_add_func(struct cx *cx,
   }
   
   return cx_func_add_imp(*f, nargs, args);
+}
+
+bool cx_add_mixl_func(struct cx *cx,
+		      const char *id,
+		      const char *args,
+		      const char *body) {
+  char *in = cx_fmt("func: %s(%s) %s;", id, args, body);
+  bool ok = cx_eval_str(cx, in);
+  free(in);
+  return ok;
 }
 
 struct cx_func *cx_get_func(struct cx *cx, const char *id, bool silent) {

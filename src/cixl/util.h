@@ -10,5 +10,6 @@
     })						\
 
 char *cx_vfmt(const char *spec, va_list args);
+char *cx_fmt(const char *spec, ...);
 
 #endif
