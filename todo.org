@@ -1,14 +1,9 @@
 * add 'ok' method
 ** always return true for types without bottom
+** implement for all types
 ** add one '?' fn in cx
 ** use in 'if'
 ** update readme/tests
-* move t/f into parser
-* add Nil type
-** add '_' to parser
-*** push nil box
-*** add '?'
-**** return false 
 * add loop tests
 * add CX_TTYPE
 ** lookup types on parse

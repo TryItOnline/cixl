@@ -85,14 +85,16 @@ The ```,``` operator may be used to cut the stack into discrete pieces and force
 ### Types
 Names that start with an uppercase letter are treated as type references. The following types are defined out of the box:
 
-- A
-- Bool
-- Coro
-- Func
-- Int
-- Lambda
-- Str
-- Type
+- A (Opt)
+- Bool (A)
+- Coro (A)
+- Func (A)
+- Int (A)
+- Lambda (A)
+- Nil (Opt)
+- Opt ()
+- Str (A)
+- Type (A)
 
 ```
 > type 42
@@ -238,6 +240,25 @@ Several parameters may share the same type. An index may may be specified instea
 ..  _fib 0 1 $n;
 ..fib 50
 [12586269025]
+```
+
+### Nil
+The nil value represents missing values. Since ```Nil``` isn't derived from ```A```, runaway nil values never get far before being trapped by a function call. ```Opt``` may be used instead where Nil values are expected.
+
+```
+> func: foo(x A);
+..func: bar(x Opt) 42;
+..
+[]
+
+> foo _
+..
+Error in row 1, col 1:
+Func not applicable: 'foo'
+
+> cls bar _
+..
+[42]
 ```
 
 ### Loops

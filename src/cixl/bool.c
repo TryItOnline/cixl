@@ -5,14 +5,6 @@
 #include "cixl/func.h"
 #include "cixl/scope.h"
 
-static void t_imp(struct cx_scope *scope) {
-  cx_box_init(cx_push(scope), scope->cx->bool_type)->as_bool = true;
-}
-
-static void f_imp(struct cx_scope *scope) {
-  cx_box_init(cx_push(scope), scope->cx->bool_type)->as_bool = false;
-}
-
 static void not_imp(struct cx_scope *scope) {
   struct cx_box x = *cx_ok(cx_pop(scope, false));
   cx_box_init(cx_push(scope), scope->cx->bool_type)->as_bool = !x.as_bool;
@@ -31,8 +23,6 @@ struct cx_type *cx_init_bool_type(struct cx *cx) {
   t->equid = equid_imp;
   t->fprint = fprint_imp;
 
-  cx_add_func(cx, "t")->ptr = t_imp;
-  cx_add_func(cx, "f")->ptr = f_imp;
   cx_add_func(cx, "not", cx_arg(t))->ptr = not_imp;
 
   return t;

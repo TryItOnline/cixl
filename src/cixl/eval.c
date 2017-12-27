@@ -97,11 +97,16 @@ ssize_t cx_eval_group(struct cx *cx, struct cx_vec *toks, ssize_t pc) {
 ssize_t cx_eval_tok(struct cx *cx, struct cx_vec *toks, ssize_t pc) {
   cx_ok(toks->count);
   struct cx_tok *t = cx_vec_get(toks, pc);
+  struct cx_scope *s = cx_scope(cx, 0);
 
   cx->row = t->row;
   cx->col = t->col;
   
   switch (t->type) {
+  case CX_TCUT: {
+    s->cut_offs = s->stack.count;
+    return pc+1;
+  }
   case CX_TFUNC:
     return cx_eval_func(cx, toks, pc);
   case CX_TGROUP:
@@ -114,11 +119,13 @@ ssize_t cx_eval_tok(struct cx *cx, struct cx_vec *toks, ssize_t pc) {
     return cx_eval_literal(cx, toks, pc);
   case CX_TMACRO:
     return cx_eval_macro(cx, toks, pc);
-  case CX_TCUT: {
-    struct cx_scope *s = cx_scope(cx, 0);
-    s->cut_offs = s->stack.count;
+  case CX_TNIL:
+    cx_box_init(cx_push(s), s->cx->nil_type);
+    return pc+1;    
+  case CX_TTRUE:
+  case CX_TFALSE:
+    cx_box_init(cx_push(s), s->cx->bool_type)->as_bool = t->type == CX_TTRUE;
     return pc+1;
-  }
   default:
     cx_error(cx, t->row, t->col, "Unexpected token: %d", t->type);
     break;
@@ -147,17 +154,10 @@ bool cx_eval(struct cx *cx, struct cx_vec *toks, ssize_t pc) {
 bool cx_eval_str(struct cx *cx, const char *in) {
   struct cx_vec toks;
   cx_vec_init(&toks, sizeof(struct cx_tok));
-  FILE *is = fmemopen ((void *)in, strlen(in), "r");
-  bool res = false;
-  if (!cx_parse(cx, is, &toks)) { goto exit; }
-  fclose(is);
-  if (!cx_eval(cx, &toks, 0)) { goto exit; }
-  res = true;
- exit: {
-    cx_do_vec(&toks, struct cx_tok, t) { cx_tok_deinit(t); }
-    cx_vec_deinit(&toks);
-    return res;
-  }
+  bool ok = cx_parse_str(cx, in, &toks) && cx_eval(cx, &toks, 0);
+  cx_do_vec(&toks, struct cx_tok, t) { cx_tok_deinit(t); }
+  cx_vec_deinit(&toks);
+  return ok;
 }
 
 bool cx_eval_args(struct cx *cx,

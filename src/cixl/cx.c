@@ -11,6 +11,7 @@
 #include "cixl/func.h"
 #include "cixl/int.h"
 #include "cixl/lambda.h"
+#include "cixl/nil.h"
 #include "cixl/parse.h"
 #include "cixl/scope.h"
 #include "cixl/str.h"
@@ -288,9 +289,11 @@ struct cx *cx_init(struct cx *cx) {
   cx_add_macro(cx, "let:", let_parse);
   cx_add_macro(cx, "func:", func_parse);
   
-  cx->any_type = cx_add_type(cx, "A", NULL);
-
+  cx->opt_type = cx_add_type(cx, "Opt", NULL);
+  cx->any_type = cx_add_type(cx, "A", cx->opt_type, NULL);
+  cx->nil_type = cx_init_nil_type(cx);
   cx->meta_type = cx_init_meta_type(cx);
+  
   cx->bool_type = cx_init_bool_type(cx);
   cx->int_type = cx_init_int_type(cx);
   cx->str_type = cx_init_str_type(cx);

@@ -47,6 +47,13 @@ static bool parse_id(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
 	  cx_tok_init(cx_vec_push(out), CX_TID, id.data, cx->row, cx->col);
 	} else if (id.data[0] == '$' || isupper(id.data[0])) {
 	  cx_tok_init(cx_vec_push(out), CX_TID, id.data, cx->row, cx->col);
+	} else if (strcmp(id.data, "t") == 0 || strcmp(id.data, "f") == 0) {
+	  cx_tok_init(cx_vec_push(out),
+		      id.data[0] == 't' ? CX_TTRUE : CX_TFALSE,
+		      NULL,
+		      cx->row, cx->col);
+	} else if (strcmp(id.data, "_") == 0) {
+	  cx_tok_init(cx_vec_push(out), CX_TNIL, NULL, cx->row, cx->col);
 	} else {
 	  bool ref = id.data[0] == '&';
 	  struct cx_func *f = cx_get_func(cx, ref ? id.data+1 : id.data, false);
