@@ -6,7 +6,7 @@
 This project aims to produce a minimal scripting language, or DSL substrate; in C. In a way, it's Lua taken one step further down the path of simplicity. The implementation is a hybrid interpreter/vm design, designed to be as fast as possible without compromising on simplicity, transparency and flexibility.
 
 ### Status
-Examples from this document should work without a hitch and run clean in ```valgrind```, outside of that I can't really promise much at the moment. Current work is focused on tracing interactions between core features; as soon as I gain enough confidence that I've steered clear of major disasters, I'll start filling in obvious gaps in functionality.
+Examples from this document should work in the most recent version and run clean in ```valgrind```, outside of that I can't really promise much at the moment. Current work is focused on tracing interactions between core features and filling in obvious gaps in functionality.
 
 ### Getting Started
 To get started, you'll need a decent C compiler with GNU-extensions and CMake installed. A primitive REPL is included, the executable weighs in at 200k. It's highly recommended to run the REPL through ```rlwrap``` for a less nerve-wrecking editing experience.
@@ -31,7 +31,7 @@ Press Return twice to eval input.
 ```
 
 ### Stack
-The parameter stack is exposed to user code, just like in Forth.
+The parameter stack is accessible from user code, just like in Forth.
 
 ```
 > 4 5 dup
@@ -83,7 +83,7 @@ The ```,``` operator may be used to cut the stack into discrete pieces and force
 ```
 
 ### Types
-Names that start with an uppercase letter are treated as type references. The following types are defined out of the box:
+Capitalized names are treated as type references, the following types are defined out of the box:
 
 - A (Opt)
 - Bool (A)
@@ -108,13 +108,18 @@ Names that start with an uppercase letter are treated as type references. The fo
 Named variables may be defined once per scope using the ```let:``` macro.
 
 ```
-> let: foo 42;
+> let: foo 'bar';
 ..
 []
 
 > $foo
 ..
-[42]
+['bar']
+
+> let: foo 'baz';
+..
+Error in row 1, col 10:
+Attempt to rebind variable: 'foo'
 ```
 
 ### Equality
