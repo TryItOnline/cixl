@@ -1,6 +1,3 @@
-* add CX_TTYPE
-** lookup types on parse
-** change CX_ID where used as type
 * add Char type
 ** add str 'for'
 ** add char 'upcase'

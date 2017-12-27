@@ -43,10 +43,11 @@ static bool parse_id(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
 	ok = m->imp(cx, in, out);
 	free(id.data);
       } else {
-	if (!lookup) {
-	  cx_tok_init(cx_vec_push(out), CX_TID, id.data, cx->row, cx->col);
-	} else if (id.data[0] == '$' || isupper(id.data[0])) {
-	  cx_tok_init(cx_vec_push(out), CX_TID, id.data, cx->row, cx->col);
+	if (isupper(id.data[0])) {
+	  struct cx_type *t = cx_get_type(cx, id.data, false);
+	  free(id.data);
+	  if (!t) { return false; }
+	  cx_tok_init(cx_vec_push(out), CX_TTYPE, t, cx->row, cx->col);
 	} else if (strcmp(id.data, "t") == 0 || strcmp(id.data, "f") == 0) {
 	  cx_tok_init(cx_vec_push(out),
 		      id.data[0] == 't' ? CX_TTRUE : CX_TFALSE,
@@ -54,6 +55,8 @@ static bool parse_id(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
 		      cx->row, cx->col);
 	} else if (strcmp(id.data, "_") == 0) {
 	  cx_tok_init(cx_vec_push(out), CX_TNIL, NULL, cx->row, cx->col);
+	} else if (!lookup || id.data[0] == '$') {
+	  cx_tok_init(cx_vec_push(out), CX_TID, id.data, cx->row, cx->col);
 	} else {
 	  bool ref = id.data[0] == '&';
 	  struct cx_func *f = cx_get_func(cx, ref ? id.data+1 : id.data, false);

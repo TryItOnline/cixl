@@ -17,24 +17,15 @@ ssize_t cx_eval_id(struct cx *cx, struct cx_vec *toks, ssize_t pc) {
   struct cx_tok *t = cx_vec_get(toks, pc);
   char *id = t->data;
 
-  if (isupper(id[0])) {
-    struct cx_type *type = cx_get_type(cx, id, false);
-    if (!type) { return -1; }
-    struct cx_box *box = cx_push(cx_scope(cx, 0));
-    box->type = cx->meta_type;
-    box->as_ptr = type;
-  } else {
-    if (id[0] == '$') {
-      struct cx_scope *s = cx_scope(cx, 0);
-      struct cx_box *v = cx_get(s, id+1, false);
-      if (!v) { return -1; }
-      cx_copy(cx_push(s), v);
-    } else {
-      cx_error(cx, t->row, t->col, "Unknown id: '%s'", id);
-      return -1;
-    }
+  if (id[0] != '$') {
+    cx_error(cx, t->row, t->col, "Unknown id: '%s'", id);
+    return -1;
   }
   
+  struct cx_scope *s = cx_scope(cx, 0);
+  struct cx_box *v = cx_get(s, id+1, false);
+  if (!v) { return -1; }
+  cx_copy(cx_push(s), v);
   return pc+1;
 }
 
@@ -121,6 +112,9 @@ ssize_t cx_eval_tok(struct cx *cx, struct cx_vec *toks, ssize_t pc) {
     return cx_eval_macro(cx, toks, pc);
   case CX_TNIL:
     cx_box_init(cx_push(s), s->cx->nil_type);
+    return pc+1;
+  case CX_TTYPE:
+    cx_box_init(cx_push(s), s->cx->meta_type)->as_ptr = t->data;
     return pc+1;    
   case CX_TTRUE:
   case CX_TFALSE:
@@ -170,32 +164,7 @@ bool cx_eval_args(struct cx *cx,
   cx_do_vec(toks, struct cx_tok, t) {
     switch (t->type) {
     case CX_TID: {
-      char *id = t->data;
-      if (isupper(id[0])) {
-	if (!tmp_ids.count) {
-	  cx_error(cx, t->row, t->col, "Missing ids for type: %s", id);
-	  cx_vec_deinit(&tmp_ids);
-	  return false;
-	}
-
-	struct cx_type *type = cx_get_type(cx, id, false);
-
-	if (!type) {
-	  cx_vec_deinit(&tmp_ids);
-	  return false;
-	}
-	
-	cx_do_vec(&tmp_ids, struct cx_tok, id) {
-	  *(struct cx_tok *)cx_vec_push(ids) = *id;
-	  *(struct cx_func_arg *)cx_vec_push(func_args) = cx_arg(type);      
-	}
-
-	cx_vec_clear(&tmp_ids);
-      } else {
-	*(struct cx_tok *)cx_vec_push(&tmp_ids) = *t;
-	t->data = NULL;
-      }
-      
+      cx_tok_copy(cx_vec_push(&tmp_ids), t);
       break;
     }
       
@@ -203,13 +172,13 @@ bool cx_eval_args(struct cx *cx,
       struct cx_box *v = t->data;
 
       if (v->type != cx->int_type || v->as_int >= func_args->count) {
-	cx_error(cx, t->row, t->col, "Invalid arg: %d", v->as_int);
+	cx_error(cx, t->row, t->col, "Invalid arg");
 	cx_vec_deinit(&tmp_ids);
 	return false;
       }
 
       if (!tmp_ids.count) {
-	cx_error(cx, t->row, t->col, "Missing ids for type: %d", v->as_int);
+	cx_error(cx, t->row, t->col, "Missing args for type: %d", v->as_int);
 	cx_vec_deinit(&tmp_ids);
 	return false;
       }
@@ -221,6 +190,25 @@ bool cx_eval_args(struct cx *cx,
 
       break;
     }
+
+    case CX_TTYPE: {
+      struct cx_type *type = t->data;
+
+      if (!tmp_ids.count) {
+	cx_error(cx, t->row, t->col, "Missing args for type: %s", type->id);
+	cx_vec_deinit(&tmp_ids);
+	return false;
+      }
+
+      cx_do_vec(&tmp_ids, struct cx_tok, id) {
+	*(struct cx_tok *)cx_vec_push(ids) = *id;
+	*(struct cx_func_arg *)cx_vec_push(func_args) = cx_arg(type);      
+      }
+      
+      cx_vec_clear(&tmp_ids);
+      
+      break;
+    }      
       
     default:
 	cx_error(cx, t->row, t->col, "Unexpected tok: %d", t->type);
