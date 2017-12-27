@@ -1,6 +1,8 @@
 * add 'ok' method
 ** always return true for types without bottom
 ** add one '?' fn in cx
+** use in 'if'
+** update readme/tests
 * move t/f into parser
 * add Nil type
 ** add '_' to parser
