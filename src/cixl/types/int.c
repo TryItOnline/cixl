@@ -4,8 +4,8 @@
 #include "cixl/box.h"
 #include "cixl/error.h"
 #include "cixl/func.h"
-#include "cixl/int.h"
 #include "cixl/scope.h"
+#include "cixl/types/int.h"
 
 static void lt_imp(struct cx_scope *scope) {
   struct cx_box

@@ -1,11 +1,11 @@
 #include "cixl/box.h"
-#include "cixl/coro.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
 #include "cixl/scope.h"
 #include "cixl/tok.h"
-#include "cixl/var.h"
+#include "cixl/types/coro.h"
 #include "cixl/types/vect.h"
+#include "cixl/var.h"
 
 struct cx_scope *cx_scope_new(struct cx *cx, struct cx_scope *parent) {
   struct cx_scope *scope = malloc(sizeof(struct cx_scope));

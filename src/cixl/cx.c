@@ -2,23 +2,23 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "cixl/bool.h"
 #include "cixl/box.h"
-#include "cixl/char.h"
-#include "cixl/coro.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
 #include "cixl/eval.h"
 #include "cixl/func.h"
-#include "cixl/int.h"
-#include "cixl/lambda.h"
 #include "cixl/nil.h"
 #include "cixl/parse.h"
 #include "cixl/scope.h"
-#include "cixl/str.h"
 #include "cixl/timer.h"
 #include "cixl/type.h"
+#include "cixl/types/bool.h"
+#include "cixl/types/char.h"
+#include "cixl/types/coro.h"
+#include "cixl/types/int.h"
+#include "cixl/types/lambda.h"
 #include "cixl/types/vect.h"
+#include "cixl/types/str.h"
 #include "cixl/util.h"
 
 static const void *get_type_id(const void *value) {

@@ -19,7 +19,7 @@ cd build
 cmake ..
 rlwrap ./cixl
 
-cixl v0.2, 10054 bmips
+cixl v0.3, 10054 bmips
 
 Press Return twice to eval input.
 

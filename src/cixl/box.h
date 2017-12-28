@@ -3,7 +3,7 @@
 
 #include <stdbool.h>
 #include <stdio.h>
-#include "cixl/int.h"
+#include "cixl/types/int.h"
 
 struct cx_func;
 struct cx_lambda;

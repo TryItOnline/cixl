@@ -1,7 +1,7 @@
 #include <string.h>
 
 #include "cixl/cmp.h"
-#include "cixl/int.h"
+#include "cixl/types/int.h"
 
 enum cx_cmp cx_cmp_char(const void *x, const void *y) {
   char xv = *(const char *)x, yv = *(const char *)y;

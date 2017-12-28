@@ -8,9 +8,9 @@
 #include "cixl/buf.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
-#include "cixl/int.h"
-#include "cixl/lambda.h"
 #include "cixl/parse.h"
+#include "cixl/types/int.h"
+#include "cixl/types/lambda.h"
 #include "cixl/vec.h"
 
 static bool parse_id(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {

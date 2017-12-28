@@ -1,11 +1,11 @@
 #include "cixl/box.h"
-#include "cixl/coro.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
 #include "cixl/eval.h"
 #include "cixl/func.h"
 #include "cixl/scope.h"
 #include "cixl/tok.h"
+#include "cixl/types/coro.h"
 
 struct cx_coro *cx_coro_init(struct cx_coro *coro,
 			     struct cx *cx,

@@ -1,5 +1,5 @@
 #include "cixl/error.h"
-#include "cixl/int.h"
+#include "cixl/types/int.h"
 #include "cixl/set.h"
 
 struct cx_set *cx_set_init(struct cx_set *set, size_t member_size, cx_cmp_t cmp) {

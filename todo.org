@@ -1,9 +1,6 @@
-* add Vect type
-** add cx_vect struct with vec & nrefs
+* finish Vect type
 ** add [] support
-** add nrefs to Vect type like lambda
-** add push/pop/len fns
-** add stash/splat funcs
+** add push/pop fns
 * add parse/eval
 ** add Tok type
 *** switch type in fprint

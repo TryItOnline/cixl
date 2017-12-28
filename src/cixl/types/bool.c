@@ -1,9 +1,9 @@
 #include "cixl/cx.h"
 #include "cixl/box.h"
-#include "cixl/bool.h"
 #include "cixl/error.h"
 #include "cixl/func.h"
 #include "cixl/scope.h"
+#include "cixl/types/bool.h"
 
 static bool equid_imp(struct cx_box *x, struct cx_box *y) {
   return x->as_bool == y->as_bool;

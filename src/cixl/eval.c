@@ -7,9 +7,9 @@
 #include "cixl/eval.h"
 #include "cixl/error.h"
 #include "cixl/func.h"
-#include "cixl/lambda.h"
 #include "cixl/parse.h"
 #include "cixl/scope.h"
+#include "cixl/types/lambda.h"
 #include "cixl/util.h"
 #include "cixl/vec.h"
 

@@ -4,8 +4,8 @@
 #include "cixl/cx.h"
 #include "cixl/error.h"
 #include "cixl/func.h"
-#include "cixl/char.h"
 #include "cixl/scope.h"
+#include "cixl/types/char.h"
 
 static void upper_imp(struct cx_scope *scope) {
   struct cx_box v = *cx_test(cx_pop(scope, false));

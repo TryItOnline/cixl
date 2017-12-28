@@ -4,9 +4,9 @@
 #include "cixl/box.h"
 #include "cixl/error.h"
 #include "cixl/eval.h"
-#include "cixl/lambda.h"
 #include "cixl/scope.h"
 #include "cixl/tok.h"
+#include "cixl/types/lambda.h"
 
 struct cx_lambda *cx_lambda_init(struct cx_lambda *lambda,
 				 struct cx_scope *scope,
