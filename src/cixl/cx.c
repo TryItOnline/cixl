@@ -223,6 +223,33 @@ static bool func_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   return true;
 }
 
+static ssize_t recall_eval(struct cx_macro_eval *eval,
+			   struct cx *cx,
+			   struct cx_vec *toks,
+			   ssize_t pc) {
+  struct cx_scope *s = cx_scope(cx, 0);
+  
+  if (!cx->func_imp) {
+    cx_error(cx, cx->row, cx->col, "Nothing to recall");
+    return -1;
+  }
+
+  if (!cx_func_imp_match(cx->func_imp, &s->stack)) {
+    cx_error(cx, cx->row, cx->col, "Recall not applicable");
+    return -1;
+  }
+
+  pc = cx_scan_args(cx, cx->func_imp->func, toks, pc+1);
+  if (!cx_eval(cx, &cx->func_imp->toks, 0)) { return -1; }
+  return pc;
+}
+
+static bool recall_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
+  struct cx_macro_eval *eval = cx_macro_eval_new(recall_eval);
+  cx_tok_init(cx_vec_push(out), CX_TMACRO, eval, cx->row, cx->col);
+  return true;
+}
+  
 static void dup_imp(struct cx_scope *scope) {
   struct cx_box *vp = cx_test(cx_peek(scope, false));
   struct cx_box v = *vp;
@@ -286,22 +313,6 @@ static void call_imp(struct cx_scope *scope) {
   cx_box_deinit(&v);
 }
 
-static void recall_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  
-  if (!cx->func_imp) {
-    cx_error(cx, cx->row, cx->col, "Nothing to recall");
-    return;
-  }
-
-  if (!cx_func_imp_match(cx->func_imp, &scope->stack)) {
-    cx_error(cx, cx->row, cx->col, "Recall not applicable");
-    return;
-  }
-  
-  cx_eval(cx, &cx->func_imp->toks, 0); 
-}
-
 static void clock_imp(struct cx_scope *scope) {
   struct cx_box v = *cx_test(cx_pop(scope, false));
   cx_timer_t timer;
@@ -350,6 +361,7 @@ struct cx *cx_init(struct cx *cx) {
   cx_add_macro(cx, "trait:", trait_parse);
   cx_add_macro(cx, "let:", let_parse);
   cx_add_macro(cx, "func:", func_parse);
+  cx_add_macro(cx, "recall", recall_parse);
   
   cx->opt_type = cx_add_type(cx, "Opt", NULL);
   cx->any_type = cx_add_type(cx, "A", cx->opt_type, NULL);
@@ -380,7 +392,6 @@ struct cx *cx_init(struct cx *cx) {
 	      cx_arg(cx->any_type))->ptr = if_imp;
   
   cx_add_func(cx, "call", cx_arg(cx->any_type))->ptr = call_imp;
-  cx_add_func(cx, "recall")->ptr = recall_imp;
 
   cx_add_func(cx, "clock", cx_arg(cx->any_type))->ptr = clock_imp;
   cx_add_func(cx, "test", cx_arg(cx->opt_type))->ptr = test_imp;
@@ -392,7 +403,7 @@ struct cx *cx_init(struct cx *cx) {
 void cx_init_math(struct cx *cx) {
   cx_test(cx_eval_str(cx,
 		      "func: _fib(a b n Int) "
-		      "$n ? if {$b, $a + $b, -- $n recall} $a;"));
+		      "$n ? if {, recall $b, $a + $b, -- $n} $a;"));
 
   cx_test(cx_eval_str(cx,
 		      "func: fib(n Int) "

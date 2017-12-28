@@ -232,11 +232,11 @@ Several parameters may share the same type. An index may may be specified instea
 [9]
 ```
 
-```recall``` may be used to call the current function recursively in the same scope:
+```recall``` may be used to call the current function recursively in the same scope, it supports scanning for arguments just like a regular function call.
 
 ```
 > func: _fib(a b n Int)
-..  $n ? if {$b, $a + $b, -- $n recall} $a;
+..  $n ? if {, recall $b, $a + $b, -- $n} $a;
 ..func: fib(n Int)
 ..  _fib 0 1 $n;
 ..fib 50

@@ -54,11 +54,12 @@ ssize_t cx_eval_lambda(struct cx *cx, struct cx_vec *toks, ssize_t pc) {
   return pc+1;
 }
 
-ssize_t cx_eval_func(struct cx *cx, struct cx_vec *toks, ssize_t pc) {
-  struct cx_tok *t = cx_vec_get(toks, pc++);
-  struct cx_func *func = t->data;
+ssize_t cx_scan_args(struct cx *cx,
+		     struct cx_func *func,
+		     struct cx_vec *toks,
+		     ssize_t pc) {
   int row = cx->row, col = cx->col;
-  
+
   while (pc < toks->count) {
     struct cx_scope *s = cx_scope(cx, 0);
     if (s->stack.count - s->cut_offs >= func->nargs) { break; }
@@ -73,7 +74,15 @@ ssize_t cx_eval_func(struct cx *cx, struct cx_vec *toks, ssize_t pc) {
   }
 
   s->cut_offs = 0;
-  return cx_funcall(func, s, row, col) ? pc : -1;
+  return pc;
+}
+
+ssize_t cx_eval_func(struct cx *cx, struct cx_vec *toks, ssize_t pc) {
+  struct cx_tok *t = cx_vec_get(toks, pc++);
+  struct cx_func *func = t->data;
+  int row = cx->row, col = cx->col;
+  pc = cx_scan_args(cx, func, toks, pc);
+  return cx_funcall(func, cx_scope(cx, 0), row, col) ? pc : -1;
 }
 
 ssize_t cx_eval_group(struct cx *cx, struct cx_vec *toks, ssize_t pc) {

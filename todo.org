@@ -3,8 +3,13 @@
 *** add call support
 *** add `...` parser support
 **** quote tokens and push Toks
-* add forward scanning to recall
-** convert to macro
+* add Vect type
+** add cx_vect struct with vec & nrefs
+** add [] support
+** add nrefs to Vect type like lambda
+** add push/pop/len fns
+** add stash/splat funcs
+
 * add fail func
 ** like test but just call error with message
 * add basic io
@@ -20,12 +25,6 @@
 * update readme
 * add Str 'int' fn
 * add Int 'str' fn
-* add Vect type
-** add cx_vect struct with vec & nrefs
-** add [] support
-** add nrefs to Vect type like lambda
-** add push/pop/len fns
-** add stash/splat funcs
 * add Rat type
 * add str interpolation
 * jit func tokens to imps
@@ -34,3 +33,6 @@
 
 clock {,10000 times {,fib 50 zap}} / 1000000
 
+eval parse '7 35 +'
+
+func: fib2(a b n Int) $n ? if {,recall $b, $a + $b, -- $n} $a;
