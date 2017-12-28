@@ -2,6 +2,7 @@
 #include <string.h>
 
 #include "cixl/error.h"
+#include "cixl/util.h"
 #include "cixl/vec.h"
 
 struct cx_vec *cx_vec_new(size_t item_size) {
@@ -26,7 +27,7 @@ void cx_vec_grow(struct cx_vec *vec, size_t capac) {
   if (vec->capac) {
     while (vec->capac < capac) { vec->capac *= CX_VEC_GROW_FACTOR; }
   } else {
-    vec->capac = capac;
+    vec->capac = cx_max(capac, CX_VEC_MIN_SIZE);
   }
 	 
   vec->items = realloc(vec->items, vec->capac*vec->item_size);
