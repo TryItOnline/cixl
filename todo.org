@@ -1,3 +1,10 @@
+* convert pc/stop_pc to cx_tok *
+** inc eval_tok
+** don't pass around/return
+* add eval fn pointer to tok
+** replaces switch in eval_tok
+* replace tok.data with as_vect/box/ptr like box
+* ---
 * add parse/unparse/eval
 ** add types/tok.h/c
 ** add Tok type
