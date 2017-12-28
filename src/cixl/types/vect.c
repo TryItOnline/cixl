@@ -48,7 +48,7 @@ static void len_imp(struct cx_scope *scope) {
   cx_box_init(cx_push(scope), scope->cx->int_type)->as_int = v->imp.count;
 }
 
-static void stack_imp(struct cx_scope *scope) {
+static void vect_imp(struct cx_scope *scope) {
   struct cx_vect *v = cx_vect_new();
   v->imp = scope->stack;
   cx_vec_init(&scope->stack, sizeof(struct cx_box));
@@ -142,7 +142,7 @@ struct cx_type *cx_init_vect_type(struct cx *cx) {
   t->deinit = deinit_imp;
   
   cx_add_func(cx, "len", cx_arg(t))->ptr = len_imp;
-  cx_add_func(cx, "stack")->ptr = stack_imp;
+  cx_add_func(cx, "vect")->ptr = vect_imp;
   
   cx_add_func(cx, "for", cx_arg(t), cx_arg(cx->any_type))->ptr = for_imp;
   cx_add_func(cx, "map", cx_arg(t), cx_arg(cx->any_type))->ptr = map_imp;

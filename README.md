@@ -42,7 +42,7 @@ The parameter stack is accessible from user code, just like in Forth.
 ..
 [1 2 3 4 5]
 
-> stack
+> vect
 ..
 [[1 2 3 4 5]@1]
 

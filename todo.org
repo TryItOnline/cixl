@@ -1,5 +1,4 @@
 * finish Vect type
-** add [] support
 ** add push/pop fns
 * add parse/eval
 ** add Tok type
@@ -26,6 +25,8 @@
 * add Char 'int' fn
 * add Int 'char' fn
 * add Rat type
+* add Set type
+* add Table type
 * add str interpolation
 
 clock {,10000 times {,fib 50 zap}} / 1000000
