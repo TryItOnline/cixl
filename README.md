@@ -143,14 +143,14 @@ Variables in the parent scope may be referenced from within the scope, but varia
 ```
 
 ### Conditions
-All types are useable as conditions; some are always true; integers test true for anything but zero; empty strings test false etc. The ```?``` operator may be used to transform any value to a condition.
+All types are useable as conditions; some are always true; integers test true for anything but zero; empty strings test false etc. The ```?``` operator may be used to transform any value to its conditional representation.
 
 ```
 > 0?
 [f]
 ```
 
-The ```!``` operator negates any value.
+The ```!``` operator negates any condition.
 
 ```
 > 42!
