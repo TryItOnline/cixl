@@ -54,7 +54,7 @@ static void copy_imp(struct cx_box *dst, struct cx_box *src) {
 
 static void fprint_imp(struct cx_box *value, FILE *out) {
   struct cx_lambda *l = value->as_ptr;
-  fprintf(out, "Lambda(%p:%d)", l, l->nrefs);
+  fprintf(out, "Lambda(%p@%d)", l, l->nrefs);
 }
 
 static void deinit_imp(struct cx_box *value) {

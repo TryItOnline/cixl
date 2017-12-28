@@ -5,6 +5,7 @@
 #include "cixl/scope.h"
 #include "cixl/tok.h"
 #include "cixl/var.h"
+#include "cixl/types/vect.h"
 
 struct cx_scope *cx_scope_new(struct cx *cx, struct cx_scope *parent) {
   struct cx_scope *scope = malloc(sizeof(struct cx_scope));
@@ -65,16 +66,7 @@ struct cx_box *cx_peek(struct cx_scope *scope, bool silent) {
 }
 
 void cx_fprint_stack(struct cx_scope *scope, FILE *out) {
-  fputc('[', out);
-  char sep = 0;
-  
-  cx_do_vec(&scope->stack, struct cx_box, b) {
-    if (sep) { fputc(sep, out); }
-    cx_fprint(b, out);
-    sep = ' ';
-  }
-
-  fputs("]\n", out);
+  cx_vect_fprint(&scope->stack, out);
 }
 
 struct cx_box *cx_set(struct cx_scope *scope, const char *id, bool force) {

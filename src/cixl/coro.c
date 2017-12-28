@@ -90,7 +90,7 @@ static void copy_imp(struct cx_box *dst, struct cx_box *src) {
 
 static void fprint_imp(struct cx_box *value, FILE *out) {
   struct cx_coro *coro = value->as_ptr;
-  fprintf(out, "Coro(%p:%d)", coro, coro->nrefs);
+  fprintf(out, "Coro(%p@%d)", coro, coro->nrefs);
 }
 
 static void deinit_imp(struct cx_box *value) {

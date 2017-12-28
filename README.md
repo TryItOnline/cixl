@@ -42,6 +42,14 @@ The parameter stack is accessible from user code, just like in Forth.
 ..
 [1 2 3 4 5]
 
+> stack
+..
+[[1 2 3 4 5]@1]
+
+> for {2 *}
+..
+[2 4 6 8 10]
+
 > cls
 ..
 []
@@ -175,7 +183,7 @@ Putting braces around a block of code defines a lambda, which is then pushed on 
 ```
 > {1 2 3}
 ..
-[Lambda(0x52d97d0:1)]
+[Lambda(0x52d97d0@1)]
 
 > call
 ..
@@ -304,11 +312,11 @@ Coroutines allow stopping execution and resuming in the same scope later on. A c
 ```
 > (1 2 yield 3)
 ..
-[Coro(0x53c9de0:1)]
+[Coro(0x53c9de0@1)]
 
 > dup call
 ..
-[Coro(0x53c9de0:1) 3]
+[Coro(0x53c9de0@1) 3]
 
 > zap call
 ..
@@ -331,7 +339,7 @@ As do lambdas, except for reusing the defining scope:
 ```
 > (let: x 42; {yield $x}) call
 ..
-[Coro(0x5476c50:1)]
+[Coro(0x5476c50@1)]
 
 > call
 ..
@@ -343,11 +351,11 @@ In the example below, ```foo``` manipulates the main stack through the passed in
 ```
 > 1 2 yield cls 3 4
 ..
-[1 2 Coro(0x541ec00:1)]
+[1 2 Coro(0x541ec00@1)]
 
 > func: foo(x Coro) $x call;          
 ..
-[1 2 Coro(0x541ec00:1)]
+[1 2 Coro(0x541ec00@1)]
 
 > foo
 ..
@@ -367,6 +375,7 @@ Capitalized names are treated as type references, the following types are define
 - Opt ()
 - Str (A)
 - Type (A)
+- Vect (A)
 
 ```
 > type 42

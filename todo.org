@@ -6,6 +6,7 @@
 ** add stash/splat funcs
 * add parse/eval
 ** add Tok type
+*** switch type in fprint
 ** add Toks type, inherit Vect
 *** add call support
 *** add `...` parser support

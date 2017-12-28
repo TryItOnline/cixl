@@ -18,6 +18,7 @@
 #include "cixl/str.h"
 #include "cixl/timer.h"
 #include "cixl/type.h"
+#include "cixl/types/vect.h"
 #include "cixl/util.h"
 
 static const void *get_type_id(const void *value) {
@@ -372,6 +373,7 @@ struct cx *cx_init(struct cx *cx) {
   cx->int_type = cx_init_int_type(cx);
   cx->char_type = cx_init_char_type(cx);
   cx->str_type = cx_init_str_type(cx);
+  cx->vect_type = cx_init_vect_type(cx);
   cx->func_type = cx_init_func_type(cx);
   cx->lambda_type = cx_init_lambda_type(cx);
   cx->coro_type = cx_init_coro_type(cx);
