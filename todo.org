@@ -7,6 +7,10 @@
 *** add call support
 *** add `...` parser support
 **** quote tokens and push Toks
+* add wrap macro for cx_add_type
+** pass NULL
+* change func imps to return bool
+* update readme
 * add fail func
 ** like test but just call error with message
 * add basic io
@@ -16,10 +20,6 @@
 *** write to stdout with newline
 * add str \n support
 * add str \' support
-* add wrap macro for cx_add_type
-** pass NULL
-* change func imps to return bool
-* update readme
 * add Str 'int' fn
 * add Int 'str' fn
 * add Char 'int' fn
