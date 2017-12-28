@@ -17,6 +17,7 @@ cd cixl
 mkdir build
 cd build
 cmake ..
+make
 rlwrap ./cixl
 
 cixl v0.3, 10054 bmips
