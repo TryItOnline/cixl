@@ -16,8 +16,12 @@ struct cx_coro *cx_coro_init(struct cx_coro *coro,
   coro->done = false;
   cx_vec_init(&coro->toks, sizeof(struct cx_tok));
 
-  for (size_t i = cx->pc+1; i < cx->toks->count; i++) {
-    cx_tok_copy(cx_vec_push(&coro->toks), cx_vec_get(cx->toks, i));
+  if (cx->toks->count > cx->pc+1) {
+    cx_vec_grow(&coro->toks, cx->toks->count-cx->pc-1);
+  
+    for (size_t i = cx->pc+1; i < cx->toks->count; i++) {
+      cx_tok_copy(cx_vec_push(&coro->toks), cx_vec_get(cx->toks, i));
+    }
   }
   
   return coro;

@@ -16,7 +16,11 @@ static const void *get_imp_id(const void *value) {
   return &(*imp)->id;
 }
 
-struct cx_func *cx_func_init(struct cx_func *func, const char *id, int nargs) {
+struct cx_func *cx_func_init(struct cx_func *func,
+			     struct cx *cx,
+			     const char *id,
+			     int nargs) {
+  func->cx = cx;
   func->id = strdup(id);
   cx_set_init(&func->imps, sizeof(struct cx_func_imp *), cx_cmp_str);
   func->imps.key = get_imp_id;
@@ -31,7 +35,10 @@ struct cx_func *cx_func_deinit(struct cx_func *func) {
   return func; 
 }
 
-struct cx_func_imp *cx_func_imp_init(struct cx_func_imp *imp, char *id) {
+struct cx_func_imp *cx_func_imp_init(struct cx_func_imp *imp,
+				     struct cx_func *func,
+				     char *id) {
+  imp->func = func;
   imp->id = id;
   imp->ptr = NULL;
   cx_vec_init(&imp->args, sizeof(struct cx_func_arg));
@@ -63,16 +70,20 @@ struct cx_func_imp *cx_func_add_imp(struct cx_func *func,
   struct cx_buf id;
   cx_buf_open(&id);
   
-  for (int i=0; i < nargs; i++) {
-    struct cx_func_arg a = args[i];
-    *(struct cx_func_arg *)cx_vec_push(&imp_args) = a;
-    
-    if (i) { fputc(' ', id.stream); }
-    
-    if (a.type) {
-      fputs(a.type->id, id.stream);
-    } else {
-      fprintf(id.stream, "%d", a.narg);
+  if (nargs) {
+    cx_vec_grow(&imp_args, nargs);
+
+    for (int i=0; i < nargs; i++) {
+      struct cx_func_arg a = args[i];
+      *(struct cx_func_arg *)cx_vec_push(&imp_args) = a;
+      
+      if (i) { fputc(' ', id.stream); }
+      
+      if (a.type) {
+	fputs(a.type->id, id.stream);
+      } else {
+	fprintf(id.stream, "%d", a.narg);
+      }
     }
   }
     
@@ -85,6 +96,7 @@ struct cx_func_imp *cx_func_add_imp(struct cx_func *func,
   }
 
   struct cx_func_imp *imp = cx_func_imp_init(malloc(sizeof(struct cx_func_imp)),
+					     func,
 					     id.data);
   *(struct cx_func_imp **)cx_set_insert(&func->imps, &id.data) = imp;
   imp->args = imp_args;
@@ -92,23 +104,27 @@ struct cx_func_imp *cx_func_add_imp(struct cx_func *func,
 }
 
 bool cx_func_imp_match(struct cx_func_imp *imp, struct cx_vec *stack) {
-    for (int i = imp->args.count-1, j = stack->count-1;
-	 i >= 0  && j >= 0;
-	 i--, j--) {
-      struct cx_func_arg *imp_arg = cx_vec_get(&imp->args, i);
+  struct cx *cx = imp->func->cx;
+  
+  for (int i = imp->args.count-1, j = stack->count-1;
+       i >= 0  && j >= 0;
+       i--, j--) {
+    struct cx_func_arg *imp_arg = cx_vec_get(&imp->args, i);
 
-      struct cx_type *imp_type = imp_arg->type
-	? imp_arg->type
-	: ((struct cx_box *)cx_vec_get(stack,
-				       stack->count -
-				       imp->args.count +
-				       imp_arg->narg))->type;
+    struct cx_type *imp_type = imp_arg->type
+      ? imp_arg->type
+      : ((struct cx_box *)cx_vec_get(stack,
+				     stack->count -
+				     imp->args.count +
+				     imp_arg->narg))->type;
       
-      struct cx_box *arg = cx_vec_get(stack, j);
-      if (!cx_type_is(arg->type, imp_type)) { return false; }
-    }  
+    struct cx_box *arg = cx_vec_get(stack, j);
+    if (imp_type != cx->opt_type && arg->type == cx->nil_type) { return false; }
+    if (imp_type == cx->opt_type || imp_type == cx->any_type) { continue; }
+    if (!cx_type_is(arg->type, imp_type)) { return false; }
+  }
 
-    return true;
+  return true;
 }
 
 struct cx_func_imp *cx_func_get_imp(struct cx_func *func, struct cx_vec *stack) {

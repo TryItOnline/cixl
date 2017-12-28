@@ -1,4 +1,3 @@
-* bench fib
 * add trait: macro
 ** create type and insert as parent for all args
 * add parse/eval
@@ -40,8 +39,5 @@
 ** add CX_TFUNC_IMP
 *** add func ref to imp struct
 
-```
-> 'foo' map &upper
-..
-['FOO']
-```
+clock {,10000 times {,fib 50 zap}} / 1000000
+

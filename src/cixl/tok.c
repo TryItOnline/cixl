@@ -50,13 +50,19 @@ void cx_tok_copy(struct cx_tok *dst, struct cx_tok *src) {
   switch (src->type) {
   case CX_TGROUP:
   case CX_TLAMBDA: {
-    struct cx_vec *body = cx_vec_new(sizeof(struct cx_tok));
+    struct cx_vec
+      *src_body = src->data,
+      *dst_body = cx_vec_new(sizeof(struct cx_tok));
     
-    cx_do_vec((struct cx_vec *)src->data, struct cx_tok, t) {
-      cx_tok_copy(cx_vec_push(body), t);
+    if (src_body->count) {
+      cx_vec_grow(dst_body, src_body->count);
+    
+      cx_do_vec(src_body, struct cx_tok, t) {
+	cx_tok_copy(cx_vec_push(dst_body), t);
+      }
     }
 
-    dst->data = body;
+    dst->data = dst_body;
     break;
   }
   case CX_TID:

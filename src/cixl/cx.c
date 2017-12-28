@@ -425,7 +425,7 @@ struct cx_func_imp *_cx_add_func(struct cx *cx,
     }
   } else {
     f = cx_set_insert(&cx->funcs, &id);
-    *f = cx_func_init(malloc(sizeof(struct cx_func)), id, nargs);
+    *f = cx_func_init(malloc(sizeof(struct cx_func)), cx, id, nargs);
   }
   
   return cx_func_add_imp(*f, nargs, args);

@@ -9,22 +9,31 @@ struct cx_scope;
 struct cx_type;
 
 struct cx_func {
+  struct cx *cx;
   char *id;
   struct cx_set imps;
   int nargs;
 };
 
-struct cx_func *cx_func_init(struct cx_func *func, const char *id, int nargs);
+struct cx_func *cx_func_init(struct cx_func *func,
+			     struct cx *cx,
+			     const char *id,
+			     int nargs);
+
 struct cx_func *cx_func_deinit(struct cx_func *func);
 			  
 struct cx_func_imp {
+  struct cx_func *func;
   char *id;
   struct cx_vec args;
   void (*ptr)(struct cx_scope *);
   struct cx_vec toks;
 };
 
-struct cx_func_imp *cx_func_imp_init(struct cx_func_imp *imp, char *id);
+struct cx_func_imp *cx_func_imp_init(struct cx_func_imp *imp,
+				     struct cx_func *func,
+				     char *id);
+
 struct cx_func_imp *cx_func_imp_deinit(struct cx_func_imp *imp);
 bool cx_func_imp_match(struct cx_func_imp *imp, struct cx_vec *stack);
 
