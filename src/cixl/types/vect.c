@@ -39,7 +39,7 @@ void cx_vect_fprint(struct cx_vec *imp, FILE *out) {
     sep = ' ';
   }
 
-  fputs("]", out);
+  fputc(']', out);
 }
 
 static void len_imp(struct cx_scope *scope) {
