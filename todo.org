@@ -1,6 +1,3 @@
-* jit func tokens to imps
-** add CX_TFUNC_IMP
-*** add func ref to imp struct
 * add Vect type
 ** add cx_vect struct with vec & nrefs
 ** add [] support

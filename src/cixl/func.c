@@ -123,28 +123,13 @@ bool cx_func_imp_match(struct cx_func_imp *imp, struct cx_vec *stack) {
   return true;
 }
 
-struct cx_func_imp *cx_func_get_imp(struct cx_func *func, struct cx_vec *stack) {
-  cx_do_set(&func->imps, struct cx_func_imp *, imp) {
-    if (cx_func_imp_match(*imp, stack)) { return *imp; }
-  }
-
-  return NULL;
-}
-
-bool cx_funcall(struct cx_func *func, struct cx_scope *scope, int row, int col) {
-  struct cx *cx = scope->cx;
-  struct cx_func_imp *imp = cx_func_get_imp(func, &scope->stack);
-
-  if (!imp) {
-    cx_error(cx, row, col, "Func not applicable: '%s'", func->id);
-    return -1;
-  }
-
+bool cx_func_imp_call(struct cx_func_imp *imp, struct cx_scope *scope) {
   if (imp->ptr) {
     imp->ptr(scope);
     return true;
   }
   
+  struct cx *cx = scope->cx;
   cx_begin(cx, false);
   struct cx_func_imp *prev = cx->func_imp;
   cx->func_imp = imp;
@@ -154,13 +139,29 @@ bool cx_funcall(struct cx_func *func, struct cx_scope *scope, int row, int col) 
   return ok;
 }
 
+struct cx_func_imp *cx_func_get_imp(struct cx_func *func, struct cx_vec *stack) {
+  cx_do_set(&func->imps, struct cx_func_imp *, imp) {
+    if (cx_func_imp_match(*imp, stack)) { return *imp; }
+  }
+
+  return NULL;
+}
+
 static bool equid_imp(struct cx_box *x, struct cx_box *y) {
   return x->as_ptr == y->as_ptr;
 }
 
 static bool call_imp(struct cx_box *value, struct cx_scope *scope) {
   struct cx *cx = scope->cx;
-  return cx_funcall(value->as_ptr, scope, cx->row, cx->col);
+  
+  struct cx_func_imp *imp = cx_func_get_imp(value->as_ptr, &scope->stack);
+
+  if (!imp) {
+    cx_error(cx, cx->row, cx->col, "Func not applicable: '%s'", imp->func->id);
+    return -1;
+  }
+
+  return cx_func_imp_call(imp, scope);
 }
 
 static void fprint_imp(struct cx_box *value, FILE *out) {

@@ -81,8 +81,44 @@ ssize_t cx_eval_func(struct cx *cx, struct cx_vec *toks, ssize_t pc) {
   struct cx_tok *t = cx_vec_get(toks, pc++);
   struct cx_func *func = t->data;
   int row = cx->row, col = cx->col;
+  
   pc = cx_scan_args(cx, func, toks, pc);
-  return cx_funcall(func, cx_scope(cx, 0), row, col) ? pc : -1;
+  struct cx_scope *s = cx_scope(cx, 0);
+  struct cx_func_imp *imp = cx_func_get_imp(func, &s->stack);
+
+  if (!imp) {
+    cx_error(cx, row, col, "Func not applicable: '%s'", func->id);
+    return -1;
+  }
+
+  t->type = CX_TFUNC_IMP;
+  t->data = imp;
+  
+  return cx_func_imp_call(imp, s) ? pc : -1;
+}
+
+ssize_t cx_eval_func_imp(struct cx *cx, struct cx_vec *toks, ssize_t pc) {
+  struct cx_tok *t = cx_vec_get(toks, pc++);
+  struct cx_func_imp *imp = t->data;
+  struct cx_func *func = imp->func;
+  int row = cx->row, col = cx->col;
+
+  pc = cx_scan_args(cx, func, toks, pc);
+  struct cx_scope *s = cx_scope(cx, 0);
+  
+  if (!cx_func_imp_match(imp, &s->stack)) {
+    printf("mismatch: %s\n", func->id);
+    imp = cx_func_get_imp(func, &s->stack);
+    
+    if (!imp) {
+      cx_error(cx, row, col, "Func not applicable: '%s'", func->id);
+      return -1;
+    }
+
+    t->data = imp;
+  }
+  
+  return cx_func_imp_call(imp, s) ? pc : -1;
 }
 
 ssize_t cx_eval_group(struct cx *cx, struct cx_vec *toks, ssize_t pc) {
@@ -109,6 +145,8 @@ ssize_t cx_eval_tok(struct cx *cx, struct cx_vec *toks, ssize_t pc) {
   }
   case CX_TFUNC:
     return cx_eval_func(cx, toks, pc);
+  case CX_TFUNC_IMP:
+    return cx_eval_func_imp(cx, toks, pc);
   case CX_TGROUP:
     return cx_eval_group(cx, toks, pc);
   case CX_TID:
