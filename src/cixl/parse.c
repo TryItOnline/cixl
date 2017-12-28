@@ -228,10 +228,6 @@ bool cx_parse_tok(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
   int row = cx->row, col = cx->col;
   bool done = false;
   
-  void push_tok(enum cx_tok_type type, void *data) {
-    cx_tok_init(cx_vec_push(out), type, data, row, col);
-  }
-  
   while (!done) {
       char c = fgetc(in);
   
