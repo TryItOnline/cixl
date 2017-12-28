@@ -82,10 +82,7 @@ static bool trait_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   }
 }
 
-static ssize_t let_eval(struct cx_macro_eval *eval,
-			struct cx *cx,
-			struct cx_vec *toks,
-			ssize_t pc) {
+static bool let_eval(struct cx_macro_eval *eval, struct cx *cx) {
   struct cx_scope *s = cx_begin(cx, true);
   cx_eval(cx, &eval->toks, 1);
   struct cx_box *val = cx_pop(s, false);
@@ -100,7 +97,7 @@ static ssize_t let_eval(struct cx_macro_eval *eval,
   if (var) { *var = *val; }
   cx_end(cx);
   
-  return var ? pc+1 : -1;
+  return var;
 }
 
 static bool let_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
@@ -132,10 +129,7 @@ static bool let_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   return true;
 }
 
-static ssize_t func_eval(struct cx_macro_eval *eval,
-			 struct cx *cx,
-			 struct cx_vec *toks,
-			 ssize_t pc) {
+static bool func_eval(struct cx_macro_eval *eval, struct cx *cx) {
   struct cx_scope *s = cx_scope(cx, 0);
   struct cx_scope *ps = cx_scope(cx, 1);
 
@@ -144,7 +138,7 @@ static ssize_t func_eval(struct cx_macro_eval *eval,
     *cx_set(s, t->data, true) = *cx_pop(ps, false);
   }
   
-  return pc+1;
+  return true;
 }
 
 static bool func_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
@@ -224,25 +218,22 @@ static bool func_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   return true;
 }
 
-static ssize_t recall_eval(struct cx_macro_eval *eval,
-			   struct cx *cx,
-			   struct cx_vec *toks,
-			   ssize_t pc) {
+static bool recall_eval(struct cx_macro_eval *eval, struct cx *cx) {
   struct cx_scope *s = cx_scope(cx, 0);
   
   if (!cx->func_imp) {
     cx_error(cx, cx->row, cx->col, "Nothing to recall");
-    return -1;
+    return false;
   }
 
   if (!cx_func_imp_match(cx->func_imp, &s->stack)) {
     cx_error(cx, cx->row, cx->col, "Recall not applicable");
-    return -1;
+    return false;
   }
 
-  pc = cx_scan_args(cx, cx->func_imp->func, toks, pc+1);
-  if (!cx_eval(cx, &cx->func_imp->toks, 0)) { return -1; }
-  return pc;
+  return
+    cx_scan_args(cx, cx->func_imp->func) &&
+    cx_eval(cx, &cx->func_imp->toks, 0);
 }
 
 static bool recall_parse(struct cx *cx, FILE *in, struct cx_vec *out) {

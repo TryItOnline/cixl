@@ -21,10 +21,7 @@ struct cx_macro *cx_macro_init(struct cx_macro *macro,
 
 struct cx_macro *cx_macro_deinit(struct cx_macro *macro);
 
-typedef ssize_t (*cx_macro_eval_t)(struct cx_macro_eval *eval,
-				   struct cx *cx,
-				   struct cx_vec *toks,
-				   ssize_t pc);
+typedef bool (*cx_macro_eval_t)(struct cx_macro_eval *eval, struct cx *cx);
 
 struct cx_macro_eval {
   struct cx_vec toks;

@@ -13,101 +13,73 @@
 #include "cixl/util.h"
 #include "cixl/vec.h"
 
-ssize_t cx_eval_id(struct cx *cx, struct cx_vec *toks, ssize_t pc) {
-  struct cx_tok *t = cx_vec_get(toks, pc);
-  char *id = t->data;
+static bool eval_id(struct cx_tok *tok, struct cx *cx) {
+  char *id = tok->data;
 
   if (id[0] != '$') {
-    cx_error(cx, t->row, t->col, "Unknown id: '%s'", id);
+    cx_error(cx, tok->row, tok->col, "Unknown id: '%s'", id);
     return -1;
   }
   
   struct cx_scope *s = cx_scope(cx, 0);
   struct cx_box *v = cx_get(s, id+1, false);
-  if (!v) { return -1; }
+  if (!v) { return false; }
   cx_copy(cx_push(s), v);
-  return pc+1;
+  return true;
 }
 
-ssize_t cx_eval_literal(struct cx *cx, struct cx_vec *toks, ssize_t pc) {
-  struct cx_tok *t = cx_vec_get(toks, pc);
-  cx_copy(cx_push(cx_scope(cx, 0)), t->data);
-  return pc+1;
+static bool eval_literal(struct cx_tok *tok, struct cx *cx) {
+  cx_copy(cx_push(cx_scope(cx, 0)), tok->data);
+  return true;
 }
 
-ssize_t cx_eval_macro(struct cx *cx, struct cx_vec *toks, ssize_t pc) {
-  struct cx_tok *t = cx_vec_get(toks, pc);
-  struct cx_macro_eval *eval = t->data;
-  return eval->imp(eval, cx, toks, pc);
+static bool eval_macro(struct cx_tok *tok, struct cx *cx) {
+  struct cx_macro_eval *eval = tok->data;
+  return eval->imp(eval, cx);
 }
 
-ssize_t cx_eval_lambda(struct cx *cx, struct cx_vec *toks, ssize_t pc) {
-  struct cx_tok *t = cx_vec_get(toks, pc);
+static bool eval_lambda(struct cx_tok *tok, struct cx *cx) {
   struct cx_scope *scope = cx_scope(cx, 0);
   
   struct cx_lambda *lambda = cx_lambda_init(malloc(sizeof(struct cx_lambda)),
 					    scope,
-					    t->data);
+					    tok->data);
 
   struct cx_box *v = cx_box_init(cx_push(scope), cx->lambda_type);
   v->as_ptr = lambda;
-  return pc+1;
+  return true;
 }
 
-ssize_t cx_scan_args(struct cx *cx,
-		     struct cx_func *func,
-		     struct cx_vec *toks,
-		     ssize_t pc) {
-  int row = cx->row, col = cx->col;
-
-  while (pc < toks->count) {
-    struct cx_scope *s = cx_scope(cx, 0);
-    if (s->stack.count - s->cut_offs >= func->nargs) { break; }
-    if ((pc = cx_eval_tok(cx, toks, pc)) == -1) { return -1; }
-  }
-
-  struct cx_scope *s = cx_scope(cx, 0);
-  
-  if (s->stack.count - s->cut_offs < func->nargs) {
-    cx_error(cx, row, col, "Not enough args for func: '%s'", func->id);
-    return -1;
-  }
-
-  s->cut_offs = 0;
-  return pc;
-}
-
-ssize_t cx_eval_func(struct cx *cx, struct cx_vec *toks, ssize_t pc) {
-  struct cx_tok *t = cx_vec_get(toks, pc++);
-  struct cx_func *func = t->data;
+static bool eval_func(struct cx_tok *tok, struct cx *cx) {
+  struct cx_func *func = tok->data;
   int row = cx->row, col = cx->col;
   
-  pc = cx_scan_args(cx, func, toks, pc);
+  if (!cx_scan_args(cx, func)) { return false; }
+    
   struct cx_scope *s = cx_scope(cx, 0);
   struct cx_func_imp *imp = cx_func_get_imp(func, &s->stack);
 
   if (!imp) {
     cx_error(cx, row, col, "Func not applicable: '%s'", func->id);
-    return -1;
+    return false;
   }
 
-  t->type = CX_TFUNC_IMP;
-  t->data = imp;
+  tok->type = CX_TFUNC_IMP;
+  tok->data = imp;
   
-  return cx_func_imp_call(imp, s) ? pc : -1;
+  return cx_func_imp_call(imp, s);
 }
 
-ssize_t cx_eval_func_imp(struct cx *cx, struct cx_vec *toks, ssize_t pc) {
-  struct cx_tok *t = cx_vec_get(toks, pc++);
-  struct cx_func_imp *imp = t->data;
+static bool eval_func_imp(struct cx_tok *tok, struct cx *cx) {
+  struct cx_func_imp *imp = tok->data;
   struct cx_func *func = imp->func;
   int row = cx->row, col = cx->col;
 
-  pc = cx_scan_args(cx, func, toks, pc);
+  if (!cx_scan_args(cx, func)) { return false; }
+  
   struct cx_scope *s = cx_scope(cx, 0);
   
   if (!cx_func_imp_match(imp, &s->stack)) {
-    printf("mismatch: %s\n", func->id);
     imp = cx_func_get_imp(func, &s->stack);
     
     if (!imp) {
@@ -115,79 +87,80 @@ ssize_t cx_eval_func_imp(struct cx *cx, struct cx_vec *toks, ssize_t pc) {
       return -1;
     }
 
-    t->data = imp;
+    tok->data = imp;
   }
   
-  return cx_func_imp_call(imp, s) ? pc : -1;
+  return cx_func_imp_call(imp, s);
 }
 
-ssize_t cx_eval_group(struct cx *cx, struct cx_vec *toks, ssize_t pc) {
-  struct cx_tok *t = cx_vec_get(toks, pc);
-  struct cx_vec *body = t->data;
+static bool eval_group(struct cx_tok *tok, struct cx *cx) {
+  struct cx_vec *body = tok->data;
   cx_begin(cx, true);
   bool ok = cx_eval(cx, body, 0);
   cx_end(cx);
-  return ok ? pc+1 : -1;
+  return ok;
 }
 
-ssize_t cx_eval_tok(struct cx *cx, struct cx_vec *toks, ssize_t pc) {
-  cx_test(toks->count);
-  struct cx_tok *t = cx_vec_get(toks, pc);
+static bool eval_tok(struct cx *cx) {
+  struct cx_tok *t = cx_vec_get(cx->toks, cx->pc++);
   struct cx_scope *s = cx_scope(cx, 0);
 
   cx->row = t->row;
   cx->col = t->col;
   
   switch (t->type) {
-  case CX_TCUT: {
+  case CX_TCUT:
     s->cut_offs = s->stack.count;
-    return pc+1;
-  }
+    return true;
   case CX_TFUNC:
-    return cx_eval_func(cx, toks, pc);
+    return eval_func(t, cx);
   case CX_TFUNC_IMP:
-    return cx_eval_func_imp(cx, toks, pc);
+    return eval_func_imp(t, cx);
   case CX_TGROUP:
-    return cx_eval_group(cx, toks, pc);
+    return eval_group(t, cx);
   case CX_TID:
-    return cx_eval_id(cx, toks, pc);
+    return eval_id(t, cx);
   case CX_TLAMBDA:
-    return cx_eval_lambda(cx, toks, pc);
+    return eval_lambda(t, cx);
   case CX_TLITERAL:
-    return cx_eval_literal(cx, toks, pc);
+    return eval_literal(t, cx);
   case CX_TMACRO:
-    return cx_eval_macro(cx, toks, pc);
+    return eval_macro(t, cx);
   case CX_TNIL:
     cx_box_init(cx_push(s), s->cx->nil_type);
-    return pc+1;
+    return true;
   case CX_TTYPE:
     cx_box_init(cx_push(s), s->cx->meta_type)->as_ptr = t->data;
-    return pc+1;    
+    return true;
   case CX_TTRUE:
   case CX_TFALSE:
     cx_box_init(cx_push(s), s->cx->bool_type)->as_bool = t->type == CX_TTRUE;
-    return pc+1;
+    return true;
   default:
     cx_error(cx, t->row, t->col, "Unexpected token: %d", t->type);
     break;
   }
 
-  return -1;
+  return false;
 }
 
 bool cx_eval(struct cx *cx, struct cx_vec *toks, ssize_t pc) {
+  ssize_t prev_pc = cx->pc;
+  struct cx_vec *prev_toks = cx->toks;
+    
   cx->pc = pc;
+  cx->toks = toks;
   bool ok = false;
   
   while (cx->pc < toks->count && cx->pc != cx->stop_pc) {
-    cx->toks = toks;
-    if ((cx->pc = cx_eval_tok(cx, toks, cx->pc)) == -1) { goto exit; }
+    if (!eval_tok(cx)) { goto exit; }
     if (cx->errors.count) { goto exit; }
   }
 
   ok = true;
  exit:
-  cx->toks = NULL;
+  cx->toks = prev_toks;
+  cx->pc = prev_pc;
   cx->stop_pc = -1;
   return ok;
 }
@@ -199,6 +172,26 @@ bool cx_eval_str(struct cx *cx, const char *in) {
   cx_do_vec(&toks, struct cx_tok, t) { cx_tok_deinit(t); }
   cx_vec_deinit(&toks);
   return ok;
+}
+
+bool cx_scan_args(struct cx *cx, struct cx_func *func) {
+  int row = cx->row, col = cx->col;
+
+  while (cx->pc < cx->toks->count) {
+    struct cx_scope *s = cx_scope(cx, 0);
+    if (s->stack.count - s->cut_offs >= func->nargs) { break; }
+    if (!eval_tok(cx)) { return false; }
+  }
+
+  struct cx_scope *s = cx_scope(cx, 0);
+  
+  if (s->stack.count - s->cut_offs < func->nargs) {
+    cx_error(cx, row, col, "Not enough args for func: '%s'", func->id);
+    return false;
+  }
+
+  s->cut_offs = 0;
+  return true;
 }
 
 bool cx_eval_args(struct cx *cx,

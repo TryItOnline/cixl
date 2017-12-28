@@ -16,10 +16,10 @@ struct cx_coro *cx_coro_init(struct cx_coro *coro,
   coro->done = false;
   cx_vec_init(&coro->toks, sizeof(struct cx_tok));
 
-  if (cx->toks->count > cx->pc+1) {
-    cx_vec_grow(&coro->toks, cx->toks->count-cx->pc-1);
+  if (cx->toks->count > cx->pc) {
+    cx_vec_grow(&coro->toks, cx->toks->count-cx->pc);
   
-    for (size_t i = cx->pc+1; i < cx->toks->count; i++) {
+    for (size_t i = cx->pc; i < cx->toks->count; i++) {
       cx_tok_copy(cx_vec_push(&coro->toks), cx_vec_get(cx->toks, i));
     }
   }
@@ -40,7 +40,7 @@ static void yield_imp(struct cx_scope *scope) {
   struct cx *cx = scope->cx;
   
   if (cx->coro) {
-    cx->coro->pc = cx->pc+1;    
+    cx->coro->pc = cx->pc;    
   } else {
     struct cx_coro *coro = cx_coro_init(malloc(sizeof(struct cx_coro)),
 					cx,
@@ -49,7 +49,7 @@ static void yield_imp(struct cx_scope *scope) {
     cx_box_init(cx_push(scope), cx->coro_type)->as_ptr = coro;
   }
   
-  cx->stop_pc = cx->pc+1;
+  cx->stop_pc = cx->pc;
 }
 
 static bool equid_imp(struct cx_box *x, struct cx_box *y) {
