@@ -117,7 +117,7 @@ bool cx_func_imp_match(struct cx_func_imp *imp, struct cx_vec *stack) {
 				     imp_arg->narg))->type;
       
     struct cx_box *arg = cx_vec_get(stack, j);
-    if (!cx_type_is(arg->type, imp_type)) { return false; }
+    if (!cx_is(arg->type, imp_type)) { return false; }
   }
 
   return true;

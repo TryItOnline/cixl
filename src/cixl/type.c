@@ -29,15 +29,15 @@ struct cx_type *cx_type_deinit(struct cx_type *type) {
   return type;  
 }
 
-void cx_type_add_parent(struct cx_type *type, struct cx_type *parent) {
-  *(struct cx_type **)cx_test(cx_set_insert(&type->parents, parent)) = parent;
+void cx_derive(struct cx_type *child, struct cx_type *parent) {
+  *(struct cx_type **)cx_test(cx_set_insert(&child->parents, parent)) = parent;
 }
 
-bool cx_type_is(struct cx_type *type, struct cx_type *parent) {
-  if (type == parent) { return true; }
+bool cx_is(struct cx_type *child, struct cx_type *parent) {
+  if (child == parent) { return true; }
   
-  cx_do_set(&type->parents, struct cx_type *, pt) {
-    if (cx_type_is(*pt, parent)) { return true; }
+  cx_do_set(&child->parents, struct cx_type *, pt) {
+    if (cx_is(*pt, parent)) { return true; }
   }
 
   return false;
@@ -53,7 +53,7 @@ static void is_imp(struct cx_scope *scope) {
     *y = cx_test(cx_pop(scope, false))->as_ptr,
     *x = cx_test(cx_pop(scope, false))->as_ptr;
 
-  cx_box_init(cx_push(scope), scope->cx->bool_type)->as_bool = cx_type_is(x, y);
+  cx_box_init(cx_push(scope), scope->cx->bool_type)->as_bool = cx_is(x, y);
 }
 
 static bool equid_imp(struct cx_box *x, struct cx_box *y) {

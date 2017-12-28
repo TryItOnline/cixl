@@ -1,5 +1,3 @@
-* add trait: macro
-** create type and insert as parent for all args
 * add parse/eval
 ** add Toks type
 *** add call support

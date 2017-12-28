@@ -376,6 +376,24 @@ Capitalized names are treated as type references, the following types are define
 [t]
 ```
 
+### Traits
+Traits are abstract types that represent sets of features, the standard types ```A``` and ```Opt``` are traits. New traits may be defined using the ```trait:``` macro.
+
+```
+> trait: StrInt Str Int;
+..
+[]
+
+> Str is StrInt,
+..Int is StrInt,
+..StrInt is A
+[t t f]
+
+> trait: StrIntChar StrInt Char;
+..
+[]
+```
+
 ### Embedding & Extending
 Everything about cixl has been designed from the ground up to support embedding in, and extending from C. The makefile contains a target named ```libcixl``` that builds a static library containing everything you need to get started. Adding a type and associated function goes something like this:
 

@@ -22,8 +22,8 @@ struct cx_type {
 
 struct cx_type *cx_type_init(struct cx_type *type, const char *id);
 struct cx_type *cx_type_deinit(struct cx_type *type);
-void cx_type_add_parent(struct cx_type *type, struct cx_type *parent);
-bool cx_type_is(struct cx_type *type, struct cx_type *parent);
+void cx_derive(struct cx_type *child, struct cx_type *parent);
+bool cx_is(struct cx_type *child, struct cx_type *parent);
 
 struct cx_type *cx_init_meta_type(struct cx *cx);
 

@@ -35,6 +35,52 @@ static const void *get_func_id(const void *value) {
   return &(*func)->id;
 }
 
+static bool trait_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
+  int row = cx->row, col = cx->col;
+  struct cx_vec toks;
+  cx_vec_init(&toks, sizeof(struct cx_tok));
+  bool ok = false;
+  
+  if (!cx_parse_tok(cx, in, &toks, false)) {
+    cx_error(cx, row, col, "Missing trait id");
+    goto exit2;
+  }
+
+  struct cx_tok id = *(struct cx_tok *)cx_vec_pop(&toks);
+
+  if (id.type != CX_TID) {
+    cx_error(cx, row, col, "Invalid trait id");
+    goto exit1;
+  }
+
+  if (!cx_parse_end(cx, in, &toks)) { goto exit1; }
+
+  cx_do_vec(&toks, struct cx_tok, t) {
+    if (t->type != CX_TTYPE) {
+      cx_error(cx, row, col, "Invalid trait arg");
+      goto exit1;
+    }
+  }
+
+  struct cx_type *trait = cx_add_type(cx, id.data, NULL);
+
+  if (!trait) { goto exit1; }
+  
+  cx_do_vec(&toks, struct cx_tok, t) {
+    struct cx_type *child = t->data;
+    cx_derive(child, trait);
+  }
+
+  ok = true;
+ exit1:
+  cx_tok_deinit(&id);
+ exit2: {
+    cx_do_vec(&toks, struct cx_tok, t) { cx_tok_deinit(t); }
+    cx_vec_deinit(&toks);
+    return ok;
+  }
+}
+
 static ssize_t let_eval(struct cx_macro_eval *eval,
 			struct cx *cx,
 			struct cx_vec *toks,
@@ -301,6 +347,7 @@ struct cx *cx_init(struct cx *cx) {
   cx_vec_init(&cx->scopes, sizeof(struct cx_scope *));
   cx_vec_init(&cx->errors, sizeof(struct cx_error));
 
+  cx_add_macro(cx, "trait:", trait_parse);
   cx_add_macro(cx, "let:", let_parse);
   cx_add_macro(cx, "func:", func_parse);
   
@@ -395,7 +442,7 @@ struct cx_type *cx_add_type(struct cx *cx, const char *id, ...) {
   va_list parents;
   va_start(parents, id);				
   struct cx_type *pt = NULL;
-  while ((pt = va_arg(parents, struct cx_type *))) { cx_type_add_parent(*t, pt); }
+  while ((pt = va_arg(parents, struct cx_type *))) { cx_derive(*t, pt); }
   va_end(parents);					
   return *t;
 }
