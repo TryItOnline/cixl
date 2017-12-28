@@ -1,4 +1,10 @@
-* use cut_offs in vect fn
+* add parse/unparse/eval
+** add types/tok.h/c
+** add Tok type
+*** switch type in fprint
+** add Toks type, inherit Vect
+*** add call support
+*** add unparse fn
 * add Vect push/pop fns
 * add wrap macro for cx_add_type
 ** pass NULL
@@ -7,12 +13,6 @@
 * add cx_init_io with load fn
 ** load first repl arg if any
 * add Rat type
-* add parse/unparse/eval
-** add Tok type
-*** switch type in fprint
-** add Toks type, inherit Vect
-*** add call support
-*** add unparse fn
 * add fail func
 ** like test but just call error with message
 * add basic io
