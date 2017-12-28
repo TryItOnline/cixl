@@ -1,5 +1,4 @@
-* finish Vect type
-** add push/pop fns
+* add Vect push/pop fns
 * add parse/eval
 ** add Tok type
 *** switch type in fprint
@@ -25,7 +24,6 @@
 * add Char 'int' fn
 * add Int 'char' fn
 * add Rat type
-* add Set type
 * add Table type
 * add str interpolation
 
