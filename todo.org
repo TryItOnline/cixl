@@ -1,3 +1,6 @@
+* jit func tokens to imps
+** add CX_TFUNC_IMP
+*** add func ref to imp struct
 * add Vect type
 ** add cx_vect struct with vec & nrefs
 ** add [] support
@@ -29,9 +32,6 @@
 * add Int 'char' fn
 * add Rat type
 * add str interpolation
-* jit func tokens to imps
-** add CX_TFUNC_IMP
-*** add func ref to imp struct
 
 clock {,10000 times {,fib 50 zap}} / 1000000
 

@@ -290,7 +290,7 @@ While the ```for``` loop repeats an action once for each value in a sequence, th
 [\F \O \O]
 ```
 
-Some types support mapping actions over their contents using ```map```, the value is modified in place and pushed on the stack again.
+Some types support mapping actions over their contents using ```map```.
 
 ```
 > 'FOO' map &lower
