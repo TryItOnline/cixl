@@ -5,11 +5,6 @@
 *** add call support
 *** add `...` parser support
 **** quote tokens and push Toks
-* add str 'map' 
-** add iter_type
-** return iter from map
-** add iterable_type
-*** derive int, str & iter
 * add forward scanning to recall
 ** convert to macro
 * add fail func
