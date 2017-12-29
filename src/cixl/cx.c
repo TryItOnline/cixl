@@ -49,7 +49,7 @@ static bool trait_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
 
   struct cx_tok id = *(struct cx_tok *)cx_vec_pop(&toks);
 
-  if (id.type != CX_TID) {
+  if (id.type != cx_id_tok()) {
     cx_error(cx, row, col, "Invalid trait id");
     goto exit1;
   }
@@ -57,7 +57,7 @@ static bool trait_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   if (!cx_parse_end(cx, in, &toks)) { goto exit1; }
 
   cx_do_vec(&toks, struct cx_tok, t) {
-    if (t->type != CX_TTYPE) {
+    if (t->type != cx_type_tok()) {
       cx_error(cx, row, col, "Invalid trait arg");
       goto exit1;
     }
@@ -113,7 +113,7 @@ static bool let_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
 
   struct cx_tok *id = cx_vec_peek(&eval->toks, 0);
 
-  if (id->type != CX_TID) {
+  if (id->type != cx_id_tok()) {
     cx_error(cx, row, col, "Invalid let id");
     cx_macro_eval_unref(eval);
     return false;
@@ -125,7 +125,7 @@ static bool let_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
     return false;
   }
   
-  cx_tok_init(cx_vec_push(out), CX_TMACRO, eval, row, col);
+  cx_tok_init(cx_vec_push(out), cx_macro_tok(), eval, row, col);
   return true;
 }
 
@@ -156,7 +156,7 @@ static bool func_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
 
   struct cx_tok id = *(struct cx_tok *)cx_vec_pop(&toks);
 
-  if (id.type != CX_TID) {
+  if (id.type != cx_id_tok()) {
     cx_error(cx, row, col, "Invalid func id");
     cx_tok_deinit(&id);
     cx_do_vec(&toks, struct cx_tok, t) { cx_tok_deinit(t); }
@@ -174,7 +174,7 @@ static bool func_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
 
   struct cx_tok args = *(struct cx_tok *)cx_vec_pop(&toks);
 
-  if (args.type != CX_TGROUP) {
+  if (args.type != cx_group_tok()) {
     cx_error(cx, row, col, "Invalid func args");
     cx_tok_deinit(&id);
     cx_tok_deinit(&args);
@@ -184,7 +184,7 @@ static bool func_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   }
   
   struct cx_macro_eval *eval = cx_macro_eval_new(func_eval);
-  cx_tok_init(cx_vec_push(&toks), CX_TMACRO, eval, row, col);
+  cx_tok_init(cx_vec_push(&toks), cx_macro_tok(), eval, row, col);
   
   struct cx_vec func_args;
   cx_vec_init(&func_args, sizeof(struct cx_func_arg));
@@ -238,7 +238,7 @@ static bool recall_eval(struct cx_macro_eval *eval, struct cx *cx) {
 
 static bool recall_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   struct cx_macro_eval *eval = cx_macro_eval_new(recall_eval);
-  cx_tok_init(cx_vec_push(out), CX_TMACRO, eval, cx->row, cx->col);
+  cx_tok_init(cx_vec_push(out), cx_macro_tok(), eval, cx->row, cx->col);
   return true;
 }
   
