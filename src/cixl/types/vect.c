@@ -42,17 +42,32 @@ void cx_vect_fprint(struct cx_vec *imp, FILE *out) {
   fputc(']', out);
 }
 
-static void len_imp(struct cx_scope *scope) {
-  struct cx_box b = *cx_test(cx_pop(scope, false));
-  struct cx_vect *v = b.as_ptr;
-  cx_box_init(cx_push(scope), scope->cx->int_type)->as_int = v->imp.count;
-}
-
 static void vect_imp(struct cx_scope *scope) {
   struct cx_vect *v = cx_vect_new();
   v->imp = scope->stack;
   cx_vec_init(&scope->stack, sizeof(struct cx_box));
   cx_box_init(cx_push(scope), scope->cx->vect_type)->as_ptr = v;
+}
+
+static void len_imp(struct cx_scope *scope) {
+  struct cx_box vec = *cx_test(cx_pop(scope, false));
+  struct cx_vect *v = vec.as_ptr;
+  cx_box_init(cx_push(scope), scope->cx->int_type)->as_int = v->imp.count;
+}
+
+static void push_imp(struct cx_scope *scope) {
+  struct cx_box
+    val = *cx_test(cx_pop(scope, false)),
+    vec = *cx_test(cx_pop(scope, false));
+  
+  struct cx_vect *v = vec.as_ptr;
+  *(struct cx_box *)cx_vec_push(&v->imp) = val;
+}
+
+static void pop_imp(struct cx_scope *scope) {
+  struct cx_box vec = *cx_test(cx_pop(scope, false));
+  struct cx_vect *v = vec.as_ptr;
+  *cx_push(scope) = *(struct cx_box *)cx_vec_pop(&v->imp);
 }
 
 static void for_imp(struct cx_scope *scope) {
@@ -141,8 +156,10 @@ struct cx_type *cx_init_vect_type(struct cx *cx) {
   t->fprint = fprint_imp;
   t->deinit = deinit_imp;
   
-  cx_add_func(cx, "len", cx_arg(t))->ptr = len_imp;
   cx_add_func(cx, "vect")->ptr = vect_imp;
+  cx_add_func(cx, "len", cx_arg(t))->ptr = len_imp;
+  cx_add_func(cx, "push", cx_arg(t), cx_arg(cx->any_type))->ptr = push_imp;
+  cx_add_func(cx, "pop", cx_arg(t))->ptr = pop_imp;
   
   cx_add_func(cx, "for", cx_arg(t), cx_arg(cx->any_type))->ptr = for_imp;
   cx_add_func(cx, "map", cx_arg(t), cx_arg(cx->any_type))->ptr = map_imp;

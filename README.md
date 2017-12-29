@@ -267,13 +267,21 @@ Func not applicable: 'foo'
 A vector is a one dimensional dynamic array that supports efficient pushing / popping and random access. The stack itself is a vector which may be retrieved using the ```vect``` function.
 
 ```
-> 1 2 (3 4 5 vect)
+> 1 2 (3 4 vect)
+..
+[1 2 [3 4]@1]
+
+> % 5 push
 ..
 [1 2 [3 4 5]@1]
 
-> {2 *} for 
+> % pop
 ..
-[1 2 6 8 10]
+[1 2 [3 4]@1 5]
+
+> _ {2 *} for 
+..
+[1 2 6 8]
 ```
 
 ### Loops

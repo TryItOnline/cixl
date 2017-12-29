@@ -5,7 +5,6 @@
 ** add Toks type, inherit Vect
 *** add call support
 *** add unparse fn
-* add Vect push/pop fns
 * add wrap macro for cx_add_type
 ** pass NULL
 * change func imps to return bool

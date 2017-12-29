@@ -57,6 +57,18 @@ static void str_tests() {
   cx_deinit(&cx);
 }
 
+static void vect_tests() {
+  struct cx cx;
+  cx_init(&cx);
+
+  run(&cx, "1 2 3 (4 5 vect) len 2 = test");
+  run(&cx, "(1 2 3 vect) pop 3 = test");
+  run(&cx, "(1 2 3 vect) % 4 push len 4 = test");
+  run(&cx, "(1 2 vect) for {2 *} + 6 = test");
+  
+  cx_deinit(&cx);
+}
+
 static void stack_tests() {
   struct cx cx;
   cx_init(&cx);
@@ -116,6 +128,7 @@ void cx_tests() {
   type_tests();
   int_tests();
   str_tests();
+  vect_tests();
   stack_tests();
   group_tests();
   func_tests();
