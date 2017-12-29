@@ -53,6 +53,7 @@ static void len_imp(struct cx_scope *scope) {
   struct cx_box vec = *cx_test(cx_pop(scope, false));
   struct cx_vect *v = vec.as_ptr;
   cx_box_init(cx_push(scope), scope->cx->int_type)->as_int = v->imp.count;
+  cx_box_deinit(&vec);
 }
 
 static void push_imp(struct cx_scope *scope) {
@@ -62,12 +63,14 @@ static void push_imp(struct cx_scope *scope) {
   
   struct cx_vect *v = vec.as_ptr;
   *(struct cx_box *)cx_vec_push(&v->imp) = val;
+  cx_box_deinit(&vec);
 }
 
 static void pop_imp(struct cx_scope *scope) {
   struct cx_box vec = *cx_test(cx_pop(scope, false));
   struct cx_vect *v = vec.as_ptr;
   *cx_push(scope) = *(struct cx_box *)cx_vec_pop(&v->imp);
+  cx_box_deinit(&vec);
 }
 
 static void for_imp(struct cx_scope *scope) {

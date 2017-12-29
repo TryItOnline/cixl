@@ -177,22 +177,19 @@ cx_tok_type(cx_id_tok, {
 
 static bool lambda_eval(struct cx_tok *tok, struct cx *cx) {
   struct cx_scope *scope = cx_scope(cx, 0);
-  
-  struct cx_lambda *lambda = cx_lambda_init(malloc(sizeof(struct cx_lambda)),
-					    scope,
-					    &tok->as_vec);
-
-  struct cx_box *v = cx_box_init(cx_push(scope), cx->lambda_type);
-  v->as_ptr = lambda;
+  struct cx_lambda *lambda = tok->as_box.as_ptr;
+  if (lambda->scope) { cx_scope_unref(lambda->scope); }
+  lambda->scope = cx_scope_ref(scope);
+  cx_copy(cx_push(scope), &tok->as_box);
   return true;
 }
 
 static void lambda_copy(struct cx_tok *dst, struct cx_tok *src) {
-  group_copy(dst, src);
+  cx_copy(&dst->as_box, &src->as_box);
 }
 
 static void lambda_deinit(struct cx_tok *tok) {
-  group_deinit(tok);
+  cx_box_deinit(&tok->as_box);
 }
 
 cx_tok_type(cx_lambda_tok, {

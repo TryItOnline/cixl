@@ -233,18 +233,19 @@ static bool parse_group(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup
 
 static bool parse_lambda(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
   int row = cx->row, col = cx->col;
+  struct cx_lambda *lambda = cx_lambda_init(malloc(sizeof(struct cx_lambda)));
 
-  struct cx_vec *body = &cx_tok_init(cx_vec_push(out),
-				     cx_lambda_tok(),
-				     row, col)->as_vec;
-  cx_vec_init(body, sizeof(struct cx_tok));
+  struct cx_box *box = &cx_tok_init(cx_vec_push(out),
+				    cx_lambda_tok(),
+				    row, col)->as_box;
+  cx_box_init(box, cx->lambda_type)->as_ptr = lambda;
   
   while (true) {
-    if (!cx_parse_tok(cx, in, body, lookup)) { return false; }
-    struct cx_tok *tok = cx_vec_peek(body, 0);
+    if (!cx_parse_tok(cx, in, &lambda->body, lookup)) { return false; }
+    struct cx_tok *tok = cx_vec_peek(&lambda->body, 0);
     
     if (tok->type == cx_unlambda_tok()) {
-      cx_tok_deinit(cx_vec_pop(body));
+      cx_tok_deinit(cx_vec_pop(&lambda->body));
       break;
     }
   }
