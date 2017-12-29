@@ -35,21 +35,13 @@ Press Return twice to eval input.
 The stack is accessible from user code, just like in Forth. Basic stack operations have dedicated operators; ```%``` for duplicating last value, ```_``` for dropping it, and ```|``` for clearing the stack.
 
 ```
-> 4 5 %
+> 1 2 3 %
 ..
-[1 2 3 4 5 5]
+[1 2 3 3]
 
 > _
 ..
-[1 2 3 4 5]
-
-> vect
-..
-[[1 2 3 4 5]@1]
-
-> for {2 *}
-..
-[2 4 6 8 10]
+[1 2 3]
 
 > |
 ..
@@ -271,6 +263,19 @@ Func not applicable: 'foo'
 [42]
 ```
 
+### Vectors
+A vector is a one dimensional dynamic array that supports efficient pushing / popping and random access. The stack itself is a vector which may be retrieved using the ```vect``` function.
+
+```
+> 1 2 (3 4 5 vect)
+..
+[1 2 [3 4 5]@1]
+
+> {2 *} for 
+..
+[1 2 6 8 10]
+```
+
 ### Loops
 The ```times``` loop may be used to repeat an action N times.
 
@@ -282,6 +287,7 @@ The ```times``` loop may be used to repeat an action N times.
 
 ```
 > 0, 42 times &++
+..
 [42]
 ```
 
