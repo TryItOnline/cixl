@@ -1,9 +1,9 @@
 <a href="https://liberapay.com/basic-gongfu/donate"><img alt="Donate using Liberapay" src="https://liberapay.com/assets/widgets/donate.svg"></a>
 
 ## cixl
-#### a minimal language
+#### a minimal scripting language
 
-This project aims to produce a minimal language for embedding in and extending from C. In a way, it's Lua taken one step further down the path of simplicity. The language is implemented as a straight forward interpreter that is designed to be as fast as possible without compromising on simplicity, transparency and flexibility.
+This project aims to produce a minimal scripting language for embedding in and extending from C. In a way, it's Lua taken one step further down the path of simplicity. The language is implemented as a straight forward interpreter that is designed to be as fast as possible without compromising on simplicity, transparency and flexibility.
 
 ### Status
 Examples from this document should work in the most recent version and run clean in ```valgrind```, outside of that I can't really promise much at the moment. Current work is focused on tracing interactions between core features and filling obvious gaps in functionality.
