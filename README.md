@@ -20,7 +20,7 @@ cmake ..
 make
 rlwrap ./cixl
 
-cixl v0.3, 10054 bmips
+cixl v0.4, 18765 bmips
 
 Press Return twice to eval input.
 
@@ -32,14 +32,14 @@ Press Return twice to eval input.
 ```
 
 ### Stack
-The parameter stack is accessible from user code, just like in Forth.
+The stack is accessible from user code, just like in Forth. Basic stack operations have dedicated operators; ```%``` for duplicating last value, ```_``` for dropping it, and ```|``` for clearing the stack.
 
 ```
-> 4 5 dup
+> 4 5 %
 ..
 [1 2 3 4 5 5]
 
-> zap
+> _
 ..
 [1 2 3 4 5]
 
@@ -253,7 +253,7 @@ Several parameters may share the same type. An index may may be specified instea
 ```
 
 ### Optionals
-The nil value is written ```_```, and may be used to represent missing values. Since ```Nil``` isn't derived from ```A```, stray nil values never get far before being trapped in a function call; ```Opt``` may be used instead where nil values are allowed.
+The nil value may be used to represent missing values. Since ```Nil``` isn't derived from ```A```, stray nil values never get far before being trapped in a function call; ```Opt``` may be used instead where nil values are allowed.
 
 ```
 > func: foo(x A);
@@ -261,12 +261,12 @@ The nil value is written ```_```, and may be used to represent missing values. S
 ..
 []
 
-> foo _
+> foo nil
 ..
 Error in row 1, col 1:
 Func not applicable: 'foo'
 
-> | bar _
+> | bar nil
 ..
 [42]
 ```
@@ -315,11 +315,11 @@ Coroutines allow stopping execution and resuming in the same scope later on. A c
 ..
 [Coro(0x53c9de0@1)]
 
-> dup call
+> % call
 ..
 [Coro(0x53c9de0@1) 3]
 
-> zap call
+> _ call
 ..
 Error in row 1, col 5:
 Coro is done

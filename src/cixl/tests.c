@@ -61,8 +61,8 @@ static void stack_tests() {
   struct cx cx;
   cx_init(&cx);
 
-  run(&cx, "7 14 dup + 28 = test");
-  run(&cx, "7 14 dup zap + 21 = test");
+  run(&cx, "7 14 % + 28 = test");
+  run(&cx, "7 14 % _ + 21 = test");
 
   cx_deinit(&cx);
 }

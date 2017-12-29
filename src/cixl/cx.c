@@ -328,7 +328,7 @@ struct cx *cx_init(struct cx *cx) {
   cx->row = cx->col = -1;
   
   cx_set_init(&cx->separators, sizeof(char), cx_cmp_char);
-  cx_add_separators(cx, " \t\n;,?!(){}");
+  cx_add_separators(cx, " \t\n;,|%_?!(){}");
 
   cx_set_init(&cx->types, sizeof(struct cx_type *), cx_cmp_str);
   cx->types.key = get_type_id;
@@ -361,7 +361,7 @@ struct cx *cx_init(struct cx *cx) {
   cx->lambda_type = cx_init_lambda_type(cx);
   cx->coro_type = cx_init_coro_type(cx);
 
-  cx_add_func(cx, "dup", cx_arg(cx->any_type))->ptr = dup_imp;
+  cx_add_func(cx, "%", cx_arg(cx->any_type))->ptr = dup_imp;
 
   cx_add_func(cx, "=", cx_arg(cx->any_type), cx_narg(0))->ptr = eqval_imp;
   cx_add_func(cx, "==", cx_arg(cx->any_type), cx_narg(0))->ptr = equid_imp;
@@ -385,12 +385,12 @@ struct cx *cx_init(struct cx *cx) {
 
 void cx_init_math(struct cx *cx) {
   cx_test(cx_eval_str(cx,
-		      "func: _fib(a b n Int) "
-		      "$n ? if {, recall $b, $a + $b, -- $n} $a;"));
+		      "func: fib-rec(a b n Int) "
+		      "$n? if {, recall $b, $a + $b, -- $n} $a;"));
 
   cx_test(cx_eval_str(cx,
 		      "func: fib(n Int) "
-		      "_fib 0 1 $n;"));
+		      "fib-rec 0 1 $n;"));
 }
 
 struct cx *cx_deinit(struct cx *cx) {
