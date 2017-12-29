@@ -11,7 +11,7 @@ struct cx_type;
 struct cx_coro {
   struct cx_scope *scope;
   struct cx_vec toks;
-  ssize_t pc;
+  struct cx_tok *pc;
   int nrefs;
   bool done;
 };

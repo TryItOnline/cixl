@@ -33,6 +33,14 @@ void cx_vec_grow(struct cx_vec *vec, size_t capac) {
   vec->items = realloc(vec->items, vec->capac*vec->item_size);
 }
 
+void *cx_vec_start(struct cx_vec *vec) {
+  return cx_test(vec->items);
+}
+
+void *cx_vec_end(struct cx_vec *vec) {
+  return cx_test(vec->items) + vec->count*vec->item_size;
+}
+
 void *cx_vec_get(struct cx_vec *vec, size_t i) {
   return vec->items + i*vec->item_size;
 }

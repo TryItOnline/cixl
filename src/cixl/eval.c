@@ -96,15 +96,15 @@ static bool eval_func_imp(struct cx_tok *tok, struct cx *cx) {
 static bool eval_group(struct cx_tok *tok, struct cx *cx) {
   struct cx_vec *body = tok->data;
   cx_begin(cx, true);
-  bool ok = cx_eval(cx, body, 0);
+  bool ok = cx_eval(cx, body, cx_vec_start(body));
   cx_end(cx);
   return ok;
 }
 
 static bool eval_tok(struct cx *cx) {
-  struct cx_tok *t = cx_vec_get(cx->toks, cx->pc++);
   struct cx_scope *s = cx_scope(cx, 0);
-
+  struct cx_tok *t = cx->pc++;
+  
   cx->row = t->row;
   cx->col = t->col;
   
@@ -144,15 +144,15 @@ static bool eval_tok(struct cx *cx) {
   return false;
 }
 
-bool cx_eval(struct cx *cx, struct cx_vec *toks, ssize_t pc) {
-  ssize_t prev_pc = cx->pc;
+bool cx_eval(struct cx *cx, struct cx_vec *toks, struct cx_tok *pc) {
+  struct cx_tok *prev_pc = cx->pc;
   struct cx_vec *prev_toks = cx->toks;
     
   cx->pc = pc;
   cx->toks = toks;
   bool ok = false;
   
-  while (cx->pc < toks->count && cx->pc != cx->stop_pc) {
+  while (cx->pc != cx_vec_end(toks) && cx->pc != cx->stop_pc) {
     if (!eval_tok(cx)) { goto exit; }
     if (cx->errors.count) { goto exit; }
   }
@@ -161,14 +161,15 @@ bool cx_eval(struct cx *cx, struct cx_vec *toks, ssize_t pc) {
  exit:
   cx->toks = prev_toks;
   cx->pc = prev_pc;
-  cx->stop_pc = -1;
+  cx->stop_pc = NULL;
   return ok;
 }
 
 bool cx_eval_str(struct cx *cx, const char *in) {
   struct cx_vec toks;
   cx_vec_init(&toks, sizeof(struct cx_tok));
-  bool ok = cx_parse_str(cx, in, &toks) && cx_eval(cx, &toks, 0);
+  bool ok = cx_parse_str(cx, in, &toks);
+  if (ok && toks.count) { ok = cx_eval(cx, &toks, cx_vec_start(&toks)); }
   cx_do_vec(&toks, struct cx_tok, t) { cx_tok_deinit(t); }
   cx_vec_deinit(&toks);
   return ok;
@@ -177,7 +178,7 @@ bool cx_eval_str(struct cx *cx, const char *in) {
 bool cx_scan_args(struct cx *cx, struct cx_func *func) {
   int row = cx->row, col = cx->col;
 
-  while (cx->pc < cx->toks->count) {
+  while (cx->pc != cx_vec_end(cx->toks)) {
     struct cx_scope *s = cx_scope(cx, 0);
     if (s->stack.count - s->cut_offs >= func->nargs) { break; }
     if (!eval_tok(cx)) { return false; }

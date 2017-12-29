@@ -133,7 +133,7 @@ bool cx_func_imp_call(struct cx_func_imp *imp, struct cx_scope *scope) {
   cx_begin(cx, false);
   struct cx_func_imp *prev = cx->func_imp;
   cx->func_imp = imp;
-  bool ok = cx_eval(cx, &imp->toks, 0);
+  bool ok = cx_eval(cx, &imp->toks, cx_vec_start(&imp->toks));
   cx->func_imp = prev;
   cx_end(cx);
   return ok;

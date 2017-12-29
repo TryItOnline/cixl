@@ -11,19 +11,19 @@ struct cx_coro *cx_coro_init(struct cx_coro *coro,
 			     struct cx *cx,
 			     struct cx_scope *scope) {
   coro->scope = cx_scope_ref(scope);
-  coro->pc = 0;
   coro->nrefs = 1;
   coro->done = false;
   cx_vec_init(&coro->toks, sizeof(struct cx_tok));
 
-  if (cx->toks->count > cx->pc) {
-    cx_vec_grow(&coro->toks, cx->toks->count-cx->pc);
+  if (cx->pc != cx_vec_end(cx->toks)) {
+    cx_vec_grow(&coro->toks, cx->toks->count);
   
-    for (size_t i = cx->pc; i < cx->toks->count; i++) {
-      cx_tok_copy(cx_vec_push(&coro->toks), cx_vec_get(cx->toks, i));
+    for (struct cx_tok *pc = cx->pc; pc != cx_vec_end(cx->toks); pc++) {
+      cx_tok_copy(cx_vec_push(&coro->toks), pc);
     }
   }
   
+  coro->pc = cx_vec_start(&coro->toks);
   return coro;
 }
 
@@ -77,7 +77,7 @@ static bool call_imp(struct cx_box *value, struct cx_scope *scope) {
   cx->coro = NULL;
   if (!ok) { return false; }
   coro->pc = cx->pc;
-  if (coro->pc == coro->toks.count) { coro->done = true; }
+  if (coro->pc == cx_vec_end(&coro->toks)) { coro->done = true; }
   if (pop_scope) { cx_pop_scope(cx, false); }
   return true;
 }

@@ -31,7 +31,7 @@ struct cx {
   struct cx_coro *coro;
   struct cx_func_imp *func_imp;
   struct cx_vec *toks;
-  ssize_t pc, stop_pc;
+  struct cx_tok *pc, *stop_pc;
   
   int row, col;
   struct cx_vec errors;

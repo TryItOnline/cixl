@@ -84,7 +84,7 @@ static bool trait_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
 
 static bool let_eval(struct cx_macro_eval *eval, struct cx *cx) {
   struct cx_scope *s = cx_begin(cx, true);
-  cx_eval(cx, &eval->toks, 1);
+  cx_eval(cx, &eval->toks, (struct cx_tok *)cx_vec_start(&eval->toks)+1);
   struct cx_box *val = cx_pop(s, false);
   
   if (!val) {
@@ -233,7 +233,7 @@ static bool recall_eval(struct cx_macro_eval *eval, struct cx *cx) {
 
   return
     cx_scan_args(cx, cx->func_imp->func) &&
-    cx_eval(cx, &cx->func_imp->toks, 0);
+    cx_eval(cx, &cx->func_imp->toks, cx_vec_start(&cx->func_imp->toks));
 }
 
 static bool recall_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
@@ -332,7 +332,7 @@ struct cx *cx_init(struct cx *cx) {
   cx->coro = NULL;
   cx->func_imp = NULL;
   cx->toks = NULL;
-  cx->pc = cx->stop_pc = -1;  
+  cx->pc = cx->stop_pc = NULL;  
   cx->row = cx->col = -1;
   
   cx_set_init(&cx->separators, sizeof(char), cx_cmp_char);
