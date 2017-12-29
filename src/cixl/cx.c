@@ -242,12 +242,6 @@ static bool recall_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   return true;
 }
   
-static void dup_imp(struct cx_scope *scope) {
-  struct cx_box *vp = cx_test(cx_peek(scope, false));
-  struct cx_box v = *vp;
-  cx_copy(cx_push(scope), &v);
-}
-
 static void eqval_imp(struct cx_scope *scope) {
   struct cx_box
     y = *cx_test(cx_pop(scope, false)),
@@ -360,8 +354,6 @@ struct cx *cx_init(struct cx *cx) {
   cx->func_type = cx_init_func_type(cx);
   cx->lambda_type = cx_init_lambda_type(cx);
   cx->coro_type = cx_init_coro_type(cx);
-
-  cx_add_func(cx, "%", cx_arg(cx->any_type))->ptr = dup_imp;
 
   cx_add_func(cx, "=", cx_arg(cx->any_type), cx_narg(0))->ptr = eqval_imp;
   cx_add_func(cx, "==", cx_arg(cx->any_type), cx_narg(0))->ptr = equid_imp;

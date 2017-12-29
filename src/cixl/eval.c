@@ -32,6 +32,22 @@ cx_tok_type(cx_cut_tok, {
     type.eval = cut_eval;
   });
 
+static bool dup_eval(struct cx_tok *tok, struct cx *cx) {
+  struct cx_scope *s = cx_scope(cx, 0);
+
+  if (!s->stack.count) {
+    cx_error(cx, tok->row, tok->col, "Nothing to dup");
+    return false;
+  }
+
+  cx_copy(cx_push(s), cx_peek(s, true));
+  return true;
+}
+
+cx_tok_type(cx_dup_tok, {
+    type.eval = dup_eval;
+  });
+
 cx_tok_type(cx_end_tok);
 
 static bool false_eval(struct cx_tok *tok, struct cx *cx) {

@@ -8,6 +8,7 @@ struct cx_vec;
 
 struct cx_tok_type *cx_cls_tok();
 struct cx_tok_type *cx_cut_tok();
+struct cx_tok_type *cx_dup_tok();
 struct cx_tok_type *cx_end_tok();
 struct cx_tok_type *cx_false_tok();
 struct cx_tok_type *cx_func_tok();
