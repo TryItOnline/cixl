@@ -1,4 +1,3 @@
-* check profile
 * add parse/unparse/eval
 ** add types/tok.h/c
 ** add Tok type

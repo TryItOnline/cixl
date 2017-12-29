@@ -14,6 +14,7 @@ struct cx_lambda *cx_lambda_init(struct cx_lambda *lambda,
   lambda->scope = cx_scope_ref(scope);
   lambda->nrefs = 1;
   cx_vec_init(&lambda->body, sizeof(struct cx_tok));
+  cx_vec_grow(&lambda->body, body->count);
   
   cx_do_vec(body, struct cx_tok, t) {
     cx_tok_copy(cx_vec_push(&lambda->body), t);
