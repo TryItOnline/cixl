@@ -51,7 +51,7 @@ The parameter stack is accessible from user code, just like in Forth.
 ..
 [2 4 6 8 10]
 
-> cls
+> |
 ..
 []
 ```
@@ -266,7 +266,7 @@ The nil value is written ```_```, and may be used to represent missing values. S
 Error in row 1, col 1:
 Func not applicable: 'foo'
 
-> cls bar _
+> | bar _
 ..
 [42]
 ```
@@ -350,7 +350,7 @@ As do lambdas, except for reusing the defining scope:
 In the example below, ```foo``` manipulates the main stack through the passed in coroutine.
 
 ```
-> 1 2 yield cls 3 4
+> 1 2 yield | 3 4
 ..
 [1 2 Coro(0x541ec00@1)]
 

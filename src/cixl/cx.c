@@ -248,14 +248,6 @@ static void dup_imp(struct cx_scope *scope) {
   cx_copy(cx_push(scope), &v);
 }
 
-static void zap_imp(struct cx_scope *scope) {
-  cx_box_deinit(cx_test(cx_pop(scope, false)));
-}
-
-static void cls_imp(struct cx_scope *scope) {
-  cx_vec_clear(&scope->stack);
-}
-
 static void eqval_imp(struct cx_scope *scope) {
   struct cx_box
     y = *cx_test(cx_pop(scope, false)),
@@ -370,8 +362,6 @@ struct cx *cx_init(struct cx *cx) {
   cx->coro_type = cx_init_coro_type(cx);
 
   cx_add_func(cx, "dup", cx_arg(cx->any_type))->ptr = dup_imp;
-  cx_add_func(cx, "zap", cx_arg(cx->any_type))->ptr = zap_imp;
-  cx_add_func(cx, "cls")->ptr = cls_imp;
 
   cx_add_func(cx, "=", cx_arg(cx->any_type), cx_narg(0))->ptr = eqval_imp;
   cx_add_func(cx, "==", cx_arg(cx->any_type), cx_narg(0))->ptr = equid_imp;

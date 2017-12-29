@@ -13,6 +13,15 @@
 #include "cixl/util.h"
 #include "cixl/vec.h"
 
+static bool cls_eval(struct cx_tok *tok, struct cx *cx) {
+  cx_vec_clear(&cx_scope(cx, 0)->stack);
+  return true;
+}
+
+cx_tok_type(cx_cls_tok, {
+    type.eval = cls_eval;
+  });
+
 static bool cut_eval(struct cx_tok *tok, struct cx *cx) {
   struct cx_scope *s = cx_scope(cx, 0);
   s->cut_offs = s->stack.count;
@@ -243,6 +252,22 @@ cx_tok_type(cx_type_tok, {
 
 cx_tok_type(cx_ungroup_tok);
 cx_tok_type(cx_unlambda_tok);
+
+static bool zap_eval(struct cx_tok *tok, struct cx *cx) {
+  struct cx_scope *s = cx_scope(cx, 0);
+
+  if (!s->stack.count) {
+    cx_error(cx, tok->row, tok->col, "Nothing to zap");
+    return false;
+  }
+  
+  cx_box_deinit(cx_pop(cx_scope(cx, 0), false));
+  return true;
+}
+
+cx_tok_type(cx_zap_tok, {
+    type.eval = zap_eval;
+  });
 
 static bool eval_tok(struct cx *cx) {
   struct cx_tok *t = cx->pc++;

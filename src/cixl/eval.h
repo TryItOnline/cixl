@@ -6,6 +6,7 @@
 struct cx;
 struct cx_vec;
 
+struct cx_tok_type *cx_cls_tok();
 struct cx_tok_type *cx_cut_tok();
 struct cx_tok_type *cx_end_tok();
 struct cx_tok_type *cx_false_tok();
@@ -21,6 +22,7 @@ struct cx_tok_type *cx_true_tok();
 struct cx_tok_type *cx_type_tok();
 struct cx_tok_type *cx_ungroup_tok();
 struct cx_tok_type *cx_unlambda_tok();
+struct cx_tok_type *cx_zap_tok();
 
 bool cx_eval(struct cx *cx, struct cx_vec *toks, struct cx_tok *pc);
 bool cx_eval_str(struct cx *cx, const char *in);
