@@ -226,14 +226,14 @@ static bool recall_eval(struct cx_macro_eval *eval, struct cx *cx) {
     return false;
   }
 
+  if (!cx_scan_args(cx, cx->func_imp->func)) { return false; }
+  
   if (!cx_func_imp_match(cx->func_imp, &s->stack)) {
     cx_error(cx, cx->row, cx->col, "Recall not applicable");
     return false;
   }
 
-  return
-    cx_scan_args(cx, cx->func_imp->func) &&
-    cx_eval(cx, &cx->func_imp->toks, cx_vec_start(&cx->func_imp->toks));
+  return cx_eval(cx, &cx->func_imp->toks, cx_vec_start(&cx->func_imp->toks));
 }
 
 static bool recall_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
