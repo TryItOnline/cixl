@@ -2,7 +2,7 @@
 #include "cixl/box.h"
 #include "cixl/error.h"
 #include "cixl/func.h"
-#include "cixl/nil.h"
+#include "cixl/types/nil.h"
 #include "cixl/scope.h"
 
 static bool equid_imp(struct cx_box *x, struct cx_box *y) {
