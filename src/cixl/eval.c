@@ -60,7 +60,7 @@ cx_tok_type(cx_false_tok, {
   });
 
 static bool func_eval(struct cx_tok *tok, struct cx *cx) {
-  struct cx_func *func = tok->data;
+  struct cx_func *func = tok->as_ptr;
   int row = cx->row, col = cx->col;
   
   if (!cx_scan_args(cx, func)) { return false; }
@@ -74,7 +74,7 @@ static bool func_eval(struct cx_tok *tok, struct cx *cx) {
   }
 
   tok->type = cx_func_imp_tok();
-  tok->data = imp;
+  tok->as_ptr = imp;
   
   return cx_func_imp_call(imp, s);
 }
@@ -84,7 +84,7 @@ cx_tok_type(cx_func_tok, {
   });
 
 static bool func_imp_eval(struct cx_tok *tok, struct cx *cx) {
-  struct cx_func_imp *imp = tok->data;
+  struct cx_func_imp *imp = tok->as_ptr;
   struct cx_func *func = imp->func;
   int row = cx->row, col = cx->col;
 
@@ -100,7 +100,7 @@ static bool func_imp_eval(struct cx_tok *tok, struct cx *cx) {
       return -1;
     }
 
-    tok->data = imp;
+    tok->as_ptr = imp;
   }
   
   return cx_func_imp_call(imp, s);
@@ -111,7 +111,7 @@ cx_tok_type(cx_func_imp_tok, {
   });
 
 static bool group_eval(struct cx_tok *tok, struct cx *cx) {
-  struct cx_vec *body = tok->data;
+  struct cx_vec *body = &tok->as_vec;
   cx_begin(cx, true);
   bool ok = cx_eval(cx, body, cx_vec_start(body));
   cx_end(cx);
@@ -120,8 +120,10 @@ static bool group_eval(struct cx_tok *tok, struct cx *cx) {
 
 static void group_copy(struct cx_tok *dst, struct cx_tok *src) {
   struct cx_vec
-    *src_body = src->data,
-    *dst_body = cx_vec_new(sizeof(struct cx_tok));
+    *src_body = &src->as_vec,
+    *dst_body = &dst->as_vec;
+
+  cx_vec_init(dst_body, sizeof(struct cx_tok));
   
   if (src_body->count) {
     cx_vec_grow(dst_body, src_body->count);
@@ -130,14 +132,12 @@ static void group_copy(struct cx_tok *dst, struct cx_tok *src) {
       cx_tok_copy(cx_vec_push(dst_body), t);
     }
   }
-  
-  dst->data = dst_body;
 }
 
 static void group_deinit(struct cx_tok *tok) {
-  struct cx_vec *body = tok->data;
+  struct cx_vec *body = &tok->as_vec;
   cx_do_vec(body, struct cx_tok, t) { cx_tok_deinit(t); }
-  free(cx_vec_deinit(body));
+  cx_vec_deinit(body);
 }
 
 cx_tok_type(cx_group_tok, {
@@ -147,7 +147,7 @@ cx_tok_type(cx_group_tok, {
   });
 
 static bool id_eval(struct cx_tok *tok, struct cx *cx) {
-  char *id = tok->data;
+  char *id = tok->as_ptr;
 
   if (id[0] != '$') {
     cx_error(cx, tok->row, tok->col, "Unknown id: '%s'", id);
@@ -162,11 +162,11 @@ static bool id_eval(struct cx_tok *tok, struct cx *cx) {
 }
 
 static void id_copy(struct cx_tok *dst, struct cx_tok *src) {
-    dst->data = strdup(src->data);
+    dst->as_ptr = strdup(src->as_ptr);
 }
 
 static void id_deinit(struct cx_tok *tok) {
-    free(tok->data);
+    free(tok->as_ptr);
 }
 
 cx_tok_type(cx_id_tok, {
@@ -180,7 +180,7 @@ static bool lambda_eval(struct cx_tok *tok, struct cx *cx) {
   
   struct cx_lambda *lambda = cx_lambda_init(malloc(sizeof(struct cx_lambda)),
 					    scope,
-					    tok->data);
+					    &tok->as_vec);
 
   struct cx_box *v = cx_box_init(cx_push(scope), cx->lambda_type);
   v->as_ptr = lambda;
@@ -202,16 +202,16 @@ cx_tok_type(cx_lambda_tok, {
   });
 
 static bool literal_eval(struct cx_tok *tok, struct cx *cx) {
-  cx_copy(cx_push(cx_scope(cx, 0)), tok->data);
+  cx_copy(cx_push(cx_scope(cx, 0)), &tok->as_box);
   return true;
 }
 
 static void literal_copy(struct cx_tok *dst, struct cx_tok *src) {
-    dst->data = cx_copy(malloc(sizeof(struct cx_box)), src->data);
+  cx_copy(&dst->as_box, &src->as_box);
 }
 
 static void literal_deinit(struct cx_tok *tok) {
-  free(cx_box_deinit(tok->data));
+  cx_box_deinit(&tok->as_box);
 }
 
 cx_tok_type(cx_literal_tok, {
@@ -221,16 +221,16 @@ cx_tok_type(cx_literal_tok, {
   });
 
 static bool macro_eval(struct cx_tok *tok, struct cx *cx) {
-  struct cx_macro_eval *eval = tok->data;
+  struct cx_macro_eval *eval = tok->as_ptr;
   return eval->imp(eval, cx);
 }
 
 static void macro_copy(struct cx_tok *dst, struct cx_tok *src) {
-  dst->data = cx_macro_eval_ref(src->data);
+  dst->as_ptr = cx_macro_eval_ref(src->as_ptr);
 }
   
 static void macro_deinit(struct cx_tok *tok) {
-  cx_macro_eval_unref(tok->data);
+  cx_macro_eval_unref(tok->as_ptr);
 }
 
 cx_tok_type(cx_macro_tok, {
@@ -258,7 +258,7 @@ cx_tok_type(cx_true_tok, {
   });
 
 static bool type_eval(struct cx_tok *tok, struct cx *cx) {
-  cx_box_init(cx_push(cx_scope(cx, 0)), cx->meta_type)->as_ptr = tok->data;
+  cx_box_init(cx_push(cx_scope(cx, 0)), cx->meta_type)->as_ptr = tok->as_ptr;
   return true;
 }
 
@@ -358,7 +358,7 @@ bool cx_eval_args(struct cx *cx,
     if (t->type == cx_id_tok()) {
       cx_tok_copy(cx_vec_push(&tmp_ids), t);
     } else if (t->type == cx_literal_tok()) {
-      struct cx_box *v = t->data;
+      struct cx_box *v = &t->as_box;
 
       if (v->type != cx->int_type || v->as_int >= func_args->count) {
 	cx_error(cx, t->row, t->col, "Invalid arg");
@@ -377,7 +377,7 @@ bool cx_eval_args(struct cx *cx,
 	*(struct cx_func_arg *)cx_vec_push(func_args) = cx_narg(v->as_int);      
       }
     } else if (t->type == cx_type_tok()) {
-      struct cx_type *type = t->data;
+      struct cx_type *type = t->as_ptr;
 
       if (!tmp_ids.count) {
 	cx_error(cx, t->row, t->col, "Missing args for type: %s", type->id);

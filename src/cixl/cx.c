@@ -63,12 +63,12 @@ static bool trait_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
     }
   }
 
-  struct cx_type *trait = cx_add_type(cx, id.data, NULL);
+  struct cx_type *trait = cx_add_type(cx, id.as_ptr, NULL);
 
   if (!trait) { goto exit1; }
   
   cx_do_vec(&toks, struct cx_tok, t) {
-    struct cx_type *child = t->data;
+    struct cx_type *child = t->as_ptr;
     cx_derive(child, trait);
   }
 
@@ -93,7 +93,7 @@ static bool let_eval(struct cx_macro_eval *eval, struct cx *cx) {
   }
 
   struct cx_tok *id = cx_vec_get(&eval->toks, 0);
-  struct cx_box *var = cx_set(s->parent, id->data, false);
+  struct cx_box *var = cx_set(s->parent, id->as_ptr, false);
   if (var) { *var = *val; }
   cx_end(cx);
   
@@ -125,7 +125,7 @@ static bool let_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
     return false;
   }
   
-  cx_tok_init(cx_vec_push(out), cx_macro_tok(), eval, row, col);
+  cx_tok_init(cx_vec_push(out), cx_macro_tok(), row, col)->as_ptr = eval;
   return true;
 }
 
@@ -135,7 +135,7 @@ static bool func_eval(struct cx_macro_eval *eval, struct cx *cx) {
 
   for (int j = eval->toks.count-1; j >= 0; j--) {
     struct cx_tok *t = cx_vec_get(&eval->toks, j);
-    *cx_set(s, t->data, true) = *cx_pop(ps, false);
+    *cx_set(s, t->as_ptr, true) = *cx_pop(ps, false);
   }
   
   return true;
@@ -184,12 +184,12 @@ static bool func_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   }
   
   struct cx_macro_eval *eval = cx_macro_eval_new(func_eval);
-  cx_tok_init(cx_vec_push(&toks), cx_macro_tok(), eval, row, col);
+  cx_tok_init(cx_vec_push(&toks), cx_macro_tok(), row, col)->as_ptr = eval;
   
   struct cx_vec func_args;
   cx_vec_init(&func_args, sizeof(struct cx_func_arg));
 
-  if (!cx_eval_args(cx, args.data, &eval->toks, &func_args)) {
+  if (!cx_eval_args(cx, &args.as_vec, &eval->toks, &func_args)) {
     cx_tok_deinit(&id);
     cx_tok_deinit(&args);
     cx_do_vec(&toks, struct cx_tok, t) { cx_tok_deinit(t); }
@@ -209,7 +209,7 @@ static bool func_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   }
 
   _cx_add_func(cx,
-	       id.data,
+	       id.as_ptr,
 	       func_args.count,
 	       (void *)func_args.items)->toks = toks;
 
@@ -238,7 +238,7 @@ static bool recall_eval(struct cx_macro_eval *eval, struct cx *cx) {
 
 static bool recall_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   struct cx_macro_eval *eval = cx_macro_eval_new(recall_eval);
-  cx_tok_init(cx_vec_push(out), cx_macro_tok(), eval, cx->row, cx->col);
+  cx_tok_init(cx_vec_push(out), cx_macro_tok(), cx->row, cx->col)->as_ptr = eval;
   return true;
 }
   

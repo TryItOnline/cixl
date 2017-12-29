@@ -1,6 +1,8 @@
 #ifndef CX_TOK_H
 #define CX_TOK_H
 
+#include "cixl/box.h"
+
 #define cx_tok_type(id, ...)			\
   struct cx_tok_type *id() {			\
     static struct cx_tok_type type;		\
@@ -25,13 +27,17 @@ struct cx_tok_type *cx_tok_type_init(struct cx_tok_type *type);
 
 struct cx_tok {
   struct cx_tok_type *type;
-  void *data;
   int row, col;
+
+  union {
+    struct cx_box as_box;
+    struct cx_vec as_vec;
+    void *as_ptr;
+  };
 };
 
 struct cx_tok *cx_tok_init(struct cx_tok *tok,
 			   struct cx_tok_type *type,
-			   void *data,
 			   int row, int col);
 
 struct cx_tok *cx_tok_deinit(struct cx_tok *tok);

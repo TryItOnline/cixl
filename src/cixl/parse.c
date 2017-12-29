@@ -48,33 +48,38 @@ static bool parse_id(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
 	  struct cx_type *t = cx_get_type(cx, id.data, !lookup);
 
 	  if (t) {
-	    cx_tok_init(cx_vec_push(out), cx_type_tok(), t, cx->row, cx->col);
+	    cx_tok_init(cx_vec_push(out),
+			cx_type_tok(),
+			cx->row, cx->col)->as_ptr = t;
 	    free(id.data);
 	  } else if (!lookup) {
-	    cx_tok_init(cx_vec_push(out), cx_id_tok(), id.data, cx->row, cx->col);
+	    cx_tok_init(cx_vec_push(out),
+			cx_id_tok(),
+			cx->row, cx->col)->as_ptr = id.data;
 	  } else {
 	    free(id.data);
 	    return false;
 	  }
 	} else if (!lookup || id.data[0] == '$') {
-	  cx_tok_init(cx_vec_push(out), cx_id_tok(), id.data, cx->row, cx->col);
+	  cx_tok_init(cx_vec_push(out),
+		      cx_id_tok(),
+		      cx->row, cx->col)->as_ptr = id.data;
 	} else if (strcmp(id.data, "t") == 0 || strcmp(id.data, "f") == 0) {
 	  cx_tok_init(cx_vec_push(out),
 		      id.data[0] == 't' ? cx_true_tok() : cx_false_tok(),
-		      NULL,
 		      cx->row, cx->col);
 	  free(id.data);
 	} else if (strcmp(id.data, "nil") == 0) {
-	  cx_tok_init(cx_vec_push(out), cx_nil_tok(), NULL, cx->row, cx->col);
+	  cx_tok_init(cx_vec_push(out), cx_nil_tok(), cx->row, cx->col);
 	  free(id.data);
 	} else if (strcmp(id.data, "|") == 0) {
-	  cx_tok_init(cx_vec_push(out), cx_cls_tok(), NULL, cx->row, cx->col);
+	  cx_tok_init(cx_vec_push(out), cx_cls_tok(), cx->row, cx->col);
 	  free(id.data);
 	} else if (strcmp(id.data, "_") == 0) {
-	  cx_tok_init(cx_vec_push(out), cx_zap_tok(), NULL, cx->row, cx->col);
+	  cx_tok_init(cx_vec_push(out), cx_zap_tok(), cx->row, cx->col);
 	  free(id.data);
 	} else if (strcmp(id.data, "%") == 0) {
-	  cx_tok_init(cx_vec_push(out), cx_dup_tok(), NULL, cx->row, cx->col);
+	  cx_tok_init(cx_vec_push(out), cx_dup_tok(), cx->row, cx->col);
 	  free(id.data);
 	} else {
 	  bool ref = id.data[0] == '&';
@@ -86,11 +91,14 @@ static bool parse_id(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
 	  }
 
 	  if (ref) {
-	    struct cx_box *box = cx_box_new(cx->func_type);
-	    box->as_ptr = f;
-	    cx_tok_init(cx_vec_push(out), cx_literal_tok(), box, cx->row, cx->col);
+	    struct cx_box *box = &cx_tok_init(cx_vec_push(out),
+					      cx_literal_tok(),
+					      cx->row, cx->col)->as_box;
+	    cx_box_init(box, cx->func_type)->as_ptr = f;
 	  } else {
-	    cx_tok_init(cx_vec_push(out), cx_func_tok(), f, cx->row, cx->col);
+	    cx_tok_init(cx_vec_push(out),
+			cx_func_tok(),
+			cx->row, cx->col)->as_ptr = f;
 	  }
 	  
 	  free(id.data);
@@ -134,9 +142,10 @@ static bool parse_int(struct cx *cx, FILE *in, struct cx_vec *out) {
       free(value.data);
       
       if (int_value || !errno) {
-	struct cx_box *box = cx_box_new(cx->int_type);
-	box->as_int = int_value;
-	cx_tok_init(cx_vec_push(out), cx_literal_tok(), box, cx->row, cx->col);
+	struct cx_box *box = &cx_tok_init(cx_vec_push(out),
+					  cx_literal_tok(),
+					  cx->row, cx->col)->as_box;
+	cx_box_init(box, cx->int_type)->as_int = int_value;
 	cx->col = col;
       }
     } else {
@@ -156,9 +165,11 @@ static bool parse_char(struct cx *cx, FILE *in, struct cx_vec *out) {
     return false;
   }
   
-  struct cx_box *box = cx_box_new(cx->char_type);
-  box->as_char = c;
-  cx_tok_init(cx_vec_push(out), cx_literal_tok(), box, cx->row, cx->col);
+  struct cx_box *box = &cx_tok_init(cx_vec_push(out),
+				    cx_literal_tok(),
+				    cx->row, cx->col)->as_box;
+  cx_box_init(box, cx->char_type)->as_char = c;
+  
   cx->col++;
   return true;
 }
@@ -187,9 +198,10 @@ static bool parse_str(struct cx *cx, FILE *in, struct cx_vec *out) {
     cx_buf_close(&value);
     
     if (ok) {
-      struct cx_box *box = cx_box_new(cx->str_type);
-      box->as_ptr = value.data;
-      cx_tok_init(cx_vec_push(out), cx_literal_tok(), box, row, col);
+      struct cx_box *box = &cx_tok_init(cx_vec_push(out),
+					cx_literal_tok(),
+					row, col)->as_box;
+      cx_box_init(box, cx->str_type)->as_ptr = value.data;
     } else {
       free(value.data);
     }
@@ -200,37 +212,35 @@ static bool parse_str(struct cx *cx, FILE *in, struct cx_vec *out) {
 
 static bool parse_group(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
   int row = cx->row, col = cx->col;
-  struct cx_vec *body = cx_vec_init(malloc(sizeof(struct cx_vec)),
-				    sizeof(struct cx_tok));
-  
-  while (true) {
-    if (!cx_parse_tok(cx, in, body, lookup)) {
-      free(body);
-      return false;
-    }
 
+  struct cx_vec *body = &cx_tok_init(cx_vec_push(out),
+				     cx_group_tok(),
+				     row, col)->as_vec;
+  cx_vec_init(body, sizeof(struct cx_tok));
+
+  while (true) {
+    if (!cx_parse_tok(cx, in, body, lookup)) { return false; }
     struct cx_tok *tok = cx_vec_peek(body, 0);
+    
     if (tok->type == cx_ungroup_tok()) {
       cx_tok_deinit(cx_vec_pop(body));
       break;
     }
   }
 
-  cx_tok_init(cx_vec_push(out), cx_group_tok(), body, row, col);
   return true;
 }
 
 static bool parse_lambda(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
   int row = cx->row, col = cx->col;
-  struct cx_vec *body = cx_vec_new(sizeof(struct cx_tok));
+
+  struct cx_vec *body = &cx_tok_init(cx_vec_push(out),
+				     cx_lambda_tok(),
+				     row, col)->as_vec;
+  cx_vec_init(body, sizeof(struct cx_tok));
   
   while (true) {
-    if (!cx_parse_tok(cx, in, body, lookup)) {
-      cx_do_vec(body, struct cx_tok, t) { cx_tok_deinit(t); }
-      free(cx_vec_deinit(body));
-      return false;
-    }
-
+    if (!cx_parse_tok(cx, in, body, lookup)) { return false; }
     struct cx_tok *tok = cx_vec_peek(body, 0);
     
     if (tok->type == cx_unlambda_tok()) {
@@ -239,7 +249,6 @@ static bool parse_lambda(struct cx *cx, FILE *in, struct cx_vec *out, bool looku
     }
   }
 
-  cx_tok_init(cx_vec_push(out), cx_lambda_tok(), body, row, col);
   return true;
 }
 
@@ -261,20 +270,20 @@ bool cx_parse_tok(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
 	cx->row++;
 	break;
       case ',':
-	cx_tok_init(cx_vec_push(out), cx_cut_tok(), NULL, row, col);
+	cx_tok_init(cx_vec_push(out), cx_cut_tok(), row, col);
 	return true;
       case ';':
-	cx_tok_init(cx_vec_push(out), cx_end_tok(), NULL, row, col);
+	cx_tok_init(cx_vec_push(out), cx_end_tok(), row, col);
 	return true;
       case '(':
 	return parse_group(cx, in, out, lookup);
       case ')':
-	cx_tok_init(cx_vec_push(out), cx_ungroup_tok(), NULL, row, col);
+	cx_tok_init(cx_vec_push(out), cx_ungroup_tok(), row, col);
 	return true;	
       case '{':
 	return parse_lambda(cx, in, out, lookup);
       case '}':
-	cx_tok_init(cx_vec_push(out), cx_unlambda_tok(), NULL, row, col);
+	cx_tok_init(cx_vec_push(out), cx_unlambda_tok(), row, col);
 	return true;
       case '\\':
 	return parse_char(cx, in, out);
@@ -302,7 +311,7 @@ bool cx_parse_end(struct cx *cx, FILE *in, struct cx_vec *out) {
     struct cx_tok *tok = cx_vec_peek(out, 0);
 
     if (tok->type == cx_id_tok()) {
-      char *id = tok->data;
+      char *id = tok->as_ptr;
       if (id[strlen(id)-1] == ':') { depth++; }
     } else if (tok->type == cx_end_tok()) {
       depth--;
