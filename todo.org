@@ -1,5 +1,10 @@
+* remove eval tok params
+** use pc
+* add cx_zap_tok & cx_cls_tok
+** replaces fns
+* don't push result in func/group if next op after call is zap
 * replace tok.data with as_vect/box/ptr like box
-* ---
+* check profile
 * add parse/unparse/eval
 ** add types/tok.h/c
 ** add Tok type
