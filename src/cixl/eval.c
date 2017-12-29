@@ -247,12 +247,11 @@ cx_tok_type(cx_unlambda_tok);
 static bool eval_tok(struct cx *cx) {
   struct cx_tok *t = cx->pc++;
 
-  if (!t->type->eval) {
-    cx_error(cx, t->row, t->col, "Unexpected token");
-  }
+  if (!t->type->eval) { cx_error(cx, t->row, t->col, "Unexpected token"); }
 
   cx->row = t->row;
   cx->col = t->col;
+
   return t->type->eval(t, cx);
 }
 
