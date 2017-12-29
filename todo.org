@@ -1,3 +1,4 @@
+* add dup tok like zap/cls
 * replace tok.data with as_vect/box/ptr like box
 * check profile
 * add parse/unparse/eval
