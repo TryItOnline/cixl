@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "cixl/bin.h"
 #include "cixl/box.h"
 #include "cixl/buf.h"
 #include "cixl/cx.h"
@@ -41,6 +42,7 @@ struct cx_func_imp *cx_func_imp_init(struct cx_func_imp *imp,
   imp->func = func;
   imp->id = id;
   imp->ptr = NULL;
+  imp->bin = NULL;
   cx_vec_init(&imp->args, sizeof(struct cx_func_arg));
   cx_vec_init(&imp->toks, sizeof(struct cx_tok));
   return imp;
@@ -51,6 +53,7 @@ struct cx_func_imp *cx_func_imp_deinit(struct cx_func_imp *imp) {
   cx_vec_deinit(&imp->args);
   cx_do_vec(&imp->toks, struct cx_tok, t) { cx_tok_deinit(t); }
   cx_vec_deinit(&imp->toks);
+  if (imp->bin) { cx_bin_unref(imp->bin); }
   return imp;
 }
 
@@ -133,7 +136,17 @@ bool cx_func_imp_call(struct cx_func_imp *imp, struct cx_scope *scope) {
   cx_begin(cx, false);
   struct cx_func_imp *prev = cx->func_imp;
   cx->func_imp = imp;
-  bool ok = cx_eval(cx, &imp->toks, cx_vec_start(&imp->toks));
+
+  if (!imp->bin) {
+    imp->bin = cx_bin_new();
+    
+    if (!cx_compile(cx, &imp->toks, imp->bin)) {
+      cx_error(cx, cx->row, cx->col, "Failed compiling func imp");
+    }
+  }
+
+  //bool ok = cx_eval(cx, &imp->toks, cx_vec_start(&imp->toks));
+  bool ok = cx_eval2(cx, imp->bin, NULL);
   cx->func_imp = prev;
   cx_end(cx);
   return ok;

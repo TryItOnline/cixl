@@ -28,6 +28,7 @@ struct cx_func_imp {
   struct cx_vec args;
   void (*ptr)(struct cx_scope *);
   struct cx_vec toks;
+  struct cx_bin *bin;
 };
 
 struct cx_func_imp *cx_func_imp_init(struct cx_func_imp *imp,

@@ -228,14 +228,19 @@ static bool recall_eval(struct cx_macro_eval *eval, struct cx *cx) {
     return false;
   }
 
-  if (!cx_scan_args(cx, cx->func_imp->func)) { return false; }
+  if (cx->bin) {
+    if (!cx_scan_args2(cx, cx->func_imp->func)) { return false; }
+  } else {
+    if (!cx_scan_args(cx, cx->func_imp->func)) { return false; }
+  }
   
   if (!cx_func_imp_match(cx->func_imp, &s->stack)) {
     cx_error(cx, cx->row, cx->col, "Recall not applicable");
     return false;
   }
 
-  return cx_eval(cx, &cx->func_imp->toks, cx_vec_start(&cx->func_imp->toks));
+  //return cx_eval(cx, &cx->func_imp->toks, cx_vec_start(&cx->func_imp->toks));
+  return cx_eval2(cx, cx->func_imp->bin, NULL);
 }
 
 static bool recall_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
@@ -425,11 +430,11 @@ struct cx *cx_init(struct cx *cx) {
 void cx_init_math(struct cx *cx) {
   cx_test(cx_eval_str(cx,
 		      "func: fib-rec(a b n Int) "
-		      "$n? if {, recall $b, $a + $b, -- $n} $a;"));
+		      "  $n? if {, recall $b, $a + $b, -- $n} $a;"));
 
   cx_test(cx_eval_str(cx,
 		      "func: fib(n Int) "
-		      "fib-rec 0 1 $n;"));
+		      "  fib-rec 0 1 $n;"));
 }
 
 struct cx *cx_deinit(struct cx *cx) {
