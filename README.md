@@ -29,7 +29,7 @@ Press Return twice to eval input.
 ```
 
 ### Status
-Examples from this document should work in the most recent version and run clean in ```valgrind```, outside of that I can't really promise much at the moment. Current work is focused on adding a separate compilation stage to speed up evaluation. In the spirit of continous integration, the compiler is being developed in parallel to the existing interpreter and may be invoked through the ```compile``` function. The compiler should be able to deal with anything but coroutines, which are currently being implemented.
+Examples from this document should work in the most recent version and run clean in ```valgrind```, outside of that I can't really promise much at the moment. Current work is focused on adding a separate compilation stage to speed up evaluation. In the spirit of continous integration, the compiler is being developed in parallel to the existing interpreter and may be invoked through the ```compile``` function.
 
 ```
 > '(1 2 +)' compile
