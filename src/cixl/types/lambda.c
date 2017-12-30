@@ -39,21 +39,7 @@ static bool call_imp(struct cx_box *value, struct cx_scope *scope) {
   bool ok = false;
   
   if (l->bin) {
-    struct cx_bin *prev_bin = cx->bin;
-    struct cx_op *prev_op = cx->op;
-
-    cx->bin = l->bin;
-    struct cx_op
-      *start = cx_vec_get(&l->bin->ops, l->start_op),
-      *end = start + l->num_ops;
-    cx->op = start;
-    
-    while (cx->op != end) {
-      if (!(ok = cx_eval_next(cx))) { break; }
-    }
-
-    cx->bin = prev_bin;
-    cx->op = prev_op;
+    ok = cx_eval2(cx, l->bin, cx_vec_get(&l->bin->ops, l->start_op));
   } else {
     ok = cx_eval(cx, &l->toks, cx_vec_start(&l->toks));
   }

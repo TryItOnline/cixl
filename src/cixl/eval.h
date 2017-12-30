@@ -19,6 +19,7 @@ struct cx_tok_type *cx_ungroup_tok();
 struct cx_tok_type *cx_unlambda_tok();
 
 bool cx_eval(struct cx *cx, struct cx_vec *toks, struct cx_tok *pc);
+bool cx_eval2(struct cx *cx, struct cx_bin *bin, struct cx_op *start);
 bool cx_eval_str(struct cx *cx, const char *in);
 
 bool cx_scan_args(struct cx *cx, struct cx_func *func);

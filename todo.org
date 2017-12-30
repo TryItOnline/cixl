@@ -1,15 +1,16 @@
-* add bin/op support in coro
-** add bool stop to cx
-*** set in yield
-*** check in lambda call
-*** check in bin call
+* add func imp bin
+** compile on demand
+** change funcall to use bin
+* remove toks/pc/stop_pc
+** lambda.toks
+** coro.toks
+** func toks
+** switch eval fns to use ops
+* move tok types to tok.h/c
 * ---
 * change macros to compile to ops
 ** add set op
 ** replaces macro_op
-* add func imp bin
-** compile on demand
-** change funcall to use bin
 * inline funcs with one imp on compile
 * ---
 * add wrap macro for cx_add_type

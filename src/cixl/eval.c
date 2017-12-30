@@ -168,6 +168,7 @@ static ssize_t lambda_compile(size_t tok_idx, struct cx_bin *bin, struct cx *cx)
   
   struct cx_vec toks = tok->as_vec;
   cx_compile(cx, &toks, bin);
+  cx_op_init(cx_vec_push(&bin->ops), cx_stop_op, tok_idx);
   struct cx_op *op = cx_vec_get(&bin->ops, i);
   op->as_lambda.num_ops = bin->ops.count - op->as_lambda.start_op;
   return tok_idx+1;
@@ -297,6 +298,26 @@ bool cx_eval(struct cx *cx, struct cx_vec *toks, struct cx_tok *pc) {
   cx->toks = prev_toks;
   cx->pc = prev_pc;
   cx->stop_pc = NULL;
+  return ok;
+}
+
+bool cx_eval2(struct cx *cx, struct cx_bin *bin, struct cx_op *start) {
+  struct cx_bin *prev_bin = cx->bin;
+  struct cx_op *prev_op = cx->op;
+
+  cx->bin = bin;
+  cx->op = start ? start : cx_vec_start(&bin->ops);
+  bool ok = false;
+  
+  while (cx->op != cx_vec_end(&cx->bin->ops) && !cx->stop) {
+    if (!cx_eval_next(cx)) { goto exit; }
+  }
+
+  ok = true;
+ exit:
+  cx->bin = prev_bin;
+  cx->op = prev_op;
+  cx->stop = false;
   return ok;
 }
 

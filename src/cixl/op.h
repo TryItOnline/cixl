@@ -48,6 +48,7 @@ bool cx_lambda_op(struct cx_tok *tok, struct cx_op *op, struct cx *cx);
 bool cx_macro_op(struct cx_tok *tok, struct cx_op *op, struct cx *cx);
 bool cx_push_op(struct cx_tok *tok, struct cx_op *op, struct cx *cx);
 bool cx_scope_op(struct cx_tok *tok, struct cx_op *op, struct cx *cx);
+bool cx_stop_op(struct cx_tok *tok, struct cx_op *op, struct cx *cx);
 bool cx_unscope_op(struct cx_tok *tok, struct cx_op *op, struct cx *cx);
 
 #endif

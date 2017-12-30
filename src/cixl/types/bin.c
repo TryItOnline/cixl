@@ -15,23 +15,7 @@ static bool equid_imp(struct cx_box *x, struct cx_box *y) {
 }
 
 static bool call_imp(struct cx_box *value, struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  struct cx_bin *prev_bin = cx->bin;
-  struct cx_op *prev_op = cx->op;
-
-  cx->bin = value->as_ptr;
-  cx->op = cx_vec_start(&cx->bin->ops);
-  bool ok = false;
-  
-  while (cx->op != cx_vec_end(&cx->bin->ops)) {
-    if (!cx_eval_next(cx)) { goto exit; }
-  }
-
-  ok = true;
- exit:
-  cx->bin = prev_bin;
-  cx->op = prev_op;
-  return ok;
+  return cx_eval2(scope->cx, value->as_ptr, NULL);
 }
 
 static void copy_imp(struct cx_box *dst, struct cx_box *src) {

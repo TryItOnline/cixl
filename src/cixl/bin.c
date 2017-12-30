@@ -1,5 +1,7 @@
+#include "cixl/cx.h"
 #include "cixl/bin.h"
 #include "cixl/error.h"
+#include "cixl/eval.h"
 #include "cixl/op.h"
 #include "cixl/tok.h"
 
@@ -53,4 +55,3 @@ bool cx_compile(struct cx *cx, struct cx_vec *in, struct cx_bin *out) {
 
   return true;
 }
-

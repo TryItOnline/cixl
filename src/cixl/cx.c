@@ -357,6 +357,7 @@ struct cx *cx_init(struct cx *cx) {
   cx->pc = cx->stop_pc = NULL;  
   cx->bin = NULL;
   cx->op = NULL;
+  cx->stop = false;
   cx->row = cx->col = -1;
   
   cx_set_init(&cx->separators, sizeof(char), cx_cmp_char);

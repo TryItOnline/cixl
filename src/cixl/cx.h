@@ -37,6 +37,7 @@ struct cx {
   struct cx_bin *bin;
   struct cx_op *op;
   
+  bool stop;
   int row, col;
   struct cx_vec errors;
 };

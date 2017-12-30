@@ -1,3 +1,4 @@
+#include "cixl/bin.h"
 #include "cixl/box.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
@@ -23,7 +24,14 @@ struct cx_coro *cx_coro_init(struct cx_coro *coro,
     }
   }
   
-  coro->pc = cx_vec_start(&coro->toks);
+  if (cx->bin) {
+    coro->bin = cx_bin_ref(cx->bin);
+    coro->op = cx->op;
+  } else {
+    coro->bin = NULL;
+    coro->pc = cx_vec_start(&coro->toks);
+  }
+  
   return coro;
 }
 
@@ -32,7 +40,8 @@ struct cx_coro *cx_coro_deinit(struct cx_coro *coro) {
 
   cx_do_vec(&coro->toks, struct cx_tok, t) { cx_tok_deinit(t); }
   cx_vec_deinit(&coro->toks);
-
+  
+  if (coro->bin) { cx_bin_unref(coro->bin); }
   return coro;
 }
 
@@ -40,7 +49,8 @@ static void yield_imp(struct cx_scope *scope) {
   struct cx *cx = scope->cx;
   
   if (cx->coro) {
-    cx->coro->pc = cx->pc;    
+    cx->coro->pc = cx->pc;
+    cx->coro->op = cx->op;
   } else {
     struct cx_coro *coro = cx_coro_init(malloc(sizeof(struct cx_coro)),
 					cx,
@@ -50,6 +60,7 @@ static void yield_imp(struct cx_scope *scope) {
   }
   
   cx->stop_pc = cx->pc;
+  cx->stop = true;
 }
 
 static bool equid_imp(struct cx_box *x, struct cx_box *y) {
@@ -73,11 +84,20 @@ static bool call_imp(struct cx_box *value, struct cx_scope *scope) {
   }
   
   cx->coro = coro;
-  bool ok = cx_eval(cx, &coro->toks, coro->pc);
+  bool ok = false;
+  
+  if (coro->bin) {
+    ok = cx_eval2(cx, coro->bin, coro->op);
+    coro->op = cx->op;
+    if (coro->op == cx_vec_end(&coro->bin->ops)) { coro->done = true; }
+  } else {
+    ok = cx_eval(cx, &coro->toks, coro->pc);
+    coro->pc = cx->pc;
+    if (coro->pc == cx_vec_end(&coro->toks)) { coro->done = true; }
+  }
+  
   cx->coro = NULL;
   if (!ok) { return false; }
-  coro->pc = cx->pc;
-  if (coro->pc == cx_vec_end(&coro->toks)) { coro->done = true; }
   if (pop_scope) { cx_pop_scope(cx, false); }
   return true;
 }

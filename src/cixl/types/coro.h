@@ -12,6 +12,8 @@ struct cx_coro {
   struct cx_scope *scope;
   struct cx_vec toks;
   struct cx_tok *pc;
+  struct cx_bin *bin;
+  struct cx_op *op;
   int nrefs;
   bool done;
 };

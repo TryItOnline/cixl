@@ -74,6 +74,11 @@ bool cx_scope_op(struct cx_tok *tok, struct cx_op *op, struct cx *cx) {
   return true;
 }
 
+bool cx_stop_op(struct cx_tok *tok, struct cx_op *op, struct cx *cx) {
+  cx->stop = true;
+  return true;
+}
+
 bool cx_unscope_op(struct cx_tok *tok, struct cx_op *op, struct cx *cx) {
   cx_end(cx);
   return true;
