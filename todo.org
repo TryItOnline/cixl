@@ -1,10 +1,16 @@
-* write lambda.compile
-** add cx.return_stack
-** push return before jumping in
-** store start_pc in lambda (idx)
+* add bin/op support in coro
+** add bool stop to cx
+*** set in yield
+*** check in lambda call
+*** check in bin call
+* ---
 * change macros to compile to ops
 ** add set op
-** remove macro_op
+** replaces macro_op
+* add func imp bin
+** compile on demand
+** change funcall to use bin
+* inline funcs with one imp on compile
 * ---
 * add wrap macro for cx_add_type
 ** pass NULL
@@ -48,3 +54,6 @@ clock {,10000 times {,fib 50 _}} / 1000000
 eval parse '7 35 +'
 
 func: fib-rec(a b n Int) $n? if {, recall $b, $a + $b, -- $n} $a;
+
+
+'{,fib 50 _}' compile call call

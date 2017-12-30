@@ -1,7 +1,9 @@
+#include "cixl/bin.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
 #include "cixl/eval.h"
 #include "cixl/func.h"
+#include "cixl/types/lambda.h"
 #include "cixl/op.h"
 #include "cixl/scope.h"
 #include "cixl/tok.h"
@@ -45,6 +47,17 @@ bool cx_get_op(struct cx_tok *tok, struct cx_op *op, struct cx *cx) {
   return true;
 }
 
+bool cx_lambda_op(struct cx_tok *tok, struct cx_op *op, struct cx *cx) {
+  struct cx_scope *scope = cx_scope(cx, 0);
+  struct cx_lambda *l = cx_lambda_init(malloc(sizeof(struct cx_lambda)), scope);
+  l->bin = cx_bin_ref(cx->bin);
+  l->start_op = op->as_lambda.start_op;
+  l->num_ops = op->as_lambda.num_ops;
+  cx_box_init(cx_push(scope), cx->lambda_type)->as_ptr = l;
+  cx->op += l->num_ops;
+  return true;
+}
+
 bool cx_macro_op(struct cx_tok *tok, struct cx_op *op, struct cx *cx) {
   struct cx_macro_eval *eval = tok->as_ptr;
   eval->imp(eval, cx);
@@ -52,7 +65,7 @@ bool cx_macro_op(struct cx_tok *tok, struct cx_op *op, struct cx *cx) {
 }
 
 bool cx_push_op(struct cx_tok *tok, struct cx_op *op, struct cx *cx) {
-  cx_copy(cx_push(cx_scope(cx, 0)),  op->as_push.value);
+  cx_copy(cx_push(cx_scope(cx, 0)),  &tok->as_box);
   return true;
 }
 

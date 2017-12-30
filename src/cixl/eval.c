@@ -72,7 +72,8 @@ cx_tok_type(cx_func_tok, {
 static ssize_t group_compile(size_t tok_idx, struct cx_bin *bin, struct cx *cx) {
   cx_op_init(cx_vec_push(&bin->ops), cx_scope_op, tok_idx)->as_scope.child = true;
   struct cx_tok *tok = cx_vec_get(&bin->toks, tok_idx);
-  cx_compile(cx, &tok->as_vec, bin);
+  struct cx_vec toks = tok->as_vec;
+  cx_compile(cx, &toks, bin);
   cx_op_init(cx_vec_push(&bin->ops), cx_unscope_op, tok_idx);
   return tok_idx+1;
 }
@@ -157,34 +158,46 @@ cx_tok_type(cx_id_tok, {
     type.deinit = id_deinit;
   });
 
+static ssize_t lambda_compile(size_t tok_idx, struct cx_bin *bin, struct cx *cx) {
+  struct cx_tok *tok = cx_vec_get(&bin->toks, tok_idx);
+
+  size_t i = bin->ops.count;
+  cx_op_init(cx_vec_push(&bin->ops),
+	     cx_lambda_op,
+	     tok_idx)->as_lambda.start_op = i+1;
+  
+  struct cx_vec toks = tok->as_vec;
+  cx_compile(cx, &toks, bin);
+  struct cx_op *op = cx_vec_get(&bin->ops, i);
+  op->as_lambda.num_ops = bin->ops.count - op->as_lambda.start_op;
+  return tok_idx+1;
+}
+
 static bool lambda_eval(struct cx_tok *tok, struct cx *cx) {
   struct cx_scope *scope = cx_scope(cx, 0);
-  struct cx_lambda *lambda = tok->as_box.as_ptr;
-  if (lambda->scope) { cx_scope_unref(lambda->scope); }
-  lambda->scope = cx_scope_ref(scope);
-  cx_copy(cx_push(scope), &tok->as_box);
+  struct cx_lambda *l = cx_lambda_init(malloc(sizeof(struct cx_lambda)), scope);
+  cx_do_vec(&tok->as_vec, struct cx_tok, t) { cx_tok_copy(cx_vec_push(&l->toks), t); }
+  cx_box_init(cx_push(scope), cx->lambda_type)->as_ptr = l;
   return true;
 }
 
 static void lambda_copy(struct cx_tok *dst, struct cx_tok *src) {
-  cx_copy(&dst->as_box, &src->as_box);
+  group_copy(dst, src);
 }
 
 static void lambda_deinit(struct cx_tok *tok) {
-  cx_box_deinit(&tok->as_box);
+  group_deinit(tok);
 }
 
 cx_tok_type(cx_lambda_tok, {
+    type.compile = lambda_compile;
     type.eval = lambda_eval;
     type.copy = lambda_copy;
     type.deinit = lambda_deinit;
   });
 
 static ssize_t literal_compile(size_t tok_idx, struct cx_bin *bin, struct cx *cx) {
-  struct cx_tok *tok = cx_vec_get(&bin->toks, tok_idx);
-  cx_op_init(cx_vec_push(&bin->ops),
-	     cx_push_op,
-	     tok_idx)->as_push.value = &tok->as_box;
+  cx_op_init(cx_vec_push(&bin->ops), cx_push_op, tok_idx);
   return tok_idx+1;
 }
 
@@ -238,9 +251,7 @@ static ssize_t type_compile(size_t tok_idx, struct cx_bin *bin, struct cx *cx) {
   struct cx_type *type = tok->as_ptr;
   tok->type = cx_literal_tok();
   cx_box_init(&tok->as_box, cx->meta_type)->as_ptr = type;    
-  cx_op_init(cx_vec_push(&bin->ops),
-	     cx_push_op,
-	     tok_idx)->as_push.value = &tok->as_box;
+  cx_op_init(cx_vec_push(&bin->ops), cx_push_op, tok_idx);
   return tok_idx+1;
 }
 

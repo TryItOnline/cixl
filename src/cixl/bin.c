@@ -21,6 +21,17 @@ struct cx_bin *cx_bin_deinit(struct cx_bin *bin) {
   return bin;
 }
 
+struct cx_bin *cx_bin_ref(struct cx_bin *bin) {
+  bin->nrefs++;
+  return bin;
+}
+
+void cx_bin_unref(struct cx_bin *bin) {
+  cx_test(bin->nrefs > 0);
+  bin->nrefs--;
+  if (!bin->nrefs) { free(cx_bin_deinit(bin)); }
+}
+
 bool cx_compile(struct cx *cx, struct cx_vec *in, struct cx_bin *out) {
   if (!in->count) { return true; }
   
