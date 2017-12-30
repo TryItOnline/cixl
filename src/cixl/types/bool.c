@@ -5,6 +5,14 @@
 #include "cixl/scope.h"
 #include "cixl/types/bool.h"
 
+static void true_imp(struct cx_scope *scope) {
+  cx_box_init(cx_push(scope), scope->cx->bool_type)->as_bool = true;
+}
+
+static void false_imp(struct cx_scope *scope) {
+  cx_box_init(cx_push(scope), scope->cx->bool_type)->as_bool = false;
+}
+
 static bool equid_imp(struct cx_box *x, struct cx_box *y) {
   return x->as_bool == y->as_bool;
 }
@@ -22,6 +30,9 @@ struct cx_type *cx_init_bool_type(struct cx *cx) {
   t->equid = equid_imp;
   t->ok = ok_imp;
   t->fprint = fprint_imp;
+
+  cx_add_func(cx, "t")->ptr = true_imp;
+  cx_add_func(cx, "f")->ptr = false_imp;
 
   return t;
 }

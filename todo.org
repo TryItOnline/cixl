@@ -1,3 +1,11 @@
+* write lambda.compile
+** add cx.return_stack
+** push return before jumping in
+** store start_pc in lambda (idx)
+* change macros to compile to ops
+** add set op
+** remove macro_op
+* ---
 * add wrap macro for cx_add_type
 ** pass NULL
 * change func imps to return bool

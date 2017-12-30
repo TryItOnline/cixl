@@ -1,11 +1,13 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "cixl/error.h"
 #include "cixl/macro.h"
 #include "cixl/tok.h"
 #include "cixl/vec.h"
 
 struct cx_tok_type *cx_tok_type_init(struct cx_tok_type *type) {
+  type->compile = NULL;
   type->eval = NULL;
   type->copy = NULL;
   type->deinit = NULL;
@@ -28,8 +30,5 @@ struct cx_tok *cx_tok_deinit(struct cx_tok *tok) {
 
 void cx_tok_copy(struct cx_tok *dst, struct cx_tok *src) {
   *dst = *src;
-
-  if (src->type->copy) {
-    src->type->copy(dst, src);
-  }
+  if (src->type->copy) { src->type->copy(dst, src); }
 }

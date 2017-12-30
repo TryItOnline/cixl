@@ -64,23 +64,6 @@ static bool parse_id(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
 	  cx_tok_init(cx_vec_push(out),
 		      cx_id_tok(),
 		      cx->row, cx->col)->as_ptr = id.data;
-	} else if (strcmp(id.data, "t") == 0 || strcmp(id.data, "f") == 0) {
-	  cx_tok_init(cx_vec_push(out),
-		      id.data[0] == 't' ? cx_true_tok() : cx_false_tok(),
-		      cx->row, cx->col);
-	  free(id.data);
-	} else if (strcmp(id.data, "nil") == 0) {
-	  cx_tok_init(cx_vec_push(out), cx_nil_tok(), cx->row, cx->col);
-	  free(id.data);
-	} else if (strcmp(id.data, "|") == 0) {
-	  cx_tok_init(cx_vec_push(out), cx_cls_tok(), cx->row, cx->col);
-	  free(id.data);
-	} else if (strcmp(id.data, "_") == 0) {
-	  cx_tok_init(cx_vec_push(out), cx_zap_tok(), cx->row, cx->col);
-	  free(id.data);
-	} else if (strcmp(id.data, "%") == 0) {
-	  cx_tok_init(cx_vec_push(out), cx_dup_tok(), cx->row, cx->col);
-	  free(id.data);
 	} else {
 	  bool ref = id.data[0] == '&';
 	  struct cx_func *f = cx_get_func(cx, ref ? id.data+1 : id.data, false);

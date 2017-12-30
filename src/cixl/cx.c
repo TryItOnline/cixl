@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "cixl/bin.h"
 #include "cixl/box.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
@@ -11,6 +12,7 @@
 #include "cixl/scope.h"
 #include "cixl/timer.h"
 #include "cixl/type.h"
+#include "cixl/types/bin.h"
 #include "cixl/types/bool.h"
 #include "cixl/types/char.h"
 #include "cixl/types/coro.h"
@@ -241,7 +243,23 @@ static bool recall_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   cx_tok_init(cx_vec_push(out), cx_macro_tok(), cx->row, cx->col)->as_ptr = eval;
   return true;
 }
-  
+
+static void nil_imp(struct cx_scope *scope) {
+  cx_box_init(cx_push(scope), scope->cx->nil_type);
+}
+
+static void cls_imp(struct cx_scope *scope) {
+  cx_vec_clear(&scope->stack);
+}
+
+static void dup_imp(struct cx_scope *scope) {
+  cx_copy(cx_push(scope), cx_test(cx_peek(scope, true)));
+}
+
+static void zap_imp(struct cx_scope *scope) {
+  cx_box_deinit(cx_test(cx_pop(scope, false)));
+}
+
 static void eqval_imp(struct cx_scope *scope) {
   struct cx_box
     y = *cx_test(cx_pop(scope, false)),
@@ -285,6 +303,24 @@ static void if_imp(struct cx_scope *scope) {
   cx_box_deinit(&y);
 }
 
+static void compile_imp(struct cx_scope *scope) {
+  struct cx *cx = scope->cx;
+  struct cx_box in = *cx_test(cx_pop(scope, false));
+
+  struct cx_vec toks;
+  cx_vec_init(&toks, sizeof(struct cx_tok));
+  bool ok = cx_parse_str(cx, in.as_ptr, &toks);
+  if (!ok) { goto exit; }
+  
+  struct cx_bin *bin = cx_bin_new();
+  if (!(ok = cx_compile(cx, &toks, bin))) { goto exit; }
+  cx_box_init(cx_push(scope), cx->bin_type)->as_ptr = bin;
+ exit:
+  cx_box_deinit(&in);
+  cx_do_vec(&toks, struct cx_tok, t) { cx_tok_deinit(t); }
+  cx_vec_deinit(&toks);
+}
+
 static void call_imp(struct cx_scope *scope) {
   struct cx_box v = *cx_test(cx_pop(scope, false));
   cx_call(&v, scope);
@@ -319,6 +355,8 @@ struct cx *cx_init(struct cx *cx) {
   cx->func_imp = NULL;
   cx->toks = NULL;
   cx->pc = cx->stop_pc = NULL;  
+  cx->bin = NULL;
+  cx->op = NULL;
   cx->row = cx->col = -1;
   
   cx_set_init(&cx->separators, sizeof(char), cx_cmp_char);
@@ -351,10 +389,17 @@ struct cx *cx_init(struct cx *cx) {
   cx->char_type = cx_init_char_type(cx);
   cx->str_type = cx_init_str_type(cx);
   cx->vect_type = cx_init_vect_type(cx);
+  cx->bin_type = cx_init_bin_type(cx);
   cx->func_type = cx_init_func_type(cx);
   cx->lambda_type = cx_init_lambda_type(cx);
   cx->coro_type = cx_init_coro_type(cx);
 
+  cx_add_func(cx, "nil")->ptr = nil_imp;
+  
+  cx_add_func(cx, "|")->ptr = cls_imp;
+  cx_add_func(cx, "%", cx_arg(cx->opt_type))->ptr = dup_imp;
+  cx_add_func(cx, "_", cx_arg(cx->opt_type))->ptr = zap_imp;
+  
   cx_add_func(cx, "=", cx_arg(cx->any_type), cx_narg(0))->ptr = eqval_imp;
   cx_add_func(cx, "==", cx_arg(cx->any_type), cx_narg(0))->ptr = equid_imp;
 
@@ -366,6 +411,7 @@ struct cx *cx_init(struct cx *cx) {
 	      cx_arg(cx->any_type),
 	      cx_arg(cx->any_type))->ptr = if_imp;
   
+  cx_add_func(cx, "compile", cx_arg(cx->str_type))->ptr = compile_imp;
   cx_add_func(cx, "call", cx_arg(cx->any_type))->ptr = call_imp;
 
   cx_add_func(cx, "clock", cx_arg(cx->any_type))->ptr = clock_imp;

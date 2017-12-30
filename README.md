@@ -5,9 +5,6 @@
 
 This project aims to produce a minimal scripting language for embedding in and extending from C. In a way, it's Lua taken one step further down the path of simplicity. The language is implemented as a straight forward interpreter that is designed to be as fast as possible without compromising on simplicity, transparency and flexibility.
 
-### Status
-Examples from this document should work in the most recent version and run clean in ```valgrind```, outside of that I can't really promise much at the moment. Current work is focused on tracing interactions between core features and filling obvious gaps in functionality.
-
 ### Getting Started
 To get started, you'll need a decent C compiler with GNU-extensions and CMake installed. A primitive REPL is included, the executable weighs in at 200k. It's highly recommended to run the REPL through ```rlwrap``` for a less nerve-wrecking editing experience.
 
@@ -29,6 +26,19 @@ Press Return twice to eval input.
 [1 2 3]
 
 > quit
+```
+
+### Status
+Examples from this document should work in the most recent version and run clean in ```valgrind```, outside of that I can't really promise much at the moment. Current work is focused on adding a separate compilation stage to speed up evaluation. In the spirit of continous integration, the compiler is being developed in parallel to the existing interpreter and may be reached through the ```compile``` function. The compiler should be able to deal with anything but lambdas and coroutines, which are currently being implemented.
+
+```
+> '(1 2 +)' compile
+..
+[Bin(0x8899a0)@1]
+
+> call
+..
+[3]
 ```
 
 ### Stack

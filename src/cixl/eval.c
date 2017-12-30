@@ -2,25 +2,23 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "cixl/bin.h"
 #include "cixl/box.h"
 #include "cixl/cx.h"
 #include "cixl/eval.h"
 #include "cixl/error.h"
 #include "cixl/func.h"
+#include "cixl/op.h"
 #include "cixl/parse.h"
 #include "cixl/scope.h"
 #include "cixl/types/lambda.h"
 #include "cixl/util.h"
 #include "cixl/vec.h"
 
-static bool cls_eval(struct cx_tok *tok, struct cx *cx) {
-  cx_vec_clear(&cx_scope(cx, 0)->stack);
-  return true;
+static ssize_t cut_compile(size_t tok_idx, struct cx_bin *bin, struct cx *cx) {
+  cx_op_init(cx_vec_push(&bin->ops), cx_cut_op, tok_idx);
+  return tok_idx+1;
 }
-
-cx_tok_type(cx_cls_tok, {
-    type.eval = cls_eval;
-  });
 
 static bool cut_eval(struct cx_tok *tok, struct cx *cx) {
   struct cx_scope *s = cx_scope(cx, 0);
@@ -29,35 +27,25 @@ static bool cut_eval(struct cx_tok *tok, struct cx *cx) {
 }
 
 cx_tok_type(cx_cut_tok, {
+    type.compile = cut_compile;
     type.eval = cut_eval;
-  });
-
-static bool dup_eval(struct cx_tok *tok, struct cx *cx) {
-  struct cx_scope *s = cx_scope(cx, 0);
-
-  if (!s->stack.count) {
-    cx_error(cx, tok->row, tok->col, "Nothing to dup");
-    return false;
-  }
-
-  cx_copy(cx_push(s), cx_peek(s, true));
-  return true;
-}
-
-cx_tok_type(cx_dup_tok, {
-    type.eval = dup_eval;
   });
 
 cx_tok_type(cx_end_tok);
 
-static bool false_eval(struct cx_tok *tok, struct cx *cx) {
-  cx_box_init(cx_push(cx_scope(cx, 0)), cx->bool_type)->as_bool = false;
-  return true;
+static ssize_t func_compile(size_t tok_idx, struct cx_bin *bin, struct cx *cx) {
+  struct cx_funcall_op *op = &cx_op_init(cx_vec_push(&bin->ops),
+					 cx_funcall_op,
+					 tok_idx)->as_funcall;
+  
+  struct cx_tok *tok = cx_vec_get(&bin->toks, tok_idx);  
+  op->func = tok->as_ptr;
+  op->imp = (op->func->imps.members.count == 1)
+    ? *(struct cx_func_imp **)cx_vec_start(&op->func->imps.members)
+    : NULL;
+  
+  return tok_idx+1;
 }
-
-cx_tok_type(cx_false_tok, {
-    type.eval = false_eval;
-  });
 
 static bool func_eval(struct cx_tok *tok, struct cx *cx) {
   struct cx_func *func = tok->as_ptr;
@@ -73,42 +61,21 @@ static bool func_eval(struct cx_tok *tok, struct cx *cx) {
     return false;
   }
 
-  tok->type = cx_func_imp_tok();
-  tok->as_ptr = imp;
-  
   return cx_func_imp_call(imp, s);
 }
 
 cx_tok_type(cx_func_tok, {
+    type.compile = func_compile;
     type.eval = func_eval;
   });
 
-static bool func_imp_eval(struct cx_tok *tok, struct cx *cx) {
-  struct cx_func_imp *imp = tok->as_ptr;
-  struct cx_func *func = imp->func;
-  int row = cx->row, col = cx->col;
-
-  if (!cx_scan_args(cx, func)) { return false; }
-  
-  struct cx_scope *s = cx_scope(cx, 0);
-  
-  if (!cx_func_imp_match(imp, &s->stack)) {
-    imp = cx_func_get_imp(func, &s->stack);
-    
-    if (!imp) {
-      cx_error(cx, row, col, "Func not applicable: '%s'", func->id);
-      return -1;
-    }
-
-    tok->as_ptr = imp;
-  }
-  
-  return cx_func_imp_call(imp, s);
+static ssize_t group_compile(size_t tok_idx, struct cx_bin *bin, struct cx *cx) {
+  cx_op_init(cx_vec_push(&bin->ops), cx_scope_op, tok_idx)->as_scope.child = true;
+  struct cx_tok *tok = cx_vec_get(&bin->toks, tok_idx);
+  cx_compile(cx, &tok->as_vec, bin);
+  cx_op_init(cx_vec_push(&bin->ops), cx_unscope_op, tok_idx);
+  return tok_idx+1;
 }
-
-cx_tok_type(cx_func_imp_tok, {
-    type.eval = func_imp_eval;
-  });
 
 static bool group_eval(struct cx_tok *tok, struct cx *cx) {
   struct cx_vec *body = &tok->as_vec;
@@ -141,10 +108,24 @@ static void group_deinit(struct cx_tok *tok) {
 }
 
 cx_tok_type(cx_group_tok, {
+    type.compile = group_compile;
     type.eval = group_eval;
     type.copy = group_copy;
     type.deinit = group_deinit;
   });
+
+static ssize_t id_compile(size_t tok_idx, struct cx_bin *bin, struct cx *cx) {
+  struct cx_tok *tok = cx_vec_get(&bin->toks, tok_idx);
+  char *id = tok->as_ptr;
+  
+  if (id[0] != '$') {
+    cx_error(cx, tok->row, tok->col, "Unknown id: '%s'", id);
+    return -1;
+  }
+
+  cx_op_init(cx_vec_push(&bin->ops), cx_get_op, tok_idx)->as_get.id = id+1;
+  return tok_idx+1;
+}
 
 static bool id_eval(struct cx_tok *tok, struct cx *cx) {
   char *id = tok->as_ptr;
@@ -170,6 +151,7 @@ static void id_deinit(struct cx_tok *tok) {
 }
 
 cx_tok_type(cx_id_tok, {
+    type.compile = id_compile;
     type.eval = id_eval;
     type.copy = id_copy;
     type.deinit = id_deinit;
@@ -198,6 +180,14 @@ cx_tok_type(cx_lambda_tok, {
     type.deinit = lambda_deinit;
   });
 
+static ssize_t literal_compile(size_t tok_idx, struct cx_bin *bin, struct cx *cx) {
+  struct cx_tok *tok = cx_vec_get(&bin->toks, tok_idx);
+  cx_op_init(cx_vec_push(&bin->ops),
+	     cx_push_op,
+	     tok_idx)->as_push.value = &tok->as_box;
+  return tok_idx+1;
+}
+
 static bool literal_eval(struct cx_tok *tok, struct cx *cx) {
   cx_copy(cx_push(cx_scope(cx, 0)), &tok->as_box);
   return true;
@@ -212,10 +202,16 @@ static void literal_deinit(struct cx_tok *tok) {
 }
 
 cx_tok_type(cx_literal_tok, {
+    type.compile = literal_compile;
     type.eval = literal_eval;
     type.copy = literal_copy;
     type.deinit = literal_deinit;
   });
+
+static ssize_t macro_compile(size_t tok_idx, struct cx_bin *bin, struct cx *cx) {
+  cx_op_init(cx_vec_push(&bin->ops), cx_macro_op, tok_idx);
+  return tok_idx+1;
+}
 
 static bool macro_eval(struct cx_tok *tok, struct cx *cx) {
   struct cx_macro_eval *eval = tok->as_ptr;
@@ -231,28 +227,22 @@ static void macro_deinit(struct cx_tok *tok) {
 }
 
 cx_tok_type(cx_macro_tok, {
+    type.compile = macro_compile;
     type.eval = macro_eval;
     type.copy = macro_copy;
     type.deinit = macro_deinit;
   });
 
-static bool nil_eval(struct cx_tok *tok, struct cx *cx) {
-  cx_box_init(cx_push(cx_scope(cx, 0)), cx->nil_type);
-  return true;
+static ssize_t type_compile(size_t tok_idx, struct cx_bin *bin, struct cx *cx) {
+  struct cx_tok *tok = cx_vec_get(&bin->toks, tok_idx);
+  struct cx_type *type = tok->as_ptr;
+  tok->type = cx_literal_tok();
+  cx_box_init(&tok->as_box, cx->meta_type)->as_ptr = type;    
+  cx_op_init(cx_vec_push(&bin->ops),
+	     cx_push_op,
+	     tok_idx)->as_push.value = &tok->as_box;
+  return tok_idx+1;
 }
-
-cx_tok_type(cx_nil_tok, {
-    type.eval = nil_eval;
-  });
-
-static bool true_eval(struct cx_tok *tok, struct cx *cx) {
-  cx_box_init(cx_push(cx_scope(cx, 0)), cx->bool_type)->as_bool = true;
-  return true;
-}
-
-cx_tok_type(cx_true_tok, {
-    type.eval = true_eval;
-  });
 
 static bool type_eval(struct cx_tok *tok, struct cx *cx) {
   cx_box_init(cx_push(cx_scope(cx, 0)), cx->meta_type)->as_ptr = tok->as_ptr;
@@ -260,27 +250,12 @@ static bool type_eval(struct cx_tok *tok, struct cx *cx) {
 }
 
 cx_tok_type(cx_type_tok, {
+    type.compile = type_compile;
     type.eval = type_eval;
   });
 
 cx_tok_type(cx_ungroup_tok);
 cx_tok_type(cx_unlambda_tok);
-
-static bool zap_eval(struct cx_tok *tok, struct cx *cx) {
-  struct cx_scope *s = cx_scope(cx, 0);
-
-  if (!s->stack.count) {
-    cx_error(cx, tok->row, tok->col, "Nothing to zap");
-    return false;
-  }
-  
-  cx_box_deinit(cx_pop(cx_scope(cx, 0), false));
-  return true;
-}
-
-cx_tok_type(cx_zap_tok, {
-    type.eval = zap_eval;
-  });
 
 static bool eval_tok(struct cx *cx) {
   struct cx_tok *t = cx->pc++;
@@ -331,6 +306,34 @@ bool cx_scan_args(struct cx *cx, struct cx_func *func) {
     struct cx_scope *s = cx_scope(cx, 0);
     if (s->stack.count - s->cut_offs >= func->nargs) { break; }
     if (!eval_tok(cx)) { return false; }
+  }
+
+  struct cx_scope *s = cx_scope(cx, 0);
+  
+  if (s->stack.count - s->cut_offs < func->nargs) {
+    cx_error(cx, row, col, "Not enough args for func: '%s'", func->id);
+    return false;
+  }
+
+  s->cut_offs = 0;
+  return true;
+}
+
+bool cx_eval_next(struct cx *cx) {
+  struct cx_op *op = cx->op++;
+  struct cx_tok *tok = cx_vec_get(&cx->bin->toks, op->tok_idx);
+  cx->row = tok->row;
+  cx->col = tok->col;
+  return op->eval(tok, op, cx);
+}
+
+bool cx_scan_args2(struct cx *cx, struct cx_func *func) {
+  int row = cx->row, col = cx->col;
+
+  while (cx->op != cx_vec_end(&cx->bin->ops)) {
+    struct cx_scope *s = cx_scope(cx, 0);
+    if (s->stack.count - s->cut_offs >= func->nargs) { break; }
+    if (!cx_eval_next(cx)) { return false; }
   }
 
   struct cx_scope *s = cx_scope(cx, 0);
