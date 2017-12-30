@@ -391,6 +391,7 @@ In the example below, ```foo``` manipulates the main stack through the passed in
 Capitalized names are treated as type references, the following types are defined out of the box:
 
 - A (Opt)
+- Bin (A)
 - Bool (A)
 - Coro (A)
 - Func (A)
