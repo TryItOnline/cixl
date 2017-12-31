@@ -12,7 +12,6 @@
 #include "cixl/parse.h"
 #include "cixl/scope.h"
 #include "cixl/timer.h"
-#include "cixl/type.h"
 #include "cixl/types/bin.h"
 #include "cixl/types/bool.h"
 #include "cixl/types/char.h"
@@ -354,6 +353,7 @@ static void test_imp(struct cx_scope *scope) {
 }
 
 struct cx *cx_init(struct cx *cx) {
+  cx->next_type = 1;
   cx->func_imp = NULL;
   cx->bin = NULL;
   cx->op = NULL;
@@ -469,7 +469,7 @@ struct cx_type *cx_add_type(struct cx *cx, const char *id, ...) {
     return NULL;
   }
   
-  *t = cx_type_init(malloc(sizeof(struct cx_type)), id);
+  *t = cx_type_init(malloc(sizeof(struct cx_type)), cx, id);
     
   va_list parents;
   va_start(parents, id);				

@@ -29,7 +29,7 @@ Press Return twice to eval input.
 ```
 
 ### Status
-Examples from this document should work in the most recent version and run clean in ```valgrind```, outside of that I can't really promise much at the moment. Current work is focused on profiling and filling in obvious gaps in functionality.
+Examples from this document should work in the most recent version and run clean in ```valgrind```, outside of that I can't really promise much at the moment. Current work is focused on profiling and filling obvious gaps in functionality.
 
 ### Stack
 The stack is accessible from user code, just like in Forth. Basic stack operations have dedicated operators; ```%``` for duplicating last value, ```_``` for dropping it, and ```|``` for clearing the stack.

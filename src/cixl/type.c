@@ -8,8 +8,12 @@
 #include "cixl/scope.h"
 #include "cixl/type.h"
 
-struct cx_type *cx_type_init(struct cx_type *type, const char *id) {
+struct cx_type *cx_type_init(struct cx_type *type, struct cx *cx, const char *id) {
+  type->cx = cx;
   type->id = strdup(id);
+  type->tag = cx->next_type;
+  cx->next_type *= 2;
+  type->tags = type->tag;
   cx_set_init(&type->parents, sizeof(struct cx_type *), cx_cmp_ptr);
   
   type->eqval = NULL;
@@ -31,13 +35,17 @@ struct cx_type *cx_type_deinit(struct cx_type *type) {
 
 void cx_derive(struct cx_type *child, struct cx_type *parent) {
   *(struct cx_type **)cx_test(cx_set_insert(&child->parents, parent)) = parent;
+  child->tags |= parent->tag;
 }
 
 bool cx_is(struct cx_type *child, struct cx_type *parent) {
-  if (child == parent) { return true; }
+  if (child->tags & parent->tag) { return true; }
   
   cx_do_set(&child->parents, struct cx_type *, pt) {
-    if (cx_is(*pt, parent)) { return true; }
+    if (cx_is(*pt, parent)) {
+      child->tags |= parent->tag;
+      return true;
+    }
   }
 
   return false;

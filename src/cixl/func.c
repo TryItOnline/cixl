@@ -107,20 +107,21 @@ struct cx_func_imp *cx_func_add_imp(struct cx_func *func,
 }
 
 bool cx_func_imp_match(struct cx_func_imp *imp, struct cx_vec *stack) {
-  for (int i = imp->args.count-1, j = stack->count-1;
-       i >= 0  && j >= 0;
+  if (!imp->args.count) { return true; }
+  
+  struct cx_func_arg *i = (struct cx_func_arg *)cx_vec_end(&imp->args)-1;
+  struct cx_box *j = (struct cx_box *)cx_vec_end(stack)-1;
+  
+  for (; i >= (struct cx_func_arg *)imp->args.items &&
+	 j >= (struct cx_box *)stack->items;
        i--, j--) {
-    struct cx_func_arg *imp_arg = cx_vec_get(&imp->args, i);
 
-    struct cx_type *imp_type = imp_arg->type
-      ? imp_arg->type
+    struct cx_type *t = i->type
+      ? i->type
       : ((struct cx_box *)cx_vec_get(stack,
-				     stack->count -
-				     imp->args.count +
-				     imp_arg->narg))->type;
+				     stack->count-imp->args.count+i->narg))->type;
       
-    struct cx_box *arg = cx_vec_get(stack, j);
-    if (!cx_is(arg->type, imp_type)) { return false; }
+    if (!cx_is(j->type, t)) { return false; }
   }
 
   return true;

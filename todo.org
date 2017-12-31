@@ -1,14 +1,15 @@
-* step pointers instead of cx_vec_get in func_imp_match
-* speed up cx_is
-** add cx_type.tag, tags uint64_t
-** keep next_type_tag in cx
-** start on 1, double on each new type
-** change cx_is to binary AND type tags instead
---
 * add wrap macro for cx_add_type
 ** pass NULL
 * change func imps to return bool
 * update readme
+* add struct: macro
+** add Struct type 
+*** add to parents for all structs
+** add cx_type.trait
+*** set to true for all user defined traits
+** only allow Structs and traits as parents
+** use ref counted sets of cx_struct_slot as instances
+* add Rat type
 * add fail func
 ** like test but just call error with message
 * add basic io
@@ -22,7 +23,6 @@
 * add cx_init_io with load fn
 ** load first repl arg if any
 ** push rest on stack
-* add Rat type
 * add Str 'int' fn
 * add Int 'str' fn
 * add Char 'int' fn

@@ -23,6 +23,7 @@ struct cx {
   struct cx_type *any_type, *bin_type, *bool_type, *char_type, *func_type, *int_type,
     *lambda_type, *meta_type, *nil_type, *opt_type, *str_type, *vect_type;
 
+  cx_type_tag_t next_type;
   struct cx_set macros, funcs;
   
   struct cx_vec scopes;
