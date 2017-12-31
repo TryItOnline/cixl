@@ -1,3 +1,7 @@
+* store lambda box in op instead of alloc on eval
+** create on init
+** add op.deinit to clear
+---
 * add emit
 ** add op_type.emit like eval
 *** write C to buf
