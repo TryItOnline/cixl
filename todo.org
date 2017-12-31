@@ -6,6 +6,7 @@
 ** replaces int/rat imps
 ** add cx_init_cmp_type
 * add Table type
+* add rat sub/div
 * add struct: macro
 ** add Struct type 
 *** add to parents for all structs

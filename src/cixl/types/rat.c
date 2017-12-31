@@ -137,7 +137,7 @@ static bool ok_imp(struct cx_box *v) {
 
 static void fprint_imp(struct cx_box *v, FILE *out) {
   struct cx_rat *r = &v->as_rat;
-  fprintf(out, "%" PRIu64 "/%" PRIu64, r->num, r->den);
+  fprintf(out, "%s%" PRIu64 "/%" PRIu64, r->neg ? "-" : "", r->num, r->den);
 }
 
 struct cx_type *cx_init_rat_type(struct cx *cx) {

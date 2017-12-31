@@ -108,7 +108,7 @@ static bool parse_int(struct cx *cx, FILE *in, struct cx_vec *out) {
     char c = fgetc(in);
     if (c == EOF) { goto exit; }
       
-    if (!isdigit(c)) {
+    if (col > cx->col && !isdigit(c)) {
       ok = (ungetc(c, in) != EOF);
       goto exit;
     }
@@ -272,6 +272,20 @@ bool cx_parse_tok(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
 	return parse_char(cx, in, out);
       case '\'':
 	return parse_str(cx, in, out);
+      case '-': {
+	char c1 = fgetc(in);
+	if (isdigit(c1)) {
+	  ungetc(c1, in);
+	  ungetc(c, in);
+	  return parse_int(cx, in, out);
+	} else {
+	  ungetc(c1, in);
+	  ungetc(c, in);
+	  return parse_id(cx, in, out, lookup);
+	}
+	
+	break;
+      }
       default:
 	if (isdigit(c)) {
 	  ungetc(c, in);
