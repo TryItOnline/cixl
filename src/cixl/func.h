@@ -26,7 +26,7 @@ struct cx_func_imp {
   struct cx_func *func;
   char *id;
   struct cx_vec args;
-  void (*ptr)(struct cx_scope *);
+  bool (*ptr)(struct cx_scope *);
   struct cx_vec toks;
   struct cx_bin *bin;
 };

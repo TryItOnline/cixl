@@ -51,17 +51,19 @@ bool cx_is(struct cx_type *child, struct cx_type *parent) {
   return false;
 }
 
-static void type_imp(struct cx_scope *scope) {
+static bool type_imp(struct cx_scope *scope) {
   struct cx_box v = *cx_test(cx_pop(scope, false));
   cx_box_init(cx_push(scope), scope->cx->meta_type)->as_ptr = v.type;
+  return true;
 }
 
-static void is_imp(struct cx_scope *scope) {
+static bool is_imp(struct cx_scope *scope) {
   struct cx_type
     *y = cx_test(cx_pop(scope, false))->as_ptr,
     *x = cx_test(cx_pop(scope, false))->as_ptr;
 
   cx_box_init(cx_push(scope), scope->cx->bool_type)->as_bool = cx_is(x, y);
+  return true;
 }
 
 static bool equid_imp(struct cx_box *x, struct cx_box *y) {

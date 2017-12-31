@@ -7,81 +7,104 @@
 #include "cixl/scope.h"
 #include "cixl/types/int.h"
 
-static void lt_imp(struct cx_scope *scope) {
+static bool lt_imp(struct cx_scope *scope) {
   struct cx_box
     y = *cx_test(cx_pop(scope, false)),
     x = *cx_test(cx_pop(scope, false));
+
   cx_box_init(cx_push(scope), scope->cx->bool_type)->as_bool = x.as_int < y.as_int;
+  return true;
 }
 
-static void gt_imp(struct cx_scope *scope) {
+static bool gt_imp(struct cx_scope *scope) {
   struct cx_box
     y = *cx_test(cx_pop(scope, false)),
     x = *cx_test(cx_pop(scope, false));
+  
   cx_box_init(cx_push(scope), scope->cx->bool_type)->as_bool = x.as_int > y.as_int;
+  return true;
 }
 
-static void inc_imp(struct cx_scope *scope) {
+static bool inc_imp(struct cx_scope *scope) {
   struct cx_box v = *cx_test(cx_pop(scope, false));
   cx_box_init(cx_push(scope), scope->cx->int_type)->as_int = v.as_int+1;
+  return true;
 }
 
-static void dec_imp(struct cx_scope *scope) {
+static bool dec_imp(struct cx_scope *scope) {
   struct cx_box v = *cx_test(cx_pop(scope, false));
   cx_box_init(cx_push(scope), scope->cx->int_type)->as_int = v.as_int-1;
+  return true;
 }
 
-static void add_imp(struct cx_scope *scope) {
+static bool add_imp(struct cx_scope *scope) {
   struct cx_box
     y = *cx_test(cx_pop(scope, false)),
     x = *cx_test(cx_pop(scope, false));
+
   cx_box_init(cx_push(scope), scope->cx->int_type)->as_int = x.as_int + y.as_int;
+  return true;
 }
 
-static void sub_imp(struct cx_scope *scope) {
+static bool sub_imp(struct cx_scope *scope) {
   struct cx_box
     y = *cx_test(cx_pop(scope, false)),
     x = *cx_test(cx_pop(scope, false));
+
   cx_box_init(cx_push(scope), scope->cx->int_type)->as_int = x.as_int - y.as_int;
+  return true;
 }
 
-static void mul_imp(struct cx_scope *scope) {
+static bool mul_imp(struct cx_scope *scope) {
   struct cx_box
     y = *cx_test(cx_pop(scope, false)),
     x = *cx_test(cx_pop(scope, false));
+  
   cx_box_init(cx_push(scope), scope->cx->int_type)->as_int = x.as_int * y.as_int;
+  return true;
 }
 
-static void div_imp(struct cx_scope *scope) {
+static bool div_imp(struct cx_scope *scope) {
   struct cx_box
     y = *cx_test(cx_pop(scope, false)),
     x = *cx_test(cx_pop(scope, false));
+
   cx_box_init(cx_push(scope), scope->cx->int_type)->as_int = x.as_int / y.as_int;
+  return true;
 }
 
-static void times_imp(struct cx_scope *scope) {
+static bool times_imp(struct cx_scope *scope) {
   struct cx_box
     v = *cx_test(cx_pop(scope, false)),
     reps = *cx_test(cx_pop(scope, false));
 
+  bool ok = false;
+  
   for (cx_int_t i = 0; i < reps.as_int; i++) {
-    if (!cx_call(&v, scope)) { break; }
+    if (!cx_call(&v, scope)) { goto exit; }
   }
 
+  ok = true;
+ exit:
   cx_box_deinit(&v);
+  return ok;
 }
 
-static void for_imp(struct cx_scope *scope) {
+static bool for_imp(struct cx_scope *scope) {
   struct cx_box
     act = *cx_test(cx_pop(scope, false)),
     reps = *cx_test(cx_pop(scope, false));
 
+  bool ok = false;
+  
   for (cx_int_t i = 0; i < reps.as_int; i++) {
     cx_box_init(cx_push(scope), scope->cx->int_type)->as_int = i;
-    if (!cx_call(&act, scope)) { break; }
+    if (!cx_call(&act, scope)) { goto exit; }
   }
 
+ exit:
   cx_box_deinit(&act);
+  return ok;
 }
 
 static bool equid_imp(struct cx_box *x, struct cx_box *y) {

@@ -42,21 +42,23 @@ void cx_vect_fprint(struct cx_vec *imp, FILE *out) {
   fputc(']', out);
 }
 
-static void vect_imp(struct cx_scope *scope) {
+static bool vect_imp(struct cx_scope *scope) {
   struct cx_vect *v = cx_vect_new();
   v->imp = scope->stack;
   cx_vec_init(&scope->stack, sizeof(struct cx_box));
   cx_box_init(cx_push(scope), scope->cx->vect_type)->as_ptr = v;
+  return true;
 }
 
-static void len_imp(struct cx_scope *scope) {
+static bool len_imp(struct cx_scope *scope) {
   struct cx_box vec = *cx_test(cx_pop(scope, false));
   struct cx_vect *v = vec.as_ptr;
   cx_box_init(cx_push(scope), scope->cx->int_type)->as_int = v->imp.count;
   cx_box_deinit(&vec);
+  return true;
 }
 
-static void push_imp(struct cx_scope *scope) {
+static bool push_imp(struct cx_scope *scope) {
   struct cx_box
     val = *cx_test(cx_pop(scope, false)),
     vec = *cx_test(cx_pop(scope, false));
@@ -64,32 +66,38 @@ static void push_imp(struct cx_scope *scope) {
   struct cx_vect *v = vec.as_ptr;
   *(struct cx_box *)cx_vec_push(&v->imp) = val;
   cx_box_deinit(&vec);
+  return true;
 }
 
-static void pop_imp(struct cx_scope *scope) {
+static bool pop_imp(struct cx_scope *scope) {
   struct cx_box vec = *cx_test(cx_pop(scope, false));
   struct cx_vect *v = vec.as_ptr;
   *cx_push(scope) = *(struct cx_box *)cx_vec_pop(&v->imp);
   cx_box_deinit(&vec);
+  return true;
 }
 
-static void for_imp(struct cx_scope *scope) {
+static bool for_imp(struct cx_scope *scope) {
   struct cx_box
     act = *cx_test(cx_pop(scope, false)),
     vect = *cx_test(cx_pop(scope, false));
   
   struct cx_vect *v = vect.as_ptr;
+  bool ok = false;
   
   cx_do_vec(&v->imp, struct cx_box, b) {
     cx_copy(cx_push(scope), b);
-    if (!cx_call(&act, scope)) { break; }
+    if (!cx_call(&act, scope)) { goto exit; }
   }
 
+  ok = true;
+ exit:
   cx_box_deinit(&vect);
   cx_box_deinit(&act);
+  return ok;
 }
 
-static void map_imp(struct cx_scope *scope) {
+static bool map_imp(struct cx_scope *scope) {
   struct cx *cx = scope->cx;
 
   struct cx_box
@@ -97,15 +105,16 @@ static void map_imp(struct cx_scope *scope) {
     vect = *cx_test(cx_pop(scope, false));
   
   struct cx_vect *v = vect.as_ptr;
+  bool ok = false;
   
   cx_do_vec(&v->imp, struct cx_box, in) {
     cx_copy(cx_push(scope), in);
-    if (!cx_call(&act, scope)) { break; }
+    if (!cx_call(&act, scope)) { goto exit; }
     struct cx_box *out = cx_pop(scope, true);
 
     if (!out) {
       cx_error(cx, cx->row, cx->col, "Missing result");
-      break;
+      goto exit;
     }
 
     cx_box_deinit(in);
@@ -113,7 +122,10 @@ static void map_imp(struct cx_scope *scope) {
   }
 
   *cx_push(scope) = vect;
+  ok = true;
+ exit:
   cx_box_deinit(&act);
+  return ok;
 }
 
 static bool equid_imp(struct cx_box *x, struct cx_box *y) {

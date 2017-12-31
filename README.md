@@ -385,9 +385,10 @@ Everything about cixl has been designed from the ground up to support embedding 
 #include <cixl/func.h>
 #include <cixl/scope.h>
 
-static void len_imp(struct cx_scope *scope) {
+static bool len_imp(struct cx_scope *scope) {
   struct cx_box v = *cx_test(cx_pop(scope, false));
   cx_box_init(cx_push(scope), scope->cx->int_type)->as_int = strlen(v.as_ptr);
+  return true;
 }
 
 static bool equid_imp(struct cx_box *x, struct cx_box *y) {

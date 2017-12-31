@@ -7,14 +7,16 @@
 #include "cixl/scope.h"
 #include "cixl/types/char.h"
 
-static void upper_imp(struct cx_scope *scope) {
+static bool upper_imp(struct cx_scope *scope) {
   struct cx_box v = *cx_test(cx_pop(scope, false));
   cx_box_init(cx_push(scope), scope->cx->char_type)->as_char = toupper(v.as_char);
+  return true;
 }
 
-static void lower_imp(struct cx_scope *scope) {
+static bool lower_imp(struct cx_scope *scope) {
   struct cx_box v = *cx_test(cx_pop(scope, false));
   cx_box_init(cx_push(scope), scope->cx->char_type)->as_char = tolower(v.as_char);
+  return true;
 }
 
 static bool equid_imp(struct cx_box *x, struct cx_box *y) {

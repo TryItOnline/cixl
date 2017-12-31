@@ -7,52 +7,63 @@
 #include "cixl/scope.h"
 #include "cixl/types/str.h"
 
-static void len_imp(struct cx_scope *scope) {
+static bool len_imp(struct cx_scope *scope) {
   struct cx_box v = *cx_test(cx_pop(scope, false));
   cx_box_init(cx_push(scope), scope->cx->int_type)->as_int = strlen(v.as_ptr);
+  return true;
 }
 
-static void for_imp(struct cx_scope *scope) {
+static bool for_imp(struct cx_scope *scope) {
   struct cx_box
     act = *cx_test(cx_pop(scope, false)),
     str = *cx_test(cx_pop(scope, false));
 
+  bool ok = false;
+
   for (char *c = str.as_ptr; *c; c++) {
     cx_box_init(cx_push(scope), scope->cx->char_type)->as_char = *c;
-    if (!cx_call(&act, scope)) { break; }
+    if (!cx_call(&act, scope)) { goto exit; }
   }
 
+  ok = true;
+ exit:
   cx_box_deinit(&str);
   cx_box_deinit(&act);
+  return ok;
 }
 
-static void map_imp(struct cx_scope *scope) {
+static bool map_imp(struct cx_scope *scope) {
   struct cx *cx = scope->cx;
 
   struct cx_box
     act = *cx_test(cx_pop(scope, false)),
     str = *cx_test(cx_pop(scope, false));
 
+  bool ok = false;
+  
   for (char *c = str.as_ptr; *c; c++) {
     cx_box_init(cx_push(scope), scope->cx->char_type)->as_char = *c;
-    if (!cx_call(&act, scope)) { break; }
+    if (!cx_call(&act, scope)) { goto exit; }
     struct cx_box *res = cx_pop(scope, true);
 
     if (!res) {
       cx_error(cx, cx->row, cx->col, "Missing result for '%c'", *c);
-      break;
+      goto exit;
     }
 
     if (res->type != cx->char_type) {
       cx_error(cx, cx->row, cx->col, "Expected type Char, got %s", res->type->id);
-      break;
+      goto exit;
     }
 
     *c = res->as_char;
   }
 
   *cx_push(scope) = str;
+  ok = true;
+ exit:
   cx_box_deinit(&act);
+  return ok;
 }
 
 static bool equid_imp(struct cx_box *x, struct cx_box *y) {

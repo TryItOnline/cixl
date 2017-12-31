@@ -224,23 +224,27 @@ static bool func_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   return true;
 }
 
-static void nil_imp(struct cx_scope *scope) {
+static bool nil_imp(struct cx_scope *scope) {
   cx_box_init(cx_push(scope), scope->cx->nil_type);
+  return true;
 }
 
-static void cls_imp(struct cx_scope *scope) {
+static bool cls_imp(struct cx_scope *scope) {
   cx_vec_clear(&scope->stack);
+  return true;
 }
 
-static void dup_imp(struct cx_scope *scope) {
+static bool dup_imp(struct cx_scope *scope) {
   cx_copy(cx_push(scope), cx_test(cx_peek(scope, true)));
+  return true;
 }
 
-static void zap_imp(struct cx_scope *scope) {
+static bool zap_imp(struct cx_scope *scope) {
   cx_box_deinit(cx_test(cx_pop(scope, false)));
+  return true;
 }
 
-static void eqval_imp(struct cx_scope *scope) {
+static bool eqval_imp(struct cx_scope *scope) {
   struct cx_box
     y = *cx_test(cx_pop(scope, false)),
     x = *cx_test(cx_pop(scope, false));
@@ -248,9 +252,10 @@ static void eqval_imp(struct cx_scope *scope) {
   cx_box_init(cx_push(scope), scope->cx->bool_type)->as_bool = cx_eqval(&x, &y);
   cx_box_deinit(&x);
   cx_box_deinit(&y);
+  return true;
 }
 
-static void equid_imp(struct cx_scope *scope) {
+static bool equid_imp(struct cx_scope *scope) {
   struct cx_box
     y = *cx_test(cx_pop(scope, false)),
     x = *cx_test(cx_pop(scope, false));
@@ -258,21 +263,24 @@ static void equid_imp(struct cx_scope *scope) {
   cx_box_init(cx_push(scope), scope->cx->bool_type)->as_bool = cx_equid(&x, &y);
   cx_box_deinit(&x);
   cx_box_deinit(&y);
+  return true;
 }
 
-static void ok_imp(struct cx_scope *scope) {
+static bool ok_imp(struct cx_scope *scope) {
   struct cx_box v = *cx_test(cx_pop(scope, false));
   cx_box_init(cx_push(scope), scope->cx->bool_type)->as_bool = cx_ok(&v);
   cx_box_deinit(&v);
+  return true;
 }
 
-static void not_imp(struct cx_scope *scope) {
+static bool not_imp(struct cx_scope *scope) {
   struct cx_box v = *cx_test(cx_pop(scope, false));
   cx_box_init(cx_push(scope), scope->cx->bool_type)->as_bool = !cx_ok(&v);
   cx_box_deinit(&v);
+  return true;
 }
 
-static void if_imp(struct cx_scope *scope) {
+static bool if_imp(struct cx_scope *scope) {
   struct cx_box
     y = *cx_test(cx_pop(scope, false)),
     x = *cx_test(cx_pop(scope, false)),
@@ -281,9 +289,10 @@ static void if_imp(struct cx_scope *scope) {
   cx_call(cx_ok(&c) ? &x : &y, scope);
   cx_box_deinit(&x);
   cx_box_deinit(&y);
+  return true;
 }
 
-static void compile_imp(struct cx_scope *scope) {
+static bool compile_imp(struct cx_scope *scope) {
   struct cx *cx = scope->cx;
   struct cx_box in = *cx_test(cx_pop(scope, false));
 
@@ -303,53 +312,56 @@ static void compile_imp(struct cx_scope *scope) {
   cx_box_deinit(&in);
   cx_do_vec(&toks, struct cx_tok, t) { cx_tok_deinit(t); }
   cx_vec_deinit(&toks);
+  return ok;
 }
 
-static void call_imp(struct cx_scope *scope) {
+static bool call_imp(struct cx_scope *scope) {
   struct cx_box v = *cx_test(cx_pop(scope, false));
-  cx_call(&v, scope);
+  bool ok = cx_call(&v, scope);
   cx_box_deinit(&v);
+  return ok;
 }
 
-static void recall_imp(struct cx_scope *scope) {
+static bool recall_imp(struct cx_scope *scope) {
   struct cx *cx = scope->cx;
   
   if (!cx->func_imp) {
     cx_error(cx, cx->row, cx->col, "Nothing to recall");
-    return;
+    return false;
   }
 
-  if (!cx_scan_args(cx, cx->func_imp->func)) { return; }
+  if (!cx_scan_args(cx, cx->func_imp->func)) { return false; }
   
   if (!cx_func_imp_match(cx->func_imp, &scope->stack)) {
     cx_error(cx, cx->row, cx->col, "Recall not applicable");
-    return;
+    return false;
   }
 
-  cx_eval(cx, cx->func_imp->bin, NULL);
+  return cx_eval(cx, cx->func_imp->bin, NULL);
 }
 
-static void clock_imp(struct cx_scope *scope) {
+static bool clock_imp(struct cx_scope *scope) {
   struct cx_box v = *cx_test(cx_pop(scope, false));
   cx_timer_t timer;
   cx_timer_reset(&timer);
   bool ok = cx_call(&v, scope);
   cx_box_deinit(&v);
-
-  if (ok) {
-    cx_box_init(cx_push(scope), scope->cx->int_type)->as_int = cx_timer_ns(&timer);
-  }
+  cx_box_init(cx_push(scope), scope->cx->int_type)->as_int = cx_timer_ns(&timer);
+  return ok;
 }
 
-static void test_imp(struct cx_scope *scope) {
+static bool test_imp(struct cx_scope *scope) {
   struct cx_box v = *cx_test(cx_pop(scope, false));
   struct cx *cx = scope->cx;
+  bool ok = true;
   
   if (!cx_ok(&v)) {
     cx_error(cx, cx->row, cx->col, "Test failed");
+    ok = false;
   }
 
   cx_box_deinit(&v);
+  return ok;
 }
 
 struct cx *cx_init(struct cx *cx) {
