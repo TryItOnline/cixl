@@ -3,7 +3,7 @@
 ## cixl
 #### a minimal, decently typed scripting language
 
-This project aims to produce a minimal, decently typed scripting language for embedding in and extending from C. In a way, it's Lua taken one step further down the path of simplicity. The language is implemented as a straight forward interpreter that is designed to be as fast as possible without compromising on simplicity, transparency and flexibility.
+This project aims to produce a minimal, decently typed scripting language for embedding in and extending from C. In a way, it's Lua taken one step further. The language is implemented as a straight forward 3-stage (parse/compile/eval) interpreter that is designed to be as fast as possible without compromising on simplicity, transparency and flexibility.
 
 ### Getting Started
 To get started, you'll need a decent C compiler with GNU-extensions and CMake installed. A primitive REPL is included, the executable weighs in at 200k. It's highly recommended to run the REPL through ```rlwrap``` for a less nerve-wrecking editing experience.
@@ -29,17 +29,7 @@ Press Return twice to eval input.
 ```
 
 ### Status
-Examples from this document should work in the most recent version and run clean in ```valgrind```, outside of that I can't really promise much at the moment. Current work is focused on adding a separate compilation stage to speed up evaluation. In the spirit of continous integration, the compiler is being developed in parallel to the existing interpreter and may be invoked through the ```compile``` function.
-
-```
-> '(1 2 +)' compile
-..
-[Bin(0x8899a0)@1]
-
-> call
-..
-[3]
-```
+Examples from this document should work in the most recent version and run clean in ```valgrind```, outside of that I can't really promise much at the moment. Current work is focused on profiling and filling in obvious gaps in functionality.
 
 ### Stack
 The stack is accessible from user code, just like in Forth. Basic stack operations have dedicated operators; ```%``` for duplicating last value, ```_``` for dropping it, and ```|``` for clearing the stack.
@@ -331,69 +321,12 @@ Some types support mapping actions over their contents using ```map```.
 ['foo']
 ```
 
-### Coroutines
-Coroutines allow stopping execution and resuming in the same scope later on. A coroutine context is returned on first ```yield```, ```call```-ing it resumes execution from previous yield.
-
-```
-> (1 2 yield 3)
-..
-[Coro(0x53c9de0@1)]
-
-> % call
-..
-[Coro(0x53c9de0@1) 3]
-
-> _ call
-..
-Error in row 1, col 5:
-Coro is done
-```
-
-Functions work more or less the same way:
-
-```
-> func: foo()
-..  1 2 yield 3;
-..foo call
-..
-[3]
-```
-
-As do lambdas, except for reusing the defining scope:
-
-```
-> (let: x 42; {yield $x}) call
-..
-[Coro(0x5476c50@1)]
-
-> call
-..
-[42]
-```
-
-In the example below, ```foo``` manipulates the main stack through the passed in coroutine.
-
-```
-> 1 2 yield | 3 4
-..
-[1 2 Coro(0x541ec00@1)]
-
-> func: foo(x Coro) $x call;          
-..
-[1 2 Coro(0x541ec00@1)]
-
-> foo
-..
-[3 4]
-````
-
 ### Types
 Capitalized names are treated as type references, the following types are defined out of the box:
 
 - A (Opt)
 - Bin (A)
 - Bool (A)
-- Coro (A)
 - Func (A)
 - Int (A)
 - Lambda (A)
@@ -427,6 +360,19 @@ Traits are abstract types that represent sets of features, the standard types ``
 > trait: StrIntChar StrInt Char;
 ..
 []
+```
+
+### Meta
+The compiler may be invoked from within the language through the ```compile``` function, the result is a compiled sequence of operations that may be passed around and called.
+
+```
+> '(1 2 +)' compile
+..
+[Bin(0x8899a0)@1]
+
+> call
+..
+[3]
 ```
 
 ### Embedding & Extending

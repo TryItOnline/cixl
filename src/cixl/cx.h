@@ -20,15 +20,14 @@ struct cx {
   struct cx_set separators;
 
   struct cx_set types;
-  struct cx_type *any_type, *bin_type, *bool_type, *char_type, *coro_type, *func_type,
-    *int_type, *lambda_type, *meta_type, *nil_type, *opt_type, *str_type, *vect_type;
+  struct cx_type *any_type, *bin_type, *bool_type, *char_type, *func_type, *int_type,
+    *lambda_type, *meta_type, *nil_type, *opt_type, *str_type, *vect_type;
 
   struct cx_set macros, funcs;
   
   struct cx_vec scopes;
   struct cx_scope *main;
   
-  struct cx_coro *coro;
   struct cx_func_imp *func_imp;
 
   struct cx_bin *bin;

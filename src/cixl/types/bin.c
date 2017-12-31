@@ -20,8 +20,7 @@ static bool call_imp(struct cx_box *value, struct cx_scope *scope) {
 
 static void copy_imp(struct cx_box *dst, struct cx_box *src) {
   struct cx_bin *b = src->as_ptr;
-  dst->as_ptr = b;
-  b->nrefs++;
+  dst->as_ptr = cx_bin_ref(b);
 }
 
 static void fprint_imp(struct cx_box *value, FILE *out) {
@@ -31,9 +30,7 @@ static void fprint_imp(struct cx_box *value, FILE *out) {
 
 static void deinit_imp(struct cx_box *value) {
   struct cx_bin *b = value->as_ptr;
-  cx_test(b->nrefs > 0);
-  b->nrefs--;
-  if (!b->nrefs) { free(cx_bin_deinit(b)); }
+  cx_bin_unref(b);
 }
 
 struct cx_type *cx_init_bin_type(struct cx *cx) {

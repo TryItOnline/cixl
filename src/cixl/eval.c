@@ -24,7 +24,7 @@ bool cx_eval(struct cx *cx, struct cx_bin *bin, struct cx_op *start) {
   cx->op = start ? start : cx_vec_start(&bin->ops);
   bool ok = false;
   
-  while (cx->op != cx_vec_end(&cx->bin->ops) && !cx->stop) {
+  while (cx->op < (struct cx_op *)cx_vec_end(&cx->bin->ops) && !cx->stop) {
     if (!cx_eval_next(cx)) { goto exit; }
   }
 
@@ -66,14 +66,14 @@ bool cx_eval_next(struct cx *cx) {
   struct cx_tok *tok = cx_vec_get(&cx->bin->toks, op->tok_idx);
   cx->row = tok->row;
   cx->col = tok->col;
-  return cx_op_eval(op, tok, cx);
+  return cx_op_eval(op, tok, cx) && !cx->errors.count;
 }
 
 bool cx_scan_args(struct cx *cx, struct cx_func *func) {
   int row = cx->row, col = cx->col;
   struct cx_scope *s = cx_scope(cx, 0);
 
-  while (cx->op != cx_vec_end(&cx->bin->ops)) {
+  while (cx->op < (struct cx_op *)cx_vec_end(&cx->bin->ops)) {
     if (cx_scope(cx, 0) == s && s->stack.count - s->cut_offs >= func->nargs) {
       break;
     }

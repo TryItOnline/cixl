@@ -6,7 +6,6 @@
 #include "cixl/vec.h"
 
 struct cx;
-struct cx_coro;
 
 struct cx_scope {
   struct cx *cx;

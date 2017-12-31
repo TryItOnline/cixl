@@ -318,10 +318,7 @@ bool cx_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
 bool cx_parse_str(struct cx *cx, const char *in, struct cx_vec *out) {
   FILE *is = fmemopen ((void *)in, strlen(in), "r");
   bool ok = false;
-  if (!cx_parse(cx, is, out)) {
-    printf("cx_parse_str failed: %s\n", in);
-    goto exit;
-  }
+  if (!cx_parse(cx, is, out)) { goto exit; }
   ok = true;
  exit:
   fclose(is);

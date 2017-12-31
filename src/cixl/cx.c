@@ -16,7 +16,6 @@
 #include "cixl/types/bin.h"
 #include "cixl/types/bool.h"
 #include "cixl/types/char.h"
-#include "cixl/types/coro.h"
 #include "cixl/types/int.h"
 #include "cixl/types/lambda.h"
 #include "cixl/types/nil.h"
@@ -355,7 +354,6 @@ static void test_imp(struct cx_scope *scope) {
 }
 
 struct cx *cx_init(struct cx *cx) {
-  cx->coro = NULL;
   cx->func_imp = NULL;
   cx->bin = NULL;
   cx->op = NULL;
@@ -394,7 +392,6 @@ struct cx *cx_init(struct cx *cx) {
   cx->bin_type = cx_init_bin_type(cx);
   cx->func_type = cx_init_func_type(cx);
   cx->lambda_type = cx_init_lambda_type(cx);
-  cx->coro_type = cx_init_coro_type(cx);
 
   cx_add_func(cx, "nil")->ptr = nil_imp;
   

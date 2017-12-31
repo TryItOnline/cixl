@@ -3,7 +3,6 @@
 #include "cixl/error.h"
 #include "cixl/scope.h"
 #include "cixl/tok.h"
-#include "cixl/types/coro.h"
 #include "cixl/types/vect.h"
 #include "cixl/var.h"
 
