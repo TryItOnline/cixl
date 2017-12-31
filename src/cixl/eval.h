@@ -4,20 +4,9 @@
 #include <stdbool.h>
 
 struct cx;
-struct cx_tok;
+struct cx_bin;
+struct cx_op;
 struct cx_vec;
-
-struct cx_tok_type *cx_cut_tok();
-struct cx_tok_type *cx_end_tok();
-struct cx_tok_type *cx_func_tok();
-struct cx_tok_type *cx_group_tok();
-struct cx_tok_type *cx_id_tok();
-struct cx_tok_type *cx_lambda_tok();
-struct cx_tok_type *cx_literal_tok();
-struct cx_tok_type *cx_macro_tok();
-struct cx_tok_type *cx_type_tok();
-struct cx_tok_type *cx_ungroup_tok();
-struct cx_tok_type *cx_unlambda_tok();
 
 bool cx_eval_next(struct cx *cx);
 bool cx_eval(struct cx *cx, struct cx_bin *bin, struct cx_op *start);
