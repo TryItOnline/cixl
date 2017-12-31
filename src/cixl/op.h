@@ -8,7 +8,8 @@ struct cx_func_imp;
 struct cx_op;
 struct cx_tok;
 
-typedef bool (*cx_op_eval_t)(struct cx_tok *, struct cx_op *, struct cx *);
+enum cx_op_type {CX_OCUT, CX_OGET, CX_OFUNCALL, CX_OLAMBDA, CX_OMACRO, CX_OPUSH,
+		 CX_OSCOPE, CX_OSTOP, CX_OUNSCOPE};
 
 struct cx_get_op {
   char *id;
@@ -29,7 +30,7 @@ struct cx_scope_op {
 
 struct cx_op {
   size_t tok_idx;
-  cx_op_eval_t eval;
+  enum cx_op_type type;
   
   union {
     struct cx_get_op as_get;
@@ -39,16 +40,7 @@ struct cx_op {
   };
 };
 
-struct cx_op *cx_op_init(struct cx_op *op, cx_op_eval_t eval, size_t tok_idx);
-
-bool cx_cut_op(struct cx_tok *tok, struct cx_op *op, struct cx *cx);
-bool cx_get_op(struct cx_tok *tok, struct cx_op *op, struct cx *cx);
-bool cx_funcall_op(struct cx_tok *tok, struct cx_op *op, struct cx *cx);
-bool cx_lambda_op(struct cx_tok *tok, struct cx_op *op, struct cx *cx);
-bool cx_macro_op(struct cx_tok *tok, struct cx_op *op, struct cx *cx);
-bool cx_push_op(struct cx_tok *tok, struct cx_op *op, struct cx *cx);
-bool cx_scope_op(struct cx_tok *tok, struct cx_op *op, struct cx *cx);
-bool cx_stop_op(struct cx_tok *tok, struct cx_op *op, struct cx *cx);
-bool cx_unscope_op(struct cx_tok *tok, struct cx_op *op, struct cx *cx);
+struct cx_op *cx_op_init(struct cx_op *op, enum cx_op_type type, size_t tok_idx);
+bool cx_op_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx);
 
 #endif

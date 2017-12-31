@@ -1,6 +1,3 @@
-* add cx_op_eval
-** change fn ptr to int/enum + switch
-* ---
 * change macros to compile to ops
 ** add set op
 ** replaces macro_op
