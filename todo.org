@@ -1,3 +1,15 @@
+* add emit fn
+** add cx_op_type again
+** eval & emit fns
+** replaces enum
+** duffs device/switch
+*** labels for lambdas
+*** call fn recursively
+** replace scan_args 
+*** add cx.func
+*** check after each relevant op
+*** call fn if enough args and error if no match
+* ---
 * add nvect fn
 ** vect of len n
 ** init to nil
