@@ -1,3 +1,4 @@
+* add Rat type
 * add struct: macro
 ** add Struct type 
 *** add to parents for all structs
@@ -5,7 +6,6 @@
 *** set to true for all user defined traits
 ** only allow Structs and traits as parents
 ** use ref counted sets of cx_struct_slot as instances
-* add Rat type
 * add fail func
 ** like test but just call error with message
 * add basic io
@@ -23,6 +23,8 @@
 * add Int 'str' fn
 * add Char 'int' fn
 * add Int 'char' fn
+* add lets: macro
+** typecheck and bind stack to vars
 * add str interpolation
 
 clock {,10000 times {,fib 50 _}} / 1000000
