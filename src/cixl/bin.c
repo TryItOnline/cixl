@@ -12,6 +12,8 @@ struct cx_bin *cx_bin_new() {
 struct cx_bin *cx_bin_init(struct cx_bin *bin) {
   cx_vec_init(&bin->toks, sizeof(struct cx_tok));
   cx_vec_init(&bin->ops, sizeof(struct cx_op));
+  cx_set_init(&bin->funcs, sizeof(struct cx_bin_func), cx_cmp_ptr);
+  bin->funcs.key_offset = offsetof(struct cx_bin_func, imp);
   bin->nrefs = 1;
   return bin;
 }
@@ -20,6 +22,7 @@ struct cx_bin *cx_bin_deinit(struct cx_bin *bin) {
   cx_do_vec(&bin->toks, struct cx_tok, t) { cx_tok_deinit(t); }
   cx_vec_deinit(&bin->toks);
   cx_vec_deinit(&bin->ops);
+  cx_set_deinit(&bin->funcs);
   return bin;
 }
 
@@ -33,6 +36,20 @@ void cx_bin_unref(struct cx_bin *bin) {
   bin->nrefs--;
   if (!bin->nrefs) { free(cx_bin_deinit(bin)); }
 }
+
+struct cx_bin_func *cx_bin_add_func(struct cx_bin *bin,
+				    struct cx_func_imp *imp,
+				    size_t start_op) {
+  struct cx_bin_func *f = cx_test(cx_set_insert(&bin->funcs, &imp));
+  f->imp = imp;
+  f->start_op = start_op;
+  return f;
+}
+
+struct cx_bin_func *cx_bin_get_func(struct cx_bin *bin, struct cx_func_imp *imp) {
+  return cx_set_get(&bin->funcs, &imp);
+}
+
 
 bool cx_compile(struct cx *cx,
 		struct cx_tok *start,

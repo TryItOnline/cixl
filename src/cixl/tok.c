@@ -47,17 +47,38 @@ cx_tok_type(CX_TCUT, {
 
 cx_tok_type(CX_TEND);
 
-static ssize_t func_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) {
+static ssize_t func_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) {  
+  struct cx_tok *tok = cx_vec_get(&bin->toks, tok_idx);  
+  struct cx_func *func = tok->as_ptr;
+  struct cx_func_imp *imp = (func->imps.members.count == 1)
+    ? *(struct cx_func_imp **)cx_vec_start(&func->imps.members)
+    : NULL;
+
+  if (imp && !imp->ptr && !cx_bin_get_func(bin, imp)) {    
+    size_t i = bin->ops.count;
+    cx_op_init(cx_vec_push(&bin->ops),
+	       CX_OFUNC(),
+	       tok_idx)->as_func.start_op = i+1;
+    
+    if (imp->toks.count) {
+      if (!cx_compile(cx, cx_vec_start(&imp->toks), cx_vec_end(&imp->toks), bin)) {
+	tok = cx_vec_get(&bin->toks, tok_idx);  
+	cx_error(cx, tok->row, tok->col, "Failed compiling func");
+      }
+    }
+    
+    cx_op_init(cx_vec_push(&bin->ops), CX_OSTOP(), tok_idx);
+    struct cx_op *op = cx_vec_get(&bin->ops, i);
+    op->as_func.num_ops = bin->ops.count - op->as_func.start_op;
+    cx_bin_add_func(bin, imp, op->as_func.start_op);
+  }
+
   struct cx_funcall_op *op = &cx_op_init(cx_vec_push(&bin->ops),
 					 CX_OFUNCALL(),
 					 tok_idx)->as_funcall;
-  
-  struct cx_tok *tok = cx_vec_get(&bin->toks, tok_idx);  
-  op->func = tok->as_ptr;
-  op->imp = (op->func->imps.members.count == 1)
-    ? *(struct cx_func_imp **)cx_vec_start(&op->func->imps.members)
-    : NULL;
-  
+  op->func = func;
+  op->imp = imp;
+	   
   return tok_idx+1;
 }
 
@@ -69,7 +90,12 @@ static ssize_t group_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) 
   cx_op_init(cx_vec_push(&bin->ops), CX_OSCOPE(), tok_idx)->as_scope.child = true;
   struct cx_tok *tok = cx_vec_get(&bin->toks, tok_idx);
   struct cx_vec *toks = &tok->as_vec;
-  cx_compile(cx, cx_vec_start(toks), cx_vec_end(toks), bin);
+  if (toks->count) {
+    if (!cx_compile(cx, cx_vec_start(toks), cx_vec_end(toks), bin)) {
+      tok = cx_vec_get(&bin->toks, tok_idx);  
+      cx_error(cx, tok->row, tok->col, "Failed compiling group");
+    }
+  }
   cx_op_init(cx_vec_push(&bin->ops), CX_OUNSCOPE(), tok_idx);
   return tok_idx+1;
 }
@@ -137,8 +163,15 @@ static ssize_t lambda_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx)
 	     CX_OLAMBDA(),
 	     tok_idx)->as_lambda.start_op = i+1;
   
-  struct cx_vec toks = tok->as_vec;
-  cx_compile(cx, cx_vec_start(&toks), cx_vec_end(&toks), bin);
+  struct cx_vec *toks = &tok->as_vec;
+
+  if (toks->count) {
+    if (!cx_compile(cx, cx_vec_start(toks), cx_vec_end(toks), bin)) {
+      tok = cx_vec_get(&bin->toks, tok_idx);  
+      cx_error(cx, tok->row, tok->col, "Failed compiling lambda");
+    }
+  }
+  
   cx_op_init(cx_vec_push(&bin->ops), CX_OSTOP(), tok_idx);
   struct cx_op *op = cx_vec_get(&bin->ops, i);
   op->as_lambda.num_ops = bin->ops.count - op->as_lambda.start_op;

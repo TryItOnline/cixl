@@ -1,13 +1,21 @@
 #ifndef CX_BIN_H
 #define CX_BIN_H
 
+#include "cixl/set.h"
 #include "cixl/vec.h"
 
 struct cx;
+struct cx_func_imp;
 struct cx_tok;
+
+struct cx_bin_func {
+  struct cx_func_imp *imp;
+  size_t start_op;
+};
 
 struct cx_bin {
   struct cx_vec toks, ops;
+  struct cx_set funcs;
   int nrefs;
 };
 
@@ -18,6 +26,12 @@ struct cx_bin *cx_bin_deinit(struct cx_bin *bin);
 
 struct cx_bin *cx_bin_ref(struct cx_bin *bin);
 void cx_bin_unref(struct cx_bin *bin);
+
+struct cx_bin_func *cx_bin_add_func(struct cx_bin *bin,
+				    struct cx_func_imp *imp,
+				    size_t op_idx);
+
+struct cx_bin_func *cx_bin_get_func(struct cx_bin *bin, struct cx_func_imp *imp);
 
 bool cx_compile(struct cx *cx,
 		struct cx_tok *start,

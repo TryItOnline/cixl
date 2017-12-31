@@ -20,31 +20,40 @@ struct cx_op *cx_op_init(struct cx_op *op, struct cx_op_type *type, size_t tok_i
 }
 
 static bool cut_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
-    struct cx_scope *s = cx_scope(cx, 0);
-    s->cut_offs = s->stack.count;
-    return true;
+  struct cx_scope *s = cx_scope(cx, 0);
+  s->cut_offs = s->stack.count;
+  return true;
 }
 
 cx_op_type(CX_OCUT, {
     type.eval = cut_eval;
   });
 
+static bool func_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
+  cx->op += op->as_func.num_ops;
+  return true;
+}
+
+cx_op_type(CX_OFUNC, {
+    type.eval = func_eval;
+  });
+
 static bool funcall_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
-    struct cx_func *func = op->as_funcall.func;
-    if (!cx_scan_args(cx, func)) { return false; }
+  struct cx_func *func = op->as_funcall.func;
+  if (!cx_scan_args(cx, func)) { return false; }
     
-    struct cx_scope *s = cx_scope(cx, 0);
-    struct cx_func_imp *imp = op->as_funcall.imp;
-    if (imp && !cx_func_imp_match(imp, &s->stack)) { imp = NULL; }
-    if (!imp) { imp = cx_func_get_imp(func, &s->stack); }
+  struct cx_scope *s = cx_scope(cx, 0);
+  struct cx_func_imp *imp = op->as_funcall.imp;
+  if (imp && !cx_func_imp_match(imp, &s->stack)) { imp = NULL; }
+  if (!imp) { imp = cx_func_get_imp(func, &s->stack); }
     
-    if (!imp) {
-      cx_error(cx, cx->row, cx->col, "Func not applicable: '%s'", func->id);
-      return false;
-    }
+  if (!imp) {
+    cx_error(cx, cx->row, cx->col, "Func not applicable: '%s'", func->id);
+    return false;
+  }
     
-    op->as_funcall.imp = imp;
-    return cx_func_imp_call(imp, s);
+  op->as_funcall.imp = imp;
+  return cx_func_imp_call(imp, s);
 }
 
 cx_op_type(CX_OFUNCALL, {
@@ -52,11 +61,11 @@ cx_op_type(CX_OFUNCALL, {
   });
 
 static bool get_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
-    struct cx_scope *s = cx_scope(cx, 0);
-    struct cx_box *v = cx_get(s, op->as_get.id, false);
-    if (!v) { return false; }
-    cx_copy(cx_push(s), v);
-    return true;
+  struct cx_scope *s = cx_scope(cx, 0);
+  struct cx_box *v = cx_get(s, op->as_get.id, false);
+  if (!v) { return false; }
+  cx_copy(cx_push(s), v);
+  return true;
 }
 
 cx_op_type(CX_OGET, {
@@ -64,13 +73,13 @@ cx_op_type(CX_OGET, {
   });
 
 static bool lambda_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
-    struct cx_scope *scope = cx_scope(cx, 0);
-    struct cx_lambda *l = cx_lambda_init(malloc(sizeof(struct cx_lambda)), scope);
-    l->start_op = op->as_lambda.start_op;
-    l->num_ops = op->as_lambda.num_ops;
-    cx_box_init(cx_push(scope), cx->lambda_type)->as_ptr = l;
-    cx->op += l->num_ops;
-    return true;
+  struct cx_scope *scope = cx_scope(cx, 0);
+  struct cx_lambda *l = cx_lambda_init(malloc(sizeof(struct cx_lambda)), scope);
+  l->start_op = op->as_lambda.start_op;
+  l->num_ops = op->as_lambda.num_ops;
+  cx_box_init(cx_push(scope), cx->lambda_type)->as_ptr = l;
+  cx->op += l->num_ops;
+  return true;
 }
 
 cx_op_type(CX_OLAMBDA, {
@@ -78,8 +87,8 @@ cx_op_type(CX_OLAMBDA, {
   });
 
 static bool push_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
-    cx_copy(cx_push(cx_scope(cx, 0)),  &tok->as_box);
-    return true;
+  cx_copy(cx_push(cx_scope(cx, 0)),  &tok->as_box);
+  return true;
 }
 
 cx_op_type(CX_OPUSH, {
@@ -87,8 +96,8 @@ cx_op_type(CX_OPUSH, {
   });
 
 static bool scope_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
-    cx_begin(cx, op->as_scope.child);
-    return true;
+  cx_begin(cx, op->as_scope.child);
+  return true;
 }
 
 cx_op_type(CX_OSCOPE, {
@@ -96,13 +105,13 @@ cx_op_type(CX_OSCOPE, {
   });
 
 static bool set_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
-    struct cx_scope *s = cx_scope(cx, op->as_set.parent ? 1 : 0);
-    struct cx_box *v = cx_pop(s, false);
-    if (!v) { return false; }
-    *cx_set(op->as_set.parent ? cx_scope(cx, 0) : s,
-	    op->as_set.id,
-	    op->as_set.force) = *v;
-    return true;
+  struct cx_scope *s = cx_scope(cx, op->as_set.parent ? 1 : 0);
+  struct cx_box *v = cx_pop(s, false);
+  if (!v) { return false; }
+  *cx_set(op->as_set.parent ? cx_scope(cx, 0) : s,
+	  op->as_set.id,
+	  op->as_set.force) = *v;
+  return true;
 }
 
 cx_op_type(CX_OSET, {
@@ -110,8 +119,8 @@ cx_op_type(CX_OSET, {
   });
 
 static bool stop_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
-    cx->stop = true;
-    return true;
+  cx->stop = true;
+  return true;
 }
 
 cx_op_type(CX_OSTOP, {
@@ -119,8 +128,8 @@ cx_op_type(CX_OSTOP, {
   });
 
 static bool unscope_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
-    cx_end(cx);
-    return true;
+  cx_end(cx);
+  return true;
 }
 
 cx_op_type(CX_OUNSCOPE, {

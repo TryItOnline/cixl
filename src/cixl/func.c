@@ -127,28 +127,43 @@ bool cx_func_imp_match(struct cx_func_imp *imp, struct cx_vec *stack) {
   return true;
 }
 
+bool cx_func_imp_eval(struct cx_func_imp *imp, struct cx_scope *scope) {
+  struct cx *cx = scope->cx;
+  struct cx_func_imp *prev = cx->func_imp;
+  cx->func_imp = imp;
+  struct cx_bin_func *bin = cx_bin_get_func(cx->bin, imp);
+  bool ok = false;
+
+  if (bin) {
+    ok = cx_eval(cx, cx->bin, cx_vec_get(&cx->bin->ops, bin->start_op));
+  } else {
+    if (!imp->bin) {
+      imp->bin = cx_bin_new();
+      
+      if (!cx_compile(cx,
+		      cx_vec_start(&imp->toks),
+		      cx_vec_end(&imp->toks),
+		      imp->bin)) {
+	cx_error(cx, cx->row, cx->col, "Failed compiling func imp");
+      }
+    }
+    
+    ok = cx_eval(cx, imp->bin, NULL);
+  }
+  
+  cx->func_imp = prev;
+  return ok;
+}
+
 bool cx_func_imp_call(struct cx_func_imp *imp, struct cx_scope *scope) {
   if (imp->ptr) {
     imp->ptr(scope);
     return true;
   }
   
-  struct cx *cx = scope->cx;
-  cx_begin(cx, false);
-  struct cx_func_imp *prev = cx->func_imp;
-  cx->func_imp = imp;
-
-  if (!imp->bin) {
-    imp->bin = cx_bin_new();
-    
-    if (!cx_compile(cx, cx_vec_start(&imp->toks), cx_vec_end(&imp->toks), imp->bin)) {
-      cx_error(cx, cx->row, cx->col, "Failed compiling func imp");
-    }
-  }
-
-  bool ok = cx_eval(cx, imp->bin, NULL);
-  cx->func_imp = prev;
-  cx_end(cx);
+  cx_begin(scope->cx, false);
+  bool ok = cx_func_imp_eval(imp, scope);
+  cx_end(scope->cx);
   return ok;
 }
 

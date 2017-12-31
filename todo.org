@@ -1,14 +1,9 @@
-* add func inlining
-** inline like lambda in compile if one imp
-** add bin.func_imps
-*** map from func_imp ptr to op_idx
-*** check cx->bin->func_imps in cx_func_imp_call
-*** eval if found
-* ---
 * add emit
-** add cx_op_type again
-** eval & emit fns
-** replaces enum
+** add op_type.emit like eval
+*** write C to buf
+** add bin emit fn
+*** like compile
+*** return str
 ** duffs device/switch
 *** labels for lambdas
 *** call fn recursively

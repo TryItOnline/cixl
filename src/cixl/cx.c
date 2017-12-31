@@ -338,7 +338,7 @@ static bool recall_imp(struct cx_scope *scope) {
     return false;
   }
 
-  return cx_eval(cx, cx->func_imp->bin, NULL);
+  return cx_func_imp_eval(cx->func_imp, scope);
 }
 
 static bool clock_imp(struct cx_scope *scope) {

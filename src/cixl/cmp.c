@@ -16,8 +16,9 @@ enum cx_cmp cx_cmp_int(const void *x, const void *y) {
 }
 
 enum cx_cmp cx_cmp_ptr(const void *x, const void *y) {
-  if (x < y) { return CX_CMP_LT; }
-  return (x > y) ? CX_CMP_GT : CX_CMP_EQ;
+  void *const *xv = x, * const *yv = y;
+  if (*xv < *yv) { return CX_CMP_LT; }
+  return (*xv > *yv) ? CX_CMP_GT : CX_CMP_EQ;
 }
 
 enum cx_cmp cx_cmp_str(const void *x, const void *y) {
