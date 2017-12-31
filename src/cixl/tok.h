@@ -10,6 +10,7 @@
     static bool init = true;			\
 						\
     if (init) {					\
+      init = false;				\
       cx_tok_type_init(&type);			\
       __VA_ARGS__;				\
     }						\

@@ -88,16 +88,16 @@ static ssize_t let_eval(struct cx_macro_eval *eval,
 			struct cx_bin *bin,
 			size_t tok_idx,
 			struct cx *cx) {
-  cx_op_init(cx_vec_push(&bin->ops), CX_OSCOPE, tok_idx)->as_scope.child = true;  
+  cx_op_init(cx_vec_push(&bin->ops), CX_OSCOPE(), tok_idx)->as_scope.child = true;  
 
   if (!cx_compile(cx, cx_vec_get(&eval->toks, 1), cx_vec_end(&eval->toks), bin)) {
     cx_error(cx, cx->row, cx->col, "Failed compiling let");
     return -1;
   }
   
-  cx_op_init(cx_vec_push(&bin->ops), CX_OUNSCOPE, tok_idx);
+  cx_op_init(cx_vec_push(&bin->ops), CX_OUNSCOPE(), tok_idx);
   struct cx_tok *id = cx_vec_get(&eval->toks, 0);
-  struct cx_op * op = cx_op_init(cx_vec_push(&bin->ops), CX_OSET, tok_idx);
+  struct cx_op * op = cx_op_init(cx_vec_push(&bin->ops), CX_OSET(), tok_idx);
   op->as_set.id = id->as_ptr;
   op->as_set.force = false;
   op->as_set.parent = false;
@@ -139,7 +139,7 @@ static ssize_t func_eval(struct cx_macro_eval *eval,
 			 struct cx *cx) {
   for (int i = eval->toks.count-1; i >= 0; i--) {
     struct cx_tok *t = cx_vec_get(&eval->toks, i);
-    struct cx_op *op = cx_op_init(cx_vec_push(&bin->ops), CX_OSET, tok_idx);
+    struct cx_op *op = cx_op_init(cx_vec_push(&bin->ops), CX_OSET(), tok_idx);
     op->as_set.id = t->as_ptr;
     op->as_set.parent = true;
     op->as_set.force = true;

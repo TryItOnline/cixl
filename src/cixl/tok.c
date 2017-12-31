@@ -37,7 +37,7 @@ void cx_tok_copy(struct cx_tok *dst, struct cx_tok *src) {
 }
 
 static ssize_t cut_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) {
-  cx_op_init(cx_vec_push(&bin->ops), CX_OCUT, tok_idx);
+  cx_op_init(cx_vec_push(&bin->ops), CX_OCUT(), tok_idx);
   return tok_idx+1;
 }
 
@@ -49,7 +49,7 @@ cx_tok_type(CX_TEND);
 
 static ssize_t func_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) {
   struct cx_funcall_op *op = &cx_op_init(cx_vec_push(&bin->ops),
-					 CX_OFUNCALL,
+					 CX_OFUNCALL(),
 					 tok_idx)->as_funcall;
   
   struct cx_tok *tok = cx_vec_get(&bin->toks, tok_idx);  
@@ -66,11 +66,11 @@ cx_tok_type(CX_TFUNC, {
   });
 
 static ssize_t group_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) {
-  cx_op_init(cx_vec_push(&bin->ops), CX_OSCOPE, tok_idx)->as_scope.child = true;
+  cx_op_init(cx_vec_push(&bin->ops), CX_OSCOPE(), tok_idx)->as_scope.child = true;
   struct cx_tok *tok = cx_vec_get(&bin->toks, tok_idx);
   struct cx_vec *toks = &tok->as_vec;
   cx_compile(cx, cx_vec_start(toks), cx_vec_end(toks), bin);
-  cx_op_init(cx_vec_push(&bin->ops), CX_OUNSCOPE, tok_idx);
+  cx_op_init(cx_vec_push(&bin->ops), CX_OUNSCOPE(), tok_idx);
   return tok_idx+1;
 }
 
@@ -111,7 +111,7 @@ static ssize_t id_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) {
     return -1;
   }
 
-  cx_op_init(cx_vec_push(&bin->ops), CX_OGET, tok_idx)->as_get.id = id+1;
+  cx_op_init(cx_vec_push(&bin->ops), CX_OGET(), tok_idx)->as_get.id = id+1;
   return tok_idx+1;
 }
 
@@ -134,12 +134,12 @@ static ssize_t lambda_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx)
 
   size_t i = bin->ops.count;
   cx_op_init(cx_vec_push(&bin->ops),
-	     CX_OLAMBDA,
+	     CX_OLAMBDA(),
 	     tok_idx)->as_lambda.start_op = i+1;
   
   struct cx_vec toks = tok->as_vec;
   cx_compile(cx, cx_vec_start(&toks), cx_vec_end(&toks), bin);
-  cx_op_init(cx_vec_push(&bin->ops), CX_OSTOP, tok_idx);
+  cx_op_init(cx_vec_push(&bin->ops), CX_OSTOP(), tok_idx);
   struct cx_op *op = cx_vec_get(&bin->ops, i);
   op->as_lambda.num_ops = bin->ops.count - op->as_lambda.start_op;
   return tok_idx+1;
@@ -160,7 +160,7 @@ cx_tok_type(CX_TLAMBDA, {
   });
 
 static ssize_t literal_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) {
-  cx_op_init(cx_vec_push(&bin->ops), CX_OPUSH, tok_idx);
+  cx_op_init(cx_vec_push(&bin->ops), CX_OPUSH(), tok_idx);
   return tok_idx+1;
 }
 
@@ -203,7 +203,7 @@ static ssize_t type_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) {
   struct cx_type *type = tok->as_ptr;
   tok->type = CX_TLITERAL();
   cx_box_init(&tok->as_box, cx->meta_type)->as_ptr = type;    
-  cx_op_init(cx_vec_push(&bin->ops), CX_OPUSH, tok_idx);
+  cx_op_init(cx_vec_push(&bin->ops), CX_OPUSH(), tok_idx);
   return tok_idx+1;
 }
 

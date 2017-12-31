@@ -8,8 +8,25 @@ struct cx_func_imp;
 struct cx_op;
 struct cx_tok;
 
-enum cx_op_type {CX_OCUT, CX_OGET, CX_OFUNCALL, CX_OLAMBDA, CX_OPUSH, CX_OSCOPE,
-		 CX_OSET, CX_OSTOP, CX_OUNSCOPE};
+#define cx_op_type(id, ...)			\
+  struct cx_op_type *id() {			\
+    static struct cx_op_type type;		\
+    static bool init = true;			\
+						\
+    if (init) {					\
+      init = false;				\
+      cx_op_type_init(&type);			\
+      __VA_ARGS__;				\
+    }						\
+						\
+    return &type;				\
+  }						\
+
+struct cx_op_type {
+  bool (*eval)(struct cx_op *, struct cx_tok *, struct cx *);
+};
+
+struct cx_op_type *cx_op_type_init(struct cx_op_type *type);
 
 struct cx_get_op {
   char *id;
@@ -35,7 +52,7 @@ struct cx_set_op {
 
 struct cx_op {
   size_t tok_idx;
-  enum cx_op_type type;
+  struct cx_op_type *type;
   
   union {
     struct cx_get_op as_get;
@@ -46,7 +63,16 @@ struct cx_op {
   };
 };
 
-struct cx_op *cx_op_init(struct cx_op *op, enum cx_op_type type, size_t tok_idx);
-bool cx_op_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx);
+struct cx_op *cx_op_init(struct cx_op *op, struct cx_op_type *type, size_t tok_idx);
+
+struct cx_op_type *CX_OCUT();
+struct cx_op_type *CX_OGET();
+struct cx_op_type *CX_OFUNCALL();
+struct cx_op_type *CX_OLAMBDA();
+struct cx_op_type *CX_OPUSH();
+struct cx_op_type *CX_OSCOPE();
+struct cx_op_type *CX_OSET();
+struct cx_op_type *CX_OSTOP();
+struct cx_op_type *CX_OUNSCOPE();
 
 #endif

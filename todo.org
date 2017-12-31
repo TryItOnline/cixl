@@ -1,4 +1,11 @@
-* add emit fn
+* add func inlining
+** inline like lambda in compile if one imp
+** add bin.func_imps
+*** map from func_imp ptr to op_idx
+*** check cx->bin->func_imps in cx_func_imp_call
+*** eval if found
+* ---
+* add emit
 ** add cx_op_type again
 ** eval & emit fns
 ** replaces enum
@@ -10,11 +17,6 @@
 *** check after each relevant op
 *** call fn if enough args and error if no match
 * ---
-* add nvect fn
-** vect of len n
-** init to nil
-* add vect put/get to/from index
-** check bounds
 * add rat sub/div
 * add rat tests
 * add Stream type
@@ -24,7 +26,11 @@
 ** stream rseek/wseek fn
 ** stream str fn
 ** stream len fn
-* ---
+* add nvect fn
+** vect of len n
+** init to nil
+* add vect put/get to/from index
+** check bounds
 * add type.cmp
 ** add Cmp trait
 ** use to implement < > <= >= for all Cmp types
@@ -60,4 +66,4 @@
 ** typecheck and bind stack to vars
 * add str interpolation
 
-clock {,10000 times {,fib 50 _}} / 1000000
+| clock {,10000 times {,fib 50 _}} / 1000000 int

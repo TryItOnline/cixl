@@ -66,7 +66,7 @@ bool cx_eval_next(struct cx *cx) {
   struct cx_tok *tok = cx_vec_get(&cx->bin->toks, op->tok_idx);
   cx->row = tok->row;
   cx->col = tok->col;
-  return cx_op_eval(op, tok, cx) && !cx->errors.count;
+  return op->type->eval(op, tok, cx) && !cx->errors.count;
 }
 
 bool cx_scan_args(struct cx *cx, struct cx_func *func) {
