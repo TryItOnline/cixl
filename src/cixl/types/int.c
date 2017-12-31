@@ -65,11 +65,21 @@ static bool mul_imp(struct cx_scope *scope) {
 }
 
 static bool div_imp(struct cx_scope *scope) {
+  struct cx *cx = scope->cx;
+  
   struct cx_box
     y = *cx_test(cx_pop(scope, false)),
     x = *cx_test(cx_pop(scope, false));
 
-  cx_box_init(cx_push(scope), scope->cx->int_type)->as_int = x.as_int / y.as_int;
+  if (!y.as_int) {
+    cx_error(cx, cx->row, cx->col, "Division by zero");
+    return false;
+  }
+  
+  cx_rat_init(&cx_box_init(cx_push(scope), scope->cx->rat_type)->as_rat,
+	      x.as_int, y.as_int,
+	      (x.as_int >= 0 || y.as_int > 0) && (x.as_int < 0 || y.as_int < 0));
+  
   return true;
 }
 
@@ -120,7 +130,7 @@ static void fprint_imp(struct cx_box *v, FILE *out) {
 }
 
 struct cx_type *cx_init_int_type(struct cx *cx) {
-  struct cx_type *t = cx_add_type(cx, "Int", cx->any_type);
+  struct cx_type *t = cx_add_type(cx, "Int", cx->num_type);
   t->equid = equid_imp;
   t->ok = ok_imp;
   t->fprint = fprint_imp;

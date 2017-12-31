@@ -1,4 +1,8 @@
-* add Rat type
+* add type.cmp
+** add Cmp trait
+** use to implement <, >, <=, >= for all Cmp types 
+** replaces int/rat imps
+** add cx_init_cmp_type
 * add struct: macro
 ** add Struct type 
 *** add to parents for all structs

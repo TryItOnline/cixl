@@ -18,8 +18,9 @@
 #include "cixl/types/int.h"
 #include "cixl/types/lambda.h"
 #include "cixl/types/nil.h"
-#include "cixl/types/vect.h"
+#include "cixl/types/rat.h"
 #include "cixl/types/str.h"
+#include "cixl/types/vect.h"
 #include "cixl/util.h"
 
 static const void *get_type_id(const void *value) {
@@ -393,11 +394,13 @@ struct cx *cx_init(struct cx *cx) {
   
   cx->opt_type = cx_add_type(cx, "Opt");
   cx->any_type = cx_add_type(cx, "A", cx->opt_type);
+  cx->num_type = cx_add_type(cx, "Num", cx->any_type);
   cx->nil_type = cx_init_nil_type(cx);
   cx->meta_type = cx_init_meta_type(cx);
   
   cx->bool_type = cx_init_bool_type(cx);
   cx->int_type = cx_init_int_type(cx);
+  cx->rat_type = cx_init_rat_type(cx);
   cx->char_type = cx_init_char_type(cx);
   cx->str_type = cx_init_str_type(cx);
   cx->vect_type = cx_init_vect_type(cx);

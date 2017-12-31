@@ -244,6 +244,19 @@ Several parameters may share the same type. An index may may be specified instea
 [12586269025]
 ```
 
+### Rationals
+Basic rational arithmetics is supported out of the box.
+
+```
+> 1 / 2, 42 / 2 *
+..
+[21/2]
+
+> trunc
+..
+10
+```
+
 ### Optionals
 The nil value may be used to represent missing values. Since ```Nil``` isn't derived from ```A```, stray nil values never get far before being trapped in a function call; ```Opt``` may be used instead where nil values are allowed.
 
@@ -328,10 +341,12 @@ Capitalized names are treated as type references, the following types are define
 - Bin (A)
 - Bool (A)
 - Func (A)
-- Int (A)
+- Int (Num)
 - Lambda (A)
 - Nil (Opt)
+- Num (A)
 - Opt ()
+- Rat (Num)
 - Str (A)
 - Type (A)
 - Vect (A)

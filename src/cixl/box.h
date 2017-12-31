@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include "cixl/types/int.h"
+#include "cixl/types/rat.h"
 
 struct cx_func;
 struct cx_lambda;
@@ -18,6 +19,7 @@ struct cx_box {
     char as_char;
     cx_int_t as_int;
     void *as_ptr;
+    struct cx_rat as_rat;
   };
 };
 
