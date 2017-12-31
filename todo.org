@@ -22,13 +22,6 @@
 * add cx_init_io with load fn
 ** load first repl arg if any
 ** push rest on stack
-* add parse/unparse/eval
-** add types/tok.h/c
-** add Tok type
-*** switch type in fprint
-** add Toks type, inherit Vect
-*** add call support
-*** add unparse fn
 * add Rat type
 * add Str 'int' fn
 * add Int 'str' fn

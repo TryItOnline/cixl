@@ -17,7 +17,7 @@ cmake ..
 make
 rlwrap ./cixl
 
-cixl v0.4, 18765 bmips
+cixl v0.5, 18765 bmips
 
 Press Return twice to eval input.
 
@@ -345,7 +345,7 @@ Capitalized names are treated as type references, the following types are define
 ```
 
 ### Traits
-Traits are abstract types that represent sets of features, the standard types ```A``` and ```Opt``` are traits. New traits may be defined using the ```trait:``` macro.
+Traits are abstract types. They are useful for simplifying type checking and/or function dispatch. New traits may be defined using the ```trait:``` macro.
 
 ```
 > trait: StrInt Str Int;

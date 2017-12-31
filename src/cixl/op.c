@@ -24,7 +24,6 @@ bool cx_op_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
 
   case CX_OFUNCALL: {
     struct cx_func *func = op->as_funcall.func;
-    
     if (!cx_scan_args(cx, func)) { return false; }
     
     struct cx_scope *s = cx_scope(cx, 0);
@@ -90,7 +89,7 @@ bool cx_op_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
   }
 
   default:
-    cx_error(cx, tok->row, tok->col, "Unknown op: %d", op->type);
+    cx_error(cx, tok->row, tok->col, "Invalid op: %d", op->type);
     return false;
   }
 
