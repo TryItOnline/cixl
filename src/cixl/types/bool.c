@@ -26,7 +26,7 @@ static void fprint_imp(struct cx_box *v, FILE *out) {
 }
 
 struct cx_type *cx_init_bool_type(struct cx *cx) {
-  struct cx_type *t = cx_add_type(cx, "Bool", cx->any_type, NULL);
+  struct cx_type *t = cx_add_type(cx, "Bool", cx->any_type);
   t->equid = equid_imp;
   t->ok = ok_imp;
   t->fprint = fprint_imp;

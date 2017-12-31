@@ -183,7 +183,7 @@ static void fprint_imp(struct cx_box *value, FILE *out) {
 }
 
 struct cx_type *cx_init_func_type(struct cx *cx) {
-  struct cx_type *t = cx_add_type(cx, "Func", cx->any_type, NULL);
+  struct cx_type *t = cx_add_type(cx, "Func", cx->any_type);
   t->equid = equid_imp;
   t->call = call_imp;
   t->fprint = fprint_imp;

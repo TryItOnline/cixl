@@ -64,7 +64,7 @@ static bool trait_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
     }
   }
 
-  struct cx_type *trait = cx_add_type(cx, id.as_ptr, NULL);
+  struct cx_type *trait = cx_add_type(cx, id.as_ptr);
 
   if (!trait) { goto exit1; }
   
@@ -379,8 +379,8 @@ struct cx *cx_init(struct cx *cx) {
   cx_add_macro(cx, "let:", let_parse);
   cx_add_macro(cx, "func:", func_parse);
   
-  cx->opt_type = cx_add_type(cx, "Opt", NULL);
-  cx->any_type = cx_add_type(cx, "A", cx->opt_type, NULL);
+  cx->opt_type = cx_add_type(cx, "Opt");
+  cx->any_type = cx_add_type(cx, "A", cx->opt_type);
   cx->nil_type = cx_init_nil_type(cx);
   cx->meta_type = cx_init_meta_type(cx);
   
@@ -461,7 +461,7 @@ bool cx_is_separator(struct cx *cx, char c) {
   return cx_set_get(&cx->separators, &c);
 }
 
-struct cx_type *cx_add_type(struct cx *cx, const char *id, ...) {
+struct cx_type *_cx_add_type(struct cx *cx, const char *id, ...) {
   struct cx_type **t = cx_test(cx_set_insert(&cx->types, &id));
 
   if (!t) {

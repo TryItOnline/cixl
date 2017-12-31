@@ -13,6 +13,9 @@
       _cx_add_func(cx, id, nargs, args);			\
     })								\
 
+#define cx_add_type(cx, id, ...)		\
+  _cx_add_type(cx, id, ##__VA_ARGS__, NULL)	\
+
 struct cx_func_arg;
 struct cx_scope;
 
@@ -47,7 +50,7 @@ struct cx *cx_deinit(struct cx *cx);
 void cx_add_separators(struct cx *cx, const char *cs);
 bool cx_is_separator(struct cx *cx, char c);
 
-struct cx_type *cx_add_type(struct cx *cx, const char *id, ...);
+struct cx_type *_cx_add_type(struct cx *cx, const char *id, ...);
 struct cx_type *cx_get_type(struct cx *cx, const char *id, bool silent);
 
 struct cx_macro *cx_add_macro(struct cx *cx, const char *id, cx_macro_parse_t imp);

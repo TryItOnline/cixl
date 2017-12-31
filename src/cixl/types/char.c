@@ -34,7 +34,7 @@ static void fprint_imp(struct cx_box *v, FILE *out) {
 }
 
 struct cx_type *cx_init_char_type(struct cx *cx) {
-  struct cx_type *t = cx_add_type(cx, "Char", cx->any_type, NULL);
+  struct cx_type *t = cx_add_type(cx, "Char", cx->any_type);
   t->equid = equid_imp;
   t->ok = ok_imp;
   t->copy = copy_imp;

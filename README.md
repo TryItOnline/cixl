@@ -419,7 +419,7 @@ int main() {
   struct cx cx;
   cx_init(&cx);
   
-  struct cx_type *t = cx_add_type(&cx, "Str", cx.any_type, NULL);
+  struct cx_type *t = cx_add_type(&cx, "Str", cx.any_type);
   t->eqval = eqval_imp;
   t->equid = equid_imp;
   t->ok = ok_imp;
