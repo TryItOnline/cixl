@@ -1,4 +1,11 @@
+* add nvect fn
+** vect of len n
+** init to nil
 * add vect put/get to/from index
+** check bounds
+* add vect reduce/filter
+* add rat sub/div
+* add rat tests
 * add type.cmp
 ** add Cmp trait
 ** use to implement < > <= >= for all Cmp types
@@ -6,7 +13,6 @@
 ** replaces int/rat imps
 ** add cx_init_cmp_type
 * add Table type
-* add rat sub/div
 * add struct: macro
 ** add Struct type 
 *** add to parents for all structs
