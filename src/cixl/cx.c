@@ -86,7 +86,21 @@ static bool trait_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
 
 static bool let_eval(struct cx_macro_eval *eval, struct cx *cx) {
   struct cx_scope *s = cx_begin(cx, true);
-  cx_eval(cx, &eval->toks, (struct cx_tok *)cx_vec_start(&eval->toks)+1);
+  struct cx_bin *bin = cx_bin_new();
+
+  if (!cx_compile(cx, cx_vec_get(&eval->toks, 1), cx_vec_end(&eval->toks), bin)) {
+    cx_error(cx, cx->row, cx->col, "Failed compiling let");
+    cx_bin_unref(bin);
+    return false;
+  }
+  
+  if (!cx_eval(cx, bin, NULL)) {
+    cx_error(cx, cx->row, cx->col, "Failed evaluating let");
+    cx_bin_unref(bin);
+    return false;
+  }
+  
+  cx_bin_unref(bin);
   struct cx_box *val = cx_pop(s, false);
   
   if (!val) {
@@ -228,19 +242,14 @@ static bool recall_eval(struct cx_macro_eval *eval, struct cx *cx) {
     return false;
   }
 
-  if (cx->bin) {
-    if (!cx_scan_args2(cx, cx->func_imp->func)) { return false; }
-  } else {
-    if (!cx_scan_args(cx, cx->func_imp->func)) { return false; }
-  }
+  if (!cx_scan_args(cx, cx->func_imp->func)) { return false; }
   
   if (!cx_func_imp_match(cx->func_imp, &s->stack)) {
     cx_error(cx, cx->row, cx->col, "Recall not applicable");
     return false;
   }
 
-  //return cx_eval(cx, &cx->func_imp->toks, cx_vec_start(&cx->func_imp->toks));
-  return cx_eval2(cx, cx->func_imp->bin, NULL);
+  return cx_eval(cx, cx->func_imp->bin, NULL);
 }
 
 static bool recall_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
@@ -318,7 +327,11 @@ static void compile_imp(struct cx_scope *scope) {
   if (!ok) { goto exit; }
   
   struct cx_bin *bin = cx_bin_new();
-  if (!(ok = cx_compile(cx, &toks, bin))) { goto exit; }
+
+  if (!(ok = cx_compile(cx, cx_vec_start(&toks), cx_vec_end(&toks), bin))) {
+    goto exit;
+  }
+  
   cx_box_init(cx_push(scope), cx->bin_type)->as_ptr = bin;
  exit:
   cx_box_deinit(&in);
@@ -358,8 +371,6 @@ static void test_imp(struct cx_scope *scope) {
 struct cx *cx_init(struct cx *cx) {
   cx->coro = NULL;
   cx->func_imp = NULL;
-  cx->toks = NULL;
-  cx->pc = cx->stop_pc = NULL;  
   cx->bin = NULL;
   cx->op = NULL;
   cx->stop = false;
@@ -430,11 +441,11 @@ struct cx *cx_init(struct cx *cx) {
 void cx_init_math(struct cx *cx) {
   cx_test(cx_eval_str(cx,
 		      "func: fib-rec(a b n Int) "
-		      "  $n? if {, recall $b, $a + $b, -- $n} $a;"));
+		      "$n? if {, recall $b, $a + $b, -- $n} $a;"));
 
   cx_test(cx_eval_str(cx,
 		      "func: fib(n Int) "
-		      "  fib-rec 0 1 $n;"));
+		      "fib-rec 0 1 $n;"));
 }
 
 struct cx *cx_deinit(struct cx *cx) {

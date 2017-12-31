@@ -14,34 +14,14 @@ struct cx_coro *cx_coro_init(struct cx_coro *coro,
   coro->scope = cx_scope_ref(scope);
   coro->nrefs = 1;
   coro->done = false;
-  cx_vec_init(&coro->toks, sizeof(struct cx_tok));
-
-  if (cx->pc != cx_vec_end(cx->toks)) {
-    cx_vec_grow(&coro->toks, cx->toks->count);
-  
-    for (struct cx_tok *pc = cx->pc; pc != cx_vec_end(cx->toks); pc++) {
-      cx_tok_copy(cx_vec_push(&coro->toks), pc);
-    }
-  }
-  
-  if (cx->bin) {
-    coro->bin = cx_bin_ref(cx->bin);
-    coro->op = cx->op;
-  } else {
-    coro->bin = NULL;
-    coro->pc = cx_vec_start(&coro->toks);
-  }
-  
+  coro->bin = cx_bin_ref(cx->bin);
+  coro->op = cx->op;
   return coro;
 }
 
 struct cx_coro *cx_coro_deinit(struct cx_coro *coro) {
   cx_scope_unref(coro->scope);
-
-  cx_do_vec(&coro->toks, struct cx_tok, t) { cx_tok_deinit(t); }
-  cx_vec_deinit(&coro->toks);
-  
-  if (coro->bin) { cx_bin_unref(coro->bin); }
+  cx_bin_unref(coro->bin);
   return coro;
 }
 
@@ -49,7 +29,6 @@ static void yield_imp(struct cx_scope *scope) {
   struct cx *cx = scope->cx;
   
   if (cx->coro) {
-    cx->coro->pc = cx->pc;
     cx->coro->op = cx->op;
   } else {
     struct cx_coro *coro = cx_coro_init(malloc(sizeof(struct cx_coro)),
@@ -59,7 +38,6 @@ static void yield_imp(struct cx_scope *scope) {
     cx_box_init(cx_push(scope), cx->coro_type)->as_ptr = coro;
   }
   
-  cx->stop_pc = cx->pc;
   cx->stop = true;
 }
 
@@ -86,15 +64,9 @@ static bool call_imp(struct cx_box *value, struct cx_scope *scope) {
   cx->coro = coro;
   bool ok = false;
   
-  if (coro->bin) {
-    ok = cx_eval2(cx, coro->bin, coro->op);
-    coro->op = cx->op;
-    if (coro->op == cx_vec_end(&coro->bin->ops)) { coro->done = true; }
-  } else {
-    ok = cx_eval(cx, &coro->toks, coro->pc);
-    coro->pc = cx->pc;
-    if (coro->pc == cx_vec_end(&coro->toks)) { coro->done = true; }
-  }
+  ok = cx_eval(cx, coro->bin, coro->op);
+  coro->op = cx->op;
+  if (coro->op == cx_vec_end(&coro->bin->ops)) { coro->done = true; }
   
   cx->coro = NULL;
   if (!ok) { return false; }

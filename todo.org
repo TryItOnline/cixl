@@ -56,7 +56,8 @@ clock {,10000 times {,fib 50 _}} / 1000000
 
 eval parse '7 35 +'
 
-func: fib-rec(a b n Int) $n? if {, recall $b, $a + $b, -- $n} $a;
+func: fib-rec(a b n Int)   $n? if {, recall $b, $a + $b, -- $n} $a;
+
 
 
 '{,fib 50 _}' compile call call

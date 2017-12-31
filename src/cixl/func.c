@@ -140,13 +140,12 @@ bool cx_func_imp_call(struct cx_func_imp *imp, struct cx_scope *scope) {
   if (!imp->bin) {
     imp->bin = cx_bin_new();
     
-    if (!cx_compile(cx, &imp->toks, imp->bin)) {
+    if (!cx_compile(cx, cx_vec_start(&imp->toks), cx_vec_end(&imp->toks), imp->bin)) {
       cx_error(cx, cx->row, cx->col, "Failed compiling func imp");
     }
   }
 
-  //bool ok = cx_eval(cx, &imp->toks, cx_vec_start(&imp->toks));
-  bool ok = cx_eval2(cx, imp->bin, NULL);
+  bool ok = cx_eval(cx, imp->bin, NULL);
   cx->func_imp = prev;
   cx_end(cx);
   return ok;

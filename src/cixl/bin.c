@@ -34,15 +34,19 @@ void cx_bin_unref(struct cx_bin *bin) {
   if (!bin->nrefs) { free(cx_bin_deinit(bin)); }
 }
 
-bool cx_compile(struct cx *cx, struct cx_vec *in, struct cx_bin *out) {
-  if (!in->count) { return true; }
-  
+bool cx_compile(struct cx *cx,
+		struct cx_tok *start,
+		struct cx_tok *end,
+		struct cx_bin *out) {
   size_t tok_idx = out->toks.count;
-  cx_vec_grow(&out->toks, out->toks.count+in->count); 
-  cx_do_vec(in, struct cx_tok, t) { cx_tok_copy(cx_vec_push(&out->toks), t); }
-  size_t max = out->toks.count;
+
+  for (struct cx_tok *t = start; t != end; t++) {
+    cx_tok_copy(cx_vec_push(&out->toks), t);
+  }
   
-  while (tok_idx < max) {
+  size_t stop = out->toks.count;
+  
+  while (tok_idx < stop) {
     struct cx_tok *tok = cx_vec_get(&out->toks, tok_idx);
     
     if (!tok->type->compile) {

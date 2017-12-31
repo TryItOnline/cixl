@@ -31,13 +31,10 @@ struct cx {
   struct cx_coro *coro;
   struct cx_func_imp *func_imp;
 
-  struct cx_vec *toks;
-  struct cx_tok *pc, *stop_pc;
-
   struct cx_bin *bin;
-  struct cx_op *op;
-  
+  struct cx_op *op;  
   bool stop;
+  
   int row, col;
   struct cx_vec errors;
 };

@@ -8,7 +8,6 @@ struct cx_type;
 
 struct cx_lambda {
   struct cx_scope *scope;
-  struct cx_vec toks;
 
   struct cx_bin *bin;
   ssize_t start_op, num_ops;

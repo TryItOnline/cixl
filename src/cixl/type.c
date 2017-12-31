@@ -71,7 +71,7 @@ struct cx_type *cx_init_meta_type(struct cx *cx) {
   t->fprint = fprint_imp;
   
   cx_add_func(cx, "type", cx_arg(cx->any_type))->ptr = type_imp;
-  cx_add_func(cx, "is", cx_arg(cx->any_type), cx_arg(t))->ptr = is_imp;
+  cx_add_func(cx, "is", cx_arg(t), cx_arg(t))->ptr = is_imp;
 
   return t;
 }

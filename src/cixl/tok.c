@@ -8,7 +8,6 @@
 
 struct cx_tok_type *cx_tok_type_init(struct cx_tok_type *type) {
   type->compile = NULL;
-  type->eval = NULL;
   type->copy = NULL;
   type->deinit = NULL;
   return type;

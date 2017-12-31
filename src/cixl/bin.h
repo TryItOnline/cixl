@@ -4,6 +4,7 @@
 #include "cixl/vec.h"
 
 struct cx;
+struct cx_tok;
 
 struct cx_bin {
   struct cx_vec toks, ops;
@@ -18,6 +19,9 @@ struct cx_bin *cx_bin_deinit(struct cx_bin *bin);
 struct cx_bin *cx_bin_ref(struct cx_bin *bin);
 void cx_bin_unref(struct cx_bin *bin);
 
-bool cx_compile(struct cx *cx, struct cx_vec *in, struct cx_bin *out);
+bool cx_compile(struct cx *cx,
+		struct cx_tok *start,
+		struct cx_tok *end,
+		struct cx_bin *out);
 
 #endif

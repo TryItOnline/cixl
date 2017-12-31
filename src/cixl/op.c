@@ -23,7 +23,7 @@ bool cx_cut_op(struct cx_tok *tok, struct cx_op *op, struct cx *cx) {
 bool cx_funcall_op(struct cx_tok *tok, struct cx_op *op, struct cx *cx) {
   struct cx_func *func = op->as_funcall.func;
   
-  if (!cx_scan_args2(cx, func)) { return false; }
+  if (!cx_scan_args(cx, func)) { return false; }
   
   struct cx_scope *s = cx_scope(cx, 0);
   struct cx_func_imp *imp = op->as_funcall.imp;
@@ -50,7 +50,6 @@ bool cx_get_op(struct cx_tok *tok, struct cx_op *op, struct cx *cx) {
 bool cx_lambda_op(struct cx_tok *tok, struct cx_op *op, struct cx *cx) {
   struct cx_scope *scope = cx_scope(cx, 0);
   struct cx_lambda *l = cx_lambda_init(malloc(sizeof(struct cx_lambda)), scope);
-  l->bin = cx_bin_ref(cx->bin);
   l->start_op = op->as_lambda.start_op;
   l->num_ops = op->as_lambda.num_ops;
   cx_box_init(cx_push(scope), cx->lambda_type)->as_ptr = l;
