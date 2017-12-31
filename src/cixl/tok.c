@@ -41,11 +41,11 @@ static ssize_t cut_compile(size_t tok_idx, struct cx_bin *bin, struct cx *cx) {
   return tok_idx+1;
 }
 
-cx_tok_type(cx_cut_tok, {
+cx_tok_type(CX_TCUT, {
     type.compile = cut_compile;
   });
 
-cx_tok_type(cx_end_tok);
+cx_tok_type(CX_TEND);
 
 static ssize_t func_compile(size_t tok_idx, struct cx_bin *bin, struct cx *cx) {
   struct cx_funcall_op *op = &cx_op_init(cx_vec_push(&bin->ops),
@@ -61,7 +61,7 @@ static ssize_t func_compile(size_t tok_idx, struct cx_bin *bin, struct cx *cx) {
   return tok_idx+1;
 }
 
-cx_tok_type(cx_func_tok, {
+cx_tok_type(CX_TFUNC, {
     type.compile = func_compile;
   });
 
@@ -96,7 +96,7 @@ static void group_deinit(struct cx_tok *tok) {
   cx_vec_deinit(body);
 }
 
-cx_tok_type(cx_group_tok, {
+cx_tok_type(CX_TGROUP, {
     type.compile = group_compile;
     type.copy = group_copy;
     type.deinit = group_deinit;
@@ -116,14 +116,14 @@ static ssize_t id_compile(size_t tok_idx, struct cx_bin *bin, struct cx *cx) {
 }
 
 static void id_copy(struct cx_tok *dst, struct cx_tok *src) {
-    dst->as_ptr = strdup(src->as_ptr);
+  dst->as_ptr = strdup(src->as_ptr);
 }
 
 static void id_deinit(struct cx_tok *tok) {
-    free(tok->as_ptr);
+  free(tok->as_ptr);
 }
 
-cx_tok_type(cx_id_tok, {
+cx_tok_type(CX_TID, {
     type.compile = id_compile;
     type.copy = id_copy;
     type.deinit = id_deinit;
@@ -153,7 +153,7 @@ static void lambda_deinit(struct cx_tok *tok) {
   group_deinit(tok);
 }
 
-cx_tok_type(cx_lambda_tok, {
+cx_tok_type(CX_TLAMBDA, {
     type.compile = lambda_compile;
     type.copy = lambda_copy;
     type.deinit = lambda_deinit;
@@ -172,7 +172,7 @@ static void literal_deinit(struct cx_tok *tok) {
   cx_box_deinit(&tok->as_box);
 }
 
-cx_tok_type(cx_literal_tok, {
+cx_tok_type(CX_TLITERAL, {
     type.compile = literal_compile;
     type.copy = literal_copy;
     type.deinit = literal_deinit;
@@ -191,7 +191,7 @@ static void macro_deinit(struct cx_tok *tok) {
   cx_macro_eval_unref(tok->as_ptr);
 }
 
-cx_tok_type(cx_macro_tok, {
+cx_tok_type(CX_TMACRO, {
     type.compile = macro_compile;
     type.copy = macro_copy;
     type.deinit = macro_deinit;
@@ -200,15 +200,15 @@ cx_tok_type(cx_macro_tok, {
 static ssize_t type_compile(size_t tok_idx, struct cx_bin *bin, struct cx *cx) {
   struct cx_tok *tok = cx_vec_get(&bin->toks, tok_idx);
   struct cx_type *type = tok->as_ptr;
-  tok->type = cx_literal_tok();
+  tok->type = CX_TLITERAL();
   cx_box_init(&tok->as_box, cx->meta_type)->as_ptr = type;    
   cx_op_init(cx_vec_push(&bin->ops), cx_push_op, tok_idx);
   return tok_idx+1;
 }
 
-cx_tok_type(cx_type_tok, {
+cx_tok_type(CX_TTYPE, {
     type.compile = type_compile;
   });
 
-cx_tok_type(cx_ungroup_tok);
-cx_tok_type(cx_unlambda_tok);
+cx_tok_type(CX_TUNGROUP);
+cx_tok_type(CX_TUNLAMBDA);

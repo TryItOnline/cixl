@@ -5,7 +5,7 @@
 #include "cixl/set.h"
 #include "cixl/type.h"
 
-#define CX_VERSION "0.4"
+#define CX_VERSION "0.5"
 
 #define cx_add_func(cx, id, ...) ({				\
       struct cx_func_arg args[] = {__VA_ARGS__};		\

@@ -98,9 +98,9 @@ bool cx_eval_args(struct cx *cx,
   cx_vec_init(&tmp_ids, sizeof(struct cx_tok));
 
   cx_do_vec(toks, struct cx_tok, t) {
-    if (t->type == cx_id_tok()) {
+    if (t->type == CX_TID()) {
       cx_tok_copy(cx_vec_push(&tmp_ids), t);
-    } else if (t->type == cx_literal_tok()) {
+    } else if (t->type == CX_TLITERAL()) {
       struct cx_box *v = &t->as_box;
 
       if (v->type != cx->int_type || v->as_int >= func_args->count) {
@@ -119,7 +119,7 @@ bool cx_eval_args(struct cx *cx,
 	*(struct cx_tok *)cx_vec_push(ids) = *id;
 	*(struct cx_func_arg *)cx_vec_push(func_args) = cx_narg(v->as_int);      
       }
-    } else if (t->type == cx_type_tok()) {
+    } else if (t->type == CX_TTYPE()) {
       struct cx_type *type = t->as_ptr;
 
       if (!tmp_ids.count) {

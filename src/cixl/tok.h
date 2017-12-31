@@ -47,16 +47,16 @@ struct cx_tok *cx_tok_deinit(struct cx_tok *tok);
 
 void cx_tok_copy(struct cx_tok *dst, struct cx_tok *src);
 
-struct cx_tok_type *cx_cut_tok();
-struct cx_tok_type *cx_end_tok();
-struct cx_tok_type *cx_func_tok();
-struct cx_tok_type *cx_group_tok();
-struct cx_tok_type *cx_id_tok();
-struct cx_tok_type *cx_lambda_tok();
-struct cx_tok_type *cx_literal_tok();
-struct cx_tok_type *cx_macro_tok();
-struct cx_tok_type *cx_type_tok();
-struct cx_tok_type *cx_ungroup_tok();
-struct cx_tok_type *cx_unlambda_tok();
+struct cx_tok_type *CX_TCUT();
+struct cx_tok_type *CX_TEND();
+struct cx_tok_type *CX_TFUNC();
+struct cx_tok_type *CX_TGROUP();
+struct cx_tok_type *CX_TID();
+struct cx_tok_type *CX_TLAMBDA();
+struct cx_tok_type *CX_TLITERAL();
+struct cx_tok_type *CX_TMACRO();
+struct cx_tok_type *CX_TTYPE();
+struct cx_tok_type *CX_TUNGROUP();
+struct cx_tok_type *CX_TUNLAMBDA();
 
 #endif
