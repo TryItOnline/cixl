@@ -8,6 +8,7 @@
 #include "cixl/error.h"
 #include "cixl/eval.h"
 #include "cixl/func.h"
+#include "cixl/op.h"
 #include "cixl/parse.h"
 #include "cixl/scope.h"
 #include "cixl/timer.h"
@@ -84,36 +85,24 @@ static bool trait_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   }
 }
 
-static bool let_eval(struct cx_macro_eval *eval, struct cx *cx) {
-  struct cx_scope *s = cx_begin(cx, true);
-  struct cx_bin *bin = cx_bin_new();
+static ssize_t let_eval(struct cx_macro_eval *eval,
+			struct cx_bin *bin,
+			size_t tok_idx,
+			struct cx *cx) {
+  cx_op_init(cx_vec_push(&bin->ops), CX_OSCOPE, tok_idx)->as_scope.child = true;  
 
   if (!cx_compile(cx, cx_vec_get(&eval->toks, 1), cx_vec_end(&eval->toks), bin)) {
     cx_error(cx, cx->row, cx->col, "Failed compiling let");
-    cx_bin_unref(bin);
-    return false;
-  }
-  
-  if (!cx_eval(cx, bin, NULL)) {
-    cx_error(cx, cx->row, cx->col, "Failed evaluating let");
-    cx_bin_unref(bin);
-    return false;
-  }
-  
-  cx_bin_unref(bin);
-  struct cx_box *val = cx_pop(s, false);
-  
-  if (!val) {
-    cx_end(cx);
     return -1;
   }
-
-  struct cx_tok *id = cx_vec_get(&eval->toks, 0);
-  struct cx_box *var = cx_set(s->parent, id->as_ptr, false);
-  if (var) { *var = *val; }
-  cx_end(cx);
   
-  return var;
+  cx_op_init(cx_vec_push(&bin->ops), CX_OUNSCOPE, tok_idx);
+  struct cx_tok *id = cx_vec_get(&eval->toks, 0);
+  struct cx_op * op = cx_op_init(cx_vec_push(&bin->ops), CX_OSET, tok_idx);
+  op->as_set.id = id->as_ptr;
+  op->as_set.force = false;
+  op->as_set.parent = false;
+  return tok_idx+1;
 }
 
 static bool let_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
@@ -145,16 +134,19 @@ static bool let_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   return true;
 }
 
-static bool func_eval(struct cx_macro_eval *eval, struct cx *cx) {
-  struct cx_scope *s = cx_scope(cx, 0);
-  struct cx_scope *ps = cx_scope(cx, 1);
-
-  for (int j = eval->toks.count-1; j >= 0; j--) {
-    struct cx_tok *t = cx_vec_get(&eval->toks, j);
-    *cx_set(s, t->as_ptr, true) = *cx_pop(ps, false);
+static ssize_t func_eval(struct cx_macro_eval *eval,
+			 struct cx_bin *bin,
+			 size_t tok_idx,
+			 struct cx *cx) {
+  for (int i = eval->toks.count-1; i >= 0; i--) {
+    struct cx_tok *t = cx_vec_get(&eval->toks, i);
+    struct cx_op *op = cx_op_init(cx_vec_push(&bin->ops), CX_OSET, tok_idx);
+    op->as_set.id = t->as_ptr;
+    op->as_set.parent = true;
+    op->as_set.force = true;
   }
   
-  return true;
+  return tok_idx+1;
 }
 
 static bool func_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
@@ -232,24 +224,6 @@ static bool func_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   cx_tok_deinit(&id);
   cx_vec_deinit(&func_args);
   return true;
-}
-
-static void recall_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  
-  if (!cx->func_imp) {
-    cx_error(cx, cx->row, cx->col, "Nothing to recall");
-    return;
-  }
-
-  if (!cx_scan_args(cx, cx->func_imp->func)) { return; }
-  
-  if (!cx_func_imp_match(cx->func_imp, &scope->stack)) {
-    cx_error(cx, cx->row, cx->col, "Recall not applicable");
-    return;
-  }
-
-  cx_eval(cx, cx->func_imp->bin, NULL);
 }
 
 static void nil_imp(struct cx_scope *scope) {
@@ -337,6 +311,24 @@ static void call_imp(struct cx_scope *scope) {
   struct cx_box v = *cx_test(cx_pop(scope, false));
   cx_call(&v, scope);
   cx_box_deinit(&v);
+}
+
+static void recall_imp(struct cx_scope *scope) {
+  struct cx *cx = scope->cx;
+  
+  if (!cx->func_imp) {
+    cx_error(cx, cx->row, cx->col, "Nothing to recall");
+    return;
+  }
+
+  if (!cx_scan_args(cx, cx->func_imp->func)) { return; }
+  
+  if (!cx_func_imp_match(cx->func_imp, &scope->stack)) {
+    cx_error(cx, cx->row, cx->col, "Recall not applicable");
+    return;
+  }
+
+  cx_eval(cx, cx->func_imp->bin, NULL);
 }
 
 static void clock_imp(struct cx_scope *scope) {

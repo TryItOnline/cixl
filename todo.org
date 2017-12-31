@@ -1,17 +1,14 @@
-* change macros to compile to ops
-** add set op
-** replaces macro_op
-* ---
-* add wrap macro for cx_add_type
-** pass NULL
-* change func imps to return bool
-* update readme
 * step pointers instead of cx_vec_get in func_imp_match
 * speed up cx_is
 ** add cx_type.tag, tags uint64_t
 ** keep next_type_tag in cx
 ** start on 1, double on each new type
 ** change cx_is to binary AND type tags instead
+--
+* add wrap macro for cx_add_type
+** pass NULL
+* change func imps to return bool
+* update readme
 * add fail func
 ** like test but just call error with message
 * add basic io

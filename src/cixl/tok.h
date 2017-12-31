@@ -21,7 +21,7 @@ struct cx_bin;
 struct cx_tok;
 
 struct cx_tok_type {
-  ssize_t (*compile)(size_t tok_idx, struct cx_bin *bin, struct cx *cx);
+  ssize_t (*compile)(struct cx_bin *bin, size_t tok_idx, struct cx *cx);
   void (*copy)(struct cx_tok *dst, struct cx_tok *src);
   void (*deinit)(struct cx_tok *);
 };

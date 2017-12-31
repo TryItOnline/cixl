@@ -59,11 +59,6 @@ bool cx_op_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
     break;
   }
 
-  case CX_OMACRO: {
-    struct cx_macro_eval *eval = tok->as_ptr;
-    return eval->imp(eval, cx);
-  }
-
   case CX_OPUSH: {
     cx_copy(cx_push(cx_scope(cx, 0)),  &tok->as_box);
     break;
@@ -71,6 +66,16 @@ bool cx_op_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
 
   case CX_OSCOPE: {
     cx_begin(cx, op->as_scope.child);
+    break;
+  }
+
+  case CX_OSET: {
+    struct cx_scope *s = cx_scope(cx, op->as_set.parent ? 1 : 0);
+    struct cx_box *v = cx_pop(s, false);
+    if (!v) { return false; }
+    *cx_set(op->as_set.parent ? cx_scope(cx, 0) : s,
+	    op->as_set.id,
+	    op->as_set.force) = *v;
     break;
   }
 

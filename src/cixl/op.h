@@ -8,8 +8,8 @@ struct cx_func_imp;
 struct cx_op;
 struct cx_tok;
 
-enum cx_op_type {CX_OCUT, CX_OGET, CX_OFUNCALL, CX_OLAMBDA, CX_OMACRO, CX_OPUSH,
-		 CX_OSCOPE, CX_OSTOP, CX_OUNSCOPE};
+enum cx_op_type {CX_OCUT, CX_OGET, CX_OFUNCALL, CX_OLAMBDA, CX_OPUSH, CX_OSCOPE,
+		 CX_OSET, CX_OSTOP, CX_OUNSCOPE};
 
 struct cx_get_op {
   char *id;
@@ -28,6 +28,11 @@ struct cx_scope_op {
   bool child;
 };
 
+struct cx_set_op {
+  char *id;
+  bool parent, force;
+};
+
 struct cx_op {
   size_t tok_idx;
   enum cx_op_type type;
@@ -36,6 +41,7 @@ struct cx_op {
     struct cx_get_op as_get;
     struct cx_funcall_op as_funcall;
     struct cx_lambda_op as_lambda;
+    struct cx_set_op as_set;
     struct cx_scope_op as_scope;
   };
 };

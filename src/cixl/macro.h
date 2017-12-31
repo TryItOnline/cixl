@@ -5,6 +5,7 @@
 #include "cixl/vec.h"
 
 struct cx;
+struct cx_bin;
 struct cx_macro;
 struct cx_macro_eval;
 
@@ -21,7 +22,10 @@ struct cx_macro *cx_macro_init(struct cx_macro *macro,
 
 struct cx_macro *cx_macro_deinit(struct cx_macro *macro);
 
-typedef bool (*cx_macro_eval_t)(struct cx_macro_eval *eval, struct cx *cx);
+typedef ssize_t (*cx_macro_eval_t)(struct cx_macro_eval *eval,
+				   struct cx_bin *bin,
+				   size_t tok_idx,
+				   struct cx *cx);
 
 struct cx_macro_eval {
   struct cx_vec toks;

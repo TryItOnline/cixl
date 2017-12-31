@@ -54,7 +54,7 @@ bool cx_compile(struct cx *cx,
       return false;
     }
     
-    if ((tok_idx = tok->type->compile(tok_idx, out, cx)) == -1) { return false; }
+    if ((tok_idx = tok->type->compile(out, tok_idx, cx)) == -1) { return false; }
   }
 
   return true;

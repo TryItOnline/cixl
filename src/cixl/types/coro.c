@@ -12,10 +12,10 @@ struct cx_coro *cx_coro_init(struct cx_coro *coro,
 			     struct cx *cx,
 			     struct cx_scope *scope) {
   coro->scope = cx_scope_ref(scope);
-  coro->nrefs = 1;
-  coro->done = false;
   coro->bin = cx_bin_ref(cx->bin);
   coro->op = cx->op;
+  coro->nrefs = 1;
+  coro->done = false;
   return coro;
 }
 
