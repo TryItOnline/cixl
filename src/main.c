@@ -7,7 +7,7 @@
 int main() {
   cx_vec_tests();
   cx_set_tests();
-  //cx_tests();
+  cx_tests();
 
   struct cx cx;
   cx_init(&cx);

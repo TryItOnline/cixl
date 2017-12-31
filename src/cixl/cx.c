@@ -234,28 +234,22 @@ static bool func_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   return true;
 }
 
-static bool recall_eval(struct cx_macro_eval *eval, struct cx *cx) {
-  struct cx_scope *s = cx_scope(cx, 0);
+static void recall_imp(struct cx_scope *scope) {
+  struct cx *cx = scope->cx;
   
   if (!cx->func_imp) {
     cx_error(cx, cx->row, cx->col, "Nothing to recall");
-    return false;
+    return;
   }
 
-  if (!cx_scan_args(cx, cx->func_imp->func)) { return false; }
+  if (!cx_scan_args(cx, cx->func_imp->func)) { return; }
   
-  if (!cx_func_imp_match(cx->func_imp, &s->stack)) {
+  if (!cx_func_imp_match(cx->func_imp, &scope->stack)) {
     cx_error(cx, cx->row, cx->col, "Recall not applicable");
-    return false;
+    return;
   }
 
-  return cx_eval(cx, cx->func_imp->bin, NULL);
-}
-
-static bool recall_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
-  struct cx_macro_eval *eval = cx_macro_eval_new(recall_eval);
-  cx_tok_init(cx_vec_push(out), CX_TMACRO(), cx->row, cx->col)->as_ptr = eval;
-  return true;
+  cx_eval(cx, cx->func_imp->bin, NULL);
 }
 
 static void nil_imp(struct cx_scope *scope) {
@@ -394,7 +388,6 @@ struct cx *cx_init(struct cx *cx) {
   cx_add_macro(cx, "trait:", trait_parse);
   cx_add_macro(cx, "let:", let_parse);
   cx_add_macro(cx, "func:", func_parse);
-  cx_add_macro(cx, "recall", recall_parse);
   
   cx->opt_type = cx_add_type(cx, "Opt", NULL);
   cx->any_type = cx_add_type(cx, "A", cx->opt_type, NULL);
@@ -430,6 +423,7 @@ struct cx *cx_init(struct cx *cx) {
   
   cx_add_func(cx, "compile", cx_arg(cx->str_type))->ptr = compile_imp;
   cx_add_func(cx, "call", cx_arg(cx->any_type))->ptr = call_imp;
+  cx_add_func(cx, "recall", cx_arg(cx->any_type))->ptr = recall_imp;
 
   cx_add_func(cx, "clock", cx_arg(cx->any_type))->ptr = clock_imp;
   cx_add_func(cx, "test", cx_arg(cx->opt_type))->ptr = test_imp;
