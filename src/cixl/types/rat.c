@@ -30,7 +30,7 @@ struct cx_rat *cx_rat_init(struct cx_rat *rat, uint64_t num, uint64_t den, bool 
   return rat;
 }
 
-int64_t cx_rat_trunc(struct cx_rat *rat) {
+int64_t cx_rat_int(struct cx_rat *rat) {
   int64_t n = rat->num / rat->den;
   return rat->neg ? -n : n;
 }
@@ -119,9 +119,9 @@ static bool mul_imp(struct cx_scope *scope) {
   return true;
 }
 
-static bool trunc_imp(struct cx_scope *scope) {
+static bool int_imp(struct cx_scope *scope) {
   struct cx_box v = *cx_test(cx_pop(scope, false));
-  cx_box_init(cx_push(scope), scope->cx->int_type)->as_int = cx_rat_trunc(&v.as_rat);
+  cx_box_init(cx_push(scope), scope->cx->int_type)->as_int = cx_rat_int(&v.as_rat);
   return true;
 }
 
@@ -152,7 +152,7 @@ struct cx_type *cx_init_rat_type(struct cx *cx) {
   cx_add_func(cx, "+", cx_arg(t), cx_arg(t))->ptr = add_imp;
   cx_add_func(cx, "*", cx_arg(t), cx_arg(t))->ptr = mul_imp;
   
-  cx_add_func(cx, "trunc", cx_arg(t))->ptr = trunc_imp;
+  cx_add_func(cx, "int", cx_arg(t))->ptr = int_imp;
   
   return t;
 }

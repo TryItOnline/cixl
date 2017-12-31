@@ -15,6 +15,9 @@ struct cx_rat {
 };
 
 struct cx_rat *cx_rat_init(struct cx_rat *rat, uint64_t num, uint64_t den, bool neg);
+
+int64_t cx_rat_int(struct cx_rat *rat);
+
 void cx_rat_add(struct cx_rat *dst, struct cx_rat *src);
 void cx_rat_mul(struct cx_rat *dst, struct cx_rat *src);
 

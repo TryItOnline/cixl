@@ -248,13 +248,13 @@ Several parameters may share the same type. An index may may be specified instea
 Basic rational arithmetics is supported out of the box.
 
 ```
-> 1 / 2, 42 / 2 *
+> 1 / 2, -42 / 2 *
 ..
-[21/2]
+[-21/2]
 
-> trunc
+> int
 ..
-10
+-10
 ```
 
 ### Optionals
