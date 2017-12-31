@@ -3,9 +3,16 @@
 ** init to nil
 * add vect put/get to/from index
 ** check bounds
-* add vect reduce/filter
 * add rat sub/div
 * add rat tests
+* add Stream type
+** cx_stream with byte vec & r/w pos
+** stream fn to create
+** stream '...' write fn
+** stream rseek/wseek fn
+** stream str fn
+** stream len fn
+* ---
 * add type.cmp
 ** add Cmp trait
 ** use to implement < > <= >= for all Cmp types
