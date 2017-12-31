@@ -1,7 +1,3 @@
-* add wrap macro for cx_add_type
-** pass NULL
-* change func imps to return bool
-* update readme
 * add struct: macro
 ** add Struct type 
 *** add to parents for all structs
@@ -30,9 +26,3 @@
 * add str interpolation
 
 clock {,10000 times {,fib 50 _}} / 1000000
-
-eval parse '7 35 +'
-
-func: fib-rec(a b n Int) $n? if {, recall $b, $a + $b, -- $n} $a;
-
-'{,fib 50 _}' compile call call
