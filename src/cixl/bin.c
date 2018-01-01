@@ -38,7 +38,7 @@ void cx_bin_unref(struct cx_bin *bin) {
 }
 
 struct cx_bin_func *cx_bin_add_func(struct cx_bin *bin,
-				    struct cx_func_imp *imp,
+				    struct cx_fimp *imp,
 				    size_t start_op) {
   struct cx_bin_func *f = cx_test(cx_set_insert(&bin->funcs, &imp));
   f->imp = imp;
@@ -46,7 +46,7 @@ struct cx_bin_func *cx_bin_add_func(struct cx_bin *bin,
   return f;
 }
 
-struct cx_bin_func *cx_bin_get_func(struct cx_bin *bin, struct cx_func_imp *imp) {
+struct cx_bin_func *cx_bin_get_func(struct cx_bin *bin, struct cx_fimp *imp) {
   return cx_set_get(&bin->funcs, &imp);
 }
 

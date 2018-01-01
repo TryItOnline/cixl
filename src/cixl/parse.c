@@ -25,21 +25,21 @@ static bool parse_type(struct cx *cx,
     cx_tok_init(cx_vec_push(out),
 		CX_TTYPE(),
 		cx->row, cx->col)->as_ptr = t;
-   } else if (!lookup) {
+  } else if (!lookup) {
     cx_tok_init(cx_vec_push(out),
 		CX_TID(),
 		cx->row, cx->col)->as_ptr = strdup(id);
   } else {
-     return false;
+    return false;
   }
 
   return true;
 }
 
-static struct cx_vec *parse_func_imp(struct cx *cx,
-				     struct cx_func *func,
-				     FILE *in,
-				     struct cx_vec *out) {
+static struct cx_vec *parse_fimp(struct cx *cx,
+				 struct cx_func *func,
+				 FILE *in,
+				 struct cx_vec *out) {
   char c = fgetc(in);
 
   if (c != '<') {
@@ -72,8 +72,8 @@ static bool parse_func(struct cx *cx, const char *id, FILE *in, struct cx_vec *o
   struct cx_func *f = cx_get_func(cx, ref ? id+1 : id, false);
   if (!f) { return false; }
 
-  struct cx_func_imp *imp = NULL;
-  struct cx_vec *types = parse_func_imp(cx, f, in, out);
+  struct cx_fimp *imp = NULL;
+  struct cx_vec *types = parse_fimp(cx, f, in, out);
 	  
   if (types) {
     imp = cx_func_get_imp(f, types);

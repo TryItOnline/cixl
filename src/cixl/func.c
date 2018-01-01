@@ -11,7 +11,7 @@
 #include "cixl/tok.h"
 
 static const void *get_imp_arg_tags(const void *value) {
-  struct cx_func_imp *const *imp = value;
+  struct cx_fimp *const *imp = value;
   return &(*imp)->arg_tags;
 }
 
@@ -27,7 +27,7 @@ struct cx_func *cx_func_init(struct cx_func *func,
 			     int nargs) {
   func->cx = cx;
   func->id = strdup(id);
-  cx_set_init(&func->imps, sizeof(struct cx_func_imp *), cmp_arg_tags);
+  cx_set_init(&func->imps, sizeof(struct cx_fimp *), cmp_arg_tags);
   func->imps.key = get_imp_arg_tags;
   func->nargs = nargs;
   return func;
@@ -35,14 +35,14 @@ struct cx_func *cx_func_init(struct cx_func *func,
 
 struct cx_func *cx_func_deinit(struct cx_func *func) {
   free(func->id);
-  cx_do_set(&func->imps, struct cx_func_imp *, i) { free(cx_func_imp_deinit(*i)); }
+  cx_do_set(&func->imps, struct cx_fimp *, i) { free(cx_fimp_deinit(*i)); }
   cx_set_deinit(&func->imps);
   return func; 
 }
 
-struct cx_func_imp *cx_func_imp_init(struct cx_func_imp *imp,
-				     struct cx_func *func,
-				     cx_type_tag_t arg_tags) {
+struct cx_fimp *cx_fimp_init(struct cx_fimp *imp,
+			     struct cx_func *func,
+			     cx_type_tag_t arg_tags) {
   imp->func = func;
   imp->arg_tags = arg_tags;
   imp->ptr = NULL;
@@ -52,7 +52,7 @@ struct cx_func_imp *cx_func_imp_init(struct cx_func_imp *imp,
   return imp;
 }
 
-struct cx_func_imp *cx_func_imp_deinit(struct cx_func_imp *imp) {
+struct cx_fimp *cx_fimp_deinit(struct cx_fimp *imp) {
   cx_vec_deinit(&imp->args);
   cx_do_vec(&imp->toks, struct cx_tok, t) { cx_tok_deinit(t); }
   cx_vec_deinit(&imp->toks);
@@ -68,9 +68,9 @@ struct cx_func_arg cx_narg(int n) {
   return (struct cx_func_arg) { NULL, n };
 }
 
-struct cx_func_imp *cx_func_add_imp(struct cx_func *func,
-				    int nargs,
-				    struct cx_func_arg *args) {
+struct cx_fimp *cx_func_add_imp(struct cx_func *func,
+				int nargs,
+				struct cx_func_arg *args) {
   struct cx_vec imp_args;
   cx_vec_init(&imp_args, sizeof(struct cx_func_arg));
   cx_type_tag_t arg_tags = 0;
@@ -85,22 +85,22 @@ struct cx_func_imp *cx_func_add_imp(struct cx_func *func,
     }
   }
     
-  struct cx_func_imp **found = cx_set_get(&func->imps, &arg_tags);
+  struct cx_fimp **found = cx_set_get(&func->imps, &arg_tags);
   
   if (found) {
     cx_set_delete(&func->imps, &arg_tags);
-    free(cx_func_imp_deinit(*found));
+    free(cx_fimp_deinit(*found));
   }
 
-  struct cx_func_imp *imp = cx_func_imp_init(malloc(sizeof(struct cx_func_imp)),
-					     func,
-					     arg_tags);
-  *(struct cx_func_imp **)cx_set_insert(&func->imps, &arg_tags) = imp;
+  struct cx_fimp *imp = cx_fimp_init(malloc(sizeof(struct cx_fimp)),
+				     func,
+				     arg_tags);
+  *(struct cx_fimp **)cx_set_insert(&func->imps, &arg_tags) = imp;
   imp->args = imp_args;
   return imp;
 }
 
-bool cx_func_imp_match(struct cx_func_imp *imp, struct cx_vec *stack) {
+bool cx_fimp_match(struct cx_fimp *imp, struct cx_vec *stack) {
   if (!imp->args.count) { return true; }
   
   struct cx_func_arg *i = (struct cx_func_arg *)cx_vec_end(&imp->args)-1;
@@ -121,10 +121,10 @@ bool cx_func_imp_match(struct cx_func_imp *imp, struct cx_vec *stack) {
   return true;
 }
 
-bool cx_func_imp_eval(struct cx_func_imp *imp, struct cx_scope *scope) {
+bool cx_fimp_eval(struct cx_fimp *imp, struct cx_scope *scope) {
   struct cx *cx = scope->cx;
-  struct cx_func_imp *prev = cx->func_imp;
-  cx->func_imp = imp;
+  struct cx_fimp *prev = cx->fimp;
+  cx->fimp = imp;
   struct cx_bin_func *bin = cx_bin_get_func(cx->bin, imp);
   bool ok = false;
 
@@ -145,25 +145,25 @@ bool cx_func_imp_eval(struct cx_func_imp *imp, struct cx_scope *scope) {
     ok = cx_eval(cx, imp->bin, NULL);
   }
   
-  cx->func_imp = prev;
+  cx->fimp = prev;
   return ok;
 }
 
-bool cx_func_imp_call(struct cx_func_imp *imp, struct cx_scope *scope) {
+bool cx_fimp_call(struct cx_fimp *imp, struct cx_scope *scope) {
   if (imp->ptr) {
     imp->ptr(scope);
     return true;
   }
   
   cx_begin(scope->cx, false);
-  bool ok = cx_func_imp_eval(imp, scope);
+  bool ok = cx_fimp_eval(imp, scope);
   cx_end(scope->cx);
   return ok;
 }
 
-struct cx_func_imp *cx_func_get_imp(struct cx_func *func, struct cx_vec *stack) {
-  cx_do_set(&func->imps, struct cx_func_imp *, imp) {
-    if (cx_func_imp_match(*imp, stack)) { return *imp; }
+struct cx_fimp *cx_func_get_imp(struct cx_func *func, struct cx_vec *stack) {
+  cx_do_set(&func->imps, struct cx_fimp *, imp) {
+    if (cx_fimp_match(*imp, stack)) { return *imp; }
   }
 
   return NULL;
@@ -176,14 +176,14 @@ static bool equid_imp(struct cx_box *x, struct cx_box *y) {
 static bool call_imp(struct cx_box *value, struct cx_scope *scope) {
   struct cx *cx = scope->cx;
   
-  struct cx_func_imp *imp = cx_func_get_imp(value->as_ptr, &scope->stack);
+  struct cx_fimp *imp = cx_func_get_imp(value->as_ptr, &scope->stack);
 
   if (!imp) {
     cx_error(cx, cx->row, cx->col, "Func not applicable: '%s'", imp->func->id);
     return -1;
   }
 
-  return cx_func_imp_call(imp, scope);
+  return cx_fimp_call(imp, scope);
 }
 
 static void fprint_imp(struct cx_box *value, FILE *out) {

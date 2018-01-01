@@ -47,7 +47,7 @@ cx_tok_type(CX_TCUT, {
 
 cx_tok_type(CX_TEND);
 
-static bool inline_fimp(struct cx_func_imp *imp,
+static bool inline_fimp(struct cx_fimp *imp,
 			struct cx_bin *bin,
 			size_t tok_idx,
 			struct cx *cx) {
@@ -73,7 +73,7 @@ static bool inline_fimp(struct cx_func_imp *imp,
 
 static ssize_t fimp_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) {  
   struct cx_tok *tok = cx_vec_get(&bin->toks, tok_idx);  
-  struct cx_func_imp *imp = tok->as_ptr;
+  struct cx_fimp *imp = tok->as_ptr;
 
   if (!imp->ptr &&
       !cx_bin_get_func(bin, imp) &&
@@ -98,8 +98,8 @@ cx_tok_type(CX_TFIMP, {
 static ssize_t func_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) {  
   struct cx_tok *tok = cx_vec_get(&bin->toks, tok_idx);  
   struct cx_func *func = tok->as_ptr;
-  struct cx_func_imp *imp = (func->imps.members.count == 1)
-    ? *(struct cx_func_imp **)cx_vec_start(&func->imps.members)
+  struct cx_fimp *imp = (func->imps.members.count == 1)
+    ? *(struct cx_fimp **)cx_vec_start(&func->imps.members)
     : NULL;
 
   if (imp &&

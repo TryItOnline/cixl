@@ -43,13 +43,13 @@ static bool funcall_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
   if (!cx_scan_args(cx, func)) { return false; }
     
   struct cx_scope *s = cx_scope(cx, 0);
-  struct cx_func_imp *imp = op->as_funcall.imp;
+  struct cx_fimp *imp = op->as_funcall.imp;
 
   if (imp) {
-    if (!cx_func_imp_match(imp, &s->stack)) { imp = NULL; }
+    if (!cx_fimp_match(imp, &s->stack)) { imp = NULL; }
   } else {
     imp = op->as_funcall.jit_imp;
-    if (imp && !cx_func_imp_match(imp, &s->stack)) { imp = NULL; }
+    if (imp && !cx_fimp_match(imp, &s->stack)) { imp = NULL; }
     if (!imp) { imp = cx_func_get_imp(func, &s->stack); }
   }
   
@@ -59,7 +59,7 @@ static bool funcall_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
   }
     
   op->as_funcall.jit_imp = imp;
-  return cx_func_imp_call(imp, s);
+  return cx_fimp_call(imp, s);
 }
 
 cx_op_type(CX_OFUNCALL, {

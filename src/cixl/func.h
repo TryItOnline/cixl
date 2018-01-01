@@ -23,7 +23,7 @@ struct cx_func *cx_func_init(struct cx_func *func,
 
 struct cx_func *cx_func_deinit(struct cx_func *func);
 			  
-struct cx_func_imp {
+struct cx_fimp {
   struct cx_func *func;
   cx_type_tag_t arg_tags;
   struct cx_vec args;
@@ -32,14 +32,14 @@ struct cx_func_imp {
   struct cx_bin *bin;
 };
 
-struct cx_func_imp *cx_func_imp_init(struct cx_func_imp *imp,
-				     struct cx_func *func,
-				     cx_type_tag_t arg_tags);
+struct cx_fimp *cx_fimp_init(struct cx_fimp *imp,
+			     struct cx_func *func,
+			     cx_type_tag_t arg_tags);
 
-struct cx_func_imp *cx_func_imp_deinit(struct cx_func_imp *imp);
-bool cx_func_imp_match(struct cx_func_imp *imp, struct cx_vec *stack);
-bool cx_func_imp_eval(struct cx_func_imp *imp, struct cx_scope *scope);
-bool cx_func_imp_call(struct cx_func_imp *imp, struct cx_scope *scope);
+struct cx_fimp *cx_fimp_deinit(struct cx_fimp *imp);
+bool cx_fimp_match(struct cx_fimp *imp, struct cx_vec *stack);
+bool cx_fimp_eval(struct cx_fimp *imp, struct cx_scope *scope);
+bool cx_fimp_call(struct cx_fimp *imp, struct cx_scope *scope);
 
 struct cx_func_arg {
   struct cx_type *type;
@@ -49,11 +49,11 @@ struct cx_func_arg {
 struct cx_func_arg cx_arg(struct cx_type *type);
 struct cx_func_arg cx_narg(int n);
 
-struct cx_func_imp *cx_func_add_imp(struct cx_func *func,
-				    int nargs,
-				    struct cx_func_arg *args);
+struct cx_fimp *cx_func_add_imp(struct cx_func *func,
+				int nargs,
+				struct cx_func_arg *args);
 
-struct cx_func_imp *cx_func_get_imp(struct cx_func *func, struct cx_vec *args);
+struct cx_fimp *cx_func_get_imp(struct cx_func *func, struct cx_vec *args);
 
 struct cx_type *cx_init_func_type(struct cx *cx);
 struct cx_type *cx_init_func_type(struct cx *cx);

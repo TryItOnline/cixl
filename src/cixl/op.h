@@ -4,7 +4,7 @@
 #include "cixl/box.h"
 
 struct cx_func;
-struct cx_func_imp;
+struct cx_fimp;
 struct cx_op;
 struct cx_tok;
 
@@ -38,7 +38,7 @@ struct cx_func_op {
 
 struct cx_funcall_op {
   struct cx_func *func;
-  struct cx_func_imp *imp, *jit_imp;
+  struct cx_fimp *imp, *jit_imp;
 };
 
 struct cx_lambda_op {

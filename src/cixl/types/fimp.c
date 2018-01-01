@@ -10,19 +10,19 @@ static bool equid_imp(struct cx_box *x, struct cx_box *y) {
 }
 
 static bool call_imp(struct cx_box *value, struct cx_scope *scope) {
-  struct cx_func_imp *imp = value->as_ptr;
+  struct cx_fimp *imp = value->as_ptr;
   
-  if (!cx_func_imp_match(imp, &scope->stack)) {
+  if (!cx_fimp_match(imp, &scope->stack)) {
     struct cx *cx = scope->cx;
     cx_error(cx, cx->row, cx->col, "Func not applicable: '%s'", imp->func->id);
     return -1;
   }
 
-  return cx_func_imp_call(imp, scope);
+  return cx_fimp_call(imp, scope);
 }
 
 static void fprint_imp(struct cx_box *value, FILE *out) {
-  struct cx_func_imp *imp = value->as_ptr;
+  struct cx_fimp *imp = value->as_ptr;
   fprintf(out, "Fimp(%s", imp->func->id);
   cx_do_vec(&imp->args, struct cx_func_arg, a) {
     if (a->type) {

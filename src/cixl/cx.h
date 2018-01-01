@@ -33,7 +33,7 @@ struct cx {
   struct cx_vec scopes;
   struct cx_scope *main;
   
-  struct cx_func_imp *func_imp;
+  struct cx_fimp *fimp;
 
   struct cx_bin *bin;
   struct cx_op *op;
@@ -57,10 +57,10 @@ struct cx_type *cx_get_type(struct cx *cx, const char *id, bool silent);
 struct cx_macro *cx_add_macro(struct cx *cx, const char *id, cx_macro_parse_t imp);
 struct cx_macro *cx_get_macro(struct cx *cx, const char *id, bool silent);
 
-struct cx_func_imp *_cx_add_func(struct cx *cx,
-				 const char *id,
-				 int nargs,
-				 struct cx_func_arg *args);
+struct cx_fimp *_cx_add_func(struct cx *cx,
+			     const char *id,
+			     int nargs,
+			     struct cx_func_arg *args);
 
 bool cx_add_mixl_func(struct cx *cx,
 		      const char *id,

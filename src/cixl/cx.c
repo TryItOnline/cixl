@@ -340,19 +340,19 @@ static bool call_imp(struct cx_scope *scope) {
 static bool recall_imp(struct cx_scope *scope) {
   struct cx *cx = scope->cx;
   
-  if (!cx->func_imp) {
+  if (!cx->fimp) {
     cx_error(cx, cx->row, cx->col, "Nothing to recall");
     return false;
   }
 
-  if (!cx_scan_args(cx, cx->func_imp->func)) { return false; }
+  if (!cx_scan_args(cx, cx->fimp->func)) { return false; }
   
-  if (!cx_func_imp_match(cx->func_imp, &scope->stack)) {
+  if (!cx_fimp_match(cx->fimp, &scope->stack)) {
     cx_error(cx, cx->row, cx->col, "Recall not applicable");
     return false;
   }
 
-  return cx_func_imp_eval(cx->func_imp, scope);
+  return cx_fimp_eval(cx->fimp, scope);
 }
 
 static bool clock_imp(struct cx_scope *scope) {
@@ -381,7 +381,7 @@ static bool test_imp(struct cx_scope *scope) {
 
 struct cx *cx_init(struct cx *cx) {
   cx->next_type_tag = 1;
-  cx->func_imp = NULL;
+  cx->fimp = NULL;
   cx->bin = NULL;
   cx->op = NULL;
   cx->stop = false;
@@ -520,10 +520,10 @@ struct cx_type *cx_get_type(struct cx *cx, const char *id, bool silent) {
   return t ? *t : NULL;
 }
 
-struct cx_func_imp *_cx_add_func(struct cx *cx,
-				 const char *id,
-				 int nargs,
-				 struct cx_func_arg *args) {
+struct cx_fimp *_cx_add_func(struct cx *cx,
+			     const char *id,
+			     int nargs,
+			     struct cx_func_arg *args) {
   struct cx_func **f = cx_set_get(&cx->funcs, &id);
 
   if (f) {
