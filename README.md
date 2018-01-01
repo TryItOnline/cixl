@@ -407,7 +407,7 @@ Traits are abstract types, they are useful for simplifying type checking and/or 
 The compiler may be invoked from within the language through the ```compile``` function, the result is a compiled sequence of operations that may be passed around and called.
 
 ```
-> '(1 2 +)' compile
+> '1 + 2' compile
 ..
 [Bin(0x8899a0)@1]
 

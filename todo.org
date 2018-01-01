@@ -1,5 +1,10 @@
-* add compile: macro
-* --
+* add cx_init_io
+** add ask fn
+*** read from stdin until newline with prompt
+** add say fn
+*** write to stdout with newline
+** add load fn
+*** add cx_load(cx, const char *path)
 * add rat sub/div
 * add rat tests
 * add str \n \t \' support
@@ -31,14 +36,6 @@
 ** use ref counted sets of cx_struct_slot as instances
 * add fail func
 ** like test but just call error with message
-* add basic io
-** add ask fn from main
-*** read from stdin until newline with prompt
-** add say fn from main
-*** write to stdout with newline
-* add cx_init_io with load fn
-** load first repl arg if any
-** push rest on stack
 * add Str 'int' fn
 * add Int 'str' fn
 * add Char 'int' fn
