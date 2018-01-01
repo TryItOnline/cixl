@@ -245,6 +245,19 @@ static bool zap_imp(struct cx_scope *scope) {
   return true;
 }
 
+static bool flip_imp(struct cx_scope *scope) {
+  if (scope->stack.count < 2) {
+    struct cx *cx = scope->cx;
+    cx_error(cx, cx->row, cx->col, "Nothing to flip");
+    return false;
+  }
+
+  struct cx_box *ptr = cx_vec_peek(&scope->stack, 0), tmp = *ptr;
+  *ptr = *(ptr-1);
+  *(ptr-1) = tmp;
+  return true;
+}
+
 static bool eqval_imp(struct cx_scope *scope) {
   struct cx_box
     y = *cx_test(cx_pop(scope, false)),
@@ -413,6 +426,7 @@ struct cx *cx_init(struct cx *cx) {
   cx_add_func(cx, "|")->ptr = cls_imp;
   cx_add_func(cx, "%", cx_arg(cx->opt_type))->ptr = dup_imp;
   cx_add_func(cx, "_", cx_arg(cx->opt_type))->ptr = zap_imp;
+  cx_add_func(cx, "~", cx_arg(cx->opt_type))->ptr = flip_imp;
   
   cx_add_func(cx, "=", cx_arg(cx->any_type), cx_narg(0))->ptr = eqval_imp;
   cx_add_func(cx, "==", cx_arg(cx->any_type), cx_narg(0))->ptr = equid_imp;

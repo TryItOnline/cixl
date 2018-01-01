@@ -106,11 +106,15 @@ cx_op_type(CX_OSCOPE, {
 
 static bool set_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
   struct cx_scope *s = cx_scope(cx, op->as_set.parent ? 1 : 0);
-  struct cx_box *v = cx_pop(s, false);
-  if (!v) { return false; }
-  *cx_set(op->as_set.parent ? cx_scope(cx, 0) : s,
-	  op->as_set.id,
-	  op->as_set.force) = *v;
+  struct cx_box *src = cx_pop(s, false);
+  if (!src) { return false; }
+  
+  struct cx_box *dst = cx_set(op->as_set.parent ? cx_scope(cx, 0) : s,
+			      op->as_set.id,
+			      op->as_set.force);
+
+  if (!dst) { return false; }
+  *dst = *src;
   return true;
 }
 
