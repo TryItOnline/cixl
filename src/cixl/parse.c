@@ -9,10 +9,42 @@
 #include "cixl/cx.h"
 #include "cixl/error.h"
 #include "cixl/eval.h"
+#include "cixl/func.h"
 #include "cixl/parse.h"
 #include "cixl/types/int.h"
 #include "cixl/types/lambda.h"
 #include "cixl/vec.h"
+
+static struct cx_vec *parse_func_imp(struct cx *cx,
+				     struct cx_func *func,
+				     FILE *in,
+				     struct cx_vec *out) {
+  char c = fgetc(in);
+
+  if (c != '<') {
+    ungetc(c, in);
+    return 0;
+  }
+  
+  int row = cx->row, col = cx->col;
+  struct cx_vec *types = cx_vec_new(sizeof(struct cx_box));
+  
+  while (true) {
+    if (!cx_parse_tok(cx, in, out, false)) { return false; }
+    struct cx_tok *tok = cx_vec_pop(out);
+    if (tok->type == CX_TUNTYPE()) { break; }
+
+    if (tok->type != CX_TTYPE()) {
+      cx_error(cx, row, col, "Invalid func type");
+      free(cx_vec_deinit(types));
+      return NULL;
+    }
+
+    cx_box_init(cx_vec_push(types), tok->as_ptr);
+  }
+
+  return types;
+}
 
 static bool parse_id(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
   struct cx_buf id;
@@ -32,7 +64,6 @@ static bool parse_id(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
     fputc(c, id.stream);
     col++;
   }
-
  exit: {
     cx_buf_close(&id);
 
@@ -67,24 +98,39 @@ static bool parse_id(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
 	} else {
 	  bool ref = id.data[0] == '&';
 	  struct cx_func *f = cx_get_func(cx, ref ? id.data+1 : id.data, false);
+	  free(id.data);
 
-	  if (!f) {
-	    free(id.data);
-	    return false;
+	  if (!f) { return false; }
+
+	  struct cx_func_imp *imp = NULL;
+	  struct cx_vec *types = parse_func_imp(cx, f, in, out);
+	  
+	  if (types) {
+	    imp = cx_func_get_imp(f, types);
+	    if (!imp) { cx_error(cx, cx->row, cx->col, "Func imp not found"); }
+	    free(cx_vec_deinit(types));
 	  }
-
+	  
 	  if (ref) {
 	    struct cx_box *box = &cx_tok_init(cx_vec_push(out),
 					      CX_TLITERAL(),
 					      cx->row, cx->col)->as_box;
-	    cx_box_init(box, cx->func_type)->as_ptr = f;
+	    if (imp) {
+	      cx_box_init(box, cx->fimp_type)->as_ptr = imp;
+	    } else {
+	      cx_box_init(box, cx->func_type)->as_ptr = f;
+	    }
 	  } else {
-	    cx_tok_init(cx_vec_push(out),
-			CX_TFUNC(),
-			cx->row, cx->col)->as_ptr = f;
+	    if (imp) {
+	      cx_tok_init(cx_vec_push(out),
+			  CX_TFIMP(),
+			  cx->row, cx->col)->as_ptr = imp;
+	    } else {
+	      cx_tok_init(cx_vec_push(out),
+			  CX_TFUNC(),
+			  cx->row, cx->col)->as_ptr = f;
+	    }
 	  }
-	  
-	  free(id.data);
 	}
 	
 	cx->col = col;
@@ -240,61 +286,64 @@ bool cx_parse_tok(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
   bool done = false;
 
   while (!done) {
-      char c = fgetc(in);
+    char c = fgetc(in);
       
-      switch (c) {
-      case EOF:
-	done = true;
-	break;
-      case ' ':
-	cx->col++;
-	break;
-      case '\n':
-	cx->row++;
-	break;
-      case ',':
-	cx_tok_init(cx_vec_push(out), CX_TCUT(), row, col);
-	return true;
-      case ';':
-	cx_tok_init(cx_vec_push(out), CX_TEND(), row, col);
-	return true;
-      case '(':
-	return parse_group(cx, in, out, lookup);
-      case ')':
-	cx_tok_init(cx_vec_push(out), CX_TUNGROUP(), row, col);
-	return true;	
-      case '{':
-	return parse_lambda(cx, in, out, lookup);
-      case '}':
-	cx_tok_init(cx_vec_push(out), CX_TUNLAMBDA(), row, col);
-	return true;
-      case '\\':
-	return parse_char(cx, in, out);
-      case '\'':
-	return parse_str(cx, in, out);
-      case '-': {
-	char c1 = fgetc(in);
-	if (isdigit(c1)) {
-	  ungetc(c1, in);
-	  ungetc(c, in);
-	  return parse_int(cx, in, out);
-	} else {
-	  ungetc(c1, in);
-	  ungetc(c, in);
-	  return parse_id(cx, in, out, lookup);
-	}
-	
-	break;
-      }
-      default:
-	if (isdigit(c)) {
-	  ungetc(c, in);
-	  return parse_int(cx, in, out);
-	}
-	
+    switch (c) {
+    case EOF:
+      done = true;
+      break;
+    case ' ':
+      cx->col++;
+      break;
+    case '\n':
+      cx->row++;
+      break;
+    case ',':
+      cx_tok_init(cx_vec_push(out), CX_TCUT(), row, col);
+      return true;
+    case ';':
+      cx_tok_init(cx_vec_push(out), CX_TEND(), row, col);
+      return true;
+    case '(':
+      return parse_group(cx, in, out, lookup);
+    case ')':
+      cx_tok_init(cx_vec_push(out), CX_TUNGROUP(), row, col);
+      return true;	
+    case '{':
+      return parse_lambda(cx, in, out, lookup);
+    case '}':
+      cx_tok_init(cx_vec_push(out), CX_TUNLAMBDA(), row, col);
+      return true;
+    case '>':
+      cx_tok_init(cx_vec_push(out), CX_TUNTYPE(), row, col);
+      return true;	
+    case '\\':
+      return parse_char(cx, in, out);
+    case '\'':
+      return parse_str(cx, in, out);
+    case '-': {
+      char c1 = fgetc(in);
+      if (isdigit(c1)) {
+	ungetc(c1, in);
+	ungetc(c, in);
+	return parse_int(cx, in, out);
+      } else {
+	ungetc(c1, in);
 	ungetc(c, in);
 	return parse_id(cx, in, out, lookup);
       }
+	
+      break;
+    }
+    default:
+      if (isdigit(c)) {
+	ungetc(c, in);
+	return parse_int(cx, in, out);
+      }
+	
+      ungetc(c, in);
+      return parse_id(cx, in, out, lookup);
+    }
   }
 
   return false;

@@ -1,5 +1,5 @@
-#ifndef CX_STR_H
-#define CX_STR_H
+#ifndef CX_TYPE_STR_H
+#define CX_TYPE_STR_H
 
 struct cx;
 struct cx_type;

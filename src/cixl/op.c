@@ -44,15 +44,21 @@ static bool funcall_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
     
   struct cx_scope *s = cx_scope(cx, 0);
   struct cx_func_imp *imp = op->as_funcall.imp;
-  if (imp && !cx_func_imp_match(imp, &s->stack)) { imp = NULL; }
-  if (!imp) { imp = cx_func_get_imp(func, &s->stack); }
-    
+
+  if (imp) {
+    if (!cx_func_imp_match(imp, &s->stack)) { imp = NULL; }
+  } else {
+    imp = op->as_funcall.jit_imp;
+    if (imp && !cx_func_imp_match(imp, &s->stack)) { imp = NULL; }
+    if (!imp) { imp = cx_func_get_imp(func, &s->stack); }
+  }
+  
   if (!imp) {
     cx_error(cx, cx->row, cx->col, "Func not applicable: '%s'", func->id);
     return false;
   }
     
-  op->as_funcall.imp = imp;
+  op->as_funcall.jit_imp = imp;
   return cx_func_imp_call(imp, s);
 }
 

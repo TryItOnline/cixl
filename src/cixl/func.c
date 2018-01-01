@@ -9,7 +9,6 @@
 #include "cixl/func.h"
 #include "cixl/scope.h"
 #include "cixl/tok.h"
-#include "cixl/type.h"
 
 static const void *get_imp_arg_tags(const void *value) {
   struct cx_func_imp *const *imp = value;

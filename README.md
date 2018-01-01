@@ -31,63 +31,6 @@ Press Return twice to eval input.
 ### Status
 Examples from this document should work in the most recent version and run clean in ```valgrind```, outside of that I can't really promise much at the moment. Current work is focused on profiling and filling obvious gaps in functionality.
 
-### Performance
-There is still a lot of work remaining in the profiling and benchmarking departments, but preliminary results puts cixl at around 1-5 times slower than Python. Measured time is displayed in milliseconds.
-
-Let's start with a tail-recursive fibonacci to exercise the interpreter loop, it's worth mentioning that cixl uses 64-bit integers while Python settles for 32-bit:
-
-```
-> func: fib-rec(a b n Int)
-..  $n? if {$b $a $b + $n -- recall} $a;
-..func: fib(n Int)
-..  fib-rec 0 1 $n;
-..clock {10000 times {50 fib _}} / 1000000 int
-..
-[571]
-```
-
-```
-from timeit import timeit
-
-def _fib(a, b, n):
-    return _fib(b, a+b, n-1) if n > 0 else a
-
-def fib(n):
-    return _fib(0, 1, n)
-
-def test():
-    for i in range(10000):
-        fib(50)
-
-print(int(timeit(test, number=1) * 1000))
-
-$ python3 fib.py 
-118
-```
-
-Next up is consing a vector:
-
-```
-> | clock {(let: v vect; 10000000 for {$v ~ push})} / 1000000 int
-..
-[2034]
-```
-
-```
-from timeit import timeit
-
-def test():
-    v = []
-    
-    for i in range(10000000):
-        v.append(i)
-
-print(int(timeit(test, number=1) * 1000))
-
-$ python3 vect.py 
-1348
-```
-
 ### Stack
 The stack is accessible from user code, just like in Forth. Basic stack operations have dedicated operators; ```%``` for duplicating last value, ```_``` for dropping it, ```~``` for flipping the last two values and ```|``` for clearing the stack.
 
@@ -284,6 +227,19 @@ Each argument needs a type, ```A``` may be used to accept any type.
 [42]
 ```
 
+Argument types may be specified to select a specific implementation. Besides documentation and sanity checking, this allows the compiler to inline the definition in cases where there are more than one implementation.
+
+```
+> &+<Int>
+..
+[Fimp(+ Int Int)]
+
+> &+<Str>
+..
+Error in row 1, col 4:
+Func imp not found
+```
+
 Several parameters may share the same type. An index may may be specified instead of type to refer to previous arguments, it is substituted for the actual type on evaluation.
 
 ```
@@ -401,6 +357,7 @@ Capitalized names are treated as type references, the following types are define
 - A (Opt)
 - Bin (A)
 - Bool (A)
+- Fimp (A)
 - Func (A)
 - Int (Num)
 - Lambda (A)
@@ -511,6 +468,63 @@ int main() {
   cx_deinit(&cx);
   return 0;
 }
+```
+
+### Performance
+There is still a lot of work remaining in the profiling and benchmarking departments, but preliminary results puts cixl at around 1-5 times slower than Python. Measured time is displayed in milliseconds.
+
+Let's start with a tail-recursive fibonacci to exercise the interpreter loop, it's worth mentioning that cixl uses 64-bit integers while Python settles for 32-bit:
+
+```
+> func: fib-rec(a b n Int)
+..  $n? if {$b $a $b + $n -- recall} $a;
+..func: fib(n Int)
+..  fib-rec 0 1 $n;
+..clock {10000 times {50 fib _}} / 1000000 int
+..
+[571]
+```
+
+```
+from timeit import timeit
+
+def _fib(a, b, n):
+    return _fib(b, a+b, n-1) if n > 0 else a
+
+def fib(n):
+    return _fib(0, 1, n)
+
+def test():
+    for i in range(10000):
+        fib(50)
+
+print(int(timeit(test, number=1) * 1000))
+
+$ python3 fib.py 
+118
+```
+
+Next up is consing a vector:
+
+```
+> | clock {(let: v vect; 10000000 for {$v ~ push})} / 1000000 int
+..
+[2034]
+```
+
+```
+from timeit import timeit
+
+def test():
+    v = []
+    
+    for i in range(10000000):
+        v.append(i)
+
+print(int(timeit(test, number=1) * 1000))
+
+$ python3 vect.py 
+1348
 ```
 
 ### Zen

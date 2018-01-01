@@ -15,6 +15,7 @@
 #include "cixl/types/bin.h"
 #include "cixl/types/bool.h"
 #include "cixl/types/char.h"
+#include "cixl/types/fimp.h"
 #include "cixl/types/int.h"
 #include "cixl/types/lambda.h"
 #include "cixl/types/nil.h"
@@ -387,7 +388,7 @@ struct cx *cx_init(struct cx *cx) {
   cx->row = cx->col = -1;
   
   cx_set_init(&cx->separators, sizeof(char), cx_cmp_char);
-  cx_add_separators(cx, " \t\n;,|%_?!(){}");
+  cx_add_separators(cx, " \t\n;,|%_?!(){}<>");
 
   cx_set_init(&cx->types, sizeof(struct cx_type *), cx_cmp_str);
   cx->types.key = get_type_id;
@@ -419,6 +420,7 @@ struct cx *cx_init(struct cx *cx) {
   cx->vect_type = cx_init_vect_type(cx);
   cx->bin_type = cx_init_bin_type(cx);
   cx->func_type = cx_init_func_type(cx);
+  cx->fimp_type = cx_init_fimp_type(cx);
   cx->lambda_type = cx_init_lambda_type(cx);
 
   cx_add_func(cx, "nil")->ptr = nil_imp;

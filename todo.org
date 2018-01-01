@@ -1,11 +1,8 @@
-* add func types
-** enclose in <> after func name
-*** ?<Int>
-** add cx_parse_func_imp to get imp
-** add Fimp type
-** add CX_TFUNC_IMP
-*** compile like CX_TFUNC with one imp
-** add cx_funcall_op.jit_imp
+* extract parse_type/parse_func from parse_id
+* rename func_imp to fimp globally
+* add imps fn to func
+** return vect of imps
+* ---
 * add rat sub/div
 * add rat tests
 * add str \n \t \' support

@@ -1,5 +1,5 @@
-#ifndef CX_LAMBDA_H
-#define CX_LAMBDA_H
+#ifndef CX_TYPE_LAMBDA_H
+#define CX_TYPE_LAMBDA_H
 
 #include "cixl/vec.h"
 

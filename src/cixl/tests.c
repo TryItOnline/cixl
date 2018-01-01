@@ -36,7 +36,7 @@ static void int_tests() {
 
   run(&cx, "42 test");
   run(&cx, "0! test");
-  run(&cx, "21 + 21 = 42 test");
+  run(&cx, "21 +<Int> 21 = 42 test");
   run(&cx, "7 + 14, 7 + 14 + = 42 test");
   run(&cx, "1 = 2! test");
 
@@ -63,7 +63,7 @@ static void vect_tests() {
 
   run(&cx, "1 2 3 (4 5 vect) len 2 = test");
   run(&cx, "(1 2 3 vect) pop 3 = test");
-  run(&cx, "(1 2 3 vect) % 4 push len 4 = test");
+  run(&cx, "(1 2 3 vect) % 4 push<Vect A> len 4 = test");
   run(&cx, "(1 2 vect) for {2 *} + 6 = test");
   
   cx_deinit(&cx);

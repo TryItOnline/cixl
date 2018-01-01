@@ -4,6 +4,7 @@
 #include <stdarg.h>
 
 #include "cixl/set.h"
+#include "cixl/type.h"
 
 struct cx_scope;
 struct cx_type;
@@ -54,6 +55,7 @@ struct cx_func_imp *cx_func_add_imp(struct cx_func *func,
 
 struct cx_func_imp *cx_func_get_imp(struct cx_func *func, struct cx_vec *args);
 
+struct cx_type *cx_init_func_type(struct cx *cx);
 struct cx_type *cx_init_func_type(struct cx *cx);
 
 #endif

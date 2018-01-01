@@ -1,5 +1,5 @@
-#ifndef CX_INT_H
-#define CX_INT_H
+#ifndef CX_TYPE_INT_H
+#define CX_TYPE_INT_H
 
 #include <stdint.h>
 

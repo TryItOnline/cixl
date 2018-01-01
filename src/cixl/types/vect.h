@@ -1,5 +1,5 @@
-#ifndef CX_VECT_H
-#define CX_VECT_H
+#ifndef CX_TYPE_VECT_H
+#define CX_TYPE_VECT_H
 
 #include "cixl/vec.h"
 

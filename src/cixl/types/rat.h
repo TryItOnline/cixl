@@ -1,5 +1,5 @@
-#ifndef CX_RAT_H
-#define CX_RAT_H
+#ifndef CX_TYPE_RAT_H
+#define CX_TYPE_RAT_H
 
 #include <stdbool.h>
 #include <stdint.h>

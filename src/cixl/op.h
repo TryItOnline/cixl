@@ -38,7 +38,7 @@ struct cx_func_op {
 
 struct cx_funcall_op {
   struct cx_func *func;
-  struct cx_func_imp *imp;
+  struct cx_func_imp *imp, *jit_imp;
 };
 
 struct cx_lambda_op {
