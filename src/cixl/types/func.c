@@ -10,6 +10,7 @@
 #include "cixl/tok.h"
 #include "cixl/types/fimp.h"
 #include "cixl/types/func.h"
+#include "cixl/types/vect.h"
 
 static const void *get_imp_arg_tags(const void *value) {
   struct cx_fimp *const *imp = value;
@@ -89,6 +90,19 @@ struct cx_fimp *cx_func_get_imp(struct cx_func *func, struct cx_vec *stack) {
   return NULL;
 }
 
+static bool imps_imp(struct cx_scope *scope) {
+  struct cx *cx = scope->cx;
+  struct cx_func *f = cx_test(cx_pop(scope, false))->as_ptr;
+  struct cx_vect *is = cx_vect_new();
+
+  cx_do_set(&f->imps, struct cx_fimp *, i) {
+    cx_box_init(cx_vec_push(&is->imp), cx->fimp_type)->as_ptr = *i;
+  }
+  
+  cx_box_init(cx_push(scope), scope->cx->vect_type)->as_ptr = is;
+  return true;
+}
+
 static bool equid_imp(struct cx_box *x, struct cx_box *y) {
   return x->as_ptr == y->as_ptr;
 }
@@ -116,5 +130,8 @@ struct cx_type *cx_init_func_type(struct cx *cx) {
   t->equid = equid_imp;
   t->call = call_imp;
   t->fprint = fprint_imp;
+
+  cx_add_func(cx, "imps", cx_arg(t))->ptr = imps_imp;
+
   return t;
 }

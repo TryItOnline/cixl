@@ -3,10 +3,10 @@
 ## cixl
 #### a minimal, decently typed scripting language
 
-This project aims to produce a minimal, decently typed scripting language for embedding in and extending from C. In a way, it's Lua taken one step further. The language is implemented as a straight forward 3-stage (parse/compile/eval) interpreter that is designed to be as fast as possible without compromising on simplicity, transparency and flexibility. The codebase has no external dependencies and is currently hovering around 3 kloc.
+This project aims to produce a minimal, decently typed scripting language for embedding in and extending from C. The language is implemented as a straight forward 3-stage (parse/compile/eval) interpreter that is designed to be as fast as possible without compromising on simplicity, transparency and flexibility. The codebase has no external dependencies and is currently hovering around 3 kloc.
 
 ### Getting Started
-To get started, you'll need a decent C compiler with GNU-extensions and CMake installed. A primitive REPL is included, the executable weighs in at 200k. It's highly recommended to run the REPL through ```rlwrap``` for a less nerve-wrecking editing experience.
+To get started, you'll need a decent C compiler with GNU-extensions and CMake installed. A primitive REPL is included, the executable weighs in at 400k. It's highly recommended to run the REPL through ```rlwrap``` for a less nerve-wrecking editing experience.
 
 ```
 git clone https://github.com/basic-gongfu/cixl.git
@@ -248,7 +248,7 @@ Several parameters may share the same type. An index may may be specified instea
 [12586269025]
 ```
 
-Argument types may be specified to select a specific function implementation. Besides documentation and sanity checking, this allows the compiler to inline the definition in cases where more than one implementation share the same name.
+Argument types may be specified in angle brackets to select a specific function implementation. Besides documentation and sanity checking, this allows the compiler to inline the definition in cases where more than one implementation share the same name.
 
 ```
 > &+<Int>
@@ -259,6 +259,14 @@ Argument types may be specified to select a specific function implementation. Be
 ..
 Error in row 1, col 4:
 Func imp not found
+```
+
+A vector containing all implementations for a specific function may be retrieved by calling the ```imps``` function.
+
+```
+> &+ imps
+..
+[[Fimp(+ Int Int) Fimp(+ Rat Rat)]@1]
 ```
 
 ### Rationals

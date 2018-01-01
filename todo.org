@@ -1,6 +1,5 @@
-* add imps fn to func
-** return vect of imps
-* ---
+* add compile: macro
+* --
 * add rat sub/div
 * add rat tests
 * add str \n \t \' support
