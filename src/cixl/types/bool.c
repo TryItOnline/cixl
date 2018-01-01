@@ -1,11 +1,12 @@
 #include "cixl/cx.h"
 #include "cixl/box.h"
 #include "cixl/error.h"
-#include "cixl/func.h"
 #include "cixl/scope.h"
 #include "cixl/types/bool.h"
+#include "cixl/types/fimp.h"
+#include "cixl/types/func.h"
 
-static bool true_imp(struct cx_scope *scope) {
+bool true_imp(struct cx_scope *scope) {
   cx_box_init(cx_push(scope), scope->cx->bool_type)->as_bool = true;
   return true;
 }

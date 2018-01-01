@@ -4,10 +4,11 @@
 #include "cixl/cx.h"
 #include "cixl/bin.h"
 #include "cixl/error.h"
-#include "cixl/func.h"
 #include "cixl/macro.h"
 #include "cixl/op.h"
 #include "cixl/tok.h"
+#include "cixl/types/fimp.h"
+#include "cixl/types/func.h"
 #include "cixl/vec.h"
 
 struct cx_tok_type *cx_tok_type_init(struct cx_tok_type *type) {

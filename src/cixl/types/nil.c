@@ -1,7 +1,8 @@
 #include "cixl/cx.h"
 #include "cixl/box.h"
 #include "cixl/error.h"
-#include "cixl/func.h"
+#include "cixl/types/fimp.h"
+#include "cixl/types/func.h"
 #include "cixl/types/nil.h"
 #include "cixl/scope.h"
 

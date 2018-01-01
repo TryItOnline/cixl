@@ -1,11 +1,12 @@
-#ifndef CX_FUNC_H
-#define CX_FUNC_H
+#ifndef CX_TYPE_FUNC_H
+#define CX_TYPE_FUNC_H
 
 #include <stdarg.h>
 
 #include "cixl/set.h"
 #include "cixl/type.h"
 
+struct cx_fimp;
 struct cx_scope;
 struct cx_type;
 
@@ -23,24 +24,6 @@ struct cx_func *cx_func_init(struct cx_func *func,
 
 struct cx_func *cx_func_deinit(struct cx_func *func);
 			  
-struct cx_fimp {
-  struct cx_func *func;
-  cx_type_tag_t arg_tags;
-  struct cx_vec args;
-  bool (*ptr)(struct cx_scope *);
-  struct cx_vec toks;
-  struct cx_bin *bin;
-};
-
-struct cx_fimp *cx_fimp_init(struct cx_fimp *imp,
-			     struct cx_func *func,
-			     cx_type_tag_t arg_tags);
-
-struct cx_fimp *cx_fimp_deinit(struct cx_fimp *imp);
-bool cx_fimp_match(struct cx_fimp *imp, struct cx_vec *stack);
-bool cx_fimp_eval(struct cx_fimp *imp, struct cx_scope *scope);
-bool cx_fimp_call(struct cx_fimp *imp, struct cx_scope *scope);
-
 struct cx_func_arg {
   struct cx_type *type;
   int narg;
@@ -55,7 +38,6 @@ struct cx_fimp *cx_func_add_imp(struct cx_func *func,
 
 struct cx_fimp *cx_func_get_imp(struct cx_func *func, struct cx_vec *args);
 
-struct cx_type *cx_init_func_type(struct cx *cx);
 struct cx_type *cx_init_func_type(struct cx *cx);
 
 #endif

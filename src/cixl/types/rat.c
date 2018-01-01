@@ -3,8 +3,9 @@
 #include "cixl/cx.h"
 #include "cixl/box.h"
 #include "cixl/error.h"
-#include "cixl/func.h"
 #include "cixl/scope.h"
+#include "cixl/types/fimp.h"
+#include "cixl/types/func.h"
 #include "cixl/types/rat.h"
 
 static uint64_t gcd(uint64_t a, uint64_t b) {

@@ -4,9 +4,10 @@
 #include "cixl/cx.h"
 #include "cixl/box.h"
 #include "cixl/error.h"
-#include "cixl/func.h"
 #include "cixl/scope.h"
 #include "cixl/type.h"
+#include "cixl/types/fimp.h"
+#include "cixl/types/func.h"
 
 struct cx_type *cx_type_init(struct cx_type *type, struct cx *cx, const char *id) {
   type->cx = cx;

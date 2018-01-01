@@ -3,9 +3,10 @@
 #include "cixl/box.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
-#include "cixl/func.h"
 #include "cixl/scope.h"
 #include "cixl/types/char.h"
+#include "cixl/types/fimp.h"
+#include "cixl/types/func.h"
 
 static bool upper_imp(struct cx_scope *scope) {
   struct cx_box v = *cx_test(cx_pop(scope, false));

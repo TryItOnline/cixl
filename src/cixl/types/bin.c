@@ -6,11 +6,12 @@
 #include "cixl/cx.h"
 #include "cixl/error.h"
 #include "cixl/eval.h"
-#include "cixl/func.h"
 #include "cixl/op.h"
 #include "cixl/tok.h"
 #include "cixl/scope.h"
 #include "cixl/types/bin.h"
+#include "cixl/types/fimp.h"
+#include "cixl/types/func.h"
 
 static bool equid_imp(struct cx_box *x, struct cx_box *y) {
   return x->as_ptr == y->as_ptr;
