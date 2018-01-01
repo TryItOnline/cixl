@@ -3,7 +3,6 @@
 
 #include "cixl/bin.h"
 #include "cixl/box.h"
-#include "cixl/buf.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
 #include "cixl/eval.h"
@@ -12,9 +11,15 @@
 #include "cixl/tok.h"
 #include "cixl/type.h"
 
-static const void *get_imp_id(const void *value) {
+static const void *get_imp_arg_tags(const void *value) {
   struct cx_func_imp *const *imp = value;
-  return &(*imp)->id;
+  return &(*imp)->arg_tags;
+}
+
+enum cx_cmp cmp_arg_tags(const void *x, const void *y) {
+  const cx_type_tag_t *xv = x, *yv = y;
+  if (*xv < *yv) { return CX_CMP_LT; }
+  return (*xv > *yv) ? CX_CMP_GT : CX_CMP_EQ;
 }
 
 struct cx_func *cx_func_init(struct cx_func *func,
@@ -23,8 +28,8 @@ struct cx_func *cx_func_init(struct cx_func *func,
 			     int nargs) {
   func->cx = cx;
   func->id = strdup(id);
-  cx_set_init(&func->imps, sizeof(struct cx_func_imp *), cx_cmp_str);
-  func->imps.key = get_imp_id;
+  cx_set_init(&func->imps, sizeof(struct cx_func_imp *), cmp_arg_tags);
+  func->imps.key = get_imp_arg_tags;
   func->nargs = nargs;
   return func;
 }
@@ -38,9 +43,9 @@ struct cx_func *cx_func_deinit(struct cx_func *func) {
 
 struct cx_func_imp *cx_func_imp_init(struct cx_func_imp *imp,
 				     struct cx_func *func,
-				     char *id) {
+				     cx_type_tag_t arg_tags) {
   imp->func = func;
-  imp->id = id;
+  imp->arg_tags = arg_tags;
   imp->ptr = NULL;
   imp->bin = NULL;
   cx_vec_init(&imp->args, sizeof(struct cx_func_arg));
@@ -49,7 +54,6 @@ struct cx_func_imp *cx_func_imp_init(struct cx_func_imp *imp,
 }
 
 struct cx_func_imp *cx_func_imp_deinit(struct cx_func_imp *imp) {
-  free(imp->id);
   cx_vec_deinit(&imp->args);
   cx_do_vec(&imp->toks, struct cx_tok, t) { cx_tok_deinit(t); }
   cx_vec_deinit(&imp->toks);
@@ -70,8 +74,7 @@ struct cx_func_imp *cx_func_add_imp(struct cx_func *func,
 				    struct cx_func_arg *args) {
   struct cx_vec imp_args;
   cx_vec_init(&imp_args, sizeof(struct cx_func_arg));
-  struct cx_buf id;
-  cx_buf_open(&id);
+  cx_type_tag_t arg_tags = 0;
   
   if (nargs) {
     cx_vec_grow(&imp_args, nargs);
@@ -79,29 +82,21 @@ struct cx_func_imp *cx_func_add_imp(struct cx_func *func,
     for (int i=0; i < nargs; i++) {
       struct cx_func_arg a = args[i];
       *(struct cx_func_arg *)cx_vec_push(&imp_args) = a;
-      
-      if (i) { fputc(' ', id.stream); }
-      
-      if (a.type) {
-	fputs(a.type->id, id.stream);
-      } else {
-	fprintf(id.stream, "%d", a.narg);
-      }
+      if (a.type) { arg_tags += a.type->tag; }
     }
   }
     
-  cx_buf_close(&id);
-  struct cx_func_imp **found = cx_set_get(&func->imps, &id.data);
+  struct cx_func_imp **found = cx_set_get(&func->imps, &arg_tags);
   
   if (found) {
-    cx_set_delete(&func->imps, &id.data);
+    cx_set_delete(&func->imps, &arg_tags);
     free(cx_func_imp_deinit(*found));
   }
 
   struct cx_func_imp *imp = cx_func_imp_init(malloc(sizeof(struct cx_func_imp)),
 					     func,
-					     id.data);
-  *(struct cx_func_imp **)cx_set_insert(&func->imps, &id.data) = imp;
+					     arg_tags);
+  *(struct cx_func_imp **)cx_set_insert(&func->imps, &arg_tags) = imp;
   imp->args = imp_args;
   return imp;
 }
