@@ -11,8 +11,8 @@
 struct cx_type *cx_type_init(struct cx_type *type, struct cx *cx, const char *id) {
   type->cx = cx;
   type->id = strdup(id);
-  type->tag = cx->next_type;
-  cx->next_type *= 2;
+  type->tag = cx->next_type_tag;
+  cx->next_type_tag *= 2;
   type->tags = type->tag;
   cx_set_init(&type->parents, sizeof(struct cx_type *), cx_cmp_ptr);
   

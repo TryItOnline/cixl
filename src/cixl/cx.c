@@ -366,7 +366,7 @@ static bool test_imp(struct cx_scope *scope) {
 }
 
 struct cx *cx_init(struct cx *cx) {
-  cx->next_type = 1;
+  cx->next_type_tag = 1;
   cx->func_imp = NULL;
   cx->bin = NULL;
   cx->op = NULL;

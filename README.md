@@ -360,7 +360,7 @@ Capitalized names are treated as type references, the following types are define
 ```
 
 ### Traits
-Traits are abstract types, they are useful for simplifying type checking and/or function dispatch. Besides the standard traits; 'A', 'Num' and 'Opt'; new traits may be defined using the ```trait:``` macro.
+Traits are abstract types, they are useful for simplifying type checking and/or function dispatch. Besides the standard offering; 'A', 'Num' and 'Opt'; new traits may be defined using the ```trait:``` macro.
 
 ```
 > trait: StrInt Str Int;

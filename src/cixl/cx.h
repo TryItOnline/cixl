@@ -27,7 +27,7 @@ struct cx {
     *lambda_type, *meta_type, *nil_type, *num_type, *opt_type, *rat_type, *str_type,
     *vect_type;
 
-  cx_type_tag_t next_type;
+  cx_type_tag_t next_type_tag;
   struct cx_set macros, funcs;
   
   struct cx_vec scopes;
