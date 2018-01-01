@@ -227,19 +227,6 @@ Each argument needs a type, ```A``` may be used to accept any type.
 [42]
 ```
 
-Argument types may be specified to select a specific implementation. Besides documentation and sanity checking, this allows the compiler to inline the definition in cases where there are more than one implementation.
-
-```
-> &+<Int>
-..
-[Fimp(+ Int Int)]
-
-> &+<Str>
-..
-Error in row 1, col 4:
-Func imp not found
-```
-
 Several parameters may share the same type. An index may may be specified instead of type to refer to previous arguments, it is substituted for the actual type on evaluation.
 
 ```
@@ -259,6 +246,19 @@ Several parameters may share the same type. An index may may be specified instea
 ..  fib-rec 0 1 $n;
 ..fib 50
 [12586269025]
+```
+
+Argument types may be specified to select a specific function implementation. Besides documentation and sanity checking, this allows the compiler to inline the definition in cases where more than one implementation share the same name.
+
+```
+> &+<Int>
+..
+[Fimp(+ Int Int)]
+
+> &+<Str>
+..
+Error in row 1, col 4:
+Func imp not found
 ```
 
 ### Rationals

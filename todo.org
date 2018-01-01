@@ -1,4 +1,3 @@
-* extract parse_type/parse_func from parse_id
 * rename func_imp to fimp globally
 * add imps fn to func
 ** return vect of imps

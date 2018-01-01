@@ -15,6 +15,27 @@
 #include "cixl/types/lambda.h"
 #include "cixl/vec.h"
 
+static bool parse_type(struct cx *cx,
+		       const char *id,
+		       struct cx_vec *out,
+		       bool lookup) {
+  struct cx_type *t = cx_get_type(cx, id, !lookup);
+  
+  if (t) {
+    cx_tok_init(cx_vec_push(out),
+		CX_TTYPE(),
+		cx->row, cx->col)->as_ptr = t;
+   } else if (!lookup) {
+    cx_tok_init(cx_vec_push(out),
+		CX_TID(),
+		cx->row, cx->col)->as_ptr = strdup(id);
+  } else {
+     return false;
+  }
+
+  return true;
+}
+
 static struct cx_vec *parse_func_imp(struct cx *cx,
 				     struct cx_func *func,
 				     FILE *in,
@@ -46,6 +67,44 @@ static struct cx_vec *parse_func_imp(struct cx *cx,
   return types;
 }
 
+static bool parse_func(struct cx *cx, const char *id, FILE *in, struct cx_vec *out) {
+  bool ref = id[0] == '&';
+  struct cx_func *f = cx_get_func(cx, ref ? id+1 : id, false);
+  if (!f) { return false; }
+
+  struct cx_func_imp *imp = NULL;
+  struct cx_vec *types = parse_func_imp(cx, f, in, out);
+	  
+  if (types) {
+    imp = cx_func_get_imp(f, types);
+    if (!imp) { cx_error(cx, cx->row, cx->col, "Func imp not found"); }
+    free(cx_vec_deinit(types));
+  }
+  
+  if (ref) {
+    struct cx_box *box = &cx_tok_init(cx_vec_push(out),
+				      CX_TLITERAL(),
+				      cx->row, cx->col)->as_box;
+    if (imp) {
+      cx_box_init(box, cx->fimp_type)->as_ptr = imp;
+    } else {
+      cx_box_init(box, cx->func_type)->as_ptr = f;
+    }
+  } else {
+    if (imp) {
+      cx_tok_init(cx_vec_push(out),
+		  CX_TFIMP(),
+		  cx->row, cx->col)->as_ptr = imp;
+    } else {
+      cx_tok_init(cx_vec_push(out),
+		  CX_TFUNC(),
+		  cx->row, cx->col)->as_ptr = f;
+    }
+  }
+
+  return true;
+}
+
 static bool parse_id(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
   struct cx_buf id;
   cx_buf_open(&id);
@@ -73,73 +132,24 @@ static bool parse_id(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
       if (m) {
 	cx->col = col;
 	ok = m->imp(cx, in, out);
-	free(id.data);
       } else {
 	if (isupper(id.data[0])) {
-	  struct cx_type *t = cx_get_type(cx, id.data, !lookup);
-
-	  if (t) {
-	    cx_tok_init(cx_vec_push(out),
-			CX_TTYPE(),
-			cx->row, cx->col)->as_ptr = t;
-	    free(id.data);
-	  } else if (!lookup) {
-	    cx_tok_init(cx_vec_push(out),
-			CX_TID(),
-			cx->row, cx->col)->as_ptr = id.data;
-	  } else {
-	    free(id.data);
-	    return false;
-	  }
+	  ok = parse_type(cx, id.data, out, lookup);
 	} else if (!lookup || id.data[0] == '$') {
 	  cx_tok_init(cx_vec_push(out),
 		      CX_TID(),
-		      cx->row, cx->col)->as_ptr = id.data;
+		      cx->row, cx->col)->as_ptr = strdup(id.data);
 	} else {
-	  bool ref = id.data[0] == '&';
-	  struct cx_func *f = cx_get_func(cx, ref ? id.data+1 : id.data, false);
-	  free(id.data);
-
-	  if (!f) { return false; }
-
-	  struct cx_func_imp *imp = NULL;
-	  struct cx_vec *types = parse_func_imp(cx, f, in, out);
-	  
-	  if (types) {
-	    imp = cx_func_get_imp(f, types);
-	    if (!imp) { cx_error(cx, cx->row, cx->col, "Func imp not found"); }
-	    free(cx_vec_deinit(types));
-	  }
-	  
-	  if (ref) {
-	    struct cx_box *box = &cx_tok_init(cx_vec_push(out),
-					      CX_TLITERAL(),
-					      cx->row, cx->col)->as_box;
-	    if (imp) {
-	      cx_box_init(box, cx->fimp_type)->as_ptr = imp;
-	    } else {
-	      cx_box_init(box, cx->func_type)->as_ptr = f;
-	    }
-	  } else {
-	    if (imp) {
-	      cx_tok_init(cx_vec_push(out),
-			  CX_TFIMP(),
-			  cx->row, cx->col)->as_ptr = imp;
-	    } else {
-	      cx_tok_init(cx_vec_push(out),
-			  CX_TFUNC(),
-			  cx->row, cx->col)->as_ptr = f;
-	    }
-	  }
+	  ok = parse_func(cx, id.data, in, out);
 	}
-	
+
 	cx->col = col;
       }
     } else {
       cx_error(cx, cx->row, cx->col, "Failed parsing id");
-      free(id.data);
     }
     
+    free(id.data);
     return ok;
   }
 }
