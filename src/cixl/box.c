@@ -54,13 +54,3 @@ struct cx_box *cx_copy(struct cx_box *dst, struct cx_box *src) {
 void cx_fprint(struct cx_box *box, FILE *out) {
   cx_test(box->type->fprint)(box, out);
 }
-
-bool cx_box_emit(struct cx_box *box, FILE *out, struct cx *cx) {
-  if (!box->type->emit) {
-    cx_error(cx, cx->row, cx->col, "Emit not implemented for %s", box->type->id);
-    return false;
-  }
-  
-  box->type->emit(box, out);
-  return true;
-}

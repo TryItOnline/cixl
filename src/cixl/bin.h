@@ -40,6 +40,4 @@ bool cx_compile(struct cx *cx,
 		struct cx_tok *end,
 		struct cx_bin *out);
 
-bool cx_emit(struct cx *cx, struct cx_bin *bin, FILE *out);
-
 #endif

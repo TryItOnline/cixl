@@ -24,7 +24,6 @@ struct cx_tok;
 
 struct cx_op_type {
   bool (*eval)(struct cx_op *, struct cx_tok *, struct cx *);
-  bool (*emit)(struct cx_op *, struct cx_tok *, FILE *, struct cx *);
 };
 
 struct cx_op_type *cx_op_type_init(struct cx_op_type *type);

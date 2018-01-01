@@ -1,12 +1,3 @@
-* add emit
-** replace scan_args
-*** add cx.scan_func/imp/scope
-*** set in funcall op/recall
-*** repurpose scan_args to check fields and call fn if ok
-**** error if no match
-**** call from funcall op/push op/recall
-**** break out of emit switch on successful call
-* ---
 * add func types
 ** enclose in <> after func name
 *** ?<Int>

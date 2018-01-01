@@ -12,25 +12,6 @@
 #include "cixl/scope.h"
 #include "cixl/types/bin.h"
 
-static bool emit_imp(struct cx_scope *scope) {
-  struct cx_bin *bin = cx_test(cx_pop(scope, false))->as_ptr;
-  struct cx *cx = scope->cx;
-  struct cx_buf buf;
-  cx_buf_open(&buf);
-  bool ok = false;
-  
-  if ((ok = cx_emit(cx, bin, buf.stream))) {
-    cx_buf_close(&buf);
-    cx_box_init(cx_push(scope), scope->cx->str_type)->as_ptr = buf.data;
-  } else {
-    cx_buf_close(&buf);
-    free(buf.data);
-  }
-  
-  cx_bin_unref(bin);
-  return ok;
-}
-
 static bool equid_imp(struct cx_box *x, struct cx_box *y) {
   return x->as_ptr == y->as_ptr;
 }
@@ -61,8 +42,6 @@ struct cx_type *cx_init_bin_type(struct cx *cx) {
   t->copy = copy_imp;
   t->fprint = fprint_imp;
   t->deinit = deinit_imp;
-
-  cx_add_func(cx, "emit", cx_arg(t))->ptr = emit_imp;
 
   return t;
 }
