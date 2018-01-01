@@ -55,4 +55,9 @@
 ** typecheck and bind stack to vars
 * add str interpolation
 
-| clock {,10000 times {,fib 50 _}} / 1000000 int
+func: fib-rec(a b n Int) $n? if {$b $a $b + $n -- recall} $a;
+
+func: fib(n Int) fib-rec 0 1 $n;
+
+
+| clock {,10000 times {50 fib _}} / 1000000 int

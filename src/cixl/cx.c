@@ -439,11 +439,11 @@ struct cx *cx_init(struct cx *cx) {
 void cx_init_math(struct cx *cx) {
   cx_test(cx_eval_str(cx,
 		      "func: fib-rec(a b n Int) "
-		      "$n? if {, recall $b, $a + $b, -- $n} $a;"));
+		      "$n? if {$b $a $b + $n -- recall} $a;"));
 
   cx_test(cx_eval_str(cx,
 		      "func: fib(n Int) "
-		      "fib-rec 0 1 $n;"));
+		      "0 1 $n fib-rec;"));
 }
 
 struct cx *cx_deinit(struct cx *cx) {
