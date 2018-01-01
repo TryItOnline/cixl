@@ -2,10 +2,10 @@
 ** enclose in <> after func name
 *** ?<Int>
 ** add cx_parse_func_imp to get imp
+** add Fimp type
 ** add CX_TFUNC_IMP
 *** compile like CX_TFUNC with one imp
 ** add cx_funcall_op.jit_imp
-* ---
 * add rat sub/div
 * add rat tests
 * add Stream type
