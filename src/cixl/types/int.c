@@ -129,12 +129,19 @@ static void fprint_imp(struct cx_box *v, FILE *out) {
   fprintf(out, "%" PRId64, v->as_int);
 }
 
+static void emit_imp(struct cx_box *v, FILE *out) {
+  fprintf(out,
+	  "cx_box_init(cx_push(scope), cx->int_type)->as_int = %" PRId64 ";\n",
+	  v->as_int);
+}
+
 struct cx_type *cx_init_int_type(struct cx *cx) {
   struct cx_type *t = cx_add_type(cx, "Int", cx->num_type);
   t->equid = equid_imp;
   t->ok = ok_imp;
   t->fprint = fprint_imp;
-
+  t->emit = emit_imp;
+  
   cx_add_func(cx, "<", cx_arg(t), cx_arg(t))->ptr = lt_imp;
   cx_add_func(cx, ">", cx_arg(t), cx_arg(t))->ptr = gt_imp;
 

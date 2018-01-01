@@ -1,20 +1,18 @@
-* store lambda box in op instead of alloc on eval
-** create on init
-** add op.deinit to clear
----
 * add emit
-** add op_type.emit like eval
-*** write C to buf
-** add bin emit fn
-*** like compile
-*** return str
-** duffs device/switch
-*** labels for lambdas
-*** call fn recursively
-** replace scan_args 
-*** add cx.func
-*** check after each relevant op
-*** call fn if enough args and error if no match
+** replace scan_args
+*** add cx.scan_func/imp/scope
+*** set in funcall op/recall
+*** repurpose scan_args to check fields and call fn if ok
+**** error if no match
+*** call from funcall op/push op/recall
+* ---
+* add func types
+** enclose in <> after func name
+*** ?<Int>
+** add cx_parse_func_imp to get imp
+** add CX_TFUNC_IMP
+*** compile like CX_TFUNC with one imp
+** add cx_funcall_op.jit_imp
 * ---
 * add rat sub/div
 * add rat tests

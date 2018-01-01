@@ -76,3 +76,50 @@ bool cx_compile(struct cx *cx,
 
   return true;
 }
+
+bool cx_emit(struct cx *cx, struct cx_bin *bin, FILE *out) {
+  fputs("bool eval(struct cx *cx, size_t start) {\n"
+	"bool _eval(size_t start) {\n"
+	"cx->emit_pc = start;\n"
+	"struct cx_scope *scope = cx_scope(cx, 0);\n\n"
+	"while (!cx->stop) {\n"
+	"switch (cx->emit_pc) {\n",
+	out);
+  
+  size_t prev_pc = cx->emit_pc;
+  cx->emit_pc = 0;
+  bool ok = false;
+  
+  cx_do_vec(&bin->ops, struct cx_op, o) {
+    struct cx_tok *tok = cx_vec_get(&bin->toks, o->tok_idx);
+    cx->row = tok->row;
+    cx->col = tok->col;
+    
+    if (!o->type->emit) {
+      cx_error(cx, tok->row, tok->col, "Emit not supported yet");
+      goto exit;
+    }
+    
+    if (!o->type->emit(o, tok, out, cx)) { goto exit; }
+  }
+
+  fprintf(out, "case %zd:\n", cx->emit_pc++);
+  fputs("\tcx->stop = true;\n\tbreak;\n", out);
+  
+  fputs("}}\n\n"
+	"cx->stop = false;\n"
+	"return true;\n"
+	"}\n\n"
+	"bool (*prev)(size_t start) = cx->emit_eval;\n"
+	"cx->emit_eval = _eval;\n"
+	"bool ok = _eval(start);\n"
+	"cx->emit_eval = prev;\n"
+	"return ok;\n"
+	"}",
+	out);
+
+  ok = true;
+ exit:
+  cx->emit_pc = prev_pc;
+  return ok;
+}

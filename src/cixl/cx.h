@@ -36,7 +36,11 @@ struct cx {
   struct cx_func_imp *func_imp;
 
   struct cx_bin *bin;
-  struct cx_op *op;  
+  struct cx_op *op;
+
+  bool (*emit_eval)(size_t);
+  size_t emit_pc;
+
   bool stop;
   
   int row, col;

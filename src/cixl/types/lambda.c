@@ -10,11 +10,20 @@
 #include "cixl/tok.h"
 #include "cixl/types/lambda.h"
 
-struct cx_lambda *cx_lambda_init(struct cx_lambda *lambda, struct cx_scope *scope) {
-  lambda->bin = cx_bin_ref(scope->cx->bin);
-  lambda->start_op = -1;
-  lambda->num_ops = -1;
+struct cx_lambda *cx_lambda_new(struct cx_scope *scope,
+				size_t start_op,
+				size_t num_ops) {
+  return cx_lambda_init(malloc(sizeof(struct cx_lambda)), scope, start_op, num_ops);
+}
+
+struct cx_lambda *cx_lambda_init(struct cx_lambda *lambda,
+				 struct cx_scope *scope,
+				 size_t start_op,
+				 size_t num_ops) {
   lambda->scope = cx_scope_ref(scope);
+  lambda->bin = cx_bin_ref(scope->cx->bin);
+  lambda->start_op = start_op;
+  lambda->num_ops = num_ops;
   lambda->nrefs = 1;
   return lambda;
 }

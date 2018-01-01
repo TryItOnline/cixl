@@ -25,8 +25,17 @@ static bool cut_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
   return true;
 }
 
+static bool cut_emit(struct cx_op *op, struct cx_tok *tok, FILE *out, struct cx *cx) {
+  fprintf(out, "case %zd:\n", cx->emit_pc++);
+  fprintf(out, "\tcx->row = %d; cx->col = %d;\n", tok->row, tok->col);
+  fputs("\tscope->cut_offs = scope->stack.count;\n", out);
+  fputs("\tcx->emit_pc++;\n", out);
+  return true;
+}
+
 cx_op_type(CX_OCUT, {
     type.eval = cut_eval;
+    type.emit = cut_emit;
   });
 
 static bool func_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
@@ -34,8 +43,20 @@ static bool func_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
   return true;
 }
 
+static bool func_emit(struct cx_op *op,
+		      struct cx_tok *tok,
+		      FILE *out,
+		      struct cx *cx) {
+  fprintf(out, "case %zd:\n", cx->emit_pc++);
+  fprintf(out, "\tcx->row = %d; cx->col = %d;\n", tok->row, tok->col);
+  fprintf(out, "\tcx->emit_pc += %zd;\n", op->as_func.num_ops);
+  fputs("\tbreak;\n", out);
+  return true;
+}
+
 cx_op_type(CX_OFUNC, {
     type.eval = func_eval;
+    type.emit = func_emit;
   });
 
 static bool funcall_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
@@ -56,8 +77,25 @@ static bool funcall_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
   return cx_func_imp_call(imp, s);
 }
 
+static bool funcall_emit(struct cx_op *op,
+			 struct cx_tok *tok,
+			 FILE *out,
+			 struct cx *cx) {
+  fprintf(out, "case %zd: {\n", cx->emit_pc++);
+  fprintf(out, "\tcx->row = %d; cx->col = %d;\n", tok->row, tok->col);
+  fprintf(out,
+	  "\tstruct cx_func *f = cx_get_func(cx, \"%s\");\n",
+	  op->as_funcall.func->id); 
+  fputs("\tstruct cx_func_imp *i = cx_func_get_imp(f, &scope->stack);\n", out);
+  fputs("\tcx_func_imp_call(i, scope);\n", out);
+  fputs("\tcx->emit_pc++;\n", out);
+  fputs("}\n", out);
+  return true;
+}
+
 cx_op_type(CX_OFUNCALL, {
     type.eval = funcall_eval;
+    type.emit = funcall_emit;
   });
 
 static bool get_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
@@ -68,22 +106,51 @@ static bool get_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
   return true;
 }
 
+static bool get_emit(struct cx_op *op, struct cx_tok *tok, FILE *out, struct cx *cx) {
+  fprintf(out, "case %zd:\n", cx->emit_pc++);
+  fprintf(out, "\tcx->row = %d; cx->col = %d;\n", tok->row, tok->col);
+  fprintf(out,
+	  "\tcx_copy(cx_push(scope), cx_get(scope, %s, false));\n",
+	  op->as_get.id);
+  fputs("\tcx->emit_pc++;\n", out);
+  return true;
+}
+
 cx_op_type(CX_OGET, {
     type.eval = get_eval;
+    type.emit = get_emit;
   });
 
 static bool lambda_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
   struct cx_scope *scope = cx_scope(cx, 0);
-  struct cx_lambda *l = cx_lambda_init(malloc(sizeof(struct cx_lambda)), scope);
-  l->start_op = op->as_lambda.start_op;
-  l->num_ops = op->as_lambda.num_ops;
+  struct cx_lambda *l = cx_lambda_new(scope,
+				      op->as_lambda.start_op,
+				      op->as_lambda.num_ops);
   cx_box_init(cx_push(scope), cx->lambda_type)->as_ptr = l;
   cx->op += l->num_ops;
   return true;
 }
 
+static bool lambda_emit(struct cx_op *op,
+			struct cx_tok *tok,
+			FILE *out,
+			struct cx *cx) {
+  fprintf(out, "case %zd: {\n", cx->emit_pc++);
+  fprintf(out, "\tcx->row = %d; cx->col = %d;\n", tok->row, tok->col);
+  fprintf(out,
+	  "\tstruct cx_lambda *l = cx_lambda_new(scope, %zd, %zd);\n",
+	  op->as_lambda.start_op,
+	  op->as_lambda.num_ops);
+  fputs("\tcx_box_init(cx_push(scope), cx->lambda_type)->as_ptr = l;\n", out);
+  fputs("\tcx->emit_pc += l->num_ops;", out);
+  fputs("\tbreak;\n}\n", out);
+  return true;
+}
+
+
 cx_op_type(CX_OLAMBDA, {
     type.eval = lambda_eval;
+    type.emit = lambda_emit;
   });
 
 static bool push_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
@@ -91,8 +158,21 @@ static bool push_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
   return true;
 }
 
+static bool push_emit(struct cx_op *op,
+		      struct cx_tok *tok,
+		      FILE *out,
+		      struct cx *cx) {
+  fprintf(out, "case %zd:\n", cx->emit_pc++);
+  fprintf(out, "\tcx->row = %d; cx->col = %d;\n", tok->row, tok->col);
+  fputc('\t', out);
+  if (!cx_box_emit(&tok->as_box, out, cx)) { return false; }
+  fputs("\tcx->emit_pc++;\n", out);
+  return true;
+}
+
 cx_op_type(CX_OPUSH, {
     type.eval = push_eval;
+    type.emit = push_emit;
   });
 
 static bool scope_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
@@ -100,8 +180,22 @@ static bool scope_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
   return true;
 }
 
+static bool scope_emit(struct cx_op *op,
+		       struct cx_tok *tok,
+		       FILE *out,
+		       struct cx *cx) {
+  fprintf(out, "case %zd:\n", cx->emit_pc++);
+  fprintf(out, "\tcx->row = %d; cx->col = %d;\n", tok->row, tok->col);
+  fprintf(out,
+	  "\tscope = cx_begin(cx, %s);\n",
+	  op->as_scope.child ? "true" : "false");
+  fputs("\tcx->emit_pc++;\n", out);
+  return true;
+}
+
 cx_op_type(CX_OSCOPE, {
     type.eval = scope_eval;
+    type.emit = scope_emit;
   });
 
 static bool set_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
@@ -114,8 +208,28 @@ static bool set_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
   return true;
 }
 
+static bool set_emit(struct cx_op *op,
+		     struct cx_tok *tok,
+		     FILE *out,
+		     struct cx *cx) {
+  fprintf(out, "case %zd: {\n", cx->emit_pc++);
+  fprintf(out, "\tcx->row = %d; cx->col = %d;\n", tok->row, tok->col);
+  fprintf(out,
+	  "\tstruct cx_box *v = cx_pop(%s, false);\n",
+	  op->as_set.parent ? "cx_scope(cx, 1)" : "scope");
+  fputs("if (!v) { return false; }", out);
+  fprintf(out,
+	  "\t*cx_set(scope, %s, %s) = *v;\n",
+	  op->as_set.id,
+	  op->as_set.force ? "true" : "false");
+  fputs("\tcx->emit_pc++;\n", out);
+  fputs("}\n", out);
+  return true;
+}
+
 cx_op_type(CX_OSET, {
     type.eval = set_eval;
+    type.emit = set_emit;
   });
 
 static bool stop_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
@@ -123,8 +237,21 @@ static bool stop_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
   return true;
 }
 
+static bool stop_emit(struct cx_op *op,
+		      struct cx_tok *tok,
+		      FILE *out,
+		      struct cx *cx) {
+  fprintf(out, "case %zd:\n", cx->emit_pc++);
+  fprintf(out, "\tcx->row = %d; cx->col = %d;\n", tok->row, tok->col);
+  fputs("\tcx->stop=true;\n", out);
+  fputs("\tcx->emit_pc++;\n", out);
+  fputs("\tbreak;\n", out);
+  return true;
+}
+
 cx_op_type(CX_OSTOP, {
     type.eval = stop_eval;
+    type.emit = stop_emit;
   });
 
 static bool unscope_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
@@ -132,6 +259,18 @@ static bool unscope_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
   return true;
 }
 
+static bool unscope_emit(struct cx_op *op,
+			 struct cx_tok *tok,
+			 FILE *out,
+			 struct cx *cx) {
+  fprintf(out, "case %zd:\n", cx->emit_pc++);
+  fprintf(out, "\tcx->row = %d; cx->col = %d;\n", tok->row, tok->col);
+  fputs("\tcx_end(cx);\n", out);
+  fputs("\tcx->emit_pc++;\n", out);
+  return true;
+}
+
 cx_op_type(CX_OUNSCOPE, {
     type.eval = unscope_eval;
+    type.emit = unscope_emit;
   });

@@ -370,6 +370,8 @@ struct cx *cx_init(struct cx *cx) {
   cx->func_imp = NULL;
   cx->bin = NULL;
   cx->op = NULL;
+  cx->emit_pc = 0;
+  cx->emit_eval = NULL;
   cx->stop = false;
   cx->row = cx->col = -1;
   
