@@ -8,6 +8,9 @@
 ** add cx_funcall_op.jit_imp
 * add rat sub/div
 * add rat tests
+* add str \n support
+* add str \' support
+
 * add Stream type
 ** cx_stream with byte vec & r/w pos
 ** stream fn to create
@@ -41,9 +44,6 @@
 *** read from stdin until newline with prompt
 ** add say fn from main
 *** write to stdout with newline
-* add str \n support
-* add str \' support
-
 * add cx_init_io with load fn
 ** load first repl arg if any
 ** push rest on stack
@@ -56,9 +56,6 @@
 * add str interpolation
 
 func: fib-rec(a b n Int) $n? if {$b $a $b + $n -- recall} $a;
-
 func: fib(n Int) fib-rec 0 1 $n;
-
 | clock {,10000 times {50 fib _}} / 1000000 int
-
 | clock {(let: v vect; 10000000 for {$v ~ push})} / 1000000 int
