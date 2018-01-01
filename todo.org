@@ -8,9 +8,7 @@
 ** add cx_funcall_op.jit_imp
 * add rat sub/div
 * add rat tests
-* add str \n support
-* add str \' support
-
+* add str \n \t \' support
 * add Stream type
 ** cx_stream with byte vec & r/w pos
 ** stream fn to create
