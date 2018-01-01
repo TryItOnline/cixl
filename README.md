@@ -32,7 +32,7 @@ Press Return twice to eval input.
 Examples from this document should work in the most recent version and run clean in ```valgrind```, outside of that I can't really promise much at the moment. Current work is focused on profiling and filling obvious gaps in functionality.
 
 ### Performance
-There is still a lot of work remaining in the profiling and benchmarking departments, but preliminary results puts cixl at around 2-5 times as slow as Python. Measured time is displayed in milliseconds.
+There is still a lot of work remaining in the profiling and benchmarking departments, but preliminary results puts cixl at around 1-5 times slower than Python. Measured time is displayed in milliseconds.
 
 Let's start with a tail-recursive fibonacci to exercise the interpreter loop, it's worth mentioning that cixl uses 64-bit integers while Python settles for 32-bit:
 
@@ -89,7 +89,7 @@ $ python3 vect.py
 ```
 
 ### Stack
-The stack is accessible from user code, just like in Forth. Basic stack operations have dedicated operators; ```%``` for duplicating last value, ```_``` for dropping it, and ```|``` for clearing the stack.
+The stack is accessible from user code, just like in Forth. Basic stack operations have dedicated operators; ```%``` for duplicating last value, ```_``` for dropping it, ```~``` for flipping the last two values and ```|``` for clearing the stack.
 
 ```
 > 1 2 3 %
@@ -99,6 +99,10 @@ The stack is accessible from user code, just like in Forth. Basic stack operatio
 > _
 ..
 [1 2 3]
+
+> ~
+..
+[1 3 2]
 
 > |
 ..
