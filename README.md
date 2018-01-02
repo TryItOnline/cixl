@@ -262,6 +262,14 @@ Several parameters may share the same type. An index may may be specified instea
 [9]
 ```
 
+Existing implementations may be overridden at any point.
+```
+> func: +(x y Int) 42;
+..1 + 2
+..
+[42]
+```
+
 ```recall``` may be used to call the current function recursively in the same scope, it supports scanning for arguments just like a regular function call.
 
 ```
@@ -286,12 +294,12 @@ Error in row 1, col 4:
 Func imp not found
 ```
 
-A vector containing all implementations for a specific function may be retrieved by calling the ```imps``` function.
+A vector containing all implementations for a specific function in the order they are considered during dispatch may be retrieved by calling the ```imps``` function.
 
 ```
 > &+ imps
 ..
-[[Fimp(+ Int Int) Fimp(+ Rat Rat)]@1]
+[[Fimp(+ Rat Rat) Fimp(+ Int Int)]@1]
 ```
 
 ### Conversions

@@ -63,15 +63,16 @@ struct cx_fimp *cx_func_add_imp(struct cx_func *func,
     for (int i=0; i < nargs; i++) {
       struct cx_func_arg a = args[i];
       *(struct cx_func_arg *)cx_vec_push(&imp_args) = a;
-      if (a.type) { arg_tags += a.type->tag; }
+      if (a.type) { arg_tags |= a.type->tag; }
     }
   }
     
   struct cx_fimp **found = cx_set_get(&func->imps, &arg_tags);
   
   if (found) {
+    struct cx_fimp *imp = *found;
     cx_set_delete(&func->imps, &arg_tags);
-    free(cx_fimp_deinit(*found));
+    free(cx_fimp_deinit(imp));
   }
 
   struct cx_fimp *imp = cx_fimp_init(malloc(sizeof(struct cx_fimp)),

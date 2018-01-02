@@ -1,4 +1,3 @@
-* return imps in reverse order
 * add support for trait redefinition
 ** loop all types and remove from parents/tags
 * add vect get
