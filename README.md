@@ -136,7 +136,7 @@ And identity:
 ..ask 'what\'s your name? '
 ..
 hello
-what's your name: Sifoo
+what's your name? Sifoo
 ['Sifoo']
 ```
 

@@ -1,10 +1,9 @@
+* return imps in reverse order
 * add support for trait redefinition
 ** loop all types and remove from parents/tags
-* add enum support
 * add vect get
-* add str lower/upper
+* add str upper/lower in cixl using map
 * add rat sub/div
-* --
 * add str interpolation
 * add Stream type
 ** cx_stream with byte vec & r/w pos
