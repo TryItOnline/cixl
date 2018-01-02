@@ -1,6 +1,14 @@
+* change get_imp to process imps in reverse
 * add str \n \t \' support
 * add rat sub/div
 * add rat tests
+* add Str 'int' fn
+* add Int 'str' fn
+* add Char 'int' fn
+* add Int 'char' fn
+
+* ---
+* add str interpolation
 * add Stream type
 ** cx_stream with byte vec & r/w pos
 ** stream fn to create
@@ -29,13 +37,8 @@
 ** use ref counted sets of cx_struct_slot as instances
 * add fail func
 ** like test but just call error with message
-* add Str 'int' fn
-* add Int 'str' fn
-* add Char 'int' fn
-* add Int 'char' fn
 * add lets: macro
 ** typecheck and bind stack to vars
-* add str interpolation
 
 func: fib-rec(a b n Int) $n? if {$b $a $b + $n -- recall} $a;
 func: fib(n Int) fib-rec 0 1 $n;

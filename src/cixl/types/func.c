@@ -83,8 +83,10 @@ struct cx_fimp *cx_func_add_imp(struct cx_func *func,
 }
 
 struct cx_fimp *cx_func_get_imp(struct cx_func *func, struct cx_vec *stack) {
-  cx_do_set(&func->imps, struct cx_fimp *, imp) {
-    if (cx_fimp_match(*imp, stack)) { return *imp; }
+  for (struct cx_fimp **i = (struct cx_fimp **)cx_vec_end(&func->imps.members) - 1;
+       i >= (struct cx_fimp **)func->imps.members.items;
+       i--) {
+    if (cx_fimp_match(*i, stack)) { return *i; }
   }
 
   return NULL;
