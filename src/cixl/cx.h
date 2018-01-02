@@ -5,7 +5,7 @@
 #include "cixl/set.h"
 #include "cixl/type.h"
 
-#define CX_VERSION "0.5"
+#define CX_VERSION "0.6"
 
 #define cx_add_func(cx, id, ...) ({				\
       struct cx_func_arg args[] = {__VA_ARGS__};		\
@@ -28,7 +28,7 @@ struct cx {
     *str_type, *vect_type;
 
   cx_type_tag_t next_type_tag;
-  struct cx_set macros, funcs;
+  struct cx_set macros, funcs, consts;
   
   struct cx_vec scopes;
   struct cx_scope *main;
@@ -67,6 +67,9 @@ bool cx_add_mixl_func(struct cx *cx,
 		      const char *body);
 
 struct cx_func *cx_get_func(struct cx *cx, const char *id, bool silent);
+
+struct cx_box *cx_get_const(struct cx *cx, const char *id, bool silent);
+struct cx_box *cx_set_const(struct cx *cx, const char *id, bool force);
 
 struct cx_scope *cx_scope(struct cx *cx, size_t i);
 void cx_push_scope(struct cx *cx, struct cx_scope *scope);

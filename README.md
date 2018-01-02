@@ -112,20 +112,20 @@ Value equality:
 ```
 > 'foo' = 'foo'
 ..
-[t]
+[#t]
 ```
 
 And identity:
 ```
 > 'foo' == 'foo'
 ..
-[f]
+[#f]
 ```
 
 ```
 > 42 == 42
 ..
-[t]
+[#t]
 ```
 
 ### IO
@@ -177,14 +177,14 @@ All types are useable as conditions; some are always true; integers test true fo
 
 ```
 > 0?
-[f]
+[#f]
 ```
 
 The ```!``` operator negates any condition.
 
 ```
 > 42!
-[f]
+[#f]
 ```
 
 The ```if``` statement may be used to branch on a condition, it calls '?' implicitly so you can throw any value at it.
@@ -333,7 +333,7 @@ Basic rational arithmetics is supported out of the box.
 ```
 
 ### Optionals
-The nil value may be used to represent missing values. Since ```Nil``` isn't derived from ```A```, stray nil values never get far before being trapped in a function call; ```Opt``` may be used instead where nil values are allowed.
+The ```#nil``` value may be used to represent missing values. Since ```Nil``` isn't derived from ```A```, stray ```#nil``` values never get far before being trapped in a function call; ```Opt``` may be used instead where ```#nil``` is allowed.
 
 ```
 > func: foo(x A);
@@ -341,12 +341,12 @@ The nil value may be used to represent missing values. Since ```Nil``` isn't der
 ..
 []
 
-> foo nil
+> foo #nil
 ..
 Error in row 1, col 1:
 Func not applicable: 'foo'
 
-> | bar nil
+> | bar #nil
 ..
 [42]
 ```
@@ -432,7 +432,7 @@ Capitalized names are treated as type references, the following types are define
 [Int]
 
 > is A
-[t]
+[#t]
 ```
 
 ### Traits
@@ -446,7 +446,7 @@ Traits are abstract types, they are useful for simplifying type checking and/or 
 > Str is StrInt,
 ..Int is StrInt,
 ..StrInt is A
-[t t f]
+[#t #t #f]
 
 > trait: StrIntChar StrInt Char;
 ..

@@ -72,6 +72,7 @@ struct cx_op *cx_op_init(struct cx_op *op, struct cx_op_type *type, size_t tok_i
 
 struct cx_op_type *CX_OCUT();
 struct cx_op_type *CX_OGET();
+struct cx_op_type *CX_OGET_CONST();
 struct cx_op_type *CX_OFUNC();
 struct cx_op_type *CX_OFUNCALL();
 struct cx_op_type *CX_OLAMBDA();

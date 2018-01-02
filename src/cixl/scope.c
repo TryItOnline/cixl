@@ -68,24 +68,6 @@ void cx_fprint_stack(struct cx_scope *scope, FILE *out) {
   cx_vect_fprint(&scope->stack, out);
 }
 
-struct cx_box *cx_set(struct cx_scope *scope, const char *id, bool force) {
-  struct cx_var *var = cx_set_get(&scope->env, &id);
-
-  if (var) {
-    if (!force) {
-      struct cx *cx = scope->cx;
-      cx_error(cx, cx->row, cx->col, "Attempt to rebind variable: '%s'", id);
-      return NULL;
-    }
-      
-    cx_box_deinit(&var->value);
-  } else {
-    var = cx_var_init(cx_set_insert(&scope->env, &id), id);
-  }
-
-  return &var->value;
-}
-
 struct cx_box *cx_get(struct cx_scope *scope, const char *id, bool silent) {
   struct cx_var *var = cx_set_get(&scope->env, &id);
 
@@ -94,10 +76,28 @@ struct cx_box *cx_get(struct cx_scope *scope, const char *id, bool silent) {
 
     if (!silent) {
       struct cx *cx = scope->cx;
-      cx_error(cx, cx->row, cx->col, "Unknown variable: '%s'", id);
+      cx_error(cx, cx->row, cx->col, "Unknown var: '%s'", id);
     }
     
     return NULL;
+  }
+
+  return &var->value;
+}
+
+struct cx_box *cx_set(struct cx_scope *scope, const char *id, bool force) {
+  struct cx_var *var = cx_set_get(&scope->env, &id);
+
+  if (var) {
+    if (!force) {
+      struct cx *cx = scope->cx;
+      cx_error(cx, cx->row, cx->col, "Attempt to rebind var: '%s'", id);
+      return NULL;
+    }
+      
+    cx_box_deinit(&var->value);
+  } else {
+    var = cx_var_init(cx_set_insert(&scope->env, &id), id);
   }
 
   return &var->value;

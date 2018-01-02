@@ -1,6 +1,10 @@
+* convert nil to const like bool
+* add support for trait redefinition
+** loop all types and remove from parents/tags
+* add enum support
+* add vect get
+* add str lower/upper
 * add rat sub/div
-* add str lower/upper/set
-* add vect get/set
 * --
 * add str interpolation
 * add Stream type

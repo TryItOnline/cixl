@@ -135,7 +135,7 @@ static bool parse_id(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
       } else {
 	if (isupper(id.data[0])) {
 	  ok = parse_type(cx, id.data, out, lookup);
-	} else if (!lookup || id.data[0] == '$') {
+	} else if (!lookup || id.data[0] == '#' || id.data[0] == '$') {
 	  cx_tok_init(cx_vec_push(out),
 		      CX_TID(),
 		      cx->row, cx->col)->as_ptr = strdup(id.data);

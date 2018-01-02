@@ -24,6 +24,7 @@
 #include "cixl/types/str.h"
 #include "cixl/types/vect.h"
 #include "cixl/util.h"
+#include "cixl/var.h"
 
 static const void *get_type_id(const void *value) {
   struct cx_type *const *type = value;
@@ -227,11 +228,6 @@ static bool func_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   return true;
 }
 
-static bool nil_imp(struct cx_scope *scope) {
-  cx_box_init(cx_push(scope), scope->cx->nil_type);
-  return true;
-}
-
 static bool cls_imp(struct cx_scope *scope) {
   cx_vec_clear(&scope->stack);
   return true;
@@ -400,6 +396,9 @@ struct cx *cx_init(struct cx *cx) {
   cx_set_init(&cx->funcs, sizeof(struct cx_func *), cx_cmp_str);
   cx->funcs.key = get_func_id;
 
+  cx_set_init(&cx->consts, sizeof(struct cx_var), cx_cmp_str);
+  cx->consts.key_offset = offsetof(struct cx_var, id);
+
   cx_vec_init(&cx->scopes, sizeof(struct cx_scope *));
   cx_vec_init(&cx->errors, sizeof(struct cx_error));
 
@@ -424,8 +423,6 @@ struct cx *cx_init(struct cx *cx) {
   cx->fimp_type = cx_init_fimp_type(cx);
   cx->lambda_type = cx_init_lambda_type(cx);
 
-  cx_add_func(cx, "nil")->ptr = nil_imp;
-  
   cx_add_func(cx, "|")->ptr = cls_imp;
   cx_add_func(cx, "%", cx_arg(cx->opt_type))->ptr = dup_imp;
   cx_add_func(cx, "_", cx_arg(cx->opt_type))->ptr = zap_imp;
@@ -458,6 +455,9 @@ struct cx *cx_deinit(struct cx *cx) {
   
   cx_do_vec(&cx->scopes, struct cx_scope *, s) { cx_scope_unref(*s); }
   cx_vec_deinit(&cx->scopes);
+
+  cx_do_set(&cx->consts, struct cx_var, v) { cx_var_deinit(v); }
+  cx_set_deinit(&cx->consts);
 
   cx_do_set(&cx->macros, struct cx_macro *, m) { free(cx_macro_deinit(*m)); }
   cx_set_deinit(&cx->macros);
@@ -573,6 +573,34 @@ struct cx_macro *cx_get_macro(struct cx *cx, const char *id, bool silent) {
   }
   
   return m ? *m : NULL;
+}
+
+struct cx_box *cx_get_const(struct cx *cx, const char *id, bool silent) {
+  struct cx_var *var = cx_set_get(&cx->consts, &id);
+
+  if (!var) {
+    if (!silent) { cx_error(cx, cx->row, cx->col, "Unknown const: '%s'", id); }
+    return NULL;
+  }
+
+  return &var->value;
+}
+
+struct cx_box *cx_set_const(struct cx *cx, const char *id, bool force) {
+  struct cx_var *var = cx_set_get(&cx->consts, &id);
+
+  if (var) {
+    if (!force) {
+      cx_error(cx, cx->row, cx->col, "Attempt to rebind const: '%s'", id);
+      return NULL;
+    }
+      
+    cx_box_deinit(&var->value);
+  } else {
+    var = cx_var_init(cx_set_insert(&cx->consts, &id), id);
+  }
+
+  return &var->value;
 }
 
 struct cx_scope *cx_scope(struct cx *cx, size_t i) {

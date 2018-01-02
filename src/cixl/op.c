@@ -79,6 +79,17 @@ cx_op_type(CX_OGET, {
     type.eval = get_eval;
   });
 
+static bool get_const_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
+  struct cx_box *v = cx_get_const(cx, op->as_get.id, false);
+  if (!v) { return false; }
+  cx_copy(cx_push(cx_scope(cx, 0)), v);
+  return true;
+}
+
+cx_op_type(CX_OGET_CONST, {
+    type.eval = get_const_eval;
+  });
+
 static bool lambda_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
   struct cx_scope *scope = cx_scope(cx, 0);
   struct cx_lambda *l = cx_lambda_new(scope,

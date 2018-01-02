@@ -15,7 +15,7 @@ static bool ok_imp(struct cx_box *x) {
 }
 
 static void fprint_imp(struct cx_box *v, FILE *out) {
-  fputc('_', out);
+  fputs("#nil", out);
 }
 
 struct cx_type *cx_init_nil_type(struct cx *cx) {
@@ -23,5 +23,8 @@ struct cx_type *cx_init_nil_type(struct cx *cx) {
   t->equid = equid_imp;
   t->ok = ok_imp;
   t->fprint = fprint_imp;
+
+  cx_box_init(cx_set_const(cx, "nil", false), t);
+
   return t;
 }
