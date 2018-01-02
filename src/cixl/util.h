@@ -5,13 +5,13 @@
 
 #define cx_min(x, y) ({				\
       typeof(x) _x = x;				\
-      typeof(x) _y = y;				\
+      typeof(y) _y = y;				\
       (_x <= _y) ? _x : _y;			\
     })						\
 
 #define cx_max(x, y) ({				\
       typeof(x) _x = x;				\
-      typeof(x) _y = y;				\
+      typeof(y) _y = y;				\
       (_x >= _y) ? _x : _y;			\
     })
 
