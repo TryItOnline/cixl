@@ -39,7 +39,22 @@ static void copy_imp(struct cx_box *dst, struct cx_box *src) {
 }
 
 static void fprint_imp(struct cx_box *v, FILE *out) {
-  fprintf(out, "\\%c", v->as_char);
+  char c = v->as_char;
+  
+  switch (c) {
+  case '\n':
+    fputs("\\\\n", out);
+    break;
+  case '\t':
+    fputs("\\\\t", out);
+    break;
+  default:
+    if (isgraph(c)) {
+      fprintf(out, "\\%c", v->as_char);
+    } else {
+      fprintf(out, "\\\\%d", v->as_char);
+    }
+  }
 }
 
 struct cx_type *cx_init_char_type(struct cx *cx) {

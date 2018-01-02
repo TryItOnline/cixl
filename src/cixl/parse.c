@@ -198,10 +198,34 @@ static bool parse_int(struct cx *cx, FILE *in, struct cx_vec *out) {
 
 static bool parse_char(struct cx *cx, FILE *in, struct cx_vec *out) {
   char c = fgetc(in);
-
+  int row = cx->row, col = cx->col;
+  
   if (c == EOF) {
-    cx_error(cx, cx->row, cx->col, "Invalid char literal");
+    cx_error(cx, row, col, "Invalid char literal");
     return false;
+  }
+
+  if (c == '\\') {
+    c = fgetc(in);
+    
+    switch(c) {
+    case 'n':
+      c = '\n';
+      break;
+    case 't':
+      c = '\t';
+      break;
+    default:
+      ungetc(c, in);
+      
+      if (!parse_int(cx, in, out)) {
+	cx_error(cx, row, col, "Invalid char literal");
+	return false;
+      }
+
+      struct cx_tok *t = cx_vec_pop(out);
+      c = t->as_box.as_int;
+    }
   }
   
   struct cx_box *box = &cx_tok_init(cx_vec_push(out),
