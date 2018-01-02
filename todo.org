@@ -1,8 +1,8 @@
 * add rat sub/div
-* add str lower/upper
-* add vect get
-* add str interpolation
+* add str lower/upper/set
+* add vect get/set
 * --
+* add str interpolation
 * add Stream type
 ** cx_stream with byte vec & r/w pos
 ** stream fn to create
