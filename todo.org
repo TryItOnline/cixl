@@ -2,7 +2,6 @@
 * add support for trait redefinition
 ** loop all types and remove from parents/tags
 * add vect get
-* add str upper/lower in cixl using map
 * add rat sub/div
 * add str interpolation
 * add Stream type

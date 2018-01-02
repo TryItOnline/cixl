@@ -49,7 +49,7 @@ bool cx_eval_str(struct cx *cx, const char *in) {
     goto exit1;
   }
 
-  struct cx_bin *bin = cx_bin_new();
+  struct cx_bin *bin = cx->bin ? cx_bin_ref(cx->bin) : cx_bin_new();
   if (!cx_compile(cx, cx_vec_start(&toks), cx_vec_end(&toks), bin)) { goto exit2; }
   if (!cx_eval(cx, bin, NULL)) { goto exit2; }
   ok = true;

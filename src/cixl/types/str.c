@@ -9,107 +9,6 @@
 #include "cixl/types/fimp.h"
 #include "cixl/types/func.h"
 
-static bool len_imp(struct cx_scope *scope) {
-  struct cx_box v = *cx_test(cx_pop(scope, false));
-  cx_box_init(cx_push(scope), scope->cx->int_type)->as_int = strlen(v.as_ptr);
-  cx_box_deinit(&v);
-  return true;
-}
-
-static bool get_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  
-  struct cx_box
-    i = *cx_test(cx_pop(scope, false)),
-    s = *cx_test(cx_pop(scope, false));
-
-  char *sv = s.as_ptr;
-  bool ok = false;
-  
-  if (i.as_int < 0 || i.as_int >= strlen(sv)) {
-    cx_error(cx, cx->row, cx->col, "Index out of bounds: %" PRId64, i.as_int);
-    goto exit;
-  }
-  
-  cx_box_init(cx_push(scope), cx->char_type)->as_char = *(sv+i.as_int);
-  ok = true;
- exit:
-  cx_box_deinit(&s);
-  return ok;
-}
-
-static bool int_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  struct cx_box v = *cx_test(cx_pop(scope, false));
-  char *s = v.as_ptr;
-  cx_int_t iv = strtoimax(s, NULL, 10);
-  bool ok = false;
-  
-  if (!iv && (!s[0] || s[0] != '0' || s[1])) {
-    cx_error(cx, cx->row, cx->col, "Failed parsing int: '%s'", s);
-    goto exit;
-  }
-  
-  cx_box_init(cx_push(scope), cx->int_type)->as_int = iv;
-  ok = true;
- exit:
-  cx_box_deinit(&v);
-  return ok;
-}
-
-static bool for_imp(struct cx_scope *scope) {
-  struct cx_box
-    act = *cx_test(cx_pop(scope, false)),
-    str = *cx_test(cx_pop(scope, false));
-
-  bool ok = false;
-
-  for (char *c = str.as_ptr; *c; c++) {
-    cx_box_init(cx_push(scope), scope->cx->char_type)->as_char = *c;
-    if (!cx_call(&act, scope)) { goto exit; }
-  }
-
-  ok = true;
- exit:
-  cx_box_deinit(&str);
-  cx_box_deinit(&act);
-  return ok;
-}
-
-static bool map_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-
-  struct cx_box
-    act = *cx_test(cx_pop(scope, false)),
-    str = *cx_test(cx_pop(scope, false));
-
-  bool ok = false;
-  
-  for (char *c = str.as_ptr; *c; c++) {
-    cx_box_init(cx_push(scope), scope->cx->char_type)->as_char = *c;
-    if (!cx_call(&act, scope)) { goto exit; }
-    struct cx_box *res = cx_pop(scope, true);
-
-    if (!res) {
-      cx_error(cx, cx->row, cx->col, "Missing result for '%c'", *c);
-      goto exit;
-    }
-
-    if (res->type != cx->char_type) {
-      cx_error(cx, cx->row, cx->col, "Expected type Char, got %s", res->type->id);
-      goto exit;
-    }
-
-    *c = res->as_char;
-  }
-
-  *cx_push(scope) = str;
-  ok = true;
- exit:
-  cx_box_deinit(&act);
-  return ok;
-}
-
 static bool equid_imp(struct cx_box *x, struct cx_box *y) {
   return x->as_ptr == y->as_ptr;
 }
@@ -143,13 +42,5 @@ struct cx_type *cx_init_str_type(struct cx *cx) {
   t->copy = copy_imp;
   t->fprint = fprint_imp;
   t->deinit = deinit_imp;
-  
-  cx_add_func(cx, "len", cx_arg(t))->ptr = len_imp;
-  cx_add_func(cx, "get", cx_arg(t), cx_arg(cx->int_type))->ptr = get_imp;
-  cx_add_func(cx, "int", cx_arg(t))->ptr = int_imp;
-
-  cx_add_func(cx, "for", cx_arg(t), cx_arg(cx->any_type))->ptr = for_imp;
-  cx_add_func(cx, "map", cx_arg(t), cx_arg(cx->any_type))->ptr = map_imp;
-
   return t;
 }

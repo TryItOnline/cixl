@@ -2,6 +2,7 @@
 #include "cixl/error.h"
 #include "cixl/eval.h"
 #include "cixl/libs/math.h"
+#include "cixl/libs/str.h"
 #include "cixl/scope.h"
 #include "cixl/tests.h"
 
@@ -58,13 +59,14 @@ static void char_tests() {
 static void str_tests() {
   struct cx cx;
   cx_init(&cx);
-
+  cx_init_str(&cx);
+  
   run(&cx, "'foo' test");
   run(&cx, "''! test");
   run(&cx, "'foo' = 'foo' test");
   run(&cx, "'foo' = 'bar' ! test");
   run(&cx, "'foo' == 'foo' ! test");
-  run(&cx, "'foo' map &upper = 'FOO' test");
+  run(&cx, "'foo' upper = 'FOO' test");
   run(&cx, "'foobar' 3 get \\b = test");
   run(&cx, "'42' int 42 = test");
   
