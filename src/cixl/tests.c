@@ -40,7 +40,18 @@ static void int_tests() {
   run(&cx, "21 +<Int> 21 = 42 test");
   run(&cx, "7 + 14, 7 + 14 + = 42 test");
   run(&cx, "1 = 2! test");
+  run(&cx, "42 str '42' = test");
 
+  cx_deinit(&cx);
+}
+
+static void char_tests() {
+  struct cx cx;
+  cx_init(&cx);
+
+  run(&cx, "\\a upper \\A = test");
+  run(&cx, "\\0 int + 7 char \\7 = test");
+  
   cx_deinit(&cx);
 }
 
@@ -54,6 +65,18 @@ static void str_tests() {
   run(&cx, "'foo' = 'bar' ! test");
   run(&cx, "'foo' == 'foo' ! test");
   run(&cx, "'foo' map &upper = 'FOO' test");
+  run(&cx, "'foobar' 3 get \\b = test");
+  run(&cx, "'42' int 42 = test");
+  
+  cx_deinit(&cx);
+}
+
+static void rat_tests() {
+  struct cx cx;
+  cx_init(&cx);
+
+  run(&cx, "1 / 2, 5 / 2 *, 5 / 4 = test");
+  run(&cx, "1 / 2, 5 / 2 +, 3 / 1 = test");
   
   cx_deinit(&cx);
 }
@@ -114,7 +137,9 @@ static void math_tests() {
 void cx_tests() {
   type_tests();
   int_tests();
+  char_tests();
   str_tests();
+  rat_tests();
   vect_tests();
   stack_tests();
   group_tests();

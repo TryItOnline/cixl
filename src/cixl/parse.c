@@ -227,6 +227,7 @@ static bool parse_str(struct cx *cx, FILE *in, struct cx_vec *out) {
       cx_error(cx, row, col, "Unterminated str literal");
       goto exit;
     }
+    
     if (c == '\'' && pc != '\\') { break; }
 
     if (pc == '\\' && c != '\\') {
@@ -236,6 +237,7 @@ static bool parse_str(struct cx *cx, FILE *in, struct cx_vec *out) {
 	break;
       case 't':
 	c = '\t';
+	break;
       }
     }
 

@@ -1,10 +1,4 @@
-* add Str 'int' fn
-* add Int 'str' fn
-* add Char 'int' fn
-* add Int 'char' fn
 * add rat sub/div
-* add rat tests
-* ---
 * add str interpolation
 * add Stream type
 ** cx_stream with byte vec & r/w pos

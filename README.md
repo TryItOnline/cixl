@@ -294,6 +294,31 @@ A vector containing all implementations for a specific function may be retrieved
 [[Fimp(+ Int Int) Fimp(+ Rat Rat)]@1]
 ```
 
+### Conversions
+Where conversions to other types make sense, a function named after the target type is provided.
+
+```
+> '42' int
+..
+[42]
+
+> str
+..
+['42']
+
+> 1 get
+..
+[\2]
+
+> int
+..
+[50]
+
+> + 5 char
+..
+[\7]
+```
+
 ### Rationals
 Basic rational arithmetics is supported out of the box.
 

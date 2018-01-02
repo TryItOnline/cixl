@@ -7,6 +7,7 @@
 #include "cixl/types/fimp.h"
 #include "cixl/types/func.h"
 #include "cixl/types/int.h"
+#include "cixl/util.h"
 
 static bool lt_imp(struct cx_scope *scope) {
   struct cx_box
@@ -84,6 +85,26 @@ static bool div_imp(struct cx_scope *scope) {
   return true;
 }
 
+static bool char_imp(struct cx_scope *scope) {
+  struct cx *cx = scope->cx;
+  struct cx_box v = *cx_test(cx_pop(scope, false));
+  
+  if (v.as_int < 0 || v.as_int > 255) {
+    cx_error(cx, cx->row, cx->col, "Invalid char: %" PRId64, v.as_int);
+    return false;
+  }
+  
+  cx_box_init(cx_push(scope), cx->char_type)->as_char = v.as_int;
+  return true;
+}
+
+static bool str_imp(struct cx_scope *scope) {
+  struct cx_box v = *cx_test(cx_pop(scope, false));
+  char *s = cx_fmt("%" PRId64, v.as_int);
+  cx_box_init(cx_push(scope), scope->cx->str_type)->as_ptr = s;
+  return true;
+}
+
 static bool times_imp(struct cx_scope *scope) {
   struct cx_box
     v = *cx_test(cx_pop(scope, false)),
@@ -147,6 +168,8 @@ struct cx_type *cx_init_int_type(struct cx *cx) {
   cx_add_func(cx, "*", cx_arg(t), cx_arg(t))->ptr = mul_imp;
   cx_add_func(cx, "/", cx_arg(t), cx_arg(t))->ptr = div_imp;
   
+  cx_add_func(cx, "char", cx_arg(t))->ptr = char_imp;
+  cx_add_func(cx, "str", cx_arg(t))->ptr = str_imp;
   cx_add_func(cx, "times", cx_arg(t), cx_arg(cx->any_type))->ptr = times_imp;
   cx_add_func(cx, "for", cx_arg(t), cx_arg(cx->any_type))->ptr = for_imp;
   
