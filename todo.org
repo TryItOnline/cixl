@@ -1,5 +1,34 @@
+* add case: macro
+** case: 
+(= 1 2) 42
+$foo ('foo' $foo vect)
+$bar ('bar' $bar vect)
+#t 'default'
+** execute first clause that tests ok
+** error if no case matches 
+---
+* add enum: macro
+** add cx_enum
+** types/enum.h/c
+** embed type
+** add manually
+** store vect & map
+** use box.int_value
+** add enum cx_meta_type { CX_ENUM, CX_TRAIT, CX_TYPE, CX_STRUCT }
+*** replaces type.trait
+*** add param to add_type
+*** set A, Opt & Num to CX_TRAIT
+** set names as constants
+** add int/str fns
+** add get fns from int/str
+*** enum: FooBar x y z; 0 foo-bar -> #x, 'y' foo-bar -> #y
+** allow redefinition
+** disallow rebinding consts as different types
+* --
 * add vect get
+** add vect lib
 * add rat sub/div
+** move fns to math lib
 * add str interpolation
 * add Stream type
 ** cx_stream with byte vec & r/w pos
