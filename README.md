@@ -133,10 +133,10 @@ And identity:
 
 ```
 > say 'hello'  
-..ask 'enter name: '
+..ask 'what\'s your name? '
 ..
 hello
-enter name: Sifoo
+what's your name: Sifoo
 ['Sifoo']
 ```
 

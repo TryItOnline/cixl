@@ -218,6 +218,7 @@ static bool parse_str(struct cx *cx, FILE *in, struct cx_vec *out) {
   cx_buf_open(&value);
   int row = cx->row, col = cx->col;
   bool ok = false;
+  char pc = 0;
   
   while (true) {
     char c = fgetc(in);
@@ -226,9 +227,20 @@ static bool parse_str(struct cx *cx, FILE *in, struct cx_vec *out) {
       cx_error(cx, row, col, "Unterminated str literal");
       goto exit;
     }
-      
-    if (c == '\'') { break; }
-    fputc(c, value.stream);
+    if (c == '\'' && pc != '\\') { break; }
+
+    if (pc == '\\' && c != '\\') {
+      switch (c) {
+      case 'n':
+	c = '\n';
+	break;
+      case 't':
+	c = '\t';
+      }
+    }
+
+    if (c != '\\' || pc == '\\') { fputc(c, value.stream); }
+    pc = c;
     cx->col++;
   }
 

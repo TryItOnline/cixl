@@ -1,12 +1,9 @@
-* change get_imp to process imps in reverse
-* add str \n \t \' support
-* add rat sub/div
-* add rat tests
 * add Str 'int' fn
 * add Int 'str' fn
 * add Char 'int' fn
 * add Int 'char' fn
-
+* add rat sub/div
+* add rat tests
 * ---
 * add str interpolation
 * add Stream type
