@@ -1,3 +1,4 @@
+#include <errno.h>
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
@@ -452,16 +453,6 @@ struct cx *cx_init(struct cx *cx) {
   return cx;
 }
 
-void cx_init_math(struct cx *cx) {
-  cx_test(cx_eval_str(cx,
-		      "func: fib-rec(a b n Int) "
-		      "$n? if {$b $a $b + $n -- recall} $a;"));
-
-  cx_test(cx_eval_str(cx,
-		      "func: fib(n Int) "
-		      "0 1 $n fib-rec;"));
-}
-
 struct cx *cx_deinit(struct cx *cx) {
   cx_set_deinit(&cx->separators);
   
@@ -617,4 +608,28 @@ struct cx_scope *cx_begin(struct cx *cx, bool child) {
 
 void cx_end(struct cx *cx) {
   cx_pop_scope(cx, false);
+}
+
+bool cx_load(struct cx *cx, const char *path) {
+  FILE *f = fopen(path , "r");
+
+  if (!f) {
+    cx_error(cx, cx->row, cx->col, "Failed opening file '%s': %d", path, errno);
+  }
+  
+  fseek(f, 0, SEEK_END);
+  size_t len = ftell(f);
+  rewind(f);
+
+  char *buf = malloc(len+1);
+  buf[len] = 0;
+  
+  if (fread(buf, len, 1 , f) != 1) {
+    cx_error(cx, cx->row, cx->col, "Failed reading file '%s': %d", path, errno);
+  }
+  
+  fclose(f);
+  bool ok = cx_eval_str(cx, buf);
+  free(buf);
+  return ok;
 }

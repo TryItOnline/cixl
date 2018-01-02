@@ -128,6 +128,31 @@ And identity:
 [t]
 ```
 
+### IO
+```say``` and ```ask``` may be used to perform basic IO.
+
+```
+> say 'hello'  
+..ask 'enter name: '
+..
+hello
+enter name: Sifoo
+['Sifoo']
+```
+
+Code may be loaded from file using ```load```, the loaded code is evaluated in the current scope.
+
+test.cx:
+```
++2
+```
+
+```
+> 1, load 'test.cx'
+..
+[3]
+```
+
 ### Scopes
 Enclosing code in parens evaluates it in a separate scope with a clean stack. The last value on the stack is automatically returned on scope exit.
 
@@ -481,7 +506,7 @@ int main() {
 ### Performance
 There is still a lot of work remaining in the profiling and benchmarking departments, but preliminary results puts cixl at around 1-5 times slower than Python. Measured time is displayed in milliseconds.
 
-Let's start with a tail-recursive fibonacci to exercise the interpreter loop, it's worth mentioning that cixl uses 64-bit integers while Python settles for 32-bit:
+Let's start with a tail-recursive fibonacci to exercise the interpreter loop, it's worth mentioning that cixl uses 64-bit integers while Python settles for 32-bit.
 
 ```
 > func: fib-rec(a b n Int)
@@ -512,7 +537,7 @@ $ python3 fib.py
 118
 ```
 
-Next up is consing a vector:
+Next up is consing a vector.
 
 ```
 > | clock {(let: v vect; 10000000 for {$v ~ push})} / 1000000 int

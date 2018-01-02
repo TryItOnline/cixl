@@ -1,13 +1,6 @@
-* add cx_init_io
-** add ask fn
-*** read from stdin until newline with prompt
-** add say fn
-*** write to stdout with newline
-** add load fn
-*** add cx_load(cx, const char *path)
+* add str \n \t \' support
 * add rat sub/div
 * add rat tests
-* add str \n \t \' support
 * add Stream type
 ** cx_stream with byte vec & r/w pos
 ** stream fn to create

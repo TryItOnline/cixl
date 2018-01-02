@@ -44,7 +44,6 @@ struct cx {
 };
 
 struct cx *cx_init(struct cx *cx);
-void cx_init_math(struct cx *cx);
 
 struct cx *cx_deinit(struct cx *cx);
 
@@ -74,5 +73,7 @@ void cx_push_scope(struct cx *cx, struct cx_scope *scope);
 struct cx_scope *cx_pop_scope(struct cx *cx, bool silent);
 struct cx_scope *cx_begin(struct cx *cx, bool child);
 void cx_end(struct cx *cx);
+
+bool cx_load(struct cx *cx, const char *path);
 
 #endif

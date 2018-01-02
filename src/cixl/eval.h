@@ -5,6 +5,7 @@
 
 struct cx;
 struct cx_bin;
+struct cx_func;
 struct cx_op;
 struct cx_vec;
 
