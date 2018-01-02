@@ -1,5 +1,3 @@
-* add support for trait redefinition
-** loop all types and remove from parents/tags
 * add vect get
 * add rat sub/div
 * add str interpolation

@@ -263,6 +263,7 @@ Several parameters may share the same type. An index may may be specified instea
 ```
 
 Existing implementations may be overridden at any point.
+
 ```
 > func: +(x y Int) 42;
 ..1 + 2

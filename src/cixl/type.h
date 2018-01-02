@@ -16,6 +16,7 @@ struct cx_type {
   char *id;
   cx_type_tag_t tag, tags;
   struct cx_set parents;
+  bool trait;
   
   bool (*eqval)(struct cx_box *, struct cx_box *);
   bool (*equid)(struct cx_box *, struct cx_box *);

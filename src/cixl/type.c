@@ -15,6 +15,7 @@ struct cx_type *cx_type_init(struct cx_type *type, struct cx *cx, const char *id
   type->tag = cx->next_type_tag;
   cx->next_type_tag *= 2;
   type->tags = type->tag;
+  type->trait = false;
   cx_set_init(&type->parents, sizeof(struct cx_type *), cx_cmp_ptr);
   
   type->eqval = NULL;
