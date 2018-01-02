@@ -1,5 +1,8 @@
 * add rat sub/div
+* add str lower/upper
+* add vect get
 * add str interpolation
+* --
 * add Stream type
 ** cx_stream with byte vec & r/w pos
 ** stream fn to create
@@ -7,11 +10,6 @@
 ** stream rseek/wseek fn
 ** stream str fn
 ** stream len fn
-* add nvect fn
-** vect of len n
-** init to nil
-* add vect put/get to/from index
-** check bounds
 * add type.cmp
 ** add Cmp trait
 ** use to implement < > <= >= for all Cmp types
