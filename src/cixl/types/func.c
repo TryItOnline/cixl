@@ -83,7 +83,7 @@ struct cx_fimp *cx_func_add_imp(struct cx_func *func,
 }
 
 struct cx_fimp *cx_func_get_imp(struct cx_func *func, struct cx_vec *stack) {
-  for (struct cx_fimp **i = (struct cx_fimp **)cx_vec_end(&func->imps.members) - 1;
+  for (struct cx_fimp **i = cx_vec_peek(&func->imps.members, 0);
        i >= (struct cx_fimp **)func->imps.members.items;
        i--) {
     if (cx_fimp_match(*i, stack)) { return *i; }
@@ -97,7 +97,9 @@ static bool imps_imp(struct cx_scope *scope) {
   struct cx_func *f = cx_test(cx_pop(scope, false))->as_ptr;
   struct cx_vect *is = cx_vect_new();
 
-  cx_do_set(&f->imps, struct cx_fimp *, i) {
+  for (struct cx_fimp **i = cx_vec_peek(&f->imps.members, 0);
+       i >= (struct cx_fimp **)f->imps.members.items;
+       i--) {
     cx_box_init(cx_vec_push(&is->imp), cx->fimp_type)->as_ptr = *i;
   }
   
