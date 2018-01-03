@@ -382,6 +382,39 @@ static bool recall_imp(struct cx_scope *scope) {
   return cx_fimp_eval(cx->fimp, scope);
 }
 
+static bool upcall_imp(struct cx_scope *scope) {
+  struct cx *cx = scope->cx;
+  
+  if (!cx->fimp) {
+    cx_error(cx, cx->row, cx->col, "Nothing to upcall");
+    return false;
+  }
+
+  struct cx_func *func = cx->fimp->func;
+  if (!cx_scan_args(cx, func)) { return false; }
+  ssize_t i = cx_set_index(&func->imps, &cx->fimp->arg_tags);
+
+  if (i == -1) {
+    cx_error(cx, cx->row, cx->col, "Recall fimp not found");
+    return false;
+  }
+
+  if (!i) {
+    cx_error(cx, cx->row, cx->col, "Nothing to upcall");
+    return false;
+  }
+  
+  struct cx_fimp *imp = cx_func_get_imp(func, &scope->stack,
+					func->imps.members.count-i);
+  
+  if (!imp) {
+    cx_error(cx, cx->row, cx->col, "Upcall not applicable");
+    return false;
+  }
+
+  return cx_fimp_call(imp, scope);
+}
+
 static bool clock_imp(struct cx_scope *scope) {
   struct cx_box v = *cx_test(cx_pop(scope, false));
   cx_timer_t timer;
@@ -471,7 +504,8 @@ struct cx *cx_init(struct cx *cx) {
   
   cx_add_func(cx, "compile", cx_arg(cx->str_type))->ptr = compile_imp;
   cx_add_func(cx, "call", cx_arg(cx->any_type))->ptr = call_imp;
-  cx_add_func(cx, "recall", cx_arg(cx->any_type))->ptr = recall_imp;
+  cx_add_func(cx, "recall")->ptr = recall_imp;
+  cx_add_func(cx, "upcall")->ptr = upcall_imp;
 
   cx_add_func(cx, "clock", cx_arg(cx->any_type))->ptr = clock_imp;
   cx_add_func(cx, "test", cx_arg(cx->opt_type))->ptr = test_imp;

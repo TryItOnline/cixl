@@ -50,6 +50,12 @@ void *cx_set_get(struct cx_set *set, const void *key) {
   return found;
 }
 
+ssize_t cx_set_index(struct cx_set *set, const void *key) {
+  void *found = NULL;
+  size_t i = cx_set_find(set, key, 0, &found);
+  return found ? i : -1;
+}
+
 void *cx_set_insert(struct cx_set *set, const void *key) {
   void *found = NULL;
   size_t i = cx_set_find(set, key, 0, &found);

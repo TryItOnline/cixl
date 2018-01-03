@@ -303,6 +303,16 @@ A vector containing all implementations for a specific function in the order the
 [[Fimp(+ Rat Rat) Fimp(+ Int Int)]@1]
 ```
 
+```upcall``` provides an easy way to call the next matching implementation, it also supports scanning for arguments.
+
+```
+> func: maybe-add(x y Num) $x + $y;
+..func: maybe-add(x y Int) $x = 42 if 42 {$x $y upcall};
+..maybe-add 1 2 , maybe-add 42 2
+..
+[3 42]
+```
+
 ### Conversions
 Where conversions to other types make sense, a function named after the target type is provided.
 

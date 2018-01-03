@@ -51,7 +51,7 @@ static bool funcall_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
   } else {
     imp = op->as_funcall.jit_imp;
     if (imp && !cx_fimp_match(imp, &s->stack)) { imp = NULL; }
-    if (!imp) { imp = cx_func_get_imp(func, &s->stack); }
+    if (!imp) { imp = cx_func_get_imp(func, &s->stack, 0); }
   }
   
   if (!imp) {
