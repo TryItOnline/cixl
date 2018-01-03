@@ -307,7 +307,7 @@ A vector containing all implementations for a specific function in the order the
 
 ```
 > func: maybe-add(x y Num) $x + $y;
-..func: maybe-add(x y Int) $x = 42 if 42 {$x $y upcall};
+..func: maybe-add(x y Int) $x = 42 if 42 {upcall $x $y};
 ..maybe-add 1 2 , maybe-add 42 2
 ..
 [3 42]

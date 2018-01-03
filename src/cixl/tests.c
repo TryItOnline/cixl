@@ -128,7 +128,7 @@ static void func_tests() {
 
   run(&cx,
       "func: maybe-add(x y Num) $x + $y; "
-      "func: maybe-add(x y Int) $x = 42 if 42 {$x $y upcall}; "
+      "func: maybe-add(x y Int) $x = 42 if 42 {upcall $x $y}; "
       "maybe-add 1 2 3 = test "
       "maybe-add 42 2 42 = test");
   

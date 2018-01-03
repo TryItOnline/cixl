@@ -1,5 +1,3 @@
-* add upcall
----
 * add value dispatch?
 ** allow literals as ids in func defs
 ** add to args
