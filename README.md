@@ -35,7 +35,8 @@ Examples from this document should work in the most recent version and run clean
 The stack is accessible from user code, just like in Forth. Basic stack operations have dedicated operators; ```%``` for duplicating last value, ```_``` for dropping it, ```~``` for flipping the last two values and ```|``` for clearing the stack.
 
 ```
-> 1 2 3 %
+> |
+..1 2 3 %
 ..
 [1 2 3 3]
 
@@ -56,7 +57,8 @@ The stack is accessible from user code, just like in Forth. Basic stack operatio
 But unlike Forth, functions scan forward until enough arguments are on the stack to allow reordering parameters and operations in user code to fit the problem being solved.
 
 ```
-> 1 + 2
+> |
+..1 + 2
 ..
 [3]
 
@@ -76,7 +78,8 @@ But unlike Forth, functions scan forward until enough arguments are on the stack
 The ```,``` operator may be used to cut the stack into discrete pieces and force functions to scan forward.
 
 ```
-> 1 + 2
+> |
+..1 + 2
 ..3 + 4
 ..
 [6 4]
@@ -91,7 +94,8 @@ The ```,``` operator may be used to cut the stack into discrete pieces and force
 Named variables may be defined once per scope using the ```let:``` macro.
 
 ```
-> let: foo 'bar';
+> |
+..let: foo 'bar';
 ..
 []
 
@@ -110,20 +114,23 @@ Two flavors of equality are provided.
 
 Value equality:
 ```
-> 'foo' = 'foo'
+> |
+..'foo' = 'foo'
 ..
 [#t]
 ```
 
 And identity:
 ```
-> 'foo' == 'foo'
+> |
+..'foo' == 'foo'
 ..
 [#f]
 ```
 
 ```
-> 42 == 42
+> |
+..42 == 42
 ..
 [#t]
 ```
@@ -132,7 +139,8 @@ And identity:
 ```say``` and ```ask``` may be used to perform basic IO.
 
 ```
-> say 'hello'  
+> |
+..say 'hello'  
 ..ask 'what\'s your name? '
 ..
 hello
@@ -148,7 +156,8 @@ test.cx:
 ```
 
 ```
-> 1, load 'test.cx'
+> |
+..1, load 'test.cx'
 ..
 [3]
 ```
@@ -157,7 +166,8 @@ test.cx:
 Enclosing code in parens evaluates it in a separate scope with a clean stack. The last value on the stack is automatically returned on scope exit.
 
 ```
-> (1 2 3)
+> |
+..(1 2 3)
 ..
 [3]
 ```
@@ -165,7 +175,8 @@ Enclosing code in parens evaluates it in a separate scope with a clean stack. Th
 Variables in the parent scope may be referenced from within the scope, but variables defined inside are not visible from the outside.
 
 ```
-> let: foo 1;
+> |
+..let: foo 1;
 ..(let: foo 2; $foo)
 ..$foo
 ..
@@ -176,25 +187,29 @@ Variables in the parent scope may be referenced from within the scope, but varia
 All types are useable as conditions; some are always true; integers test true for anything but zero; empty strings test false etc. The ```?``` operator may be used to transform any value to its conditional representation.
 
 ```
-> 0?
+> |
+..0?
 [#f]
 ```
 
 The ```!``` operator negates any condition.
 
 ```
-> 42!
+> |
+..42!
 [#f]
 ```
 
 The ```if``` statement may be used to branch on a condition, it calls '?' implicitly so you can throw any value at it.
 
 ```
-> 42 if 'not zero' 'zero'
+> |
+..42 if 'not zero' 'zero'
 ..
 ['not zero']
 
-> ''! if 'empty' 'not empty'
+> |
+..''! if 'empty' 'not empty'
 ..
 ['empty']
 ```
@@ -203,7 +218,8 @@ The ```if``` statement may be used to branch on a condition, it calls '?' implic
 Putting braces around a block of code defines a lambda, which is then pushed on the stack.
 
 ```
-> {1 2 3}
+> |
+..{1 2 3}
 ..
 [Lambda(0x52d97d0@1)]
 
@@ -215,7 +231,8 @@ Putting braces around a block of code defines a lambda, which is then pushed on 
 Lambdas inherit the defining scope.
 
 ```
-> (let: x 42; {$x}) call
+> |
+..(let: x 42; {$x}) call
 ..
 [42]
 ```
@@ -224,7 +241,8 @@ Lambdas inherit the defining scope.
 The ```func:``` macro may be used to define named functions. Several implementations may be defined for the same name as long as they have the same arity and different argument types. Each function opens an implicit scope that is closed on exit.
 
 ```
-> func: foo() 42;
+> |
+..func: foo() 42;
 ..foo
 ..
 [42]
@@ -233,7 +251,8 @@ The ```func:``` macro may be used to define named functions. Several implementat
 Prefixing a function name with ```&``` pushes a reference on the stack.
 
 ```
-> func: foo() 42;
+> |
+..func: foo() 42;
 ..&foo
 ..
 [Func(foo)]
@@ -246,7 +265,8 @@ Prefixing a function name with ```&``` pushes a reference on the stack.
 Each argument needs a type, ```A``` may be used to accept any type.
 
 ```
-> func: bar(x A) $x + 35;
+> |
+..func: bar(x A) $x + 35;
 ..bar 7
 ..
 [42]
@@ -255,8 +275,9 @@ Each argument needs a type, ```A``` may be used to accept any type.
 Several parameters may share the same type. An index may may be specified instead of type to refer to previous arguments, it is substituted for the actual type on evaluation.
 
 ```
-> func: baz(x y Int z T0)
-    $x + $y + $z;
+> |
+..func: baz(x y Int z T0)
+..  $x + $y + $z;
 ..baz 1 3 5
 ..
 [9]
@@ -265,9 +286,10 @@ Several parameters may share the same type. An index may may be specified instea
 It's possible to specify literal values for arguments instead of names and types.
 
 ```
-> func: foo(x Int) #f;
-..func: foo(42) #t;
-..foo 41, foo 42
+> |
+..func: bar(x Int) #f;
+..func: bar(42) #t;
+..bar 41, bar 42
 ..
 [#f #t]
 ```
@@ -275,7 +297,8 @@ It's possible to specify literal values for arguments instead of names and types
 Overriding existing implementations is as easy as defining a function with identical argument list.
 
 ```
-> func: +(x y Int) 42;
+> |
+..func: +(x y Int) 42;
 ..1 + 2
 ..
 [42]
@@ -284,7 +307,8 @@ Overriding existing implementations is as easy as defining a function with ident
 ```recall``` may be used to call the current function recursively in the same scope, it supports scanning for arguments just like a regular function call.
 
 ```
-> func: fib-rec(a b n Int)
+> |
+..func: fib-rec(a b n Int)
 ..  $n? if {, recall $b, $a + $b, -- $n} $a;
 ..func: fib(n Int)
 ..  fib-rec 0 1 $n;
@@ -295,7 +319,8 @@ Overriding existing implementations is as easy as defining a function with ident
 Argument types may be specified in angle brackets to select a specific function implementation. Besides documentation and sanity checking, this allows the compiler to inline the definition in cases where more than one implementation share the same name.
 
 ```
-> &+<Int>
+> |
+..&+<Int>
 ..
 [Fimp(+ Int Int)]
 
@@ -308,7 +333,8 @@ Func imp not found
 A vector containing all implementations for a specific function in the order they are considered during dispatch may be retrieved by calling the ```imps``` function.
 
 ```
-> &+ imps
+> |
+..&+ imps
 ..
 [[Fimp(+ Rat Rat) Fimp(+ Int Int)]@1]
 ```
@@ -316,7 +342,8 @@ A vector containing all implementations for a specific function in the order the
 ```upcall``` provides an easy way to call the next matching implementation, it also supports scanning for arguments.
 
 ```
-> func: maybe-add(x y Num) $x + $y;
+> |
+..func: maybe-add(x y Num) $x + $y;
 ..func: maybe-add(x y Int) $x = 42 if 42 {upcall $x $y};
 ..maybe-add 1 2 , maybe-add 42 2
 ..
@@ -327,7 +354,8 @@ A vector containing all implementations for a specific function in the order the
 Where conversions to other types make sense, a function named after the target type is provided.
 
 ```
-> '42' int
+> |
+..'42' int
 ..
 [42]
 
@@ -352,7 +380,8 @@ Where conversions to other types make sense, a function named after the target t
 Basic rational arithmetics is supported out of the box.
 
 ```
-> 1 / 2, -42 / 2 *
+> |
+..1 / 2, -42 / 2 *
 ..
 [-21/2]
 
@@ -365,7 +394,8 @@ Basic rational arithmetics is supported out of the box.
 The ```#nil``` value may be used to represent missing values. Since ```Nil``` isn't derived from ```A```, stray ```#nil``` values never get far before being trapped in a function call; ```Opt``` may be used instead where ```#nil``` is allowed.
 
 ```
-> func: foo(x A);
+> |
+..func: foo(x A);
 ..func: bar(x Opt) 42;
 ..
 []
@@ -384,7 +414,8 @@ Func not applicable: 'foo'
 A vector is a one dimensional dynamic array that supports efficient pushing / popping and random access. The stack itself is a vector which may be retrieved using the ```vect``` function.
 
 ```
-> 1 2 (3 4 vect)
+> |
+..1 2 (3 4 vect)
 ..
 [1 2 [3 4]@1]
 
@@ -405,13 +436,15 @@ A vector is a one dimensional dynamic array that supports efficient pushing / po
 The ```times``` loop may be used to repeat an action N times.
 
 ```
-> 10 times 42
+> |
+..10 times 42
 ..
 [42 42 42 42 42 42 42 42 42 42]
 ```
 
 ```
-> 0, 42 times &++
+> |
+..0, 42 times &++
 ..
 [42]
 ```
@@ -419,13 +452,15 @@ The ```times``` loop may be used to repeat an action N times.
 While the ```for``` loop repeats an action once for each value in a sequence, the current value is pushed on the stack before calling the action.
 
 ```
-> 10 for {+ 42,}
+> |
+..10 for {+ 42,}
 ..
 [42 43 44 45 46 47 48 49 50 51]
 ```
 
 ```
-> 'foo' for &upper
+> |
+..'foo' for &upper
 ..
 [\F \O \O]
 ```
@@ -433,9 +468,10 @@ While the ```for``` loop repeats an action once for each value in a sequence, th
 Some types support mapping actions over their contents using ```map```.
 
 ```
-> 'FOO' map &lower
+> |
+..'foo' map {int ++ char}
 ..
-['foo']
+['gpp']
 ```
 
 ### Types
@@ -457,7 +493,8 @@ Capitalized names are treated as type references, the following types are define
 - Vect (A)
 
 ```
-> type 42
+> |
+..type 42
 [Int]
 
 > is A
@@ -468,7 +505,8 @@ Capitalized names are treated as type references, the following types are define
 Traits are abstract types, they are useful for simplifying type checking and/or function dispatch. Besides the standard offering; 'A', 'Num' and 'Opt'; new traits may be defined using the ```trait:``` macro.
 
 ```
-> trait: StrInt Str Int;
+> |
+..trait: StrInt Str Int;
 ..
 []
 
@@ -486,7 +524,8 @@ Traits are abstract types, they are useful for simplifying type checking and/or 
 The compiler may be invoked from within the language through the ```compile``` function, the result is a compiled sequence of operations that may be passed around and called.
 
 ```
-> '1 + 2' compile
+> |
+..'1 + 2' compile
 ..
 [Bin(0x8899a0)@1]
 
@@ -563,7 +602,8 @@ There is still a lot of work remaining in the profiling and benchmarking departm
 Let's start with a tail-recursive fibonacci to exercise the interpreter loop, it's worth mentioning that cixl uses 64-bit integers while Python settles for 32-bit.
 
 ```
-> func: fib-rec(a b n Int)
+> |
+..func: fib-rec(a b n Int)
 ..  $n? if {$b $a $b + $n -- recall} $a;
 ..func: fib(n Int)
 ..  fib-rec 0 1 $n;
@@ -594,7 +634,8 @@ $ python3 fib.py
 Next up is consing a vector.
 
 ```
-> | clock {(let: v vect; 10000000 for {$v ~ push})} / 1000000 int
+> |
+..clock {(let: v vect; 10000000 for {$v ~ push})} / 1000000 int
 ..
 [2034]
 ```
