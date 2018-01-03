@@ -150,7 +150,7 @@ Code may be loaded from file using ```load```, the loaded code is evaluated in t
 
 test.cx:
 ```
-+2
++ 2
 ```
 
 ```
