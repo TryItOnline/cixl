@@ -1,6 +1,11 @@
-* add value dispatch?
-** allow literals as ids in func defs
-** add to args
+* change vect push to peek vect
+** run benchmarks
+---
+* add ^ (pow)
+** add as separator
+** implement for int/rat in math
+* add rat sub/div
+** move fns to math lib
 ---
 * add case: macro
 ** case: 
@@ -9,7 +14,7 @@ $foo ('foo' $foo vect)
 $bar ('bar' $bar vect)
 #t 'default'
 ** execute first clause that tests ok
-** error if no case matches 
+** error if no match 
 ---
 * add enum: macro
 ** add cx_enum
@@ -25,14 +30,12 @@ $bar ('bar' $bar vect)
 ** set names as constants
 ** add int/str fns
 ** add get fns from int/str
-*** enum: FooBar x y z; 0 foo-bar -> #x, 'y' foo-bar -> #y
+*** enum: FooBar() x y z; 0 foo-bar -> #x, 'y' foo-bar -> #y
 ** allow redefinition
 ** disallow rebinding consts as different types
 * --
 * add vect get
 ** add vect lib
-* add rat sub/div
-** move fns to math lib
 * add str interpolation
 * add Stream type
 ** cx_stream with byte vec & r/w pos

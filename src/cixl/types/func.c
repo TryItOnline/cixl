@@ -2,7 +2,7 @@
 #include <string.h>
 
 #include "cixl/bin.h"
-#include "cixl/box.h"
+#include "cixl/buf.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
 #include "cixl/eval.h"
@@ -12,15 +12,9 @@
 #include "cixl/types/func.h"
 #include "cixl/types/vect.h"
 
-static const void *get_imp_arg_tags(const void *value) {
+static const void *get_imp_id(const void *value) {
   struct cx_fimp *const *imp = value;
-  return &(*imp)->arg_tags;
-}
-
-enum cx_cmp cmp_arg_tags(const void *x, const void *y) {
-  const cx_type_tag_t *xv = x, *yv = y;
-  if (*xv < *yv) { return CX_CMP_LT; }
-  return (*xv > *yv) ? CX_CMP_GT : CX_CMP_EQ;
+  return &(*imp)->id;
 }
 
 struct cx_func *cx_func_init(struct cx_func *func,
@@ -29,25 +23,50 @@ struct cx_func *cx_func_init(struct cx_func *func,
 			     int nargs) {
   func->cx = cx;
   func->id = strdup(id);
-  cx_set_init(&func->imps, sizeof(struct cx_fimp *), cmp_arg_tags);
-  func->imps.key = get_imp_arg_tags;
+  cx_set_init(&func->imp_lookup, sizeof(struct cx_fimp *), cx_cmp_str);
+  func->imp_lookup.key = get_imp_id;
+  cx_vec_init(&func->imps, sizeof(struct cx_fimp *));
   func->nargs = nargs;
   return func;
 }
 
 struct cx_func *cx_func_deinit(struct cx_func *func) {
   free(func->id);
-  cx_do_set(&func->imps, struct cx_fimp *, i) { free(cx_fimp_deinit(*i)); }
-  cx_set_deinit(&func->imps);
+  cx_do_set(&func->imp_lookup, struct cx_fimp *, i) { free(cx_fimp_deinit(*i)); }
+  cx_set_deinit(&func->imp_lookup);
+  cx_vec_deinit(&func->imps);
   return func; 
 }
 
+struct cx_func_arg *cx_func_arg_deinit(struct cx_func_arg *arg) {
+  if (!arg->type && arg->narg == -1) { cx_box_deinit(&arg->value); }
+  return arg;
+}
+
 struct cx_func_arg cx_arg(struct cx_type *type) {
-  return (struct cx_func_arg) { type, -1 };
+  return (struct cx_func_arg) { .type = type };
+}
+
+struct cx_func_arg cx_varg(struct cx_box *value) {
+  struct cx_func_arg arg = { .type = NULL, .narg = -1};
+  cx_copy(&arg.value, value);
+  return arg;
 }
 
 struct cx_func_arg cx_narg(int n) {
-  return (struct cx_func_arg) { NULL, n };
+  return (struct cx_func_arg) { .type = NULL, .narg = n };
+}
+
+static void fprint_arg_id(struct cx_func_arg *a,
+			  struct cx_vec *args,
+			  FILE *out) {
+  if (a->type) {
+    fputs(a->type->id, out);
+  } else if (a->narg != -1) {
+    fprint_arg_id(cx_vec_get(args, a->narg), args, out);
+  } else {
+    cx_fprint(&a->value, out);
+  }
 }
 
 struct cx_fimp *cx_func_add_imp(struct cx_func *func,
@@ -55,7 +74,9 @@ struct cx_fimp *cx_func_add_imp(struct cx_func *func,
 				struct cx_func_arg *args) {
   struct cx_vec imp_args;
   cx_vec_init(&imp_args, sizeof(struct cx_func_arg));
-  cx_type_tag_t arg_tags = 0;
+
+  struct cx_buf id;
+  cx_buf_open(&id);
   
   if (nargs) {
     cx_vec_grow(&imp_args, nargs);
@@ -63,22 +84,29 @@ struct cx_fimp *cx_func_add_imp(struct cx_func *func,
     for (int i=0; i < nargs; i++) {
       struct cx_func_arg a = args[i];
       *(struct cx_func_arg *)cx_vec_push(&imp_args) = a;
-      if (a.type) { arg_tags |= a.type->tag; }
+      if (i) { fputc(' ', id.stream); }
+      fprint_arg_id(&a, &imp_args, id.stream);
     }
   }
-    
-  struct cx_fimp **found = cx_set_get(&func->imps, &arg_tags);
+
+  cx_buf_close(&id);
+  struct cx_fimp **found = cx_set_get(&func->imp_lookup, &id.data);
+  struct cx_fimp *imp = NULL;
   
   if (found) {
-    struct cx_fimp *imp = *found;
-    cx_set_delete(&func->imps, &arg_tags);
-    free(cx_fimp_deinit(imp));
+    imp = *found;
+    size_t i = imp->i;
+    cx_fimp_deinit(imp);
+    cx_fimp_init(imp, func, id.data, i);
+  } else {
+    imp = cx_fimp_init(malloc(sizeof(struct cx_fimp)),
+		       func,
+		       id.data,
+		       func->imps.count);
+    *(struct cx_fimp **)cx_set_insert(&func->imp_lookup, &id.data) = imp;
+    *(struct cx_fimp **)cx_vec_push(&func->imps) = imp;
   }
-
-  struct cx_fimp *imp = cx_fimp_init(malloc(sizeof(struct cx_fimp)),
-				     func,
-				     arg_tags);
-  *(struct cx_fimp **)cx_set_insert(&func->imps, &arg_tags) = imp;
+  
   imp->args = imp_args;
   return imp;
 }
@@ -86,10 +114,10 @@ struct cx_fimp *cx_func_add_imp(struct cx_func *func,
 struct cx_fimp *cx_func_get_imp(struct cx_func *func,
 				struct cx_vec *stack,
 				size_t offs) {
-  if (offs >= func->imps.members.count) { return NULL; }
+  if (offs >= func->imps.count) { return NULL; }
   
-  for (struct cx_fimp **i = cx_vec_peek(&func->imps.members, offs);
-       i >= (struct cx_fimp **)func->imps.members.items;
+  for (struct cx_fimp **i = cx_vec_peek(&func->imps, offs);
+       i >= (struct cx_fimp **)func->imps.items;
        i--) {
     if (cx_fimp_match(*i, stack)) { return *i; }
   }
@@ -102,8 +130,8 @@ static bool imps_imp(struct cx_scope *scope) {
   struct cx_func *f = cx_test(cx_pop(scope, false))->as_ptr;
   struct cx_vect *is = cx_vect_new();
 
-  for (struct cx_fimp **i = cx_vec_peek(&f->imps.members, 0);
-       i >= (struct cx_fimp **)f->imps.members.items;
+  for (struct cx_fimp **i = cx_vec_peek(&f->imps, 0);
+       i >= (struct cx_fimp **)f->imps.items;
        i--) {
     cx_box_init(cx_vec_push(&is->imp), cx->fimp_type)->as_ptr = *i;
   }

@@ -1,4 +1,5 @@
 #include <ctype.h>
+#include <inttypes.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -98,51 +99,62 @@ bool cx_eval_args(struct cx *cx,
 		  struct cx_vec *func_args) {
   struct cx_vec tmp_ids;
   cx_vec_init(&tmp_ids, sizeof(struct cx_tok));
-
+  bool ok = false;
+  
   cx_do_vec(toks, struct cx_tok, t) {
     if (t->type == CX_TID()) {
-      cx_tok_copy(cx_vec_push(&tmp_ids), t);
+      char *id = t->as_ptr;
+
+      if (id[0] == 'T' && isdigit(id[1])) {
+	int i = strtoimax(id+1, NULL, 10);
+
+	if (i >= func_args->count || (!i && id[1] != '0')) {
+	  cx_error(cx, t->row, t->col, "Invalid arg type: %s", t->as_ptr);
+	  goto exit;
+	}
+	
+	if (!tmp_ids.count) {
+	  cx_error(cx, t->row, t->col, "Missing args for type: %s", t->as_ptr);
+	  goto exit;
+	}
+	
+	cx_do_vec(&tmp_ids, struct cx_tok, id) {
+	  *(struct cx_tok *)cx_vec_push(ids) = *id;
+	  *(struct cx_func_arg *)cx_vec_push(func_args) = cx_narg(i);      
+	}
+
+	cx_vec_clear(&tmp_ids);
+      } else {
+	cx_tok_copy(cx_vec_push(&tmp_ids), t);
+      }
     } else if (t->type == CX_TLITERAL()) {
       struct cx_box *v = &t->as_box;
-
-      if (v->type != cx->int_type || v->as_int >= func_args->count) {
-	cx_error(cx, t->row, t->col, "Invalid arg");
-	cx_vec_deinit(&tmp_ids);
-	return false;
-      }
-
-      if (!tmp_ids.count) {
-	cx_error(cx, t->row, t->col, "Missing args for type: %d", v->as_int);
-	cx_vec_deinit(&tmp_ids);
-	return false;
-      }
-      
-      cx_do_vec(&tmp_ids, struct cx_tok, id) {
-	*(struct cx_tok *)cx_vec_push(ids) = *id;
-	*(struct cx_func_arg *)cx_vec_push(func_args) = cx_narg(v->as_int);      
-      }
+      *(struct cx_tok *)cx_vec_push(ids) = *t;
+      *(struct cx_func_arg *)cx_vec_push(func_args) = cx_varg(v);        
     } else if (t->type == CX_TTYPE()) {
       struct cx_type *type = t->as_ptr;
 
-      if (!tmp_ids.count) {
-	cx_error(cx, t->row, t->col, "Missing args for type: %s", type->id);
-	cx_vec_deinit(&tmp_ids);
-	return false;
-      }
-
-      cx_do_vec(&tmp_ids, struct cx_tok, id) {
-	*(struct cx_tok *)cx_vec_push(ids) = *id;
-	*(struct cx_func_arg *)cx_vec_push(func_args) = cx_arg(type);      
-      }
+      if (tmp_ids.count) {
+	cx_do_vec(&tmp_ids, struct cx_tok, id) {
+	  *(struct cx_tok *)cx_vec_push(ids) = *id;
+	  *(struct cx_func_arg *)cx_vec_push(func_args) = cx_arg(type);      
+	}
       
-      cx_vec_clear(&tmp_ids);
+	cx_vec_clear(&tmp_ids);
+      } else {
+	struct cx_box box;
+	cx_box_init(&box, cx->meta_type)->as_ptr = type;
+	*(struct cx_tok *)cx_vec_push(ids) = *t;
+	*(struct cx_func_arg *)cx_vec_push(func_args) = cx_varg(&box);
+      }
     } else {
       cx_error(cx, t->row, t->col, "Unexpected tok: %d", t->type);
-      cx_vec_deinit(&tmp_ids);
-      return false;
+      goto exit;
     }
   }
-  
+
+  ok = true;
+ exit:
   cx_vec_deinit(&tmp_ids);
-  return true;
+  return ok;
 }

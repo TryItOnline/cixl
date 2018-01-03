@@ -10,7 +10,8 @@ struct cx_scope;
 
 struct cx_fimp {
   struct cx_func *func;
-  cx_type_tag_t arg_tags;
+  char *id;
+  size_t i;
   struct cx_vec args;
   bool (*ptr)(struct cx_scope *);
   struct cx_vec toks;
@@ -19,7 +20,8 @@ struct cx_fimp {
 
 struct cx_fimp *cx_fimp_init(struct cx_fimp *imp,
 			     struct cx_func *func,
-			     cx_type_tag_t arg_tags);
+			     char *id,
+			     size_t i);
 
 struct cx_fimp *cx_fimp_deinit(struct cx_fimp *imp);
 bool cx_fimp_match(struct cx_fimp *imp, struct cx_vec *stack);

@@ -5,6 +5,8 @@
 #include <stdio.h>
 #include "cixl/set.h"
 
+#define CX_TYPE_TAG_MAX UINT64_MAX
+
 struct cx;
 struct cx_box;
 struct cx_scope;

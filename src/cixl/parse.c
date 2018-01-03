@@ -55,13 +55,16 @@ static struct cx_vec *parse_fimp(struct cx *cx,
     struct cx_tok *tok = cx_vec_pop(out);
     if (tok->type == CX_TUNTYPE()) { break; }
 
-    if (tok->type != CX_TTYPE()) {
+    if (tok->type == CX_TTYPE()) {
+      struct cx_box *v = cx_box_init(cx_vec_push(types), tok->as_ptr);
+      v->undef = true;
+    } else if (tok->type == CX_TLITERAL()) {
+      cx_copy(cx_vec_push(types), &tok->as_box);      
+    } else {
       cx_error(cx, row, col, "Invalid func type");
       free(cx_vec_deinit(types));
       return NULL;
     }
-
-    cx_box_init(cx_vec_push(types), tok->as_ptr);
   }
 
   return types;
@@ -172,7 +175,7 @@ static bool parse_int(struct cx *cx, FILE *in, struct cx_vec *out) {
     fputc(c, value.stream);
     col++;
   }
-
+  
  exit: {
     cx_buf_close(&value);
     
@@ -351,6 +354,9 @@ bool cx_parse_tok(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
       return true;
     case ';':
       cx_tok_init(cx_vec_push(out), CX_TEND(), row, col);
+      return true;
+    case '_':
+      cx_tok_init(cx_vec_push(out), CX_TZAP(), row, col);
       return true;
     case '(':
       return parse_group(cx, in, out, lookup);

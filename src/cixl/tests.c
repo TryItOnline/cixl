@@ -124,14 +124,22 @@ static void func_tests() {
   run(&cx, "func: foo() 42; foo = 42 test");
   run(&cx, "func: foo() 42; &foo call = 42 test");
   run(&cx, "func: bar(x A) $x + 35; bar 7 42 = test");
-  run(&cx, "func: baz(x y Int z 0) $x + $y + $z; baz 1 3 5 9 = test");
+  run(&cx, "func: baz(x y Int z T0) $x + $y + $z; baz 1 3 5 9 = test");
 
   run(&cx,
       "func: maybe-add(x y Num) $x + $y; "
       "func: maybe-add(x y Int) $x = 42 if 42 {upcall $x $y}; "
       "maybe-add 1 2 3 = test "
       "maybe-add 42 2 42 = test");
-  
+
+  run(&cx,
+      "func: answer(0) 0; "
+      "func: answer(x Int) $x; "
+      "func: answer(42) 'correct'; "
+      "answer 0 0 = test "
+      "answer 1 1 = test "
+      "answer 42 'correct' = test");
+
   cx_deinit(&cx);
 }
 

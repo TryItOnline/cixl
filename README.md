@@ -17,7 +17,7 @@ cmake ..
 make
 rlwrap ./cixl
 
-cixl v0.5, 18765 bmips
+cixl v0.6, 18765 bmips
 
 Press Return twice to eval input.
 
@@ -255,14 +255,24 @@ Each argument needs a type, ```A``` may be used to accept any type.
 Several parameters may share the same type. An index may may be specified instead of type to refer to previous arguments, it is substituted for the actual type on evaluation.
 
 ```
-> func: baz(x y Int z 0)
+> func: baz(x y Int z T0)
     $x + $y + $z;
 ..baz 1 3 5
 ..
 [9]
 ```
 
-Existing implementations may be overridden at any point.
+It's possible to specify literal values for arguments instead of names and types.
+
+```
+> func: foo(x Int) #f;
+..func: foo(42) #t;
+..foo 41, foo 42
+..
+[#f #t]
+```
+
+Overriding existing implementations is as easy as defining a function with identical argument list.
 
 ```
 > func: +(x y Int) 42;

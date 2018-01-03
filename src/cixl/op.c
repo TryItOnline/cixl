@@ -55,7 +55,7 @@ static bool funcall_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
   }
   
   if (!imp) {
-    cx_error(cx, cx->row, cx->col, "Func not applicable: '%s'", func->id);
+    cx_error(cx, cx->row, cx->col, "Func not applicable: %s", func->id);
     return false;
   }
     
@@ -156,4 +156,20 @@ static bool unscope_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
 
 cx_op_type(CX_OUNSCOPE, {
     type.eval = unscope_eval;
+  });
+
+static bool zap_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
+  struct cx_box *v = cx_pop(cx_scope(cx, op->as_zap.parent ? 1 : 0), true);
+
+  if (!v) {
+    cx_error(cx, tok->row, tok->col, "Nothing to zap");
+    return false;
+  }
+  
+  cx_box_deinit(v);
+  return true;
+}
+
+cx_op_type(CX_OZAP, {
+    type.eval = zap_eval;
   });

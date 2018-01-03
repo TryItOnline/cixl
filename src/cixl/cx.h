@@ -77,6 +77,7 @@ struct cx_scope *cx_pop_scope(struct cx *cx, bool silent);
 struct cx_scope *cx_begin(struct cx *cx, bool child);
 void cx_end(struct cx *cx);
 
+bool cx_funcall(struct cx *cx, const char *id);
 bool cx_load(struct cx *cx, const char *path);
 
 #endif

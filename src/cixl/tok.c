@@ -99,8 +99,8 @@ cx_tok_type(CX_TFIMP, {
 static ssize_t func_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) {  
   struct cx_tok *tok = cx_vec_get(&bin->toks, tok_idx);  
   struct cx_func *func = tok->as_ptr;
-  struct cx_fimp *imp = (func->imps.members.count == 1)
-    ? *(struct cx_fimp **)cx_vec_start(&func->imps.members)
+  struct cx_fimp *imp = (func->imps.count == 1)
+    ? *(struct cx_fimp **)cx_vec_start(&func->imps)
     : NULL;
 
   if (imp &&
@@ -290,3 +290,12 @@ cx_tok_type(CX_TTYPE, {
 cx_tok_type(CX_TUNGROUP);
 cx_tok_type(CX_TUNLAMBDA);
 cx_tok_type(CX_TUNTYPE);
+
+static ssize_t zap_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) {
+  cx_op_init(cx_vec_push(&bin->ops), CX_OZAP(), tok_idx)->as_zap.parent = false;
+  return tok_idx+1;
+}
+
+cx_tok_type(CX_TZAP, {
+    type.compile = zap_compile;
+  });

@@ -13,6 +13,7 @@ struct cx_type;
 
 struct cx_box {
   struct cx_type *type;
+  bool undef;
   
   union {
     bool as_bool;

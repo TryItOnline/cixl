@@ -54,6 +54,10 @@ struct cx_set_op {
   bool parent, force;
 };
 
+struct cx_zap_op {
+  bool parent;
+};
+
 struct cx_op {
   size_t tok_idx;
   struct cx_op_type *type;
@@ -63,8 +67,9 @@ struct cx_op {
     struct cx_func_op as_func;
     struct cx_funcall_op as_funcall;
     struct cx_lambda_op as_lambda;
-    struct cx_set_op as_set;
     struct cx_scope_op as_scope;
+    struct cx_set_op as_set;
+    struct cx_zap_op as_zap;
   };
 };
 
@@ -81,5 +86,6 @@ struct cx_op_type *CX_OSCOPE();
 struct cx_op_type *CX_OSET();
 struct cx_op_type *CX_OSTOP();
 struct cx_op_type *CX_OUNSCOPE();
+struct cx_op_type *CX_OZAP();
 
 #endif

@@ -1,3 +1,5 @@
+#include <inttypes.h>
+
 #include "cixl/bin.h"
 #include "cixl/box.h"
 #include "cixl/cx.h"
@@ -10,9 +12,11 @@
 
 struct cx_fimp *cx_fimp_init(struct cx_fimp *imp,
 			     struct cx_func *func,
-			     cx_type_tag_t arg_tags) {
+			     char *id,
+			     size_t i) {
   imp->func = func;
-  imp->arg_tags = arg_tags;
+  imp->id = id;
+  imp->i = i;
   imp->ptr = NULL;
   imp->bin = NULL;
   cx_vec_init(&imp->args, sizeof(struct cx_func_arg));
@@ -21,9 +25,14 @@ struct cx_fimp *cx_fimp_init(struct cx_fimp *imp,
 }
 
 struct cx_fimp *cx_fimp_deinit(struct cx_fimp *imp) {
+  free(imp->id);
+       
+  cx_do_vec(&imp->args, struct cx_func_arg, a) { cx_func_arg_deinit(a); }
   cx_vec_deinit(&imp->args);
+  
   cx_do_vec(&imp->toks, struct cx_tok, t) { cx_tok_deinit(t); }
   cx_vec_deinit(&imp->toks);
+
   if (imp->bin) { cx_bin_unref(imp->bin); }
   return imp;
 }
@@ -36,14 +45,25 @@ bool cx_fimp_match(struct cx_fimp *imp, struct cx_vec *stack) {
   
   for (; i >= (struct cx_func_arg *)imp->args.items &&
 	 j >= (struct cx_box *)stack->items;
-       i--, j--) {
+       i--, j--) {    
+    struct cx_type *t = i->type;
 
-    struct cx_type *t = i->type
-      ? i->type
-      : ((struct cx_box *)cx_vec_get(stack,
-				     stack->count-imp->args.count+i->narg))->type;
-      
-    if (!cx_is(j->type, t)) { return false; }
+    if (!t && i->narg != -1) {
+      t = ((struct cx_box *)cx_vec_get(stack,
+				       stack->count-imp->args.count+i->narg))->type;
+    }
+
+    if (t) {
+      if (!cx_is(j->type, t)) { return false; }
+    } else if (!j->undef) {
+      struct cx *cx = imp->func->cx;
+      struct cx_scope *s = cx_scope(cx, 0);
+      cx_copy(cx_push(s), &i->value);
+      cx_copy(cx_push(s), j);
+      if (!cx_funcall(cx, "=")) { return false; }
+      struct cx_box *ok = cx_test(cx_pop(s, false));
+      if (!ok->as_bool) { return false; }
+    }
   }
 
   return true;
@@ -108,11 +128,15 @@ static bool call_imp(struct cx_box *value, struct cx_scope *scope) {
 static void fprint_imp(struct cx_box *value, FILE *out) {
   struct cx_fimp *imp = value->as_ptr;
   fprintf(out, "Fimp(%s", imp->func->id);
+  
   cx_do_vec(&imp->args, struct cx_func_arg, a) {
     if (a->type) {
       fprintf(out, " %s", a->type->id);
-    } else {
+    } else if (a->narg != -1) {
       fprintf(out, " %d", a->narg);      
+    } else {
+      fputc(' ', out);
+      cx_fprint(&a->value, out);
     }
   }
   fputc(')', out);

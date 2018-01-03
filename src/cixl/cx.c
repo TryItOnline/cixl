@@ -161,10 +161,15 @@ static ssize_t func_eval(struct cx_macro_eval *eval,
 			 struct cx *cx) {
   for (int i = eval->toks.count-1; i >= 0; i--) {
     struct cx_tok *t = cx_vec_get(&eval->toks, i);
-    struct cx_op *op = cx_op_init(cx_vec_push(&bin->ops), CX_OSET(), tok_idx);
-    op->as_set.id = t->as_ptr;
-    op->as_set.parent = true;
-    op->as_set.force = true;
+
+    if (t->type == CX_TID()) {
+      struct cx_op *op = cx_op_init(cx_vec_push(&bin->ops), CX_OSET(), tok_idx);
+      op->as_set.id = t->as_ptr;
+      op->as_set.parent = true;
+      op->as_set.force = true;
+    } else {
+      cx_op_init(cx_vec_push(&bin->ops), CX_OZAP(), tok_idx)->as_zap.parent = true;
+    }
   }
   
   return tok_idx+1;
@@ -254,11 +259,6 @@ static bool cls_imp(struct cx_scope *scope) {
 
 static bool dup_imp(struct cx_scope *scope) {
   cx_copy(cx_push(scope), cx_test(cx_peek(scope, true)));
-  return true;
-}
-
-static bool zap_imp(struct cx_scope *scope) {
-  cx_box_deinit(cx_test(cx_pop(scope, false)));
   return true;
 }
 
@@ -385,27 +385,16 @@ static bool recall_imp(struct cx_scope *scope) {
 static bool upcall_imp(struct cx_scope *scope) {
   struct cx *cx = scope->cx;
   
-  if (!cx->fimp) {
+  if (!cx->fimp || !cx->fimp->i) {
     cx_error(cx, cx->row, cx->col, "Nothing to upcall");
     return false;
   }
 
   struct cx_func *func = cx->fimp->func;
   if (!cx_scan_args(cx, func)) { return false; }
-  ssize_t i = cx_set_index(&func->imps, &cx->fimp->arg_tags);
 
-  if (i == -1) {
-    cx_error(cx, cx->row, cx->col, "Recall fimp not found");
-    return false;
-  }
-
-  if (!i) {
-    cx_error(cx, cx->row, cx->col, "Nothing to upcall");
-    return false;
-  }
-  
   struct cx_fimp *imp = cx_func_get_imp(func, &scope->stack,
-					func->imps.members.count-i);
+					func->imps.count-cx->fimp->i);
   
   if (!imp) {
     cx_error(cx, cx->row, cx->col, "Upcall not applicable");
@@ -488,7 +477,6 @@ struct cx *cx_init(struct cx *cx) {
 
   cx_add_func(cx, "|")->ptr = cls_imp;
   cx_add_func(cx, "%", cx_arg(cx->opt_type))->ptr = dup_imp;
-  cx_add_func(cx, "_", cx_arg(cx->opt_type))->ptr = zap_imp;
   cx_add_func(cx, "~", cx_arg(cx->opt_type))->ptr = flip_imp;
   
   cx_add_func(cx, "=", cx_arg(cx->any_type), cx_narg(0))->ptr = eqval_imp;
@@ -700,6 +688,20 @@ struct cx_scope *cx_begin(struct cx *cx, bool child) {
 
 void cx_end(struct cx *cx) {
   cx_pop_scope(cx, false);
+}
+
+bool cx_funcall(struct cx *cx, const char *id) {
+  struct cx_func *func = cx_get_func(cx, id, false);
+  if (!func) { return false; }
+  struct cx_scope *s = cx_scope(cx, 0);
+  struct cx_fimp *imp = cx_func_get_imp(func, &s->stack, 0);
+  
+  if (!imp) {
+    cx_error(cx, cx->row, cx->col, "Func not applicable: %s", func->id);
+    return false;
+  }
+  
+  return cx_fimp_call(imp, s);
 }
 
 bool cx_load(struct cx *cx, const char *path) {

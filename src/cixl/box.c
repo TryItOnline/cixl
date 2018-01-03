@@ -10,6 +10,7 @@ struct cx_box *cx_box_new(struct cx_type *type) {
 
 struct cx_box *cx_box_init(struct cx_box *box, struct cx_type *type) {
   box->type = type;
+  box->undef = false;
   return box;
 }
 
@@ -40,8 +41,9 @@ bool cx_call(struct cx_box *box, struct cx_scope *scope) {
 }
 
 struct cx_box *cx_copy(struct cx_box *dst, struct cx_box *src) {
-  if (src->type->copy) {
+  if (src->type->copy && !src->undef) {
     dst->type = src->type;
+    dst->undef = false;
     src->type->copy(dst, src);
   }
   else {
