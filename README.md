@@ -161,7 +161,7 @@ test.cx:
 ```
 
 ### Scopes
-Enclosing code in parens evaluates it in a separate scope with a clean stack. The last value on the stack is automatically returned on scope exit.
+Code enclosed in parens is evaluated in a separate scope, the last value on the stack is automatically returned on scope exit.
 
 ```
 > |
@@ -213,7 +213,7 @@ The ```if``` statement may be used to branch on a condition, it calls '?' implic
 ```
 
 ### Lambdas
-Putting braces around a block of code defines a lambda, which is then pushed on the stack.
+Putting braces around a block of code defines a lambda that is pushed on the stack.
 
 ```
 > |
@@ -473,7 +473,7 @@ Some types support mapping actions over their contents using ```map```.
 ```
 
 ### Types
-Capitalized names are treated as type references, the following types are defined out of the box:
+Capitalized names are treated as types, the following list is defined out of the box:
 
 - A (Opt)
 - Bin (A)
@@ -500,7 +500,7 @@ Capitalized names are treated as type references, the following types are define
 ```
 
 ### Traits
-Traits are abstract types, they are useful for simplifying type checking and/or function dispatch. Besides the standard offering; 'A', 'Num' and 'Opt'; new traits may be defined using the ```trait:``` macro.
+Traits are abstract types that may be used to simplify type checking and/or function dispatch. Besides the standard offering; 'A', 'Num' and 'Opt'; new traits may be defined using the ```trait:``` macro.
 
 ```
 > |
@@ -595,7 +595,7 @@ int main() {
 ```
 
 ### Performance
-There is still a lot of work remaining in the profiling and benchmarking departments, but preliminary results puts cixl at around 1/2-4 times slower than Python. Measured time is displayed in milliseconds.
+There is still plenty of work remaining in the profiling and benchmarking departments, but preliminary indications puts cixl at around 1/2-4 times slower than Python. Measured time is displayed in milliseconds.
 
 Let's start with a tail-recursive fibonacci to exercise the interpreter loop, it's worth mentioning that cixl uses 64-bit integers while Python settles for 32-bit.
 
@@ -668,4 +668,4 @@ $ python3 vect.py
 ### License
 GPLv3
 
-Give me a yell if something is unclear, wrong or missing. And please do consider helping out with a donation via [paypal](https://paypal.me/basicgongfu) or [liberapay](https://liberapay.com/basic-gongfu/donate) if you find this worthwhile. I have the opportunity and motivation to work full time on this project, but I still need some help with covering basic needs for that to happen.
+Give me a yell if something is unclear, wrong or missing. And please do consider helping out with a donation via [paypal](https://paypal.me/basicgongfu) or [liberapay](https://liberapay.com/basic-gongfu/donate) if you find this worthwhile. I have the opportunity and motivation to work full time on this project, but still need some help with covering basic needs for that to happen.
