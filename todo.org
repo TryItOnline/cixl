@@ -3,6 +3,10 @@
 ** implement for int/rat in math
 * add rat sub/div
 ** move fns to math lib
+* change str to use nrefs
+** add struct cx_str
+*** data, len & nrefs
+*** get len on demand
 * add case: macro
 ** case: 
 (= 1 2) 42
