@@ -1,12 +1,10 @@
 * change vect push to peek vect
 ** run benchmarks
----
 * add ^ (pow)
 ** add as separator
 ** implement for int/rat in math
 * add rat sub/div
 ** move fns to math lib
----
 * add case: macro
 ** case: 
 (= 1 2) 42
@@ -15,7 +13,6 @@ $bar ('bar' $bar vect)
 #t 'default'
 ** execute first clause that tests ok
 ** error if no match 
----
 * add enum: macro
 ** add cx_enum
 ** types/enum.h/c
@@ -33,7 +30,6 @@ $bar ('bar' $bar vect)
 *** enum: FooBar() x y z; 0 foo-bar -> #x, 'y' foo-bar -> #y
 ** allow redefinition
 ** disallow rebinding consts as different types
-* --
 * add vect get
 ** add vect lib
 * add str interpolation
