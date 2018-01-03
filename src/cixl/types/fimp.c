@@ -38,6 +38,7 @@ struct cx_fimp *cx_fimp_deinit(struct cx_fimp *imp) {
 }
 
 bool cx_fimp_match(struct cx_fimp *imp, struct cx_vec *stack) {
+  if (stack->count < imp->args.count) { return false; }
   if (!imp->args.count) { return true; }
   
   struct cx_func_arg *i = (struct cx_func_arg *)cx_vec_end(&imp->args)-1;
@@ -127,19 +128,7 @@ static bool call_imp(struct cx_box *value, struct cx_scope *scope) {
 
 static void fprint_imp(struct cx_box *value, FILE *out) {
   struct cx_fimp *imp = value->as_ptr;
-  fprintf(out, "Fimp(%s", imp->func->id);
-  
-  cx_do_vec(&imp->args, struct cx_func_arg, a) {
-    if (a->type) {
-      fprintf(out, " %s", a->type->id);
-    } else if (a->narg != -1) {
-      fprintf(out, " %d", a->narg);      
-    } else {
-      fputc(' ', out);
-      cx_fprint(&a->value, out);
-    }
-  }
-  fputc(')', out);
+  fprintf(out, "Fimp(%s %s)", imp->func->id, imp->id);
 }
 
 struct cx_type *cx_init_fimp_type(struct cx *cx) {
