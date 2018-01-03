@@ -2,11 +2,11 @@
 #define CX_TYPE_FIMP_H
 
 #include <cixl/vec.h>
+#include "cixl/type.h"
 
 struct cx;
 struct cx_func;
 struct cx_scope;
-struct cx_type;
 
 struct cx_fimp {
   struct cx_func *func;

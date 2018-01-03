@@ -1,3 +1,9 @@
+* add upcall
+---
+* add value dispatch?
+** allow literals as ids in func defs
+** add to args
+---
 * add case: macro
 ** case: 
 (= 1 2) 42

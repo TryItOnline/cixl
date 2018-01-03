@@ -38,8 +38,6 @@ static void int_tests() {
 
   run(&cx, "42 test");
   run(&cx, "0! test");
-  run(&cx, "21 +<Int> 21 = 42 test");
-  run(&cx, "7 + 14, 7 + 14 + = 42 test");
   run(&cx, "1 = 2! test");
   run(&cx, "42 str '42' = test");
 
@@ -49,7 +47,8 @@ static void int_tests() {
 static void char_tests() {
   struct cx cx;
   cx_init(&cx);
-
+  cx_init_math(&cx);
+  
   run(&cx, "\\a upper \\A = test");
   run(&cx, "\\0 int + 7 char \\7 = test");
   
@@ -76,6 +75,7 @@ static void str_tests() {
 static void rat_tests() {
   struct cx cx;
   cx_init(&cx);
+  cx_init_math(&cx);
 
   run(&cx, "1 / 2, 5 / 2 *, 5 / 4 = test");
   run(&cx, "1 / 2, 5 / 2 +, 3 / 1 = test");
@@ -86,6 +86,7 @@ static void rat_tests() {
 static void vect_tests() {
   struct cx cx;
   cx_init(&cx);
+  cx_init_math(&cx);
 
   run(&cx, "1 2 3 (4 5 vect) len 2 = test");
   run(&cx, "(1 2 3 vect) pop 3 = test");
@@ -98,6 +99,7 @@ static void vect_tests() {
 static void stack_tests() {
   struct cx cx;
   cx_init(&cx);
+  cx_init_math(&cx);
 
   run(&cx, "7 14 % + 28 = test");
   run(&cx, "7 14 % _ + 21 = test");
@@ -117,7 +119,8 @@ static void group_tests() {
 static void func_tests() {
   struct cx cx;
   cx_init(&cx);
-
+  cx_init_math(&cx);
+  
   run(&cx, "func: foo() 42; foo = 42 test");
   run(&cx, "func: foo() 42; &foo call = 42 test");
   run(&cx, "func: bar(x A) $x + 35; bar 7 42 = test");
@@ -131,6 +134,8 @@ static void math_tests() {
   cx_init(&cx);
   cx_init_math(&cx);
 
+  run(&cx, "21 +<Int> 21 = 42 test");
+  run(&cx, "7 + 14, 7 + 14 + = 42 test");
   run(&cx, "fib 50 = 12586269025 test");
 
   cx_deinit(&cx);

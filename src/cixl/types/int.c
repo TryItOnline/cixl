@@ -28,60 +28,14 @@ static bool gt_imp(struct cx_scope *scope) {
 }
 
 static bool inc_imp(struct cx_scope *scope) {
-  struct cx_box v = *cx_test(cx_pop(scope, false));
-  cx_box_init(cx_push(scope), scope->cx->int_type)->as_int = v.as_int+1;
+  struct cx_box *v = cx_test(cx_peek(scope, false));
+  v->as_int++;
   return true;
 }
 
 static bool dec_imp(struct cx_scope *scope) {
-  struct cx_box v = *cx_test(cx_pop(scope, false));
-  cx_box_init(cx_push(scope), scope->cx->int_type)->as_int = v.as_int-1;
-  return true;
-}
-
-static bool add_imp(struct cx_scope *scope) {
-  struct cx_box
-    y = *cx_test(cx_pop(scope, false)),
-    x = *cx_test(cx_pop(scope, false));
-
-  cx_box_init(cx_push(scope), scope->cx->int_type)->as_int = x.as_int + y.as_int;
-  return true;
-}
-
-static bool sub_imp(struct cx_scope *scope) {
-  struct cx_box
-    y = *cx_test(cx_pop(scope, false)),
-    x = *cx_test(cx_pop(scope, false));
-
-  cx_box_init(cx_push(scope), scope->cx->int_type)->as_int = x.as_int - y.as_int;
-  return true;
-}
-
-static bool mul_imp(struct cx_scope *scope) {
-  struct cx_box
-    y = *cx_test(cx_pop(scope, false)),
-    x = *cx_test(cx_pop(scope, false));
-  
-  cx_box_init(cx_push(scope), scope->cx->int_type)->as_int = x.as_int * y.as_int;
-  return true;
-}
-
-static bool div_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  
-  struct cx_box
-    y = *cx_test(cx_pop(scope, false)),
-    x = *cx_test(cx_pop(scope, false));
-
-  if (!y.as_int) {
-    cx_error(cx, cx->row, cx->col, "Division by zero");
-    return false;
-  }
-  
-  cx_rat_init(&cx_box_init(cx_push(scope), scope->cx->rat_type)->as_rat,
-	      abs(x.as_int), abs(y.as_int),
-	      (x.as_int >= 0 || y.as_int > 0) && (x.as_int < 0 || y.as_int < 0));
-  
+  struct cx_box *v = cx_test(cx_peek(scope, false));
+  v->as_int--;
   return true;
 }
 
@@ -162,11 +116,6 @@ struct cx_type *cx_init_int_type(struct cx *cx) {
 
   cx_add_func(cx, "++", cx_arg(t))->ptr = inc_imp;
   cx_add_func(cx, "--", cx_arg(t))->ptr = dec_imp;
-
-  cx_add_func(cx, "+", cx_arg(t), cx_arg(t))->ptr = add_imp;
-  cx_add_func(cx, "-", cx_arg(t), cx_arg(t))->ptr = sub_imp;
-  cx_add_func(cx, "*", cx_arg(t), cx_arg(t))->ptr = mul_imp;
-  cx_add_func(cx, "/", cx_arg(t), cx_arg(t))->ptr = div_imp;
   
   cx_add_func(cx, "char", cx_arg(t))->ptr = char_imp;
   cx_add_func(cx, "str", cx_arg(t))->ptr = str_imp;

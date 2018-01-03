@@ -100,26 +100,6 @@ static bool gt_imp(struct cx_scope *scope) {
   return true;
 }
 
-static bool add_imp(struct cx_scope *scope) {
-  struct cx_box
-    y = *cx_test(cx_pop(scope, false)),
-    x = *cx_test(cx_pop(scope, false));
-
-  cx_rat_add(&x.as_rat, &y.as_rat);
-  *cx_push(scope) = x;  
-  return true;
-}
-
-static bool mul_imp(struct cx_scope *scope) {
-  struct cx_box
-    y = *cx_test(cx_pop(scope, false)),
-    x = *cx_test(cx_pop(scope, false));
-
-  cx_rat_mul(&x.as_rat, &y.as_rat);
-  *cx_push(scope) = x;  
-  return true;
-}
-
 static bool int_imp(struct cx_scope *scope) {
   struct cx_box v = *cx_test(cx_pop(scope, false));
   cx_box_init(cx_push(scope), scope->cx->int_type)->as_int = cx_rat_int(&v.as_rat);
@@ -149,9 +129,6 @@ struct cx_type *cx_init_rat_type(struct cx *cx) {
 
   cx_add_func(cx, "<", cx_arg(t), cx_arg(t))->ptr = lt_imp;
   cx_add_func(cx, ">", cx_arg(t), cx_arg(t))->ptr = gt_imp;
-
-  cx_add_func(cx, "+", cx_arg(t), cx_arg(t))->ptr = add_imp;
-  cx_add_func(cx, "*", cx_arg(t), cx_arg(t))->ptr = mul_imp;
   
   cx_add_func(cx, "int", cx_arg(t))->ptr = int_imp;
   
