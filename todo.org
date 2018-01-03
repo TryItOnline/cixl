@@ -1,5 +1,3 @@
-* change vect push to peek vect
-** run benchmarks
 * add ^ (pow)
 ** add as separator
 ** implement for int/rat in math

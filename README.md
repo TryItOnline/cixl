@@ -609,7 +609,7 @@ Let's start with a tail-recursive fibonacci to exercise the interpreter loop, it
 ..  fib-rec 0 1 $n;
 ..clock {10000 times {50 fib _}} / 1000000 int
 ..
-[571]
+[520]
 ```
 
 ```
@@ -637,7 +637,7 @@ Next up is consing a vector.
 > |
 ..clock {(let: v vect; 10000000 for {$v ~ push})} / 1000000 int
 ..
-[2034]
+[1886]
 ```
 
 ```
