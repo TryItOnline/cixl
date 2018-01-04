@@ -8,7 +8,7 @@ Raise your hands everyone who's at some point torn their hair out and cursed at 
 One of the basic tenets of Lisp is to provide fewer concepts and use them for everything, though almost to a fault in Lisps case. Doing so leads to more composable and powerful API's. Most other languages unfortunately didn't get the memo, time libraries even less so. Some, like Python; seem to have read the memo upside down and added as many distinct freaking [concepts](https://docs.python.org/3.5/library/datetime.html) as they could possibly think of. Needless to say, I decided that [cixl](https://github.com/basic-gongfu/cixl) would be better of following Lisps lead.
 
 ### The Cixl Way
-Cixl provides a single concept to represent both pointsin time and durations with nanosecond precision. Internally; time is represented as an absolute, zero-based number of months and nanoseconds; no assumptions are made about epochs.
+[Cixl](https://github.com/basic-gongfu/cixl) provides a single concept to represent both pointsin time and durations with nanosecond precision. Internally; time is represented as an absolute, zero-based number of months and nanoseconds; no assumptions are made about epochs.
 
 Time may be queried for absolute and relative field values;
 
@@ -48,7 +48,7 @@ Time may be queried for absolute and relative field values;
 manually constructed;
 
 ```
-   3 days
+   | 3 days
 ...
 [Time(72:0:0.0)]
 
@@ -60,7 +60,7 @@ manually constructed;
 compared, added and subtracted;
 
 ```
-   2m =, 120s
+   | 2m =, 120s
 ...
 [#t]
 
@@ -82,6 +82,6 @@ and scaled.
 ```
 
 ### That's It?
-There is more to come, but I figured this would make a good introduction to some of the choices made. Mixing time and time zones never made any sense to me, and all the conversion pixie dust in the world isn't going to fix that; they are better off being implemented as simple conversions. Consider unicode strings as a comparison; we generally don't tack the encoding onto byte strings just in case someone might want to go unicode in the future; what usually happens instead is that user code is asked to specify the encoding when the conversion happens. We will have to see if I manage to talk myself into tackling week numbers, there are few things I hate more than throwing up.
+There is more to come, but I figured this would make a good introduction to some of the choices made. Mixing time and time zones never made any sense to me, and all the conversion pixie dust in the world isn't going to fix that; they are better off being implemented as simple conversions. Consider unicode strings as a comparison; we generally don't tack encodings onto byte strings just in case someone might want to go unicode in the future; what usually happens instead is that user code is asked to specify the encoding at conversion time. We will have to see if I manage to talk myself into tackling week numbers, there are few things I hate more than throwing up.
 
 Give me a yell if something is unclear, wrong or missing. And please do consider helping out with a donation via [paypal](https://paypal.me/basicgongfu) or [liberapay](https://liberapay.com/basic-gongfu/donate) if you find this worthwhile, every contribution counts.

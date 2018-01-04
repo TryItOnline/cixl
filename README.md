@@ -534,7 +534,7 @@ and scaled.
 ```
    | 1 months +, 1 days * 3
 ...
-
+[Time(0/3/3)]
 ```
 
 ### Types
