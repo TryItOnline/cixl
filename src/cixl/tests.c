@@ -3,6 +3,7 @@
 #include "cixl/eval.h"
 #include "cixl/libs/math.h"
 #include "cixl/libs/str.h"
+#include "cixl/libs/time.h"
 #include "cixl/scope.h"
 #include "cixl/tests.h"
 
@@ -141,6 +142,18 @@ static void rat_tests() {
   cx_deinit(&cx);
 }
 
+static void time_tests() {
+  struct cx cx;
+  cx_init(&cx);
+  cx_init_time(&cx);
+
+  run(&cx, "2m =, 120s test");
+  run(&cx, "1 days +, 1h * 2h = 50 test");
+  run(&cx, "now < now test");
+  
+  cx_deinit(&cx);
+}
+
 static void vect_tests() {
   struct cx cx;
   cx_init(&cx);
@@ -176,6 +189,7 @@ void cx_tests() {
   char_tests();
   str_tests();
   rat_tests();
+  time_tests();
   vect_tests();
   math_tests();
 }

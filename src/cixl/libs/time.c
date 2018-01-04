@@ -246,6 +246,16 @@ static bool sub_imp(struct cx_scope *scope) {
   return true;
 }
 
+static bool mul_imp(struct cx_scope *scope) {
+  struct cx_box
+    y = *cx_test(cx_pop(scope, false)),
+    *x = cx_test(cx_peek(scope, false));
+  
+  x->as_time.months *= y.as_int;
+  x->as_time.ns *= y.as_int;
+  return true;
+}
+
 static bool lt_imp(struct cx_scope *scope) {
   struct cx_time
     yt = cx_test(cx_pop(scope, false))->as_time,
@@ -305,6 +315,8 @@ void cx_init_time(struct cx *cx) {
 	      cx_arg(cx->time_type), cx_arg(cx->time_type))->ptr = add_imp;
   cx_add_func(cx, "-",
 	      cx_arg(cx->time_type), cx_arg(cx->time_type))->ptr = sub_imp;
+  cx_add_func(cx, "*",
+	      cx_arg(cx->time_type), cx_arg(cx->int_type))->ptr = mul_imp;
 
   cx_add_func(cx, "<",
 	      cx_arg(cx->time_type), cx_arg(cx->time_type))->ptr = lt_imp;

@@ -1,6 +1,3 @@
-* finish time
-** add *
----
 * add %% fn
 ** add type->clone
 *** default to copy
