@@ -1,3 +1,8 @@
+* add support for types in multi let
+** check with isa on bind
+*** add optional type to CX_OSET
+* add lets: macro
+** typecheck and bind stack to vars
 * add ^ (pow)
 ** add as separator
 ** implement for int/rat in math
@@ -58,8 +63,6 @@ $bar ('bar' $bar vect)
 ** use ref counted sets of cx_struct_slot as instances
 * add fail func
 ** like test but just call error with message
-* add lets: macro
-** typecheck and bind stack to vars
 
 func: fib-rec(a b n Int) $n? if {$b $a $b + $n -- recall} $a;
 func: fib(n Int) fib-rec 0 1 $n;
