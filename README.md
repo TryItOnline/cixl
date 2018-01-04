@@ -110,10 +110,10 @@ Attempt to rebind variable: 'foo'
 Multiple names may be bound at the same time by enclosing them in parens.
 
 ```
-> let: (x y z) 1 2 3;
+> let: (x y z) 1 2, 3 + 4;
 ..$x $y $z
 ..
-[1 2 3]
+[1 2 7]
 ```
 
 ### Equality

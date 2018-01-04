@@ -58,7 +58,7 @@ static void let_tests() {
   cx_init_math(&cx);
 
   run(&cx, "let: foo 42; $foo 42 = test");
-  run(&cx, "let: (x y z) 1 3 5; $x + $y + $z 9 = test");
+  run(&cx, "let: (x y z) 1 2, 3 + 4; $x + $y + $z 10 = test");
 
   cx_deinit(&cx);
 }
