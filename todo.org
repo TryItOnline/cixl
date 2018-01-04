@@ -8,6 +8,7 @@
 * add support for types in multi let
 ** check with isa on bind
 *** add optional type to CX_OSET
+---
 * add lets: macro
 ** typecheck and bind stack to vars
 * add ^ (pow)
