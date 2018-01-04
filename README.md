@@ -504,7 +504,7 @@ Times may be queried for absolute and relative field values;
 manually constructed;
 
 ```
-   3 days
+   | 3 days
 ...
 [Time(72:0:0.0)]
 
@@ -516,7 +516,7 @@ manually constructed;
 compared, added and subtracted;
 
 ```
-   2m =, 120s
+   | 2m =, 120s
 ...
 [#t]
 
