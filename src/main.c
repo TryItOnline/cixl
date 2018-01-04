@@ -2,6 +2,7 @@
 #include "cixl/libs/io.h"
 #include "cixl/libs/math.h"
 #include "cixl/libs/str.h"
+#include "cixl/libs/time.h"
 #include "cixl/repl.h"
 #include "cixl/set.h"
 #include "cixl/tests.h"
@@ -17,6 +18,7 @@ int main() {
   cx_init_io(&cx);
   cx_init_math(&cx);
   cx_init_str(&cx);
+  cx_init_time(&cx);
   cx_repl(&cx, stdin, stdout);
   cx_deinit(&cx);
   return 0;

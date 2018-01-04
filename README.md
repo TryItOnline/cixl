@@ -15,15 +15,15 @@ cmake ..
 make
 rlwrap ./cixl
 
-cixl v0.6, 18765 bmips
+cixl v0.7, 18765 bmips
 
 Press Return twice to eval input.
 
-> 1 2 3
-..
+   1 2 3
+...
 [1 2 3]
 
-> quit
+   quit
 ```
 
 ### Status
@@ -33,21 +33,20 @@ Examples should work in the most recent version and run clean in ```valgrind```,
 The stack is accessible from user code, just like in Forth. Basic stack operations have dedicated operators; ```%``` for duplicating last value, ```_``` for dropping it, ```~``` for flipping the last two values and ```|``` for clearing the stack.
 
 ```
-> |
-..1 2 3 %
-..
+   | 1 2 3 %
+...
 [1 2 3 3]
 
-> _
-..
+   _
+...
 [1 2 3]
 
-> ~
-..
+   ~
+...
 [1 3 2]
 
-> |
-..
+   |
+...
 []
 ```
 
@@ -55,36 +54,35 @@ The stack is accessible from user code, just like in Forth. Basic stack operatio
 But unlike Forth, functions scan forward until enough arguments are on the stack to allow reordering parameters and operations in user code to fit the problem being solved.
 
 ```
-> |
-..1 + 2
-..
+   | 1 + 2
+...
 [3]
 
-> 1 2 +
-..
+   1 2 +
+...
 [3 3]
 
-> + 1 2
-..
+   + 1 2
+...
 [6 1 2]
 
-> + +
-..
+   + +
+...
 [9]
 ```
 
 The ```,``` operator may be used to cut the stack into discrete pieces and force functions to scan forward.
 
 ```
-> |
-..1 + 2
-..3 + 4
-..
+   |
+...1 + 2
+...3 + 4
+...
 [6 4]
 
-> 1 + 2,
-..3 + 4
-..
+   1 + 2,
+...3 + 4
+...
 [3 7]
 ```
 
@@ -92,17 +90,16 @@ The ```,``` operator may be used to cut the stack into discrete pieces and force
 Named variables may be defined once per scope using the ```let:``` macro.
 
 ```
-> |
-..let: foo 'bar';
-..
+   | let: foo 'bar';
+...
 []
 
-> $foo
-..
+   $foo
+...
 ['bar']
 
-> let: foo 'baz';
-..
+   let: foo 'baz';
+...
 Error in row 1, col 10:
 Attempt to rebind variable: 'foo'
 ```
@@ -110,9 +107,10 @@ Attempt to rebind variable: 'foo'
 Multiple names may be bound at the same time by enclosing them in parens.
 
 ```
-> let: (x y z) 1 2, 3 + 4;
-..$x $y $z
-..
+   |
+...let: (x y z) 1 2, 3 + 4;
+...$x $y $z
+...
 [1 2 7]
 ```
 
@@ -121,24 +119,21 @@ Two flavors of equality are provided.
 
 Value equality:
 ```
-> |
-..'foo' = 'foo'
-..
+   | 'foo' = 'foo'
+...
 [#t]
 ```
 
 And identity:
 ```
-> |
-..'foo' == 'foo'
-..
+   | 'foo' == 'foo'
+...
 [#f]
 ```
 
 ```
-> |
-..42 == 42
-..
+   | 42 == 42
+...
 [#t]
 ```
 
@@ -146,20 +141,19 @@ And identity:
 Code enclosed in parens is evaluated in a separate scope, the last value on the stack is automatically returned on scope exit.
 
 ```
-> |
-..(1 2 3)
-..
+   | (1 2 3)
+...
 [3]
 ```
 
 Variables in the parent scope may be referenced from within, but variables defined inside are not visible from the outside.
 
 ```
-> |
-..let: foo 1;
-..(let: foo 2; $foo)
-..$foo
-..
+   |
+...let: foo 1;
+...(let: foo 2; $foo)
+...$foo
+...
 [2 1]
 ```
 
@@ -167,10 +161,10 @@ Variables in the parent scope may be referenced from within, but variables defin
 ```say``` and ```ask``` may be used to perform basic IO.
 
 ```
-> |
-..say 'hello'  
-..ask 'what\'s your name? '
-..
+   |
+...say 'hello'  
+...ask 'what\'s your name? '
+...
 hello
 what's your name? Sifoo
 ['Sifoo']
@@ -184,9 +178,9 @@ test.cx:
 ```
 
 ```
-> |
-..1, load 'test.cx'
-..
+   |
+...1, load 'test.cx'
+...
 [3]
 ```
 
@@ -194,30 +188,28 @@ test.cx:
 All types are useable as conditions; some are always true; integers test true for anything but zero; empty strings test false etc. The ```?``` operator may be used to transform any value to its conditional representation.
 
 ```
-> |
-..0?
+   | 0?
+...
 [#f]
 ```
 
 The ```!``` operator negates any condition.
 
 ```
-> |
-..42!
+   | 42!
+...
 [#f]
 ```
 
 The ```if``` statement may be used to branch on a condition, it calls '?' implicitly so you can throw any value at it.
 
 ```
-> |
-..42 if 'not zero' 'zero'
-..
+   | 42 if 'not zero' 'zero'
+...
 ['not zero']
 
-> |
-..''! if 'empty' 'not empty'
-..
+   | ''! if 'empty' 'not empty'
+...
 ['empty']
 ```
 
@@ -225,22 +217,20 @@ The ```if``` statement may be used to branch on a condition, it calls '?' implic
 Putting braces around a block of code defines a lambda that is pushed on the stack.
 
 ```
-> |
-..{1 2 3}
-..
+   | {1 2 3}
+...
 [Lambda(0x52d97d0@1)]
 
-> call
-..
+   call
+...
 [1 2 3]
 ```
 
 Lambdas inherit the defining scope.
 
 ```
-> |
-..(let: x 42; {$x}) call
-..
+   | (let: x 42; {$x}) call
+...
 [42]
 ```
 
@@ -248,91 +238,91 @@ Lambdas inherit the defining scope.
 The ```func:``` macro may be used to define named functions. Several implementations may be defined for the same name as long as they have the same arity and different argument types. Each function opens an implicit scope that is closed on exit.
 
 ```
-> |
-..func: foo() 42;
-..foo
-..
+   |
+...func: foo() 42;
+...foo
+...
 [42]
 ```
 
 Prefixing a function name with ```&``` pushes a reference on the stack.
 
 ```
-> |
-..func: foo() 42;
-..&foo
-..
+   |
+...func: foo() 42;
+...&foo
+...
 [Func(foo)]
 
-> call
-..
+   call
+...
 [42]
 ```
 
 Each argument needs a type, ```A``` may be used to accept any type.
 
 ```
-> |
-..func: bar(x A) $x + 35;
-..bar 7
-..
+   |
+...func: bar(x A) $x + 35;
+...bar 7
+...
 [42]
 ```
 
 Several parameters may share the same type. An index may may be specified instead of type to refer to previous arguments, it is substituted for the actual type on evaluation.
 
 ```
-> |
-..func: baz(x y Int z T0)
-..  $x + $y + $z;
-..baz 1 3 5
-..
+   |
+...func: baz(x y Int z T0)
+...  $x + $y + $z;
+...baz 1 3 5
+...
 [9]
 ```
 
 It's possible to specify literal values for arguments instead of names and types.
 
 ```
-> |
-..func: bar(x Int) #f;
-..func: bar(42) #t;
-..bar 41, bar 42
-..
+   |
+...func: bar(x Int) #f;
+...func: bar(42) #t;
+...bar 41, bar 42
+...
 [#f #t]
 ```
 
 Overriding existing implementations is as easy as defining a function with identical argument list.
 
 ```
-> |
-..func: +(x y Int) 42;
-..1 + 2
-..
+   |
+...func: +(x y Int) 42;
+...1 + 2
+...
 [42]
 ```
 
 ```recall``` may be used to call the current function recursively in the same scope, it supports scanning for arguments just like a regular function call.
 
 ```
-> |
-..func: fib-rec(a b n Int)
-..  $n? if {, recall $b, $a + $b, -- $n} $a;
-..func: fib(n Int)
-..  fib-rec 0 1 $n;
-..fib 50
+   |
+...func: fib-rec(a b n Int)
+...  $n? if {, recall $b, $a + $b, -- $n} $a;
+...func: fib(n Int)
+...  fib-rec 0 1 $n;
+...fib 50
+...
 [12586269025]
 ```
 
 Argument types may be specified in angle brackets to select a specific function implementation. Besides documentation and sanity checking, this allows the compiler to inline the definition in cases where more than one implementation share the same name.
 
 ```
-> |
-..&+<Int>
-..
+   | &+<Int>
+...
 [Fimp(+ Int Int)]
 
-> &+<Str>
-..
+   &+<Str>
+...
 Error in row 1, col 4:
 Func imp not found
 ```
@@ -340,20 +330,19 @@ Func imp not found
 A vector containing all implementations for a specific function in the order they are considered during dispatch may be retrieved by calling the ```imps``` function.
 
 ```
-> |
-..&+ imps
-..
+   | &+ imps
+...
 [[Fimp(+ Rat Rat) Fimp(+ Int Int)]@1]
 ```
 
 ```upcall``` provides an easy way to call the next matching implementation, it also supports scanning for arguments.
 
 ```
-> |
-..func: maybe-add(x y Num) $x + $y;
-..func: maybe-add(x y Int) $x = 42 if 42 {upcall $x $y};
-..maybe-add 1 2 , maybe-add 42 2
-..
+   |
+...func: maybe-add(x y Num) $x + $y;
+...func: maybe-add(x y Int) $x = 42 if 42 {upcall $x $y};
+...maybe-add 1 2 , maybe-add 42 2
+...
 [3 42]
 ```
 
@@ -361,25 +350,24 @@ A vector containing all implementations for a specific function in the order the
 Where conversions to other types make sense, a function named after the target type is provided.
 
 ```
-> |
-..'42' int
-..
+   | '42' int
+...
 [42]
 
-> str
-..
+   str
+...
 ['42']
 
-> 1 get
-..
+   1 get
+...
 [\2]
 
-> int
-..
+   int
+...
 [50]
 
-> + 5 char
-..
+   + 5 char
+...
 [\7]
 ```
 
@@ -387,13 +375,12 @@ Where conversions to other types make sense, a function named after the target t
 Basic rational arithmetics is supported out of the box.
 
 ```
-> |
-..1 / 2, -42 / 2 *
-..
+   | 1 / 2, -42 / 2 *
+...
 [-21/2]
 
-> int
-..
+   int
+...
 -10
 ```
 
@@ -401,19 +388,19 @@ Basic rational arithmetics is supported out of the box.
 The ```#nil``` value may be used to represent missing values. Since ```Nil``` isn't derived from ```A```, stray ```#nil``` values never get far before being trapped in a function call; ```Opt``` may be used instead where ```#nil``` is allowed.
 
 ```
-> |
-..func: foo(x A);
-..func: bar(x Opt) 42;
+   |
+...func: foo(x A);
+...func: bar(x Opt) 42;
 ..
 []
 
-> foo #nil
-..
+   foo #nil
+...
 Error in row 1, col 1:
 Func not applicable: 'foo'
 
-> | bar #nil
-..
+   | bar #nil
+...
 [42]
 ```
 
@@ -421,21 +408,20 @@ Func not applicable: 'foo'
 A vector is a one dimensional dynamic array that supports efficient pushing / popping and random access. The stack itself is a vector which may be retrieved using the ```vect``` function.
 
 ```
-> |
-..1 2 (3 4 vect)
-..
+   | 1 2 (3 4 vect)
+...
 [1 2 [3 4]@1]
 
-> % 5 push
-..
+   % 5 push
+...
 [1 2 [3 4 5]@1]
 
-> % pop
-..
+   % pop
+...
 [1 2 [3 4]@1 5]
 
-> _ {2 *} for 
-..
+   _ {2 *} for 
+...
 [1 2 6 8]
 ```
 
@@ -443,42 +429,104 @@ A vector is a one dimensional dynamic array that supports efficient pushing / po
 The ```times``` loop may be used to repeat an action N times.
 
 ```
-> |
-..10 times 42
-..
+   | 10 times 42
+...
 [42 42 42 42 42 42 42 42 42 42]
 ```
 
 ```
-> |
-..0, 42 times &++
-..
+   | 0, 42 times &++
+...
 [42]
 ```
 
 While the ```for``` loop repeats an action once for each value in a sequence, the current value is pushed on the stack before calling the action.
 
 ```
-> |
-..10 for {+ 42,}
-..
+   | 10 for {+ 42,}
+...
 [42 43 44 45 46 47 48 49 50 51]
 ```
 
 ```
-> |
-..'foo' for &upper
-..
+   | 'foo' for &upper
+...
 [\F \O \O]
 ```
 
 Some types support mapping actions over their contents using ```map```.
 
 ```
-> |
-..'foo' map {int ++ char}
-..
+   | 'foo' map {int ++ char}
+...
 ['gpp']
+```
+
+### Time
+A single concept is used to represent both points in time and intervals; no assumptions are made about epochs, the precision is nanoseconds and all fields are zero-based. ```now``` returns the current local time.
+
+```
+   | now
+...
+[Time(2018/0/3 20:14:48.105655092)]
+```
+
+Times may be queried for absolute and relative field values;
+
+```
+   |
+...let: t now;
+...years $t, month $t, days $t
+...
+[2018 0 3]
+
+   | months $t
+...
+[24216]
+
+   / 12 int
+...
+[2018]
+
+   | hour $t, minute $t, second $t, nsecond $t
+...
+[20 14 48 105655092]
+
+   | h $t, m $t, s $t, ms $t, us $t, ns $t
+...
+[93 5591 335485 335485094 335485094756 335485094756404]
+
+   | h $t / 24 int
+...
+[3]
+```
+
+manually constructed;
+
+```
+   3 days
+...
+[Time(72:0:0.0)]
+
+   days
+...
+[3]
+```
+
+and compared, added and subtracted.
+
+```
+   2m =, 120s
+...
+[#t]
+
+   | 1 years +, 2 months +, 3 days ,- 12h
+...
+[Time(1/2/2) 12:0:0.0]
+
+   < now
+...
+[#t]
 ```
 
 ### Types
@@ -496,6 +544,7 @@ Capitalized names are treated as types, the following list is defined out of the
 - Opt ()
 - Rat (Num)
 - Str (A)
+- Time (A)
 - Type (A)
 - Vect (A)
 
@@ -512,18 +561,17 @@ Capitalized names are treated as types, the following list is defined out of the
 Traits are abstract types that may be used to simplify type checking and/or function dispatch. Besides the standard offering; 'A', 'Num' and 'Opt'; new traits may be defined using the ```trait:``` macro.
 
 ```
-> |
-..trait: StrInt Str Int;
-..
+   | trait: StrInt Str Int;
+...
 []
 
-> Str is StrInt,
-..Int is StrInt,
-..StrInt is A
+   Str is StrInt,
+...Int is StrInt,
+...StrInt is A
 [#t #t #f]
 
-> trait: StrIntChar StrInt Char;
-..
+   trait: StrIntChar StrInt Char;
+...
 []
 ```
 
@@ -531,13 +579,12 @@ Traits are abstract types that may be used to simplify type checking and/or func
 The compiler may be invoked from within the language through the ```compile``` function, the result is a compiled sequence of operations that may be passed around and called.
 
 ```
-> |
-..'1 + 2' compile
-..
+   | '1 + 2' compile
+...
 [Bin(0x8899a0)@1]
 
-> call
-..
+   call
+...
 [3]
 ```
 
@@ -609,13 +656,13 @@ There is still plenty of work remaining in the profiling and benchmarking depart
 Let's start with a tail-recursive fibonacci to exercise the interpreter loop, it's worth mentioning that cixl uses 64-bit integers while Python settles for 32-bit.
 
 ```
-> |
-..func: fib-rec(a b n Int)
-..  $n? if {$b $a $b + $n -- recall} $a;
-..func: fib(n Int)
-..  fib-rec 0 1 $n;
-..clock {10000 times {50 fib _}} / 1000000 int
-..
+   |
+...func: fib-rec(a b n Int)
+...  $n? if {$b $a $b + $n -- recall} $a;
+...func: fib(n Int)
+...  fib-rec 0 1 $n;
+...clock {10000 times {50 fib _}} / 1000000 int
+...
 [520]
 ```
 
@@ -641,9 +688,8 @@ $ python3 fib.py
 Next up is consing a vector.
 
 ```
-> |
-..clock {(let: v vect; 10000000 for {$v ~ push})} / 1000000 int
-..
+   | clock {(let: v vect; 10000000 for {$v ~ push})} / 1000000 int
+...
 [1886]
 ```
 

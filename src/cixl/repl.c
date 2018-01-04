@@ -28,7 +28,7 @@ void cx_repl(struct cx *cx, FILE *in, FILE *out) {
 
   while (true) {
     fflush(body.stream);
-    fputs(body.size ? ".." : "> ", out);
+    fputs(body.size ? "..." : "   ", out);
     
     if (fgets(line, sizeof(line), in) == NULL) { break; }
 

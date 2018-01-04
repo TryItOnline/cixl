@@ -22,6 +22,7 @@
 #include "cixl/types/nil.h"
 #include "cixl/types/rat.h"
 #include "cixl/types/str.h"
+#include "cixl/types/time.h"
 #include "cixl/types/vect.h"
 #include "cixl/util.h"
 #include "cixl/var.h"
@@ -497,6 +498,7 @@ struct cx *cx_init(struct cx *cx) {
   cx->rat_type = cx_init_rat_type(cx);
   cx->char_type = cx_init_char_type(cx);
   cx->str_type = cx_init_str_type(cx);
+  cx->time_type = cx_init_time_type(cx);
   cx->vect_type = cx_init_vect_type(cx);
   cx->bin_type = cx_init_bin_type(cx);
   cx->func_type = cx_init_func_type(cx);

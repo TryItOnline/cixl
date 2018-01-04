@@ -5,7 +5,7 @@
 #include "cixl/set.h"
 #include "cixl/type.h"
 
-#define CX_VERSION "0.6"
+#define CX_VERSION "0.7"
 
 #define cx_add_func(cx, id, ...) ({				\
       struct cx_func_arg args[] = {__VA_ARGS__};		\
@@ -25,7 +25,7 @@ struct cx {
   struct cx_set types;
   struct cx_type *any_type, *bin_type, *bool_type, *char_type, *fimp_type, *func_type,
     *int_type, *lambda_type, *meta_type, *nil_type, *num_type, *opt_type, *rat_type,
-    *str_type, *vect_type;
+    *str_type, *time_type, *vect_type;
 
   cx_type_tag_t next_type_tag;
   struct cx_set macros, funcs, consts;

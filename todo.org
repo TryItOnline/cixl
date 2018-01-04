@@ -1,3 +1,14 @@
+* finish now fn
+* add years, months, days, hours, mins, secs, msecs, usecs & nsecs
+** return time
+---
+* add %% fn
+** add type->clone
+*** default to copy
+** rename dup to copy
+** rename zap to drop
+* remove cx_vect type
+** move nrefs/ref/unref to cx_vec
 * add support for types in multi let
 ** check with isa on bind
 *** add optional type to CX_OSET
