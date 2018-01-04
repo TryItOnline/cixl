@@ -463,7 +463,7 @@ Some types support mapping actions over their contents using ```map```.
 ```
 
 ### Time
-A single concept is used to represent both points in time and durations; no assumptions are made about epochs, the precision is nanoseconds and all fields are zero-based.
+Cixl provides a single concept to represent both pointsin time and durations with nanosecond precision. Internally; time is represented as an absolute, zero-based number of months and nanoseconds; no assumptions are made about epochs.
 
 Times may be queried for absolute and relative field values;
 

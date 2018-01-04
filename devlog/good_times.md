@@ -2,13 +2,13 @@
 #### 2018-01-04
 
 ### Intro
-Raise your hands everyone who's at some point torn their hair out and cursed at a time library API. I know I have, more than I wish to remember. For some reason we've decided to make time really, really complex; and it's been going on for thousands of years. Epochs, leaps, months; arbitrary multiples of 7, 6 and 10; time zones, daylight savings; the list goes on and on. I was once tasked with the very unpleasant problem of calculating week numbers with varying start days for cabin rentals, something that precious few libraries are capable of; ever since then I feel like throwing up whenever I see a calendar problem approaching. The question that has been lingering in my mind is how much of the complexity is intrinsic to the problem and how much comes from using suboptimal abstractions. I recently had a reason to ponder that question again while adding support for time to [cixl](https://github.com/basic-gongfu/cixl).
+Raise your hands everyone who's at some point torn their hair out and cursed at a time library API. I know I have, more than I wish to remember. For some reason we've agreed to make time really, really complex; and it's been going on for thousands of years. Epochs, leaps, months; arbitrary multiples of 7, 6 and 10; time zones, daylight savings; the list goes on and on. I was once tasked with the very unpleasant problem of calculating week numbers with varying start days for cabin rentals, something that precious few libraries are capable of; ever since then I feel like throwing up whenever someone mentions week numbers. The question that's been lingering in my mind is how much complexity is intrinsic to the problem and how much comes from choosing suboptimal abstractions. I recently had a reason to ponder that question again while adding support for time to [cixl](https://github.com/basic-gongfu/cixl).
 
 ### The Lisp Way
-One of the basic tenets of Lisp is to provide fewer abstractions and use them for everything, though almost to a fault in Lisps case. Doing so leads to more composable and powerful API's. Most other languages unfortunately didn't get the memo, time libraries even less so. Some, like Python; seem to have read the memo upside down and added as many freaking distinct [concepts](https://docs.python.org/3.5/library/datetime.html) as they could possibly think of. Needless to say, I decided that [cixl](https://github.com/basic-gongfu/cixl) would be better of following Lisps lead.
+One of the basic tenets of Lisp is to provide fewer concepts and use them for everything, though almost to a fault in Lisps case. Doing so leads to more composable and powerful API's. Most other languages unfortunately didn't get the memo, time libraries even less so. Some, like Python; seem to have read the memo upside down and added as many distinct freaking [concepts](https://docs.python.org/3.5/library/datetime.html) as they could possibly think of. Needless to say, I decided that [cixl](https://github.com/basic-gongfu/cixl) would be better of following Lisps lead.
 
 ### The Cixl Way
-Cixl provides a single concept to represent both points in time and durations; no assumptions are made about epochs, the precision is nanoseconds and all fields are zero-based. Internally, time is represented as number of months and nanoseconds.
+Cixl provides a single concept to represent both pointsin time and durations with nanosecond precision. Internally; time is represented as an absolute, zero-based number of months and nanoseconds; no assumptions are made about epochs.
 
 Time may be queried for absolute and relative field values;
 
@@ -78,7 +78,7 @@ and scaled.
 ```
    | 1 months +, 1 days * 3
 ...
-
+[Time(0/3/3)]
 ```
 
 ### That's It?
