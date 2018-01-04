@@ -82,6 +82,6 @@ and scaled.
 ```
 
 ### That's It?
-There is more to come, but I figured this would make a good introduction to some of the choices made. Mixing time and zones never made any sense to me, they are clearly better off being implemented as conversions in my mind. Consider unicode strings as a comparison; we generally don't tack encodings onto byte strings just in case someone might want to go unicode in the future; what usually happens instead is that user code is asked to specify the encoding at conversion time. We will have to wait and see if I manage to talk myself into tackling week numbers, there are few things I hate more than throwing up.
+There is more to come, but I figured this would make a good introduction to some of the choices made. Mixing time and zones never made any sense to me, they are clearly better off being implemented as independent conversions in my mind. Consider unicode strings as a comparison; we generally don't tack encodings onto byte strings just in case someone might want to go unicode in the future; what usually happens instead is that user code is asked to specify an encoding at conversion time. We will have to wait and see if I manage to talk myself into tackling week numbers, there are few things I hate more than throwing up.
 
 Give me a yell if something is unclear, wrong or missing. And please do consider helping out with a donation via [paypal](https://paypal.me/basicgongfu) or [liberapay](https://liberapay.com/basic-gongfu/donate) if you find this worthwhile, every contribution counts.
