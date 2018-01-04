@@ -4,7 +4,7 @@
 This project aims to produce a minimal, decently typed scripting language for embedding in and extending from C. The language is implemented as a straight forward 3-stage (parse/compile/eval) interpreter that is designed to be as fast as possible without compromising on simplicity, transparency and flexibility. The codebase has no external dependencies and is currently hovering around 3 kloc.
 
 ### Getting Started
-To get started, you'll need a decent C compiler with GNU-extensions and CMake installed. A primitive REPL is included, the executable weighs in at 400k. It's highly recommended to run the REPL through ```rlwrap``` for a less nerve-wrecking editing experience.
+To get started, you'll need a reasonably modern C compiler with GNU-extensions and CMake installed. A basic REPL is included, it's highly recommended to run it through ```rlwrap``` for a less nerve-wrecking editing experience.
 
 ```
 git clone https://github.com/basic-gongfu/cixl.git
@@ -27,7 +27,7 @@ Press Return twice to eval input.
 ```
 
 ### Status
-Examples from this document should work in the most recent version and run clean in ```valgrind```, outside of that I can't really promise much at the moment. Current work is focused on profiling and filling obvious gaps in functionality.
+Examples should work in the most recent version and run clean in ```valgrind```, outside of that I can't really promise much at the moment. Current work is focused on profiling and filling obvious gaps in functionality.
 
 ### Stack
 The stack is accessible from user code, just like in Forth. Basic stack operations have dedicated operators; ```%``` for duplicating last value, ```_``` for dropping it, ```~``` for flipping the last two values and ```|``` for clearing the stack.
@@ -107,6 +107,15 @@ Error in row 1, col 10:
 Attempt to rebind variable: 'foo'
 ```
 
+Multiple names may be bound at the same time by enclosing them in parens.
+
+```
+> let: (x y z) 1 2 3;
+..$x $y $z
+..
+[1 2 3]
+```
+
 ### Equality
 Two flavors of equality are provided.
 
@@ -133,6 +142,27 @@ And identity:
 [#t]
 ```
 
+### Scopes
+Code enclosed in parens is evaluated in a separate scope, the last value on the stack is automatically returned on scope exit.
+
+```
+> |
+..(1 2 3)
+..
+[3]
+```
+
+Variables in the parent scope may be referenced from within, but variables defined inside are not visible from the outside.
+
+```
+> |
+..let: foo 1;
+..(let: foo 2; $foo)
+..$foo
+..
+[2 1]
+```
+
 ### IO
 ```say``` and ```ask``` may be used to perform basic IO.
 
@@ -146,7 +176,7 @@ what's your name? Sifoo
 ['Sifoo']
 ```
 
-Code may be loaded from file using ```load```, the loaded code is evaluated in the current scope.
+Code may be loaded from file using ```load```, it is evaluated in the current scope.
 
 test.cx:
 ```
@@ -158,27 +188,6 @@ test.cx:
 ..1, load 'test.cx'
 ..
 [3]
-```
-
-### Scopes
-Code enclosed in parens is evaluated in a separate scope, the last value on the stack is automatically returned on scope exit.
-
-```
-> |
-..(1 2 3)
-..
-[3]
-```
-
-Variables in the parent scope may be referenced from within the scope, but variables defined inside are not visible from the outside.
-
-```
-> |
-..let: foo 1;
-..(let: foo 2; $foo)
-..$foo
-..
-[2 1]
 ```
 
 ### Conditions

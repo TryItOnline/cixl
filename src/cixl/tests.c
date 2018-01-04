@@ -32,6 +32,64 @@ static void type_tests() {
   cx_deinit(&cx);
 }
 
+static void stack_tests() {
+  struct cx cx;
+  cx_init(&cx);
+  cx_init_math(&cx);
+
+  run(&cx, "7 14 % + 28 = test");
+  run(&cx, "7 14 % _ + 21 = test");
+
+  cx_deinit(&cx);
+}
+
+static void group_tests() {
+  struct cx cx;
+  cx_init(&cx);
+
+  run(&cx, "(7 14 21) 21 = test");
+
+  cx_deinit(&cx);
+}
+
+static void let_tests() {
+  struct cx cx;
+  cx_init(&cx);
+  cx_init_math(&cx);
+
+  run(&cx, "let: foo 42; $foo 42 = test");
+  run(&cx, "let: (x y z) 1 3 5; $x + $y + $z 9 = test");
+
+  cx_deinit(&cx);
+}
+
+static void func_tests() {
+  struct cx cx;
+  cx_init(&cx);
+  cx_init_math(&cx);
+  
+  run(&cx, "func: foo() 42; foo = 42 test");
+  run(&cx, "func: foo() 42; &foo call = 42 test");
+  run(&cx, "func: bar(x A) $x + 35; bar 7 42 = test");
+  run(&cx, "func: baz(x y Int z T0) $x + $y + $z; baz 1 3 5 9 = test");
+
+  run(&cx,
+      "func: maybe-add(x y Num) $x + $y; "
+      "func: maybe-add(x y Int) $x = 42 if 42 {upcall $x $y}; "
+      "maybe-add 1 2 3 = test "
+      "maybe-add 42 2 42 = test");
+
+  run(&cx,
+      "func: answer(0) 0; "
+      "func: answer(x Int) $x; "
+      "func: answer(42) 'correct'; "
+      "answer 0 0 = test "
+      "answer 1 1 = test "
+      "answer 42 'correct' = test");
+
+  cx_deinit(&cx);
+}
+
 static void int_tests() {
   struct cx cx;
   cx_init(&cx);
@@ -96,59 +154,12 @@ static void vect_tests() {
   cx_deinit(&cx);
 }
 
-static void stack_tests() {
-  struct cx cx;
-  cx_init(&cx);
-  cx_init_math(&cx);
-
-  run(&cx, "7 14 % + 28 = test");
-  run(&cx, "7 14 % _ + 21 = test");
-
-  cx_deinit(&cx);
-}
-
-static void group_tests() {
-  struct cx cx;
-  cx_init(&cx);
-
-  run(&cx, "(7 14 21) 21 = test");
-
-  cx_deinit(&cx);
-}
-
-static void func_tests() {
-  struct cx cx;
-  cx_init(&cx);
-  cx_init_math(&cx);
-  
-  run(&cx, "func: foo() 42; foo = 42 test");
-  run(&cx, "func: foo() 42; &foo call = 42 test");
-  run(&cx, "func: bar(x A) $x + 35; bar 7 42 = test");
-  run(&cx, "func: baz(x y Int z T0) $x + $y + $z; baz 1 3 5 9 = test");
-
-  run(&cx,
-      "func: maybe-add(x y Num) $x + $y; "
-      "func: maybe-add(x y Int) $x = 42 if 42 {upcall $x $y}; "
-      "maybe-add 1 2 3 = test "
-      "maybe-add 42 2 42 = test");
-
-  run(&cx,
-      "func: answer(0) 0; "
-      "func: answer(x Int) $x; "
-      "func: answer(42) 'correct'; "
-      "answer 0 0 = test "
-      "answer 1 1 = test "
-      "answer 42 'correct' = test");
-
-  cx_deinit(&cx);
-}
-
 static void math_tests() {
   struct cx cx;
   cx_init(&cx);
   cx_init_math(&cx);
 
-  run(&cx, "21 +<Int> 21 = 42 test");
+  run(&cx, "21 +<Int Int> 21 = 42 test");
   run(&cx, "7 + 14, 7 + 14 + = 42 test");
   run(&cx, "fib 50 = 12586269025 test");
 
@@ -157,13 +168,14 @@ static void math_tests() {
 
 void cx_tests() {
   type_tests();
+  stack_tests();
+  group_tests();
+  let_tests();
+  func_tests();
   int_tests();
   char_tests();
   str_tests();
   rat_tests();
   vect_tests();
-  stack_tests();
-  group_tests();
-  func_tests();
   math_tests();
 }

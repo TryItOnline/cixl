@@ -117,12 +117,30 @@ static ssize_t let_eval(struct cx_macro_eval *eval,
     return -1;
   }
   
-  cx_op_init(cx_vec_push(&bin->ops), CX_OUNSCOPE(), tok_idx);
-  struct cx_tok *id = cx_vec_get(&eval->toks, 0);
-  struct cx_op * op = cx_op_init(cx_vec_push(&bin->ops), CX_OSET(), tok_idx);
-  op->as_set.id = id->as_ptr;
-  op->as_set.force = false;
-  op->as_set.parent = false;
+  void set(const char *id) {
+    struct cx_op * op = cx_op_init(cx_vec_push(&bin->ops), CX_OSET(), tok_idx);
+    op->as_set.id = id;
+    op->as_set.force = false;
+    op->as_set.pop_parent = false;
+    op->as_set.set_parent = true;
+  }
+
+  struct cx_tok *id_tok = cx_vec_get(&eval->toks, 0);
+  if (id_tok->type == CX_TID()) {
+    set(id_tok->as_ptr);
+  } else {
+    struct cx_vec *ids = &id_tok->as_vec;
+    
+    for (struct cx_tok *t = cx_vec_peek(ids, 0);
+	 t >= (struct cx_tok *)ids->items;
+	 t--) {
+      set(t->as_ptr);
+    }
+  }
+  
+  cx_op_init(cx_vec_push(&bin->ops),
+	     CX_OUNSCOPE(),
+	     tok_idx)->as_unscope.push_result = false;
   return tok_idx+1;
 }
 
@@ -133,26 +151,35 @@ static bool let_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   
   if (!cx_parse_tok(cx, in, &eval->toks, false)) {
     cx_error(cx, row, col, "Missing let id");
-    cx_macro_eval_unref(eval);
-    return false;
+    goto error;
   }
 
   struct cx_tok *id = cx_vec_peek(&eval->toks, 0);
 
-  if (id->type != CX_TID()) {
-    cx_error(cx, row, col, "Invalid let id");
-    cx_macro_eval_unref(eval);
-    return false;
+  if (id->type != CX_TID() && id->type != CX_TGROUP()) {
+    cx_error(cx, id->row, id->col, "Invalid let id");
+    goto error;
+  }
+
+  if (id->type == CX_TGROUP()) {
+    cx_do_vec(&id->as_vec, struct cx_tok, t) {
+      if (t->type != CX_TID()) {
+	cx_error(cx, t->row, t->col, "Invalid let id");
+	goto error;
+      }
+    }
   }
   
   if (!cx_parse_end(cx, in, &eval->toks)) {
     cx_error(cx, row, col, "Empty let");
-    cx_macro_eval_unref(eval);
-    return false;
+    goto error;
   }
   
   cx_tok_init(cx_vec_push(out), CX_TMACRO(), row, col)->as_ptr = eval;
   return true;
+ error:
+  cx_macro_eval_unref(eval);
+  return false;  
 }
 
 static ssize_t func_eval(struct cx_macro_eval *eval,
@@ -165,7 +192,8 @@ static ssize_t func_eval(struct cx_macro_eval *eval,
     if (t->type == CX_TID()) {
       struct cx_op *op = cx_op_init(cx_vec_push(&bin->ops), CX_OSET(), tok_idx);
       op->as_set.id = t->as_ptr;
-      op->as_set.parent = true;
+      op->as_set.pop_parent = true;
+      op->as_set.set_parent = false;
       op->as_set.force = true;
     } else {
       cx_op_init(cx_vec_push(&bin->ops), CX_OZAP(), tok_idx)->as_zap.parent = true;

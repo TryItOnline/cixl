@@ -123,11 +123,10 @@ cx_op_type(CX_OSCOPE, {
   });
 
 static bool set_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
-  struct cx_scope *s = cx_scope(cx, op->as_set.parent ? 1 : 0);
-  struct cx_box *src = cx_pop(s, false);
+  struct cx_box *src = cx_pop(cx_scope(cx, op->as_set.pop_parent ? 1 : 0), false);
   if (!src) { return false; }
   
-  struct cx_box *dst = cx_set(op->as_set.parent ? cx_scope(cx, 0) : s,
+  struct cx_box *dst = cx_set(cx_scope(cx, op->as_set.set_parent ? 1 : 0),
 			      op->as_set.id,
 			      op->as_set.force);
 
@@ -150,6 +149,7 @@ cx_op_type(CX_OSTOP, {
   });
 
 static bool unscope_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
+  if (!op->as_unscope.push_result) { cx_vec_clear(&cx_scope(cx, 0)->stack); }
   cx_end(cx);
   return true;
 }

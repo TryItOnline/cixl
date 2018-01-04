@@ -29,7 +29,7 @@ struct cx_op_type {
 struct cx_op_type *cx_op_type_init(struct cx_op_type *type);
 
 struct cx_get_op {
-  char *id;
+  const char *id;
 };
 
 struct cx_func_op {
@@ -50,8 +50,12 @@ struct cx_scope_op {
 };
 
 struct cx_set_op {
-  char *id;
-  bool parent, force;
+  const char *id;
+  bool pop_parent, set_parent, force;
+};
+
+struct cx_unscope_op {
+  bool push_result;
 };
 
 struct cx_zap_op {
@@ -69,6 +73,7 @@ struct cx_op {
     struct cx_lambda_op as_lambda;
     struct cx_scope_op as_scope;
     struct cx_set_op as_set;
+    struct cx_unscope_op as_unscope;
     struct cx_zap_op as_zap;
   };
 };
