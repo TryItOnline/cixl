@@ -1,6 +1,5 @@
-* finish now fn
-* add years, months, days, hours, mins, secs, msecs, usecs & nsecs
-** return time
+* finish time
+** add *
 ---
 * add %% fn
 ** add type->clone

@@ -1,0 +1,87 @@
+## Good Times
+#### 2018-01-04
+
+### Intro
+Raise your hands everyone who's at some point torn their hair out and cursed at a time library API. I know I have, more than I wish to remember. For some reason we've decided to make time really, really complex; and it's been going on for thousands of years. Epochs, leaps, months; arbitrary multiples of 7, 6 and 10; time zones, daylight savings; the list goes on and on. I was once tasked with the very unpleasant problem of calculating week numbers with varying start days for cabin rentals, something that precious few libraries are capable of; ever since then I feel like throwing up whenever I see a calendar problem approaching. The question that has been lingering in my mind is how much of the complexity is intrinsic to the problem and how much comes from using suboptimal abstractions. I recently had a reason to ponder that question again while adding support for time to [cixl](https://github.com/basic-gongfu/cixl).
+
+### The Lisp Way
+One of the basic tenets of Lisp is to provide fewer abstractions and use them for everything, though almost to a fault in Lisps case. Doing so leads to more composable and powerful API's. Most other languages unfortunately didn't get the memo, time libraries even less so. Some, like Python; seem to have read the memo upside down and added as many freaking distinct [concepts](https://docs.python.org/3.5/library/datetime.html) as they could possibly think of. Needless to say, I decided that [cixl](https://github.com/basic-gongfu/cixl) would be better of following Lisps lead.
+
+### The Cixl Way
+Cixl provides a single concept to represent both points in time and durations; no assumptions are made about epochs, the precision is nanoseconds and all fields are zero-based. Internally, time is represented as number of months and nanoseconds.
+
+Time may be queried for absolute and relative field values;
+
+```
+   | let: t now; $t
+...
+[Time(2018/0/3 20:14:48.105655092)]
+
+...years $t, month $t, days $t
+...
+[2018 0 3]
+
+   | months $t
+...
+[24216]
+
+   / 12 int
+...
+[2018]
+
+   | hour $t, minute $t, second $t, nsecond $t
+...
+[20 14 48 105655092]
+
+   | h $t, m $t, s $t, ms $t, us $t, ns $t
+...
+[93 5591 335485 335485094 335485094756 335485094756404]
+
+   | h $t / 24 int
+...
+[3]
+
+   | m $t / 60 int
+...
+[93]
+```
+manually constructed;
+
+```
+   3 days
+...
+[Time(72:0:0.0)]
+
+   days
+...
+[3]
+```
+
+compared, added and subtracted;
+
+```
+   2m =, 120s
+...
+[#t]
+
+   | 1 years +, 2 months +, 3 days ,- 12h
+...
+[Time(1/2/2) 12:0:0.0]
+
+   < now
+...
+[#t]
+```
+
+and scaled.
+
+```
+   | 1 months +, 1 days * 3
+...
+
+```
+
+### That's It?
+There is more to come, but I figured this would make a good introduction to some of the choices made. Mixing time and time zones never made any sense to me, and all the conversion pixie dust in the world isn't going to fix that; they are better off being implemented as simple conversions. Consider unicode strings as a comparison; we generally don't tack the encoding onto byte strings just in case someone might want to go unicode in the future; what usually happens instead is that user code is asked to specify the encoding when the conversion happens. We will have to see if I manage to talk myself into tackling week numbers, there are few things I hate more than throwing up.
+
+Give me a yell if something is unclear, wrong or missing. And please do consider helping out with a donation via [paypal](https://paypal.me/basicgongfu) or [liberapay](https://liberapay.com/basic-gongfu/donate) if you find this worthwhile, every contribution counts.

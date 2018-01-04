@@ -463,19 +463,15 @@ Some types support mapping actions over their contents using ```map```.
 ```
 
 ### Time
-A single concept is used to represent both points in time and intervals; no assumptions are made about epochs, the precision is nanoseconds and all fields are zero-based. ```now``` returns the current local time.
-
-```
-   | now
-...
-[Time(2018/0/3 20:14:48.105655092)]
-```
+A single concept is used to represent both points in time and durations; no assumptions are made about epochs, the precision is nanoseconds and all fields are zero-based.
 
 Times may be queried for absolute and relative field values;
 
 ```
-   |
-...let: t now;
+   | let: t now; $t
+...
+[Time(2018/0/3 20:14:48.105655092)]
+
 ...years $t, month $t, days $t
 ...
 [2018 0 3]
@@ -499,6 +495,10 @@ Times may be queried for absolute and relative field values;
    | h $t / 24 int
 ...
 [3]
+
+   | m $t / 60 int
+...
+[93]
 ```
 
 manually constructed;
@@ -513,7 +513,7 @@ manually constructed;
 [3]
 ```
 
-and compared, added and subtracted.
+compared, added and subtracted;
 
 ```
    2m =, 120s
@@ -527,6 +527,14 @@ and compared, added and subtracted.
    < now
 ...
 [#t]
+```
+
+and scaled.
+
+```
+   | 1 months +, 1 days * 3
+...
+
 ```
 
 ### Types
@@ -723,4 +731,4 @@ $ python3 vect.py
 ### License
 GPLv3
 
-Give me a yell if something is unclear, wrong or missing. And please do consider helping out with a donation via [paypal](https://paypal.me/basicgongfu) or [liberapay](https://liberapay.com/basic-gongfu/donate) if you find this worthwhile. I have the opportunity and motivation to work full time on this project, but still need some help with covering basic needs for that to happen.
+Give me a yell if something is unclear, wrong or missing. And please do consider helping out with a donation via [paypal](https://paypal.me/basicgongfu) or [liberapay](https://liberapay.com/basic-gongfu/donate) if you find this worthwhile, every contribution counts.
