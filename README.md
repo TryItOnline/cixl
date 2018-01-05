@@ -178,8 +178,7 @@ test.cx:
 ```
 
 ```
-   |
-...1, load 'test.cx'
+   | 1, load 'test.cx'
 ...
 [3]
 ```
@@ -472,7 +471,7 @@ Times may be queried for absolute and relative field values;
 ...
 [Time(2018/0/3 20:14:48.105655092)]
 
-...years $t, month $t, days $t
+   | years $t, month $t, days $t
 ...
 [2018 0 3]
 
@@ -520,7 +519,7 @@ compared, added and subtracted;
 ...
 [#t]
 
-   | 1 years +, 2 months +, 3 days ,- 12h
+   | 1 years +, 2 months +, 3 days -, 12h
 ...
 [Time(1/2/2) 12:0:0.0]
 
