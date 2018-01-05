@@ -43,14 +43,6 @@ void cx_vect_fprint(struct cx_vec *imp, FILE *out) {
   fputc(']', out);
 }
 
-static bool vect_imp(struct cx_scope *scope) {
-  struct cx_vect *v = cx_vect_new();
-  v->imp = scope->stack;
-  cx_vec_init(&scope->stack, sizeof(struct cx_box));
-  cx_box_init(cx_push(scope), scope->cx->vect_type)->as_ptr = v;
-  return true;
-}
-
 static bool len_imp(struct cx_scope *scope) {
   struct cx_box vec = *cx_test(cx_pop(scope, false));
   struct cx_vect *v = vec.as_ptr;
@@ -182,7 +174,6 @@ struct cx_type *cx_init_vect_type(struct cx *cx) {
   t->fprint = fprint_imp;
   t->deinit = deinit_imp;
   
-  cx_add_func(cx, "vect")->ptr = vect_imp;
   cx_add_func(cx, "len", cx_arg(t))->ptr = len_imp;
   cx_add_func(cx, "push", cx_arg(t), cx_arg(cx->any_type))->ptr = push_imp;
   cx_add_func(cx, "pop", cx_arg(t))->ptr = pop_imp;

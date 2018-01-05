@@ -149,14 +149,14 @@ And identity:
 ```
 
 ### References
-Some kinds of values are reference counted; Vects, Lambdas etc. Reference values display the number of references following ```@``` when printed. Doubling the copy operator results in a deep copy where applicable and defaults to regular copy where not.
+Some values are reference counted; Vects, Lambdas etc. Reference values display the number of references following ```@``` when printed. Doubling the copy operator results in a deep copy where applicable and defaults to regular copy where not.
 
 ```
-   | (1 2 3 vect) %
+   | [1 2 3] %
 ...
 [[1 2 3]@2 [1 2 3]@2]
 
-   | (1 2 3 vect) %%
+   | [1 2 3] %%
 ...
 [[1 2 3]@1 [1 2 3]@1]
 ```
@@ -431,21 +431,21 @@ Func not applicable: 'foo'
 A vector is a one dimensional dynamic array that supports efficient pushing / popping and random access. The stack itself is a vector which may be retrieved using the ```vect``` function.
 
 ```
-   | 1 2 (3 4 vect)
+   | [1 2, 3 + 4]
 ...
-[1 2 [3 4]@1]
+[[1 2 7]@1]
 
    % 5 push
 ...
-[1 2 [3 4 5]@1]
+[[1 2 7 5]@1]
 
    % pop
 ...
-[1 2 [3 4]@1 5]
+[[1 2 7]@1 5]
 
    _ {2 *} for 
 ...
-[1 2 6 8]
+[2 4 14]
 ```
 
 ### Loops
@@ -719,7 +719,7 @@ $ python3 fib.py
 Next up is consing a vector.
 
 ```
-   | clock {(let: v vect; 10000000 for {$v ~ push})} / 1000000 int
+   | clock {(let: v []; 10000000 for {$v ~ push})} / 1000000 int
 ...
 [1886]
 ```

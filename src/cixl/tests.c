@@ -161,10 +161,10 @@ static void vect_tests() {
   cx_init(&cx);
   cx_init_math(&cx);
 
-  run(&cx, "1 2 3 (4 5 vect) len 2 = test");
-  run(&cx, "(1 2 3 vect) pop 3 = test");
-  run(&cx, "(1 2 3 vect) % 4 push<Vect A> len 4 = test");
-  run(&cx, "(1 2 vect) for {2 *} + 6 = test");
+  run(&cx, "1 2 3 [4 5] len 2 = test");
+  run(&cx, "[1 2 3] pop 3 = test");
+  run(&cx, "[1 2 3] % 4 push<Vect A> len 4 = test");
+  run(&cx, "[1 2] for {2 *} + 6 = test");
   
   cx_deinit(&cx);
 }

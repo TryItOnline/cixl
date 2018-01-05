@@ -5,6 +5,7 @@
 #include "cixl/types/fimp.h"
 #include "cixl/types/func.h"
 #include "cixl/types/lambda.h"
+#include "cixl/types/vect.h"
 #include "cixl/op.h"
 #include "cixl/scope.h"
 #include "cixl/tok.h"
@@ -144,6 +145,19 @@ static bool set_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
 
 cx_op_type(CX_OSET, {
     type.eval = set_eval;
+  });
+
+static bool stash_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
+  struct cx_scope *s = cx_scope(cx, 0);
+  struct cx_vect *v = cx_vect_new();
+  v->imp = s->stack;
+  cx_vec_init(&s->stack, sizeof(struct cx_box));
+  cx_box_init(cx_push(s), s->cx->vect_type)->as_ptr = v;
+  return true;
+}
+
+cx_op_type(CX_OSTASH, {
+    type.eval = stash_eval;
   });
 
 static bool stop_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {

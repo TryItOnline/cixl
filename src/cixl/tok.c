@@ -278,6 +278,15 @@ cx_tok_type(CX_TMACRO, {
     type.deinit = macro_deinit;
   });
 
+static ssize_t stash_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) {
+  cx_op_init(cx_vec_push(&bin->ops), CX_OSTASH(), tok_idx);
+  return tok_idx+1;
+}
+
+cx_tok_type(CX_TSTASH, {
+    type.compile = stash_compile;
+  });
+
 static ssize_t type_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) {
   struct cx_tok *tok = cx_vec_get(&bin->toks, tok_idx);
   struct cx_type *type = tok->as_ptr;
@@ -294,6 +303,7 @@ cx_tok_type(CX_TTYPE, {
 cx_tok_type(CX_TUNGROUP);
 cx_tok_type(CX_TUNLAMBDA);
 cx_tok_type(CX_TUNTYPE);
+cx_tok_type(CX_TUNVECT);
 
 static ssize_t zap_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) {
   cx_op_init(cx_vec_push(&bin->ops), CX_OZAP(), tok_idx)->as_zap.parent = false;

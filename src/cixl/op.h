@@ -90,6 +90,7 @@ struct cx_op_type *CX_OLAMBDA();
 struct cx_op_type *CX_OPUSH();
 struct cx_op_type *CX_OSCOPE();
 struct cx_op_type *CX_OSET();
+struct cx_op_type *CX_OSTASH();
 struct cx_op_type *CX_OSTOP();
 struct cx_op_type *CX_OUNSCOPE();
 struct cx_op_type *CX_OZAP();

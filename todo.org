@@ -1,15 +1,15 @@
-* include months when calculating days
-** deal with leap years
-* add day fn to return day of month
+* calculate month/year days in days fn
+* add day fn to get day of month
+* add month-days fn to get days in month for time
 * add date fn to trunc time
+* add time fn to frac time
 * add date fn for vect
 ** expect y m d
 *** bind as many as are present
 * add time fn for vect
-** expect y m d h m s ns
+** expect h m s ns
 *** bind as many as are present
 *---
-* replace vect fn with []-syntax
 * add ^ (pow)
 ** add as separator
 ** implement for int/rat in math
