@@ -23,6 +23,7 @@ struct cx_type {
   bool (*call)(struct cx_box *, struct cx_scope *);
   bool (*ok)(struct cx_box *);
   void (*copy)(struct cx_box *dst, struct cx_box *src);
+  void (*clone)(struct cx_box *dst, struct cx_box *src);
   void (*fprint)(struct cx_box *, FILE *);
   void (*deinit)(struct cx_box *);
 };

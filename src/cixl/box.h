@@ -35,6 +35,7 @@ bool cx_equid(struct cx_box *x, struct cx_box *y);
 bool cx_ok(struct cx_box *x);
 bool cx_call(struct cx_box *box, struct cx_scope *scope);
 struct cx_box *cx_copy(struct cx_box *dst, struct cx_box *src);
+struct cx_box *cx_clone(struct cx_box *dst, struct cx_box *src);
 void cx_fprint(struct cx_box *box, FILE *out);
 
 #endif

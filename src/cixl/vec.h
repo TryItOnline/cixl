@@ -20,6 +20,7 @@
 struct cx_vec {
   size_t count, capac, item_size;
   unsigned char *items;
+  int nrefs;
 };
 
 struct cx_vec *cx_vec_new(size_t item_size);

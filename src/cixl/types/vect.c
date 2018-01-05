@@ -153,6 +153,15 @@ static void copy_imp(struct cx_box *dst, struct cx_box *src) {
   dst->as_ptr = cx_vect_ref(src->as_ptr);
 }
 
+static void clone_imp(struct cx_box *dst, struct cx_box *src) {
+  struct cx_vect *src_vect = src->as_ptr, *dst_vect = cx_vect_new();
+  dst->as_ptr = dst_vect;
+
+  cx_do_vec(&src_vect->imp, struct cx_box, v) {
+    cx_clone(cx_vec_push(&dst_vect->imp), v);
+  }
+}
+
 static void fprint_imp(struct cx_box *b, FILE *out) {
   struct cx_vect *v = b->as_ptr;
   cx_vect_fprint(&v->imp, out);
@@ -169,6 +178,7 @@ struct cx_type *cx_init_vect_type(struct cx *cx) {
   t->equid = equid_imp;
   t->ok = ok_imp;
   t->copy = copy_imp;
+  t->clone = clone_imp;
   t->fprint = fprint_imp;
   t->deinit = deinit_imp;
   

@@ -286,8 +286,13 @@ static bool cls_imp(struct cx_scope *scope) {
   return true;
 }
 
-static bool dup_imp(struct cx_scope *scope) {
+static bool copy_imp(struct cx_scope *scope) {
   cx_copy(cx_push(scope), cx_test(cx_peek(scope, true)));
+  return true;
+}
+
+static bool clone_imp(struct cx_scope *scope) {
+  cx_clone(cx_push(scope), cx_test(cx_peek(scope, true)));
   return true;
 }
 
@@ -466,7 +471,7 @@ struct cx *cx_init(struct cx *cx) {
   cx->row = cx->col = -1;
   
   cx_set_init(&cx->separators, sizeof(char), cx_cmp_char);
-  cx_add_separators(cx, " \t\n;,|%_?!(){}<>");
+  cx_add_separators(cx, " \t\n;,|_?!(){}<>");
 
   cx_set_init(&cx->types, sizeof(struct cx_type *), cx_cmp_str);
   cx->types.key = get_type_id;
@@ -506,7 +511,8 @@ struct cx *cx_init(struct cx *cx) {
   cx->lambda_type = cx_init_lambda_type(cx);
 
   cx_add_func(cx, "|")->ptr = cls_imp;
-  cx_add_func(cx, "%", cx_arg(cx->opt_type))->ptr = dup_imp;
+  cx_add_func(cx, "%", cx_arg(cx->opt_type))->ptr = copy_imp;
+  cx_add_func(cx, "%%", cx_arg(cx->opt_type))->ptr = clone_imp;
   cx_add_func(cx, "~", cx_arg(cx->opt_type))->ptr = flip_imp;
   
   cx_add_func(cx, "=", cx_arg(cx->any_type), cx_narg(0))->ptr = eqval_imp;

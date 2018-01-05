@@ -53,6 +53,13 @@ struct cx_box *cx_copy(struct cx_box *dst, struct cx_box *src) {
   return dst;
 }
 
+struct cx_box *cx_clone(struct cx_box *dst, struct cx_box *src) {
+  if (!src->type->clone) { return cx_copy(dst, src); }
+  dst->type = src->type;
+  src->type->clone(dst, src);
+  return dst;
+}
+
 void cx_fprint(struct cx_box *box, FILE *out) {
   cx_test(box->type->fprint)(box, out);
 }

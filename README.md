@@ -30,7 +30,7 @@ Press Return twice to eval input.
 Examples should work in the most recent version and run clean in ```valgrind```, outside of that I can't really promise much at the moment. Current work is focused on profiling and filling obvious gaps in functionality.
 
 ### Stack
-The stack is accessible from user code, just like in Forth. Basic stack operations have dedicated operators; ```%``` for duplicating last value, ```_``` for dropping it, ```~``` for flipping the last two values and ```|``` for clearing the stack.
+The stack is accessible from user code, just like in Forth. Basic stack operations have dedicated operators; ```%``` for copying the last value, ```_``` for dropping it, ```~``` for flipping the last two values and ```|``` for clearing the stack.
 
 ```
    | 1 2 3 %
@@ -135,6 +135,19 @@ And identity:
    | 42 == 42
 ...
 [#t]
+```
+
+### References
+Some kinds of values are reference counted; Vects, Lambdas etc. Reference values display the number of references following ```@``` when printed. Doubling the copy operator results in a deep copy where applicable and defaults to regular copy where not.
+
+```
+   | (1 2 3 vect) %
+...
+[[1 2 3]@2 [1 2 3]@2]
+
+   | (1 2 3 vect) %%
+...
+[[1 2 3]@1 [1 2 3]@1]
 ```
 
 ### Scopes
