@@ -9,6 +9,7 @@
 ** expect y m d h m s ns
 *** bind as many as are present
 *---
+* replace vect fn with []-syntax
 * add ^ (pow)
 ** add as separator
 ** implement for int/rat in math
