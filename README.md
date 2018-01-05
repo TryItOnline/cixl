@@ -495,7 +495,7 @@ Times may be queried for absolute and relative field values;
 ...
 [Time(2018/0/3 20:14:48.105655092)]
 
-   | years $t, month $t, days $t
+   | years $t, month $t, day $t
 ...
 [2018 0 3]
 
@@ -531,7 +531,7 @@ manually constructed;
 ...
 [Time(72:0:0.0)]
 
-   days
+   day
 ...
 [3]
 ```
@@ -550,6 +550,14 @@ compared, added and subtracted;
    < now
 ...
 [#t]
+
+   | 10 days -, 1 years
+...
+[Time(-1/0/10)]
+
+   days
+...
+[-356]
 ```
 
 and scaled.

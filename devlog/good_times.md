@@ -71,6 +71,14 @@ compared, added and subtracted;
    < now
 ...
 [#t]
+
+   | 10 days -, 1 years
+...
+[Time(-1/0/10)]
+
+   days
+...
+[-356]
 ```
 
 and scaled.

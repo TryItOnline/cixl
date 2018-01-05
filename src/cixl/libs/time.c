@@ -11,6 +11,23 @@
 #include "cixl/types/func.h"
 #include "cixl/types/time.h"
 
+static bool is_leap_year(int year) {
+  return !(year%4) && ((year%100) || !(year%400));
+}
+
+static int days_in_month(int year, int month) {
+  cx_test(month >= 0 && month < 12);
+  
+  switch (month) {
+  case 0: case 2: case 4: case 6: case 7: case 9: case 11:
+    return 31;
+  case 1:
+    return is_leap_year(year) ? 29 : 28;
+  }
+
+  return 30;
+}
+
 static bool years_imp(struct cx_scope *scope) {
   struct cx *cx = scope->cx;
   struct cx_box n = *cx_test(cx_pop(scope, false));
@@ -146,10 +163,34 @@ static bool time_months_imp(struct cx_scope *scope) {
   return true;
 }
 
-static bool time_days_imp(struct cx_scope *scope) {
+static bool time_day_imp(struct cx_scope *scope) {
   struct cx *cx = scope->cx;
   struct cx_box t = *cx_test(cx_pop(scope, false));
   cx_box_init(cx_push(scope), cx->int_type)->as_int = t.as_time.ns / CX_DAY;
+  return true;
+}
+
+static bool time_days_imp(struct cx_scope *scope) {
+  struct cx *cx = scope->cx;
+  struct cx_time t = cx_test(cx_pop(scope, false))->as_time;
+
+  int y_max = abs(t.months/12), m_max = abs(t.months%12);
+  cx_int_t days = 0;
+
+  for (int y = 0, m = 0; y < y_max || m < m_max;) {
+    days += days_in_month(y, m);
+
+    if (m == 11) {
+      y++;
+      m = 0;
+    } else {
+      m++;
+    }
+  }
+
+  if (t.months < 0) { days *= -1; }
+  days += t.ns / CX_DAY;
+  cx_box_init(cx_push(scope), cx->int_type)->as_int = days;
   return true;
 }
 
@@ -295,6 +336,7 @@ void cx_init_time(struct cx *cx) {
   cx_add_func(cx, "years", cx_arg(cx->time_type))->ptr = time_years_imp;
   cx_add_func(cx, "month", cx_arg(cx->time_type))->ptr = month_imp;
   cx_add_func(cx, "months", cx_arg(cx->time_type))->ptr = time_months_imp;
+  cx_add_func(cx, "day", cx_arg(cx->time_type))->ptr = time_day_imp;
   cx_add_func(cx, "days", cx_arg(cx->time_type))->ptr = time_days_imp;
 
   cx_add_func(cx, "hour", cx_arg(cx->time_type))->ptr = hour_imp;
