@@ -57,10 +57,12 @@ static void let_tests() {
   struct cx cx;
   cx_init(&cx);
   cx_init_math(&cx);
+  cx_init_str(&cx);
 
   run(&cx, "let: foo 42; $foo 42 = test");
   run(&cx, "let: (x y z) 1 2, 3 + 4; $x + $y + $z 10 = test");
-
+  run(&cx, "let: (bar Int baz Str) 7 '35'; $bar +, $baz int = 42 test");
+  
   cx_deinit(&cx);
 }
 

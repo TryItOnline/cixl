@@ -114,6 +114,17 @@ Multiple names may be bound at the same time by enclosing them in parens.
 [1 2 7]
 ```
 
+Types may be specified for documentation and type checking.
+
+```
+   |
+...let: (x y Int z Str) 1 2 3;
+...$x $y $z
+...
+Error in row 1, col 5:
+Expected type Str, actual: Int
+```
+
 ### Equality
 Two flavors of equality are provided.
 
@@ -326,7 +337,7 @@ Overriding existing implementations is as easy as defining a function with ident
 [12586269025]
 ```
 
-Argument types may be specified in angle brackets to select a specific function implementation. Besides documentation and sanity checking, this allows the compiler to inline the definition in cases where more than one implementation share the same name.
+Argument types may be specified in angle brackets to select a specific function implementation. Besides documentation and type checking, this allows the compiler to inline the definition in cases where more than one implementation share the same name.
 
 ```
    | &+<Int>

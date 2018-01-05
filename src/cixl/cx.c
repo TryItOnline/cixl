@@ -118,30 +118,68 @@ static ssize_t let_eval(struct cx_macro_eval *eval,
     return -1;
   }
   
-  void set(const char *id) {
+  void set(const char *id, struct cx_type *type) {
     struct cx_op * op = cx_op_init(cx_vec_push(&bin->ops), CX_OSET(), tok_idx);
     op->as_set.id = id;
+    op->as_set.type = type;
     op->as_set.force = false;
     op->as_set.pop_parent = false;
     op->as_set.set_parent = true;
   }
 
   struct cx_tok *id_tok = cx_vec_get(&eval->toks, 0);
-  if (id_tok->type == CX_TID()) {
-    set(id_tok->as_ptr);
-  } else {
-    struct cx_vec *ids = &id_tok->as_vec;
-    
-    for (struct cx_tok *t = cx_vec_peek(ids, 0);
-	 t >= (struct cx_tok *)ids->items;
-	 t--) {
-      set(t->as_ptr);
-    }
-  }
   
+  if (id_tok->type == CX_TID()) {
+    set(id_tok->as_ptr, NULL);
+  } else {
+    struct cx_vec *toks = &id_tok->as_vec, ids, types;
+    cx_vec_init(&ids, sizeof(struct cx_tok));
+    cx_vec_init(&types, sizeof(struct cx_type *));
+    bool ok = false;
+    
+    bool push_type(struct cx_type *type) {
+      if (ids.count == types.count) {
+	cx_error(cx, cx->row, cx->col, "Missing let id");
+	return false;
+      }
+      
+      for (struct cx_tok *id = cx_vec_get(&ids, types.count);
+	   id != cx_vec_end(&ids);
+	   id++) {
+	*(struct cx_type **)cx_vec_push(&types) = type;	
+      }
+
+      return true;
+    }
+    
+    cx_do_vec(toks, struct cx_tok, t) {
+      if (t->type == CX_TID()) {
+	*(struct cx_tok *)cx_vec_push(&ids) = *t;
+      } else if (t->type == CX_TTYPE() && !push_type(t->as_ptr)) {
+	goto exit;
+      }
+    }
+
+    if (ids.count > types.count && !push_type(NULL)) { goto exit; }
+    struct cx_tok *id = cx_vec_peek(&ids, 0);
+    struct cx_type **type = cx_vec_peek(&types, 0);
+    
+    for (; id >= (struct cx_tok *)ids.items; id--, type--) {
+      set(id->as_ptr, *type);
+    }
+    
+    ok = true;
+    
+    exit:
+    cx_vec_deinit(&ids);
+    cx_vec_deinit(&types);
+    if (!ok) { return -1; }
+  }
+
   cx_op_init(cx_vec_push(&bin->ops),
 	     CX_OUNSCOPE(),
 	     tok_idx)->as_unscope.push_result = false;
+
   return tok_idx+1;
 }
 
@@ -162,15 +200,6 @@ static bool let_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
     goto error;
   }
 
-  if (id->type == CX_TGROUP()) {
-    cx_do_vec(&id->as_vec, struct cx_tok, t) {
-      if (t->type != CX_TID()) {
-	cx_error(cx, t->row, t->col, "Invalid let id");
-	goto error;
-      }
-    }
-  }
-  
   if (!cx_parse_end(cx, in, &eval->toks)) {
     cx_error(cx, row, col, "Empty let");
     goto error;
@@ -192,6 +221,7 @@ static ssize_t func_eval(struct cx_macro_eval *eval,
 
     if (t->type == CX_TID()) {
       struct cx_op *op = cx_op_init(cx_vec_push(&bin->ops), CX_OSET(), tok_idx);
+      op->as_set.type = NULL;
       op->as_set.id = t->as_ptr;
       op->as_set.pop_parent = true;
       op->as_set.set_parent = false;

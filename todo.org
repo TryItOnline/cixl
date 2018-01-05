@@ -1,9 +1,3 @@
-* add support for types in multi let
-** check with isa on bind
-*** add optional type to CX_OSET
----
-* add lets: macro
-** typecheck and bind stack to vars
 * add ^ (pow)
 ** add as separator
 ** implement for int/rat in math
@@ -13,6 +7,8 @@
 ** add struct cx_str
 *** data, len & nrefs
 *** get len on demand
+* add lets: macro
+** typecheck and bind stack to vars
 * add case: macro
 ** case: 
 (= 1 2) 42

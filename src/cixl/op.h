@@ -51,6 +51,7 @@ struct cx_scope_op {
 
 struct cx_set_op {
   const char *id;
+  struct cx_type *type;
   bool pop_parent, set_parent, force;
 };
 

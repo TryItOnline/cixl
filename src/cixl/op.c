@@ -125,6 +125,13 @@ cx_op_type(CX_OSCOPE, {
 static bool set_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
   struct cx_box *src = cx_pop(cx_scope(cx, op->as_set.pop_parent ? 1 : 0), false);
   if (!src) { return false; }
+
+  if (op->as_set.type && !cx_is(src->type, op->as_set.type)) {
+    cx_error(cx, tok->row, tok->col,
+	     "Expected type %s, actual: %s",
+	     op->as_set.type->id, src->type->id);
+    return false;
+  }
   
   struct cx_box *dst = cx_set(cx_scope(cx, op->as_set.set_parent ? 1 : 0),
 			      op->as_set.id,
