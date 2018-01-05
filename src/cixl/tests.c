@@ -149,9 +149,11 @@ static void time_tests() {
   cx_init(&cx);
   cx_init_time(&cx);
 
+  run(&cx, "now < now test");
+  run(&cx, "[1 0 0 24] time days = 367 test");
   run(&cx, "2m =, 120s test");
   run(&cx, "1 days +, 1h * 2h = 50 test");
-  run(&cx, "now < now test");
+  run(&cx, "1 months +, 1 days * 3 days = 94");
   
   cx_deinit(&cx);
 }

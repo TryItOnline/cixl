@@ -1,9 +1,3 @@
-* add date fn to trunc time
-* add time fn to frac time
-* add time fn for vect
-** expect y m d h m s ns
-*** bind as many as are present
-*---
 * add ^ (pow)
 ** add as separator
 ** implement for int/rat in math

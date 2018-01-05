@@ -495,6 +495,10 @@ Times may be queried for absolute and relative field values;
 ...
 [Time(2018/0/3 20:14:48.105655092)]
 
+   % date ~ time
+...
+[Time(2018/0/3) Time(20:14:48.105655092)]
+
    | years $t, month $t, day $t
 ...
 [2018 0 3]
@@ -527,6 +531,10 @@ Times may be queried for absolute and relative field values;
 manually constructed;
 
 ```
+   | [2018 0 3 20 14] time
+...
+[Time(2018/0/3 20:14:0.0)]
+
    | 3 days
 ...
 [Time(72:0:0.0)]

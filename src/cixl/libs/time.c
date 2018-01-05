@@ -10,6 +10,8 @@
 #include "cixl/types/fimp.h"
 #include "cixl/types/func.h"
 #include "cixl/types/time.h"
+#include "cixl/types/vect.h"
+#include "cixl/util.h"
 
 static bool is_leap_year(int year) {
   return !(year%4) && ((year%100) || !(year%400));
@@ -118,6 +120,57 @@ static bool ns_imp(struct cx_scope *scope) {
   return true;
 }
 
+static bool vect_time_imp(struct cx_scope *scope) {
+  struct cx *cx = scope->cx;
+  struct cx_box in = *cx_test(cx_pop(scope, false));
+  struct cx_vect *vs = in.as_ptr;
+
+  if (vs->imp.count > 7) {
+    cx_error(cx, cx->row, cx->col, "Too many time values");
+    return false;
+  }
+
+  struct cx_time t;
+  cx_time_init(&t, 0, 0);
+  
+  for (int i = 0; i < cx_min(vs->imp.count, 7); i++) {
+    struct cx_box *v = cx_vec_get(&vs->imp, i);
+
+    if (v->type != cx->int_type) {
+      cx_error(cx, cx->row, cx->col, "Invalid time value");
+      return false;
+    }
+    
+    switch (i) {
+    case 0:
+      t.months += v->as_int*12;
+      break;
+    case 1:
+      t.months += v->as_int;
+      break;
+    case 2:
+      t.ns += v->as_int*CX_DAY;
+      break;
+    case 3:
+      t.ns += v->as_int*CX_HOUR;
+      break;
+    case 4:
+      t.ns += v->as_int*CX_MIN;
+      break;
+    case 5:
+      t.ns += v->as_int*CX_SEC;
+      break;
+    case 6:
+      t.ns += v->as_int;
+      break;
+    }
+  }
+
+  cx_box_init(cx_push(scope), cx->time_type)->as_time = t;
+  cx_box_deinit(&in);  
+  return true;
+}
+
 static bool now_imp(struct cx_scope *scope) {
   struct cx *cx = scope->cx;
 
@@ -139,6 +192,19 @@ static bool now_imp(struct cx_scope *scope) {
 	       (tm.tm_sec) * CX_SEC +
 	       ts.tv_nsec);
   
+  return true;
+}
+
+static bool time_date_imp(struct cx_scope *scope) {
+  struct cx_time *t = &cx_test(cx_peek(scope, false))->as_time;
+  t->ns = t->ns / CX_DAY * CX_DAY;
+  return true;
+}
+
+static bool time_time_imp(struct cx_scope *scope) {
+  struct cx_time *t = &cx_test(cx_peek(scope, false))->as_time;
+  t->months = 0;
+  t->ns %= CX_DAY;
   return true;
 }
 
@@ -330,9 +396,15 @@ void cx_init_time(struct cx *cx) {
   cx_add_func(cx, "s", cx_arg(cx->int_type))->ptr = s_imp;
   cx_add_func(cx, "ms", cx_arg(cx->int_type))->ptr = ms_imp;
   cx_add_func(cx, "us", cx_arg(cx->int_type))->ptr = us_imp;
-  cx_add_func(cx, "ns", cx_arg(cx->int_type))->ptr = ns_imp;
+  cx_add_func(cx, "ns", cx_arg(cx->int_type))->ptr = ns_imp;  
+
   
+  cx_add_func(cx, "time", cx_arg(cx->vect_type))->ptr = vect_time_imp;
   cx_add_func(cx, "now")->ptr = now_imp;
+
+  cx_add_func(cx, "date", cx_arg(cx->time_type))->ptr = time_date_imp;
+  cx_add_func(cx, "time", cx_arg(cx->time_type))->ptr = time_time_imp;
+
   cx_add_func(cx, "years", cx_arg(cx->time_type))->ptr = time_years_imp;
   cx_add_func(cx, "month", cx_arg(cx->time_type))->ptr = month_imp;
   cx_add_func(cx, "months", cx_arg(cx->time_type))->ptr = time_months_imp;
