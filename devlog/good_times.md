@@ -8,7 +8,7 @@ Raise hands everyone who have at some point torn their hair out and cursed at a 
 One of the basic tenets of both Forth and Lisp is to provide fewer concepts and use them for everything, almost to a fault. Doing so leads to more composable and powerful languages with less duplication. Most unfortunately didn't get the memo, time libraries even less so; the people responsible for Python's seem to have read the memo upside down and added as many distinct freaking [concepts](https://docs.python.org/3.5/library/datetime.html) as they could possibly think of. Needless to say, I decided that [cixl](https://github.com/basic-gongfu/cixl) would be better of following Forth's and Lisp's lead.
 
 ### The Cixl Way
-[Cixl](https://github.com/basic-gongfu/cixl) provides a single concept to represent points in time and durations, with nanosecond precision. Internally; time is represented as an absolute, zero-based number of months and nanoseconds; no assumptions are made about epochs.
+[Cixl](https://github.com/basic-gongfu/cixl) provides a single concept to represent points in time and durations, with nanosecond precision. Internally; time is represented as an absolute, zero-based number of months and nanoseconds.
 
 Time may be queried for absolute and relative field values;
 
