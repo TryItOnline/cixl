@@ -12,9 +12,9 @@
 * add type: macro
 ** type: Id Str Sym;
 *** id 'foo' -> Id('foo'), id `bar -> Id(`bar)
-* add struct: macro
-** add struct get/put fns
-** only allow Structs and traits as parents
+* add rec: macro
+** add rec get/put fns
+** only allow recs and traits as parents
 * add ^ (pow)
 ** add as separator
 ** implement for int/rat in math
