@@ -15,6 +15,11 @@
       (_x >= _y) ? _x : _y;			\
     })
 
+#define cx_baseof(ptr, typ, fld) ({				\
+      const typeof( ((typ *)0)->fld ) *fp = (ptr);		\
+      (typ *)((char *)fp - offsetof(typ, fld));			\
+    })								\
+
 char *cx_vfmt(const char *spec, va_list args);
 char *cx_fmt(const char *spec, ...);
 

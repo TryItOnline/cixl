@@ -25,7 +25,7 @@ struct cx {
   struct cx_set types;
   struct cx_type *any_type, *bin_type, *bool_type, *char_type, *fimp_type, *func_type,
     *int_type, *lambda_type, *meta_type, *nil_type, *num_type, *opt_type, *rat_type,
-    *str_type, *time_type, *vect_type;
+    *str_type, *struct_type, *time_type, *vect_type;
 
   cx_type_tag_t next_type_tag;
   struct cx_set macros, funcs, consts;
@@ -51,6 +51,7 @@ void cx_add_separators(struct cx *cx, const char *cs);
 bool cx_is_separator(struct cx *cx, char c);
 
 struct cx_type *_cx_add_type(struct cx *cx, const char *id, ...);
+struct cx_struct_type *cx_add_struct_type(struct cx *cx, const char *id);
 struct cx_type *cx_get_type(struct cx *cx, const char *id, bool silent);
 
 struct cx_macro *cx_add_macro(struct cx *cx, const char *id, cx_macro_parse_t imp);

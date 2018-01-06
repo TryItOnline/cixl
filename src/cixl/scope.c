@@ -13,7 +13,7 @@ struct cx_scope *cx_scope_new(struct cx *cx, struct cx_scope *parent) {
   cx_vec_init(&scope->stack, sizeof(struct cx_box));
 
   cx_set_init(&scope->env, sizeof(struct cx_var), cx_cmp_str);
-  scope->env.key_offset = offsetof(struct cx_var, id);
+  scope->env.key_offs = offsetof(struct cx_var, id);
 
   scope->cut_offs = 0;
   scope->nrefs = 0;

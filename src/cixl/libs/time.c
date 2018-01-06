@@ -405,6 +405,7 @@ void cx_init_time(struct cx *cx) {
   cx_add_func(cx, "date", cx_arg(cx->time_type))->ptr = time_date_imp;
   cx_add_func(cx, "time", cx_arg(cx->time_type))->ptr = time_time_imp;
 
+  cx_add_func(cx, "year", cx_arg(cx->time_type))->ptr = time_years_imp;
   cx_add_func(cx, "years", cx_arg(cx->time_type))->ptr = time_years_imp;
   cx_add_func(cx, "month", cx_arg(cx->time_type))->ptr = month_imp;
   cx_add_func(cx, "months", cx_arg(cx->time_type))->ptr = time_months_imp;

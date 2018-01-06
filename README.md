@@ -91,10 +91,7 @@ Named variables may be defined once per scope using the ```let:``` macro.
 
 ```
    | let: foo 'bar';
-...
-[]
-
-   $foo
+...$foo
 ...
 ['bar']
 
@@ -292,15 +289,31 @@ Each argument needs a type, ```A``` may be used to accept any type.
 [42]
 ```
 
-Several parameters may share the same type. An index may may be specified instead of type to refer to previous arguments, it is substituted for the actual type on evaluation.
+Several parameters may share the same type.
 
 ```
    |
-...func: baz(x y Any z T0)
-...  $x + $y + $z;
-...baz 1 3 5
+...func: baz(x y Int) $x + $y;
+...baz 7 35
 ...
-[9]
+[42]
+```
+
+
+An index may may be specified instead of type to refer to previous arguments, it is substituted for the actual type on evaluation.
+
+```
+   |
+...func: baz(x A y T0)
+...  $x + $y;
+...baz 1 2
+...
+[3]
+
+   | baz 1 'foo'
+...
+Error in row 1, col 7:
+Func not applicable: baz
 ```
 
 It's possible to specify literal values for arguments instead of names and types.
@@ -428,7 +441,7 @@ Func not applicable: 'foo'
 ```
 
 ### Vectors
-A vector is a one dimensional dynamic array that supports efficient pushing / popping and random access. The stack itself is a vector which may be retrieved using the ```vect``` function.
+A vector is a one dimensional dynamic array that supports efficient pushing / popping and random access.
 
 ```
    | [1 2, 3 + 4]

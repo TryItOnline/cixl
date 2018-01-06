@@ -1,6 +1,8 @@
 #ifndef CX_SET_H
 #define CX_SET_H
 
+#include <stdio.h>
+
 #include "cixl/cmp.h"
 #include "cixl/vec.h"
 
@@ -11,7 +13,7 @@ struct cx_set {
   struct cx_vec members;
   cx_cmp_t cmp;
   const void *(*key)(const void *);
-  size_t key_offset;
+  size_t key_offs;
 };
 
 struct cx_set *cx_set_init(struct cx_set *set, size_t member_size, cx_cmp_t cmp);

@@ -1,3 +1,7 @@
+* add struct: macro
+** add cx_struct_ref/unref
+** add cx_struct_get/cx_struct_put
+** only allow Structs and traits as parents
 * add ^ (pow)
 ** add as separator
 ** implement for int/rat in math
@@ -51,13 +55,6 @@ $bar ('bar' $bar vect)
 ** replaces int/rat imps
 ** add cx_init_cmp_type
 * add Table type
-* add struct: macro
-** add Struct type 
-*** add to parents for all structs
-** add cx_type.trait
-*** set to true for all user defined traits
-** only allow Structs and traits as parents
-** use ref counted sets of cx_struct_slot as instances
 * add fail func
 ** like test but just call error with message
 

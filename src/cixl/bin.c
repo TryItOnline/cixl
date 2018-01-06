@@ -13,7 +13,7 @@ struct cx_bin *cx_bin_init(struct cx_bin *bin) {
   cx_vec_init(&bin->toks, sizeof(struct cx_tok));
   cx_vec_init(&bin->ops, sizeof(struct cx_op));
   cx_set_init(&bin->funcs, sizeof(struct cx_bin_func), cx_cmp_ptr);
-  bin->funcs.key_offset = offsetof(struct cx_bin_func, imp);
+  bin->funcs.key_offs = offsetof(struct cx_bin_func, imp);
   bin->nrefs = 1;
   return bin;
 }

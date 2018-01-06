@@ -6,7 +6,7 @@ struct cx_set *cx_set_init(struct cx_set *set, size_t member_size, cx_cmp_t cmp)
   cx_vec_init(&set->members, member_size);
   set->cmp = cmp;
   set->key = NULL;
-  set->key_offset = 0;
+  set->key_offs = 0;
   return set;
 }
 
@@ -17,7 +17,7 @@ struct cx_set *cx_set_deinit(struct cx_set *set) {
 
 const void *cx_set_key(struct cx_set *set, const void *value) {
   const char *key = set->key ? set->key(value) : value;
-  return key + set->key_offset;
+  return key + set->key_offs;
 }
 
 size_t cx_set_find(struct cx_set *set, const void *key, size_t min, void **found) {

@@ -22,6 +22,7 @@
 #include "cixl/types/nil.h"
 #include "cixl/types/rat.h"
 #include "cixl/types/str.h"
+#include "cixl/types/struct.h"
 #include "cixl/types/time.h"
 #include "cixl/types/vect.h"
 #include "cixl/util.h"
@@ -513,7 +514,7 @@ struct cx *cx_init(struct cx *cx) {
   cx->funcs.key = get_func_id;
 
   cx_set_init(&cx->consts, sizeof(struct cx_var), cx_cmp_str);
-  cx->consts.key_offset = offsetof(struct cx_var, id);
+  cx->consts.key_offs = offsetof(struct cx_var, id);
 
   cx_vec_init(&cx->scopes, sizeof(struct cx_scope *));
   cx_vec_init(&cx->errors, sizeof(struct cx_error));
@@ -525,6 +526,8 @@ struct cx *cx_init(struct cx *cx) {
   cx->opt_type = cx_add_type(cx, "Opt");
   cx->any_type = cx_add_type(cx, "A", cx->opt_type);
   cx->num_type = cx_add_type(cx, "Num", cx->any_type);
+  cx->struct_type = cx_add_type(cx, "Struct", cx->any_type);
+
   cx->nil_type = cx_init_nil_type(cx);
   cx->meta_type = cx_init_meta_type(cx);
   
@@ -539,7 +542,7 @@ struct cx *cx_init(struct cx *cx) {
   cx->func_type = cx_init_func_type(cx);
   cx->fimp_type = cx_init_fimp_type(cx);
   cx->lambda_type = cx_init_lambda_type(cx);
-
+  
   cx_add_func(cx, "|")->ptr = cls_imp;
   cx_add_func(cx, "%", cx_arg(cx->opt_type))->ptr = copy_imp;
   cx_add_func(cx, "%%", cx_arg(cx->opt_type))->ptr = clone_imp;
@@ -617,6 +620,26 @@ struct cx_type *_cx_add_type(struct cx *cx, const char *id, ...) {
   while ((pt = va_arg(parents, struct cx_type *))) { cx_derive(*t, pt); }
   va_end(parents);					
   return *t;
+}
+
+struct cx_struct_type *cx_add_struct_type(struct cx *cx, const char *id) {
+  struct cx_type **found = cx_set_get(&cx->types, &id);
+
+  if (found && !cx_is(*found, cx->struct_type)) {
+    cx_error(cx, cx->row, cx->col, "Attempt to redefine %s as struct", id);
+    return NULL;
+  }
+  
+  if (found) {
+    struct cx_struct_type *t = cx_baseof(*found, struct cx_struct_type, imp);
+    cx_struct_type_deinit(t);
+    cx_struct_type_init(t, cx, id);
+    return t;
+  }
+  
+  struct cx_struct_type *t = cx_struct_type_new(cx, id);
+  *(struct cx_type **)cx_test(cx_set_insert(&cx->types, &id)) = &t->imp;  
+  return t;
 }
 
 struct cx_type *cx_get_type(struct cx *cx, const char *id, bool silent) {
