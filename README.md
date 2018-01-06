@@ -609,11 +609,12 @@ Capitalized names are treated as types, the following list is defined out of the
 - Vect (A)
 
 ```
-> |
-..type 42
+   | type 42
+...
 [Int]
 
-> is A
+   is A
+...
 [#t]
 ```
 
