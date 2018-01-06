@@ -21,8 +21,8 @@
 #include "cixl/types/lambda.h"
 #include "cixl/types/nil.h"
 #include "cixl/types/rat.h"
+#include "cixl/types/rec.h"
 #include "cixl/types/str.h"
-#include "cixl/types/struct.h"
 #include "cixl/types/sym.h"
 #include "cixl/types/time.h"
 #include "cixl/types/vect.h"
@@ -531,7 +531,7 @@ struct cx *cx_init(struct cx *cx) {
   cx->opt_type = cx_add_type(cx, "Opt");
   cx->any_type = cx_add_type(cx, "A", cx->opt_type);
   cx->num_type = cx_add_type(cx, "Num", cx->any_type);
-  cx->struct_type = cx_add_type(cx, "Struct", cx->any_type);
+  cx->rec_type = cx_add_type(cx, "Rec", cx->any_type);
 
   cx->nil_type = cx_init_nil_type(cx);
   cx->meta_type = cx_init_meta_type(cx);
@@ -631,22 +631,22 @@ struct cx_type *_cx_add_type(struct cx *cx, const char *id, ...) {
   return *t;
 }
 
-struct cx_struct_type *cx_add_struct_type(struct cx *cx, const char *id) {
+struct cx_rec_type *cx_add_rec_type(struct cx *cx, const char *id) {
   struct cx_type **found = cx_set_get(&cx->types, &id);
 
-  if (found && !cx_is(*found, cx->struct_type)) {
-    cx_error(cx, cx->row, cx->col, "Attempt to redefine %s as struct", id);
+  if (found && !cx_is(*found, cx->rec_type)) {
+    cx_error(cx, cx->row, cx->col, "Attempt to redefine %s as rec", id);
     return NULL;
   }
   
   if (found) {
-    struct cx_struct_type *t = cx_baseof(*found, struct cx_struct_type, imp);
-    cx_struct_type_deinit(t);
-    cx_struct_type_init(t, cx, id);
+    struct cx_rec_type *t = cx_baseof(*found, struct cx_rec_type, imp);
+    cx_rec_type_deinit(t);
+    cx_rec_type_init(t, cx, id);
     return t;
   }
   
-  struct cx_struct_type *t = cx_struct_type_new(cx, id);
+  struct cx_rec_type *t = cx_rec_type_new(cx, id);
   *(struct cx_type **)cx_test(cx_set_insert(&cx->types, &id)) = &t->imp;  
   return t;
 }

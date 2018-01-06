@@ -27,12 +27,14 @@ struct cx_type *cx_type_init(struct cx_type *type, struct cx *cx, const char *id
   type->fprint = NULL;
   type->deinit = NULL;
 
+  type->type_deinit = NULL;
   return type;
 }
 
 struct cx_type *cx_type_deinit(struct cx_type *type) {
-  free(type->id);
+  if (type->type_deinit) { type->type_deinit(type); }  
   cx_set_deinit(&type->parents);
+  free(type->id);
   return type;  
 }
 

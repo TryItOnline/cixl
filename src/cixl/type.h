@@ -15,7 +15,7 @@ struct cx_type {
   uint64_t tag, tags;
   struct cx_set parents;
   bool trait;
-  
+
   bool (*eqval)(struct cx_box *, struct cx_box *);
   bool (*equid)(struct cx_box *, struct cx_box *);
   bool (*call)(struct cx_box *, struct cx_scope *);
@@ -24,6 +24,8 @@ struct cx_type {
   void (*clone)(struct cx_box *dst, struct cx_box *src);
   void (*fprint)(struct cx_box *, FILE *);
   void (*deinit)(struct cx_box *);
+
+  void (*type_deinit)(struct cx_type *);
 };
 
 struct cx_type *cx_type_init(struct cx_type *type, struct cx *cx, const char *id);

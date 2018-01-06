@@ -171,7 +171,7 @@ Symbols are immutable singleton strings that support fast equality checks.
 ```
 
 ### References
-Some values are reference counted; Vects, Lambdas etc. Reference values display the number of references following ```@``` when printed. Doubling the copy operator results in a deep copy where applicable and defaults to regular copy where not.
+Some values are reference counted; vectors, lambdas etc. Reference counted values display the number of references following ```@``` when printed. Doubling the copy operator results in a deep copy where applicable and defaults to regular copy where not.
 
 ```
    | [1 2 3] %
@@ -632,6 +632,7 @@ Capitalized names are treated as types, the following list is defined out of the
 - Num (A)
 - Opt ()
 - Rat (Num)
+- Rec (A)
 - Str (A)
 - Sym (A)
 - Time (A)

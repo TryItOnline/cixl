@@ -1,15 +1,10 @@
-* rename Struct to Rec
-** cx_rec_type/cx_rec
-** store boxes cx_rec
-*** add cx_field_type
-**** store as sym type
+* add rec: macro
+** add rec get/put fns
+** only allow recs and traits as parents
 * add type: macro
 ** type: Size Int
 *** size 42 -> Size(42)
 *** inherit and register conversion fns
-* add rec: macro
-** add rec get/put fns
-** only allow recs and traits as parents
 * add ^ (pow)
 ** add as separator
 ** implement for int/rat in math
