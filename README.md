@@ -296,7 +296,7 @@ Several parameters may share the same type. An index may may be specified instea
 
 ```
    |
-...func: baz(x y Int z T0)
+...func: baz(x y Any z T0)
 ...  $x + $y + $z;
 ...baz 1 3 5
 ...
@@ -340,11 +340,11 @@ Overriding existing implementations is as easy as defining a function with ident
 Argument types may be specified in angle brackets to select a specific function implementation. Besides documentation and type checking, this allows the compiler to inline the definition in cases where more than one implementation share the same name.
 
 ```
-   | &+<Int>
+   | &+<Int Int>
 ...
 [Fimp(+ Int Int)]
 
-   &+<Str>
+   &+<Str Str>
 ...
 Error in row 1, col 4:
 Func imp not found
