@@ -486,7 +486,7 @@ Some types support mapping actions over their contents using ```map```.
 ```
 
 ### Time
-Cixl provides a single concept to represent points in time and durations, with nanosecond precision. Internally; time is represented as an absolute, zero-based number of months and nanoseconds.
+Cixl provides a single concept to represent points in time and intervals. Internally; time is represented as an absolute, zero-based number of months and nanoseconds. The representation is key to providing dual semantics, since it allows remembering enough information to give sensible answers.
 
 Times may be queried for absolute and relative field values;
 
