@@ -631,7 +631,7 @@ Traits are abstract types that may be used to simplify type checking and/or func
 ...StrInt is A
 [#t #t #f]
 
-   trait: StrIntChar StrInt Char;
+   | trait: StrIntChar StrInt Char;
 ...
 []
 ```
