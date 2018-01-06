@@ -39,25 +39,6 @@ static bool get_imp(struct cx_scope *scope) {
   return ok;
 }
 
-static bool int_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  struct cx_box v = *cx_test(cx_pop(scope, false));
-  char *s = v.as_ptr;
-  cx_int_t iv = strtoimax(s, NULL, 10);
-  bool ok = false;
-  
-  if (!iv && (!s[0] || s[0] != '0' || s[1])) {
-    cx_error(cx, cx->row, cx->col, "Failed parsing int: '%s'", s);
-    goto exit;
-  }
-  
-  cx_box_init(cx_push(scope), cx->int_type)->as_int = iv;
-  ok = true;
- exit:
-  cx_box_deinit(&v);
-  return ok;
-}
-
 static bool for_imp(struct cx_scope *scope) {
   struct cx_box
     act = *cx_test(cx_pop(scope, false)),
@@ -114,8 +95,6 @@ static bool map_imp(struct cx_scope *scope) {
 void cx_init_str(struct cx *cx) {
   cx_add_func(cx, "len", cx_arg(cx->str_type))->ptr = len_imp;
   cx_add_func(cx, "get", cx_arg(cx->str_type), cx_arg(cx->int_type))->ptr = get_imp;
-
-  cx_add_func(cx, "int", cx_arg(cx->str_type))->ptr = int_imp;
   
   cx_add_func(cx, "for", cx_arg(cx->str_type), cx_arg(cx->any_type))->ptr = for_imp;
   cx_add_func(cx, "map", cx_arg(cx->str_type), cx_arg(cx->any_type))->ptr = map_imp;

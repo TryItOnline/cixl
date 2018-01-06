@@ -9,6 +9,25 @@
 #include "cixl/types/fimp.h"
 #include "cixl/types/func.h"
 
+static bool int_imp(struct cx_scope *scope) {
+  struct cx *cx = scope->cx;
+  struct cx_box v = *cx_test(cx_pop(scope, false));
+  char *s = v.as_ptr;
+  cx_int_t iv = strtoimax(s, NULL, 10);
+  bool ok = false;
+  
+  if (!iv && (!s[0] || s[0] != '0' || s[1])) {
+    cx_error(cx, cx->row, cx->col, "Failed parsing int: '%s'", s);
+    goto exit;
+  }
+  
+  cx_box_init(cx_push(scope), cx->int_type)->as_int = iv;
+  ok = true;
+ exit:
+  cx_box_deinit(&v);
+  return ok;
+}
+
 static bool equid_imp(struct cx_box *x, struct cx_box *y) {
   return x->as_ptr == y->as_ptr;
 }
@@ -42,5 +61,8 @@ struct cx_type *cx_init_str_type(struct cx *cx) {
   t->copy = copy_imp;
   t->fprint = fprint_imp;
   t->deinit = deinit_imp;
+
+  cx_add_func(cx, "int", cx_arg(t))->ptr = int_imp;
+
   return t;
 }
