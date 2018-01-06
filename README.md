@@ -361,6 +361,10 @@ Argument types may be specified in angle brackets to select a specific function 
 ...
 Error in row 1, col 4:
 Func imp not found
+
+   | 7 +<Int Int> 35
+...
+[42]
 ```
 
 A vector containing all implementations for a specific function in the order they are considered during dispatch may be retrieved by calling the ```imps``` function.
