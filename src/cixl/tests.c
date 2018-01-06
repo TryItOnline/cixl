@@ -133,6 +133,18 @@ static void str_tests() {
   cx_deinit(&cx);
 }
 
+static void sym_tests() {
+  struct cx cx;
+  cx_init(&cx);
+  
+  run(&cx, "`foo = `foo test");
+  run(&cx, "`foo = `bar !test");
+  run(&cx, "'foo' sym = `foo test");
+  run(&cx, "`foo str = 'foo' test");
+    
+  cx_deinit(&cx);
+}
+
 static void rat_tests() {
   struct cx cx;
   cx_init(&cx);
@@ -192,6 +204,7 @@ void cx_tests() {
   int_tests();
   char_tests();
   str_tests();
+  sym_tests();
   rat_tests();
   time_tests();
   vect_tests();

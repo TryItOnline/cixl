@@ -127,7 +127,7 @@ Two flavors of equality are provided.
 
 Value equality:
 ```
-   | 'foo' = 'foo'
+   | [1 2 3] = [1 2 3]
 ...
 [#t]
 ```
@@ -143,6 +143,31 @@ And identity:
    | 42 == 42
 ...
 [#t]
+```
+
+### Symbols
+Symbols are immutable singleton strings that support fast equality checks.
+
+```
+   | `foo
+...
+[`foo]
+
+   = `foo
+...
+[#t]
+
+   | `foo = `bar
+...
+[#f]
+
+   | 'baz' sym
+...
+[`baz]
+
+   str
+...
+['baz']
 ```
 
 ### References
@@ -224,11 +249,11 @@ The ```!``` operator negates any condition.
 The ```if``` statement may be used to branch on a condition, it calls '?' implicitly so you can throw any value at it.
 
 ```
-   | 42 if 'not zero' 'zero'
+   | 42 if `not-zero `zero
 ...
 ['not zero']
 
-   | ''! if 'empty' 'not empty'
+   | ''! if `empty `not-empty
 ...
 ['empty']
 ```
@@ -608,6 +633,7 @@ Capitalized names are treated as types, the following list is defined out of the
 - Opt ()
 - Rat (Num)
 - Str (A)
+- Sym (A)
 - Time (A)
 - Type (A)
 - Vect (A)

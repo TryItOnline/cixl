@@ -9,12 +9,10 @@ struct cx;
 struct cx_box;
 struct cx_scope;
 
-typedef uint64_t cx_type_tag_t;
-
 struct cx_type {
   struct cx *cx;
   char *id;
-  cx_type_tag_t tag, tags;
+  uint64_t tag, tags;
   struct cx_set parents;
   bool trait;
   

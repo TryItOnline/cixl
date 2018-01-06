@@ -25,10 +25,10 @@ struct cx {
   struct cx_set types;
   struct cx_type *any_type, *bin_type, *bool_type, *char_type, *fimp_type, *func_type,
     *int_type, *lambda_type, *meta_type, *nil_type, *num_type, *opt_type, *rat_type,
-    *str_type, *struct_type, *time_type, *vect_type;
+    *str_type, *struct_type, *sym_type, *time_type, *vect_type;
 
-  cx_type_tag_t next_type_tag;
-  struct cx_set macros, funcs, consts;
+  uint64_t next_sym_tag, next_type_tag;
+  struct cx_set macros, funcs, consts, syms;
   
   struct cx_vec scopes;
   struct cx_scope *main;
@@ -71,6 +71,7 @@ struct cx_func *cx_get_func(struct cx *cx, const char *id, bool silent);
 
 struct cx_box *cx_get_const(struct cx *cx, const char *id, bool silent);
 struct cx_box *cx_set_const(struct cx *cx, const char *id, bool force);
+struct cx_sym cx_sym(struct cx *cx, const char *id);
 
 struct cx_scope *cx_scope(struct cx *cx, size_t i);
 void cx_push_scope(struct cx *cx, struct cx_scope *scope);

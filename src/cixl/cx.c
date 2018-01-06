@@ -23,6 +23,7 @@
 #include "cixl/types/rat.h"
 #include "cixl/types/str.h"
 #include "cixl/types/struct.h"
+#include "cixl/types/sym.h"
 #include "cixl/types/time.h"
 #include "cixl/types/vect.h"
 #include "cixl/util.h"
@@ -383,6 +384,7 @@ static bool not_imp(struct cx_scope *scope) {
   
   bool ok = cx_ok(v);
   cx_box_deinit(v);  
+  cx_pop(scope, false);
   cx_box_init(cx_push(scope), cx->bool_type)->as_bool = !ok;
   return true;
 }
@@ -494,7 +496,7 @@ static bool test_imp(struct cx_scope *scope) {
 }
 
 struct cx *cx_init(struct cx *cx) {
-  cx->next_type_tag = 1;
+  cx->next_sym_tag = cx->next_type_tag = 1;
   cx->fimp = NULL;
   cx->bin = NULL;
   cx->op = NULL;
@@ -516,6 +518,9 @@ struct cx *cx_init(struct cx *cx) {
   cx_set_init(&cx->consts, sizeof(struct cx_var), cx_cmp_str);
   cx->consts.key_offs = offsetof(struct cx_var, id);
 
+  cx_set_init(&cx->syms, sizeof(struct cx_sym), cx_cmp_str);
+  cx->consts.key_offs = offsetof(struct cx_sym, id);
+
   cx_vec_init(&cx->scopes, sizeof(struct cx_scope *));
   cx_vec_init(&cx->errors, sizeof(struct cx_error));
 
@@ -536,6 +541,7 @@ struct cx *cx_init(struct cx *cx) {
   cx->rat_type = cx_init_rat_type(cx);
   cx->char_type = cx_init_char_type(cx);
   cx->str_type = cx_init_str_type(cx);
+  cx->sym_type = cx_init_sym_type(cx);
   cx->time_type = cx_init_time_type(cx);
   cx->vect_type = cx_init_vect_type(cx);
   cx->bin_type = cx_init_bin_type(cx);
@@ -576,6 +582,9 @@ struct cx *cx_deinit(struct cx *cx) {
   
   cx_do_vec(&cx->scopes, struct cx_scope *, s) { cx_scope_unref(*s); }
   cx_vec_deinit(&cx->scopes);
+
+  cx_do_set(&cx->syms, struct cx_sym, s) { cx_sym_deinit(s); }
+  cx_set_deinit(&cx->syms);
 
   cx_do_set(&cx->consts, struct cx_var, v) { cx_var_deinit(v); }
   cx_set_deinit(&cx->consts);
@@ -742,6 +751,11 @@ struct cx_box *cx_set_const(struct cx *cx, const char *id, bool force) {
   }
 
   return &var->value;
+}
+
+struct cx_sym cx_sym(struct cx *cx, const char *id) {
+  struct cx_sym *s = cx_set_get(&cx->syms, &id);
+  return s ? *s : *cx_sym_init(cx_set_insert(&cx->syms, &id), id, cx->next_sym_tag++);
 }
 
 struct cx_scope *cx_scope(struct cx *cx, size_t i) {

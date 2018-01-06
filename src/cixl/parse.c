@@ -292,6 +292,41 @@ static bool parse_str(struct cx *cx, FILE *in, struct cx_vec *out) {
   }
 }
 
+static bool parse_sym(struct cx *cx, FILE *in, struct cx_vec *out) {
+  struct cx_buf id;
+  cx_buf_open(&id);
+  int col = cx->col;
+  bool ok = true;
+  
+  while (true) {
+    char c = fgetc(in);
+    if (c == EOF) { goto exit; }
+    
+    if (cx_is_separator(cx, c)) {
+      ok = ungetc(c, in) != EOF;
+      goto exit;
+    }
+
+    fputc(c, id.stream);
+    col++;
+  }
+
+  ok = true;
+ exit:
+  cx_buf_close(&id);
+
+  if (ok) {
+    struct cx_box *box = &cx_tok_init(cx_vec_push(out),
+				      CX_TLITERAL(),
+				      cx->row, col)->as_box;
+    cx_box_init(box, cx->sym_type)->as_sym = cx_sym(cx, id.data);
+  }
+  
+  free(id.data);
+  return ok;
+}
+
+
 static bool parse_group(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
   struct cx_vec *body = &cx_tok_init(cx_vec_push(out),
 				     CX_TGROUP(),
@@ -400,6 +435,8 @@ bool cx_parse_tok(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
       return parse_char(cx, in, out);
     case '\'':
       return parse_str(cx, in, out);
+    case '`':
+      return parse_sym(cx, in, out);
     case '-': {
       char c1 = fgetc(in);
       if (isdigit(c1)) {

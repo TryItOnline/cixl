@@ -1,9 +1,3 @@
-** cx.syms
-** struct cx_sym with id & tag
-*** add cx.next_sym_tag
-*** static during lifetime of sym
-** add cx_cmp_sym with tag eq 
-** add sym str fn
 * rename Struct to Rec
 ** cx_rec_type/cx_rec
 ** store boxes cx_rec
