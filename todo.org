@@ -1,6 +1,3 @@
-* add rec: macro
-** add rec get/put fns
-** only allow recs and traits as parents
 * add type: macro
 ** type: Size Int
 *** size 42 -> Size(42)
@@ -14,6 +11,12 @@
 ** add struct cx_str
 *** data, len & nrefs
 *** get len on demand
+* add lazy iters
+** type.iter fn
+** extract map that takes/returns iter
+** extract for to drive iter
+* add some/none fns
+*** Iter->Call->Iter
 * add lets: macro
 ** typecheck and bind stack to vars
 * add case: macro
@@ -24,23 +27,6 @@ $bar ('bar' $bar vect)
 #t 'default'
 ** execute first clause that tests ok
 ** error if no match 
-* add enum: macro
-** add cx_enum
-** types/enum.h/c
-** embed type
-** add manually
-** store vect & map
-** use box.int_value
-** add enum cx_meta_type { CX_ENUM, CX_TRAIT, CX_TYPE, CX_STRUCT }
-*** replaces type.trait
-*** add param to add_type
-*** set A, Opt & Num to CX_TRAIT
-** set names as constants
-** add int/str fns
-** add get fns from int/str
-*** enum: FooBar() x y z; 0 foo-bar -> #x, 'y' foo-bar -> #y
-** allow redefinition
-** disallow rebinding consts as different types
 * add vect get
 ** add vect lib
 * add str interpolation
@@ -77,3 +63,5 @@ func: fib(n Int) fib-rec 0 1 $n;
    | $foo [`x `y] get
 ...
 [42 'foo']
+
+rec: Node(A) left right Node value A;

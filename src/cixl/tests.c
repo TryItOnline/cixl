@@ -3,6 +3,7 @@
 #include "cixl/eval.h"
 #include "cixl/libs/math.h"
 #include "cixl/libs/str.h"
+#include "cixl/libs/rec.h"
 #include "cixl/libs/time.h"
 #include "cixl/scope.h"
 #include "cixl/tests.h"
@@ -195,6 +196,23 @@ static void math_tests() {
   cx_deinit(&cx);
 }
 
+static void rec_tests() {
+  struct cx cx;
+  cx_init(&cx);
+  cx_init_rec(&cx);
+
+  run(&cx,
+      "rec: Foo() x y Int; "
+      "let: foo Foo new; "
+      "$foo !test "
+      "$foo put `x 42 "
+      "$foo test "
+      "$foo get `x = 42 test "
+      "$foo get `y = #nil test");
+
+  cx_deinit(&cx);
+}
+
 void cx_tests() {
   type_tests();
   stack_tests();
@@ -209,4 +227,5 @@ void cx_tests() {
   time_tests();
   vect_tests();
   math_tests();
+  rec_tests();
 }

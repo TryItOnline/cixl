@@ -31,6 +31,12 @@ struct cx_type *cx_type_init(struct cx_type *type, struct cx *cx, const char *id
   return type;
 }
 
+struct cx_type *cx_type_reinit(struct cx_type *type) {
+  type->tags = type->tag;
+  cx_set_clear(&type->parents);
+  return type;
+}
+
 struct cx_type *cx_type_deinit(struct cx_type *type) {
   if (type->type_deinit) { type->type_deinit(type); }  
   cx_set_deinit(&type->parents);

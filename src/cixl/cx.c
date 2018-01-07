@@ -72,7 +72,7 @@ static bool trait_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
     goto exit1;
   }
 
-  if (!cx_parse_end(cx, in, &toks)) { goto exit1; }
+  if (!cx_parse_end(cx, in, &toks, false)) { goto exit1; }
 
   cx_do_vec(&toks, struct cx_tok, t) {
     if (t->type != CX_TTYPE()) {
@@ -202,7 +202,7 @@ static bool let_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
     goto error;
   }
 
-  if (!cx_parse_end(cx, in, &eval->toks)) {
+  if (!cx_parse_end(cx, in, &eval->toks, true)) {
     cx_error(cx, row, col, "Empty let");
     goto error;
   }
@@ -295,7 +295,7 @@ static bool func_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
 
   cx_tok_deinit(&args);
 
-  if (!cx_parse_end(cx, in, &toks)) {
+  if (!cx_parse_end(cx, in, &toks, true)) {
     cx_tok_deinit(&id);
     cx_do_vec(&toks, struct cx_tok, t) { cx_tok_deinit(t); }
     cx_vec_deinit(&toks);
@@ -529,9 +529,16 @@ struct cx *cx_init(struct cx *cx) {
   cx_add_macro(cx, "func:", func_parse);
   
   cx->opt_type = cx_add_type(cx, "Opt");
+  cx->opt_type->trait = true;
+
   cx->any_type = cx_add_type(cx, "A", cx->opt_type);
+  cx->any_type->trait = true;
+
   cx->num_type = cx_add_type(cx, "Num", cx->any_type);
+  cx->num_type->trait = true;
+  
   cx->rec_type = cx_add_type(cx, "Rec", cx->any_type);
+  cx->rec_type->trait = true;
 
   cx->nil_type = cx_init_nil_type(cx);
   cx->meta_type = cx_init_meta_type(cx);
@@ -554,8 +561,8 @@ struct cx *cx_init(struct cx *cx) {
   cx_add_func(cx, "%%", cx_arg(cx->opt_type))->ptr = clone_imp;
   cx_add_func(cx, "~", cx_arg(cx->opt_type))->ptr = flip_imp;
   
-  cx_add_func(cx, "=", cx_arg(cx->any_type), cx_narg(0))->ptr = eqval_imp;
-  cx_add_func(cx, "==", cx_arg(cx->any_type), cx_narg(0))->ptr = equid_imp;
+  cx_add_func(cx, "=", cx_arg(cx->opt_type), cx_narg(0))->ptr = eqval_imp;
+  cx_add_func(cx, "==", cx_arg(cx->opt_type), cx_narg(0))->ptr = equid_imp;
 
   cx_add_func(cx, "?", cx_arg(cx->opt_type))->ptr = ok_imp;
   cx_add_func(cx, "!", cx_arg(cx->opt_type))->ptr = not_imp;
@@ -641,8 +648,7 @@ struct cx_rec_type *cx_add_rec_type(struct cx *cx, const char *id) {
   
   if (found) {
     struct cx_rec_type *t = cx_baseof(*found, struct cx_rec_type, imp);
-    cx_rec_type_deinit(t);
-    cx_rec_type_init(t, cx, id);
+    cx_rec_type_reinit(t);
     return t;
   }
   

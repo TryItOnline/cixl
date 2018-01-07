@@ -465,11 +465,11 @@ bool cx_parse_tok(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
   return false;
 }
 
-bool cx_parse_end(struct cx *cx, FILE *in, struct cx_vec *out) {
+bool cx_parse_end(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
   int depth = 1;
   
   while (depth) {
-    if (!cx_parse_tok(cx, in, out, true)) { return false; }
+    if (!cx_parse_tok(cx, in, out, lookup)) { return false; }
     struct cx_tok *tok = cx_vec_peek(out, 0);
 
     if (tok->type == CX_TID()) {

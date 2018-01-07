@@ -264,7 +264,7 @@ Putting braces around a block of code defines a lambda that is pushed on the sta
 ```
    | {1 2 3}
 ...
-[Lambda(0x52d97d0@1)]
+[Lambda(0x52d97d0)@1]
 
    call
 ...
@@ -649,25 +649,49 @@ Capitalized names are treated as types, the following list is defined out of the
 [#t]
 ```
 
+### Records
+Records map finite sets of fields to values. Record types are required to specify an (optionally empty) list of parent types, traits and other record types are supported; and will inherit any fields that don't clash with its own. 
+
+```
+   |
+   rec: Node(A)
+     left right Node
+     value A;
+...
+[]
+```
+
+```new``` may be used to create new record instances. Getting and putting field values is accomplished using symbols, uninitialized fields return ```#nil```.
+
+```
+   |
+...let: n Node new % put `value 42;
+...$n put `value 42
+...$n
+...
+[Node(value.42)@1]
+
+   get `value
+...
+[42]
+
+   | $n get `left
+...
+[#nil]
+```
+
 ### Traits
-Traits are abstract types that may be used to simplify type checking and/or function dispatch. Besides the standard offering; 'A', 'Num' and 'Opt'; new traits may be defined using the ```trait:``` macro.
+Traits are abstract types that may be used to simplify type checking and/or function dispatch. Besides the standard offering; 'A', 'Num', 'Opt' and 'Rec'; new traits may be defined using the ```trait:``` macro.
 
 ```
-   | trait: StrInt Str Int;
+   |
+   trait: StrInt Str Int;
+...Str is StrInt, Int is StrInt, Sym is StrInt
 ...
-[]
-
-   Str is StrInt,
-...Int is StrInt,
-...StrInt is A
 [#t #t #f]
-
-   | trait: StrIntChar StrInt Char;
-...
-[]
 ```
 
-### Meta
+### Mxeta
 The compiler may be invoked from within the language through the ```compile``` function, the result is a compiled sequence of operations that may be passed around and called.
 
 ```
