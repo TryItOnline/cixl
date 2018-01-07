@@ -10,6 +10,7 @@ repeat: ($c put)
   `total    $q,
   `used     $q;
 
+* change struct eqval to funcall '='
 * add type: macro
 ** type: Size Int
 *** size 42 -> Size(42)
