@@ -1,5 +1,3 @@
-* debug memory leak in bookings example
-** new-resource followed by $calendar
 * add type: macro
 ** type: Size Int
 *** size 42 -> Size(42)

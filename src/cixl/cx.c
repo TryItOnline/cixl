@@ -314,6 +314,7 @@ static bool func_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
 }
 
 static bool cls_imp(struct cx_scope *scope) {
+  cx_do_vec(&scope->stack, struct cx_box, v) { cx_box_deinit(v); }
   cx_vec_clear(&scope->stack);
   return true;
 }
