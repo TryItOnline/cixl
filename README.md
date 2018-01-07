@@ -122,7 +122,7 @@ Error in row 1, col 5:
 Expected type Str, actual: Int
 ```
 
-Bindings in the current scope may be quieried and explicitly removed.
+Bindings in the current scope may be queried and explicitly removed.
 
 ```
    |
