@@ -191,6 +191,7 @@ static bool func_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   cx_tok_deinit(&args);
 
   if (!cx_parse_end(cx, in, &toks, true)) {
+    cx_error(cx, cx->row, cx->col, "Missing func end");
     cx_tok_deinit(&id);
     cx_do_vec(&toks, struct cx_tok, t) { cx_tok_deinit(t); }
     cx_vec_deinit(&toks);
@@ -231,7 +232,11 @@ static bool repeat_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
     goto exit;
   }
   
-  if (!cx_parse_end(cx, in, &toks, true)) { goto exit; }
+  if (!cx_parse_end(cx, in, &toks, true)) {
+    cx_error(cx, cx->row, cx->col, "Missing repeat end");
+    goto exit;
+  }
+  
   struct cx_tok *prefix = cx_vec_peek(&toks, 0);
   struct cx_macro_eval *eval = cx_macro_eval_new(repeat_eval);
 

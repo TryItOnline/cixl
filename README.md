@@ -539,6 +539,17 @@ Some types support mapping actions over their contents using ```map```.
 ['gpp']
 ```
 
+If you find repeating patterns in your code, the ```repeat:```-macro may allow isolating common parts without breaking the flow.
+
+```
+   | repeat: (say upper) 'foo', 'bar', 'baz';
+...
+FOO
+BAR
+BAZ
+[]
+```
+
 ### Time
 Cixl provides a single concept to represent points in time and intervals. Internally; time is represented as an absolute, zero-based number of months and nanoseconds. The representation is key to providing dual semantics, since it allows remembering enough information to give sensible answers.
 
@@ -628,18 +639,6 @@ and scaled.
    | 1 months +, 1 days * 3
 ...
 [Time(0/3/3)]
-```
-
-### DRY
-If you find repeating patterns in your code, the ```repeat:```-macro may allow isolating common parts without breaking the flow.
-
-```
-   repeat: (say upper) 'foo', 'bar', 'baz';
-...
-FOO
-BAR
-BAZ
-[]
 ```
 
 ### Types

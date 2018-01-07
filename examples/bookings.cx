@@ -12,23 +12,40 @@ rec: Capacity(A)
   start end Time
   total used Int;
 
-func: new-capacity(r Resource start end Time q Int)
+func: new-capacity(r Resource start end Time total used Int)
   let: c Capacity new;
   repeat: ($c put)
     `resource $r
     `start    $start
     `end      $end
-    `total    $q
-    `used     $q;
+    `total    $total
+    `used     $used;
   $c;
 
 func: new-resource(q Int)
   let: r Resource new;
   $r put `quantity $q
-  $r put `calendar [new-capacity $r $min-time $max-time $q]
+  $r put `calendar [new-capacity $r $min-time $max-time $q 0]
   $r;
-  
+
+func: update-capacity(in Capacity start end Time total used Int out Vect)
+  $out push $in;
+
+func: update-calendar(in Vect start end Time total used Int)
+  let: out [];
+  $in for {update-capacity $start $end $total $used $out}
+  $out;
+
 rec: Booking(A)
   resource Resource
   start end Time
   quantity Int;
+
+func: new-booking(r Resource start end Time q Int)
+  let: b Booking new;
+  repeat: ($b put)
+    `resource $r
+    `start $start
+    `end $end
+    `quantity $q;
+  $r put `calendar, update-calendar $r get `calendar $start $end 0 $q;

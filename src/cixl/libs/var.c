@@ -108,7 +108,11 @@ static bool let_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
     goto error;
   }
 
-  if (!cx_parse_end(cx, in, &eval->toks, true)) { goto error; }
+  if (!cx_parse_end(cx, in, &eval->toks, true)) {
+    cx_error(cx, cx->row, cx->col, "Missing let end");
+    goto error;
+  }
+  
   cx_tok_init(cx_vec_push(out), CX_TMACRO(), row, col)->as_ptr = eval;
   return true;
  error:

@@ -5,6 +5,7 @@
 #include "cixl/box.h"
 #include "cixl/buf.h"
 #include "cixl/error.h"
+#include "cixl/eval.h"
 #include "cixl/libs/io.h"
 #include "cixl/scope.h"
 #include "cixl/types/fimp.h"
@@ -437,4 +438,6 @@ void cx_init_time(struct cx *cx) {
 	      cx_arg(cx->time_type), cx_arg(cx->time_type))->ptr = lt_imp;
   cx_add_func(cx, ">",
 	      cx_arg(cx->time_type), cx_arg(cx->time_type))->ptr = gt_imp;
+
+  cx_test(cx_eval_str(cx, "func: today() now date;"));
 }
