@@ -1,3 +1,4 @@
+* add unlet(Sym)/unlet-all fns
 * add type: macro
 ** type: Size Int
 *** size 42 -> Size(42)
