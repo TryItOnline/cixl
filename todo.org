@@ -1,5 +1,14 @@
 * add unlet(Sym) fn
 * add is-let (Sym->Bool) fn
+* add repeat: macro
+
+repeat: ($c put)
+  `resource $r,
+  `start    $start,
+  `end      $end,
+  `total    $q,
+  `used     $q;
+
 * add type: macro
 ** type: Size Int
 *** size 42 -> Size(42)
