@@ -29,7 +29,7 @@ struct cx_op_type {
 struct cx_op_type *cx_op_type_init(struct cx_op_type *type);
 
 struct cx_get_op {
-  const char *id;
+  struct cx_sym id;
 };
 
 struct cx_func_op {
@@ -51,7 +51,7 @@ struct cx_scope_op {
 };
 
 struct cx_set_op {
-  const char *id;
+  struct cx_sym id;
   struct cx_type *type;
   bool pop_parent, set_parent, force;
 };

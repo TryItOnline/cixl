@@ -178,9 +178,13 @@ static ssize_t id_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) {
   char *id = tok->as_ptr;
   
   if (id[0] == '#') {
-    cx_op_init(cx_vec_push(&bin->ops), CX_OGET_CONST(), tok_idx)->as_get.id = id+1;
+    cx_op_init(cx_vec_push(&bin->ops),
+	       CX_OGET_CONST(),
+	       tok_idx)->as_get.id = cx_sym(cx, id+1);
   } else if (id[0] == '$') {
-    cx_op_init(cx_vec_push(&bin->ops), CX_OGET(), tok_idx)->as_get.id = id+1;
+    cx_op_init(cx_vec_push(&bin->ops),
+	       CX_OGET(),
+	       tok_idx)->as_get.id = cx_sym(cx, id+1);
   } else {
     cx_error(cx, tok->row, tok->col, "Unknown id: '%s'", id);
     return -1;

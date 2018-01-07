@@ -18,6 +18,7 @@
 
 struct cx_func_arg;
 struct cx_scope;
+struct cx_sym;
 
 struct cx {
   struct cx_set separators;
@@ -28,7 +29,7 @@ struct cx {
     *rec_type, *str_type, *sym_type, *time_type, *vect_type;
 
   uint64_t next_sym_tag, next_type_tag;
-  struct cx_set macros, funcs, consts, syms;
+  struct cx_set syms, macros, funcs, consts;
   
   struct cx_vec scopes;
   struct cx_scope *main;
@@ -69,8 +70,8 @@ bool cx_add_mixl_func(struct cx *cx,
 
 struct cx_func *cx_get_func(struct cx *cx, const char *id, bool silent);
 
-struct cx_box *cx_get_const(struct cx *cx, const char *id, bool silent);
-struct cx_box *cx_set_const(struct cx *cx, const char *id, bool force);
+struct cx_box *cx_get_const(struct cx *cx, struct cx_sym id, bool silent);
+struct cx_box *cx_set_const(struct cx *cx, struct cx_sym id, bool force);
 
 struct cx_sym cx_sym(struct cx *cx, const char *id);
 

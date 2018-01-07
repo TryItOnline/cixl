@@ -12,7 +12,7 @@ struct cx_scope *cx_scope_new(struct cx *cx, struct cx_scope *parent) {
   scope->parent = parent ? cx_scope_ref(parent) : NULL;
   cx_vec_init(&scope->stack, sizeof(struct cx_box));
 
-  cx_set_init(&scope->env, sizeof(struct cx_var), cx_cmp_str);
+  cx_set_init(&scope->env, sizeof(struct cx_var), cx_cmp_sym);
   scope->env.key_offs = offsetof(struct cx_var, id);
 
   scope->cut_offs = 0;
@@ -68,7 +68,7 @@ void cx_fprint_stack(struct cx_scope *scope, FILE *out) {
   cx_vect_fprint(&scope->stack, out);
 }
 
-struct cx_box *cx_get(struct cx_scope *scope, const char *id, bool silent) {
+struct cx_box *cx_get(struct cx_scope *scope, struct cx_sym id, bool silent) {
   struct cx_var *var = cx_set_get(&scope->env, &id);
 
   if (!var) {
@@ -76,7 +76,7 @@ struct cx_box *cx_get(struct cx_scope *scope, const char *id, bool silent) {
 
     if (!silent) {
       struct cx *cx = scope->cx;
-      cx_error(cx, cx->row, cx->col, "Unknown var: '%s'", id);
+      cx_error(cx, cx->row, cx->col, "Unknown var: '%s'", id.id);
     }
     
     return NULL;
@@ -85,13 +85,13 @@ struct cx_box *cx_get(struct cx_scope *scope, const char *id, bool silent) {
   return &var->value;
 }
 
-struct cx_box *cx_set(struct cx_scope *scope, const char *id, bool force) {
+struct cx_box *cx_set(struct cx_scope *scope, struct cx_sym id, bool force) {
   struct cx_var *var = cx_set_get(&scope->env, &id);
 
   if (var) {
     if (!force) {
       struct cx *cx = scope->cx;
-      cx_error(cx, cx->row, cx->col, "Attempt to rebind var: '%s'", id);
+      cx_error(cx, cx->row, cx->col, "Attempt to rebind var: '%s'", id.id);
       return NULL;
     }
       
@@ -104,14 +104,14 @@ struct cx_box *cx_set(struct cx_scope *scope, const char *id, bool force) {
 }
 
 bool cx_islet(struct cx_scope *scope, struct cx_sym id) {
-  return cx_set_get(&scope->env, &id.id);
+  return cx_set_get(&scope->env, &id);
 }
 
 void cx_unlet(struct cx_scope *scope, struct cx_sym id) {
-  struct cx_var *v = cx_set_get(&scope->env, &id.id);
+  struct cx_var *v = cx_set_get(&scope->env, &id);
   
   if (v) {
     cx_var_deinit(v);
-    cx_set_delete(&scope->env, &id.id);
+    cx_set_delete(&scope->env, &id);
   }
 }

@@ -31,8 +31,8 @@ struct cx_type *cx_init_bool_type(struct cx *cx) {
   t->ok = ok_imp;
   t->fprint = fprint_imp;
 
-  cx_box_init(cx_set_const(cx, "t", false), t)->as_bool = true;
-  cx_box_init(cx_set_const(cx, "f", false), t)->as_bool = false;
+  cx_box_init(cx_set_const(cx, cx_sym(cx, "t"), false), t)->as_bool = true;
+  cx_box_init(cx_set_const(cx, cx_sym(cx, "f"), false), t)->as_bool = false;
 
   cx_add_func(cx, "int", cx_arg(t))->ptr = int_imp;
   

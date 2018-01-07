@@ -24,7 +24,7 @@ struct cx_type *cx_init_nil_type(struct cx *cx) {
   t->ok = ok_imp;
   t->fprint = fprint_imp;
 
-  cx_box_init(cx_set_const(cx, "nil", false), t);
+  cx_box_init(cx_set_const(cx, cx_sym(cx, "nil"), false), t);
 
   return t;
 }

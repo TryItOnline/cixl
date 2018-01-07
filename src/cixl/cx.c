@@ -119,7 +119,7 @@ static ssize_t func_eval(struct cx_macro_eval *eval,
     if (t->type == CX_TID()) {
       struct cx_op *op = cx_op_init(cx_vec_push(&bin->ops), CX_OSET(), tok_idx);
       op->as_set.type = NULL;
-      op->as_set.id = t->as_ptr;
+      op->as_set.id = cx_sym(cx, t->as_ptr);
       op->as_set.pop_parent = true;
       op->as_set.set_parent = false;
       op->as_set.force = true;
@@ -402,6 +402,9 @@ struct cx *cx_init(struct cx *cx) {
   cx_set_init(&cx->separators, sizeof(char), cx_cmp_char);
   cx_add_separators(cx, " \t\n;,|_?!()[]{}<>");
 
+  cx_set_init(&cx->syms, sizeof(struct cx_sym), cx_cmp_str);
+  cx->consts.key_offs = offsetof(struct cx_sym, id);
+
   cx_set_init(&cx->types, sizeof(struct cx_type *), cx_cmp_str);
   cx->types.key = get_type_id;
   
@@ -411,11 +414,8 @@ struct cx *cx_init(struct cx *cx) {
   cx_set_init(&cx->funcs, sizeof(struct cx_func *), cx_cmp_str);
   cx->funcs.key = get_func_id;
 
-  cx_set_init(&cx->consts, sizeof(struct cx_var), cx_cmp_str);
+  cx_set_init(&cx->consts, sizeof(struct cx_var), cx_cmp_sym);
   cx->consts.key_offs = offsetof(struct cx_var, id);
-
-  cx_set_init(&cx->syms, sizeof(struct cx_sym), cx_cmp_str);
-  cx->consts.key_offs = offsetof(struct cx_sym, id);
 
   cx_vec_init(&cx->scopes, sizeof(struct cx_scope *));
   cx_vec_init(&cx->errors, sizeof(struct cx_error));
@@ -485,9 +485,6 @@ struct cx *cx_deinit(struct cx *cx) {
   cx_do_vec(&cx->scopes, struct cx_scope *, s) { cx_scope_unref(*s); }
   cx_vec_deinit(&cx->scopes);
 
-  cx_do_set(&cx->syms, struct cx_sym, s) { cx_sym_deinit(s); }
-  cx_set_deinit(&cx->syms);
-
   cx_do_set(&cx->consts, struct cx_var, v) { cx_var_deinit(v); }
   cx_set_deinit(&cx->consts);
 
@@ -499,6 +496,9 @@ struct cx *cx_deinit(struct cx *cx) {
 
   cx_do_set(&cx->types, struct cx_type *, t) { free(cx_type_deinit(*t)); }
   cx_set_deinit(&cx->types);
+
+  cx_do_set(&cx->syms, struct cx_sym, s) { cx_sym_deinit(s); }
+  cx_set_deinit(&cx->syms);
 
   cx_do_vec(&cx->errors, char *, e) { free(*e); }
   cx_vec_deinit(&cx->errors);
@@ -622,7 +622,7 @@ struct cx_macro *cx_get_macro(struct cx *cx, const char *id, bool silent) {
   return m ? *m : NULL;
 }
 
-struct cx_box *cx_get_const(struct cx *cx, const char *id, bool silent) {
+struct cx_box *cx_get_const(struct cx *cx, struct cx_sym id, bool silent) {
   struct cx_var *var = cx_set_get(&cx->consts, &id);
 
   if (!var) {
@@ -633,7 +633,7 @@ struct cx_box *cx_get_const(struct cx *cx, const char *id, bool silent) {
   return &var->value;
 }
 
-struct cx_box *cx_set_const(struct cx *cx, const char *id, bool force) {
+struct cx_box *cx_set_const(struct cx *cx, struct cx_sym id, bool force) {
   struct cx_var *var = cx_set_get(&cx->consts, &id);
 
   if (var) {

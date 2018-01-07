@@ -28,7 +28,7 @@ static ssize_t let_eval(struct cx_macro_eval *eval,
   
   void set(const char *id, struct cx_type *type) {
     struct cx_op * op = cx_op_init(cx_vec_push(&bin->ops), CX_OSET(), tok_idx);
-    op->as_set.id = id;
+    op->as_set.id = cx_sym(cx, id);
     op->as_set.type = type;
     op->as_set.force = false;
     op->as_set.pop_parent = false;
