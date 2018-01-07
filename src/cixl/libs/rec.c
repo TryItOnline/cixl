@@ -173,7 +173,7 @@ static bool get_imp(struct cx_scope *scope) {
     goto exit;
   }
   
-  struct cx_box *v = cx_rec_get(r.as_ptr, &f);
+  struct cx_box *v = cx_rec_get(r.as_ptr, f);
 
   if (v) {
     cx_copy(cx_push(scope), v);
@@ -206,7 +206,7 @@ static bool put_imp(struct cx_scope *scope) {
     goto exit;
   }
 
-  cx_rec_put(r.as_ptr, &fid, &v);
+  cx_rec_put(r.as_ptr, fid, &v);
   ok = true;
  exit:
   cx_box_deinit(&v);

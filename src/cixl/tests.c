@@ -5,6 +5,7 @@
 #include "cixl/libs/str.h"
 #include "cixl/libs/rec.h"
 #include "cixl/libs/time.h"
+#include "cixl/libs/var.h"
 #include "cixl/scope.h"
 #include "cixl/tests.h"
 
@@ -59,10 +60,15 @@ static void let_tests() {
   cx_init(&cx);
   cx_init_math(&cx);
   cx_init_str(&cx);
+  cx_init_var(&cx);
 
   run(&cx, "let: foo 42; $foo 42 = test");
   run(&cx, "let: (x y z) 1 2, 3 + 4; $x + $y + $z 10 = test");
   run(&cx, "let: (bar Int baz Str) 7 '35'; $bar +, $baz int = 42 test");
+
+  run(&cx,
+      "islet `foo if {unlet `foo} {} "
+      "let: foo 'foo'; $foo = 'foo' test");
   
   cx_deinit(&cx);
 }
@@ -200,6 +206,7 @@ static void rec_tests() {
   struct cx cx;
   cx_init(&cx);
   cx_init_rec(&cx);
+  cx_init_var(&cx);
 
   run(&cx,
       "rec: Foo() x y Int; "

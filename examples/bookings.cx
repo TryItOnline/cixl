@@ -1,10 +1,12 @@
-let: calendar [];
-let: min-time [] time;
-let: max-time [9999 11 30] time;
+, islet `min-time if {} {
+  let: min-time [] time;
+  let: max-time [9999 11 30] time;
+}
 
 rec: Resource(A)
-  quantity Int;
-
+  quantity Int
+  calendar Vect;
+  
 rec: Capacity(A)
   resource Resource
   start end Time
@@ -22,8 +24,7 @@ func: new-capacity(r Resource start end Time q Int)
 func: new-resource(q Int)
   let: r Resource new;
   $r put `quantity $q
-  $calendar push,
-  new-capacity $r $min-time $max-time $q
+  $r put `calendar [new-capacity $r $min-time $max-time $q]
   $r;
   
 rec: Booking(A)

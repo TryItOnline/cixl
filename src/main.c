@@ -4,6 +4,7 @@
 #include "cixl/libs/rec.h"
 #include "cixl/libs/str.h"
 #include "cixl/libs/time.h"
+#include "cixl/libs/var.h"
 #include "cixl/repl.h"
 #include "cixl/set.h"
 #include "cixl/tests.h"
@@ -21,6 +22,7 @@ int main() {
   cx_init_rec(&cx);
   cx_init_str(&cx);
   cx_init_time(&cx);
+  cx_init_var(&cx);
   cx_repl(&cx, stdin, stdout);
   cx_deinit(&cx);
   return 0;

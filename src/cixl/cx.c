@@ -109,111 +109,6 @@ static bool trait_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   }
 }
 
-static ssize_t let_eval(struct cx_macro_eval *eval,
-			struct cx_bin *bin,
-			size_t tok_idx,
-			struct cx *cx) {
-  cx_op_init(cx_vec_push(&bin->ops), CX_OSCOPE(), tok_idx)->as_scope.child = true;  
-
-  if (!cx_compile(cx, cx_vec_get(&eval->toks, 1), cx_vec_end(&eval->toks), bin)) {
-    cx_error(cx, cx->row, cx->col, "Failed compiling let");
-    return -1;
-  }
-  
-  void set(const char *id, struct cx_type *type) {
-    struct cx_op * op = cx_op_init(cx_vec_push(&bin->ops), CX_OSET(), tok_idx);
-    op->as_set.id = id;
-    op->as_set.type = type;
-    op->as_set.force = false;
-    op->as_set.pop_parent = false;
-    op->as_set.set_parent = true;
-  }
-
-  struct cx_tok *id_tok = cx_vec_get(&eval->toks, 0);
-  
-  if (id_tok->type == CX_TID()) {
-    set(id_tok->as_ptr, NULL);
-  } else {
-    struct cx_vec *toks = &id_tok->as_vec, ids, types;
-    cx_vec_init(&ids, sizeof(struct cx_tok));
-    cx_vec_init(&types, sizeof(struct cx_type *));
-    bool ok = false;
-    
-    bool push_type(struct cx_type *type) {
-      if (ids.count == types.count) {
-	cx_error(cx, cx->row, cx->col, "Missing let id");
-	return false;
-      }
-      
-      for (struct cx_tok *id = cx_vec_get(&ids, types.count);
-	   id != cx_vec_end(&ids);
-	   id++) {
-	*(struct cx_type **)cx_vec_push(&types) = type;	
-      }
-
-      return true;
-    }
-    
-    cx_do_vec(toks, struct cx_tok, t) {
-      if (t->type == CX_TID()) {
-	*(struct cx_tok *)cx_vec_push(&ids) = *t;
-      } else if (t->type == CX_TTYPE() && !push_type(t->as_ptr)) {
-	goto exit;
-      }
-    }
-
-    if (ids.count > types.count && !push_type(NULL)) { goto exit; }
-    struct cx_tok *id = cx_vec_peek(&ids, 0);
-    struct cx_type **type = cx_vec_peek(&types, 0);
-    
-    for (; id >= (struct cx_tok *)ids.items; id--, type--) {
-      set(id->as_ptr, *type);
-    }
-    
-    ok = true;
-    
-    exit:
-    cx_vec_deinit(&ids);
-    cx_vec_deinit(&types);
-    if (!ok) { return -1; }
-  }
-
-  cx_op_init(cx_vec_push(&bin->ops),
-	     CX_OUNSCOPE(),
-	     tok_idx)->as_unscope.push_result = false;
-
-  return tok_idx+1;
-}
-
-static bool let_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
-  struct cx_macro_eval *eval = cx_macro_eval_new(let_eval);
-
-  int row = cx->row, col = cx->col;
-  
-  if (!cx_parse_tok(cx, in, &eval->toks, false)) {
-    cx_error(cx, row, col, "Missing let id");
-    goto error;
-  }
-
-  struct cx_tok *id = cx_vec_peek(&eval->toks, 0);
-
-  if (id->type != CX_TID() && id->type != CX_TGROUP()) {
-    cx_error(cx, id->row, id->col, "Invalid let id");
-    goto error;
-  }
-
-  if (!cx_parse_end(cx, in, &eval->toks, true)) {
-    cx_error(cx, row, col, "Empty let");
-    goto error;
-  }
-  
-  cx_tok_init(cx_vec_push(out), CX_TMACRO(), row, col)->as_ptr = eval;
-  return true;
- error:
-  cx_macro_eval_unref(eval);
-  return false;  
-}
-
 static ssize_t func_eval(struct cx_macro_eval *eval,
 			 struct cx_bin *bin,
 			 size_t tok_idx,
@@ -526,7 +421,6 @@ struct cx *cx_init(struct cx *cx) {
   cx_vec_init(&cx->errors, sizeof(struct cx_error));
 
   cx_add_macro(cx, "trait:", trait_parse);
-  cx_add_macro(cx, "let:", let_parse);
   cx_add_macro(cx, "func:", func_parse);
   
   cx->opt_type = cx_add_type(cx, "Opt");

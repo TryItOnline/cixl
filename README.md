@@ -122,6 +122,18 @@ Error in row 1, col 5:
 Expected type Str, actual: Int
 ```
 
+Bindings in the current scope may be quieried and explicitly removed.
+
+```
+   |
+   let: x 42;
+   islet `x if {unlet `x} {}
+   let: x 'foo';
+   $x
+...
+['foo']
+```
+
 ### Equality
 Two flavors of equality are provided.
 

@@ -102,3 +102,16 @@ struct cx_box *cx_set(struct cx_scope *scope, const char *id, bool force) {
 
   return &var->value;
 }
+
+bool cx_islet(struct cx_scope *scope, struct cx_sym id) {
+  return cx_set_get(&scope->env, &id.id);
+}
+
+void cx_unlet(struct cx_scope *scope, struct cx_sym id) {
+  struct cx_var *v = cx_set_get(&scope->env, &id.id);
+  
+  if (v) {
+    cx_var_deinit(v);
+    cx_set_delete(&scope->env, &id.id);
+  }
+}

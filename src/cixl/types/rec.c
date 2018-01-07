@@ -161,20 +161,20 @@ void cx_rec_unref(struct cx_rec *rec) {
   }
 }
 
-struct cx_box *cx_rec_get(struct cx_rec *rec, struct cx_sym *fid) {
-  struct cx_field_value *f = cx_set_get(&rec->values, fid);
+struct cx_box *cx_rec_get(struct cx_rec *rec, struct cx_sym fid) {
+  struct cx_field_value *f = cx_set_get(&rec->values, &fid);
   return f ? &f->box : NULL;
 }
 
-void cx_rec_put(struct cx_rec *rec, struct cx_sym *fid, struct cx_box *v) {
-  struct cx_field_value *f = cx_set_get(&rec->values, fid);
+void cx_rec_put(struct cx_rec *rec, struct cx_sym fid, struct cx_box *v) {
+  struct cx_field_value *f = cx_set_get(&rec->values, &fid);
 
   if (f) {
     cx_box_deinit(&f->box);
   } else if (!f) {
-    f = cx_set_insert(&rec->values, fid);
+    f = cx_set_insert(&rec->values, &fid);
   }
   
-  f->id = *fid;
+  f->id = fid;
   cx_copy(&f->box, v);
 }

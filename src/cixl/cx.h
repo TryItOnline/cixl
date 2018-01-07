@@ -71,6 +71,7 @@ struct cx_func *cx_get_func(struct cx *cx, const char *id, bool silent);
 
 struct cx_box *cx_get_const(struct cx *cx, const char *id, bool silent);
 struct cx_box *cx_set_const(struct cx *cx, const char *id, bool force);
+
 struct cx_sym cx_sym(struct cx *cx, const char *id);
 
 struct cx_scope *cx_scope(struct cx *cx, size_t i);
