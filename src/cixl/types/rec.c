@@ -41,7 +41,7 @@ static void copy_imp(struct cx_box *dst, struct cx_box *src) {
 }
 
 static void clone_imp(struct cx_box *dst, struct cx_box *src) {
-  struct cx_rec *src_rec = src->as_ptr, *dst_rec = cx_rec_new(src->type);
+  struct cx_rec *src_rec = src->as_ptr, *dst_rec = cx_rec_new();
   dst->as_ptr = dst_rec;
 
   cx_do_set(&src_rec->values, struct cx_field_value, sv) {
@@ -151,7 +151,7 @@ bool cx_add_field(struct cx_rec_type *type,
 
 struct cx_rec *cx_rec_new() {
   struct cx_rec *rec = malloc(sizeof(struct cx_rec));
-   cx_set_init(&rec->values, sizeof(struct cx_field_value), cx_cmp_sym);
+  cx_set_init(&rec->values, sizeof(struct cx_field_value), cx_cmp_sym);
   rec->nrefs = 1;
   return rec;
 }
@@ -178,7 +178,13 @@ struct cx_box *cx_rec_get(struct cx_rec *rec, struct cx_sym *fid) {
 
 void cx_rec_put(struct cx_rec *rec, struct cx_sym *fid, struct cx_box *v) {
   struct cx_field_value *f = cx_set_get(&rec->values, fid);
-  if (!f) { f = cx_set_insert(&rec->values, fid); }
+
+  if (f) {
+    cx_box_deinit(&f->box);
+  } else if (!f) {
+    f = cx_set_insert(&rec->values, fid);
+  }
+  
   f->id = *fid;
   cx_copy(&f->box, v);
 }

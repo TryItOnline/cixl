@@ -33,6 +33,7 @@ struct cx_get_op {
 };
 
 struct cx_func_op {
+  struct cx_fimp *imp;
   size_t start_op, num_ops;
 };
 

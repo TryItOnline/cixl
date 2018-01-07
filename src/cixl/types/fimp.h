@@ -15,6 +15,7 @@ struct cx_fimp {
   struct cx_vec args;
   bool (*ptr)(struct cx_scope *);
   struct cx_vec toks;
+  struct cx_scope *scope;
   struct cx_bin *bin;
 };
 

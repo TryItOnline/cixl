@@ -32,6 +32,8 @@ cx_op_type(CX_OCUT, {
   });
 
 static bool func_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
+  struct cx_fimp *imp = op->as_func.imp;
+  if (!imp->scope) { imp->scope = cx_scope_ref(cx_scope(cx, 0)); }
   cx->op += op->as_func.num_ops;
   return true;
 }
@@ -115,7 +117,7 @@ cx_op_type(CX_OPUSH, {
   });
 
 static bool scope_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
-  cx_begin(cx, op->as_scope.child);
+  cx_begin(cx, op->as_scope.child ? cx_scope(cx, 0) : NULL);
   return true;
 }
 

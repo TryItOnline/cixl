@@ -53,10 +53,12 @@ static bool inline_fimp(struct cx_fimp *imp,
 			size_t tok_idx,
 			struct cx *cx) {
   size_t i = bin->ops.count;
-  cx_op_init(cx_vec_push(&bin->ops),
-	     CX_OFUNC(),
-	     tok_idx)->as_func.start_op = i+1;
-  
+  struct cx_op *op = cx_op_init(cx_vec_push(&bin->ops),
+				CX_OFUNC(),
+				tok_idx);
+  op->as_func.imp = imp;
+  op->as_func.start_op = i+1;
+
   if (imp->toks.count) {
     if (!cx_compile(cx, cx_vec_start(&imp->toks), cx_vec_end(&imp->toks), bin)) {
       struct cx_tok *tok = cx_vec_get(&bin->toks, tok_idx);  
@@ -66,7 +68,7 @@ static bool inline_fimp(struct cx_fimp *imp,
   }
   
   cx_op_init(cx_vec_push(&bin->ops), CX_OSTOP(), tok_idx);
-  struct cx_op *op = cx_vec_get(&bin->ops, i);
+  op = cx_vec_get(&bin->ops, i);
   op->as_func.num_ops = bin->ops.count - op->as_func.start_op;
   cx_bin_add_func(bin, imp, op->as_func.start_op);
   return true;

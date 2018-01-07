@@ -18,6 +18,7 @@ struct cx_fimp *cx_fimp_init(struct cx_fimp *imp,
   imp->id = id;
   imp->i = i;
   imp->ptr = NULL;
+  imp->scope = NULL;
   imp->bin = NULL;
   cx_vec_init(&imp->args, sizeof(struct cx_func_arg));
   cx_vec_init(&imp->toks, sizeof(struct cx_tok));
@@ -33,6 +34,7 @@ struct cx_fimp *cx_fimp_deinit(struct cx_fimp *imp) {
   cx_do_vec(&imp->toks, struct cx_tok, t) { cx_tok_deinit(t); }
   cx_vec_deinit(&imp->toks);
 
+  if (imp->scope) { cx_scope_unref(imp->scope); }
   if (imp->bin) { cx_bin_unref(imp->bin); }
   return imp;
 }
@@ -104,7 +106,7 @@ bool cx_fimp_call(struct cx_fimp *imp, struct cx_scope *scope) {
     return true;
   }
   
-  cx_begin(scope->cx, false);
+  cx_begin(scope->cx, imp->scope);
   bool ok = cx_fimp_eval(imp, scope);
   cx_end(scope->cx);
   return ok;

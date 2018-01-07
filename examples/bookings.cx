@@ -1,0 +1,32 @@
+let: calendar [];
+let: min-time [] time;
+let: max-time [9999 11 30] time;
+
+rec: Resource(A)
+  quantity Int;
+
+rec: Capacity(A)
+  resource Resource
+  start end Time
+  total used Int;
+
+func: new-capacity(r Resource start end Time q Int)
+  let: c Capacity new;
+  $c put `resource $r
+  $c put `start $start
+  $c put `end $end
+  $c put `total $q
+  $c put `used $q
+  $c;
+
+func: new-resource(q Int)
+  let: r Resource new;
+  $r put `quantity $q
+  $calendar push,
+  new-capacity $r $min-time $max-time $q
+  $r;
+  
+rec: Booking(A)
+  resource Resource
+  start end Time
+  quantity Int;

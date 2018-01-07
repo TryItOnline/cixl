@@ -580,7 +580,7 @@ struct cx *cx_init(struct cx *cx) {
   cx_add_func(cx, "clock", cx_arg(cx->any_type))->ptr = clock_imp;
   cx_add_func(cx, "test", cx_arg(cx->opt_type))->ptr = test_imp;
   
-  cx->main = cx_begin(cx, false);
+  cx->main = cx_begin(cx, NULL);
   return cx;
 }
 
@@ -640,11 +640,7 @@ struct cx_type *_cx_add_type(struct cx *cx, const char *id, ...) {
 
 struct cx_rec_type *cx_add_rec_type(struct cx *cx, const char *id) {
   struct cx_type **found = cx_set_get(&cx->types, &id);
-
-  if (found && !cx_is(*found, cx->rec_type)) {
-    cx_error(cx, cx->row, cx->col, "Attempt to redefine %s as rec", id);
-    return NULL;
-  }
+  if (found) { return NULL; }
   
   if (found) {
     struct cx_rec_type *t = cx_baseof(*found, struct cx_rec_type, imp);
@@ -789,8 +785,8 @@ struct cx_scope *cx_pop_scope(struct cx *cx, bool silent) {
   return s;
 }
 
-struct cx_scope *cx_begin(struct cx *cx, bool child) {
-  struct cx_scope *s = cx_scope_new(cx, child ? cx_scope(cx, 0) : NULL);
+struct cx_scope *cx_begin(struct cx *cx, struct cx_scope *parent) {
+  struct cx_scope *s = cx_scope_new(cx, parent);
   cx_push_scope(cx, s);
   return s;
 }
@@ -825,13 +821,13 @@ bool cx_load(struct cx *cx, const char *path) {
   rewind(f);
 
   char *buf = malloc(len+1);
-  buf[len] = 0;
   
   if (fread(buf, len, 1 , f) != 1) {
     cx_error(cx, cx->row, cx->col, "Failed reading file '%s': %d", path, errno);
   }
   
   fclose(f);
+  buf[len] = 0;
   bool ok = cx_eval_str(cx, buf);
   free(buf);
   return ok;

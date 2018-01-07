@@ -75,11 +75,13 @@ static bool rec_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
     }
   }
   
+  if (!cx_parse_end(cx, in, &toks, false)) { goto exit3; }
+
   struct cx_rec_type *rec_type = type
     ? cx_baseof(type, struct cx_rec_type, imp)
-    : cx_add_rec_type(cx, id.as_ptr);
-  
-  if (!cx_parse_end(cx, in, &toks, false)) { goto exit3; }
+    : cx_test(cx_add_rec_type(cx, type ? type->id : id.as_ptr));
+
+  if (type) { cx_rec_type_reinit(rec_type); }
 
   struct cx_vec fids, ftypes;
   cx_vec_init(&fids, sizeof(struct cx_tok));

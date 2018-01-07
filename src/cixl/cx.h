@@ -5,7 +5,7 @@
 #include "cixl/set.h"
 #include "cixl/type.h"
 
-#define CX_VERSION "0.7"
+#define CX_VERSION "0.8"
 
 #define cx_add_func(cx, id, ...) ({				\
       struct cx_func_arg args[] = {__VA_ARGS__};		\
@@ -76,7 +76,7 @@ struct cx_sym cx_sym(struct cx *cx, const char *id);
 struct cx_scope *cx_scope(struct cx *cx, size_t i);
 void cx_push_scope(struct cx *cx, struct cx_scope *scope);
 struct cx_scope *cx_pop_scope(struct cx *cx, bool silent);
-struct cx_scope *cx_begin(struct cx *cx, bool child);
+struct cx_scope *cx_begin(struct cx *cx, struct cx_scope *parent);
 void cx_end(struct cx *cx);
 
 bool cx_funcall(struct cx *cx, const char *id);
