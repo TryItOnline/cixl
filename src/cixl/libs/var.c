@@ -108,11 +108,7 @@ static bool let_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
     goto error;
   }
 
-  if (!cx_parse_end(cx, in, &eval->toks, true)) {
-    cx_error(cx, row, col, "Empty let");
-    goto error;
-  }
-  
+  if (!cx_parse_end(cx, in, &eval->toks, true)) { goto error; }
   cx_tok_init(cx_vec_push(out), CX_TMACRO(), row, col)->as_ptr = eval;
   return true;
  error:

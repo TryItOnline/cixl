@@ -1,12 +1,3 @@
-* add repeat: macro
-
-repeat: ($c put)
-  `resource $r,
-  `start    $start,
-  `end      $end,
-  `total    $q,
-  `used     $q;
-
 * add rec benchmark
 ** create rec: Foo bar Int baz Str in loop & set fields
 * change rec eqval to funcall '='

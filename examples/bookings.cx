@@ -14,11 +14,12 @@ rec: Capacity(A)
 
 func: new-capacity(r Resource start end Time q Int)
   let: c Capacity new;
-  $c put `resource $r
-  $c put `start $start
-  $c put `end $end
-  $c put `total $q
-  $c put `used $q
+  repeat: ($c put)
+    `resource $r
+    `start    $start
+    `end      $end
+    `total    $q
+    `used     $q;
   $c;
 
 func: new-resource(q Int)

@@ -630,6 +630,18 @@ and scaled.
 [Time(0/3/3)]
 ```
 
+### DRY
+If you find repeating patterns in your code, the ```repeat:```-macro may allow isolating common parts without breaking the flow.
+
+```
+   repeat: (say upper) 'foo', 'bar', 'baz';
+...
+FOO
+BAR
+BAZ
+[]
+```
+
 ### Types
 Capitalized names are treated as types, the following list is defined out of the box:
 

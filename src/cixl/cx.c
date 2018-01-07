@@ -208,6 +208,58 @@ static bool func_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   return true;
 }
 
+static ssize_t repeat_eval(struct cx_macro_eval *eval,
+			   struct cx_bin *bin,
+			   size_t tok_idx,
+			   struct cx *cx) {
+  if (!cx_compile(cx, cx_vec_start(&eval->toks), cx_vec_end(&eval->toks), bin)) {
+    cx_error(cx, cx->row, cx->col, "Failed compiling repeat");
+    return -1;
+  }
+
+  return tok_idx+1;
+}
+
+static bool repeat_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
+  struct cx_vec toks;
+  cx_vec_init(&toks, sizeof(struct cx_tok));
+  int row = cx->row, col = cx->col;
+  bool ok = false;
+  
+  if (!cx_parse_tok(cx, in, &toks, true)) {
+    cx_error(cx, cx->row, cx->col, "Missing repeat prefix");
+    goto exit;
+  }
+  
+  if (!cx_parse_end(cx, in, &toks, true)) { goto exit; }
+  struct cx_tok *prefix = cx_vec_peek(&toks, 0);
+  struct cx_macro_eval *eval = cx_macro_eval_new(repeat_eval);
+
+  for (struct cx_tok *t = cx_vec_get(&toks, 1), *pt = NULL;
+       t != cx_vec_end(&toks);
+       pt = t, t++) {
+    if (!pt || pt->type == CX_TCUT()) {
+        if (prefix->type == CX_TGROUP()) {
+	  cx_do_vec(&prefix->as_vec, struct cx_tok, tt) {
+	    cx_tok_copy(cx_vec_push(&eval->toks), tt);
+	  }
+	} else {
+	  cx_tok_copy(cx_vec_push(&eval->toks), prefix);
+	}
+    }
+    
+    cx_tok_copy(cx_vec_push(&eval->toks), t);
+  }
+					  
+  cx_tok_init(cx_vec_push(out), CX_TMACRO(), row, col)->as_ptr = eval;
+  ok = true;
+ exit: {
+    cx_do_vec(&toks, struct cx_tok, t) { cx_tok_deinit(t); }
+    cx_vec_deinit(&toks);
+    return ok;
+  }
+}
+
 static bool cls_imp(struct cx_scope *scope) {
   cx_do_vec(&scope->stack, struct cx_box, v) { cx_box_deinit(v); }
   cx_vec_clear(&scope->stack);
@@ -422,6 +474,7 @@ struct cx *cx_init(struct cx *cx) {
 
   cx_add_macro(cx, "trait:", trait_parse);
   cx_add_macro(cx, "func:", func_parse);
+  cx_add_macro(cx, "repeat:", repeat_parse);
   
   cx->opt_type = cx_add_type(cx, "Opt");
   cx->opt_type->trait = true;
