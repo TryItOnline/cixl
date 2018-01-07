@@ -1,4 +1,5 @@
-* add unlet(Sym)/unlet-all fns
+* add unlet(Sym) fn
+* add is-let (Sym->Bool) fn
 * add type: macro
 ** type: Size Int
 *** size 42 -> Size(42)
