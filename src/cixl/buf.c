@@ -2,6 +2,7 @@
 
 #include "cixl/buf.h"
 #include "cixl/error.h"
+#include "cixl/memstream.h"
 
 struct cx_buf *cx_buf_open(struct cx_buf *buf) {
   buf->data = NULL;
