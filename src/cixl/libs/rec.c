@@ -190,18 +190,23 @@ static bool get_imp(struct cx_scope *scope) {
 static bool put_imp(struct cx_scope *scope) {
   struct cx *cx = scope->cx;
   struct cx_box v = *cx_test(cx_pop(scope, false));
-  struct cx_sym f = cx_test(cx_pop(scope, false))->as_sym;
+  struct cx_sym fid = cx_test(cx_pop(scope, false))->as_sym;
   struct cx_box r = *cx_test(cx_pop(scope, false));
-
   struct cx_rec_type *rt = cx_baseof(r.type, struct cx_rec_type, imp);
+  struct cx_field *f = cx_set_get(&rt->fields, &fid);
   bool ok = false;
-  
-  if (!cx_set_get(&rt->fields, &f)) {
-    cx_error(cx, cx->row, cx->col, "Invalid %s field: %s", rt->imp.id, f.id);
+    
+  if (!f) {
+    cx_error(cx, cx->row, cx->col, "Invalid %s field: %s", rt->imp.id, fid.id);
     goto exit;
   }
-  
-  cx_rec_put(r.as_ptr, &f, &v);
+
+  if (!cx_is(v.type, f->type)) {
+    cx_error(cx, cx->row, cx->col, "Expected %s, was %s", f->type->id, v.type->id);
+    goto exit;
+  }
+
+  cx_rec_put(r.as_ptr, &fid, &v);
   ok = true;
  exit:
   cx_box_deinit(&v);
