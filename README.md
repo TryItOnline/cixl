@@ -691,7 +691,7 @@ Traits are abstract types that may be used to simplify type checking and/or func
 [#t #t #f]
 ```
 
-### Mxeta
+### Meta
 The compiler may be invoked from within the language through the ```compile``` function, the result is a compiled sequence of operations that may be passed around and called.
 
 ```
