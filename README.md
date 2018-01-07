@@ -650,7 +650,7 @@ Capitalized names are treated as types, the following list is defined out of the
 ```
 
 ### Records
-Records map finite sets of fields to values. Record types are required to specify an (optionally empty) list of parent types, traits and other record types are supported; and will inherit any fields that don't clash with its own. 
+Records map finite sets of typed fields to values. Record types are required to specify an (optionally empty) list of parent types and traits; and will inherit any fields that don't clash with its own. 
 
 ```
    |
@@ -665,7 +665,7 @@ Records map finite sets of fields to values. Record types are required to specif
 
 ```
    |
-...let: n Node new % put `value 42;
+...let: n Node new;
 ...$n put `value 42
 ...$n
 ...

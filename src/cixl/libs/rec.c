@@ -79,10 +79,6 @@ static bool rec_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
     ? cx_baseof(type, struct cx_rec_type, imp)
     : cx_add_rec_type(cx, id.as_ptr);
   
-  cx_do_vec(&parents.as_vec, struct cx_tok, t) {
-    cx_derive_rec(rec_type, t->as_ptr);
-  }
-
   if (!cx_parse_end(cx, in, &toks, false)) { goto exit3; }
 
   struct cx_vec fids, ftypes;
@@ -131,6 +127,10 @@ static bool rec_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
     }
   }
 
+  cx_do_vec(&parents.as_vec, struct cx_tok, t) {
+    cx_derive_rec(rec_type, t->as_ptr);
+  }
+  
   ok = true;
  exit4:
   cx_vec_deinit(&fids);	      
