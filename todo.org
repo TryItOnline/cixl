@@ -10,7 +10,10 @@ repeat: ($c put)
   `total    $q,
   `used     $q;
 
-* change struct eqval to funcall '='
+* add rec benchmark
+** create rec: Foo bar Int baz Str in loop & set fields
+* change rec eqval to funcall '='
+** move field comparison to default rec imp
 * add type: macro
 ** type: Size Int
 *** size 42 -> Size(42)
