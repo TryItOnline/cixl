@@ -59,13 +59,7 @@ bool cx_fimp_match(struct cx_fimp *imp, struct cx_vec *stack) {
     if (t) {
       if (!cx_is(j->type, t)) { return false; }
     } else if (!j->undef) {
-      struct cx *cx = imp->func->cx;
-      struct cx_scope *s = cx_scope(cx, 0);
-      cx_copy(cx_push(s), &i->value);
-      cx_copy(cx_push(s), j);
-      if (!cx_funcall(cx, "=")) { return false; }
-      struct cx_box *ok = cx_test(cx_pop(s, false));
-      if (!ok->as_bool) { return false; }
+      if (!cx_eqval(&i->value, j)) { return false; }
     }
   }
 

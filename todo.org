@@ -1,3 +1,4 @@
+* check field type in rec put
 * add unlet(Sym) fn
 * add is-let (Sym->Bool) fn
 * add repeat: macro
