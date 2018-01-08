@@ -47,7 +47,7 @@ static bool int_div_imp(struct cx_scope *scope) {
   }
   
   cx_rat_init(&cx_box_init(cx_push(scope), scope->cx->rat_type)->as_rat,
-	      abs(x.as_int), abs(y.as_int),
+	      cx_abs(x.as_int), cx_abs(y.as_int),
 	      (x.as_int >= 0 || y.as_int > 0) && (x.as_int < 0 || y.as_int < 0));
   
   return true;

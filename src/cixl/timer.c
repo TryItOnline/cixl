@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "cixl/timer.h"
 
 void cx_timer_reset(cx_timer_t *timer) {

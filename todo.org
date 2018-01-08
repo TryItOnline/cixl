@@ -1,5 +1,3 @@
-* add rec benchmark
-** create rec: Foo bar Int baz Str in loop & set fields
 * change rec eqval to funcall '='
 ** move field comparison to default rec imp
 * add type: macro
@@ -15,12 +13,6 @@
 ** add struct cx_str
 *** data, len & nrefs
 *** get len on demand
-* add lazy iters
-** type.iter fn
-** extract map that takes/returns iter
-** extract for to drive iter
-* add some/none fns
-*** Iter->Call->Iter
 * add lets: macro
 ** typecheck and bind stack to vars
 * add case: macro
@@ -51,21 +43,6 @@ $bar ('bar' $bar vect)
 * add fail func
 ** like test but just call error with message
 
-func: fib-rec(a b n Int) $n? if {$b $a $b + $n -- recall} $a;
-func: fib(n Int) fib-rec 0 1 $n;
 | clock {,10000 times {50 fib _}} / 1000000 int
-| clock {(let: v vect; 10000000 for {$v ~ push})} / 1000000 int
-
-   $foo, put `x 42 put `y 'foo' 
-...
-[Foo(x 42 y 'foo')]
-
-   get `x
-...
-[42]
-
-   | $foo [`x `y] get
-...
-[42 'foo']
-
-rec: Node(A) left right Node value A;
+| clock {(let: v []; 10000000 for {$v ~ push})} / 1000000 int
+| rec: Foo() x Int y Str; clock {,10000000 times {Foo new % `x 42 put `y 'bar' put}} / 1000000 int

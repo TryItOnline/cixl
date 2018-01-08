@@ -241,7 +241,7 @@ static bool time_days_imp(struct cx_scope *scope) {
   struct cx *cx = scope->cx;
   struct cx_time t = cx_test(cx_pop(scope, false))->as_time;
 
-  int y_max = abs(t.months/12), m_max = abs(t.months%12);
+  int y_max = cx_abs(t.months/12), m_max = cx_abs(t.months%12);
   cx_int_t days = 0;
 
   for (int y = 0, m = 0; y < y_max || m < m_max;) {

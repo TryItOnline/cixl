@@ -802,7 +802,7 @@ Let's start with a tail-recursive fibonacci to exercise the interpreter loop, it
 ...  fib-rec 0 1 $n;
 ...clock {10000 times {50 fib _}} / 1000000 int
 ...
-[520]
+[499]
 ```
 
 ```
@@ -829,7 +829,7 @@ Next up is consing a vector.
 ```
    | clock {(let: v []; 10000000 for {$v ~ push})} / 1000000 int
 ...
-[1886]
+[2366]
 ```
 
 ```
@@ -845,6 +845,33 @@ print(int(timeit(test, number=1) * 1000))
 
 $ python3 vect.py 
 1348
+```
+
+Moving on to instantiating and modifying classes/records.
+
+```
+   | rec: Foo() x Int y Str;
+...clock {,10000000 times {Foo new % `x 42 put `y 'bar' put}} / 1000000 int
+...
+[7161]
+```
+
+```
+from timeit import timeit
+
+class Foo():
+    pass
+
+def test():
+    for i in range(10000000):
+        foo = Foo()
+        foo.x = 42
+        foo.y = "bar"
+
+print(int(timeit(test, number=1) * 1000))
+
+$ python3 rec.py
+3213
 ```
 
 ### Zen

@@ -602,7 +602,8 @@ struct cx_rec_type *cx_add_rec_type(struct cx *cx, const char *id) {
   }
   
   struct cx_rec_type *t = cx_rec_type_new(cx, id);
-  *(struct cx_type **)cx_test(cx_set_insert(&cx->types, &id)) = &t->imp;  
+  *(struct cx_type **)cx_test(cx_set_insert(&cx->types, &id)) = &t->imp;
+  cx_derive(&t->imp, cx->rec_type);
   return t;
 }
 
