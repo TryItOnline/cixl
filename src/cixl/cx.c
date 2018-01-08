@@ -72,7 +72,10 @@ static bool trait_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
     goto exit1;
   }
 
-  if (!cx_parse_end(cx, in, &toks, false)) { goto exit1; }
+  if (!cx_parse_end(cx, in, &toks, false)) {
+    cx_error(cx, cx->row, cx->col, "Missing trait end");
+    goto exit1;
+  }
 
   cx_do_vec(&toks, struct cx_tok, t) {
     if (t->type != CX_TTYPE()) {

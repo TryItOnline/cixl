@@ -1,3 +1,4 @@
+* make sure errors are reported when parse_end fails
 * add isfunc/unfunc fns
 ** extract func lib
 * add $N-support

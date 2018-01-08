@@ -75,7 +75,10 @@ static bool rec_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
     }
   }
   
-  if (!cx_parse_end(cx, in, &toks, false)) { goto exit3; }
+  if (!cx_parse_end(cx, in, &toks, false)) {
+    cx_error(cx, cx->row, cx->col, "Missing rec end");
+    goto exit3;
+  }
 
   struct cx_rec_type *rec_type = type
     ? cx_baseof(type, struct cx_rec_type, imp)
