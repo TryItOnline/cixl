@@ -790,7 +790,7 @@ int main() {
 ```
 
 ### Performance
-There is still plenty of work remaining in the profiling and benchmarking departments, but preliminary indications puts cixl at around 1/2-4 times slower than Python. Measured time is displayed in milliseconds.
+There is still plenty of work remaining in the profiling and benchmarking departments, but preliminary indications puts cixl at around 1-4 times slower than Python. Measured time is displayed in milliseconds.
 
 Let's start with a tail-recursive fibonacci to exercise the interpreter loop, it's worth mentioning that cixl uses 64-bit integers while Python settles for 32-bit.
 
