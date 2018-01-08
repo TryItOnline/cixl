@@ -4,7 +4,7 @@
 This project aims to produce a minimal, decently typed scripting language for embedding in and extending from C. The language is implemented as a straight forward 3-stage (parse/compile/eval) interpreter that is designed to be as fast as possible without compromising on simplicity, transparency and flexibility. The codebase has no external dependencies and is currently hovering around 4 kloc including tests and standard library.
 
 ### Getting Started
-To get started, you'll need a reasonably modern C compiler with GNU-extensions and CMake installed. Building on macOS unfortunately doesn't work yet, as it's missing support for POSIX memory streams and timers. Most Linuxes and BSDs should be fine, I don't know enought about what's going on in Windows land these days to have a clue. A basic REPL is included, it's highly recommended to run it through ```rlwrap``` for a less nerve-wrecking editing experience.
+To get started, you'll need a reasonably modern C compiler with GNU-extensions and CMake installed. Building on macOS unfortunately doesn't work yet, as it's missing support for POSIX memory streams and timers. Most Linuxes and BSDs should be fine, I don't know enough about Windows to have a clue. A basic REPL is included, it's highly recommended to run it through ```rlwrap``` for a less nerve-wrecking editing experience.
 
 ```
 git clone https://github.com/basic-gongfu/cixl.git
