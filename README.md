@@ -847,7 +847,7 @@ $ python3 vect.py
 1348
 ```
 
-Moving on to instantiating and modifying classes/records.
+Moving on to instantiating records.
 
 ```
    | rec: Foo() x Int y Str;
