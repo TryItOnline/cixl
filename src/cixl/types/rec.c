@@ -82,7 +82,6 @@ struct cx_rec_type *cx_rec_type_init(struct cx_rec_type *type,
 
   cx_set_init(&type->fields, sizeof(struct cx_field), cx_cmp_sym);
   type->fields.key_offs = offsetof(struct cx_field, id);
-  cx_derive(&type->imp, cx->rec_type);
   return type;
 }
 

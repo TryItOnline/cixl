@@ -677,7 +677,7 @@ Records map finite sets of typed fields to values. Record types are required to 
 
 ```
    |
-   rec: Node(A)
+   rec: Node()
      left right Node
      value A;
 ...
