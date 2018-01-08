@@ -539,7 +539,7 @@ Some types support mapping actions over their contents using ```map```.
 ['gpp']
 ```
 
-If you find repeating patterns in your code, the ```repeat:```-macro may allow isolating common parts without breaking the flow.
+If you find repeating patterns in your code, the ```repeat:``` macro may allow isolating common parts without breaking the flow.
 
 ```
    | repeat: (say upper) 'foo', 'bar', 'baz';

@@ -1,3 +1,4 @@
+#include <inttypes.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
@@ -15,7 +16,7 @@ void cx_repl(struct cx *cx, FILE *in, FILE *out) {
 
   if (cx_eval_str(cx, "1000000000, clock {30 fib _} / int")) {
     struct cx_box bmips = *cx_pop(cx->main, false);
-    fprintf(out, "%zd bmips\n\n", bmips.as_int);
+    fprintf(out, "%" PRId64 " bmips\n\n", bmips.as_int);
   } else {
     fputs("? bmips\n\n", out);
   }
