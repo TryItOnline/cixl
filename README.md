@@ -708,18 +708,18 @@ Records support full deep equality by default, but ```=``` may be implemented to
 ```
    |
 ...rec: Foo() x Int y Str;
-...let: (foo bar) Foo new %%;
-...$foo put `x 42
-...$foo put `y 'foo'
+...let: (bar baz) Foo new %%;
 ...$bar put `x 42
 ...$bar put `y 'bar'
-...$foo = $bar
+...$baz put `x 42
+...$baz put `y 'baz'
+...$bar = $baz
 ...
 [#f]
 
    |
    func: =(a b Foo) $a get `x =, $b get `x;
-...$foo = $bar
+...$bar = $baz
 ...
 [#t]
 ```

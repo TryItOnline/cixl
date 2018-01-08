@@ -218,23 +218,18 @@ static void rec_tests() {
       " $foo get `y = #nil test)");
 
   run(&cx,
-      "(let: (foo bar) Foo new %%; "
-      " $foo put `x 42 "
-      " $bar put `x 42 "
-      " $foo = $bar test "
-      " $foo put `y 'foo' "
-      " $foo = $bar !test "
-      " $bar put `y 'bar' "
-      " $foo = $bar !test)");
+      "let: (bar baz) Foo new %%; "
+      "$bar put `x 42 "
+      "$baz put `x 42 "
+      "$bar = $baz test "
+      "$bar put `y 'bar' "
+      "$bar = $baz !test "
+      "$baz put `y 'baz' "
+      "$bar = $baz !test");
   
   run(&cx,
-      "(let: (foo bar) Foo new %%; "
-      " $foo put `x 42 "
-      " $foo put `y 'foo' "
-      " $bar put `x 42 "
-      " $bar put `y 'bar' "
-      " func: =(a b Foo) $a get `x =, $b get `x; "
-      " $foo = $bar test)");
+      "func: =(a b Foo) $a get `x =, $b get `x; "
+      "$bar = $baz test");
   
   cx_deinit(&cx);
 }
