@@ -1,7 +1,9 @@
-* change rec eqval to funcall '='
-** move field comparison to default rec imp
 * add isfunc/unfunc fns
 ** extract func lib
+* add $N-support
+** parse integer if first char is numeric
+** index stack from end
+** update cut_offs
 * add type: macro
 ** type: Size Int
 *** size 42 -> Size(42)
