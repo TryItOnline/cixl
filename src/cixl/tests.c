@@ -209,14 +209,23 @@ static void rec_tests() {
   cx_init_var(&cx);
 
   run(&cx,
-      "rec: Foo() x y Int; "
-      "let: foo Foo new; "
-      "$foo !test "
-      "$foo put `x 42 "
-      "$foo test "
-      "$foo get `x = 42 test "
-      "$foo get `y = #nil test");
+      "rec: Foo() x Int y Str; "
+      "(let: foo Foo new; "
+      " $foo !test "
+      " $foo put `x 42 "
+      " $foo test "
+      " $foo get `x = 42 test "
+      " $foo get `y = #nil test)");
 
+  run(&cx,
+      "(let: (foo bar) Foo new %%; "
+      " $foo put `x 42 "
+      " $foo put `y 'foo' "
+      " $bar put `x 42 "
+      " $bar put `y 'bar' "
+      " func: =(a b Foo) $a get `x =, $b get `x; "
+      " $foo = $bar test)");
+  
   cx_deinit(&cx);
 }
 

@@ -43,7 +43,7 @@ bool cx_call(struct cx_box *box, struct cx_scope *scope) {
 struct cx_box *cx_copy(struct cx_box *dst, struct cx_box *src) {
   if (src->type->copy && !src->undef) {
     dst->type = src->type;
-    dst->undef = false;
+    dst->undef = src->undef;
     src->type->copy(dst, src);
   }
   else {
@@ -56,6 +56,7 @@ struct cx_box *cx_copy(struct cx_box *dst, struct cx_box *src) {
 struct cx_box *cx_clone(struct cx_box *dst, struct cx_box *src) {
   if (!src->type->clone) { return cx_copy(dst, src); }
   dst->type = src->type;
+  dst->undef = src->undef;
   src->type->clone(dst, src);
   return dst;
 }

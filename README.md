@@ -1,7 +1,7 @@
 ## ![](cixl.png?raw=true) <a href="https://liberapay.com/basic-gongfu/donate"><img alt="Donate using Liberapay" src="https://liberapay.com/assets/widgets/donate.svg"></a>
 #### cixl - a minimal, decently typed scripting language
 
-This project aims to produce a minimal, decently typed scripting language for embedding in and extending from C. The language is implemented as a straight forward 3-stage (parse/compile/eval) interpreter that is designed to be as fast as possible without compromising on simplicity, transparency and flexibility. The codebase has no external dependencies and is currently hovering around 4 kloc including tests and standard library.
+This project aims to produce a minimal, decently typed scripting language for embedding in and extending from C. The language is implemented as a straight forward 3-stage (parse/compile/eval) interpreter that is designed to be as fast as possible without compromising on simplicity, transparency and flexibility. The codebase has no external dependencies and is currently hovering around 5 kloc including tests and standard library.
 
 ### Getting Started
 To get started, you'll need a reasonably modern C compiler with GNU-extensions and CMake installed. Building on macOS unfortunately doesn't work yet, as it's missing support for POSIX memory streams and timers. Most Linuxes and BSDs should be fine, I don't know enough about Windows to have a clue. A basic REPL is included, it's highly recommended to run it through ```rlwrap``` for a less nerve-wrecking editing experience.
@@ -292,7 +292,7 @@ Lambdas inherit the defining scope.
 ```
 
 ### Functions
-The ```func:``` macro may be used to define named functions. Several implementations may be defined for the same name as long as they have the same arity and different argument types. Each function opens an implicit scope that is closed on exit.
+The ```func:``` macro may be used to define named functions. Several implementations may be defined for the same name as long as they have the same arity and different argument types. Each function captures its defining environment and opens an implicit child scope that is closed on exit. Function definitions may appear anywhere in the code, but they are all defined in order of appearance during compilation.
 
 ```
    |
@@ -673,7 +673,7 @@ Capitalized names are treated as types, the following list is defined out of the
 ```
 
 ### Records
-Records map finite sets of typed fields to values. Record types are required to specify an (optionally empty) list of parent types and traits; and will inherit any fields that don't clash with its own. 
+Records map finite sets of typed fields to values. Record types are required to specify an (optionally empty) list of parent types and traits; and will inherit any fields that don't clash with its own. Record definitions may appear anywhere in the code, but they are all defined in order of appearance during compilation.
 
 ```
    |
@@ -704,7 +704,7 @@ Records map finite sets of typed fields to values. Record types are required to 
 ```
 
 ### Traits
-Traits are abstract types that may be used to simplify type checking and/or function dispatch. Besides the standard offering; 'A', 'Num', 'Opt' and 'Rec'; new traits may be defined using the ```trait:``` macro.
+Traits are abstract types that may be used to simplify type checking and/or function dispatch. Besides the standard offering; 'A', 'Num', 'Opt' and 'Rec'; new traits may be defined using the ```trait:``` macro. Trait definitions may appear anywhere in the code, but they are all defined in order of appearance during compilation.
 
 ```
    |
@@ -788,6 +788,9 @@ int main() {
   return 0;
 }
 ```
+
+### Modularity
+The core language is split into libraries, or libs in cixl jargon; and may be custom tailored to any level of functionality from C. This is an ongoing process, but you may get an idea of where it's going by having a look on existing [libs](https://github.com/basic-gongfu/cixl/tree/master/src/cixl/libs).
 
 ### Performance
 There is still plenty of work remaining in the profiling and benchmarking departments, but preliminary indications puts cixl at around 1-4 times slower than Python. Measured time is displayed in milliseconds.
