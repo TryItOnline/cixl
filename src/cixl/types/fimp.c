@@ -39,7 +39,9 @@ struct cx_fimp *cx_fimp_deinit(struct cx_fimp *imp) {
   return imp;
 }
 
-bool cx_fimp_match(struct cx_fimp *imp, struct cx_vec *stack) {
+bool cx_fimp_match(struct cx_fimp *imp,
+		   struct cx_vec *stack,
+		   struct cx_scope *scope) {
   if (stack->count < imp->args.count) { return false; }
   if (!imp->args.count) { return true; }
   
@@ -59,7 +61,7 @@ bool cx_fimp_match(struct cx_fimp *imp, struct cx_vec *stack) {
     if (t) {
       if (!cx_is(j->type, t)) { return false; }
     } else if (!j->undef) {
-      if (!cx_eqval(&i->value, j)) { return false; }
+      if (!cx_eqval(&i->value, j, scope)) { return false; }
     }
   }
 
@@ -113,7 +115,7 @@ static bool equid_imp(struct cx_box *x, struct cx_box *y) {
 static bool call_imp(struct cx_box *value, struct cx_scope *scope) {
   struct cx_fimp *imp = value->as_ptr;
   
-  if (!cx_fimp_match(imp, &scope->stack)) {
+  if (!cx_fimp_match(imp, &scope->stack, scope)) {
     struct cx *cx = scope->cx;
     cx_error(cx, cx->row, cx->col, "Func not applicable: '%s'", imp->func->id);
     return -1;

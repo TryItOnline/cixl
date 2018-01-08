@@ -16,7 +16,7 @@ struct cx_type {
   struct cx_set parents;
   bool trait;
 
-  bool (*eqval)(struct cx_box *, struct cx_box *);
+  bool (*eqval)(struct cx_box *, struct cx_box *, struct cx_scope *);
   bool (*equid)(struct cx_box *, struct cx_box *);
   bool (*call)(struct cx_box *, struct cx_scope *);
   bool (*ok)(struct cx_box *);

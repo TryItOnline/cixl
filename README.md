@@ -703,6 +703,27 @@ Records map finite sets of typed fields to values. Record types are required to 
 [#nil]
 ```
 
+Records support full deep equality by default, but ```=``` may be implemented to customize the behavior.
+
+```
+   |
+...rec: Foo() x Int y Str;
+...let: (foo bar) Foo new %%;
+...$foo put `x 42
+...$foo put `y 'foo'
+...$bar put `x 42
+...$bar put `y 'bar'
+...$foo = $bar
+...
+[#f]
+
+   |
+   func: =(a b Foo) $a get `x =, $b get `x;
+...$foo = $bar
+...
+[#t]
+```
+
 ### Traits
 Traits are abstract types that may be used to simplify type checking and/or function dispatch. Besides the standard offering; 'A', 'Num', 'Opt' and 'Rec'; new traits may be defined using the ```trait:``` macro. Trait definitions may appear anywhere in the code, but they are all defined in order of appearance during compilation.
 

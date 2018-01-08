@@ -299,7 +299,9 @@ static bool eqval_imp(struct cx_scope *scope) {
     y = *cx_test(cx_pop(scope, false)),
     x = *cx_test(cx_pop(scope, false));
   
-  cx_box_init(cx_push(scope), scope->cx->bool_type)->as_bool = cx_eqval(&x, &y);
+  cx_box_init(cx_push(scope),
+	      scope->cx->bool_type)->as_bool = cx_eqval(&x, &y, scope);
+  
   cx_box_deinit(&x);
   cx_box_deinit(&y);
   return true;
@@ -394,7 +396,7 @@ static bool recall_imp(struct cx_scope *scope) {
 
   if (!cx_scan_args(cx, cx->fimp->func)) { return false; }
   
-  if (!cx_fimp_match(cx->fimp, &scope->stack)) {
+  if (!cx_fimp_match(cx->fimp, &scope->stack, scope)) {
     cx_error(cx, cx->row, cx->col, "Recall not applicable");
     return false;
   }
@@ -413,8 +415,10 @@ static bool upcall_imp(struct cx_scope *scope) {
   struct cx_func *func = cx->fimp->func;
   if (!cx_scan_args(cx, func)) { return false; }
 
-  struct cx_fimp *imp = cx_func_get_imp(func, &scope->stack,
-					func->imps.count-cx->fimp->i);
+  struct cx_fimp *imp = cx_func_get_imp(func,
+					&scope->stack,
+					func->imps.count-cx->fimp->i,
+					scope);
   
   if (!imp) {
     cx_error(cx, cx->row, cx->col, "Upcall not applicable");
@@ -753,7 +757,7 @@ bool cx_funcall(struct cx *cx, const char *id) {
   struct cx_func *func = cx_get_func(cx, id, false);
   if (!func) { return false; }
   struct cx_scope *s = cx_scope(cx, 0);
-  struct cx_fimp *imp = cx_func_get_imp(func, &s->stack, 0);
+  struct cx_fimp *imp = cx_func_get_imp(func, &s->stack, 0, s);
   
   if (!imp) {
     cx_error(cx, cx->row, cx->col, "Func not applicable: %s", func->id);

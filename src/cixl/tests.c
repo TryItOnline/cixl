@@ -220,6 +220,16 @@ static void rec_tests() {
   run(&cx,
       "(let: (foo bar) Foo new %%; "
       " $foo put `x 42 "
+      " $bar put `x 42 "
+      " $foo = $bar test "
+      " $foo put `y 'foo' "
+      " $foo = $bar !test "
+      " $bar put `y 'bar' "
+      " $foo = $bar !test)");
+  
+  run(&cx,
+      "(let: (foo bar) Foo new %%; "
+      " $foo put `x 42 "
       " $foo put `y 'foo' "
       " $bar put `x 42 "
       " $bar put `y 'bar' "

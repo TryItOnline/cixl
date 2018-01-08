@@ -43,8 +43,9 @@ struct cx_fimp *cx_func_add_imp(struct cx_func *func,
 				struct cx_func_arg *args);
 
 struct cx_fimp *cx_func_get_imp(struct cx_func *func,
-				struct cx_vec *args,
-				size_t offs);
+				struct cx_vec *stack,
+				size_t offs,
+				struct cx_scope *scope);
 
 struct cx_type *cx_init_func_type(struct cx *cx);
 

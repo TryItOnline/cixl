@@ -125,12 +125,14 @@ static bool equid_imp(struct cx_box *x, struct cx_box *y) {
   return x->as_ptr == y->as_ptr;
 }
 
-static bool eqval_imp(struct cx_box *x, struct cx_box *y) {
+static bool eqval_imp(struct cx_box *x, struct cx_box *y, struct cx_scope *scope) {
   struct cx_vect *xv = x->as_ptr, *yv = y->as_ptr;
   if (xv->imp.count != yv->imp.count) { return false; }
   
   for (size_t i = 0; i < xv->imp.count; i++) {
-    if (!cx_eqval(cx_vec_get(&xv->imp, i), cx_vec_get(&yv->imp, i))) { return false; }
+    if (!cx_eqval(cx_vec_get(&xv->imp, i), cx_vec_get(&yv->imp, i), scope)) {
+      return false;
+    }
   }
   
   return true;

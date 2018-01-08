@@ -214,8 +214,42 @@ static bool put_imp(struct cx_scope *scope) {
   return ok;
 }
 
+static bool eqval_imp(struct cx_scope *scope) {
+  struct cx *cx = scope->cx;
+  
+  struct cx_box
+    x = *cx_test(cx_pop(scope, false)),
+    y = *cx_test(cx_pop(scope, false));
+
+  struct cx_rec *xr = x.as_ptr, *yr = y.as_ptr;
+  bool eqval = true;
+  
+  if (xr->values.members.count != yr->values.members.count) {
+    eqval = false;
+  } else {
+    for (size_t i = 0; i < xr->values.members.count; i++) {
+      struct cx_field_value
+	*xv = cx_vec_get(&xr->values.members, i),
+	*yv = cx_vec_get(&yr->values.members, i);
+      
+      if (xv->id.tag != yv->id.tag || !cx_eqval(&xv->box, &yv->box, scope)) {
+	eqval = false;
+	break;
+      }
+    }
+  }
+
+  cx_box_init(cx_push(scope), cx->bool_type)->as_bool = eqval;
+  cx_box_deinit(&x);
+  cx_box_deinit(&y);
+  return true;
+}
+
 void cx_init_rec(struct cx *cx) {
   cx_add_macro(cx, "rec:", rec_parse); 
+
+  cx_add_func(cx, "=", cx_arg(cx->rec_type), cx_arg(cx->rec_type))->ptr = eqval_imp;
+
   cx_add_func(cx, "new", cx_arg(cx->meta_type))->ptr = new_imp;
   cx_add_func(cx, "get", cx_arg(cx->rec_type), cx_arg(cx->sym_type))->ptr = get_imp;
 

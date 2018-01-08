@@ -32,7 +32,7 @@ static bool equid_imp(struct cx_box *x, struct cx_box *y) {
   return x->as_ptr == y->as_ptr;
 }
 
-static bool eqval_imp(struct cx_box *x, struct cx_box *y) {
+static bool eqval_imp(struct cx_box *x, struct cx_box *y, struct cx_scope *scope) {
   return strcmp(x->as_ptr, y->as_ptr) == 0;
 }
 

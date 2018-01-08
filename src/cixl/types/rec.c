@@ -1,34 +1,19 @@
 #include <stdlib.h>
 
-#include "cixl/box.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
+#include "cixl/scope.h"
 #include "cixl/types/rec.h"
-
-struct cx_field_value {
-  struct cx_sym id;
-  struct cx_box box;
-}; 
 
 static bool equid_imp(struct cx_box *x, struct cx_box *y) {
   return x->as_ptr == y->as_ptr;
 }
 
-static bool eqval_imp(struct cx_box *x, struct cx_box *y) {
-  struct cx_rec *xr = x->as_ptr, *yr = y->as_ptr;
-  if (xr->values.members.count != yr->values.members.count) { return false; }
-  
-  for (size_t i = 0; i < xr->values.members.count; i++) {
-    struct cx_field_value
-      *xv = cx_vec_get(&xr->values.members, i),
-      *yv = cx_vec_get(&yr->values.members, i);
-    
-    if (xv->id.tag != yv->id.tag || !cx_eqval(&xv->box, &yv->box)) {
-      return false;
-    }
-  }
-  
-  return true;
+static bool eqval_imp(struct cx_box *x, struct cx_box *y, struct cx_scope *scope) {
+  cx_copy(cx_push(scope), x);
+  cx_copy(cx_push(scope), y);
+  if (!cx_funcall(scope->cx, "=")) { return false; }
+  return cx_test(cx_pop(scope, false))->as_bool;
 }
 
 static bool ok_imp(struct cx_box *v) {

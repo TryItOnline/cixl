@@ -1,6 +1,7 @@
 #ifndef CX_REC_H
 #define CX_REC_H
 
+#include "cixl/box.h"
 #include "cixl/set.h"
 #include "cixl/type.h"
 #include "cixl/types/sym.h"
@@ -37,6 +38,11 @@ struct cx_rec {
   struct cx_set values;
   int nrefs;
 };
+
+struct cx_field_value {
+  struct cx_sym id;
+  struct cx_box box;
+}; 
 
 struct cx_rec *cx_rec_new();
 struct cx_rec *cx_rec_ref(struct cx_rec *rec);

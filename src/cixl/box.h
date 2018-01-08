@@ -32,7 +32,7 @@ struct cx_box *cx_box_new(struct cx_type *type);
 struct cx_box *cx_box_init(struct cx_box *box, struct cx_type *type);
 struct cx_box *cx_box_deinit(struct cx_box *box);
 
-bool cx_eqval(struct cx_box *x, struct cx_box *y);
+bool cx_eqval(struct cx_box *x, struct cx_box *y, struct cx_scope *scope);
 bool cx_equid(struct cx_box *x, struct cx_box *y);
 bool cx_ok(struct cx_box *x);
 bool cx_call(struct cx_box *box, struct cx_scope *scope);
