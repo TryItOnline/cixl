@@ -24,6 +24,17 @@ static void run(struct cx *cx, const char *in) {
   }
 }
 
+static void comment_tests() {
+  struct cx cx;
+  cx_init(&cx);
+  cx_init_math(&cx);
+  
+  run(&cx, "1 //testing testing\n+ 2 = 3 test");
+  run(&cx, "1 /*testing\ntesting*/+ 2 = 3 test");
+
+  cx_deinit(&cx);
+}
+
 static void type_tests() {
   struct cx cx;
   cx_init(&cx);
@@ -242,6 +253,7 @@ static void rec_tests() {
 }
 
 void cx_tests() {
+  comment_tests();
   type_tests();
   stack_tests();
   group_tests();

@@ -272,6 +272,23 @@ test.cx:
 [3]
 ```
 
+### Comments
+Two kinds of code comments are supported, line comments and block comments.
+
+```
+   |
+...1 // Line comments terminate on line breaks
+...+ 2
+[3]
+
+   |
+...1 /* While block comments may span
+...multiple lines */
+...+ 2
+...
+[3]
+```
+
 ### Conditions
 All types are useable as conditions; some are always true; integers test true for anything but zero; empty strings test false etc. The ```?``` operator may be used to transform any value to its conditional representation.
 

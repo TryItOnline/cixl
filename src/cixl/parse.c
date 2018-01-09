@@ -55,7 +55,7 @@ static struct cx_vec *parse_fimp(struct cx *cx,
     if (!cx_parse_tok(cx, in, out, false)) { return false; }
     struct cx_tok *tok = cx_vec_pop(out);
 
-    if (tok->type == CX_TID() && !strcmp(tok->as_ptr, ">")) {
+    if (tok->type == CX_TID() && strcmp(tok->as_ptr, ">") == 0) {
       cx_tok_deinit(tok);
       break;
     }
@@ -113,6 +113,58 @@ static bool parse_func(struct cx *cx, const char *id, FILE *in, struct cx_vec *o
   return true;
 }
 
+static bool parse_line_comment(struct cx *cx, FILE *in) {
+  int row = cx->row, col = cx->col;
+  bool done = false;
+  
+  while (!done) {
+    char c = fgetc(in);
+
+    switch(c) {
+    case EOF:
+      cx_error(cx, row, col, "Unterminated comment");
+      return false;
+    case '\n':
+      cx->row++;
+      cx->col = 0;
+      done = true;
+      break;
+    default:
+      cx->col++;
+      break;
+    }
+  }
+
+  return true;
+}
+
+static bool parse_block_comment(struct cx *cx, FILE *in) {
+  int row = cx->row, col = cx->col;
+  char pc = 0;
+  
+  while (true) {
+    char c = fgetc(in);
+
+    switch(c) {
+    case EOF:
+      cx_error(cx, row, col, "Unterminated comment");
+      return false;
+    case '\n':
+      cx->row++;
+      cx->col = 0;
+      break;
+    default:
+      cx->col++;
+      break;
+    }
+    
+    if (c == '/' && pc == '*') { break; }
+    pc = c;
+  }
+
+  return true;
+}
+
 static bool parse_id(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
   struct cx_buf id;
   cx_buf_open(&id);
@@ -137,20 +189,25 @@ static bool parse_id(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
     cx_buf_close(&id);
 
     if (ok) {
-      struct cx_macro *m = cx_get_macro(cx, id.data, true);
+      char *s = id.data;
+      struct cx_macro *m = cx_get_macro(cx, s, true);
       
       if (m) {
 	cx->col = col;
 	ok = m->imp(cx, in, out);
       } else {
-	if (isupper(id.data[0])) {
-	  ok = parse_type(cx, id.data, out, lookup);
-	} else if (!lookup || id.data[0] == '#' || id.data[0] == '$') {
+	if (isupper(s[0])) {
+	  ok = parse_type(cx, s, out, lookup);
+	} else if (!lookup || s[0] == '#' || s[0] == '$') {
 	  cx_tok_init(cx_vec_push(out),
 		      CX_TID(),
-		      cx->row, cx->col)->as_ptr = strdup(id.data);
+		      cx->row, cx->col)->as_ptr = strdup(s);
+	} else if (s[0] == '/' && s[1] == '/') {
+	  ok = parse_line_comment(cx, in);
+	} else if (s[0] == '/' && s[1] == '*') {
+	  ok = parse_block_comment(cx, in);
 	} else {
-	  ok = parse_func(cx, id.data, in, out);
+	  ok = parse_func(cx, s, in, out);
 	}
 
 	cx->col = col;

@@ -3,10 +3,19 @@
   let: max-time [9999 11 30] time;
 }
 
+/*
+  Resources support tracking availability in time.
+*/
+
 rec: Resource()
   quantity Int
   calendar Vect;
-  
+
+/*
+  Capacities keep track of total and used quantity for a specific resource and
+  interval. They are used as building blocks for resource calendars.
+*/
+
 rec: Capacity()
   start end  Time
   total used Int;
@@ -20,11 +29,19 @@ func: new-capacity(start end Time total used Int)
     `used     $used;
   $c;
 
+/*
+  Resources start out with one continous segment of full capacity in the calendar.
+*/
+
 func: new-resource(q Int)
   let: r Resource new;
   $r put `quantity $q
   $r put `calendar [new-capacity $min-time $max-time $q 0]
   $r;
+
+/*
+  Capacities are split into several segments when updated.
+*/
 
 func: update-capacity(in Capacity start end Time total used Int out Vect)
   $in get `start < $start if {(
@@ -59,6 +76,10 @@ func: update-resource(r Resource start end Time total used Int)
   $r put `calendar,
   update-calendar $c $start $end $total $used;
 
+/*
+  Bookings represent used quantity for a specific resource and interval.
+*/
+
 rec: Booking()
   resource  Resource
   start end Time
@@ -75,8 +96,11 @@ func: new-booking(r Resource start end Time q Int)
   update-resource $r $start $end 0 $q
   $b;
 
+/*
+  Bookings represent used quantity for a specific resource and interval.
+*/
+
 func: run-tests()
   let: r new-resource 10;
-  let: (start end) today, today ,+ 1 days;
-  new-booking $r $start $end 5 _
-  new-booking $r $start $end 6;
+  new-booking $r today today ,+ 1 days 5 _
+  new-booking $r now now ,+ 1h 6;
