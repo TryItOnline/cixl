@@ -268,6 +268,25 @@ test.cx:
 [3]
 ```
 
+### Errors
+Error handling is a work in progress, but two functions are provided for signalling errors. ```fail``` may be used to signal an error the with specified error message.
+
+```
+   fail 'We\'re going down!'
+...
+Error in row 1, col 6:
+We're going down
+```
+
+While ```test``` may be used to signal an error when the specified condition doesn't hold.
+
+```
+   1 = 2 test
+...
+Error in row 1, col 7:
+Test failed
+```
+
 ### Conditions
 All types are useable as conditions; some are always true; integers test true for anything but zero; empty strings test false etc. The ```?``` operator may be used to transform any value to its conditional representation.
 
@@ -753,7 +772,7 @@ Records support full deep equality by default, but ```=``` may be implemented to
 ```
 
 ### Traits
-Traits are abstract types that may be used to simplify type checking and/or function dispatch. Besides the standard offering; 'A', 'Num', 'Opt' and 'Rec'; new traits may be defined using the ```trait:``` macro. Trait definitions may appear anywhere in the code, but they are all defined in order of appearance during compilation.
+Traits are abstract types that may be used to simplify type checking and/or function dispatch. Besides the standard offering; 'A', 'Cmp', 'Num', 'Opt' and 'Rec'; new traits may be defined using the ```trait:``` macro. Trait definitions may appear anywhere in the code, but they are all defined in order of appearance during compilation.
 
 ```
    |
