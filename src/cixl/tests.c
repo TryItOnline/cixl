@@ -69,12 +69,13 @@ static void group_tests() {
 static void if_tests() {
   struct cx cx;
   cx_init(&cx);
-
+  cx_init_str(&cx);
+  
   run(&cx, "#t if 42 = 42 test");
   run(&cx, "#f else 42 = 42 test");
   run(&cx, "#t if-else `yes `no = `yes test");
   run(&cx, "#f if-else `yes `no = `no test");
-
+  run(&cx, "'foo' %%, $ if &upper");
   cx_deinit(&cx);
 }
 
