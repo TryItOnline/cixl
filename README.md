@@ -298,7 +298,7 @@ The ```if``` statement may be used to branch on a condition, it calls '?' implic
 ```
 
 ### Errors
-Error handling is a work in progress, but two functions are provided for signalling errors. ```fail``` may be used to signal an error the with specified error message.
+Error handling is a work in progress, but two functions are provided for signalling errors. ```fail``` may be used to signal an error with specified error message.
 
 ```
    fail 'We\'re going down!'
