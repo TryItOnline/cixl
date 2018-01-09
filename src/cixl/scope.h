@@ -27,8 +27,6 @@ void cx_fprint_stack(struct cx_scope *scope, FILE *out);
 
 struct cx_box *cx_get(struct cx_scope *scope, struct cx_sym id, bool silent);
 struct cx_box *cx_set(struct cx_scope *scope, struct cx_sym id, bool force);
-
-bool cx_islet(struct cx_scope *scope, struct cx_sym id);
-void cx_unlet(struct cx_scope *scope, struct cx_sym id);
+bool cx_unset(struct cx_scope *scope, struct cx_sym id, bool silent);
 
 #endif

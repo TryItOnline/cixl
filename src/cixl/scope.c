@@ -76,7 +76,7 @@ struct cx_box *cx_get(struct cx_scope *scope, struct cx_sym id, bool silent) {
 
     if (!silent) {
       struct cx *cx = scope->cx;
-      cx_error(cx, cx->row, cx->col, "Unknown var: '%s'", id.id);
+      cx_error(cx, cx->row, cx->col, "Unknown var: %s", id.id);
     }
     
     return NULL;
@@ -91,7 +91,7 @@ struct cx_box *cx_set(struct cx_scope *scope, struct cx_sym id, bool force) {
   if (var) {
     if (!force) {
       struct cx *cx = scope->cx;
-      cx_error(cx, cx->row, cx->col, "Attempt to rebind var: '%s'", id.id);
+      cx_error(cx, cx->row, cx->col, "Attempt to rebind var: %s", id.id);
       return NULL;
     }
       
@@ -103,15 +103,19 @@ struct cx_box *cx_set(struct cx_scope *scope, struct cx_sym id, bool force) {
   return &var->value;
 }
 
-bool cx_islet(struct cx_scope *scope, struct cx_sym id) {
-  return cx_set_get(&scope->env, &id);
-}
-
-void cx_unlet(struct cx_scope *scope, struct cx_sym id) {
+bool cx_unset(struct cx_scope *scope, struct cx_sym id, bool silent) {
   struct cx_var *v = cx_set_get(&scope->env, &id);
-  
-  if (v) {
-    cx_var_deinit(v);
-    cx_set_delete(&scope->env, &id);
+
+  if (!v) {
+    if (!silent) {
+      struct cx *cx = scope->cx;
+      cx_error(cx, cx->row, cx->col, "Unknown var: %s", id.id);
+    }
+
+    return false;
   }
+
+  cx_var_deinit(v);
+  cx_set_delete(&scope->env, &id);
+  return true;
 }

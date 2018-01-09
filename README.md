@@ -134,12 +134,27 @@ Error in row 1, col 5:
 Expected type Str, actual: Int
 ```
 
-Bindings in the current scope may be queried and explicitly removed.
+The same functionality may be accessed symbolically.
+
+```
+   |
+...is-let `foo, get-let `foo
+...
+[#f #nil]
+
+   |
+...let: foo 42;
+...is-let `foo, get-let `foo
+...
+[#t 42]
+```
+
+Bindings in the current scope may be explicitly removed.
 
 ```
    |
    let: x 42;
-   islet `x if {unlet `x} {}
+   unlet `x
    let: x 'foo';
    $x
 ...

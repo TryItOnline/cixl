@@ -1,6 +1,4 @@
-* rename islet to is-let
-** add let & get-let fns
-* rename if to ifelse
+* rename if to if-else
 ** add if/else fns
 ** update bookings/tests/readme
 * ---

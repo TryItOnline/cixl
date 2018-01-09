@@ -62,13 +62,21 @@ static void let_tests() {
   cx_init_str(&cx);
   cx_init_var(&cx);
 
-  run(&cx, "let: foo 42; $foo 42 = test");
-  run(&cx, "let: (x y z) 1 2, 3 + 4; $x + $y + $z 10 = test");
-  run(&cx, "let: (bar Int baz Str) 7 '35'; $bar +, $baz int = 42 test");
+  run(&cx, "(let: foo 42; $foo 42 = test)");
+  run(&cx, "(let: (x y z) 1 2, 3 + 4; $x + $y + $z 10 = test)");
+  run(&cx, "(let: (foo Int bar Str) 7 '35'; $foo +, $bar int = 42 test)");
+
+  run(&cx, "(is-let `foo !test "
+           " get-let `foo = #nil test "
+           " let `foo 42 "
+           " is-let `foo test "
+           " get-let `foo = 42 test)");
 
   run(&cx,
-      "islet `foo if {unlet `foo} {} "
-      "let: foo 'foo'; $foo = 'foo' test");
+      "(let: foo 42; "
+      " unlet `foo "
+      " let: foo 'foo'; "
+      " $foo = 'foo' test)");
   
   cx_deinit(&cx);
 }

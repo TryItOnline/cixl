@@ -1,4 +1,4 @@
-, islet `min-time if {} {
+, is-let `min-time if {} {
   let: min-time [] time;
   let: max-time [9999 11 30] time;
 }
@@ -27,21 +27,21 @@ func: new-resource(q Int)
   $r;
 
 func: update-capacity(in Capacity start end Time total used Int out Vect)
-  $in get `start < $start if {
+  $in get `start < $start if {(
     let: head $in %%;
     $head put `end $start
     $in put `start $start
     $out push $head
-  } {}
+  )} {}
 
   $out push $in
 
-  $in get `end > $end if {
+  $in get `end > $end if {(
     let: tail $in %%;
     $tail put `start $end
     $in put `end $end
     $out push $tail
-  } {}
+  )} {}
 
   let: t get $in `total + $total;
   let: u get $in `used + $used;
