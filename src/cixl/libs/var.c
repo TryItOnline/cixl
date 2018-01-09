@@ -138,14 +138,9 @@ static bool is_let_imp(struct cx_scope *scope) {
 
 static bool get_let_imp(struct cx_scope *scope) {
   struct cx_sym s = cx_test(cx_pop(scope, false))->as_sym;
-  struct cx_box *v = cx_get(scope, s, true);
-  
-  if (v) {
-    cx_copy(cx_push(scope), v);
-  } else {
-    cx_box_init(cx_push(scope), scope->cx->nil_type);
-  }
-
+  struct cx_box *v = cx_get(scope, s, false);
+  if (!v) { return false; }
+  cx_copy(cx_push(scope), v);
   return true;
 }
 

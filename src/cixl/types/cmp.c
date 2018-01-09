@@ -91,10 +91,10 @@ struct cx_type *cx_init_cmp_type(struct cx *cx) {
   t->trait = true;
 
   cx_add_func(cx, "cmp", cx_arg(t), cx_narg(0))->ptr = cmp_imp;
-  cx_add_func(cx, "lt", cx_arg(t), cx_narg(0))->ptr = lt_imp;
-  cx_add_func(cx, "gt", cx_arg(t), cx_narg(0))->ptr = gt_imp;
-  cx_add_func(cx, "lte", cx_arg(t), cx_narg(0))->ptr = lte_imp;
-  cx_add_func(cx, "gte", cx_arg(t), cx_narg(0))->ptr = gte_imp;
+  cx_add_func(cx, "<", cx_arg(t), cx_narg(0))->ptr = lt_imp;
+  cx_add_func(cx, ">", cx_arg(t), cx_narg(0))->ptr = gt_imp;
+  cx_add_func(cx, "<=", cx_arg(t), cx_narg(0))->ptr = lte_imp;
+  cx_add_func(cx, ">=", cx_arg(t), cx_narg(0))->ptr = gte_imp;
   
   return t;
 }

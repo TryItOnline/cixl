@@ -10,9 +10,8 @@ struct cx;
 struct cx_scope {
   struct cx *cx;
   struct cx_scope *parent;
-  struct cx_vec stack;
+  struct cx_vec stack, cut_offs;
   struct cx_set env;
-  size_t cut_offs;
   int nrefs;
 };
 

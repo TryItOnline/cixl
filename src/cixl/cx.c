@@ -473,7 +473,7 @@ struct cx *cx_init(struct cx *cx) {
   cx->row = cx->col = -1;
   
   cx_set_init(&cx->separators, sizeof(char), cx_cmp_char);
-  cx_add_separators(cx, " \t\n;,|_?!()[]{}<>");
+  cx_add_separators(cx, " \t\n;,|_?!()[]{}");
 
   cx_set_init(&cx->syms, sizeof(struct cx_sym), cx_cmp_str);
   cx->consts.key_offs = offsetof(struct cx_sym, id);

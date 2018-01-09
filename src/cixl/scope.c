@@ -11,11 +11,11 @@ struct cx_scope *cx_scope_new(struct cx *cx, struct cx_scope *parent) {
   scope->cx = cx;
   scope->parent = parent ? cx_scope_ref(parent) : NULL;
   cx_vec_init(&scope->stack, sizeof(struct cx_box));
+  cx_vec_init(&scope->cut_offs, sizeof(size_t));
 
   cx_set_init(&scope->env, sizeof(struct cx_var), cx_cmp_sym);
   scope->env.key_offs = offsetof(struct cx_var, id);
 
-  scope->cut_offs = 0;
   scope->nrefs = 0;
   return scope;
 }
@@ -34,6 +34,7 @@ void cx_scope_unref(struct cx_scope *scope) {
 
     cx_do_vec(&scope->stack, struct cx_box, b) { cx_box_deinit(b); }
     cx_vec_deinit(&scope->stack);
+    cx_vec_deinit(&scope->cut_offs);
     
     cx_do_set(&scope->env, struct cx_var, v) { cx_var_deinit(v); }
     cx_set_deinit(&scope->env);

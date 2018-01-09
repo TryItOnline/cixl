@@ -137,10 +137,14 @@ Expected type Str, actual: Int
 The same functionality may be accessed symbolically.
 
 ```
-   |
-...is-let `foo, get-let `foo
+   | is-let `foo
 ...
-[#f #nil]
+[#f]
+
+   | get-let `foo
+...
+Error in row 1, col 12:
+Unknown var: foo
 
    |
 ...let: foo 42;
@@ -666,7 +670,7 @@ compared, added and subtracted;
 ...
 [Time(1/2/2) 12:0:0.0]
 
-   lt now
+   <= now
 ...
 [#t]
 

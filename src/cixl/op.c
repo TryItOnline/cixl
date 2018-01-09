@@ -23,7 +23,7 @@ struct cx_op *cx_op_init(struct cx_op *op, struct cx_op_type *type, size_t tok_i
 
 static bool cut_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
   struct cx_scope *s = cx_scope(cx, 0);
-  s->cut_offs = s->stack.count;
+  *(size_t *)cx_vec_push(&s->cut_offs) = s->stack.count;
   return true;
 }
 
@@ -74,12 +74,12 @@ static bool get_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
   struct cx_scope *s = cx_scope(cx, 0);
   
   if (!op->as_get.id.id[0]) {
-    if (!s->cut_offs) {
+    if (!s->cut_offs.count) {
       cx_error(cx, tok->row, tok->col, "Nothing to uncut");
       return false;
     }
-    
-    s->cut_offs--;
+    size_t *cut_offs = cx_vec_peek(&s->cut_offs, 0);
+    (*cut_offs)--;
   } else {
     struct cx_box *v = cx_get(s, op->as_get.id, false);
     if (!v) { return false; }

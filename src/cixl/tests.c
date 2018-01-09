@@ -67,7 +67,6 @@ static void let_tests() {
   run(&cx, "(let: (foo Int bar Str) 7 '35'; $foo +, $bar int = 42 test)");
 
   run(&cx, "(is-let `foo !test "
-           " get-let `foo = #nil test "
            " let `foo 42 "
            " is-let `foo test "
            " get-let `foo = 42 test)");
@@ -176,11 +175,11 @@ static void time_tests() {
   cx_init(&cx);
   cx_init_time(&cx);
 
-  run(&cx, "now lt now test");
+  run(&cx, "now <= now test");
   run(&cx, "[1 0 0 24] time days = 367 test");
   run(&cx, "2m =, 120s test");
-  run(&cx, "1 days +, 1h * 2h = 50 test");
-  run(&cx, "1 months +, 1 days * 3 days = 94");
+  run(&cx, "1 days ,+ 1h * 2h = 50 test");
+  run(&cx, "1 months ,+ 1 days * 3 days = 94");
   
   cx_deinit(&cx);
 }
