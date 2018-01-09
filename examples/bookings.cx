@@ -1,4 +1,12 @@
-, is-let `min-time if {} {
+/*
+  This file contains the humble beginnings of a booking system written in Cixl
+  for demonstration purposes. Once Cixl is installed, the tests may be run by
+  executing "load '../examples/bookings.cx'" followed by "run-tests".
+
+  https://github.com/basic-gongfu/cixl#getting-started
+*/
+
+, is-let `min-time else {
   let: min-time [] time;
   let: max-time [9999 11 30] time;
 }
@@ -35,8 +43,9 @@ func: new-capacity(start end Time total used Int)
 
 func: new-resource(q Int)
   let: r Resource new;
-  $r put `quantity $q
-  $r put `calendar [new-capacity $min-time $max-time $q 0]
+  repeat: ($r put)
+    `quantity $q,
+    `calendar [new-capacity $min-time $max-time $q 0];
   $r;
 
 /*
@@ -49,7 +58,7 @@ func: update-capacity(in Capacity start end Time total used Int out Vect)
     $head put `end $start
     $in put `start $start
     $out push $head
-  )} {}
+  )}
 
   $out push $in
 
@@ -58,13 +67,12 @@ func: update-capacity(in Capacity start end Time total used Int out Vect)
     $tail put `start $end
     $in put `end $end
     $out push $tail
-  )} {}
+  )}
 
   let: t get $in `total + $total;
   let: u get $in `used + $used;
-  if $u > $t {fail 'Overbook'} { }
-  $in put `total $t
-  $in put `used $u;
+  if $u > $t {fail 'Overbook'}
+  repeat: ($in put) `total $t, `used  $u;;
 
 func: update-calendar(in Vect start end Time total used Int)
   let: out [];
@@ -86,7 +94,7 @@ rec: Booking()
   quantity  Int;
 
 func: new-booking(r Resource start end Time q Int)
-  $end <= $start if {fail 'Invalid booking length'} {}
+  $end <= $start if {fail 'Invalid booking length'}
   let: b Booking new;
   repeat: ($b put)
     `resource $r,
@@ -103,5 +111,6 @@ func: new-booking(r Resource start end Time q Int)
 
 func: run-tests()
   let: r new-resource 10;
-  new-booking $r today today ,+ 1 days 5 _
-  new-booking $r now now ,+ 1h 6;
+  repeat: (new-booking $r)
+    (today today ,+ 1 days 5),
+    (now   now ,+ 1h       6);;

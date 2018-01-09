@@ -77,10 +77,12 @@ bool cx_scan_args(struct cx *cx, struct cx_func *func) {
   struct cx_op *end = cx_vec_end(&cx->bin->ops);
   
   while (cx->op != end) {
-    size_t cut_offs = s->cut_offs.count ? *(size_t *)cx_vec_peek(&s->cut_offs, 0) : 0;
-
-    if (cx_scope(cx, 0) == s && s->stack.count - cut_offs >= func->nargs) {
-      break;
+    if (cx_scope(cx, 0) == s) {
+      size_t cut_offs = s->cut_offs.count
+	? *(size_t *)cx_vec_peek(&s->cut_offs, 0)
+	: 0;
+      
+      if (s->stack.count - cut_offs >= func->nargs) { break; }
     }
 
     if (!cx_eval_next(cx)) { return false; }

@@ -244,17 +244,33 @@ static bool repeat_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   struct cx_tok *prefix = cx_vec_get(&toks, 0);
   struct cx_macro_eval *eval = cx_macro_eval_new(repeat_eval);
 
+  void push_prefix(struct cx_vec *out) {
+      if (prefix->type == CX_TGROUP()) {
+	cx_do_vec(&prefix->as_vec, struct cx_tok, t) {
+	  cx_tok_copy(cx_vec_push(out), t);
+	}
+      } else {
+	cx_tok_copy(cx_vec_push(out), prefix);
+      }
+  }
+  
   for (struct cx_tok *t = cx_vec_get(&toks, 1), *pt = NULL;
        t != cx_vec_end(&toks);
        pt = t, t++) {
     if (!pt || pt->type == CX_TCUT()) {
-        if (prefix->type == CX_TGROUP()) {
-	  cx_do_vec(&prefix->as_vec, struct cx_tok, tt) {
-	    cx_tok_copy(cx_vec_push(&eval->toks), tt);
-	  }
-	} else {
-	  cx_tok_copy(cx_vec_push(&eval->toks), prefix);
+      if (t->type == CX_TGROUP()) {
+	struct cx_vec tmp = t->as_vec;
+	cx_vec_init(&t->as_vec, sizeof(struct cx_tok));
+	push_prefix(&t->as_vec);
+
+	cx_do_vec(&tmp, struct cx_tok, tt) {
+	  *(struct cx_tok *)cx_vec_push(&t->as_vec) = *tt;
 	}
+
+	cx_vec_deinit(&tmp);
+      }
+
+      push_prefix(&eval->toks);
     }
     
     cx_tok_copy(cx_vec_push(&eval->toks), t);
@@ -350,6 +366,28 @@ static bool not_imp(struct cx_scope *scope) {
 
 static bool if_imp(struct cx_scope *scope) {
   struct cx_box
+    x = *cx_test(cx_pop(scope, false)),
+    c = *cx_test(cx_pop(scope, false));
+  
+  if (cx_ok(&c)) { cx_call(&x, scope); }
+  cx_box_deinit(&x);
+  cx_box_deinit(&c);
+  return true;
+}
+
+static bool else_imp(struct cx_scope *scope) {
+  struct cx_box
+    x = *cx_test(cx_pop(scope, false)),
+    c = *cx_test(cx_pop(scope, false));
+  
+  if (!cx_ok(&c)) { cx_call(&x, scope); }
+  cx_box_deinit(&x);
+  cx_box_deinit(&c);
+  return true;
+}
+
+static bool if_else_imp(struct cx_scope *scope) {
+  struct cx_box
     y = *cx_test(cx_pop(scope, false)),
     x = *cx_test(cx_pop(scope, false)),
     c = *cx_test(cx_pop(scope, false));
@@ -357,6 +395,7 @@ static bool if_imp(struct cx_scope *scope) {
   cx_call(cx_ok(&c) ? &x : &y, scope);
   cx_box_deinit(&x);
   cx_box_deinit(&y);
+  cx_box_deinit(&c);
   return true;
 }
 
@@ -538,10 +577,13 @@ struct cx *cx_init(struct cx *cx) {
   cx_add_func(cx, "?", cx_arg(cx->opt_type))->ptr = ok_imp;
   cx_add_func(cx, "!", cx_arg(cx->opt_type))->ptr = not_imp;
 
-  cx_add_func(cx, "if",
+  cx_add_func(cx, "if", cx_arg(cx->opt_type), cx_arg(cx->any_type))->ptr = if_imp;
+  cx_add_func(cx, "else", cx_arg(cx->opt_type), cx_arg(cx->any_type))->ptr = else_imp;
+
+  cx_add_func(cx, "if-else",
 	      cx_arg(cx->opt_type),
 	      cx_arg(cx->any_type),
-	      cx_arg(cx->any_type))->ptr = if_imp;
+	      cx_arg(cx->any_type))->ptr = if_else_imp;
   
   cx_add_func(cx, "compile", cx_arg(cx->str_type))->ptr = compile_imp;
   cx_add_func(cx, "call", cx_arg(cx->any_type))->ptr = call_imp;

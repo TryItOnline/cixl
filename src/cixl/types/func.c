@@ -147,11 +147,11 @@ static bool equid_imp(struct cx_box *x, struct cx_box *y) {
 
 static bool call_imp(struct cx_box *value, struct cx_scope *scope) {
   struct cx *cx = scope->cx;
-  
-  struct cx_fimp *imp = cx_func_get_imp(value->as_ptr, &scope->stack, 0, scope);
+  struct cx_func *func = value->as_ptr;
+  struct cx_fimp *imp = cx_func_get_imp(func, &scope->stack, 0, scope);
 
   if (!imp) {
-    cx_error(cx, cx->row, cx->col, "Func not applicable: '%s'", imp->func->id);
+    cx_error(cx, cx->row, cx->col, "Func not applicable: '%s'", func->id);
     return -1;
   }
 

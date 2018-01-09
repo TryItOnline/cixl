@@ -78,9 +78,10 @@ static bool get_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
       cx_error(cx, tok->row, tok->col, "Nothing to uncut");
       return false;
     }
+    
     size_t *cut_offs = cx_vec_peek(&s->cut_offs, 0);
     (*cut_offs)--;
-    if (*cut_offs) { cx_vec_pop(&s->cut_offs); }
+    if (!(*cut_offs)) { cx_vec_pop(&s->cut_offs); }
   } else {
     struct cx_box *v = cx_get(s, op->as_get.id, false);
     if (!v) { return false; }

@@ -306,16 +306,21 @@ The ```!``` operator negates any condition.
 [#f]
 ```
 
-The ```if``` statement may be used to branch on a condition, it calls '?' implicitly so you can throw any value at it.
+```if```, ```else``` and ```if-else``` may be used to branch on a condition, they call '?' implicitly so you can throw any value at them.
 
 ```
-   | 42 if `not-zero `zero
+  | 'foo' %%, $ if &upper
 ...
-['not zero']
+['FOO']
 
-   | ''! if `empty `not-empty
+  | #nil else { say 'not nil' }
 ...
-['empty']
+not nil
+[]
+
+  | 42 if-else `not-zero `zero
+...
+[`not zero]
 ```
 
 ### Errors

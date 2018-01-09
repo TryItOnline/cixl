@@ -66,6 +66,18 @@ static void group_tests() {
   cx_deinit(&cx);
 }
 
+static void if_tests() {
+  struct cx cx;
+  cx_init(&cx);
+
+  run(&cx, "#t if 42 = 42 test");
+  run(&cx, "#f else 42 = 42 test");
+  run(&cx, "#t if-else `yes `no = `yes test");
+  run(&cx, "#f if-else `yes `no = `no test");
+
+  cx_deinit(&cx);
+}
+
 static void let_tests() {
   struct cx cx;
   cx_init(&cx);
@@ -103,7 +115,7 @@ static void func_tests() {
 
   run(&cx,
       "func: maybe-add(x y Num) $x + $y; "
-      "func: maybe-add(x y Int) $x = 42 if 42 {upcall $x $y}; "
+      "func: maybe-add(x y Int) $x = 42 if-else 42 {upcall $x $y}; "
       "maybe-add 1 2 3 = test "
       "maybe-add 42 2 42 = test");
 
@@ -257,6 +269,7 @@ void cx_tests() {
   type_tests();
   stack_tests();
   group_tests();
+  if_tests();
   let_tests();
   func_tests();
   int_tests();
