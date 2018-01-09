@@ -1,6 +1,6 @@
-** add if/else fns
+* add if/else fns
+** rename if to if-else
 ** update bookings/tests/readme
-* ---
 * change str to use nrefs
 ** add struct cx_str
 *** data, len & nrefs

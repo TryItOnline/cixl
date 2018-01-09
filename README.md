@@ -310,7 +310,7 @@ We're going down
 While ```test``` may be used to signal an error when the specified condition doesn't hold.
 
 ```
-   1 = 2 test
+   | 1 = 2 test
 ...
 Error in row 1, col 7:
 Test failed
