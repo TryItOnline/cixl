@@ -97,7 +97,8 @@ func: new-booking(r Resource start end Time q Int)
   $b;
 
 /*
-  Bookings represent used quantity for a specific resource and interval.
+  This should result in an overbook error since it tries to book 11 out of 10 for
+  the next hour.
 */
 
 func: run-tests()
