@@ -86,7 +86,7 @@ The ```,``` operator may be used to cut the stack into discrete pieces and force
 [3 7]
 ```
 
-While ```$``` goes the other ways and pulls values across cuts.
+While ```$``` may be used to pull values across cuts.
 
 ```
    1 2,
