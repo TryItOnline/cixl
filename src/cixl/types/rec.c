@@ -32,7 +32,7 @@ static void clone_imp(struct cx_box *dst, struct cx_box *src) {
   cx_do_set(&src_rec->values, struct cx_field_value, sv) {
     struct cx_field_value *dv = cx_test(cx_set_insert(&dst_rec->values, &sv->id));
     dv->id = sv->id;
-    cx_copy(&dv->box, &sv->box);
+    cx_clone(&dv->box, &sv->box);
   }
 }
 

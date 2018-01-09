@@ -1,8 +1,20 @@
-* add fail fn
-** call cx_error & return false
+* rename islet to is-let
+** add let & get-let fns
 * rename if to ifelse
 ** add if/else fns
 ** update bookings/tests/readme
+* ---
+* change str to use nrefs
+** add struct cx_str
+*** data, len & nrefs
+*** get len on demand
+* add Table type
+** extract cx_table from Rec
+** add type.cmp
+** add cmp fn
+*** return `eq/lt/gt
+** allow specifying key
+** add $resources table
 * add type: macro
 ** type: Size Int
 *** size 42 -> Size(42)
@@ -12,10 +24,6 @@
 ** implement for int/rat in math
 * add rat sub/div
 ** move fns to math lib
-* change str to use nrefs
-** add struct cx_str
-*** data, len & nrefs
-*** get len on demand
 * add lets: macro
 ** typecheck and bind stack to vars
 * add case: macro
@@ -42,7 +50,6 @@ $bar ('bar' $bar vect)
 ** use as fallback for eqval
 ** replaces int/rat imps
 ** add cx_init_cmp_type
-* add Table type
 * add fail func
 ** like test but just call error with message
 

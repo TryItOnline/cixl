@@ -455,6 +455,14 @@ static bool test_imp(struct cx_scope *scope) {
   return ok;
 }
 
+static bool fail_imp(struct cx_scope *scope) {
+  struct cx_box m = *cx_test(cx_pop(scope, false));
+  struct cx *cx = scope->cx;
+  cx_error(cx, cx->row, cx->col, m.as_ptr);
+  cx_box_deinit(&m);
+  return false;
+}
+
 struct cx *cx_init(struct cx *cx) {
   cx->next_sym_tag = cx->next_type_tag = 1;
   cx->fimp = NULL;
@@ -539,6 +547,7 @@ struct cx *cx_init(struct cx *cx) {
 
   cx_add_func(cx, "clock", cx_arg(cx->any_type))->ptr = clock_imp;
   cx_add_func(cx, "test", cx_arg(cx->opt_type))->ptr = test_imp;
+  cx_add_func(cx, "fail", cx_arg(cx->opt_type))->ptr = fail_imp;
   
   cx->main = cx_begin(cx, NULL);
   return cx;

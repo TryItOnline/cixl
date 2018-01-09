@@ -8,14 +8,12 @@ rec: Resource()
   calendar Vect;
   
 rec: Capacity()
-  resource   Resource
   start end  Time
   total used Int;
 
-func: new-capacity(r Resource start end Time total used Int)
+func: new-capacity(start end Time total used Int)
   let: c Capacity new;
   repeat: ($c put)
-    `resource $r,
     `start    $start,
     `end      $end,
     `total    $total,
@@ -25,7 +23,7 @@ func: new-capacity(r Resource start end Time total used Int)
 func: new-resource(q Int)
   let: r Resource new;
   $r put `quantity $q
-  $r put `calendar [new-capacity $r $min-time $max-time $q 0]
+  $r put `calendar [new-capacity $min-time $max-time $q 0]
   $r;
 
 func: update-capacity(in Capacity start end Time total used Int out Vect)
@@ -73,4 +71,11 @@ func: new-booking(r Resource start end Time q Int)
     `start    $start,
     `end      $end,
     `quantity $q;
-  update-resource $r $start $end 0 $q;
+  update-resource $r $start $end 0 $q
+  $b;
+
+func: run-tests()
+  let: r new-resource 10;
+  let: (start end) today, today +, 1 days;
+  new-booking $r $start $end 5 _
+  new-booking $r $start $end 6;
