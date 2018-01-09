@@ -86,6 +86,18 @@ The ```,``` operator may be used to cut the stack into discrete pieces and force
 [3 7]
 ```
 
+While ```$``` goes the other ways and pulls values across cuts.
+
+```
+   1 2,
+...
+[1 2]
+
+   $ + 3
+...
+[1 5]
+```
+
 ### Variables
 Named variables may be defined once per scope using the ```let:``` macro.
 

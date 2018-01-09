@@ -72,9 +72,20 @@ cx_op_type(CX_OFUNCALL, {
 
 static bool get_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
   struct cx_scope *s = cx_scope(cx, 0);
-  struct cx_box *v = cx_get(s, op->as_get.id, false);
-  if (!v) { return false; }
-  cx_copy(cx_push(s), v);
+  
+  if (!op->as_get.id.id[0]) {
+    if (!s->cut_offs) {
+      cx_error(cx, tok->row, tok->col, "Nothing to uncut");
+      return false;
+    }
+    
+    s->cut_offs--;
+  } else {
+    struct cx_box *v = cx_get(s, op->as_get.id, false);
+    if (!v) { return false; }
+    cx_copy(cx_push(s), v);
+  }
+  
   return true;
 }
 
