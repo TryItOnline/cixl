@@ -240,7 +240,7 @@ static bool repeat_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
     goto exit;
   }
   
-  struct cx_tok *prefix = cx_vec_peek(&toks, 0);
+  struct cx_tok *prefix = cx_vec_get(&toks, 0);
   struct cx_macro_eval *eval = cx_macro_eval_new(repeat_eval);
 
   for (struct cx_tok *t = cx_vec_get(&toks, 1), *pt = NULL;
@@ -775,6 +775,7 @@ bool cx_load(struct cx *cx, const char *path) {
 
   if (!f) {
     cx_error(cx, cx->row, cx->col, "Failed opening file '%s': %d", path, errno);
+    return false;
   }
   
   fseek(f, 0, SEEK_END);

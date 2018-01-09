@@ -1,3 +1,8 @@
+* add fail fn
+** call cx_error & return false
+* rename if to ifelse
+** add if/else fns
+** update bookings/tests/readme
 * add type: macro
 ** type: Size Int
 *** size 42 -> Size(42)

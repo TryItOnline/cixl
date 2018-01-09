@@ -54,7 +54,11 @@ static struct cx_vec *parse_fimp(struct cx *cx,
   while (true) {
     if (!cx_parse_tok(cx, in, out, false)) { return false; }
     struct cx_tok *tok = cx_vec_pop(out);
-    if (tok->type == CX_TUNTYPE()) { break; }
+    
+    if (tok->type == CX_TID() && !strcmp(tok->as_ptr, ">")) {
+      cx_tok_deinit(tok);
+      break;
+    }
 
     if (tok->type == CX_TTYPE()) {
       struct cx_box *v = cx_box_init(cx_vec_push(types), tok->as_ptr);
@@ -404,6 +408,7 @@ bool cx_parse_tok(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
       break;
     case '\n':
       cx->row++;
+      cx->col = 0;
       break;
     case ',':
       cx_tok_init(cx_vec_push(out), CX_TCUT(), row, col);
@@ -429,9 +434,6 @@ bool cx_parse_tok(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
     case '}':
       cx_tok_init(cx_vec_push(out), CX_TUNLAMBDA(), row, col);
       return true;
-    case '>':
-      cx_tok_init(cx_vec_push(out), CX_TUNTYPE(), row, col);
-      return true;	
     case '\\':
       return parse_char(cx, in, out);
     case '\'':

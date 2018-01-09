@@ -152,7 +152,7 @@ static void clone_imp(struct cx_box *dst, struct cx_box *src) {
   dst->as_ptr = dst_vect;
 
   cx_do_vec(&src_vect->imp, struct cx_box, v) {
-    cx_clone(cx_vec_push(&dst_vect->imp), v);
+    cx_copy(cx_vec_push(&dst_vect->imp), v);
   }
 }
 

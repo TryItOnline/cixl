@@ -11,7 +11,7 @@
 						\
     if (init) {					\
       init = false;				\
-      cx_tok_type_init(&type);			\
+      cx_tok_type_init(&type, #id);		\
       __VA_ARGS__;				\
     }						\
 						\
@@ -22,12 +22,13 @@ struct cx_bin;
 struct cx_tok;
 
 struct cx_tok_type {
+  const char *id;
   ssize_t (*compile)(struct cx_bin *bin, size_t tok_idx, struct cx *cx);
   void (*copy)(struct cx_tok *dst, struct cx_tok *src);
   void (*deinit)(struct cx_tok *);
 };
 
-struct cx_tok_type *cx_tok_type_init(struct cx_tok_type *type);
+struct cx_tok_type *cx_tok_type_init(struct cx_tok_type *type, const char *id);
 
 struct cx_tok {
   struct cx_tok_type *type;
@@ -61,7 +62,6 @@ struct cx_tok_type *CX_TSTASH();
 struct cx_tok_type *CX_TTYPE();
 struct cx_tok_type *CX_TUNGROUP();
 struct cx_tok_type *CX_TUNLAMBDA();
-struct cx_tok_type *CX_TUNTYPE();
 struct cx_tok_type *CX_TUNVECT();
 struct cx_tok_type *CX_TVECT();
 struct cx_tok_type *CX_TZAP();

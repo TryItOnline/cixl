@@ -11,7 +11,8 @@
 #include "cixl/types/func.h"
 #include "cixl/vec.h"
 
-struct cx_tok_type *cx_tok_type_init(struct cx_tok_type *type) {
+struct cx_tok_type *cx_tok_type_init(struct cx_tok_type *type, const char *id) {
+  type->id = id;
   type->compile = NULL;
   type->copy = NULL;
   type->deinit = NULL;
@@ -308,7 +309,6 @@ cx_tok_type(CX_TTYPE, {
 
 cx_tok_type(CX_TUNGROUP);
 cx_tok_type(CX_TUNLAMBDA);
-cx_tok_type(CX_TUNTYPE);
 cx_tok_type(CX_TUNVECT);
 
 static ssize_t zap_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) {
