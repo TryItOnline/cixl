@@ -647,7 +647,7 @@ compared, added and subtracted;
 ...
 [Time(1/2/2) 12:0:0.0]
 
-   < now
+   lt now
 ...
 [#t]
 
@@ -674,18 +674,19 @@ Capitalized names are treated as types, the following list is defined out of the
 - A (Opt)
 - Bin (A)
 - Bool (A)
+- Cmp (A)
 - Fimp (A)
 - Func (A)
 - Int (Num)
 - Lambda (A)
 - Nil (Opt)
-- Num (A)
+- Num (Cmp)
 - Opt ()
 - Rat (Num)
 - Rec (A)
-- Str (A)
+- Str (Cmp)
 - Sym (A)
-- Time (A)
+- Time (Cmp)
 - Type (A)
 - Vect (A)
 

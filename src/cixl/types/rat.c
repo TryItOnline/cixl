@@ -76,30 +76,6 @@ enum cx_cmp cx_cmp_rat(const void *x, const void *y) {
   return (xn > yn) ? CX_CMP_GT : CX_CMP_EQ;
 }
 
-static bool lt_imp(struct cx_scope *scope) {
-  struct cx_box
-    y = *cx_test(cx_pop(scope, false)),
-    x = *cx_test(cx_pop(scope, false));
-
-  cx_box_init(cx_push(scope),
-	      scope->cx->bool_type)->as_bool = cx_cmp_rat(&x.as_rat,
-							  &y.as_rat) == CX_CMP_LT;
-  
-  return true;
-}
-
-static bool gt_imp(struct cx_scope *scope) {
-  struct cx_box
-    y = *cx_test(cx_pop(scope, false)),
-    x = *cx_test(cx_pop(scope, false));
-
-  cx_box_init(cx_push(scope),
-	      scope->cx->bool_type)->as_bool = cx_cmp_rat(&x.as_rat,
-							  &y.as_rat) == CX_CMP_GT;
-  
-  return true;
-}
-
 static bool int_imp(struct cx_scope *scope) {
   struct cx_box v = *cx_test(cx_pop(scope, false));
   cx_box_init(cx_push(scope), scope->cx->int_type)->as_int = cx_rat_int(&v.as_rat);
@@ -109,6 +85,10 @@ static bool int_imp(struct cx_scope *scope) {
 static bool equid_imp(struct cx_box *x, struct cx_box *y) {
   struct cx_rat *xr = &x->as_rat, *yr = &y->as_rat;
   return xr->num == yr->num && xr->den == yr->den;
+}
+
+static enum cx_cmp cmp_imp(struct cx_box *x, struct cx_box *y) {
+  return cx_cmp_rat(&x->as_rat, &y->as_rat);
 }
 
 static bool ok_imp(struct cx_box *v) {
@@ -124,12 +104,10 @@ static void fprint_imp(struct cx_box *v, FILE *out) {
 struct cx_type *cx_init_rat_type(struct cx *cx) {
   struct cx_type *t = cx_add_type(cx, "Rat", cx->num_type);
   t->equid = equid_imp;
+  t->cmp = cmp_imp;
   t->ok = ok_imp;
   t->fprint = fprint_imp;
 
-  cx_add_func(cx, "<", cx_arg(t), cx_arg(t))->ptr = lt_imp;
-  cx_add_func(cx, ">", cx_arg(t), cx_arg(t))->ptr = gt_imp;
-  
   cx_add_func(cx, "int", cx_arg(t))->ptr = int_imp;
   
   return t;

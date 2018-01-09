@@ -2,17 +2,19 @@
 ** add if/else fns
 ** update bookings/tests/readme
 * ---
+* add call stack
+** log function calls with func/row/col
+** copy to error struct
+** print in repl
 * change str to use nrefs
 ** add struct cx_str
 *** data, len & nrefs
 *** get len on demand
 * add Table type
 ** extract cx_table from Rec
-** add type.cmp
-** add cmp fn
-*** return `eq/lt/gt
 ** allow specifying key
 ** add $resources table
+* implement Cmp for Vect/Rec
 * add type: macro
 ** type: Size Int
 *** size 42 -> Size(42)

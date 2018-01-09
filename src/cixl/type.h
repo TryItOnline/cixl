@@ -18,6 +18,7 @@ struct cx_type {
 
   bool (*eqval)(struct cx_box *, struct cx_box *, struct cx_scope *);
   bool (*equid)(struct cx_box *, struct cx_box *);
+  enum cx_cmp (*cmp)(struct cx_box *, struct cx_box *);
   bool (*call)(struct cx_box *, struct cx_scope *);
   bool (*ok)(struct cx_box *);
   void (*copy)(struct cx_box *dst, struct cx_box *src);

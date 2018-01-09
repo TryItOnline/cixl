@@ -20,6 +20,7 @@ struct cx_type *cx_type_init(struct cx_type *type, struct cx *cx, const char *id
   
   type->eqval = NULL;
   type->equid = NULL;
+  type->cmp = NULL;
   type->ok = NULL;
   type->call = NULL;
   type->copy = NULL;

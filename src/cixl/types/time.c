@@ -17,6 +17,23 @@ static bool equid_imp(struct cx_box *x, struct cx_box *y) {
   return xt->months == yt->months && xt->ns == yt->ns;
 }
 
+
+static enum cx_cmp cmp_imp(struct cx_box *x, struct cx_box *y) {
+  struct cx_time *xt = &x->as_time, *yt = &y->as_time;
+  
+  if (xt->months < yt->months ||
+      (xt->months == yt->months && xt->ns < yt->ns)) {
+    return CX_CMP_LT;
+  }
+
+  if (xt->months > yt->months ||
+      (xt->months == yt->months && xt->ns > yt->ns)) {
+    return CX_CMP_GT;
+  }
+
+  return CX_CMP_EQ;
+}
+
 static bool ok_imp(struct cx_box *v) {
   struct cx_time *t = &v->as_time;
   return t->months || t->ns;
@@ -54,8 +71,9 @@ static void fprint_imp(struct cx_box *v, FILE *out) {
 }
 
 struct cx_type *cx_init_time_type(struct cx *cx) {
-  struct cx_type *t = cx_add_type(cx, "Time", cx->any_type);
+  struct cx_type *t = cx_add_type(cx, "Time", cx->cmp_type);
   t->equid = equid_imp;
+  t->cmp = cmp_imp;
   t->ok = ok_imp;
   t->fprint = fprint_imp;
   return t;

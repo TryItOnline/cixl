@@ -364,30 +364,6 @@ static bool mul_imp(struct cx_scope *scope) {
   return true;
 }
 
-static bool lt_imp(struct cx_scope *scope) {
-  struct cx_time
-    yt = cx_test(cx_pop(scope, false))->as_time,
-    xt = cx_test(cx_pop(scope, false))->as_time;
-  
-  cx_box_init(cx_push(scope), scope->cx->bool_type)->as_bool =
-    xt.months < yt.months ||
-    (xt.months == yt.months && xt.ns < yt.ns);
-  
-  return true;
-}
-
-static bool gt_imp(struct cx_scope *scope) {
-  struct cx_time
-    yt = cx_test(cx_pop(scope, false))->as_time,
-    xt = cx_test(cx_pop(scope, false))->as_time;
-  
-  cx_box_init(cx_push(scope), scope->cx->bool_type)->as_bool =
-    xt.months > yt.months ||
-    (xt.months == yt.months && xt.ns > yt.ns);
-  
-  return true;
-}
-
 void cx_init_time(struct cx *cx) {
   cx_add_func(cx, "years", cx_arg(cx->int_type))->ptr = years_imp;
   cx_add_func(cx, "months", cx_arg(cx->int_type))->ptr = months_imp;
@@ -433,11 +409,6 @@ void cx_init_time(struct cx *cx) {
 	      cx_arg(cx->time_type), cx_arg(cx->time_type))->ptr = sub_imp;
   cx_add_func(cx, "*",
 	      cx_arg(cx->time_type), cx_arg(cx->int_type))->ptr = mul_imp;
-
-  cx_add_func(cx, "<",
-	      cx_arg(cx->time_type), cx_arg(cx->time_type))->ptr = lt_imp;
-  cx_add_func(cx, ">",
-	      cx_arg(cx->time_type), cx_arg(cx->time_type))->ptr = gt_imp;
 
   cx_test(cx_eval_str(cx, "func: today() now date;"));
 }

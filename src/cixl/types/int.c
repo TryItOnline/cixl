@@ -9,24 +9,6 @@
 #include "cixl/types/int.h"
 #include "cixl/util.h"
 
-static bool lt_imp(struct cx_scope *scope) {
-  struct cx_box
-    y = *cx_test(cx_pop(scope, false)),
-    x = *cx_test(cx_pop(scope, false));
-
-  cx_box_init(cx_push(scope), scope->cx->bool_type)->as_bool = x.as_int < y.as_int;
-  return true;
-}
-
-static bool gt_imp(struct cx_scope *scope) {
-  struct cx_box
-    y = *cx_test(cx_pop(scope, false)),
-    x = *cx_test(cx_pop(scope, false));
-  
-  cx_box_init(cx_push(scope), scope->cx->bool_type)->as_bool = x.as_int > y.as_int;
-  return true;
-}
-
 static bool inc_imp(struct cx_scope *scope) {
   struct cx_box *v = cx_test(cx_peek(scope, false));
   v->as_int++;
@@ -97,6 +79,10 @@ static bool equid_imp(struct cx_box *x, struct cx_box *y) {
   return x->as_int == y->as_int;
 }
 
+static enum cx_cmp cmp_imp(struct cx_box *x, struct cx_box *y) {
+  return cx_cmp_int(&x->as_int, &y->as_int);
+}
+
 static bool ok_imp(struct cx_box *v) {
   return v->as_int != 0;
 }
@@ -108,12 +94,10 @@ static void fprint_imp(struct cx_box *v, FILE *out) {
 struct cx_type *cx_init_int_type(struct cx *cx) {
   struct cx_type *t = cx_add_type(cx, "Int", cx->num_type);
   t->equid = equid_imp;
+  t->cmp = cmp_imp;
   t->ok = ok_imp;
   t->fprint = fprint_imp;
   
-  cx_add_func(cx, "<", cx_arg(t), cx_arg(t))->ptr = lt_imp;
-  cx_add_func(cx, ">", cx_arg(t), cx_arg(t))->ptr = gt_imp;
-
   cx_add_func(cx, "++", cx_arg(t))->ptr = inc_imp;
   cx_add_func(cx, "--", cx_arg(t))->ptr = dec_imp;
   

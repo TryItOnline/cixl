@@ -27,6 +27,10 @@ bool cx_equid(struct cx_box *x, struct cx_box *y) {
   return cx_test(x->type->equid)(x, y);
 }
 
+enum cx_cmp cx_cmp(struct cx_box *x, struct cx_box *y) {
+  return cx_test(x->type->cmp)(x, y);
+}
+
 bool cx_ok(struct cx_box *x) {
   return x->type->ok ? x->type->ok(x) : true;
 }

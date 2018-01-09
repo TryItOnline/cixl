@@ -36,6 +36,10 @@ static bool eqval_imp(struct cx_box *x, struct cx_box *y, struct cx_scope *scope
   return strcmp(x->as_ptr, y->as_ptr) == 0;
 }
 
+static enum cx_cmp cmp_imp(struct cx_box *x, struct cx_box *y) {
+  return cx_cmp_str(&x, &y);
+}
+
 static bool ok_imp(struct cx_box *v) {
   char *s = v->as_ptr;
   return s[0];
@@ -57,6 +61,7 @@ struct cx_type *cx_init_str_type(struct cx *cx) {
   struct cx_type *t = cx_add_type(cx, "Str", cx->any_type);
   t->eqval = eqval_imp;
   t->equid = equid_imp;
+  t->cmp = cmp_imp;
   t->ok = ok_imp;
   t->copy = copy_imp;
   t->fprint = fprint_imp;

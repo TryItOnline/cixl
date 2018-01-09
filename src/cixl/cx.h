@@ -24,9 +24,9 @@ struct cx {
   struct cx_set separators;
 
   struct cx_set types;
-  struct cx_type *any_type, *bin_type, *bool_type, *char_type, *fimp_type, *func_type,
-    *int_type, *lambda_type, *meta_type, *nil_type, *num_type, *opt_type, *rat_type,
-    *rec_type, *str_type, *sym_type, *time_type, *vect_type;
+  struct cx_type *any_type, *bin_type, *bool_type, *char_type, *cmp_type, *fimp_type,
+    *func_type, *int_type, *lambda_type, *meta_type, *nil_type, *num_type, *opt_type,
+    *rat_type, *rec_type, *str_type, *sym_type, *time_type, *vect_type;
 
   uint64_t next_sym_tag, next_type_tag;
   struct cx_set syms, macros, funcs, consts;

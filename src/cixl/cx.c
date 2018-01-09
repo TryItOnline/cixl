@@ -15,6 +15,7 @@
 #include "cixl/types/bin.h"
 #include "cixl/types/bool.h"
 #include "cixl/types/char.h"
+#include "cixl/types/cmp.h"
 #include "cixl/types/fimp.h"
 #include "cixl/types/func.h"
 #include "cixl/types/int.h"
@@ -502,7 +503,9 @@ struct cx *cx_init(struct cx *cx) {
   cx->any_type = cx_add_type(cx, "A", cx->opt_type);
   cx->any_type->trait = true;
 
-  cx->num_type = cx_add_type(cx, "Num", cx->any_type);
+  cx->cmp_type = cx_init_cmp_type(cx);
+  
+  cx->num_type = cx_add_type(cx, "Num", cx->cmp_type);
   cx->num_type->trait = true;
   
   cx->rec_type = cx_add_type(cx, "Rec", cx->any_type);
