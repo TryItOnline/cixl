@@ -268,25 +268,6 @@ test.cx:
 [3]
 ```
 
-### Errors
-Error handling is a work in progress, but two functions are provided for signalling errors. ```fail``` may be used to signal an error the with specified error message.
-
-```
-   fail 'We\'re going down!'
-...
-Error in row 1, col 6:
-We're going down
-```
-
-While ```test``` may be used to signal an error when the specified condition doesn't hold.
-
-```
-   1 = 2 test
-...
-Error in row 1, col 7:
-Test failed
-```
-
 ### Conditions
 All types are useable as conditions; some are always true; integers test true for anything but zero; empty strings test false etc. The ```?``` operator may be used to transform any value to its conditional representation.
 
@@ -314,6 +295,25 @@ The ```if``` statement may be used to branch on a condition, it calls '?' implic
    | ''! if `empty `not-empty
 ...
 ['empty']
+```
+
+### Errors
+Error handling is a work in progress, but two functions are provided for signalling errors. ```fail``` may be used to signal an error the with specified error message.
+
+```
+   fail 'We\'re going down!'
+...
+Error in row 1, col 6:
+We're going down
+```
+
+While ```test``` may be used to signal an error when the specified condition doesn't hold.
+
+```
+   1 = 2 test
+...
+Error in row 1, col 7:
+Test failed
 ```
 
 ### Lambdas
