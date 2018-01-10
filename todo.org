@@ -3,6 +3,10 @@
 *** data, len & nrefs
 *** get len on demand
 * add Ref type
+* add type.new
+** implement for all types
+** replaces Rec fn
+** Bin new compile ''
 * add Guid type
 * add Iter type
 ** add struct cx_iter
