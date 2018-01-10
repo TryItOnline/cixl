@@ -12,6 +12,7 @@
 struct cx_func;
 struct cx_lambda;
 struct cx_scope;
+struct cx_str;
 struct cx_type;
 
 struct cx_box {
@@ -24,6 +25,7 @@ struct cx_box {
     int64_t as_int;
     void *as_ptr;
     struct cx_rat as_rat;
+    struct cx_str *as_str;
     struct cx_sym as_sym;
     struct cx_time as_time;
   };

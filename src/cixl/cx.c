@@ -405,7 +405,7 @@ static bool compile_imp(struct cx_scope *scope) {
 
   struct cx_vec toks;
   cx_vec_init(&toks, sizeof(struct cx_tok));
-  bool ok = cx_parse_str(cx, in.as_ptr, &toks);
+  bool ok = cx_parse_str(cx, in.as_str->data, &toks);
   if (!ok) { goto exit; }
   
   struct cx_bin *bin = cx_bin_new();
@@ -498,7 +498,7 @@ static bool test_imp(struct cx_scope *scope) {
 static bool fail_imp(struct cx_scope *scope) {
   struct cx_box m = *cx_test(cx_pop(scope, false));
   struct cx *cx = scope->cx;
-  cx_error(cx, cx->row, cx->col, m.as_ptr);
+  cx_error(cx, cx->row, cx->col, m.as_str->data);
   cx_box_deinit(&m);
   return false;
 }
@@ -592,7 +592,7 @@ struct cx *cx_init(struct cx *cx) {
 
   cx_add_func(cx, "clock", cx_arg(cx->any_type))->ptr = clock_imp;
   cx_add_func(cx, "test", cx_arg(cx->opt_type))->ptr = test_imp;
-  cx_add_func(cx, "fail", cx_arg(cx->opt_type))->ptr = fail_imp;
+  cx_add_func(cx, "fail", cx_arg(cx->str_type))->ptr = fail_imp;
   
   cx->main = cx_begin(cx, NULL);
   srand((ptrdiff_t)cx + clock());

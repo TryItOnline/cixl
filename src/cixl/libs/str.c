@@ -9,10 +9,11 @@
 #include "cixl/libs/str.h"
 #include "cixl/types/func.h"
 #include "cixl/types/fimp.h"
+#include "cixl/types/str.h"
 
 static bool len_imp(struct cx_scope *scope) {
   struct cx_box v = *cx_test(cx_pop(scope, false));
-  cx_box_init(cx_push(scope), scope->cx->int_type)->as_int = strlen(v.as_ptr);
+  cx_box_init(cx_push(scope), scope->cx->int_type)->as_int = v.as_str->len;
   cx_box_deinit(&v);
   return true;
 }
@@ -24,15 +25,14 @@ static bool get_imp(struct cx_scope *scope) {
     i = *cx_test(cx_pop(scope, false)),
     s = *cx_test(cx_pop(scope, false));
 
-  char *sv = s.as_ptr;
   bool ok = false;
   
-  if (i.as_int < 0 || i.as_int >= strlen(sv)) {
+  if (i.as_int < 0 || i.as_int >= s.as_str->len) {
     cx_error(cx, cx->row, cx->col, "Index out of bounds: %" PRId64, i.as_int);
     goto exit;
   }
   
-  cx_box_init(cx_push(scope), cx->char_type)->as_char = *(sv+i.as_int);
+  cx_box_init(cx_push(scope), cx->char_type)->as_char = *(s.as_str->data+i.as_int);
   ok = true;
  exit:
   cx_box_deinit(&s);
@@ -46,7 +46,7 @@ static bool for_imp(struct cx_scope *scope) {
 
   bool ok = false;
 
-  for (char *c = str.as_ptr; *c; c++) {
+  for (char *c = str.as_str->data; *c; c++) {
     cx_box_init(cx_push(scope), scope->cx->char_type)->as_char = *c;
     if (!cx_call(&act, scope)) { goto exit; }
   }
@@ -67,7 +67,7 @@ static bool map_imp(struct cx_scope *scope) {
 
   bool ok = false;
   
-  for (char *c = str.as_ptr; *c; c++) {
+  for (char *c = str.as_str->data; *c; c++) {
     cx_box_init(cx_push(scope), scope->cx->char_type)->as_char = *c;
     if (!cx_call(&act, scope)) { goto exit; }
     struct cx_box *res = cx_pop(scope, true);

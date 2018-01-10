@@ -7,6 +7,7 @@
 #include "cixl/scope.h"
 #include "cixl/types/fimp.h"
 #include "cixl/types/func.h"
+#include "cixl/types/str.h"
 #include "cixl/types/sym.h"
 
 struct cx_sym *cx_sym_init(struct cx_sym *sym, const char *id, uint64_t tag) {
@@ -29,14 +30,14 @@ enum cx_cmp cx_cmp_sym(const void *x, const void *y) {
 static bool sym_imp(struct cx_scope *scope) {
   struct cx_box s = *cx_test(cx_pop(scope, false));
   cx_box_init(cx_push(scope),
-	      scope->cx->sym_type)->as_sym = cx_sym(scope->cx, s.as_ptr);
+	      scope->cx->sym_type)->as_sym = cx_sym(scope->cx, s.as_str->data);
   cx_box_deinit(&s);
   return true;
 }
 
 static bool str_imp(struct cx_scope *scope) {
   struct cx_sym s = cx_test(cx_pop(scope, false))->as_sym;
-  cx_box_init(cx_push(scope), scope->cx->str_type)->as_ptr = strdup(s.id);
+  cx_box_init(cx_push(scope), scope->cx->str_type)->as_str = cx_str_new(s.id);
   return true;
 }
 

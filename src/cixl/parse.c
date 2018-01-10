@@ -14,6 +14,7 @@
 #include "cixl/types/func.h"
 #include "cixl/types/int.h"
 #include "cixl/types/lambda.h"
+#include "cixl/types/str.h"
 #include "cixl/vec.h"
 
 static bool parse_type(struct cx *cx,
@@ -345,11 +346,11 @@ static bool parse_str(struct cx *cx, FILE *in, struct cx_vec *out) {
       struct cx_box *box = &cx_tok_init(cx_vec_push(out),
 					CX_TLITERAL(),
 					row, col)->as_box;
-      cx_box_init(box, cx->str_type)->as_ptr = value.data;
-    } else {
-      free(value.data);
+
+      cx_box_init(box, cx->str_type)->as_str = cx_str_new(value.data);
     }
-    
+
+    free(value.data);
     return ok;
   }
 }

@@ -1,7 +1,3 @@
-* change str to use nrefs
-** add struct cx_str
-*** data, len & nrefs
-*** get len on demand
 * add Ref type
 * add return fn
 ** add cx.calls

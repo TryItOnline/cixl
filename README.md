@@ -105,7 +105,7 @@ Named variables may be defined once per scope using the ```let:``` macro.
    | let: foo 'bar';
 ...$foo
 ...
-['bar']
+['bar'@2]
 
    let: foo 'baz';
 ...
@@ -162,7 +162,7 @@ Bindings in the current scope may be explicitly removed.
    let: x 'foo';
    $x
 ...
-['foo']
+['foo'@2]
 ```
 
 ### Equality
@@ -210,11 +210,11 @@ Symbols are immutable singleton strings that support fast equality checks.
 
    str
 ...
-['baz']
+['baz'@1]
 ```
 
 ### References
-Some values are reference counted; vectors, lambdas etc. Reference counted values display the number of references following ```@``` when printed. Doubling the copy operator results in a deep copy where applicable and defaults to regular copy where not.
+Some values are reference counted; strings, vectors, lambdas etc. Reference counted values display the number of references following ```@``` when printed. Doubling the copy operator results in a deep copy where applicable and defaults to regular copy where not.
 
 ```
    | [1 2 3] %
@@ -251,12 +251,12 @@ Variables in the parent scope may be referenced from within, but variables defin
 
 ```
    |
-...say 'hello'  
-...ask 'what\'s your name? '
+...say 'Hello'  
+...ask 'What\'s your name? '
 ...
-hello
-what's your name? Sifoo
-['Sifoo']
+Hello
+What's your name? Sifoo
+['Sifoo'@1]
 ```
 
 Code may be loaded from file using ```load```, it is evaluated in the current scope.
@@ -311,7 +311,7 @@ While the ```!``` operator negates any condition.
 ```
   | 'foo' %%, $ if &upper
 ...
-['FOO']
+['FOO'@1]
 
   | #nil else { say 'not true' }
 ...
@@ -505,7 +505,7 @@ Where conversions to other types make sense, a function named after the target t
 
    str
 ...
-['42']
+['42'@1]
 
    1 get
 ...
@@ -608,7 +608,7 @@ Some types support mapping actions over their contents using ```map```.
 ```
    | 'foo' map {int ++ char}
 ...
-['gpp']
+['gpp'@1]
 ```
 
 If you find repeating patterns in your code, the ```repeat:``` macro may allow isolating common parts without breaking the flow.

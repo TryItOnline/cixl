@@ -9,14 +9,34 @@
 #include "cixl/types/fimp.h"
 #include "cixl/types/func.h"
 
+struct cx_str *cx_str_new(const char *data) {
+  size_t len = strlen(data);
+  struct cx_str *str = malloc(sizeof(struct cx_str)+len+1);
+  strcpy(str->data, data);
+  str->len = len;
+  str->nrefs = 1;
+  return str;
+}
+
+struct cx_str *cx_str_ref(struct cx_str *str) {
+  str->nrefs++;
+  return str;
+}
+
+void cx_str_unref(struct cx_str *str) {
+  cx_test(str->nrefs > 0);
+  str->nrefs--;
+  if (!str->nrefs) { free(str); }
+}
+
 static bool int_imp(struct cx_scope *scope) {
   struct cx *cx = scope->cx;
   struct cx_box v = *cx_test(cx_pop(scope, false));
-  char *s = v.as_ptr;
-  int64_t iv = strtoimax(s, NULL, 10);
+  struct cx_str *s = v.as_str;
+  int64_t iv = strtoimax(s->data, NULL, 10);
   bool ok = false;
   
-  if (!iv && (!s[0] || s[0] != '0' || s[1])) {
+  if (!iv && (!s->data[0] || s->data[0] != '0' || s->data[1])) {
     cx_error(cx, cx->row, cx->col, "Failed parsing int: '%s'", s);
     goto exit;
   }
@@ -29,32 +49,32 @@ static bool int_imp(struct cx_scope *scope) {
 }
 
 static bool equid_imp(struct cx_box *x, struct cx_box *y) {
-  return x->as_ptr == y->as_ptr;
+  return x->as_str == y->as_str;
 }
 
 static bool eqval_imp(struct cx_box *x, struct cx_box *y, struct cx_scope *scope) {
-  return strcmp(x->as_ptr, y->as_ptr) == 0;
+  if (x->as_str->len != y->as_str->len) { return false; }
+  return strcmp(x->as_str->data, y->as_str->data) == 0;
 }
 
 static enum cx_cmp cmp_imp(struct cx_box *x, struct cx_box *y) {
-  return cx_cmp_str(&x, &y);
+  return cx_cmp_str(&x->as_str->data, &y->as_str->data);
 }
 
 static bool ok_imp(struct cx_box *v) {
-  char *s = v->as_ptr;
-  return s[0];
+  return v->as_str->len;
 }
 
 static void copy_imp(struct cx_box *dst, struct cx_box *src) {
-  dst->as_ptr = strdup(src->as_ptr);
+  dst->as_str = cx_str_ref(src->as_str);
 }
 
 static void fprint_imp(struct cx_box *v, FILE *out) {
-  fprintf(out, "'%s'", (char *)v->as_ptr);
+  fprintf(out, "'%s'@%d", v->as_str->data, v->as_str->nrefs);
 }
 
 static void deinit_imp(struct cx_box *v) {
-  free(v->as_ptr);
+  cx_str_unref(v->as_str);
 }
 
 struct cx_type *cx_init_str_type(struct cx *cx) {

@@ -7,6 +7,7 @@
 #include "cixl/types/fimp.h"
 #include "cixl/types/func.h"
 #include "cixl/types/int.h"
+#include "cixl/types/str.h"
 #include "cixl/util.h"
 
 static bool inc_imp(struct cx_scope *scope) {
@@ -37,7 +38,8 @@ static bool char_imp(struct cx_scope *scope) {
 static bool str_imp(struct cx_scope *scope) {
   struct cx_box v = *cx_test(cx_pop(scope, false));
   char *s = cx_fmt("%" PRId64, v.as_int);
-  cx_box_init(cx_push(scope), scope->cx->str_type)->as_ptr = s;
+  cx_box_init(cx_push(scope), scope->cx->str_type)->as_str = cx_str_new(s);
+  free(s);
   return true;
 }
 

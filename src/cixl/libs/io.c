@@ -6,18 +6,19 @@
 #include "cixl/scope.h"
 #include "cixl/types/fimp.h"
 #include "cixl/types/func.h"
+#include "cixl/types/str.h"
 
 static bool say_imp(struct cx_scope *scope) {
   struct cx_box s = *cx_test(cx_pop(scope, false));
-  puts(s.as_ptr);
+  puts(s.as_str->data);
   cx_box_deinit(&s);
   return true;
 }
 
 static bool ask_imp(struct cx_scope *scope) {
-  struct cx_box prompt = *cx_test(cx_pop(scope, false));
-  fputs(prompt.as_ptr, stdout);
-  cx_box_deinit(&prompt);
+  struct cx_box p = *cx_test(cx_pop(scope, false));
+  fputs(p.as_str->data, stdout);
+  cx_box_deinit(&p);
   
   struct cx_buf out;
   cx_buf_open(&out);
@@ -29,13 +30,13 @@ static bool ask_imp(struct cx_scope *scope) {
   }
 
   cx_buf_close(&out);
-  cx_box_init(cx_push(scope), scope->cx->str_type)->as_ptr = out.data;
+  cx_box_init(cx_push(scope), scope->cx->str_type)->as_str = cx_str_new(out.data);
   return true;
 }
 
 static bool load_imp(struct cx_scope *scope) {
   struct cx_box p = *cx_test(cx_pop(scope, false));
-  cx_load(scope->cx, p.as_ptr);
+  cx_load(scope->cx, p.as_str->data);
   cx_box_deinit(&p);
   return true;
 }
