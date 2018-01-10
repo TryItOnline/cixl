@@ -49,7 +49,7 @@ func: new-resource(q Int)
   $r;
 
 /*
-  Capacities are split into segments as needed during update.
+  Capacities are split as needed during update.
 */
 
 func: update-capacity(in Capacity start end Time total used Int out Vect)
