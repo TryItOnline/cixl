@@ -809,14 +809,10 @@ Traits are abstract types that may be used to simplify type checking and/or func
 ```
 
 ### Meta
-The compiler may be invoked from within the language through the ```compile``` function, the result is a compiled sequence of operations that may be passed around and called.
+A ```Bin``` represents a compiled sequence of operations. The compiler may be invoked from within the language through the ```compile``` function. Binaries may be passed around and called, which simply executes the compiled operations in the current scope.
 
 ```
-   | '1 + 2' compile
-...
-[Bin(0x8899a0)@1]
-
-   call
+   | Bin new %, $ compile '1 + 2' call
 ...
 [3]
 ```

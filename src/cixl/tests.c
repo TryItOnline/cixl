@@ -5,6 +5,7 @@
 #include "cixl/libs/str.h"
 #include "cixl/libs/rec.h"
 #include "cixl/libs/time.h"
+#include "cixl/libs/type.h"
 #include "cixl/libs/var.h"
 #include "cixl/scope.h"
 #include "cixl/tests.h"
@@ -38,6 +39,7 @@ static void comment_tests() {
 static void type_tests() {
   struct cx cx;
   cx_init(&cx);
+  cx_init_type(&cx);
 
   run(&cx, "42 type Int = test");
   run(&cx, "Int is A test");
@@ -236,6 +238,7 @@ static void math_tests() {
 static void rec_tests() {
   struct cx cx;
   cx_init(&cx);
+  cx_init_type(&cx);
   cx_init_rec(&cx);
   cx_init_var(&cx);
 
@@ -265,6 +268,16 @@ static void rec_tests() {
   cx_deinit(&cx);
 }
 
+static void compile_tests() {
+  struct cx cx;
+  cx_init(&cx);
+  cx_init_math(&cx);
+  cx_init_type(&cx);
+
+  run(&cx, "Bin new %, $ compile '1 + 2' call = 3 test");
+  cx_deinit(&cx);
+}
+
 void cx_tests() {
   comment_tests();
   type_tests();
@@ -282,4 +295,5 @@ void cx_tests() {
   vect_tests();
   math_tests();
   rec_tests();
+  compile_tests();
 }

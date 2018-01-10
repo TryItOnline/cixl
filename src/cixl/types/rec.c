@@ -5,6 +5,10 @@
 #include "cixl/scope.h"
 #include "cixl/types/rec.h"
 
+static void new_imp(struct cx_type *type, struct cx_box *out) {
+  cx_box_init(out, type)->as_ptr = cx_rec_new();
+}
+
 static bool equid_imp(struct cx_box *x, struct cx_box *y) {
   return x->as_ptr == y->as_ptr;
 }
@@ -55,6 +59,7 @@ struct cx_rec_type *cx_rec_type_init(struct cx_rec_type *type,
 				     const char *id) {
   cx_type_init(&type->imp, cx, id);
 
+  type->imp.new = new_imp;
   type->imp.equid = equid_imp;
   type->imp.eqval = eqval_imp;
   type->imp.ok = ok_imp;

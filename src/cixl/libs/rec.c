@@ -151,19 +151,6 @@ static bool rec_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   }
 }
 
-static bool new_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  struct cx_type *t = cx_test(cx_pop(scope, false))->as_ptr;
-
-  if (!cx_is(t, cx->rec_type)) {
-    cx_error(cx, cx->row, cx->col, "Expected rec type, actual: %s", t->id);
-    return false;
-  }
-  
-  cx_box_init(cx_push(scope), t)->as_ptr = cx_rec_new();
-  return true;
-}
-
 static bool get_imp(struct cx_scope *scope) {
   struct cx *cx = scope->cx;
   struct cx_sym f = cx_test(cx_pop(scope, false))->as_sym;
@@ -253,7 +240,6 @@ void cx_init_rec(struct cx *cx) {
 
   cx_add_func(cx, "=", cx_arg(cx->rec_type), cx_arg(cx->rec_type))->ptr = eqval_imp;
 
-  cx_add_func(cx, "new", cx_arg(cx->meta_type))->ptr = new_imp;
   cx_add_func(cx, "get", cx_arg(cx->rec_type), cx_arg(cx->sym_type))->ptr = get_imp;
 
   cx_add_func(cx, "put",

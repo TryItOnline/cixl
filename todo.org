@@ -1,7 +1,5 @@
-* add type.new
-** implement for all types
-** replaces Rec fn
-** Bin new compile ''
+* implement Sym new
+** generate unique symbol
 * add Guid type
 ** add Resource/Booking.id
 * add return fn
@@ -30,6 +28,10 @@
 ** allow specifying key
 ** add $resources table
 * implement Cmp for Sym/Vect/Rec
+* use cx_str for CX_TID
+** add cx_tok.as_str
+** grep CX_TID/as_ptr
+* implement type.new for Int/Str/Rat/Time
 * add type: macro
 ** type: Size Int
 *** size 42 -> Size(42)
@@ -53,10 +55,6 @@ $bar ('bar' $bar vect)
 * add vect get
 ** add vect lib
 * add str interpolation
-* add call stack
-** log function calls with func/row/col
-** copy to error struct
-** print in repl
 * add Stream type
 ** cx_stream with byte vec & r/w pos
 ** stream fn to create

@@ -13,6 +13,10 @@
 #include "cixl/types/fimp.h"
 #include "cixl/types/func.h"
 
+static void new_imp(struct cx_type *type, struct cx_box *out) {
+  cx_box_init(out, type)->as_ptr = cx_bin_new();
+}
+
 static bool equid_imp(struct cx_box *x, struct cx_box *y) {
   return x->as_ptr == y->as_ptr;
 }
@@ -38,6 +42,7 @@ static void deinit_imp(struct cx_box *value) {
 
 struct cx_type *cx_init_bin_type(struct cx *cx) {
   struct cx_type *t = cx_add_type(cx, "Bin", cx->any_type);
+  t->new = new_imp;
   t->equid = equid_imp;
   t->call = call_imp;
   t->copy = copy_imp;

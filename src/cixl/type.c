@@ -18,6 +18,7 @@ struct cx_type *cx_type_init(struct cx_type *type, struct cx *cx, const char *id
   type->trait = false;
   cx_set_init(&type->parents, sizeof(struct cx_type *), cx_cmp_ptr);
   
+  type->new = NULL;
   type->eqval = NULL;
   type->equid = NULL;
   type->cmp = NULL;
@@ -63,21 +64,6 @@ bool cx_is(struct cx_type *child, struct cx_type *parent) {
   return false;
 }
 
-static bool type_imp(struct cx_scope *scope) {
-  struct cx_box v = *cx_test(cx_pop(scope, false));
-  cx_box_init(cx_push(scope), scope->cx->meta_type)->as_ptr = v.type;
-  return true;
-}
-
-static bool is_imp(struct cx_scope *scope) {
-  struct cx_type
-    *y = cx_test(cx_pop(scope, false))->as_ptr,
-    *x = cx_test(cx_pop(scope, false))->as_ptr;
-
-  cx_box_init(cx_push(scope), scope->cx->bool_type)->as_bool = cx_is(x, y);
-  return true;
-}
-
 static bool equid_imp(struct cx_box *x, struct cx_box *y) {
   return x->as_ptr == y->as_ptr;
 }
@@ -91,9 +77,5 @@ struct cx_type *cx_init_meta_type(struct cx *cx) {
   struct cx_type *t = cx_add_type(cx, "Type", cx->any_type);
   t->equid = equid_imp;
   t->fprint = fprint_imp;
-  
-  cx_add_func(cx, "type", cx_arg(cx->any_type))->ptr = type_imp;
-  cx_add_func(cx, "is", cx_arg(t), cx_arg(t))->ptr = is_imp;
-
   return t;
 }

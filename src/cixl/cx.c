@@ -401,22 +401,24 @@ static bool if_else_imp(struct cx_scope *scope) {
 
 static bool compile_imp(struct cx_scope *scope) {
   struct cx *cx = scope->cx;
-  struct cx_box in = *cx_test(cx_pop(scope, false));
+  
+  struct cx_box
+    in = *cx_test(cx_pop(scope, false)),
+    out = *cx_test(cx_pop(scope, false));
 
   struct cx_vec toks;
   cx_vec_init(&toks, sizeof(struct cx_tok));
   bool ok = cx_parse_str(cx, in.as_str->data, &toks);
   if (!ok) { goto exit; }
   
-  struct cx_bin *bin = cx_bin_new();
+  struct cx_bin *bin = out.as_ptr;
 
   if (!(ok = cx_compile(cx, cx_vec_start(&toks), cx_vec_end(&toks), bin))) {
     goto exit;
   }
-  
-  cx_box_init(cx_push(scope), cx->bin_type)->as_ptr = bin;
  exit:
   cx_box_deinit(&in);
+  cx_box_deinit(&out);
   cx_do_vec(&toks, struct cx_tok, t) { cx_tok_deinit(t); }
   cx_vec_deinit(&toks);
   return ok;
@@ -584,8 +586,10 @@ struct cx *cx_init(struct cx *cx) {
 	      cx_arg(cx->opt_type),
 	      cx_arg(cx->any_type),
 	      cx_arg(cx->any_type))->ptr = if_else_imp;
-  
-  cx_add_func(cx, "compile", cx_arg(cx->str_type))->ptr = compile_imp;
+
+  cx_add_func(cx, "compile",
+	      cx_arg(cx->bin_type),
+	      cx_arg(cx->str_type))->ptr = compile_imp;
   cx_add_func(cx, "call", cx_arg(cx->any_type))->ptr = call_imp;
   cx_add_func(cx, "recall")->ptr = recall_imp;
   cx_add_func(cx, "upcall")->ptr = upcall_imp;
