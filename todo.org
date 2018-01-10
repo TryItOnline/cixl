@@ -3,6 +3,16 @@
 *** data, len & nrefs
 *** get len on demand
 * add Ref type
+* add return fn
+** add cx.calls
+*** add struct cx_call
+**** cx_box target, return_pc, row, col
+** rename CX_TSTOP to CX_TRETURN
+** stop if return_pc is nil
+** call inlined fns directly from CX_OFUNCALL
+* add overlaps fn to bookings
+** add and/or operators
+** return early otherwise
 * add type.new
 ** implement for all types
 ** replaces Rec fn
@@ -18,7 +28,6 @@
 ** extract common for loop
 ** extract common map fn
 *** keep Str override
-* investigate inlining lambdas
 * add Table type
 ** extract cx_table from Rec
 ** allow specifying key
