@@ -2,6 +2,17 @@
 ** add struct cx_str
 *** data, len & nrefs
 *** get len on demand
+* add Ref type
+* add Iter type
+** add struct cx_iter
+*** bool (*next)()
+**** next is responsible for pushing values
+** implement for Vect/Str/Int
+** implement for Rec
+*** push field ids
+** extract common for loop
+** extract common map fn
+*** keep Str override
 * add Table type
 ** extract cx_table from Rec
 ** allow specifying key
@@ -16,6 +27,7 @@
 ** implement for int/rat in math
 * add rat sub/div
 ** move fns to math lib
+
 * add lets: macro
 ** typecheck and bind stack to vars
 * add case: macro
