@@ -99,7 +99,7 @@ rec: Booking()
   quantity  Int;
 
 func: new-booking(r Resource start end Time q Int)
-  $end <= $start if {fail 'Invalid booking length'}
+  $start < $end else {fail 'Invalid booking length'}
   let: b Booking new;
   repeat: ($b put)
     `resource $r,
