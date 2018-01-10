@@ -110,7 +110,7 @@ func: new-booking(r Resource start end Time q Int)
   $b;
 
 /*
-  This should result in an overbook error since it tries to book 11 out of 10 for
+  This should fail with an overbook error since it tries to book 11 out of 10 for
   the next hour.
 */
 
