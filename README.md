@@ -298,7 +298,7 @@ All types are useable as conditions; some are always true; integers test true fo
 [#f]
 ```
 
-The ```!``` operator negates any condition.
+While the ```!``` operator negates any condition.
 
 ```
    | 42!
@@ -313,9 +313,9 @@ The ```!``` operator negates any condition.
 ...
 ['FOO']
 
-  | #nil else { say 'not nil' }
+  | #nil else { say 'not true' }
 ...
-not nil
+not true
 []
 
   | 42 if-else `not-zero `zero
@@ -327,10 +327,10 @@ not nil
 Error handling is a work in progress, but two functions are provided for signalling errors. ```fail``` may be used to signal an error with specified error message.
 
 ```
-   fail 'We\'re going down!'
+   fail 'Going down!'
 ...
 Error in row 1, col 6:
-We're going down
+Going down!
 ```
 
 While ```test``` may be used to signal an error when the specified condition doesn't hold.
