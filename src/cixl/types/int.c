@@ -48,7 +48,7 @@ static bool times_imp(struct cx_scope *scope) {
 
   bool ok = false;
   
-  for (cx_int_t i = 0; i < reps.as_int; i++) {
+  for (int64_t i = 0; i < reps.as_int; i++) {
     if (!cx_call(&v, scope)) { goto exit; }
   }
 
@@ -65,7 +65,7 @@ static bool for_imp(struct cx_scope *scope) {
 
   bool ok = false;
   
-  for (cx_int_t i = 0; i < reps.as_int; i++) {
+  for (int64_t i = 0; i < reps.as_int; i++) {
     cx_box_init(cx_push(scope), scope->cx->int_type)->as_int = i;
     if (!cx_call(&act, scope)) { goto exit; }
   }

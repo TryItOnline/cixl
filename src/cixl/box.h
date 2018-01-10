@@ -2,8 +2,9 @@
 #define CX_BOX_H
 
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
-#include "cixl/types/int.h"
+
 #include "cixl/types/rat.h"
 #include "cixl/types/sym.h"
 #include "cixl/types/time.h"
@@ -20,7 +21,7 @@ struct cx_box {
   union {
     bool as_bool;
     char as_char;
-    cx_int_t as_int;
+    int64_t as_int;
     void *as_ptr;
     struct cx_rat as_rat;
     struct cx_sym as_sym;

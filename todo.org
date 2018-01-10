@@ -1,3 +1,4 @@
+* add Guid type
 * change str to use nrefs
 ** add struct cx_str
 *** data, len & nrefs

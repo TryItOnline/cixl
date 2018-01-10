@@ -55,8 +55,8 @@ static bool int_div_imp(struct cx_scope *scope) {
 
 static bool rand_imp(struct cx_scope *scope) {
   struct cx_box max = *cx_test(cx_pop(scope, false));
-  cx_int_t out = 0;
-  int *p = (int *)&out;
+  int64_t out = 0;
+  int32_t *p = (int *)&out;
   *p++ = rand();
   *p = rand();
   cx_box_init(cx_push(scope), scope->cx->int_type)->as_int = out % max.as_int;

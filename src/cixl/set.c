@@ -1,5 +1,4 @@
 #include "cixl/error.h"
-#include "cixl/types/int.h"
 #include "cixl/set.h"
 
 struct cx_set *cx_set_init(struct cx_set *set, size_t member_size, cx_cmp_t cmp) {
@@ -77,17 +76,17 @@ void cx_set_clear(struct cx_set *set) {
 
 static void insert_delete_tests() {
   struct cx_set set;
-  cx_set_init(&set, sizeof(cx_int_t), cx_cmp_int);
+  cx_set_init(&set, sizeof(int64_t), cx_cmp_int);
   
-  for (cx_int_t i = 0; i < CX_SET_TEST_MAX; i++) {
+  for (int64_t i = 0; i < CX_SET_TEST_MAX; i++) {
     void *p = cx_set_insert(&set, &i);
     cx_test(p);
-    *(cx_int_t *)p = i;
+    *(int64_t *)p = i;
   }
 
   cx_test(set.members.count == CX_SET_TEST_MAX);
     
-  for (cx_int_t i = 0; i < CX_SET_TEST_MAX; i++) {
+  for (int64_t i = 0; i < CX_SET_TEST_MAX; i++) {
     cx_test(cx_set_delete(&set, &i));
   }
 

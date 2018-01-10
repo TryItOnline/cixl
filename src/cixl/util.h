@@ -24,6 +24,11 @@
       (_x >= _y) ? _x : _y;			\
     })
 
+#define cx_abs(x) ({				\
+      typeof(x) _x = x;				\
+      _x < 0 ? -_x : _x;			\
+    })						\
+
 #define cx_baseof(ptr, typ, fld) ({			\
       const typeof( ((typ *)0)->fld ) *fp = (ptr);	\
       (typ *)((char *)fp - offsetof(typ, fld));		\

@@ -244,7 +244,7 @@ static bool parse_int(struct cx *cx, FILE *in, struct cx_vec *out) {
     cx_buf_close(&value);
     
     if (ok) {
-      cx_int_t int_value = strtoimax(value.data, NULL, 10);
+      int64_t int_value = strtoimax(value.data, NULL, 10);
       free(value.data);
       
       if (int_value || !errno) {

@@ -13,7 +13,7 @@ static bool int_imp(struct cx_scope *scope) {
   struct cx *cx = scope->cx;
   struct cx_box v = *cx_test(cx_pop(scope, false));
   char *s = v.as_ptr;
-  cx_int_t iv = strtoimax(s, NULL, 10);
+  int64_t iv = strtoimax(s, NULL, 10);
   bool ok = false;
   
   if (!iv && (!s[0] || s[0] != '0' || s[1])) {
