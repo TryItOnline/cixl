@@ -13,8 +13,8 @@
 #include "cixl/types/fimp.h"
 #include "cixl/types/func.h"
 
-static void new_imp(struct cx_type *type, struct cx_box *out) {
-  cx_box_init(out, type)->as_ptr = cx_bin_new();
+static void new_imp(struct cx_box *out) {
+  out->as_ptr = cx_bin_new();
 }
 
 static bool equid_imp(struct cx_box *x, struct cx_box *y) {

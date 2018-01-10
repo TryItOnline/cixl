@@ -1,3 +1,4 @@
+#include <inttypes.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
@@ -41,6 +42,13 @@ static bool str_imp(struct cx_scope *scope) {
   return true;
 }
 
+static void new_imp(struct cx_box *out) {
+  struct cx *cx = out->type->cx;
+  char *id = cx_fmt("S%" PRIu64, cx->next_sym_tag);
+  out->as_sym = cx_sym(cx, id);
+  free(id);
+}
+
 static bool equid_imp(struct cx_box *x, struct cx_box *y) {
   return x->as_sym.tag == y->as_sym.tag;
 }
@@ -51,6 +59,7 @@ static void fprint_imp(struct cx_box *v, FILE *out) {
 
 struct cx_type *cx_init_sym_type(struct cx *cx) {
   struct cx_type *t = cx_add_type(cx, "Sym", cx->any_type);
+  t->new = new_imp;
   t->equid = equid_imp;
   t->fprint = fprint_imp;
 

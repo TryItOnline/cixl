@@ -473,6 +473,21 @@ static bool upcall_imp(struct cx_scope *scope) {
   return cx_fimp_call(imp, scope);
 }
 
+static bool new_imp(struct cx_scope *scope) {
+  struct cx *cx = scope->cx;
+  struct cx_type *t = cx_test(cx_pop(scope, false))->as_ptr;
+
+  if (!t->new) {
+    cx_error(cx, cx->row, cx->col, "%s does not implement new", t->id);
+    return false;
+  }
+  
+  struct cx_box *v = cx_push(scope);
+  v->type = t;
+  t->new(v);
+  return true;
+}
+
 static bool clock_imp(struct cx_scope *scope) {
   struct cx_box v = *cx_test(cx_pop(scope, false));
   cx_timer_t timer;
@@ -590,10 +605,12 @@ struct cx *cx_init(struct cx *cx) {
   cx_add_func(cx, "compile",
 	      cx_arg(cx->bin_type),
 	      cx_arg(cx->str_type))->ptr = compile_imp;
+
   cx_add_func(cx, "call", cx_arg(cx->any_type))->ptr = call_imp;
   cx_add_func(cx, "recall")->ptr = recall_imp;
   cx_add_func(cx, "upcall")->ptr = upcall_imp;
-
+  cx_add_func(cx, "new", cx_arg(cx->meta_type))->ptr = new_imp;
+  
   cx_add_func(cx, "clock", cx_arg(cx->any_type))->ptr = clock_imp;
   cx_add_func(cx, "test", cx_arg(cx->opt_type))->ptr = test_imp;
   cx_add_func(cx, "fail", cx_arg(cx->str_type))->ptr = fail_imp;

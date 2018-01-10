@@ -16,7 +16,7 @@ struct cx_type {
   struct cx_set parents;
   bool trait;
 
-  void (*new)(struct cx_type *, struct cx_box *);
+  void (*new)(struct cx_box *);
   bool (*eqval)(struct cx_box *, struct cx_box *, struct cx_scope *);
   bool (*equid)(struct cx_box *, struct cx_box *);
   enum cx_cmp (*cmp)(struct cx_box *, struct cx_box *);

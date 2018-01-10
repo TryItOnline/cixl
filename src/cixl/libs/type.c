@@ -21,21 +21,7 @@ static bool is_imp(struct cx_scope *scope) {
   return true;
 }
 
-static bool new_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  struct cx_type *t = cx_test(cx_pop(scope, false))->as_ptr;
-
-  if (!t->new) {
-    cx_error(cx, cx->row, cx->col, "%s does not implement new", t->id);
-    return false;
-  }
-
-  t->new(t, cx_push(scope));
-  return true;
-}
-
 void cx_init_type(struct cx *cx) {
   cx_add_func(cx, "type", cx_arg(cx->opt_type))->ptr = type_imp;
   cx_add_func(cx, "is", cx_arg(cx->meta_type), cx_arg(cx->meta_type))->ptr = is_imp;
-  cx_add_func(cx, "new", cx_arg(cx->meta_type))->ptr = new_imp;
 }

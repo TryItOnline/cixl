@@ -176,11 +176,12 @@ static void str_tests() {
 static void sym_tests() {
   struct cx cx;
   cx_init(&cx);
-  
+
   run(&cx, "`foo = `foo test");
   run(&cx, "`foo = `bar !test");
   run(&cx, "'foo' sym = `foo test");
   run(&cx, "`foo str = 'foo' test");
+  run(&cx, "Sym new, Sym new = !test");
     
   cx_deinit(&cx);
 }
@@ -238,7 +239,6 @@ static void math_tests() {
 static void rec_tests() {
   struct cx cx;
   cx_init(&cx);
-  cx_init_type(&cx);
   cx_init_rec(&cx);
   cx_init_var(&cx);
 
@@ -272,7 +272,6 @@ static void compile_tests() {
   struct cx cx;
   cx_init(&cx);
   cx_init_math(&cx);
-  cx_init_type(&cx);
 
   run(&cx, "Bin new %, $ compile '1 + 2' call = 3 test");
   cx_deinit(&cx);

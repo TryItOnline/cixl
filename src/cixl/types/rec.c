@@ -5,8 +5,8 @@
 #include "cixl/scope.h"
 #include "cixl/types/rec.h"
 
-static void new_imp(struct cx_type *type, struct cx_box *out) {
-  cx_box_init(out, type)->as_ptr = cx_rec_new();
+static void new_imp(struct cx_box *out) {
+  out->as_ptr = cx_rec_new();
 }
 
 static bool equid_imp(struct cx_box *x, struct cx_box *y) {
