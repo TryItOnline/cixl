@@ -1,9 +1,9 @@
-* add Guid type
 * change str to use nrefs
 ** add struct cx_str
 *** data, len & nrefs
 *** get len on demand
 * add Ref type
+* add Guid type
 * add Iter type
 ** add struct cx_iter
 *** bool (*next)()

@@ -1,5 +1,5 @@
 ## ![](cixl.png?raw=true) <a href="https://liberapay.com/basic-gongfu/donate"><img alt="Donate using Liberapay" src="https://liberapay.com/assets/widgets/donate.svg"></a>
-#### cixl - a minimal, decently typed scripting language
+#### Cixl - a minimal, decently typed scripting language
 
 This project aims to produce a minimal, decently typed scripting language for embedding in and extending from C. The language is implemented as a straight forward 3-stage (parse/compile/eval) interpreter that is designed to be as fast as possible without compromising on simplicity, transparency and flexibility. The codebase has no external dependencies and is currently hovering around 5 kloc including tests and standard library.
 
@@ -822,7 +822,7 @@ The compiler may be invoked from within the language through the ```compile``` f
 ```
 
 ### Embedding & Extending
-Everything about cixl has been designed from the ground up to support embedding in, and extending from C. The makefile contains a target named ```libcixl``` that builds a static library containing everything you need to get started. Adding a type and associated function goes something like this:
+Everything about Cixl has been designed from the ground up to support embedding in, and extending from C. The makefile contains a target named ```libcixl``` that builds a static library containing everything you need to get started. Adding a type and associated function goes something like this:
 
 ```C
 #include <cixl/box.h>
@@ -884,12 +884,12 @@ int main() {
 ```
 
 ### Modularity
-The core language is split into libraries, or libs in cixl jargon; and may be custom tailored to any level of functionality from C. This is an ongoing process, but you may get an idea of where it's going by having a look on existing [libs](https://github.com/basic-gongfu/cixl/tree/master/src/cixl/libs).
+The core language is split into libraries, or libs in Cixl jargon; and may be custom tailored to any level of functionality from C. This is an ongoing process, but you may get an idea of where it's going by having a look on existing [libs](https://github.com/basic-gongfu/cixl/tree/master/src/cixl/libs).
 
 ### Performance
-There is still plenty of work remaining in the profiling and benchmarking departments, but preliminary indications puts cixl at around 1-4 times slower than Python. Measured time is displayed in milliseconds.
+There is still plenty of work remaining in the profiling and benchmarking departments, but preliminary indications puts Cixl at around 1-4 times slower than Python. Measured time is displayed in milliseconds.
 
-Let's start with a tail-recursive fibonacci to exercise the interpreter loop, it's worth mentioning that cixl uses 64-bit integers while Python settles for 32-bit.
+Let's start with a tail-recursive fibonacci to exercise the interpreter loop, it's worth mentioning that Cixl uses 64-bit integers while Python settles for 32-bit.
 
 ```
    |
@@ -984,6 +984,6 @@ $ python3 rec.py
 - Duality of syntax is one honking great idea
 
 ### License
-GPLv3
+LGPLv3
 
 Give me a yell if something is unclear, wrong or missing. And please do consider helping out with a donation via [paypal](https://paypal.me/basicgongfu) or [liberapay](https://liberapay.com/basic-gongfu/donate) if you find this worthwhile, every contribution counts.
