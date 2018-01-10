@@ -46,10 +46,20 @@ static bool int_div_imp(struct cx_scope *scope) {
     return false;
   }
   
-  cx_rat_init(&cx_box_init(cx_push(scope), scope->cx->rat_type)->as_rat,
+  cx_rat_init(&cx_box_init(cx_push(scope), cx->rat_type)->as_rat,
 	      cx_abs(x.as_int), cx_abs(y.as_int),
 	      (x.as_int >= 0 || y.as_int > 0) && (x.as_int < 0 || y.as_int < 0));
   
+  return true;
+}
+
+static bool rand_imp(struct cx_scope *scope) {
+  struct cx_box max = *cx_test(cx_pop(scope, false));
+  cx_int_t out = 0;
+  int *p = (int *)&out;
+  *p++ = rand();
+  *p = rand();
+  cx_box_init(cx_push(scope), scope->cx->int_type)->as_int = out % max.as_int;
   return true;
 }
 
@@ -76,6 +86,8 @@ void cx_init_math(struct cx *cx) {
   cx_add_func(cx, "-", cx_arg(cx->int_type), cx_arg(cx->int_type))->ptr = int_sub_imp;
   cx_add_func(cx, "*", cx_arg(cx->int_type), cx_arg(cx->int_type))->ptr = int_mul_imp;
   cx_add_func(cx, "/", cx_arg(cx->int_type), cx_arg(cx->int_type))->ptr = int_div_imp;
+
+  cx_add_func(cx, "rand", cx_arg(cx->int_type))->ptr = rand_imp;
 
   cx_add_func(cx, "+", cx_arg(cx->rat_type), cx_arg(cx->rat_type))->ptr = rat_add_imp;
   cx_add_func(cx, "*", cx_arg(cx->rat_type), cx_arg(cx->rat_type))->ptr = rat_mul_imp;

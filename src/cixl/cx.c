@@ -595,6 +595,7 @@ struct cx *cx_init(struct cx *cx) {
   cx_add_func(cx, "fail", cx_arg(cx->opt_type))->ptr = fail_imp;
   
   cx->main = cx_begin(cx, NULL);
+  srand((ptrdiff_t)cx + clock());
   return cx;
 }
 
