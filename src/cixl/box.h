@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#include "cixl/types/guid.h"
 #include "cixl/types/rat.h"
 #include "cixl/types/sym.h"
 #include "cixl/types/time.h"
@@ -22,6 +23,7 @@ struct cx_box {
   union {
     bool as_bool;
     char as_char;
+    cx_guid_t as_guid;
     int64_t as_int;
     void *as_ptr;
     struct cx_rat as_rat;

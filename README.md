@@ -730,6 +730,7 @@ Capitalized names are treated as types, the following list is defined out of the
 - Cmp (A)
 - Fimp (A)
 - Func (A)
+- Guid (A)
 - Int (Num)
 - Lambda (A)
 - Nil (Opt)

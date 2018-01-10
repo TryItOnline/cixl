@@ -1,7 +1,3 @@
-* implement Sym new
-** generate unique symbol
-* add Guid type
-** add Resource/Booking.id
 * add return fn
 ** add cx.calls
 *** add struct cx_call
@@ -27,7 +23,7 @@
 ** extract cx_table from Rec
 ** allow specifying key
 ** add $resources table
-* implement Cmp for Sym/Vect/Rec
+* implement Cmp for Sym/Guid/Vect/Rec
 * use cx_str for CX_TID
 ** add cx_tok.as_str
 ** grep CX_TID/as_ptr

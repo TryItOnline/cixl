@@ -18,6 +18,7 @@
 #include "cixl/types/cmp.h"
 #include "cixl/types/fimp.h"
 #include "cixl/types/func.h"
+#include "cixl/types/guid.h"
 #include "cixl/types/int.h"
 #include "cixl/types/lambda.h"
 #include "cixl/types/nil.h"
@@ -577,6 +578,7 @@ struct cx *cx_init(struct cx *cx) {
   cx->str_type = cx_init_str_type(cx);
   cx->sym_type = cx_init_sym_type(cx);
   cx->time_type = cx_init_time_type(cx);
+  cx->guid_type = cx_init_guid_type(cx);
   cx->vect_type = cx_init_vect_type(cx);
   cx->bin_type = cx_init_bin_type(cx);
   cx->func_type = cx_init_func_type(cx);

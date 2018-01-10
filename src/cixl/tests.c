@@ -211,6 +211,15 @@ static void time_tests() {
   cx_deinit(&cx);
 }
 
+static void guid_tests() {
+  struct cx cx;
+  cx_init(&cx);
+
+  run(&cx, "Guid new, Guid new = !test");
+  
+  cx_deinit(&cx);
+}
+
 static void vect_tests() {
   struct cx cx;
   cx_init(&cx);
@@ -291,6 +300,7 @@ void cx_tests() {
   sym_tests();
   rat_tests();
   time_tests();
+  guid_tests();
   vect_tests();
   math_tests();
   rec_tests();

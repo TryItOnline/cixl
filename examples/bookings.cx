@@ -16,6 +16,7 @@
 */
 
 rec: Resource()
+  id       Guid
   quantity Int
   calendar Vect;
 
@@ -44,6 +45,7 @@ func: new-capacity(start end Time total used Int)
 func: new-resource(q Int)
   let: r Resource new;
   repeat: ($r put)
+    `id       (Guid new),
     `quantity $q,
     `calendar [new-capacity $min-time $max-time $q 0];
   $r;
@@ -94,6 +96,7 @@ func: update-resource(r Resource start end Time total used Int)
 */
 
 rec: Booking()
+  id        Guid   
   resource  Resource
   start end Time
   quantity  Int;
@@ -102,6 +105,7 @@ func: new-booking(r Resource start end Time q Int)
   $start < $end else {fail 'Invalid booking length'}
   let: b Booking new;
   repeat: ($b put)
+    `id       (Guid new),
     `resource $r,
     `start    $start,
     `end      $end,
