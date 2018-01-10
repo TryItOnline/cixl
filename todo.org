@@ -18,6 +18,7 @@
 ** extract common for loop
 ** extract common map fn
 *** keep Str override
+* investigate inlining lambdas
 * add Table type
 ** extract cx_table from Rec
 ** allow specifying key
