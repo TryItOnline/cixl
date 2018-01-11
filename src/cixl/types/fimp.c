@@ -108,7 +108,7 @@ bool cx_fimp_eval(struct cx_fimp *imp, struct cx_scope *scope) {
 
 bool cx_fimp_call(struct cx_fimp *imp, struct cx_scope *scope) {
   struct cx *cx = scope->cx;
-  cx_call_init(cx_vec_push(&cx->calls), cx->row, cx->col, imp, NULL);
+  cx_call_init(cx_vec_push(&cx->calls), cx->row, cx->col, imp);
 
   if (imp->ptr) {
     imp->ptr(scope);

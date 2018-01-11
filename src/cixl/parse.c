@@ -85,7 +85,7 @@ static bool parse_func(struct cx *cx, const char *id, FILE *in, struct cx_vec *o
   struct cx_vec *types = parse_fimp(cx, f, in, out);
 	  
   if (types) {
-    imp = cx_func_get_imp(f, types, 0, cx_scope(cx, 0));
+    imp = cx_func_get_imp(f, types, 0);
     if (!imp) { cx_error(cx, cx->row, cx->col, "Func imp not found"); }
     free(cx_vec_deinit(types));
   }

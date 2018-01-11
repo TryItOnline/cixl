@@ -474,8 +474,7 @@ static bool upcall_imp(struct cx_scope *scope) {
 
   imp = cx_func_get_imp(func,
 			&scope->stack,
-			func->imps.count - imp->i,
-			scope);
+			func->imps.count - imp->i);
   
   if (!imp) {
     cx_error(cx, cx->row, cx->col, "Upcall not applicable");
@@ -854,7 +853,7 @@ bool cx_funcall(struct cx *cx, const char *id) {
   struct cx_func *func = cx_get_func(cx, id, false);
   if (!func) { return false; }
   struct cx_scope *s = cx_scope(cx, 0);
-  struct cx_fimp *imp = cx_func_get_imp(func, &s->stack, 0, s);
+  struct cx_fimp *imp = cx_func_get_imp(func, &s->stack, 0);
   
   if (!imp) {
     cx_error(cx, cx->row, cx->col, "Func not applicable: %s", func->id);

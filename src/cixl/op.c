@@ -47,7 +47,6 @@ cx_op_type(CX_OFUNC, {
 static bool funcall_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
   struct cx_func *func = op->as_funcall.func;
   if (!cx_scan_args(cx, func)) { return false; }
-    
   struct cx_scope *s = cx_scope(cx, 0);
   struct cx_fimp *imp = op->as_funcall.imp;
 
@@ -56,7 +55,7 @@ static bool funcall_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
   } else {
     imp = op->as_funcall.jit_imp;
     if (imp && !cx_fimp_match(imp, &s->stack)) { imp = NULL; }
-    if (!imp) { imp = cx_func_get_imp(func, &s->stack, 0, s); }
+    if (!imp) { imp = cx_func_get_imp(func, &s->stack, 0); }
   }
   
   if (!imp) {
@@ -64,17 +63,8 @@ static bool funcall_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
     return false;
   }
     
-  op->as_funcall.jit_imp = imp;    
-  if (imp->ptr) { return cx_fimp_call(imp, s); }
-  struct cx_bin_func *bin = cx_bin_get_func(cx->bin, imp);
-  if (!bin) { return cx_fimp_call(imp, s); }
-
-  cx_call_init(cx_vec_push(&cx->calls),
-	       tok->row, tok->col,
-	       imp,
-	       imp->ptr ? NULL : cx->op);
-  cx->op = cx_vec_get(&cx->bin->ops, bin->start_op);
-  return true;
+  op->as_funcall.jit_imp = imp;
+  return cx_fimp_call(imp, s);
 }
 
 cx_op_type(CX_OFUNCALL, {
@@ -228,12 +218,7 @@ static bool unfunc_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
     cx->op = cx_vec_get(&cx->bin->ops, bin->start_op+1);
     call->recalls--;
   } else {
-    if (call->return_op) {
-      cx->op = call->return_op;
-    } else {
-      cx->stop = true;
-    }
-
+    cx->stop = true;
     cx_call_deinit(cx_vec_pop(&cx->calls));
     cx_end(cx);
   }
