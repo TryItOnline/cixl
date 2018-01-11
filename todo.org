@@ -1,4 +1,3 @@
-* don't push/pop scope in lambda call if not needed
 * extract cx_fimp_compile
 * remove scope-param from type.eqval
 ** use x->type->cx instead

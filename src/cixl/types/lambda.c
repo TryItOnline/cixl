@@ -36,13 +36,15 @@ static bool equid_imp(struct cx_box *x, struct cx_box *y) {
 static bool call_imp(struct cx_box *value, struct cx_scope *scope) {
   struct cx *cx = scope->cx;
   struct cx_lambda *l = value->as_ptr;
-  cx_push_scope(cx, l->scope);
-  bool ok = cx_eval(cx, l->bin, cx_vec_get(&l->bin->ops, l->start_op));
+  bool pop_scope = false;
   
-  if (cx->scopes.count > 1 && cx_scope(cx, 0) == l->scope) {
-    cx_pop_scope(cx, false);
+  if (scope != l->scope) {
+    cx_push_scope(cx, l->scope);
+    pop_scope = true;
   }
   
+  bool ok = cx_eval(cx, l->bin, cx_vec_get(&l->bin->ops, l->start_op));
+  if (pop_scope) { cx_pop_scope(cx, false); }
   return ok;
 }
 
