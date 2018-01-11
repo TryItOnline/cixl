@@ -137,18 +137,18 @@ Expected type Str, actual: Int
 The same functionality may be accessed symbolically.
 
 ```
-   | is-let `foo
+   | is-var `foo
 ...
 [#f]
 
-   | get-let `foo
+   | get-var `foo
 ...
 Error in row 1, col 12:
 Unknown var: foo
 
    |
 ...let: foo 42;
-...is-let `foo, get-let `foo
+...is-var `foo, get-var `foo
 ...
 [#t 42]
 ```

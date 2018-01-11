@@ -120,7 +120,7 @@ static bool let_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   return false;  
 }
 
-static bool let_imp(struct cx_scope *scope) {
+static bool put_imp(struct cx_scope *scope) {
   struct cx_box v = *cx_test(cx_pop(scope, false));
   struct cx_sym s = cx_test(cx_pop(scope, false))->as_sym;
   struct cx_box *var = cx_set(scope, s, false);
@@ -130,17 +130,17 @@ static bool let_imp(struct cx_scope *scope) {
   return true;
 }
 
-static bool is_let_imp(struct cx_scope *scope) {
-  struct cx_sym s = cx_test(cx_pop(scope, false))->as_sym;
-  cx_box_init(cx_push(scope), scope->cx->bool_type)->as_bool = cx_get(scope, s, true);
-  return true;
-}
-
-static bool get_let_imp(struct cx_scope *scope) {
+static bool get_imp(struct cx_scope *scope) {
   struct cx_sym s = cx_test(cx_pop(scope, false))->as_sym;
   struct cx_box *v = cx_get(scope, s, false);
   if (!v) { return false; }
   cx_copy(cx_push(scope), v);
+  return true;
+}
+
+static bool is_imp(struct cx_scope *scope) {
+  struct cx_sym s = cx_test(cx_pop(scope, false))->as_sym;
+  cx_box_init(cx_push(scope), scope->cx->bool_type)->as_bool = cx_get(scope, s, true);
   return true;
 }
 
@@ -153,8 +153,10 @@ static bool unlet_imp(struct cx_scope *scope) {
 void cx_init_var(struct cx *cx) {
   cx_add_macro(cx, "let:", let_parse);
 
-  cx_add_func(cx, "let", cx_arg(cx->sym_type), cx_arg(cx->any_type))->ptr = let_imp;
-  cx_add_func(cx, "is-let", cx_arg(cx->sym_type))->ptr = is_let_imp;
-  cx_add_func(cx, "get-let", cx_arg(cx->sym_type))->ptr = get_let_imp;
+  cx_add_func(cx, "put-var",
+	      cx_arg(cx->sym_type),
+	      cx_arg(cx->any_type))->ptr = put_imp;
+  cx_add_func(cx, "get-var", cx_arg(cx->sym_type))->ptr = get_imp;
+  cx_add_func(cx, "is-var", cx_arg(cx->sym_type))->ptr = is_imp;
   cx_add_func(cx, "unlet", cx_arg(cx->sym_type))->ptr = unlet_imp;
 }

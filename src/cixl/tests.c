@@ -92,10 +92,10 @@ static void let_tests() {
   run(&cx, "(let: (x y z) 1 2, 3 + 4; $x + $y + $z 10 = test)");
   run(&cx, "(let: (foo Int bar Str) 7 '35'; $foo +, $bar int = 42 test)");
 
-  run(&cx, "(is-let `foo !test "
-           " let `foo 42 "
-           " is-let `foo test "
-           " get-let `foo = 42 test)");
+  run(&cx, "(is-var `foo !test "
+           " put-var `foo 42 "
+           " is-var `foo test "
+           " get-var `foo = 42 test)");
 
   run(&cx,
       "(let: foo 42; "

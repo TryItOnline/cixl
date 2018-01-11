@@ -1,5 +1,3 @@
-* rename is-let to is-var, get-let to get-var & let to put-var
-* ---
 * add return fn
 ** add cx.calls
 *** add struct cx_call
