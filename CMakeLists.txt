@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.0)
 
 project(cixl)
 
-add_compile_options(-std=gnu1x -Wall -Werror -O3)
+add_compile_options(-std=gnu1x -Wall -Werror -O2 -g)
 
 file(GLOB_RECURSE sources src/cixl/*.c)
 file(GLOB_RECURSE headers src/cixl/*.h)

@@ -1,19 +1,14 @@
-* add return fn
-** debug lambda unscope
-** don't push/pop scope in lambda call if not needed
-** rename CX_OSTOP to CX_ORETURN
-** add returnN support
-*** zero-based
-*** check that call stack > N
-*** extract cx_return(cx, depth) from CX_ORETURN
-* add overlaps fn to bookings
-** add and/or operators
-** return early otherwise
+* don't push/pop scope in lambda call if not needed
+* extract cx_fimp_compile
 * remove scope-param from type.eqval
 ** use x->type->cx instead
 * rename get/set to get_var/put_var
 ** fns & ops
-* rename OSCOPE/UNSCOPE to OBEGIN/END
+* rename OSCOPE/UNSCOPE to OBEGIN/OEND
+* simplify OSET/OZAP
+* add overlap test to bookings
+** add and/or operators
+* ---
 * add Ref type
 * add Iter type
 ** add struct cx_iter

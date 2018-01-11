@@ -69,12 +69,9 @@ static bool funcall_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
   struct cx_bin_func *bin = cx_bin_get_func(cx->bin, imp);
   if (!bin) { return cx_fimp_call(imp, s); }
 
-  struct cx_box box;
-  cx_box_init(&box, cx->fimp_type)->as_ptr = imp;
-  
   cx_call_init(cx_vec_push(&cx->calls),
 	       tok->row, tok->col,
-	       &box,
+	       imp,
 	       imp->ptr ? NULL : cx->op);
   cx->op = cx_vec_get(&cx->bin->ops, bin->start_op);
   return true;
@@ -206,11 +203,20 @@ cx_op_type(CX_OSTASH, {
     type.eval = stash_eval;
   });
 
+static bool stop_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
+  cx->stop = true;
+  return true;
+}
+
+cx_op_type(CX_OSTOP, {
+    type.eval = stop_eval;
+  });
+
 static bool unfunc_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
   struct cx_call *call = cx_test(cx_vec_peek(&cx->calls, 0));
 
   if (call->recalls) {
-    struct cx_fimp *imp = call->target.as_ptr;
+    struct cx_fimp *imp = call->target;
     struct cx_scope *s = cx_scope(cx, 0);
     
     if (!cx_fimp_match(imp, &s->stack, s)) {
@@ -237,23 +243,6 @@ static bool unfunc_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
 
 cx_op_type(CX_OUNFUNC, {
     type.eval = unfunc_eval;
-  });
-
-static bool unlambda_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
-  struct cx_call *call = cx_test(cx_vec_pop(&cx->calls));
-
-  if (call->return_op) {
-    cx->op = call->return_op;
-  } else {
-    cx->stop = true;
-  }
-
-  cx_call_deinit(call);
-  return true;
-}
-
-cx_op_type(CX_OUNLAMBDA, {
-    type.eval = unlambda_eval;
   });
 
 static bool unscope_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {

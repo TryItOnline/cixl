@@ -37,8 +37,6 @@ static bool call_imp(struct cx_box *value, struct cx_scope *scope) {
   struct cx *cx = scope->cx;
   struct cx_lambda *l = value->as_ptr;
   cx_push_scope(cx, l->scope);
-
-  cx_call_init(cx_vec_push(&cx->calls), cx->row, cx->col, value, NULL);
   bool ok = cx_eval(cx, l->bin, cx_vec_get(&l->bin->ops, l->start_op));
   
   if (cx->scopes.count > 1 && cx_scope(cx, 0) == l->scope) {

@@ -434,8 +434,7 @@ static struct cx_call *get_fimp_call(struct cx *cx) {
   for (struct cx_call *c = cx_vec_peek(&cx->calls, 0);
        c >= (struct cx_call *)cx->calls.items;
        c--) {
-    struct cx_fimp *imp = c->target.as_ptr;
-    if (c->target.type == cx->fimp_type && !imp->ptr) { return c; }
+    if (!c->target->ptr) { return c; }
   }
 
   return NULL;
@@ -463,7 +462,7 @@ static bool upcall_imp(struct cx_scope *scope) {
     return false;
   }
 
-  struct cx_fimp *imp = call->target.as_ptr;
+  struct cx_fimp *imp = call->target;
 
   if (!imp->i) {
     cx_error(cx, cx->row, cx->col, "No more fimps");

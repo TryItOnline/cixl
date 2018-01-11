@@ -229,7 +229,7 @@ static ssize_t lambda_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx)
     }
   }
   
-  cx_op_init(cx_vec_push(&bin->ops), CX_OUNLAMBDA(), tok_idx);
+  cx_op_init(cx_vec_push(&bin->ops), CX_OSTOP(), tok_idx);
   struct cx_op *op = cx_vec_get(&bin->ops, i);
   op->as_lambda.num_ops = bin->ops.count - op->as_lambda.start_op;
   return tok_idx+1;
