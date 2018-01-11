@@ -319,7 +319,7 @@ static bool eqval_imp(struct cx_scope *scope) {
     x = *cx_test(cx_pop(scope, false));
   
   cx_box_init(cx_push(scope),
-	      scope->cx->bool_type)->as_bool = cx_eqval(&x, &y, scope);
+	      scope->cx->bool_type)->as_bool = cx_eqval(&x, &y);
   
   cx_box_deinit(&x);
   cx_box_deinit(&y);

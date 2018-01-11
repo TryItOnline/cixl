@@ -222,7 +222,7 @@ static bool eqval_imp(struct cx_scope *scope) {
 	*xv = cx_vec_get(&xr->values.members, i),
 	*yv = cx_vec_get(&yr->values.members, i);
       
-      if (xv->id.tag != yv->id.tag || !cx_eqval(&xv->box, &yv->box, scope)) {
+      if (xv->id.tag != yv->id.tag || !cx_eqval(&xv->box, &yv->box)) {
 	eqval = false;
 	break;
       }

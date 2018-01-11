@@ -1,5 +1,3 @@
-* remove scope-param from type.eqval
-** use x->type->cx instead
 * rename get/set to get_var/put_var
 ** fns & ops
 * rename OSCOPE/UNSCOPE to OBEGIN/OEND

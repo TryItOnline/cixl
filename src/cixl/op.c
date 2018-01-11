@@ -52,10 +52,10 @@ static bool funcall_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
   struct cx_fimp *imp = op->as_funcall.imp;
 
   if (imp) {
-    if (!cx_fimp_match(imp, &s->stack, s)) { imp = NULL; }
+    if (!cx_fimp_match(imp, &s->stack)) { imp = NULL; }
   } else {
     imp = op->as_funcall.jit_imp;
-    if (imp && !cx_fimp_match(imp, &s->stack, s)) { imp = NULL; }
+    if (imp && !cx_fimp_match(imp, &s->stack)) { imp = NULL; }
     if (!imp) { imp = cx_func_get_imp(func, &s->stack, 0, s); }
   }
   
@@ -219,7 +219,7 @@ static bool unfunc_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
     struct cx_fimp *imp = call->target;
     struct cx_scope *s = cx_scope(cx, 0);
     
-    if (!cx_fimp_match(imp, &s->stack, s)) {
+    if (!cx_fimp_match(imp, &s->stack)) {
       cx_error(cx, cx->row, cx->col, "Recall not applicable");
       return false;
     }

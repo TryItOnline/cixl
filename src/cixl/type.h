@@ -17,7 +17,7 @@ struct cx_type {
   bool trait;
 
   void (*new)(struct cx_box *);
-  bool (*eqval)(struct cx_box *, struct cx_box *, struct cx_scope *);
+  bool (*eqval)(struct cx_box *, struct cx_box *);
   bool (*equid)(struct cx_box *, struct cx_box *);
   enum cx_cmp (*cmp)(struct cx_box *, struct cx_box *);
   bool (*call)(struct cx_box *, struct cx_scope *);

@@ -120,7 +120,7 @@ struct cx_fimp *cx_func_get_imp(struct cx_func *func,
   for (struct cx_fimp **i = cx_vec_peek(&func->imps, offs);
        i >= (struct cx_fimp **)func->imps.items;
        i--) {
-    if (cx_fimp_match(*i, stack, scope)) { return *i; }
+    if (cx_fimp_match(*i, stack)) { return *i; }
   }
 
   return NULL;

@@ -19,8 +19,8 @@ struct cx_box *cx_box_deinit(struct cx_box *box) {
   return box;
 }
 
-bool cx_eqval(struct cx_box *x, struct cx_box *y, struct cx_scope *scope) {
-  return x->type->eqval ? x->type->eqval(x, y, scope) : cx_equid(x, y);
+bool cx_eqval(struct cx_box *x, struct cx_box *y) {
+  return x->type->eqval ? x->type->eqval(x, y) : cx_equid(x, y);
 }
 
 bool cx_equid(struct cx_box *x, struct cx_box *y) {
