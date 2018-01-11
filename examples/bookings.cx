@@ -6,11 +6,6 @@
   https://github.com/basic-gongfu/cixl#getting-started
 */
 
-, is-let `min-time else {
-  let: min-time [] time;
-  let: max-time [9999 11 30] time;
-}
-
 /*
   Resources support tracking availability in time.
 */
@@ -47,7 +42,7 @@ func: new-resource(q Int)
   repeat: ($r put)
     `id       (Guid new),
     `quantity $q,
-    `calendar [new-capacity $min-time $max-time $q 0];
+    `calendar [new-capacity #min-time #max-time $q 0];
   $r;
 
 /*

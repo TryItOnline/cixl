@@ -365,6 +365,16 @@ static bool mul_imp(struct cx_scope *scope) {
 }
 
 void cx_init_time(struct cx *cx) {
+  cx_time_init(&cx_box_init(cx_set_const(cx, cx_sym(cx, "min-time"), false),
+			    cx->time_type)->as_time,
+	       INT32_MIN,
+	       INT64_MIN);
+  
+  cx_time_init(&cx_box_init(cx_set_const(cx, cx_sym(cx, "max-time"), false),
+			    cx->time_type)->as_time,
+	       INT32_MAX,
+	       INT64_MAX);
+  
   cx_add_func(cx, "years", cx_arg(cx->int_type))->ptr = years_imp;
   cx_add_func(cx, "months", cx_arg(cx->int_type))->ptr = months_imp;
   cx_add_func(cx, "days", cx_arg(cx->int_type))->ptr = days_imp;
@@ -401,7 +411,6 @@ void cx_init_time(struct cx *cx) {
   cx_add_func(cx, "ms", cx_arg(cx->time_type))->ptr = time_ms_imp;
   cx_add_func(cx, "us", cx_arg(cx->time_type))->ptr = time_us_imp;
   cx_add_func(cx, "ns", cx_arg(cx->time_type))->ptr = time_ns_imp;
-
   
   cx_add_func(cx, "+",
 	      cx_arg(cx->time_type), cx_arg(cx->time_type))->ptr = add_imp;
