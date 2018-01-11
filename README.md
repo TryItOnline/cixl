@@ -899,7 +899,7 @@ Let's start with a tail-recursive fibonacci to exercise the interpreter loop, it
 ```
    |
 ...func: fib-rec(a b n Int)
-...  $n? if {$b $a $b + $n -- recall} $a;
+...  $n? if-else {$b $a $b + $n -- recall} $a;
 ...func: fib(n Int)
 ...  fib-rec 0 1 $n;
 ...clock {10000 times {50 fib _}} / 1000000 int

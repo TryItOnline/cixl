@@ -1,4 +1,5 @@
 #include "cixl/bin.h"
+#include "cixl/call.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
 #include "cixl/eval.h"
@@ -10,7 +11,8 @@
 #include "cixl/scope.h"
 #include "cixl/tok.h"
 
-struct cx_op_type *cx_op_type_init(struct cx_op_type *type) {
+struct cx_op_type *cx_op_type_init(struct cx_op_type *type, const char *id) {
+  type->id = id;
   type->eval = NULL;
   return type;
 }
@@ -62,8 +64,20 @@ static bool funcall_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
     return false;
   }
     
-  op->as_funcall.jit_imp = imp;
-  return cx_fimp_call(imp, s);
+  op->as_funcall.jit_imp = imp;    
+  if (imp->ptr) { return cx_fimp_call(imp, s); }
+  struct cx_bin_func *bin = cx_bin_get_func(cx->bin, imp);
+  if (!bin) { return cx_fimp_call(imp, s); }
+
+  struct cx_box box;
+  cx_box_init(&box, cx->fimp_type)->as_ptr = imp;
+  
+  cx_call_init(cx_vec_push(&cx->calls),
+	       tok->row, tok->col,
+	       &box,
+	       imp->ptr ? NULL : cx->op);
+  cx->op = cx_vec_get(&cx->bin->ops, bin->start_op);
+  return true;
 }
 
 cx_op_type(CX_OFUNCALL, {
@@ -162,6 +176,23 @@ cx_op_type(CX_OSET, {
     type.eval = set_eval;
   });
 
+static bool set_arg_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
+  struct cx_scope *s = cx_scope(cx, 0);
+  
+  struct cx_box *src = cx_pop(s->stack.count ? s : cx_scope(cx, 1), false);
+  if (!src) { return false; }
+
+  struct cx_box *dst = cx_set(s, op->as_set_arg.id, true);
+  if (!dst) { return false; }
+
+  *dst = *src;
+  return true;
+}
+
+cx_op_type(CX_OSET_ARG, {
+    type.eval = set_arg_eval;
+  });
+
 static bool stash_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
   struct cx_scope *s = cx_scope(cx, 0);
   struct cx_vect *v = cx_vect_new();
@@ -175,13 +206,54 @@ cx_op_type(CX_OSTASH, {
     type.eval = stash_eval;
   });
 
-static bool stop_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
-  cx->stop = true;
+static bool unfunc_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
+  struct cx_call *call = cx_test(cx_vec_peek(&cx->calls, 0));
+
+  if (call->recalls) {
+    struct cx_fimp *imp = call->target.as_ptr;
+    struct cx_scope *s = cx_scope(cx, 0);
+    
+    if (!cx_fimp_match(imp, &s->stack, s)) {
+      cx_error(cx, cx->row, cx->col, "Recall not applicable");
+      return false;
+    }
+
+    struct cx_bin_func *bin = cx_test(cx_bin_get_func(cx->bin, imp));
+    cx->op = cx_vec_get(&cx->bin->ops, bin->start_op+1);
+    call->recalls--;
+  } else {
+    if (call->return_op) {
+      cx->op = call->return_op;
+    } else {
+      cx->stop = true;
+    }
+
+    cx_call_deinit(cx_vec_pop(&cx->calls));
+    cx_end(cx);
+  }
+  
   return true;
 }
 
-cx_op_type(CX_OSTOP, {
-    type.eval = stop_eval;
+cx_op_type(CX_OUNFUNC, {
+    type.eval = unfunc_eval;
+  });
+
+static bool unlambda_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
+  struct cx_call *call = cx_test(cx_vec_pop(&cx->calls));
+
+  if (call->return_op) {
+    cx->op = call->return_op;
+  } else {
+    cx->stop = true;
+  }
+
+  cx_call_deinit(call);
+  return true;
+}
+
+cx_op_type(CX_OUNLAMBDA, {
+    type.eval = unlambda_eval;
   });
 
 static bool unscope_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
@@ -208,4 +280,21 @@ static bool zap_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
 
 cx_op_type(CX_OZAP, {
     type.eval = zap_eval;
+  });
+
+static bool zap_arg_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
+  struct cx_scope *s = cx_scope(cx, 0);
+  struct cx_box *v = cx_pop(s->stack.count ? s : cx_scope(cx, 1), true);
+
+  if (!v) {
+    cx_error(cx, tok->row, tok->col, "Nothing to zap");
+    return false;
+  }
+  
+  cx_box_deinit(v);
+  return true;
+}
+
+cx_op_type(CX_OZAP_ARG, {
+    type.eval = zap_arg_eval;
   });

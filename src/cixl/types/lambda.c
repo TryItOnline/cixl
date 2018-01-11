@@ -3,6 +3,7 @@
 #include "cixl/cx.h"
 #include "cixl/bin.h"
 #include "cixl/box.h"
+#include "cixl/call.h"
 #include "cixl/error.h"
 #include "cixl/eval.h"
 #include "cixl/op.h"
@@ -13,19 +14,13 @@
 struct cx_lambda *cx_lambda_new(struct cx_scope *scope,
 				size_t start_op,
 				size_t num_ops) {
-  return cx_lambda_init(malloc(sizeof(struct cx_lambda)), scope, start_op, num_ops);
-}
-
-struct cx_lambda *cx_lambda_init(struct cx_lambda *lambda,
-				 struct cx_scope *scope,
-				 size_t start_op,
-				 size_t num_ops) {
-  lambda->scope = cx_scope_ref(scope);
-  lambda->bin = cx_bin_ref(scope->cx->bin);
-  lambda->start_op = start_op;
-  lambda->num_ops = num_ops;
-  lambda->nrefs = 1;
-  return lambda;
+  struct cx_lambda *l = malloc(sizeof(struct cx_lambda));
+  l->scope = cx_scope_ref(scope);
+  l->bin = cx_bin_ref(scope->cx->bin);
+  l->start_op = start_op;
+  l->num_ops = num_ops;
+  l->nrefs = 1;
+  return l;
 }
 
 struct cx_lambda *cx_lambda_deinit(struct cx_lambda *lambda) {
@@ -43,6 +38,7 @@ static bool call_imp(struct cx_box *value, struct cx_scope *scope) {
   struct cx_lambda *l = value->as_ptr;
   cx_push_scope(cx, l->scope);
 
+  cx_call_init(cx_vec_push(&cx->calls), cx->row, cx->col, value, NULL);
   bool ok = cx_eval(cx, l->bin, cx_vec_get(&l->bin->ops, l->start_op));
   
   if (cx->scopes.count > 1 && cx_scope(cx, 0) == l->scope) {

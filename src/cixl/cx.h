@@ -33,9 +33,8 @@ struct cx {
   
   struct cx_vec scopes;
   struct cx_scope *main;
+  struct cx_vec calls;
   
-  struct cx_fimp *fimp;
-
   struct cx_bin *bin;
   struct cx_op *op;
   bool stop;

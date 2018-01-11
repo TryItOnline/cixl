@@ -1,13 +1,19 @@
 * add return fn
-** add cx.calls
-*** add struct cx_call
-**** cx_box target, return_pc, row, col
-** rename CX_TSTOP to CX_TRETURN
-** stop if return_pc is nil
-** call inlined fns directly from CX_OFUNCALL
+** debug lambda unscope
+** don't push/pop scope in lambda call if not needed
+** rename CX_OSTOP to CX_ORETURN
+** add returnN support
+*** zero-based
+*** check that call stack > N
+*** extract cx_return(cx, depth) from CX_ORETURN
 * add overlaps fn to bookings
 ** add and/or operators
 ** return early otherwise
+* remove scope-param from type.eqval
+** use x->type->cx instead
+* rename get/set to get_var/put_var
+** fns & ops
+* rename OSCOPE/UNSCOPE to OBEGIN/END
 * add Ref type
 * add Iter type
 ** add struct cx_iter

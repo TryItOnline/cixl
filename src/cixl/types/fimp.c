@@ -2,9 +2,11 @@
 
 #include "cixl/bin.h"
 #include "cixl/box.h"
+#include "cixl/call.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
 #include "cixl/eval.h"
+#include "cixl/op.h"
 #include "cixl/scope.h"
 #include "cixl/tok.h"
 #include "cixl/types/fimp.h"
@@ -70,8 +72,6 @@ bool cx_fimp_match(struct cx_fimp *imp,
 
 bool cx_fimp_eval(struct cx_fimp *imp, struct cx_scope *scope) {
   struct cx *cx = scope->cx;
-  struct cx_fimp *prev = cx->fimp;
-  cx->fimp = imp;
   struct cx_bin_func *bin = cx_bin_get_func(cx->bin, imp);
   bool ok = false;
 
@@ -80,31 +80,41 @@ bool cx_fimp_eval(struct cx_fimp *imp, struct cx_scope *scope) {
   } else {
     if (!imp->bin) {
       imp->bin = cx_bin_new();
-      
+
+      cx_op_init(cx_vec_push(&imp->bin->ops),
+		 CX_OSCOPE(),
+		 0)->as_scope.child = false;  
+
       if (!cx_compile(cx,
 		      cx_vec_start(&imp->toks),
 		      cx_vec_end(&imp->toks),
 		      imp->bin)) {
 	cx_error(cx, cx->row, cx->col, "Failed compiling func imp");
       }
+
+      cx_op_init(cx_vec_push(&imp->bin->ops), CX_OUNFUNC(), imp->bin->toks.count-1);
+      cx_bin_add_func(imp->bin, imp, 0);
     }
     
     ok = cx_eval(cx, imp->bin, NULL);
   }
   
-  cx->fimp = prev;
   return ok;
 }
 
 bool cx_fimp_call(struct cx_fimp *imp, struct cx_scope *scope) {
+  struct cx *cx = scope->cx;
+  struct cx_box box;
+  cx_box_init(&box, cx->fimp_type)->as_ptr = imp;
+  cx_call_init(cx_vec_push(&cx->calls), cx->row, cx->col, &box, NULL);
+
   if (imp->ptr) {
     imp->ptr(scope);
+    cx_call_deinit(cx_vec_pop(&cx->calls));
     return true;
   }
-  
-  cx_begin(scope->cx, imp->scope);
+
   bool ok = cx_fimp_eval(imp, scope);
-  cx_end(scope->cx);
   return ok;
 }
 

@@ -15,7 +15,7 @@ struct cx_tok;
 						\
     if (init) {					\
       init = false;				\
-      cx_op_type_init(&type);			\
+      cx_op_type_init(&type, #id);		\
       __VA_ARGS__;				\
     }						\
 						\
@@ -23,10 +23,11 @@ struct cx_tok;
   }						\
 
 struct cx_op_type {
+  const char *id;
   bool (*eval)(struct cx_op *, struct cx_tok *, struct cx *);
 };
 
-struct cx_op_type *cx_op_type_init(struct cx_op_type *type);
+struct cx_op_type *cx_op_type_init(struct cx_op_type *type, const char *id);
 
 struct cx_get_op {
   struct cx_sym id;
@@ -56,6 +57,10 @@ struct cx_set_op {
   bool pop_parent, set_parent, force;
 };
 
+struct cx_set_arg_op {
+  struct cx_sym id;
+};
+
 struct cx_unscope_op {
   bool push_result;
 };
@@ -75,6 +80,7 @@ struct cx_op {
     struct cx_lambda_op as_lambda;
     struct cx_scope_op as_scope;
     struct cx_set_op as_set;
+    struct cx_set_arg_op as_set_arg;
     struct cx_unscope_op as_unscope;
     struct cx_zap_op as_zap;
   };
@@ -91,9 +97,12 @@ struct cx_op_type *CX_OLAMBDA();
 struct cx_op_type *CX_OPUSH();
 struct cx_op_type *CX_OSCOPE();
 struct cx_op_type *CX_OSET();
+struct cx_op_type *CX_OSET_ARG();
 struct cx_op_type *CX_OSTASH();
-struct cx_op_type *CX_OSTOP();
+struct cx_op_type *CX_OUNFUNC();
+struct cx_op_type *CX_OUNLAMBDA();
 struct cx_op_type *CX_OUNSCOPE();
 struct cx_op_type *CX_OZAP();
+struct cx_op_type *CX_OZAP_ARG();
 
 #endif

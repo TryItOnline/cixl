@@ -5,6 +5,7 @@
 
 #include "cixl/bin.h"
 #include "cixl/box.h"
+#include "cixl/call.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
 #include "cixl/eval.h"
@@ -122,17 +123,14 @@ static ssize_t func_eval(struct cx_macro_eval *eval,
     struct cx_tok *t = cx_vec_get(&eval->toks, i);
 
     if (t->type == CX_TID()) {
-      struct cx_op *op = cx_op_init(cx_vec_push(&bin->ops), CX_OSET(), tok_idx);
-      op->as_set.type = NULL;
-      op->as_set.id = cx_sym(cx, t->as_ptr);
-      op->as_set.pop_parent = true;
-      op->as_set.set_parent = false;
-      op->as_set.force = true;
+      cx_op_init(cx_vec_push(&bin->ops),
+		 CX_OSET_ARG(),
+		 tok_idx)->as_set_arg.id = cx_sym(cx, t->as_ptr);
     } else {
-      cx_op_init(cx_vec_push(&bin->ops), CX_OZAP(), tok_idx)->as_zap.parent = true;
+      cx_op_init(cx_vec_push(&bin->ops), CX_OZAP_ARG(), tok_idx);
     }
   }
-  
+
   return tok_idx+1;
 }
 
@@ -194,7 +192,7 @@ static bool func_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   }
 
   cx_tok_deinit(&args);
-
+  
   if (!cx_parse_end(cx, in, &toks, true)) {
     cx_error(cx, cx->row, cx->col, "Missing func end");
     cx_tok_deinit(&id);
@@ -432,39 +430,53 @@ static bool call_imp(struct cx_scope *scope) {
   return ok;
 }
 
+static struct cx_call *get_fimp_call(struct cx *cx) {
+  for (struct cx_call *c = cx_vec_peek(&cx->calls, 0);
+       c >= (struct cx_call *)cx->calls.items;
+       c--) {
+    struct cx_fimp *imp = c->target.as_ptr;
+    if (c->target.type == cx->fimp_type && !imp->ptr) { return c; }
+  }
+
+  return NULL;
+}
+
 static bool recall_imp(struct cx_scope *scope) {
   struct cx *cx = scope->cx;
+  struct cx_call *call = get_fimp_call(cx);
   
-  if (!cx->fimp) {
+  if (!call) {
     cx_error(cx, cx->row, cx->col, "Nothing to recall");
     return false;
   }
 
-  if (!cx_scan_args(cx, cx->fimp->func)) { return false; }
-  
-  if (!cx_fimp_match(cx->fimp, &scope->stack, scope)) {
-    cx_error(cx, cx->row, cx->col, "Recall not applicable");
-    return false;
-  }
-
-  return cx_fimp_eval(cx->fimp, scope);
+  call->recalls++;  
+  return true;
 }
 
 static bool upcall_imp(struct cx_scope *scope) {
   struct cx *cx = scope->cx;
+  struct cx_call *call = get_fimp_call(cx);
   
-  if (!cx->fimp || !cx->fimp->i) {
+  if (!call) {
     cx_error(cx, cx->row, cx->col, "Nothing to upcall");
     return false;
   }
 
-  struct cx_func *func = cx->fimp->func;
+  struct cx_fimp *imp = call->target.as_ptr;
+
+  if (!imp->i) {
+    cx_error(cx, cx->row, cx->col, "No more fimps");
+    return false;
+  }
+  
+  struct cx_func *func = imp->func;
   if (!cx_scan_args(cx, func)) { return false; }
 
-  struct cx_fimp *imp = cx_func_get_imp(func,
-					&scope->stack,
-					func->imps.count-cx->fimp->i,
-					scope);
+  imp = cx_func_get_imp(func,
+			&scope->stack,
+			func->imps.count - imp->i,
+			scope);
   
   if (!imp) {
     cx_error(cx, cx->row, cx->col, "Upcall not applicable");
@@ -523,7 +535,6 @@ static bool fail_imp(struct cx_scope *scope) {
 
 struct cx *cx_init(struct cx *cx) {
   cx->next_sym_tag = cx->next_type_tag = 1;
-  cx->fimp = NULL;
   cx->bin = NULL;
   cx->op = NULL;
   cx->stop = false;
@@ -548,6 +559,7 @@ struct cx *cx_init(struct cx *cx) {
   cx->consts.key_offs = offsetof(struct cx_var, id);
 
   cx_vec_init(&cx->scopes, sizeof(struct cx_scope *));
+  cx_vec_init(&cx->calls, sizeof(struct cx_call));
   cx_vec_init(&cx->errors, sizeof(struct cx_error));
 
   cx_add_macro(cx, "trait:", trait_parse);
@@ -625,6 +637,12 @@ struct cx *cx_init(struct cx *cx) {
 struct cx *cx_deinit(struct cx *cx) {
   cx_set_deinit(&cx->separators);
   
+  cx_do_vec(&cx->errors, char *, e) { free(*e); }
+  cx_vec_deinit(&cx->errors);
+
+  cx_do_vec(&cx->calls, struct cx_call, c) { cx_call_deinit(c); }
+  cx_vec_deinit(&cx->calls);
+
   cx_do_vec(&cx->scopes, struct cx_scope *, s) { cx_scope_unref(*s); }
   cx_vec_deinit(&cx->scopes);
 
@@ -643,8 +661,6 @@ struct cx *cx_deinit(struct cx *cx) {
   cx_do_set(&cx->syms, struct cx_sym, s) { cx_sym_deinit(s); }
   cx_set_deinit(&cx->syms);
 
-  cx_do_vec(&cx->errors, char *, e) { free(*e); }
-  cx_vec_deinit(&cx->errors);
   return cx;
 }
 
@@ -809,6 +825,7 @@ void cx_push_scope(struct cx *cx, struct cx_scope *scope) {
 
 struct cx_scope *cx_pop_scope(struct cx *cx, bool silent) {
   if (cx->scopes.count == 1) {
+    cx_test(false);
     if (!silent) { cx_error(cx, cx->row, cx->col, "No open scopes"); }
     return NULL;
   }

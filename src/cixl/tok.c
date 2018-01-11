@@ -54,11 +54,14 @@ static bool inline_fimp(struct cx_fimp *imp,
 			size_t tok_idx,
 			struct cx *cx) {
   size_t i = bin->ops.count;
+
   struct cx_op *op = cx_op_init(cx_vec_push(&bin->ops),
 				CX_OFUNC(),
 				tok_idx);
   op->as_func.imp = imp;
   op->as_func.start_op = i+1;
+
+  cx_op_init(cx_vec_push(&bin->ops), CX_OSCOPE(), tok_idx)->as_scope.child = false;  
 
   if (imp->toks.count) {
     if (!cx_compile(cx, cx_vec_start(&imp->toks), cx_vec_end(&imp->toks), bin)) {
@@ -68,7 +71,7 @@ static bool inline_fimp(struct cx_fimp *imp,
     }
   }
   
-  cx_op_init(cx_vec_push(&bin->ops), CX_OSTOP(), tok_idx);
+  cx_op_init(cx_vec_push(&bin->ops), CX_OUNFUNC(), bin->toks.count-1);
   op = cx_vec_get(&bin->ops, i);
   op->as_func.num_ops = bin->ops.count - op->as_func.start_op;
   cx_bin_add_func(bin, imp, op->as_func.start_op);
@@ -226,7 +229,7 @@ static ssize_t lambda_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx)
     }
   }
   
-  cx_op_init(cx_vec_push(&bin->ops), CX_OSTOP(), tok_idx);
+  cx_op_init(cx_vec_push(&bin->ops), CX_OUNLAMBDA(), tok_idx);
   struct cx_op *op = cx_vec_get(&bin->ops, i);
   op->as_lambda.num_ops = bin->ops.count - op->as_lambda.start_op;
   return tok_idx+1;
