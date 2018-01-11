@@ -42,7 +42,7 @@ static bool call_imp(struct cx_box *value, struct cx_scope *scope) {
     cx_push_scope(cx, l->scope);
     pop_scope = true;
   }
-  
+
   bool ok = cx_eval(cx, l->bin, cx_vec_get(&l->bin->ops, l->start_op));
   if (pop_scope) { cx_pop_scope(cx, false); }
   return ok;

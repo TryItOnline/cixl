@@ -26,6 +26,7 @@ struct cx_fimp *cx_fimp_init(struct cx_fimp *imp,
 
 struct cx_fimp *cx_fimp_deinit(struct cx_fimp *imp);
 bool cx_fimp_match(struct cx_fimp *imp, struct cx_vec *stack, struct cx_scope *scope);
+bool cx_fimp_compile(struct cx_fimp *imp, size_t tok_idx, struct cx_bin *out);
 bool cx_fimp_eval(struct cx_fimp *imp, struct cx_scope *scope);
 bool cx_fimp_call(struct cx_fimp *imp, struct cx_scope *scope);
 

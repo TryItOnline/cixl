@@ -70,6 +70,25 @@ bool cx_fimp_match(struct cx_fimp *imp,
   return true;
 }
 
+bool cx_fimp_compile(struct cx_fimp *imp, size_t tok_idx, struct cx_bin *out) {
+  struct cx *cx = imp->func->cx;
+  size_t start_op = out->ops.count;
+  
+  cx_op_init(cx_vec_push(&out->ops),
+	     CX_OSCOPE(),
+	     tok_idx)->as_scope.child = false;  
+  
+  if (imp->toks.count &&
+      !cx_compile(cx, cx_vec_start(&imp->toks), cx_vec_end(&imp->toks), out)) {
+    cx_error(cx, cx->row, cx->col, "Failed compiling fimp");
+    return false;
+  }
+  
+  cx_op_init(cx_vec_push(&out->ops), CX_OUNFUNC(), out->toks.count-1);
+  cx_bin_add_func(out, imp, start_op);
+  return true;
+}
+
 bool cx_fimp_eval(struct cx_fimp *imp, struct cx_scope *scope) {
   struct cx *cx = scope->cx;
   struct cx_bin_func *bin = cx_bin_get_func(cx->bin, imp);
@@ -80,20 +99,7 @@ bool cx_fimp_eval(struct cx_fimp *imp, struct cx_scope *scope) {
   } else {
     if (!imp->bin) {
       imp->bin = cx_bin_new();
-
-      cx_op_init(cx_vec_push(&imp->bin->ops),
-		 CX_OSCOPE(),
-		 0)->as_scope.child = false;  
-
-      if (!cx_compile(cx,
-		      cx_vec_start(&imp->toks),
-		      cx_vec_end(&imp->toks),
-		      imp->bin)) {
-	cx_error(cx, cx->row, cx->col, "Failed compiling func imp");
-      }
-
-      cx_op_init(cx_vec_push(&imp->bin->ops), CX_OUNFUNC(), imp->bin->toks.count-1);
-      cx_bin_add_func(imp->bin, imp, 0);
+      if (!cx_fimp_compile(imp, 0, imp->bin)) { return false; }
     }
     
     ok = cx_eval(cx, imp->bin, NULL);

@@ -60,21 +60,9 @@ static bool inline_fimp(struct cx_fimp *imp,
 				tok_idx);
   op->as_func.imp = imp;
   op->as_func.start_op = i+1;
-
-  cx_op_init(cx_vec_push(&bin->ops), CX_OSCOPE(), tok_idx)->as_scope.child = false;  
-
-  if (imp->toks.count) {
-    if (!cx_compile(cx, cx_vec_start(&imp->toks), cx_vec_end(&imp->toks), bin)) {
-      struct cx_tok *tok = cx_vec_get(&bin->toks, tok_idx);  
-      cx_error(cx, tok->row, tok->col, "Failed compiling func");
-      return false;
-    }
-  }
-  
-  cx_op_init(cx_vec_push(&bin->ops), CX_OUNFUNC(), bin->toks.count-1);
+  if (!cx_fimp_compile(imp, tok_idx, bin)) { return false; }
   op = cx_vec_get(&bin->ops, i);
   op->as_func.num_ops = bin->ops.count - op->as_func.start_op;
-  cx_bin_add_func(bin, imp, op->as_func.start_op);
   return true;
 }
 
