@@ -38,7 +38,6 @@ void cx_repl(struct cx *cx, FILE *in, FILE *out) {
 
       if (cx_eval_str(cx, body.data)) {
 	cx_fprint_stack(cx_scope(cx, 0), out);
-	fputc('\n', out);
       } else {
 	cx_do_vec(&cx->errors, struct cx_error, e) {
 	  fprintf(out, "Error in row %d, col %d:\n%s\n", e->row, e->col, e->msg);

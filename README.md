@@ -297,40 +297,6 @@ Two kinds of code comments are supported, line comments and block comments.
 [3]
 ```
 
-### Conditions
-All types are useable as conditions; some are always true; integers test true for anything but zero; empty strings test false etc. The ```?``` operator may be used to transform any value to its conditional representation.
-
-```
-   | 0?
-...
-[#f]
-```
-
-While the ```!``` operator negates any condition.
-
-```
-   | 42!
-...
-[#f]
-```
-
-```if```, ```else``` and ```if-else``` may be used to branch on a condition, they call '?' implicitly so you can throw any value at them.
-
-```
-  | 'foo' %%, $ if &upper
-...
-['FOO'@1]
-
-  | #nil else { say 'not true' }
-...
-not true
-[]
-
-  | 42 if-else `not-zero `zero
-...
-[`not zero]
-```
-
 ### Errors
 Error handling is a work in progress, but two functions are provided for signalling errors. ```fail``` may be used to signal an error with specified error message.
 
@@ -367,6 +333,68 @@ Lambdas inherit the defining scope.
 
 ```
    | (let: x 42; {$x}) call
+...
+[42]
+```
+
+### Conditions
+All types are useable as conditions; some are always true; integers test true for anything but zero; empty strings test false etc. The ```?``` operator may be used to transform any value to its conditional representation.
+
+```
+   | 0?
+...
+[#f]
+```
+
+While the ```!``` operator negates any condition.
+
+```
+   | 42!
+...
+[#f]
+```
+
+```if```, ```else``` and ```if-else``` may be used to branch on a condition, they call '?' implicitly so you can throw any value at them.
+
+```
+  | 'foo' %%, $ if &upper
+...
+['FOO'@1]
+
+  | #nil else { say 'not true' }
+...
+not true
+[]
+
+  | 42 if-else `not-zero `zero
+...
+[`not zero]
+```
+
+Conditions may be chained using ```and``` / ```or```.
+
+```
+   | #t and 42
+...
+[42]
+
+   | 0 and 42
+...
+[0]
+
+   | 42 or #t
+...
+[42]
+
+   | 0 or 42
+...
+[42]
+```
+
+Lambdas may be used to to prevent evaluating arguments.
+
+```
+   | 42 or {say 'Bummer!' #t}
 ...
 [42]
 ```

@@ -49,8 +49,11 @@ struct cx_box *cx_push(struct cx_scope *scope) {
 
 struct cx_box *cx_pop(struct cx_scope *scope, bool silent) {
   if (!scope->stack.count) {
-    if (silent) { return NULL; }
-    cx_error(scope->cx, scope->cx->row, scope->cx->col, "Stack is empty");
+    if (!silent) {
+      cx_error(scope->cx, scope->cx->row, scope->cx->col, "Stack is empty");
+    }
+
+    return NULL;
   }
 
   return cx_vec_pop(&scope->stack);
@@ -67,6 +70,7 @@ struct cx_box *cx_peek(struct cx_scope *scope, bool silent) {
 
 void cx_fprint_stack(struct cx_scope *scope, FILE *out) {
   cx_vect_fprint(&scope->stack, out);
+  fputc('\n', out);
 }
 
 struct cx_box *cx_get_var(struct cx_scope *scope, struct cx_sym id, bool silent) {

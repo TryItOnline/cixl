@@ -363,6 +363,105 @@ static bool not_imp(struct cx_scope *scope) {
   return true;
 }
 
+static bool and_imp(struct cx_scope *scope) {
+  struct cx *cx = scope->cx;
+  
+  struct cx_box
+    y = *cx_test(cx_pop(scope, false)),
+    x = *cx_test(cx_pop(scope, false));
+  
+  if (!cx_call(&x, scope)) {
+    cx_box_deinit(&y);
+    return false;
+  }
+  
+  cx_box_deinit(&x);
+  struct cx_box *xc = cx_pop(scope, false);
+  
+  if (!xc) {
+    cx_error(cx, cx->row, cx->col, "Missing argument");
+    cx_box_deinit(&y);
+    return false;    
+  }
+
+  struct cx_box xcv = *xc;
+  
+  if (!cx_ok(&xcv)) {
+    cx_box_deinit(&y);
+    *cx_push(scope) = xcv;
+    return true;
+  }
+  
+  cx_box_deinit(&xcv);
+  
+  if (!cx_call(&y, scope)) {
+    cx_box_deinit(&y);
+    return false;
+  }
+  
+  cx_box_deinit(&y);
+  struct cx_box *yc = cx_pop(scope, false);
+
+  if (!yc) {
+    cx_error(cx, cx->row, cx->col, "Missing argument");
+    return false;    
+  }
+
+  struct cx_box ycv = *yc;
+  *cx_push(scope) = ycv;
+  return true;
+}
+
+static bool or_imp(struct cx_scope *scope) {
+  struct cx *cx = scope->cx;
+
+  struct cx_box
+    y = *cx_test(cx_pop(scope, false)),
+    x = *cx_test(cx_pop(scope, false));
+  
+  if (!cx_call(&x, scope)) {
+    cx_box_deinit(&x);
+    cx_box_deinit(&y);
+    return false;
+  }
+  
+  cx_box_deinit(&x);
+  struct cx_box *xc = cx_pop(scope, false);
+
+  if (!xc) {
+    cx_error(cx, cx->row, cx->col, "Missing argument");
+    cx_box_deinit(&y);
+    return false;    
+  }
+
+  struct cx_box xcv = *xc;
+  
+  if (cx_ok(&xcv)) {
+    cx_box_deinit(&y);
+    *cx_push(scope) = xcv;
+    return true;
+  }
+  
+  cx_box_deinit(&xcv);
+  
+  if (!cx_call(&y, scope)) {
+    cx_box_deinit(&y);
+    return false;
+  }
+  
+  cx_box_deinit(&y);
+  struct cx_box *yc = cx_pop(scope, false);
+
+  if (!yc) {
+    cx_error(cx, cx->row, cx->col, "Missing argument");
+    return false;    
+  }
+  
+  struct cx_box ycv = *yc;
+  *cx_push(scope) = ycv;
+  return true;
+}
+
 static bool if_imp(struct cx_scope *scope) {
   struct cx_box
     x = *cx_test(cx_pop(scope, false)),
@@ -605,7 +704,10 @@ struct cx *cx_init(struct cx *cx) {
 
   cx_add_func(cx, "?", cx_arg(cx->opt_type))->ptr = ok_imp;
   cx_add_func(cx, "!", cx_arg(cx->opt_type))->ptr = not_imp;
-
+  
+  cx_add_func(cx, "and", cx_arg(cx->opt_type), cx_arg(cx->opt_type))->ptr = and_imp;
+  cx_add_func(cx, "or", cx_arg(cx->opt_type), cx_arg(cx->opt_type))->ptr = or_imp;
+  
   cx_add_func(cx, "if", cx_arg(cx->opt_type), cx_arg(cx->any_type))->ptr = if_imp;
   cx_add_func(cx, "else", cx_arg(cx->opt_type), cx_arg(cx->any_type))->ptr = else_imp;
 

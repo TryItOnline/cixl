@@ -1,5 +1,3 @@
-* add overlap test to bookings
-** add and/or operators
 * add Ref type
 * add Iter type
 ** add struct cx_iter

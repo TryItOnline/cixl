@@ -71,6 +71,9 @@ func: update-capacity(in Capacity start end Time total used Int out Vect)
   if $u > $t {fail 'Overbook'}
   repeat: ($in put) `total $t, `used  $u;;
 
+func: intersects(in Capacity start end Time)
+  {$in get `start < $end} and {($in get `end > $start)};
+
 /*
   The entire calendar is scanned for each update, records are cloned to avoid
   inconsistent calendars on failure.
@@ -78,7 +81,13 @@ func: update-capacity(in Capacity start end Time total used Int out Vect)
 
 func: update-calendar(in Vect start end Time total used Int)
   let: out [];
-  $in for {%%, update-capacity $ $start $end $total $used $out _}
+
+  $in for {
+    %, intersects $ $start $end, $ if {
+      %% ~, update-capacity $ $start $end $total $used $out
+    } _
+  }
+  
   $out;
 
 func: update-resource(r Resource start end Time total used Int)
