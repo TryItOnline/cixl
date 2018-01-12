@@ -158,7 +158,7 @@ Bindings in the current scope may be explicitly removed.
 ```
    |
    let: x 42;
-   unlet `x
+   del-var `x
    let: x 'foo';
    $x
 ...

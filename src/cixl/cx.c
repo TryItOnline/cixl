@@ -124,8 +124,8 @@ static ssize_t func_eval(struct cx_macro_eval *eval,
 
     if (t->type == CX_TID()) {
       cx_op_init(cx_vec_push(&bin->ops),
-		 CX_OSET_ARG(),
-		 tok_idx)->as_set_arg.id = cx_sym(cx, t->as_ptr);
+		 CX_OPUT_ARG(),
+		 tok_idx)->as_put_arg.id = cx_sym(cx, t->as_ptr);
     } else {
       cx_op_init(cx_vec_push(&bin->ops), CX_OZAP_ARG(), tok_idx);
     }

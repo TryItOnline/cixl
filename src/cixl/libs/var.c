@@ -26,19 +26,16 @@ static ssize_t let_eval(struct cx_macro_eval *eval,
     return -1;
   }
   
-  void set(const char *id, struct cx_type *type) {
-    struct cx_op * op = cx_op_init(cx_vec_push(&bin->ops), CX_OSET(), tok_idx);
-    op->as_set.id = cx_sym(cx, id);
-    op->as_set.type = type;
-    op->as_set.force = false;
-    op->as_set.pop_parent = false;
-    op->as_set.set_parent = true;
+  void put(const char *id, struct cx_type *type) {
+    struct cx_op * op = cx_op_init(cx_vec_push(&bin->ops), CX_OPUT_VAR(), tok_idx);
+    op->as_put_var.id = cx_sym(cx, id);
+    op->as_put_var.type = type;
   }
 
   struct cx_tok *id_tok = cx_vec_get(&eval->toks, 0);
   
   if (id_tok->type == CX_TID()) {
-    set(id_tok->as_ptr, NULL);
+    put(id_tok->as_ptr, NULL);
   } else {
     struct cx_vec *toks = &id_tok->as_vec, ids, types;
     cx_vec_init(&ids, sizeof(struct cx_tok));
@@ -73,7 +70,7 @@ static ssize_t let_eval(struct cx_macro_eval *eval,
     struct cx_type **type = cx_vec_peek(&types, 0);
     
     for (; id >= (struct cx_tok *)ids.items; id--, type--) {
-      set(id->as_ptr, *type);
+      put(id->as_ptr, *type);
     }
     
     ok = true;
@@ -123,7 +120,7 @@ static bool let_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
 static bool put_imp(struct cx_scope *scope) {
   struct cx_box v = *cx_test(cx_pop(scope, false));
   struct cx_sym s = cx_test(cx_pop(scope, false))->as_sym;
-  struct cx_box *var = cx_set(scope, s, false);
+  struct cx_box *var = cx_put_var(scope, s, false);
   if (!var) { return false; }
   cx_copy(var, &v);
   cx_box_deinit(&v);
@@ -132,7 +129,7 @@ static bool put_imp(struct cx_scope *scope) {
 
 static bool get_imp(struct cx_scope *scope) {
   struct cx_sym s = cx_test(cx_pop(scope, false))->as_sym;
-  struct cx_box *v = cx_get(scope, s, false);
+  struct cx_box *v = cx_get_var(scope, s, false);
   if (!v) { return false; }
   cx_copy(cx_push(scope), v);
   return true;
@@ -140,13 +137,14 @@ static bool get_imp(struct cx_scope *scope) {
 
 static bool is_imp(struct cx_scope *scope) {
   struct cx_sym s = cx_test(cx_pop(scope, false))->as_sym;
-  cx_box_init(cx_push(scope), scope->cx->bool_type)->as_bool = cx_get(scope, s, true);
+  cx_box_init(cx_push(scope),
+	      scope->cx->bool_type)->as_bool = cx_get_var(scope, s, true);
   return true;
 }
 
-static bool unlet_imp(struct cx_scope *scope) {
+static bool del_imp(struct cx_scope *scope) {
   struct cx_sym s = cx_test(cx_pop(scope, false))->as_sym;
-  cx_unset(scope, s, false);
+  cx_del_var(scope, s, false);
   return true;
 }
 
@@ -158,5 +156,5 @@ void cx_init_var(struct cx *cx) {
 	      cx_arg(cx->any_type))->ptr = put_imp;
   cx_add_func(cx, "get-var", cx_arg(cx->sym_type))->ptr = get_imp;
   cx_add_func(cx, "is-var", cx_arg(cx->sym_type))->ptr = is_imp;
-  cx_add_func(cx, "unlet", cx_arg(cx->sym_type))->ptr = unlet_imp;
+  cx_add_func(cx, "del-var", cx_arg(cx->sym_type))->ptr = del_imp;
 }

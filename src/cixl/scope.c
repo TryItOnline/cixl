@@ -69,11 +69,11 @@ void cx_fprint_stack(struct cx_scope *scope, FILE *out) {
   cx_vect_fprint(&scope->stack, out);
 }
 
-struct cx_box *cx_get(struct cx_scope *scope, struct cx_sym id, bool silent) {
+struct cx_box *cx_get_var(struct cx_scope *scope, struct cx_sym id, bool silent) {
   struct cx_var *var = cx_set_get(&scope->env, &id);
 
   if (!var) {
-    if (scope->parent) { return cx_get(scope->parent, id, silent); }
+    if (scope->parent) { return cx_get_var(scope->parent, id, silent); }
 
     if (!silent) {
       struct cx *cx = scope->cx;
@@ -86,7 +86,7 @@ struct cx_box *cx_get(struct cx_scope *scope, struct cx_sym id, bool silent) {
   return &var->value;
 }
 
-struct cx_box *cx_set(struct cx_scope *scope, struct cx_sym id, bool force) {
+struct cx_box *cx_put_var(struct cx_scope *scope, struct cx_sym id, bool force) {
   struct cx_var *var = cx_set_get(&scope->env, &id);
 
   if (var) {
@@ -104,7 +104,7 @@ struct cx_box *cx_set(struct cx_scope *scope, struct cx_sym id, bool force) {
   return &var->value;
 }
 
-bool cx_unset(struct cx_scope *scope, struct cx_sym id, bool silent) {
+bool cx_del_var(struct cx_scope *scope, struct cx_sym id, bool silent) {
   struct cx_var *v = cx_set_get(&scope->env, &id);
 
   if (!v) {

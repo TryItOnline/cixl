@@ -99,7 +99,7 @@ static void let_tests() {
 
   run(&cx,
       "(let: foo 42; "
-      " unlet `foo "
+      " del-var `foo "
       " let: foo 'foo'; "
       " $foo = 'foo' test)");
   
