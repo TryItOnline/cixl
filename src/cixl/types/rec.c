@@ -42,7 +42,18 @@ static void clone_imp(struct cx_box *dst, struct cx_box *src) {
   }
 }
 
-static void fprint_imp(struct cx_box *v, FILE *out) {
+static void write_imp(struct cx_box *v, FILE *out) {
+  fprintf(out, "%s new", v->type->id);
+  struct cx_rec *r = v->as_ptr;
+  
+  cx_do_set(&r->values, struct cx_field_value, fv) {
+    fprintf(out, " %% `%s ", fv->id.id);
+    cx_write(&fv->box, out);
+    fputs(" put", out);
+  }
+}
+
+static void print_imp(struct cx_box *v, FILE *out) {
   struct cx_rec *r = v->as_ptr;
   fprintf(out, "%s(%p)@%d", v->type->id, r, r->nrefs);
 }
@@ -67,7 +78,8 @@ struct cx_rec_type *cx_rec_type_init(struct cx_rec_type *type,
   type->imp.ok = ok_imp;
   type->imp.copy = copy_imp;
   type->imp.clone = clone_imp;
-  type->imp.fprint = fprint_imp;
+  type->imp.write = write_imp;
+  type->imp.print = print_imp;
   type->imp.deinit = deinit_imp;
 
   type->imp.type_deinit = type_deinit_imp;

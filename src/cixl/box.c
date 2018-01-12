@@ -65,6 +65,19 @@ struct cx_box *cx_clone(struct cx_box *dst, struct cx_box *src) {
   return dst;
 }
 
-void cx_fprint(struct cx_box *box, FILE *out) {
-  cx_test(box->type->fprint)(box, out);
+bool cx_write(struct cx_box *box, FILE *out) {
+  if (!box->type->write) {
+    struct cx *cx = box->type->cx;
+    cx_error(cx, cx->row, cx->col,
+	     "Write not implemented for type: %s",
+	     box->type->id);
+    return false;
+  }
+  
+  box->type->write(box, out);
+  return true;
+}
+
+void cx_print(struct cx_box *box, FILE *out) {
+  cx_test(box->type->print)(box, out);
 }

@@ -216,6 +216,7 @@ static void guid_tests() {
   cx_init(&cx);
 
   run(&cx, "Guid new, Guid new = !test");
+  run(&cx, "Guid new % str guid = test");
   
   cx_deinit(&cx);
 }

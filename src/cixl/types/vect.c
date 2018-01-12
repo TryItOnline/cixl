@@ -30,13 +30,13 @@ void cx_vect_unref(struct cx_vect *vect) {
   }
 }
 
-void cx_vect_fprint(struct cx_vec *imp, FILE *out) {
+void cx_vect_print(struct cx_vec *imp, FILE *out) {
   fputc('[', out);
   char sep = 0;
   
   cx_do_vec(imp, struct cx_box, b) {
     if (sep) { fputc(sep, out); }
-    cx_fprint(b, out);
+    cx_print(b, out);
     sep = ' ';
   }
 
@@ -156,9 +156,24 @@ static void clone_imp(struct cx_box *dst, struct cx_box *src) {
   }
 }
 
-static void fprint_imp(struct cx_box *b, FILE *out) {
+static void write_imp(struct cx_box *b, FILE *out) {
   struct cx_vect *v = b->as_ptr;
-  cx_vect_fprint(&v->imp, out);
+
+  fputc('[', out);
+  char sep = 0;
+  
+  cx_do_vec(&v->imp, struct cx_box, b) {
+    if (sep) { fputc(sep, out); }
+    cx_write(b, out);
+    sep = ' ';
+  }
+
+  fputc(']', out);
+}
+
+static void print_imp(struct cx_box *b, FILE *out) {
+  struct cx_vect *v = b->as_ptr;
+  cx_vect_print(&v->imp, out);
   fprintf(out, "@%d", v->nrefs);
 }
 
@@ -173,7 +188,8 @@ struct cx_type *cx_init_vect_type(struct cx *cx) {
   t->ok = ok_imp;
   t->copy = copy_imp;
   t->clone = clone_imp;
-  t->fprint = fprint_imp;
+  t->write = write_imp;
+  t->print = print_imp;
   t->deinit = deinit_imp;
   
   cx_add_func(cx, "len", cx_arg(t))->ptr = len_imp;

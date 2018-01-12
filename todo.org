@@ -1,3 +1,8 @@
+* add WFile/RFile types
+** add #in/#out
+* add write(opt WFile) fn
+* add read(RFile) fn
+** call into parse/eval
 * add Iter type
 ** add struct cx_iter
 *** bool (*next)(struct cx_box *)

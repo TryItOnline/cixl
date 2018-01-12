@@ -30,7 +30,7 @@ static void copy_imp(struct cx_box *dst, struct cx_box *src) {
   dst->as_ptr = cx_bin_ref(b);
 }
 
-static void fprint_imp(struct cx_box *value, FILE *out) {
+static void print_imp(struct cx_box *value, FILE *out) {
   struct cx_bin *b = value->as_ptr;
   fprintf(out, "Bin(%p)@%d", b, b->nrefs);
 }
@@ -46,7 +46,7 @@ struct cx_type *cx_init_bin_type(struct cx *cx) {
   t->equid = equid_imp;
   t->call = call_imp;
   t->copy = copy_imp;
-  t->fprint = fprint_imp;
+  t->print = print_imp;
   t->deinit = deinit_imp;
 
   return t;

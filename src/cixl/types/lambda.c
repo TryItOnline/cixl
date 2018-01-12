@@ -54,7 +54,7 @@ static void copy_imp(struct cx_box *dst, struct cx_box *src) {
   l->nrefs++;
 }
 
-static void fprint_imp(struct cx_box *value, FILE *out) {
+static void print_imp(struct cx_box *value, FILE *out) {
   struct cx_lambda *l = value->as_ptr;
   fprintf(out, "Lambda(%p)@%d", l, l->nrefs);
 }
@@ -71,7 +71,7 @@ struct cx_type *cx_init_lambda_type(struct cx *cx) {
   t->equid = equid_imp;
   t->call = call_imp;
   t->copy = copy_imp;
-  t->fprint = fprint_imp;
+  t->print = print_imp;
   t->deinit = deinit_imp;
   return t;
 }

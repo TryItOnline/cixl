@@ -26,7 +26,8 @@ struct cx_type *cx_type_init(struct cx_type *type, struct cx *cx, const char *id
   type->call = NULL;
   type->copy = NULL;
   type->clone = NULL;
-  type->fprint = NULL;
+  type->write = NULL;
+  type->print = NULL;
   type->deinit = NULL;
 
   type->type_deinit = NULL;
@@ -68,7 +69,7 @@ static bool equid_imp(struct cx_box *x, struct cx_box *y) {
   return x->as_ptr == y->as_ptr;
 }
 
-static void fprint_imp(struct cx_box *value, FILE *out) {
+static void print_imp(struct cx_box *value, FILE *out) {
   struct cx_type *type = value->as_ptr;
   fputs(type->id, out);
 }
@@ -76,6 +77,7 @@ static void fprint_imp(struct cx_box *value, FILE *out) {
 struct cx_type *cx_init_meta_type(struct cx *cx) {
   struct cx_type *t = cx_add_type(cx, "Type", cx->any_type);
   t->equid = equid_imp;
-  t->fprint = fprint_imp;
+  t->write = print_imp;
+  t->print = print_imp;
   return t;
 }

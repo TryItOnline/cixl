@@ -57,15 +57,15 @@ struct cx_func_arg cx_narg(int n) {
   return (struct cx_func_arg) { .type = NULL, .narg = n };
 }
 
-static void fprint_arg_id(struct cx_func_arg *a,
+static void print_arg_id(struct cx_func_arg *a,
 			  struct cx_vec *args,
 			  FILE *out) {
   if (a->type) {
     fputs(a->type->id, out);
   } else if (a->narg != -1) {
-    fprint_arg_id(cx_vec_get(args, a->narg), args, out);
+    print_arg_id(cx_vec_get(args, a->narg), args, out);
   } else {
-    cx_fprint(&a->value, out);
+    cx_print(&a->value, out);
   }
 }
 
@@ -85,7 +85,7 @@ struct cx_fimp *cx_func_add_imp(struct cx_func *func,
       struct cx_func_arg a = args[i];
       *(struct cx_func_arg *)cx_vec_push(&imp_args) = a;
       if (i) { fputc(' ', id.stream); }
-      fprint_arg_id(&a, &imp_args, id.stream);
+      print_arg_id(&a, &imp_args, id.stream);
     }
   }
 
@@ -157,7 +157,12 @@ static bool call_imp(struct cx_box *value, struct cx_scope *scope) {
   return cx_fimp_call(imp, scope);
 }
 
-static void fprint_imp(struct cx_box *value, FILE *out) {
+static void write_imp(struct cx_box *value, FILE *out) {
+  struct cx_func *func = value->as_ptr;
+  fprintf(out, "&%s", func->id);
+}
+
+static void print_imp(struct cx_box *value, FILE *out) {
   struct cx_func *func = value->as_ptr;
   fprintf(out, "Func(%s)", func->id);
 }
@@ -166,7 +171,8 @@ struct cx_type *cx_init_func_type(struct cx *cx) {
   struct cx_type *t = cx_add_type(cx, "Func", cx->any_type);
   t->equid = equid_imp;
   t->call = call_imp;
-  t->fprint = fprint_imp;
+  t->write = write_imp;
+  t->print = print_imp;
 
   cx_add_func(cx, "imps", cx_arg(t))->ptr = imps_imp;
 

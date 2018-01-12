@@ -89,7 +89,7 @@ static bool ok_imp(struct cx_box *v) {
   return v->as_int != 0;
 }
 
-static void fprint_imp(struct cx_box *v, FILE *out) {
+static void print_imp(struct cx_box *v, FILE *out) {
   fprintf(out, "%" PRId64, v->as_int);
 }
 
@@ -98,7 +98,8 @@ struct cx_type *cx_init_int_type(struct cx *cx) {
   t->equid = equid_imp;
   t->cmp = cmp_imp;
   t->ok = ok_imp;
-  t->fprint = fprint_imp;
+  t->write = print_imp;
+  t->print = print_imp;
   
   cx_add_func(cx, "++", cx_arg(t))->ptr = inc_imp;
   cx_add_func(cx, "--", cx_arg(t))->ptr = dec_imp;

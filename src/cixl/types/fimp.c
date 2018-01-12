@@ -136,7 +136,12 @@ static bool call_imp(struct cx_box *value, struct cx_scope *scope) {
   return cx_fimp_call(imp, scope);
 }
 
-static void fprint_imp(struct cx_box *value, FILE *out) {
+static void write_imp(struct cx_box *value, FILE *out) {
+  struct cx_fimp *imp = value->as_ptr;
+  fprintf(out, "&%s<%s>", imp->func->id, imp->id);
+}
+
+static void print_imp(struct cx_box *value, FILE *out) {
   struct cx_fimp *imp = value->as_ptr;
   fprintf(out, "Fimp(%s %s)", imp->func->id, imp->id);
 }
@@ -145,6 +150,7 @@ struct cx_type *cx_init_fimp_type(struct cx *cx) {
   struct cx_type *t = cx_add_type(cx, "Fimp", cx->any_type);
   t->equid = equid_imp;
   t->call = call_imp;
-  t->fprint = fprint_imp;
+  t->write = write_imp;
+  t->print = print_imp;
   return t;
 }

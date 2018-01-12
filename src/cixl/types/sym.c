@@ -53,7 +53,7 @@ static bool equid_imp(struct cx_box *x, struct cx_box *y) {
   return x->as_sym.tag == y->as_sym.tag;
 }
 
-static void fprint_imp(struct cx_box *v, FILE *out) {
+static void print_imp(struct cx_box *v, FILE *out) {
   fprintf(out, "`%s", v->as_sym.id);
 }
 
@@ -61,7 +61,8 @@ struct cx_type *cx_init_sym_type(struct cx *cx) {
   struct cx_type *t = cx_add_type(cx, "Sym", cx->any_type);
   t->new = new_imp;
   t->equid = equid_imp;
-  t->fprint = fprint_imp;
+  t->write = print_imp;
+  t->print = print_imp;
 
   cx_add_func(cx, "sym", cx_arg(cx->str_type))->ptr = sym_imp;
   cx_add_func(cx, "str", cx_arg(t))->ptr = str_imp;

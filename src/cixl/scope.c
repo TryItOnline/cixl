@@ -69,7 +69,7 @@ struct cx_box *cx_peek(struct cx_scope *scope, bool silent) {
 }
 
 void cx_fprint_stack(struct cx_scope *scope, FILE *out) {
-  cx_vect_fprint(&scope->stack, out);
+  cx_vect_print(&scope->stack, out);
   fputc('\n', out);
 }
 

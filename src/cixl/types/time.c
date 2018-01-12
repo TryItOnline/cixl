@@ -50,7 +50,33 @@ static void fprint_ns(int64_t ns, FILE *out) {
   fprintf(out, "%" PRId32 ":%" PRId32 ":%" PRId32 ".%" PRId64, h, m, s, ns);
 }
 
-static void fprint_imp(struct cx_box *v, FILE *out) {
+static void write_imp(struct cx_box *v, FILE *out) {
+  fputc('[', out);
+  
+  struct cx_time *t = &v->as_time;
+  
+  int32_t y = t->months / 12, m = t->months % 12, d = t->ns / CX_DAY; 
+  fprintf(out, "%" PRId32 " %" PRId32 " %" PRId32, y, m, d);
+  int64_t ns = t->ns % CX_DAY;
+  
+  if (ns) {
+    fputc(' ', out);
+    
+    int32_t h = ns / CX_HOUR;
+    ns %= CX_HOUR;
+    int32_t m = ns / CX_MIN;
+    ns %= CX_MIN;
+    int32_t s = ns / CX_SEC;
+    ns %= CX_SEC;
+  
+    fprintf(out, "%" PRId32 " %" PRId32 " %" PRId32 " %" PRId64, h, m, s, ns);
+  }
+
+  fputs("] time", out);
+}
+
+
+static void print_imp(struct cx_box *v, FILE *out) {
   fputs("Time(", out);
   struct cx_time *t = &v->as_time;
   
@@ -75,7 +101,8 @@ struct cx_type *cx_init_time_type(struct cx *cx) {
   t->equid = equid_imp;
   t->cmp = cmp_imp;
   t->ok = ok_imp;
-  t->fprint = fprint_imp;
+  t->write = write_imp;
+  t->print = print_imp;
   return t;
 }
 
