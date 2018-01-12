@@ -73,8 +73,8 @@ bool cx_fimp_compile(struct cx_fimp *imp, size_t tok_idx, struct cx_bin *out) {
   size_t start_op = out->ops.count;
   
   cx_op_init(cx_vec_push(&out->ops),
-	     CX_OSCOPE(),
-	     tok_idx)->as_scope.child = false;  
+	     CX_OBEGIN(),
+	     tok_idx)->as_begin.child = false;  
   
   if (imp->toks.count &&
       !cx_compile(cx, cx_vec_start(&imp->toks), cx_vec_end(&imp->toks), out)) {
@@ -82,7 +82,7 @@ bool cx_fimp_compile(struct cx_fimp *imp, size_t tok_idx, struct cx_bin *out) {
     return false;
   }
   
-  cx_op_init(cx_vec_push(&out->ops), CX_OUNFIMP(), out->toks.count-1);
+  cx_op_init(cx_vec_push(&out->ops), CX_ORETURN(), out->toks.count-1);
   cx_bin_add_func(out, imp, start_op);
   return true;
 }

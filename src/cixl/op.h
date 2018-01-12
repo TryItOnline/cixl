@@ -29,6 +29,14 @@ struct cx_op_type {
 
 struct cx_op_type *cx_op_type_init(struct cx_op_type *type, const char *id);
 
+struct cx_begin_op {
+  bool child;
+};
+
+struct cx_end_op {
+  bool push_result;
+};
+
 struct cx_get_op {
   struct cx_sym id;
 };
@@ -47,10 +55,6 @@ struct cx_lambda_op {
   size_t start_op, num_ops;
 };
 
-struct cx_scope_op {
-  bool child;
-};
-
 struct cx_set_op {
   struct cx_sym id;
   struct cx_type *type;
@@ -61,42 +65,38 @@ struct cx_set_arg_op {
   struct cx_sym id;
 };
 
-struct cx_unscope_op {
-  bool push_result;
-};
-
 struct cx_op {
   size_t tok_idx;
   struct cx_op_type *type;
   
   union {
+    struct cx_begin_op as_begin;
+    struct cx_end_op as_end;
     struct cx_get_op as_get;
     struct cx_fimp_op as_fimp;
     struct cx_funcall_op as_funcall;
     struct cx_lambda_op as_lambda;
-    struct cx_scope_op as_scope;
     struct cx_set_op as_set;
     struct cx_set_arg_op as_set_arg;
-    struct cx_unscope_op as_unscope;
   };
 };
 
 struct cx_op *cx_op_init(struct cx_op *op, struct cx_op_type *type, size_t tok_idx);
 
+struct cx_op_type *CX_OBEGIN();
 struct cx_op_type *CX_OCUT();
+struct cx_op_type *CX_OEND();
 struct cx_op_type *CX_OGET();
 struct cx_op_type *CX_OGET_CONST();
 struct cx_op_type *CX_OFIMP();
 struct cx_op_type *CX_OFUNCALL();
 struct cx_op_type *CX_OLAMBDA();
 struct cx_op_type *CX_OPUSH();
-struct cx_op_type *CX_OSCOPE();
+struct cx_op_type *CX_ORETURN();
 struct cx_op_type *CX_OSET();
 struct cx_op_type *CX_OSET_ARG();
 struct cx_op_type *CX_OSTASH();
 struct cx_op_type *CX_OSTOP();
-struct cx_op_type *CX_OUNFIMP();
-struct cx_op_type *CX_OUNSCOPE();
 struct cx_op_type *CX_OZAP();
 struct cx_op_type *CX_OZAP_ARG();
 

@@ -119,7 +119,7 @@ cx_tok_type(CX_TFUNC, {
   });
 
 static ssize_t group_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) {
-  cx_op_init(cx_vec_push(&bin->ops), CX_OSCOPE(), tok_idx)->as_scope.child = true;
+  cx_op_init(cx_vec_push(&bin->ops), CX_OBEGIN(), tok_idx)->as_begin.child = true;
   struct cx_tok *tok = cx_vec_get(&bin->toks, tok_idx);
   struct cx_vec *toks = &tok->as_vec;
 
@@ -132,8 +132,8 @@ static ssize_t group_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) 
   }
   
   cx_op_init(cx_vec_push(&bin->ops),
-	     CX_OUNSCOPE(),
-	     tok_idx)->as_unscope.push_result = true;
+	     CX_OEND(),
+	     tok_idx)->as_end.push_result = true;
   return tok_idx+1;
 }
 

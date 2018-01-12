@@ -23,6 +23,25 @@ struct cx_op *cx_op_init(struct cx_op *op, struct cx_op_type *type, size_t tok_i
   return op;
 }
 
+static bool begin_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
+  cx_begin(cx, op->as_begin.child ? cx_scope(cx, 0) : NULL);
+  return true;
+}
+
+cx_op_type(CX_OBEGIN, {
+    type.eval = begin_eval;
+  });
+
+static bool end_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
+  if (!op->as_end.push_result) { cx_vec_clear(&cx_scope(cx, 0)->stack); }
+  cx_end(cx);
+  return true;
+}
+
+cx_op_type(CX_OEND, {
+    type.eval = end_eval;
+  });
+
 static bool cut_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
   struct cx_scope *s = cx_scope(cx, 0);
   *(size_t *)cx_vec_push(&s->cut_offs) = s->stack.count;
@@ -130,13 +149,32 @@ cx_op_type(CX_OPUSH, {
     type.eval = push_eval;
   });
 
-static bool scope_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
-  cx_begin(cx, op->as_scope.child ? cx_scope(cx, 0) : NULL);
+static bool return_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
+  struct cx_call *call = cx_test(cx_vec_peek(&cx->calls, 0));
+
+  if (call->recalls) {
+    struct cx_fimp *imp = call->target;
+    struct cx_scope *s = cx_scope(cx, 0);
+    
+    if (!cx_fimp_match(imp, &s->stack)) {
+      cx_error(cx, cx->row, cx->col, "Recall not applicable");
+      return false;
+    }
+
+    struct cx_bin_func *bin = cx_test(cx_bin_get_func(cx->bin, imp));
+    cx->op = cx_vec_get(&cx->bin->ops, bin->start_op+1);
+    call->recalls--;
+  } else {
+    cx->stop = true;
+    cx_call_deinit(cx_vec_pop(&cx->calls));
+    cx_end(cx);
+  }
+  
   return true;
 }
 
-cx_op_type(CX_OSCOPE, {
-    type.eval = scope_eval;
+cx_op_type(CX_ORETURN, {
+    type.eval = return_eval;
   });
 
 static bool set_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
@@ -200,44 +238,6 @@ static bool stop_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
 
 cx_op_type(CX_OSTOP, {
     type.eval = stop_eval;
-  });
-
-static bool unfimp_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
-  struct cx_call *call = cx_test(cx_vec_peek(&cx->calls, 0));
-
-  if (call->recalls) {
-    struct cx_fimp *imp = call->target;
-    struct cx_scope *s = cx_scope(cx, 0);
-    
-    if (!cx_fimp_match(imp, &s->stack)) {
-      cx_error(cx, cx->row, cx->col, "Recall not applicable");
-      return false;
-    }
-
-    struct cx_bin_func *bin = cx_test(cx_bin_get_func(cx->bin, imp));
-    cx->op = cx_vec_get(&cx->bin->ops, bin->start_op+1);
-    call->recalls--;
-  } else {
-    cx->stop = true;
-    cx_call_deinit(cx_vec_pop(&cx->calls));
-    cx_end(cx);
-  }
-  
-  return true;
-}
-
-cx_op_type(CX_OUNFIMP, {
-    type.eval = unfimp_eval;
-  });
-
-static bool unscope_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
-  if (!op->as_unscope.push_result) { cx_vec_clear(&cx_scope(cx, 0)->stack); }
-  cx_end(cx);
-  return true;
-}
-
-cx_op_type(CX_OUNSCOPE, {
-    type.eval = unscope_eval;
   });
 
 static bool zap_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
