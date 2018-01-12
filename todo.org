@@ -1,4 +1,3 @@
-* add Ref type
 * add Iter type
 ** add struct cx_iter
 *** bool (*next)(struct cx_box *)
@@ -47,3 +46,4 @@ $bar ('bar' $bar vect)
 ** stream rseek/wseek fn
 ** stream str fn
 ** stream len fn
+* add Ref type

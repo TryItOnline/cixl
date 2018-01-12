@@ -84,7 +84,7 @@ func: update-calendar(in Vect start end Time total used Int)
 
   $in for {
     %, intersects $ $start $end, $ if {
-      %% ~, update-capacity $ $start $end $total $used $out
+      %%, update-capacity $ $start $end $total $used $out
     } _
   }
   
