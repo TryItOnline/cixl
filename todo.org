@@ -1,8 +1,7 @@
 * add Ref type
 * add Iter type
 ** add struct cx_iter
-*** bool (*next)()
-**** next is responsible for pushing values
+*** bool (*next)(struct cx_box *)
 ** implement for Vect/Str/Int
 ** implement for Rec
 *** push field ids

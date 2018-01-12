@@ -728,7 +728,8 @@ struct cx *cx_init(struct cx *cx) {
   cx_add_func(cx, "clock", cx_arg(cx->any_type))->ptr = clock_imp;
   cx_add_func(cx, "test", cx_arg(cx->opt_type))->ptr = test_imp;
   cx_add_func(cx, "fail", cx_arg(cx->str_type))->ptr = fail_imp;
-  
+
+  cx->scope = NULL;
   cx->main = cx_begin(cx, NULL);
   srand((ptrdiff_t)cx + clock());
   return cx;
@@ -916,11 +917,13 @@ struct cx_sym cx_sym(struct cx *cx, const char *id) {
 }
 
 struct cx_scope *cx_scope(struct cx *cx, size_t i) {
-  return *(struct cx_scope **)cx_vec_peek(&cx->scopes, i);
+  cx_test(cx->scopes.count > i);
+  return *(cx->scope-i);
 }
 
 void cx_push_scope(struct cx *cx, struct cx_scope *scope) {
-  *(struct cx_scope **)cx_vec_push(&cx->scopes) = cx_scope_ref(scope);
+  cx->scope = cx_vec_push(&cx->scopes);
+  *cx->scope = cx_scope_ref(scope);
 }
 
 struct cx_scope *cx_pop_scope(struct cx *cx, bool silent) {
@@ -930,7 +933,9 @@ struct cx_scope *cx_pop_scope(struct cx *cx, bool silent) {
     return NULL;
   }
   
-  struct cx_scope *s = *(struct cx_scope **)cx_vec_pop(&cx->scopes);
+  struct cx_scope *s = *cx->scope;
+  cx->scope--;
+  cx_vec_pop(&cx->scopes);
 
   if (s->stack.count) {
     struct cx_box *v = cx_vec_pop(&s->stack);

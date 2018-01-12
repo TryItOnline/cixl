@@ -32,7 +32,7 @@ struct cx {
   struct cx_set syms, macros, funcs, consts;
   
   struct cx_vec scopes;
-  struct cx_scope *main;
+  struct cx_scope *main, **scope;
   struct cx_vec calls;
   
   struct cx_bin *bin;
