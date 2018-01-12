@@ -1,7 +1,7 @@
 * rename get/set to get_var/put_var
 ** fns & ops
 * rename OSCOPE/UNSCOPE to OBEGIN/OEND
-* simplify OSET/OZAP
+* simplify OSET
 * add overlap test to bookings
 ** add and/or operators
 * ---

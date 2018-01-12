@@ -33,7 +33,7 @@ struct cx_get_op {
   struct cx_sym id;
 };
 
-struct cx_func_op {
+struct cx_fimp_op {
   struct cx_fimp *imp;
   size_t start_op, num_ops;
 };
@@ -71,7 +71,7 @@ struct cx_op {
   
   union {
     struct cx_get_op as_get;
-    struct cx_func_op as_func;
+    struct cx_fimp_op as_fimp;
     struct cx_funcall_op as_funcall;
     struct cx_lambda_op as_lambda;
     struct cx_scope_op as_scope;
@@ -86,7 +86,7 @@ struct cx_op *cx_op_init(struct cx_op *op, struct cx_op_type *type, size_t tok_i
 struct cx_op_type *CX_OCUT();
 struct cx_op_type *CX_OGET();
 struct cx_op_type *CX_OGET_CONST();
-struct cx_op_type *CX_OFUNC();
+struct cx_op_type *CX_OFIMP();
 struct cx_op_type *CX_OFUNCALL();
 struct cx_op_type *CX_OLAMBDA();
 struct cx_op_type *CX_OPUSH();
@@ -95,7 +95,7 @@ struct cx_op_type *CX_OSET();
 struct cx_op_type *CX_OSET_ARG();
 struct cx_op_type *CX_OSTASH();
 struct cx_op_type *CX_OSTOP();
-struct cx_op_type *CX_OUNFUNC();
+struct cx_op_type *CX_OUNFIMP();
 struct cx_op_type *CX_OUNSCOPE();
 struct cx_op_type *CX_OZAP();
 struct cx_op_type *CX_OZAP_ARG();

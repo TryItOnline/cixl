@@ -33,15 +33,15 @@ cx_op_type(CX_OCUT, {
     type.eval = cut_eval;
   });
 
-static bool func_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
-  struct cx_fimp *imp = op->as_func.imp;
+static bool fimp_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
+  struct cx_fimp *imp = op->as_fimp.imp;
   if (!imp->scope) { imp->scope = cx_scope_ref(cx_scope(cx, 0)); }
-  cx->op += op->as_func.num_ops;
+  cx->op += op->as_fimp.num_ops;
   return true;
 }
 
-cx_op_type(CX_OFUNC, {
-    type.eval = func_eval;
+cx_op_type(CX_OFIMP, {
+    type.eval = fimp_eval;
   });
 
 static bool funcall_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
@@ -202,7 +202,7 @@ cx_op_type(CX_OSTOP, {
     type.eval = stop_eval;
   });
 
-static bool unfunc_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
+static bool unfimp_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
   struct cx_call *call = cx_test(cx_vec_peek(&cx->calls, 0));
 
   if (call->recalls) {
@@ -226,8 +226,8 @@ static bool unfunc_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
   return true;
 }
 
-cx_op_type(CX_OUNFUNC, {
-    type.eval = unfunc_eval;
+cx_op_type(CX_OUNFIMP, {
+    type.eval = unfimp_eval;
   });
 
 static bool unscope_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
