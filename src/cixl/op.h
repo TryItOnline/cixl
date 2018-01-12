@@ -65,10 +65,6 @@ struct cx_unscope_op {
   bool push_result;
 };
 
-struct cx_zap_op {
-  bool parent;
-};
-
 struct cx_op {
   size_t tok_idx;
   struct cx_op_type *type;
@@ -82,7 +78,6 @@ struct cx_op {
     struct cx_set_op as_set;
     struct cx_set_arg_op as_set_arg;
     struct cx_unscope_op as_unscope;
-    struct cx_zap_op as_zap;
   };
 };
 

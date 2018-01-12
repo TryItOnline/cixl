@@ -241,7 +241,7 @@ cx_op_type(CX_OUNSCOPE, {
   });
 
 static bool zap_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
-  struct cx_box *v = cx_pop(cx_scope(cx, op->as_zap.parent ? 1 : 0), true);
+  struct cx_box *v = cx_pop(cx_scope(cx, 0), true);
 
   if (!v) {
     cx_error(cx, tok->row, tok->col, "Nothing to zap");
