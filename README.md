@@ -280,6 +280,29 @@ test.cx:
 [3]
 ```
 
+### Serialization
+Most values support being written to files and read back in. Calling ```write``` on any value will write it's serialized representation to the specified stream.
+
+```
+   | now
+...
+[Time(2018/0/12 1:25:12.123436182)]
+
+   write #out
+...
+([2018 0 12 1 25 12 123436182] time)
+[]
+```
+
+While calling ```read``` will parse and evaluate one value at a time from the specified stream.
+
+```
+   | read #in
+...
+([2018 0 12 1 25 12 123436182] time)
+[Time(2018/0/12 1:25:12.123436182)]
+```
+
 ### Comments
 Two kinds of code comments are supported, line comments and block comments.
 
@@ -756,6 +779,7 @@ Capitalized names are treated as types, the following list is defined out of the
 - Bin (A)
 - Bool (A)
 - Cmp (A)
+- File (A)
 - Fimp (A)
 - Func (A)
 - Guid (A)
@@ -766,11 +790,13 @@ Capitalized names are treated as types, the following list is defined out of the
 - Opt ()
 - Rat (Num)
 - Rec (A)
+- RFile (File)
 - Str (Cmp)
 - Sym (A)
 - Time (Cmp)
 - Type (A)
 - Vect (A)
+- WFile (File)
 
 ```
    | type 42

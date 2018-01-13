@@ -43,7 +43,7 @@ static void clone_imp(struct cx_box *dst, struct cx_box *src) {
 }
 
 static void write_imp(struct cx_box *v, FILE *out) {
-  fprintf(out, "%s new", v->type->id);
+  fprintf(out, "(%s new", v->type->id);
   struct cx_rec *r = v->as_ptr;
   
   cx_do_set(&r->values, struct cx_field_value, fv) {
@@ -51,6 +51,8 @@ static void write_imp(struct cx_box *v, FILE *out) {
     cx_write(&fv->box, out);
     fputs(" put", out);
   }
+
+  fputc(')', out);
 }
 
 static void print_imp(struct cx_box *v, FILE *out) {

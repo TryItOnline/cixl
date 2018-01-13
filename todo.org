@@ -1,8 +1,7 @@
-* add WFile/RFile types
-** add #in/#out
-* add write(opt WFile) fn
-* add read(RFile) fn
-** call into parse/eval
+* add slab alloc
+* add and/or tests
+* add support for memory files
+** add read/write tests
 * add Iter type
 ** add struct cx_iter
 *** bool (*next)(struct cx_box *)

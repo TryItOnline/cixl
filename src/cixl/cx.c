@@ -17,6 +17,7 @@
 #include "cixl/types/bool.h"
 #include "cixl/types/char.h"
 #include "cixl/types/cmp.h"
+#include "cixl/types/file.h"
 #include "cixl/types/fimp.h"
 #include "cixl/types/func.h"
 #include "cixl/types/guid.h"
@@ -497,6 +498,46 @@ static bool if_else_imp(struct cx_scope *scope) {
   return true;
 }
 
+static bool read_imp(struct cx_scope *scope) {
+  struct cx *cx = scope->cx;
+  struct cx_box in = *cx_test(cx_pop(scope, false));
+
+  struct cx_vec toks;
+  cx_vec_init(&toks, sizeof(struct cx_tok));
+  bool ok = false;
+  
+  if (!cx_parse_tok(cx, in.as_file->ptr, &toks, true)) {
+    if (!cx->errors.count) { cx_box_init(cx_push(scope), cx->nil_type); }
+    goto exit1;
+  }
+  
+  struct cx_bin bin;
+  cx_bin_init(&bin);
+  
+  if (!cx_compile(cx, cx_vec_start(&toks), cx_vec_end(&toks), &bin)) { goto exit2; }
+  if (!cx_eval(cx, &bin, NULL)) { goto exit2; }
+  ok = true;
+ exit2:
+  cx_bin_deinit(&bin);
+ exit1:
+  cx_box_deinit(&in);
+  cx_do_vec(&toks, struct cx_tok, t) { cx_tok_deinit(t); }
+  cx_vec_deinit(&toks);
+  return ok;
+}
+
+static bool write_imp(struct cx_scope *scope) {
+  struct cx_box
+    out = *cx_test(cx_pop(scope, false)),
+    v = *cx_test(cx_pop(scope, false));
+  
+  bool ok = cx_write(&v, out.as_file->ptr);
+  fputc('\n', out.as_file->ptr);
+  cx_box_deinit(&v);
+  cx_box_deinit(&out);
+  return ok;
+}
+  
 static bool compile_imp(struct cx_scope *scope) {
   struct cx *cx = scope->cx;
   
@@ -641,7 +682,7 @@ struct cx *cx_init(struct cx *cx) {
   cx_add_separators(cx, " \t\n;,|_?!()[]{}");
 
   cx_set_init(&cx->syms, sizeof(struct cx_sym), cx_cmp_str);
-  cx->consts.key_offs = offsetof(struct cx_sym, id);
+  cx->syms.key_offs = offsetof(struct cx_sym, id);
 
   cx_set_init(&cx->types, sizeof(struct cx_type *), cx_cmp_str);
   cx->types.key = get_type_id;
@@ -693,6 +734,16 @@ struct cx *cx_init(struct cx *cx) {
   cx->func_type = cx_init_func_type(cx);
   cx->fimp_type = cx_init_fimp_type(cx);
   cx->lambda_type = cx_init_lambda_type(cx);
+
+  cx->file_type = cx_init_file_type(cx, "File", NULL);
+  cx->rfile_type = cx_init_file_type(cx, "RFile", cx->file_type);
+  cx->wfile_type = cx_init_file_type(cx, "WFile", cx->file_type);
+
+  cx_box_init(cx_set_const(cx, cx_sym(cx, "in"), false),
+	      cx->rfile_type)->as_file = cx_file_new(stdin);
+
+  cx_box_init(cx_set_const(cx, cx_sym(cx, "out"), false),
+	      cx->wfile_type)->as_file = cx_file_new(stdout);
   
   cx_add_func(cx, "|")->ptr = cls_imp;
   cx_add_func(cx, "%", cx_arg(cx->opt_type))->ptr = copy_imp;
@@ -716,6 +767,12 @@ struct cx *cx_init(struct cx *cx) {
 	      cx_arg(cx->any_type),
 	      cx_arg(cx->any_type))->ptr = if_else_imp;
 
+  cx_add_func(cx, "read", cx_arg(cx->rfile_type))->ptr = read_imp;
+
+  cx_add_func(cx, "write",
+	      cx_arg(cx->opt_type),
+	      cx_arg(cx->wfile_type))->ptr = write_imp;
+
   cx_add_func(cx, "compile",
 	      cx_arg(cx->bin_type),
 	      cx_arg(cx->str_type))->ptr = compile_imp;
@@ -732,6 +789,7 @@ struct cx *cx_init(struct cx *cx) {
   cx->scope = NULL;
   cx->main = cx_begin(cx, NULL);
   srand((ptrdiff_t)cx + clock());
+
   return cx;
 }
 
