@@ -254,8 +254,8 @@ Variables in the parent scope may be referenced from within, but variables defin
 [2 1]
 ```
 
-### IO
-```say``` and ```ask``` may be used to perform basic IO.
+### Console
+```say``` and ```ask``` may be used to perform basic console IO.
 
 ```
    |
@@ -281,7 +281,7 @@ test.cx:
 ```
 
 ### Serialization
-Most values support being written to files and read back in. Calling ```write``` on any value will write it's serialized representation to the specified stream.
+Most values support being written to files and read back in. Calling ```write``` on a value will write it's serialized representation to the specified stream.
 
 ```
    | now
