@@ -7,7 +7,7 @@
 #include "cixl/var.h"
 
 struct cx_scope *cx_scope_new(struct cx *cx, struct cx_scope *parent) {
-  struct cx_scope *scope = malloc(sizeof(struct cx_scope));
+  struct cx_scope *scope = cx_malloc(&cx->scope_alloc);
   scope->cx = cx;
   scope->parent = parent ? cx_scope_ref(parent) : NULL;
   cx_vec_init(&scope->stack, sizeof(struct cx_box));
@@ -39,7 +39,7 @@ void cx_scope_unref(struct cx_scope *scope) {
     cx_do_set(&scope->env, struct cx_var, v) { cx_var_deinit(v); }
     cx_set_deinit(&scope->env);
 
-    free(scope);
+    cx_free(&scope->cx->scope_alloc, scope);
   }
 }
 

@@ -6,7 +6,7 @@
 #include "cixl/types/rec.h"
 
 static void new_imp(struct cx_box *out) {
-  out->as_ptr = cx_rec_new();
+  out->as_ptr = cx_rec_new(out->type->cx);
 }
 
 static bool equid_imp(struct cx_box *x, struct cx_box *y) {
@@ -32,7 +32,7 @@ static void copy_imp(struct cx_box *dst, struct cx_box *src) {
 }
 
 static void clone_imp(struct cx_box *dst, struct cx_box *src) {
-  struct cx_rec *src_rec = src->as_ptr, *dst_rec = cx_rec_new();
+  struct cx_rec *src_rec = src->as_ptr, *dst_rec = cx_rec_new(src->type->cx);
   dst->as_ptr = dst_rec;
 
   cx_do_set(&src_rec->values, struct cx_field_value, sv) {
@@ -61,7 +61,7 @@ static void print_imp(struct cx_box *v, FILE *out) {
 }
 
 static void deinit_imp(struct cx_box *v) {
-  cx_rec_unref(v->as_ptr);
+  cx_rec_unref(v->as_ptr, v->type->cx);
 }
 
 static void type_deinit_imp(struct cx_type *t) {
@@ -144,8 +144,8 @@ bool cx_add_field(struct cx_rec_type *type,
   return true;
 }
 
-struct cx_rec *cx_rec_new() {
-  struct cx_rec *rec = malloc(sizeof(struct cx_rec));
+struct cx_rec *cx_rec_new(struct cx *cx) {
+  struct cx_rec *rec = cx_malloc(&cx->rec_alloc);
   cx_set_init(&rec->values, sizeof(struct cx_field_value), cx_cmp_sym);
   rec->nrefs = 1;
   return rec;
@@ -156,13 +156,13 @@ struct cx_rec *cx_rec_ref(struct cx_rec *rec) {
   return rec;
 }
 
-void cx_rec_unref(struct cx_rec *rec) {
+void cx_rec_unref(struct cx_rec *rec, struct cx *cx) {
   cx_test(rec->nrefs > 0);
   rec->nrefs--;
   if (!rec->nrefs) {
     cx_do_set(&rec->values, struct cx_field_value, v) { cx_box_deinit(&v->box); }
     cx_set_deinit(&rec->values);
-    free(rec);
+    cx_free(&cx->rec_alloc, rec);
   }
 }
 

@@ -8,7 +8,9 @@
 
 #define CX_VERSION "0.8"
 
-#define CX_LAMBDA_SLAB_SIZE 32
+#define CX_LAMBDA_SLAB_SIZE 20
+#define CX_REC_SLAB_SIZE 20
+#define CX_SCOPE_SLAB_SIZE 10
 
 #define cx_add_func(cx, id, ...) ({				\
       struct cx_func_arg args[] = {__VA_ARGS__};		\
@@ -35,7 +37,7 @@ struct cx {
   uint64_t next_sym_tag, next_type_tag;
   struct cx_set syms, macros, funcs, consts;
 
-  struct cx_malloc lambda_alloc;
+  struct cx_malloc lambda_alloc, rec_alloc, scope_alloc;
   
   struct cx_vec scopes;
   struct cx_scope *main, **scope;

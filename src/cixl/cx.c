@@ -697,6 +697,8 @@ struct cx *cx_init(struct cx *cx) {
   cx->consts.key_offs = offsetof(struct cx_var, id);
 
   cx_malloc_init(&cx->lambda_alloc, CX_LAMBDA_SLAB_SIZE, sizeof(struct cx_lambda));
+  cx_malloc_init(&cx->rec_alloc, CX_REC_SLAB_SIZE, sizeof(struct cx_rec));
+  cx_malloc_init(&cx->scope_alloc, CX_SCOPE_SLAB_SIZE, sizeof(struct cx_scope));
   
   cx_vec_init(&cx->scopes, sizeof(struct cx_scope *));
   cx_vec_init(&cx->calls, sizeof(struct cx_call));
@@ -823,6 +825,8 @@ struct cx *cx_deinit(struct cx *cx) {
   cx_set_deinit(&cx->syms);
 
   cx_malloc_deinit(&cx->lambda_alloc);
+  cx_malloc_deinit(&cx->rec_alloc);
+  cx_malloc_deinit(&cx->scope_alloc);
   return cx;
 }
 
