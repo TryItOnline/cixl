@@ -21,7 +21,7 @@ void cx_repl(struct cx *cx, FILE *in, FILE *out) {
     fputs("? bmips\n\n", out);
   }
 
-  fputs("Press Return twice to eval input.\n\n", out);
+  fputs("Press Return twice to evaluate.\n\n", out);
     
   struct cx_buf body;
   cx_buf_open(&body);

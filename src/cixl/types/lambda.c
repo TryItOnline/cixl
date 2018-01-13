@@ -14,19 +14,31 @@
 struct cx_lambda *cx_lambda_new(struct cx_scope *scope,
 				size_t start_op,
 				size_t num_ops) {
-  struct cx_lambda *l = malloc(sizeof(struct cx_lambda));
+  struct cx *cx = scope->cx;
+  struct cx_lambda *l = cx_malloc(&cx->lambda_alloc);
   l->scope = cx_scope_ref(scope);
-  l->bin = cx_bin_ref(scope->cx->bin);
+  l->bin = cx_bin_ref(cx->bin);
   l->start_op = start_op;
   l->num_ops = num_ops;
   l->nrefs = 1;
   return l;
 }
 
-struct cx_lambda *cx_lambda_deinit(struct cx_lambda *lambda) {
-  cx_bin_unref(lambda->bin);
-  cx_scope_unref(lambda->scope);
+struct cx_lambda *cx_lambda_ref(struct cx_lambda *lambda) {
+  lambda->nrefs++;
   return lambda;
+}
+
+void cx_lambda_unref(struct cx_lambda *lambda) {
+  cx_test(lambda->nrefs > 0);
+  lambda->nrefs--;
+  
+  if (!lambda->nrefs) {
+    struct cx *cx = lambda->scope->cx;
+    cx_bin_unref(lambda->bin);
+    cx_scope_unref(lambda->scope);
+    cx_free(&cx->lambda_alloc, lambda);
+  }
 }
 
 static bool equid_imp(struct cx_box *x, struct cx_box *y) {
@@ -49,9 +61,7 @@ static bool call_imp(struct cx_box *value, struct cx_scope *scope) {
 }
 
 static void copy_imp(struct cx_box *dst, struct cx_box *src) {
-  struct cx_lambda *l = src->as_ptr;
-  dst->as_ptr = l;
-  l->nrefs++;
+  dst->as_ptr = cx_lambda_ref(src->as_ptr);
 }
 
 static void print_imp(struct cx_box *value, FILE *out) {
@@ -60,10 +70,7 @@ static void print_imp(struct cx_box *value, FILE *out) {
 }
 
 static void deinit_imp(struct cx_box *value) {
-  struct cx_lambda *l = value->as_ptr;
-  cx_test(l->nrefs > 0);
-  l->nrefs--;
-  if (!l->nrefs) { free(cx_lambda_deinit(l)); }
+  cx_lambda_unref(value->as_ptr);
 }
 
 struct cx_type *cx_init_lambda_type(struct cx *cx) {

@@ -2,10 +2,13 @@
 #define CX_H
 
 #include "cixl/macro.h"
+#include "cixl/malloc.h"
 #include "cixl/set.h"
 #include "cixl/type.h"
 
 #define CX_VERSION "0.8"
+
+#define CX_LAMBDA_SLAB_SIZE 32
 
 #define cx_add_func(cx, id, ...) ({				\
       struct cx_func_arg args[] = {__VA_ARGS__};		\
@@ -31,6 +34,8 @@ struct cx {
 
   uint64_t next_sym_tag, next_type_tag;
   struct cx_set syms, macros, funcs, consts;
+
+  struct cx_malloc lambda_alloc;
   
   struct cx_vec scopes;
   struct cx_scope *main, **scope;

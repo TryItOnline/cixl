@@ -2,6 +2,7 @@
 #define CX_UTIL_H
 
 #include <stdarg.h>
+#include <stddef.h>
 
 #define _cx_cid(x, y)				\
   x ## y					\

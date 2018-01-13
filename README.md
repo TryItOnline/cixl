@@ -17,7 +17,7 @@ rlwrap ./cixl
 
 cixl v0.8, 18765 bmips
 
-Press Return twice to eval input.
+Press Return twice to evaluate.
 
    1 2 3
 ...
