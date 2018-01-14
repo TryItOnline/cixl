@@ -361,7 +361,7 @@ Lambdas inherit the defining scope.
 ```
 
 ### Conditions
-Any value may be treated as a condition; some are always true; integers test true for anything but zero; empty strings test false etc. The ```?``` operator may be used to transform any value to its conditional representation.
+Any value may be treated as a boolean; some are always true; integers test true for anything but zero; empty strings test false etc. The ```?``` operator may be used to transform any value to its boolean representation.
 
 ```
    | 0?
@@ -369,7 +369,7 @@ Any value may be treated as a condition; some are always true; integers test tru
 [#f]
 ```
 
-While the ```!``` operator negates any condition.
+While the ```!``` operator negates any value.
 
 ```
    | 42!
@@ -394,7 +394,7 @@ not true
 [`not zero]
 ```
 
-Conditions may be chained using ```and``` / ```or```.
+Values may be chained using ```and``` / ```or```.
 
 ```
    | #t and 42
@@ -414,7 +414,7 @@ Conditions may be chained using ```and``` / ```or```.
 [42]
 ```
 
-Lambdas may be used to to prevent evaluating arguments.
+Lambdas may be used to to prevent evaluating unused arguments when chaining.
 
 ```
    | 42 or {say 'Bummer!' #t}

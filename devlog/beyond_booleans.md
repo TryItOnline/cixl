@@ -52,7 +52,7 @@ class Foo():
 ```
 
 ### Cixl
-[Cixl](https://github.com/basic-gongfu/cixl) makes an honest attempt at capturing the essence of what came before and sorting out remaining issues. Any value may be treated as a boolean; some types test true regardless of actual value; like in C, integers are true unless zero; empty strings test false etc. ```?``` may be used to transform any value to it's conditional representation.
+[Cixl](https://github.com/basic-gongfu/cixl) makes an honest attempt at capturing the essence of what came before and sorting out remaining issues. Any value may be treated as a boolean; some types test true regardless of actual value; like in C, integers are true unless zero; empty strings test false etc. ```?``` may be used to transform any value to it's boolean representation.
 
 ```
    | 0?
