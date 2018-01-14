@@ -13,7 +13,7 @@ int *c = NULL || &a; // Nice try
 ```
 
 ### Common Lisp
-Common Lisp treats ```nil``` as false and any other value as true, which prevents dispatching methods on booleans among other issues. It does provide a boolean type, with a single value called ```t```; but no false value. Like C, it offers no facilities for user code to hook into the protocol. It does however allow chaining values, which allows using the regular ```or```-operator to select the first non-```nil``` value from a list among other tricks.
+Common Lisp treats ```nil``` as false and any other value as true, which prevents dispatching methods on booleans among other issues. It does provide a boolean type, with a single value called ```t```; but no false value. Like C, it offers no facilities for user code to hook into the protocol. It does however allow chaining values, which enables using ```or```to select the first non-```nil``` value among other tricks.
 
 ```
 * (or nil (list 1 2 3))
