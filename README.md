@@ -648,7 +648,7 @@ The ```times``` function may be used to repeat an action N times.
 [42]
 ```
 
-While ```for``` loop repeats an action once for each value in any iterable.
+While ```for``` loop repeats an action once for each value in any sequence.
 
 ```
    | 10 for {+ 42,}
@@ -662,7 +662,7 @@ While ```for``` loop repeats an action once for each value in any iterable.
 [\F \O \O]
 ```
 
-Iterable values support mapping actions over their values, ```map``` returns an iterator that may be chained further or consumed.
+Sequences support mapping actions over their values, ```map``` returns an iterator that may be chained further or consumed.
 
 ```
    | 'foo' map {int ++ char}
@@ -674,7 +674,7 @@ Iterable values support mapping actions over their values, ```map``` returns an 
 ['gpp'@1]
 ```
 
-Iterators may be created manually by calling ```iter``` on any iterable value.
+Iterators may be created manually by calling ```iter``` on any seq value.
 
 ```
    | [1 2 3] iter
@@ -799,9 +799,8 @@ Capitalized names are treated as types, the following list is defined out of the
 - Fimp (A)
 - Func (A)
 - Guid (A)
-- Int (Num Iterable)
-- Iter (Iterable)
-- Iterable (A)
+- Int (Num Seq)
+- Iter (Seq)
 - Lambda (A)
 - Nil (Opt)
 - Num (Cmp)
@@ -809,11 +808,12 @@ Capitalized names are treated as types, the following list is defined out of the
 - Rat (Num)
 - Rec (A)
 - RFile (File)
-- Str (Cmp Iterable)
+- Seq (A)
+- Str (Cmp Seq)
 - Sym (A)
 - Time (Cmp)
 - Type (A)
-- Vect (Iterable)
+- Vect (Seq)
 - WFile (File)
 
 ```
@@ -879,7 +879,7 @@ Records support full deep equality by default, but ```=``` may be implemented to
 ```
 
 ### Traits
-Traits are abstract types that may be used to simplify type checking and/or function dispatch. Besides the standard offering; 'A', 'Cmp', 'Iterable', 'Num', 'Opt' and 'Rec'; new traits may be defined using the ```trait:``` macro. Trait definitions may appear anywhere in the code, but they are all defined in order of appearance during compilation.
+Traits are abstract types that may be used to simplify type checking and/or function dispatch. Besides the standard offering; 'A', 'Cmp', 'Num', 'Opt', 'Rec' and 'Seq'; new traits may be defined using the ```trait:``` macro. Trait definitions may appear anywhere in the code, but they are all defined in order of appearance during compilation.
 
 ```
    |
@@ -890,7 +890,7 @@ Traits are abstract types that may be used to simplify type checking and/or func
 ```
 
 ### Meta
-A ```Bin``` represents a compiled sequence of operations. The compiler may be invoked from within the language through the ```compile``` function. Binaries may be passed around and called, which simply executes the compiled operations in the current scope.
+A ```Bin``` represents a block of compiled code. The compiler may be invoked from within the language through the ```compile``` function. Binaries may be passed around and called, which simply executes the compiled operations in the current scope.
 
 ```
    | Bin new %, $ compile '1 + 2' call

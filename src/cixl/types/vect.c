@@ -109,7 +109,7 @@ static bool pop_imp(struct cx_scope *scope) {
   return true;
 }
 
-static bool iterable_imp(struct cx_scope *scope) {
+static bool seq_imp(struct cx_scope *scope) {
   struct cx_box in = *cx_test(cx_pop(scope, false));
   struct cx_iter *it = cx_iter(&in);
   struct cx_vect *out = cx_vect_new();
@@ -190,7 +190,7 @@ static void deinit_imp(struct cx_box *v) {
 }
 
 struct cx_type *cx_init_vect_type(struct cx *cx) {
-  struct cx_type *t = cx_add_type(cx, "Vect", cx->iterable_type);
+  struct cx_type *t = cx_add_type(cx, "Vect", cx->seq_type);
   t->eqval = eqval_imp;
   t->equid = equid_imp;
   t->ok = ok_imp;
@@ -204,7 +204,7 @@ struct cx_type *cx_init_vect_type(struct cx *cx) {
   cx_add_func(cx, "len", cx_arg(t))->ptr = len_imp;
   cx_add_func(cx, "push", cx_arg(t), cx_arg(cx->any_type))->ptr = push_imp;
   cx_add_func(cx, "pop", cx_arg(t))->ptr = pop_imp;
-  cx_add_func(cx, "vect", cx_arg(cx->iterable_type))->ptr = iterable_imp;
+  cx_add_func(cx, "vect", cx_arg(cx->seq_type))->ptr = seq_imp;
   
   return t;
 }

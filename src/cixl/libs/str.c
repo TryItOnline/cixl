@@ -41,7 +41,7 @@ static bool get_imp(struct cx_scope *scope) {
   return ok;
 }
 
-static bool iterable_imp(struct cx_scope *scope) {
+static bool seq_imp(struct cx_scope *scope) {
   struct cx *cx = scope->cx;
   struct cx_box in = *cx_test(cx_pop(scope, false));
   struct cx_iter *it = cx_iter(&in);
@@ -73,7 +73,7 @@ static bool iterable_imp(struct cx_scope *scope) {
 void cx_init_str(struct cx *cx) {
   cx_add_func(cx, "len", cx_arg(cx->str_type))->ptr = len_imp;
   cx_add_func(cx, "get", cx_arg(cx->str_type), cx_arg(cx->int_type))->ptr = get_imp;
-  cx_add_func(cx, "str", cx_arg(cx->iterable_type))->ptr = iterable_imp;
+  cx_add_func(cx, "str", cx_arg(cx->seq_type))->ptr = seq_imp;
   
   cx_test(cx_eval_str(cx,
 		      "func: upper(s Str) "

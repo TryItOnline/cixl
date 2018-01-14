@@ -717,8 +717,8 @@ struct cx *cx_init(struct cx *cx) {
 
   cx->cmp_type = cx_init_cmp_type(cx);
 
-  cx->iterable_type = cx_add_type(cx, "Iterable", cx->any_type);
-  cx->iterable_type->trait = true;
+  cx->seq_type = cx_add_type(cx, "Seq", cx->any_type);
+  cx->seq_type->trait = true;
 
   cx->num_type = cx_add_type(cx, "Num", cx->cmp_type);
   cx->num_type->trait = true;

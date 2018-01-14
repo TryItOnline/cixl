@@ -117,7 +117,7 @@ static void print_imp(struct cx_box *v, FILE *out) {
 }
 
 struct cx_type *cx_init_int_type(struct cx *cx) {
-  struct cx_type *t = cx_add_type(cx, "Int", cx->num_type, cx->iterable_type);
+  struct cx_type *t = cx_add_type(cx, "Int", cx->num_type, cx->seq_type);
   t->equid = equid_imp;
   t->cmp = cmp_imp;
   t->ok = ok_imp;

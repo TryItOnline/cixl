@@ -100,14 +100,14 @@ static bool map_imp(struct cx_scope *scope) {
 }
 
 void cx_init_iter(struct cx *cx) {
-  cx_add_func(cx, "iter", cx_arg(cx->iterable_type))->ptr = iter_imp;
+  cx_add_func(cx, "iter", cx_arg(cx->seq_type))->ptr = iter_imp;
 
   cx_add_func(cx, "for",
-	      cx_arg(cx->iterable_type),
+	      cx_arg(cx->seq_type),
 	      cx_arg(cx->any_type))->ptr = for_imp;
 
   cx_add_func(cx, "map",
-	      cx_arg(cx->iterable_type),
+	      cx_arg(cx->seq_type),
 	      cx_arg(cx->any_type))->ptr = map_imp;
   
 }

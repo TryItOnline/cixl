@@ -101,6 +101,6 @@ void cx_init_math(struct cx *cx) {
 		      "  0 1 $n fib-rec;"));
 
   cx_test(cx_eval_str(cx,
-		      "func: sum(in Iterable) "
+		      "func: sum(in Seq) "
 		      "  0, $in for &+;"));
 }
