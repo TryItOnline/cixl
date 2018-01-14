@@ -3,9 +3,48 @@
 #include "cixl/error.h"
 #include "cixl/types/fimp.h"
 #include "cixl/types/func.h"
+#include "cixl/types/iter.h"
 #include "cixl/types/vect.h"
 #include "cixl/scope.h"
 #include "cixl/vec.h"
+
+struct cx_vect_iter {
+  struct cx_iter iter;
+  struct cx_vect *vect;
+  size_t i;
+};
+
+bool vect_next(struct cx_iter *iter, struct cx_box *out, struct cx_scope *scope) {
+  struct cx_vect_iter *it = cx_baseof(iter, struct cx_vect_iter, iter);
+
+  if (it->i < it->vect->imp.count) {
+    cx_copy(out, cx_vec_get(&it->vect->imp, it->i));
+    it->i++;
+    return true;
+  }
+
+  iter->done = true;
+  return false;
+}
+
+void *vect_deinit(struct cx_iter *iter) {
+  struct cx_vect_iter *it = cx_baseof(iter, struct cx_vect_iter, iter);
+  cx_vect_unref(it->vect);
+  return it;
+}
+
+cx_iter_type(vect_iter, {
+    type.next = vect_next;
+    type.deinit = vect_deinit;
+  });
+
+struct cx_vect_iter *cx_vect_iter_new(struct cx_vect *vect) {
+  struct cx_vect_iter *it = malloc(sizeof(struct cx_vect_iter));
+  cx_iter_init(&it->iter, vect_iter());
+  it->vect = cx_vect_ref(vect);
+  it->i = 0;
+  return it;
+}
 
 struct cx_vect *cx_vect_new() {
   struct cx_vect *v = malloc(sizeof(struct cx_vect));
@@ -70,55 +109,20 @@ static bool pop_imp(struct cx_scope *scope) {
   return true;
 }
 
-static bool for_imp(struct cx_scope *scope) {
-  struct cx_box
-    act = *cx_test(cx_pop(scope, false)),
-    vect = *cx_test(cx_pop(scope, false));
+static bool iterable_imp(struct cx_scope *scope) {
+  struct cx_box in = *cx_test(cx_pop(scope, false));
+  struct cx_iter *it = cx_iter(&in);
+  struct cx_vect *out = cx_vect_new();
+  struct cx_box v;
   
-  struct cx_vect *v = vect.as_ptr;
-  bool ok = false;
-  
-  cx_do_vec(&v->imp, struct cx_box, b) {
-    cx_copy(cx_push(scope), b);
-    if (!cx_call(&act, scope)) { goto exit; }
+  while (cx_iter_next(it, &v, scope)) {
+    *(struct cx_box *)cx_vec_push(&out->imp) = v;
   }
 
-  ok = true;
- exit:
-  cx_box_deinit(&vect);
-  cx_box_deinit(&act);
-  return ok;
-}
-
-static bool map_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-
-  struct cx_box
-    act = *cx_test(cx_pop(scope, false)),
-    vect = *cx_test(cx_pop(scope, false));
-  
-  struct cx_vect *v = vect.as_ptr;
-  bool ok = false;
-  
-  cx_do_vec(&v->imp, struct cx_box, in) {
-    cx_copy(cx_push(scope), in);
-    if (!cx_call(&act, scope)) { goto exit; }
-    struct cx_box *out = cx_pop(scope, true);
-
-    if (!out) {
-      cx_error(cx, cx->row, cx->col, "Missing result");
-      goto exit;
-    }
-
-    cx_box_deinit(in);
-    *in = *out;
-  }
-
-  *cx_push(scope) = vect;
-  ok = true;
- exit:
-  cx_box_deinit(&act);
-  return ok;
+  cx_box_init(cx_push(scope), scope->cx->vect_type)->as_ptr = out;
+  cx_box_deinit(&in);
+  cx_iter_unref(it);
+  return true;
 }
 
 static bool equid_imp(struct cx_box *x, struct cx_box *y) {
@@ -156,6 +160,10 @@ static void clone_imp(struct cx_box *dst, struct cx_box *src) {
   }
 }
 
+static struct cx_iter *iter_imp(struct cx_box *v) {
+  return &cx_vect_iter_new(v->as_ptr)->iter;
+}
+
 static void write_imp(struct cx_box *b, FILE *out) {
   struct cx_vect *v = b->as_ptr;
 
@@ -182,12 +190,13 @@ static void deinit_imp(struct cx_box *v) {
 }
 
 struct cx_type *cx_init_vect_type(struct cx *cx) {
-  struct cx_type *t = cx_add_type(cx, "Vect", cx->any_type);
+  struct cx_type *t = cx_add_type(cx, "Vect", cx->iterable_type);
   t->eqval = eqval_imp;
   t->equid = equid_imp;
   t->ok = ok_imp;
   t->copy = copy_imp;
   t->clone = clone_imp;
+  t->iter = iter_imp;
   t->write = write_imp;
   t->print = print_imp;
   t->deinit = deinit_imp;
@@ -195,9 +204,7 @@ struct cx_type *cx_init_vect_type(struct cx *cx) {
   cx_add_func(cx, "len", cx_arg(t))->ptr = len_imp;
   cx_add_func(cx, "push", cx_arg(t), cx_arg(cx->any_type))->ptr = push_imp;
   cx_add_func(cx, "pop", cx_arg(t))->ptr = pop_imp;
-  
-  cx_add_func(cx, "for", cx_arg(t), cx_arg(cx->any_type))->ptr = for_imp;
-  cx_add_func(cx, "map", cx_arg(t), cx_arg(cx->any_type))->ptr = map_imp;
+  cx_add_func(cx, "vect", cx_arg(cx->iterable_type))->ptr = iterable_imp;
   
   return t;
 }

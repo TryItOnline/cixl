@@ -126,7 +126,7 @@ static void deinit_imp(struct cx_box *v) {
 }
 
 struct cx_type *cx_init_str_type(struct cx *cx) {
-  struct cx_type *t = cx_add_type(cx, "Str", cx->iterable_type);
+  struct cx_type *t = cx_add_type(cx, "Str", cx->cmp_type, cx->iterable_type);
   t->eqval = eqval_imp;
   t->equid = equid_imp;
   t->cmp = cmp_imp;

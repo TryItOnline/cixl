@@ -809,11 +809,11 @@ Capitalized names are treated as types, the following list is defined out of the
 - Rat (Num)
 - Rec (A)
 - RFile (File)
-- Str (Cmp)
+- Str (Cmp Iterable)
 - Sym (A)
 - Time (Cmp)
 - Type (A)
-- Vect (A)
+- Vect (Iterable)
 - WFile (File)
 
 ```

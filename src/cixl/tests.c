@@ -29,6 +29,7 @@ static void run(struct cx *cx, const char *in) {
 static void comment_tests() {
   struct cx cx;
   cx_init(&cx);
+  cx_init_iter(&cx);
   cx_init_math(&cx);
   
   run(&cx, "1 //testing testing\n+ 2 = 3 test");
@@ -52,6 +53,7 @@ static void type_tests() {
 static void stack_tests() {
   struct cx cx;
   cx_init(&cx);
+  cx_init_iter(&cx);
   cx_init_math(&cx);
 
   run(&cx, "7 14 % + 28 = test");
@@ -72,6 +74,7 @@ static void group_tests() {
 static void if_tests() {
   struct cx cx;
   cx_init(&cx);
+  cx_init_iter(&cx);
   cx_init_str(&cx);
   
   run(&cx, "#t if 42 = 42 test");
@@ -84,6 +87,7 @@ static void if_tests() {
 static void let_tests() {
   struct cx cx;
   cx_init(&cx);
+  cx_init_iter(&cx);
   cx_init_math(&cx);
   cx_init_str(&cx);
   cx_init_var(&cx);
@@ -109,6 +113,7 @@ static void let_tests() {
 static void func_tests() {
   struct cx cx;
   cx_init(&cx);
+  cx_init_iter(&cx);
   cx_init_math(&cx);
   
   run(&cx, "func: foo() 42; foo = 42 test");
@@ -162,6 +167,7 @@ static void int_tests() {
 static void char_tests() {
   struct cx cx;
   cx_init(&cx);
+  cx_init_iter(&cx);
   cx_init_math(&cx);
   
   run(&cx, "\\a upper \\A = test");
@@ -204,6 +210,7 @@ static void sym_tests() {
 static void rat_tests() {
   struct cx cx;
   cx_init(&cx);
+  cx_init_iter(&cx);
   cx_init_math(&cx);
 
   run(&cx, "1 / 2, 5 / 2 *, 5 / 4 = test");
@@ -239,6 +246,7 @@ static void guid_tests() {
 static void vect_tests() {
   struct cx cx;
   cx_init(&cx);
+  cx_init_iter(&cx);
   cx_init_math(&cx);
 
   run(&cx, "1 2 3 [4 5] len 2 = test");
@@ -252,6 +260,7 @@ static void vect_tests() {
 static void math_tests() {
   struct cx cx;
   cx_init(&cx);
+  cx_init_iter(&cx);
   cx_init_math(&cx);
 
   run(&cx, "21 +<Int Int> 21 = 42 test");
@@ -296,6 +305,7 @@ static void rec_tests() {
 static void compile_tests() {
   struct cx cx;
   cx_init(&cx);
+  cx_init_iter(&cx);
   cx_init_math(&cx);
 
   run(&cx, "Bin new %, $ compile '1 + 2' call = 3 test");

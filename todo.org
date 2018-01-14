@@ -1,16 +1,12 @@
-* add Iter type
-** add vect iter
-*** add iter vect fn
-*** test readme sum
-** add filter fn
-** add read-iter
-*** add meta lib
-*** keep bin inside iter
+* add filter fn to iter lib
+* meta lib with read-iter
+** move read and convert to iter
+*** keep bin ref in iter
 * rename unref to deref globally
 * change all nrefs to unsigned
 * add and/or tests
-* add cond lib with if/?/!
-* ---
+* extract cond lib with if/?/!
+* extract func lib with func:/call/recall/upcall
 * add Table type
 ** extract cx_table from Rec
 ** allow specifying key
