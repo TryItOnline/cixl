@@ -9,7 +9,7 @@ For a long, long time; C didn't have a dedicated boolean type; which was mostly 
 
 ```
 int a = 42;
-int *c = NULL || &a; // Nice try
+int *b = NULL || &a; // Nice try
 ```
 
 ### Common Lisp
