@@ -361,7 +361,7 @@ Lambdas inherit the defining scope.
 ```
 
 ### Conditions
-All types are useable as conditions; some are always true; integers test true for anything but zero; empty strings test false etc. The ```?``` operator may be used to transform any value to its conditional representation.
+Any value may be treated as a condition; some are always true; integers test true for anything but zero; empty strings test false etc. The ```?``` operator may be used to transform any value to its conditional representation.
 
 ```
    | 0?
@@ -518,7 +518,7 @@ Overriding existing implementations is as easy as defining a function with ident
 [12586269025]
 ```
 
-Argument types may be specified in angle brackets to select a specific function implementation. Besides documentation and type checking, this allows the compiler to inline the definition in cases where more than one implementation share the same name.
+Argument types may be specified in angle brackets to select a specific function implementation. Besides documentation and type checking, this allows disambiguating calls and helps the compiler inline the definition in cases where more than one implementation share the same name.
 
 ```
    | &+<Int Int>
@@ -562,7 +562,7 @@ Where conversions to other types make sense, a function named after the target t
 ...
 [42]
 
-   str
+   str<Int>
 ...
 ['42'@1]
 
@@ -633,8 +633,8 @@ A vector is a one dimensional dynamic array that supports efficient pushing / po
 [2 4 14]
 ```
 
-### Loops
-The ```times``` loop may be used to repeat an action N times.
+### Iteration
+The ```times``` function may be used to repeat an action N times.
 
 ```
    | 10 times 42
@@ -648,7 +648,7 @@ The ```times``` loop may be used to repeat an action N times.
 [42]
 ```
 
-While the ```for``` loop repeats an action once for each value in a sequence, the current value is pushed on the stack before calling the action.
+While ```for``` loop repeats an action once for each value in any iterable.
 
 ```
    | 10 for {+ 42,}
@@ -662,15 +662,31 @@ While the ```for``` loop repeats an action once for each value in a sequence, th
 [\F \O \O]
 ```
 
-Some types support mapping actions over their contents using ```map```.
+Iterable values support mapping actions over their values, ```map``` returns an iterator that may be chained further or consumed.
 
 ```
    | 'foo' map {int ++ char}
 ...
+[Iter(0x545db40)@1]
+
+   str
+...
 ['gpp'@1]
 ```
 
-If you find repeating patterns in your code, the ```repeat:``` macro may allow isolating common parts without breaking the flow.
+Iterators may be created manually by calling ```iter``` on any iterable value.
+
+```
+   | [1 2 3] iter
+...
+[Iter(0x53ec8c0)@1]
+
+   sum
+...
+[6]
+```
+
+If you find repeating patterns in the code, ```repeat:``` may allow isolating common parts without breaking the flow.
 
 ```
    | repeat: (say upper) 'foo', 'bar', 'baz';
@@ -783,7 +799,9 @@ Capitalized names are treated as types, the following list is defined out of the
 - Fimp (A)
 - Func (A)
 - Guid (A)
-- Int (Num)
+- Int (Num Iterable)
+- Iter (Iterable)
+- Iterable (A)
 - Lambda (A)
 - Nil (Opt)
 - Num (Cmp)
@@ -861,7 +879,7 @@ Records support full deep equality by default, but ```=``` may be implemented to
 ```
 
 ### Traits
-Traits are abstract types that may be used to simplify type checking and/or function dispatch. Besides the standard offering; 'A', 'Cmp', 'Num', 'Opt' and 'Rec'; new traits may be defined using the ```trait:``` macro. Trait definitions may appear anywhere in the code, but they are all defined in order of appearance during compilation.
+Traits are abstract types that may be used to simplify type checking and/or function dispatch. Besides the standard offering; 'A', 'Cmp', 'Iterable', 'Num', 'Opt' and 'Rec'; new traits may be defined using the ```trait:``` macro. Trait definitions may appear anywhere in the code, but they are all defined in order of appearance during compilation.
 
 ```
    |

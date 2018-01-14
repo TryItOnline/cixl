@@ -3,11 +3,6 @@
 
 #include "cixl/box.h"
 
-struct cx_func;
-struct cx_fimp;
-struct cx_op;
-struct cx_tok;
-
 #define cx_op_type(id, ...)			\
   struct cx_op_type *id() {			\
     static struct cx_op_type type;		\
@@ -21,6 +16,11 @@ struct cx_tok;
 						\
     return &type;				\
   }						\
+
+struct cx_func;
+struct cx_fimp;
+struct cx_op;
+struct cx_tok;
 
 struct cx_op_type {
   const char *id;

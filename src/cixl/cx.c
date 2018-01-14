@@ -22,6 +22,7 @@
 #include "cixl/types/func.h"
 #include "cixl/types/guid.h"
 #include "cixl/types/int.h"
+#include "cixl/types/iter.h"
 #include "cixl/types/lambda.h"
 #include "cixl/types/nil.h"
 #include "cixl/types/rat.h"
@@ -715,7 +716,10 @@ struct cx *cx_init(struct cx *cx) {
   cx->any_type->trait = true;
 
   cx->cmp_type = cx_init_cmp_type(cx);
-  
+
+  cx->iterable_type = cx_add_type(cx, "Iterable", cx->any_type);
+  cx->iterable_type->trait = true;
+
   cx->num_type = cx_add_type(cx, "Num", cx->cmp_type);
   cx->num_type->trait = true;
   
@@ -726,6 +730,7 @@ struct cx *cx_init(struct cx *cx) {
   cx->meta_type = cx_init_meta_type(cx);
   
   cx->bool_type = cx_init_bool_type(cx);
+  cx->iter_type = cx_init_iter_type(cx);
   cx->int_type = cx_init_int_type(cx);
   cx->rat_type = cx_init_rat_type(cx);
   cx->char_type = cx_init_char_type(cx);

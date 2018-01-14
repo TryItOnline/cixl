@@ -2,6 +2,7 @@
 #include <inttypes.h>
 
 #include "cixl/box.h"
+#include "cixl/buf.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
 #include "cixl/eval.h"
@@ -9,6 +10,7 @@
 #include "cixl/libs/str.h"
 #include "cixl/types/func.h"
 #include "cixl/types/fimp.h"
+#include "cixl/types/iter.h"
 #include "cixl/types/str.h"
 
 static bool len_imp(struct cx_scope *scope) {
@@ -39,71 +41,45 @@ static bool get_imp(struct cx_scope *scope) {
   return ok;
 }
 
-static bool for_imp(struct cx_scope *scope) {
-  struct cx_box
-    act = *cx_test(cx_pop(scope, false)),
-    str = *cx_test(cx_pop(scope, false));
-
-  bool ok = false;
-
-  for (char *c = str.as_str->data; *c; c++) {
-    cx_box_init(cx_push(scope), scope->cx->char_type)->as_char = *c;
-    if (!cx_call(&act, scope)) { goto exit; }
-  }
-
-  ok = true;
- exit:
-  cx_box_deinit(&str);
-  cx_box_deinit(&act);
-  return ok;
-}
-
-static bool map_imp(struct cx_scope *scope) {
+static bool iterable_imp(struct cx_scope *scope) {
   struct cx *cx = scope->cx;
-
-  struct cx_box
-    act = *cx_test(cx_pop(scope, false)),
-    str = *cx_test(cx_pop(scope, false));
-
+  struct cx_box in = *cx_test(cx_pop(scope, false));
+  struct cx_iter *it = cx_iter(&in);
   bool ok = false;
+  struct cx_buf out;
+  cx_buf_open(&out);
+  struct cx_box c;
   
-  for (char *c = str.as_str->data; *c; c++) {
-    cx_box_init(cx_push(scope), scope->cx->char_type)->as_char = *c;
-    if (!cx_call(&act, scope)) { goto exit; }
-    struct cx_box *res = cx_pop(scope, true);
-
-    if (!res) {
-      cx_error(cx, cx->row, cx->col, "Missing result for '%c'", *c);
+  while (cx_iter_next(it, &c, scope)) {
+    if (c.type != cx->char_type) {
+      cx_error(cx, cx->row, cx->col, "Expected type Char, actual: %s", c.type->id);
+      cx_buf_close(&out);
       goto exit;
     }
-
-    if (res->type != cx->char_type) {
-      cx_error(cx, cx->row, cx->col, "Expected type Char, got %s", res->type->id);
-      goto exit;
-    }
-
-    *c = res->as_char;
+    
+    fputc(c.as_char, out.stream);
   }
 
-  *cx_push(scope) = str;
+  cx_buf_close(&out);
+  cx_box_init(cx_push(scope), cx->str_type)->as_str = cx_str_new(out.data);
   ok = true;
  exit:
-  cx_box_deinit(&act);
+  free(out.data);
+  cx_box_deinit(&in);
+  cx_iter_unref(it);
   return ok;
 }
 
 void cx_init_str(struct cx *cx) {
   cx_add_func(cx, "len", cx_arg(cx->str_type))->ptr = len_imp;
   cx_add_func(cx, "get", cx_arg(cx->str_type), cx_arg(cx->int_type))->ptr = get_imp;
+  cx_add_func(cx, "str", cx_arg(cx->iterable_type))->ptr = iterable_imp;
   
-  cx_add_func(cx, "for", cx_arg(cx->str_type), cx_arg(cx->any_type))->ptr = for_imp;
-  cx_add_func(cx, "map", cx_arg(cx->str_type), cx_arg(cx->any_type))->ptr = map_imp;
-
   cx_test(cx_eval_str(cx,
 		      "func: upper(s Str) "
-		      "  $s map &upper;"));
+		      "  $s map &upper str;"));
 
   cx_test(cx_eval_str(cx,
 		      "func: lower(s Str) "
-		      "  $s map &lower;"));
+		      "  $s map &lower str;"));
 }

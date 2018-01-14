@@ -235,10 +235,22 @@ static bool eqval_imp(struct cx_scope *scope) {
   return true;
 }
 
+static bool ok_imp(struct cx_scope *scope) {
+  struct cx_box v = *cx_test(cx_pop(scope, false));
+  struct cx_rec *r = v.as_ptr;
+  
+  cx_box_init(cx_push(scope),
+	      scope->cx->bool_type)->as_bool = r->values.members.count;
+  
+  cx_box_deinit(&v);
+  return true;
+}
+
 void cx_init_rec(struct cx *cx) {
   cx_add_macro(cx, "rec:", rec_parse); 
 
   cx_add_func(cx, "=", cx_arg(cx->rec_type), cx_arg(cx->rec_type))->ptr = eqval_imp;
+  cx_add_func(cx, "?", cx_arg(cx->rec_type))->ptr = ok_imp;
 
   cx_add_func(cx, "get", cx_arg(cx->rec_type), cx_arg(cx->sym_type))->ptr = get_imp;
 

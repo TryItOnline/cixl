@@ -38,10 +38,10 @@ static bool parse_type(struct cx *cx,
   return true;
 }
 
-static struct cx_vec *parse_fimp(struct cx *cx,
-				 struct cx_func *func,
-				 FILE *in,
-				 struct cx_vec *out) {
+char *parse_fimp(struct cx *cx,
+		 struct cx_func *func,
+		 FILE *in,
+		 struct cx_vec *out) {
   char c = fgetc(in);
 
   if (c != '<') {
@@ -50,10 +50,18 @@ static struct cx_vec *parse_fimp(struct cx *cx,
   }
   
   int row = cx->row, col = cx->col;
-  struct cx_vec *types = cx_vec_new(sizeof(struct cx_box));
+  struct cx_buf id;
+  cx_buf_open(&id);
+  char sep = 0;
   
   while (true) {
-    if (!cx_parse_tok(cx, in, out, false)) { return false; }
+    if (!cx_parse_tok(cx, in, out, false)) {
+      cx_error(cx, row, col, "Invalid func type");
+      cx_buf_close(&id);
+      free(id.data);
+      return NULL;
+    }
+    
     struct cx_tok *tok = cx_vec_pop(out);
 
     if (tok->type == CX_TID() && strcmp(tok->as_ptr, ">") == 0) {
@@ -61,19 +69,36 @@ static struct cx_vec *parse_fimp(struct cx *cx,
       break;
     }
 
+    if (sep) { fputc(sep, id.stream); }
+    
     if (tok->type == CX_TTYPE()) {
-      struct cx_box *v = cx_box_init(cx_vec_push(types), tok->as_ptr);
-      v->undef = true;
+      struct cx_type *type = tok->as_ptr;
+      fputs(type->id, id.stream);
     } else if (tok->type == CX_TLITERAL()) {
-      cx_copy(cx_vec_push(types), &tok->as_box);
+      cx_print(&tok->as_box, id.stream);
+    } else if (tok->type == CX_TID()) {
+      char *s = tok->as_ptr;
+
+      if (s[0] == 'T' && isdigit(s[1])) {
+	fputs(s+1, id.stream);
+      } else {
+	cx_error(cx, row, col, "Invalid func type: %s", s);
+	cx_buf_close(&id);
+	free(id.data);
+	return NULL;
+      }
     } else {
       cx_error(cx, row, col, "Invalid func type: %s", tok->type->id);
-      free(cx_vec_deinit(types));
+      cx_buf_close(&id);
+      free(id.data);
       return NULL;
     }
+
+    sep = ' ';
   }
 
-  return types;
+  cx_buf_close(&id);
+  return id.data;
 }
 
 static bool parse_func(struct cx *cx, const char *id, FILE *in, struct cx_vec *out) {
@@ -82,12 +107,18 @@ static bool parse_func(struct cx *cx, const char *id, FILE *in, struct cx_vec *o
   if (!f) { return false; }
 
   struct cx_fimp *imp = NULL;
-  struct cx_vec *types = parse_fimp(cx, f, in, out);
+  char *imp_id = parse_fimp(cx, f, in, out);
 	  
-  if (types) {
-    imp = cx_func_get_imp(f, types, 0);
-    if (!imp) { cx_error(cx, cx->row, cx->col, "Func imp not found"); }
-    free(cx_vec_deinit(types));
+  if (imp_id) {
+    struct cx_fimp **found = cx_set_get(&f->imp_lookup, &imp_id);
+    free(imp_id);
+    
+    if (!found) {
+      cx_error(cx, cx->row, cx->col, "Fimp not found");
+      return false;
+    }
+
+    imp = *found;
   }
   
   if (ref) {

@@ -94,9 +94,13 @@ void cx_init_math(struct cx *cx) {
 
   cx_test(cx_eval_str(cx,
 		      "func: fib-rec(a b n Int) "
-		      "$n? if-else {$b $a $b + $n -- recall} $a;"));
+		      "  $n? if-else {$b $a $b + $n -- recall} $a;"));
 
   cx_test(cx_eval_str(cx,
 		      "func: fib(n Int) "
-		      "0 1 $n fib-rec;"));
+		      "  0 1 $n fib-rec;"));
+
+  cx_test(cx_eval_str(cx,
+		      "func: sum(in Iterable) "
+		      "  0, $in for &+;"));
 }

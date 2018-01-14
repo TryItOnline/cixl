@@ -5,9 +5,49 @@
 #include "cixl/cx.h"
 #include "cixl/error.h"
 #include "cixl/scope.h"
-#include "cixl/types/str.h"
 #include "cixl/types/fimp.h"
 #include "cixl/types/func.h"
+#include "cixl/types/iter.h"
+#include "cixl/types/str.h"
+
+struct cx_str_iter {
+  struct cx_iter iter;
+  struct cx_str *str;
+  char *ptr;
+};
+
+bool str_next(struct cx_iter *iter, struct cx_box *out, struct cx_scope *scope) {
+  struct cx_str_iter *it = cx_baseof(iter, struct cx_str_iter, iter);
+  char c = *it->ptr;
+  
+  if (c) {
+    cx_box_init(out, scope->cx->char_type)->as_char = c;
+    it->ptr++;
+    return true;
+  }
+
+  iter->done = true;
+  return false;
+}
+
+void *str_deinit(struct cx_iter *iter) {
+  struct cx_str_iter *it = cx_baseof(iter, struct cx_str_iter, iter);
+  cx_str_unref(it->str);
+  return it;
+}
+
+cx_iter_type(str_iter, {
+    type.next = str_next;
+    type.deinit = str_deinit;
+  });
+
+struct cx_str_iter *cx_str_iter_new(struct cx_str *str) {
+  struct cx_str_iter *it = malloc(sizeof(struct cx_str_iter));
+  cx_iter_init(&it->iter, str_iter());
+  it->str = cx_str_ref(str);
+  it->ptr = str->data;
+  return it;
+}
 
 struct cx_str *cx_str_new(const char *data) {
   size_t len = strlen(data);
@@ -69,6 +109,10 @@ static void copy_imp(struct cx_box *dst, struct cx_box *src) {
   dst->as_str = cx_str_ref(src->as_str);
 }
 
+static struct cx_iter *iter_imp(struct cx_box *v) {
+  return &cx_str_iter_new(v->as_str)->iter;
+}
+
 static void write_imp(struct cx_box *v, FILE *out) {
   fprintf(out, "'%s'", v->as_str->data);
 }
@@ -82,12 +126,13 @@ static void deinit_imp(struct cx_box *v) {
 }
 
 struct cx_type *cx_init_str_type(struct cx *cx) {
-  struct cx_type *t = cx_add_type(cx, "Str", cx->any_type);
+  struct cx_type *t = cx_add_type(cx, "Str", cx->iterable_type);
   t->eqval = eqval_imp;
   t->equid = equid_imp;
   t->cmp = cmp_imp;
   t->ok = ok_imp;
   t->copy = copy_imp;
+  t->iter = iter_imp;
   t->write = write_imp;
   t->print = print_imp;
   t->deinit = deinit_imp;

@@ -12,6 +12,7 @@
 
 struct cx_file;
 struct cx_func;
+struct cx_iter;
 struct cx_lambda;
 struct cx_scope;
 struct cx_str;
@@ -27,6 +28,7 @@ struct cx_box {
     struct cx_file *as_file;
     cx_guid_t as_guid;
     int64_t as_int;
+    struct cx_iter *as_iter;
     void *as_ptr;
     struct cx_rat as_rat;
     struct cx_str *as_str;
@@ -46,6 +48,7 @@ bool cx_ok(struct cx_box *x);
 bool cx_call(struct cx_box *box, struct cx_scope *scope);
 struct cx_box *cx_copy(struct cx_box *dst, struct cx_box *src);
 struct cx_box *cx_clone(struct cx_box *dst, struct cx_box *src);
+struct cx_iter *cx_iter(struct cx_box *box);
 bool cx_write(struct cx_box *box, FILE *out);
 void cx_print(struct cx_box *box, FILE *out);
 

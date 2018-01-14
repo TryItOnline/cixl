@@ -63,7 +63,7 @@ static void print_arg_id(struct cx_func_arg *a,
   if (a->type) {
     fputs(a->type->id, out);
   } else if (a->narg != -1) {
-    print_arg_id(cx_vec_get(args, a->narg), args, out);
+    fprintf(out, "%d", a->narg);
   } else {
     cx_print(&a->value, out);
   }

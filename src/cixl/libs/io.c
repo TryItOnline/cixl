@@ -41,14 +41,8 @@ static bool load_imp(struct cx_scope *scope) {
   return true;
 }
 
-static bool dump_imp(struct cx_scope *scope) {
-  cx_fprint_stack(scope, stderr);
-  return true;
-}
-
 void cx_init_io(struct cx *cx) {
   cx_add_func(cx, "say", cx_arg(cx->str_type))->ptr = say_imp;
   cx_add_func(cx, "ask", cx_arg(cx->str_type))->ptr = ask_imp;
   cx_add_func(cx, "load", cx_arg(cx->str_type))->ptr = load_imp;  
-  cx_add_func(cx, "dump")->ptr = dump_imp;
 }

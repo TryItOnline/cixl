@@ -7,6 +7,7 @@
 
 struct cx;
 struct cx_box;
+struct cx_iter;
 struct cx_scope;
 
 struct cx_type {
@@ -24,6 +25,7 @@ struct cx_type {
   bool (*ok)(struct cx_box *);
   void (*copy)(struct cx_box *dst, struct cx_box *src);
   void (*clone)(struct cx_box *dst, struct cx_box *src);
+  struct cx_iter *(*iter)(struct cx_box *);
   void (*write)(struct cx_box *, FILE *);
   void (*print)(struct cx_box *, FILE *);
   void (*deinit)(struct cx_box *);

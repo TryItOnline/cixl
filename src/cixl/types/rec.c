@@ -23,8 +23,11 @@ static bool eqval_imp(struct cx_box *x, struct cx_box *y) {
 }
 
 static bool ok_imp(struct cx_box *v) {
-  struct cx_rec *r = v->as_ptr;
-  return r->values.members.count;
+  struct cx *cx = v->type->cx;
+  struct cx_scope *s = cx_scope(cx, 0);
+  cx_copy(cx_push(s), v);
+  if (!cx_funcall(cx, "?")) { return false; }
+  return cx_test(cx_pop(s, false))->as_bool;
 }
 
 static void copy_imp(struct cx_box *dst, struct cx_box *src) {

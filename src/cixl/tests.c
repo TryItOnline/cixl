@@ -1,9 +1,10 @@
 #include "cixl/cx.h"
 #include "cixl/error.h"
 #include "cixl/eval.h"
+#include "cixl/libs/iter.h"
 #include "cixl/libs/math.h"
-#include "cixl/libs/str.h"
 #include "cixl/libs/rec.h"
+#include "cixl/libs/str.h"
 #include "cixl/libs/time.h"
 #include "cixl/libs/type.h"
 #include "cixl/libs/var.h"
@@ -77,7 +78,6 @@ static void if_tests() {
   run(&cx, "#f else 42 = 42 test");
   run(&cx, "#t if-else `yes `no = `yes test");
   run(&cx, "#f if-else `yes `no = `no test");
-  run(&cx, "'foo' %%, $ if &upper");
   cx_deinit(&cx);
 }
 
@@ -133,15 +133,29 @@ static void func_tests() {
   cx_deinit(&cx);
 }
 
+static void iter_tests() {
+  struct cx cx;
+  cx_init(&cx);
+  cx_init_iter(&cx);
+  cx_init_math(&cx);
+
+  run(&cx, "0, 5 map &++, $ for &+ test");
+  
+  cx_deinit(&cx);
+}
+
 static void int_tests() {
   struct cx cx;
   cx_init(&cx);
+  cx_init_iter(&cx);
+  cx_init_math(&cx);
 
   run(&cx, "42 test");
   run(&cx, "0! test");
   run(&cx, "1 = 2! test");
-  run(&cx, "42 str '42' = test");
-
+  run(&cx, "42 str<Int> '42' = test");
+  run(&cx, "0, 5 for &+ = 10 test");
+  
   cx_deinit(&cx);
 }
 
@@ -159,6 +173,7 @@ static void char_tests() {
 static void str_tests() {
   struct cx cx;
   cx_init(&cx);
+  cx_init_iter(&cx);
   cx_init_str(&cx);
   
   run(&cx, "'foo' test");
@@ -295,6 +310,7 @@ void cx_tests() {
   if_tests();
   let_tests();
   func_tests();
+  iter_tests();
   int_tests();
   char_tests();
   str_tests();

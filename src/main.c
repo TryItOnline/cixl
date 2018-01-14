@@ -1,5 +1,6 @@
 #include "cixl/cx.h"
 #include "cixl/libs/io.h"
+#include "cixl/libs/iter.h"
 #include "cixl/libs/math.h"
 #include "cixl/libs/rec.h"
 #include "cixl/libs/str.h"
@@ -19,6 +20,7 @@ int main() {
   struct cx cx;
   cx_init(&cx);
   cx_init_io(&cx);
+  cx_init_iter(&cx);
   cx_init_math(&cx);
   cx_init_type(&cx);
   cx_init_rec(&cx);
