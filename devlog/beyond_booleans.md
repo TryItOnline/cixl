@@ -8,8 +8,7 @@ No programming language gets far without supporting some flavor of boolean logic
 For a long, long time; C didn't have a dedicated boolean type; which was mostly fine, since it allows treating ```0``` and ```NULL``` as false and anything else as true. What C gets right is allowing several different kinds of values to be projected onto the boolean domain. And that's pretty much it. It doesn't allow chaining operators without loosing the original types and offers no facilities for user code to hook into the protocol.
 
 ```
-int a = 42;
-int *b = NULL || &a; // Nice try
+int a = 42, *b = NULL || &a; // Nice try
 ```
 
 ### Common Lisp
