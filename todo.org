@@ -1,4 +1,4 @@
-* add filter fn to iter lib
+* add next fn to iter lib
 * meta lib with read-iter
 ** move read and convert to iter
 *** keep bin ref in iter
