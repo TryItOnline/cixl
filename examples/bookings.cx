@@ -1,7 +1,7 @@
 /*
-  This file contains the humble beginnings of a booking system written in Cixl
-  for demonstration purposes. Once Cixl is installed, the tests may be run by
-  executing "load '../examples/bookings.cx'" followed by "run-tests".
+  The humble beginnings of a booking system written in Cixl for demonstration
+  purposes. Once Cixl is installed, the tests may be run by executing
+  "load '../examples/bookings.cx'" followed by "run-tests".
 
   https://github.com/basic-gongfu/cixl#getting-started
 */
