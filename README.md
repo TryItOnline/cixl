@@ -1,7 +1,7 @@
 ## ![](cixl.png?raw=true) <a href="https://liberapay.com/basic-gongfu/donate"><img alt="Donate using Liberapay" src="https://liberapay.com/assets/widgets/donate.svg"></a>
 #### Cixl - a minimal, decently typed scripting language
 
-This project aims to produce a minimal, decently typed scripting language for embedding in and extending from C. The language is implemented as a straight forward 3-stage (parse/compile/eval) interpreter that is designed to be as fast as possible without compromising on simplicity, transparency and flexibility. The codebase has no external dependencies and is currently hovering around 5 kloc including tests and standard library.
+This project aims to produce a minimal, decently typed scripting language for embedding in and extending from C. The language is implemented as a straight forward 3-stage (parse/compile/eval) interpreter that is designed to be as fast as possible without compromising on simplicity, transparency and flexibility. The codebase has no external dependencies and is currently hovering around 7 kloc including tests and standard library.
 
 ### Getting Started
 To get started, you'll need a reasonably modern C compiler with GNU-extensions and CMake installed. Building on macOS unfortunately doesn't work yet, as it's missing support for POSIX memory streams and timers. Most Linuxes and BSDs should be fine, I don't know enough about Windows to have a clue. A basic REPL is included, it's highly recommended to run it through ```rlwrap``` for a less nerve-wrecking experience.
@@ -686,16 +686,26 @@ Sequences may be filtered, which also results in a new iterator.
 [6 7 8 9]
 ```
 
-Iterators may be created manually by calling ```iter``` on any sequence.
+Iterators may be created manually by calling ```iter``` on any sequence and consumed manually using ```next``` and ```drop```.
 
 ```
    | [1 2 3] iter
 ...
 [Iter(0x53ec8c0)@1]
 
-   sum
+   % %, $ drop 2 next ~ next
 ...
-[6]
+[3 #nil]
+```
+
+Functions and lambdas are sequences, calling ```iter``` creates an iterator that keeps returning values until the target returns ```#nil```.
+
+```
+   | func: forever(n Int) {$n};
+...42 forever iter
+...% next ~ next
+...
+[42 42]
 ```
 
 If you find repeating patterns in the code, ```repeat:``` may allow isolating common parts without breaking the flow.
@@ -803,30 +813,30 @@ and scaled.
 ### Types
 Capitalized names are treated as types, the following list is defined out of the box:
 
-- A (Opt)
-- Bin (A)
-- Bool (A)
-- Cmp (A)
-- File (A)
-- Fimp (A)
-- Func (A)
-- Guid (A)
-- Int (Num Seq)
-- Iter (Seq)
-- Lambda (A)
-- Nil (Opt)
-- Num (Cmp)
-- Opt ()
-- Rat (Num)
-- Rec (A)
-- RFile (File)
-- Seq (A)
-- Str (Cmp Seq)
-- Sym (A)
-- Time (Cmp)
-- Type (A)
-- Vect (Seq)
-- WFile (File)
+- A      (Opt)
+- Bin    (A)
+- Bool   (A)
+- Cmp    ()
+- File   ()
+- Fimp   (A Seq)
+- Func   (A Seq)
+- Guid   (A)
+- Int    (Num Seq)
+- Iter   (A Seq)
+- Lambda (A Seq)
+- Nil    (Opt)
+- Num    (Cmp)
+- Opt    ()
+- Rat    (A Num)
+- Rec    (A)
+- RFile  (A File)
+- Seq    ()
+- Str    (A Cmp Seq)
+- Sym    (A)
+- Time   (A Cmp)
+- Type   (A)
+- Vect   (A Seq)
+- WFile  (A File)
 
 ```
    | type 42

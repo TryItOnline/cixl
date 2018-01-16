@@ -1,5 +1,6 @@
 #include <stdlib.h>
 
+#include "cixl/call_iter.h"
 #include "cixl/cx.h"
 #include "cixl/bin.h"
 #include "cixl/box.h"
@@ -64,6 +65,10 @@ static void copy_imp(struct cx_box *dst, struct cx_box *src) {
   dst->as_ptr = cx_lambda_ref(src->as_ptr);
 }
 
+static struct cx_iter *iter_imp(struct cx_box *v) {
+  return cx_call_iter_new(v);
+}
+
 static void print_imp(struct cx_box *value, FILE *out) {
   struct cx_lambda *l = value->as_ptr;
   fprintf(out, "Lambda(%p)@%d", l, l->nrefs);
@@ -74,10 +79,11 @@ static void deinit_imp(struct cx_box *value) {
 }
 
 struct cx_type *cx_init_lambda_type(struct cx *cx) {
-  struct cx_type *t = cx_add_type(cx, "Lambda", cx->any_type);
+  struct cx_type *t = cx_add_type(cx, "Lambda", cx->any_type, cx->seq_type);
   t->equid = equid_imp;
   t->call = call_imp;
   t->copy = copy_imp;
+  t->iter = iter_imp;
   t->print = print_imp;
   t->deinit = deinit_imp;
   return t;

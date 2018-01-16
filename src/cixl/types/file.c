@@ -46,10 +46,12 @@ static void deinit_imp(struct cx_box *v) {
   cx_file_unref(v->as_file);
 }
 
-struct cx_type *cx_init_file_type(struct cx *cx,
-				  const char *name,
-				  struct cx_type *parent) {
-  struct cx_type *t = cx_add_type(cx, name, parent);
+struct cx_type *_cx_init_file_type(struct cx *cx, const char *name, ...) {
+  va_list parents;
+  va_start(parents, name);				
+  struct cx_type *t = cx_vadd_type(cx, name, parents);
+  va_end(parents);
+  
   t->equid = equid_imp;
   t->ok = ok_imp;
   t->copy = copy_imp;

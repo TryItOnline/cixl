@@ -3,6 +3,7 @@
 
 #include "cixl/bin.h"
 #include "cixl/buf.h"
+#include "cixl/call_iter.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
 #include "cixl/eval.h"
@@ -157,6 +158,10 @@ static bool call_imp(struct cx_box *value, struct cx_scope *scope) {
   return cx_fimp_call(imp, scope);
 }
 
+static struct cx_iter *iter_imp(struct cx_box *v) {
+  return cx_call_iter_new(v);
+}
+
 static void write_imp(struct cx_box *value, FILE *out) {
   struct cx_func *func = value->as_ptr;
   fprintf(out, "&%s", func->id);
@@ -168,9 +173,10 @@ static void print_imp(struct cx_box *value, FILE *out) {
 }
 
 struct cx_type *cx_init_func_type(struct cx *cx) {
-  struct cx_type *t = cx_add_type(cx, "Func", cx->any_type);
+  struct cx_type *t = cx_add_type(cx, "Func", cx->any_type, cx->seq_type);
   t->equid = equid_imp;
   t->call = call_imp;
+  t->iter = iter_imp;
   t->write = write_imp;
   t->print = print_imp;
 

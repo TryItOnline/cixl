@@ -173,6 +173,36 @@ static bool filter_imp(struct cx_scope *scope) {
   return true;
 }
 
+static bool next_imp(struct cx_scope *scope) {
+  struct cx_box it = *cx_test(cx_pop(scope, false)), v;
+
+  if (cx_iter_next(it.as_iter, &v, scope)) {
+    *cx_push(scope) = v;
+  } else {
+    cx_box_init(cx_push(scope), scope->cx->nil_type);
+  }
+
+  cx_box_deinit(&it);
+  return true;
+}
+
+static bool drop_imp(struct cx_scope *scope) {
+  struct cx_box
+    n = *cx_test(cx_pop(scope, false)),
+    it = *cx_test(cx_pop(scope, false)),
+    v;
+
+  bool done = false;
+  
+  while (!done && n.as_int-- > 0) {
+    done = !cx_iter_next(it.as_iter, &v, scope);
+    cx_box_deinit(&v);
+  }
+
+  cx_box_deinit(&it);
+  return true;
+}
+
 void cx_init_iter(struct cx *cx) {
   cx_add_func(cx, "iter", cx_arg(cx->seq_type))->ptr = iter_imp;
 
@@ -187,4 +217,10 @@ void cx_init_iter(struct cx *cx) {
   cx_add_func(cx, "filter",
 	      cx_arg(cx->seq_type),
 	      cx_arg(cx->any_type))->ptr = filter_imp;
+
+  cx_add_func(cx, "next", cx_arg(cx->iter_type))->ptr = next_imp;
+
+  cx_add_func(cx, "drop",
+	      cx_arg(cx->iter_type),
+	      cx_arg(cx->int_type))->ptr = drop_imp;
 }

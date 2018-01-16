@@ -59,6 +59,7 @@ void cx_add_separators(struct cx *cx, const char *cs);
 bool cx_is_separator(struct cx *cx, char c);
 
 struct cx_type *_cx_add_type(struct cx *cx, const char *id, ...);
+struct cx_type *cx_vadd_type(struct cx *cx, const char *id, va_list parents);
 struct cx_rec_type *cx_add_rec_type(struct cx *cx, const char *id);
 struct cx_type *cx_get_type(struct cx *cx, const char *id, bool silent);
 

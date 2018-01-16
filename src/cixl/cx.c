@@ -286,7 +286,7 @@ static bool repeat_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   }
 }
 
-static bool cls_imp(struct cx_scope *scope) {
+static bool reset_imp(struct cx_scope *scope) {
   cx_do_vec(&scope->stack, struct cx_box, v) { cx_box_deinit(v); }
   cx_vec_clear(&scope->stack);
   return true;
@@ -717,7 +717,7 @@ struct cx *cx_init(struct cx *cx) {
 
   cx->cmp_type = cx_init_cmp_type(cx);
 
-  cx->seq_type = cx_add_type(cx, "Seq", cx->any_type);
+  cx->seq_type = cx_add_type(cx, "Seq");
   cx->seq_type->trait = true;
 
   cx->num_type = cx_add_type(cx, "Num", cx->cmp_type);
@@ -744,9 +744,9 @@ struct cx *cx_init(struct cx *cx) {
   cx->fimp_type = cx_init_fimp_type(cx);
   cx->lambda_type = cx_init_lambda_type(cx);
 
-  cx->file_type = cx_init_file_type(cx, "File", NULL);
-  cx->rfile_type = cx_init_file_type(cx, "RFile", cx->file_type);
-  cx->wfile_type = cx_init_file_type(cx, "WFile", cx->file_type);
+  cx->file_type = cx_init_file_type(cx, "File");
+  cx->rfile_type = cx_init_file_type(cx, "RFile", cx->any_type, cx->file_type);
+  cx->wfile_type = cx_init_file_type(cx, "WFile", cx->any_type, cx->file_type);
 
   cx_box_init(cx_set_const(cx, cx_sym(cx, "in"), false),
 	      cx->rfile_type)->as_file = cx_file_new(stdin);
@@ -754,7 +754,7 @@ struct cx *cx_init(struct cx *cx) {
   cx_box_init(cx_set_const(cx, cx_sym(cx, "out"), false),
 	      cx->wfile_type)->as_file = cx_file_new(stdout);
   
-  cx_add_func(cx, "|")->ptr = cls_imp;
+  cx_add_func(cx, "|")->ptr = reset_imp;
   cx_add_func(cx, "%", cx_arg(cx->opt_type))->ptr = copy_imp;
   cx_add_func(cx, "%%", cx_arg(cx->opt_type))->ptr = clone_imp;
   cx_add_func(cx, "~", cx_arg(cx->opt_type))->ptr = flip_imp;
@@ -846,6 +846,14 @@ bool cx_is_separator(struct cx *cx, char c) {
 }
 
 struct cx_type *_cx_add_type(struct cx *cx, const char *id, ...) {
+  va_list parents;
+  va_start(parents, id);				
+  struct cx_type *t = cx_vadd_type(cx, id, parents);
+  va_end(parents);					
+  return t;
+}
+ 
+struct cx_type *cx_vadd_type(struct cx *cx, const char *id, va_list parents) {
   struct cx_type **t = cx_test(cx_set_insert(&cx->types, &id));
 
   if (!t) {
@@ -855,11 +863,8 @@ struct cx_type *_cx_add_type(struct cx *cx, const char *id, ...) {
   
   *t = cx_type_init(malloc(sizeof(struct cx_type)), cx, id);
     
-  va_list parents;
-  va_start(parents, id);				
   struct cx_type *pt = NULL;
   while ((pt = va_arg(parents, struct cx_type *))) { cx_derive(*t, pt); }
-  va_end(parents);					
   return *t;
 }
 

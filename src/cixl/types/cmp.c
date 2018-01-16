@@ -87,7 +87,7 @@ static bool gte_imp(struct cx_scope *scope) {
 }
 
 struct cx_type *cx_init_cmp_type(struct cx *cx) {
-  struct cx_type *t = cx_add_type(cx, "Cmp", cx->any_type);
+  struct cx_type *t = cx_add_type(cx, "Cmp");
   t->trait = true;
 
   cx_add_func(cx, "cmp", cx_arg(t), cx_narg(0))->ptr = cmp_imp;

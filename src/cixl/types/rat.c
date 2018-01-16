@@ -107,7 +107,7 @@ static void print_imp(struct cx_box *v, FILE *out) {
 }
 
 struct cx_type *cx_init_rat_type(struct cx *cx) {
-  struct cx_type *t = cx_add_type(cx, "Rat", cx->num_type);
+  struct cx_type *t = cx_add_type(cx, "Rat", cx->any_type, cx->num_type);
   t->equid = equid_imp;
   t->cmp = cmp_imp;
   t->ok = ok_imp;

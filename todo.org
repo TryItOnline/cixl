@@ -1,10 +1,13 @@
-* add next fn to iter lib
 * meta lib with read-iter
 ** move read and convert to iter
 *** keep bin ref in iter
 * rename unref to deref globally
 * change all nrefs to unsigned
 * add and/or tests
+* add filter tests
+* add pair type
+** add pair alloc
+** add iter zip/unzip
 * extract cond lib with if/?/!
 * extract func lib with func:/call/recall/upcall
 * add Table type
@@ -26,16 +29,31 @@
 ** typecheck and bind stack to vars
 * implement Cmp for Sym/Guid/Vect/Rec
 * use cx_str for CX_TID
-** add cx_tok.as_str
-** grep CX_TID/as_ptr
+** remove cx_tok.as_ptr
+** replace with cx_tok.as_str, as_func, as_fimp etc.
+* replace box.as_ptr with as_func/fimp/etc
 * implement type.new for Int/Str/Rat/Time
-* add case: macro
-** case: 
-(= 1 2) 42
-$foo ('foo' $foo vect)
-$bar ('bar' $bar vect)
-#t 'default'
 ** execute first clause that tests ok
 ** error if no match 
 * add str interpolation
 * add Ref type
+
+* change _ to func
+** add stack lib
+*** move |, %, %%, ~ & _
+
+* add switch: macro
+** var is optional
+*** bind if not bound already
+*** push before groups/funcs/fimps
+** add cond lib
+** if cond is group, eval
+*** with g pushed if present
+** if cond is literal, compare with =
+*** only if var is present
+** if cond is func/fimp, call
+** if cond is $id, compare with =
+*** only if var is present
+** if #t, eval unconditionally
+** allow single token actions
+*** call eval_token instead
