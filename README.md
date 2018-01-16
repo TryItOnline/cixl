@@ -423,7 +423,7 @@ Lambdas may be used to to prevent evaluating unused arguments when chaining.
 ```
 
 ### Functions
-The ```func:``` macro may be used to define named functions. Several implementations may be defined for the same name as long as they have the same arity and different argument types. Each function captures its defining environment and opens an implicit child scope that is closed on exit. Function definitions may appear anywhere in the code, but they are all defined in order of appearance during compilation.
+The ```func:``` macro may be used to define named functions. Several implementations may be defined for the same name as long as they have the same arity and different argument types. Each function captures its defining environment and opens an implicit child scope that is closed on exit. Functions are allowed anywhere in the code, but are defined in order of appearance during compilation.
 
 ```
    |
@@ -849,7 +849,7 @@ Capitalized names are treated as types, the following list is defined out of the
 ```
 
 ### Records
-Records map finite sets of typed fields to values. Record types are required to specify an (optionally empty) list of parent types and traits; and will inherit any fields that don't clash with its own. Record definitions may appear anywhere in the code, but they are all defined in order of appearance during compilation.
+Records map finite sets of typed fields to values. Record types are required to specify an (optionally empty) list of parent types and traits; and will inherit any fields that don't clash with its own. Records are allowed anywhere in the code, but are defined in order of appearance during compilation.
 
 ```
    |
@@ -901,7 +901,7 @@ Records support full deep equality by default, but ```=``` may be implemented to
 ```
 
 ### Traits
-Traits are abstract types that may be used to simplify type checking and/or function dispatch. Besides the standard offering; 'A', 'Cmp', 'Num', 'Opt', 'Rec' and 'Seq'; new traits may be defined using the ```trait:``` macro. Trait definitions may appear anywhere in the code, but they are all defined in order of appearance during compilation.
+Traits are abstract types that may be used to simplify type checking and/or function dispatch. Besides the standard offering; ```A```, ```Cmp```, ```Num```, ```Opt```, ```Rec``` and ```Seq```; new traits may be defined using the ```trait:``` macro. Traits are allowed anywhere in the code, but are defined in order of appearance during compilation.
 
 ```
    |
