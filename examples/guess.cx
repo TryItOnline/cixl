@@ -5,14 +5,15 @@
   https://github.com/basic-gongfu/cixl#getting-started
 */
 
-
-(let: n rand 100; {
+(let: n rand 100++; {
   ask 'Your guess: '
   
   % if {
-    switch: g
-      (< $n) (say 'Too low!'  $g)
-      (> $n) (say 'Too high!' $g)
-      #t     (say 'Correct!'  #nil);
+    int switch: g
+    (< $n) (say 'Too low!'  $g)
+    (> $n) (say 'Too high!' $g)
+    #t     (say 'Correct!'  #nil);
+  } {
+    _ #nil
   }
-}) iter for &_
+}) for &_
