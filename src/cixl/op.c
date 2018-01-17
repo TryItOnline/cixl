@@ -24,7 +24,11 @@ struct cx_op *cx_op_init(struct cx_op *op, struct cx_op_type *type, size_t tok_i
 }
 
 static bool begin_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
-  cx_begin(cx, op->as_begin.child ? cx_scope(cx, 0) : NULL);
+  struct cx_scope *parent = op->as_begin.child
+    ? cx_scope(cx, 0)
+    : op->as_begin.parent;
+  
+  cx_begin(cx, parent);
   return true;
 }
 
@@ -54,13 +58,36 @@ cx_op_type(CX_OCUT, {
 
 static bool fimp_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
   struct cx_fimp *imp = op->as_fimp.imp;
-  if (!imp->scope) { imp->scope = cx_scope_ref(cx_scope(cx, 0)); }
-  cx->op += op->as_fimp.num_ops;
+  
+  if (op->as_fimp.inline1) {
+    cx->op += op->as_fimp.num_ops;
+    if (!cx_scan_args(cx, imp->func)) { return false; }
+    
+    if (!cx_fimp_match(imp, &cx_scope(cx, 0)->stack)) {
+      cx_error(cx, cx->row, cx->col, "Func not applicable: %s", imp->func->id);
+      return false;
+    }
+
+    cx_call_init(cx_vec_push(&cx->calls), cx->row, cx->col, imp, cx->op);
+    cx->op = op+1;
+  } else {
+    cx->op += op->as_fimp.num_ops;
+  }
   return true;
 }
 
 cx_op_type(CX_OFIMP, {
     type.eval = fimp_eval;
+  });
+
+static bool fimpdef_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
+  struct cx_fimp *imp = op->as_fimpdef.imp;
+  imp->scope = cx_scope_ref(cx_scope(cx, 0));
+  return true;
+}
+
+cx_op_type(CX_OFIMPDEF, {
+    type.eval = fimpdef_eval;
   });
 
 static bool funcall_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
@@ -193,18 +220,22 @@ static bool return_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
 
   if (call->recalls) {
     struct cx_fimp *imp = call->target;
-    struct cx_scope *s = cx_scope(cx, 0);
-    
-    if (!cx_fimp_match(imp, &s->stack)) {
+    if (!cx_scan_args(cx, imp->func)) { return false; }
+
+    if (!cx_fimp_match(imp, &cx_scope(cx, 0)->stack)) {
       cx_error(cx, cx->row, cx->col, "Recall not applicable");
       return false;
     }
 
-    struct cx_bin_func *bin = cx_test(cx_bin_get_func(cx->bin, imp));
-    cx->op = cx_vec_get(&cx->bin->ops, bin->start_op+1);
+    cx->op = cx_vec_get(&cx->bin->ops, op->as_return.start_op+1);
     call->recalls--;
   } else {
-    cx->stop = true;
+    if (call->return_op) {
+      cx->op = call->return_op;
+    } else {
+      cx->stop = true;
+    }
+    
     cx_call_deinit(cx_vec_pop(&cx->calls));
     cx_end(cx);
   }

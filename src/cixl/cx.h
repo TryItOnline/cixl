@@ -36,6 +36,7 @@ struct cx_sym;
 
 struct cx {
   struct cx_set separators;
+  ssize_t inline_limit1, inline_limit2;
 
   struct cx_set types;
   struct cx_type *any_type, *bin_type, *bool_type, *char_type, *cmp_type, *file_type,
@@ -45,7 +46,7 @@ struct cx {
 
   uint64_t next_sym_tag, next_type_tag;
   struct cx_set syms, macros, funcs, consts;
-
+  
   struct cx_malloc lambda_alloc, pair_alloc, rec_alloc, scope_alloc;
   
   struct cx_vec scopes;

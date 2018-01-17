@@ -75,7 +75,7 @@ bool cx_scan_args(struct cx *cx, struct cx_func *func) {
   int row = cx->row, col = cx->col;
   struct cx_scope *s = cx_scope(cx, 0);
   struct cx_op *end = cx_vec_end(&cx->bin->ops);
-  
+
   while (cx->op != end) {
     if (cx_scope(cx, 0) == s) {
       size_t cut_offs = s->cut_offs.count

@@ -1,8 +1,3 @@
-* move func_eval to imp_compile
-** commit
-* add second level of inlining
-** add ssize_t cx.inline_limit1/2
-*** default 10 -1
 * change _ to func
 ** add stack lib
 *** move |, %, %%, ~ & _

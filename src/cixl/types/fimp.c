@@ -69,13 +69,18 @@ bool cx_fimp_match(struct cx_fimp *imp, struct cx_vec *stack) {
   return true;
 }
 
-bool cx_fimp_compile(struct cx_fimp *imp, size_t tok_idx, struct cx_bin *out) {
+bool cx_fimp_compile(struct cx_fimp *imp,
+		     size_t tok_idx,
+		     bool inline1,
+		     struct cx_bin *out) {
   struct cx *cx = imp->func->cx;
   size_t start_op = out->ops.count;
   
-  cx_op_init(cx_vec_push(&out->ops),
-	     CX_OBEGIN(),
-	     tok_idx)->as_begin.child = false;  
+  struct cx_op *op = cx_op_init(cx_vec_push(&out->ops),
+				CX_OBEGIN(),
+				tok_idx);
+  op->as_begin.child = false;
+  op->as_begin.parent = imp->scope;
 
   if (imp->toks.count) {
     if (imp->args.count) {
@@ -98,8 +103,11 @@ bool cx_fimp_compile(struct cx_fimp *imp, size_t tok_idx, struct cx_bin *out) {
     }
   }
   
-  cx_op_init(cx_vec_push(&out->ops), CX_ORETURN(), out->toks.count-1);
-  cx_bin_add_func(out, imp, start_op);
+  cx_op_init(cx_vec_push(&out->ops),
+	     CX_ORETURN(),
+	     out->toks.count-1)->as_return.start_op = start_op;
+  
+  if (!inline1) { cx_bin_add_func(out, imp, start_op); }
   return true;
 }
 
@@ -113,7 +121,7 @@ bool cx_fimp_eval(struct cx_fimp *imp, struct cx_scope *scope) {
   } else {
     if (!imp->bin) {
       imp->bin = cx_bin_new();
-      if (!cx_fimp_compile(imp, 0, imp->bin)) { return false; }
+      if (!cx_fimp_compile(imp, 0, false, imp->bin)) { return false; }
     }
     
     ok = cx_eval(cx, imp->bin, NULL);
@@ -124,7 +132,7 @@ bool cx_fimp_eval(struct cx_fimp *imp, struct cx_scope *scope) {
 
 bool cx_fimp_call(struct cx_fimp *imp, struct cx_scope *scope) {
   struct cx *cx = scope->cx;
-  cx_call_init(cx_vec_push(&cx->calls), cx->row, cx->col, imp);
+  cx_call_init(cx_vec_push(&cx->calls), cx->row, cx->col, imp, NULL);
 
   if (imp->ptr) {
     imp->ptr(scope);

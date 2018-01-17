@@ -115,9 +115,10 @@ static void func_tests() {
   cx_init(&cx);
   cx_init_iter(&cx);
   cx_init_math(&cx);
+  cx_init_var(&cx);
   
   run(&cx, "func: foo() 42; foo = 42 test");
-  run(&cx, "func: foo() 42; &foo call = 42 test");
+  run(&cx, "(let: x 42; func: foo() $x;) &foo call = 42 test");
   run(&cx, "func: bar(x A) $x + 35; bar 7 42 = test");
   run(&cx, "func: baz(x y Int z T0) $x + $y + $z; baz 1 3 5 9 = test");
 

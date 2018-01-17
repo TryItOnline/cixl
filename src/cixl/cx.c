@@ -117,6 +117,19 @@ static bool trait_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   }
 }
 
+static ssize_t func_eval(struct cx_macro_eval *eval,
+			 struct cx_bin *bin,
+			 size_t tok_idx,
+			 struct cx *cx) {
+  struct cx_tok *f = cx_vec_get(&eval->toks, 0);
+
+  cx_op_init(cx_vec_push(&bin->ops),
+	     CX_OFIMPDEF(),
+	     tok_idx)->as_fimpdef.imp = f->as_ptr;
+  
+  return tok_idx+1;
+}
+
 static bool func_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   struct cx_vec toks;
   cx_vec_init(&toks, sizeof(struct cx_tok));
@@ -182,13 +195,18 @@ static bool func_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
     return false;
   }
 
-  _cx_add_func(cx,
-	       id.as_ptr,
-	       func_args.count,
-	       (void *)func_args.items)->toks = toks;
+  struct cx_fimp *imp = _cx_add_func(cx,
+				     id.as_ptr,
+				     func_args.count,
+				     (void *)func_args.items);
+  imp->toks = toks;
 
   cx_tok_deinit(&id);
   cx_vec_deinit(&func_args);
+
+  struct cx_macro_eval *eval = cx_macro_eval_new(func_eval);
+  cx_tok_init(cx_vec_push(&eval->toks), CX_TFIMP(), row, col)->as_ptr = imp;
+  cx_tok_init(cx_vec_push(out), CX_TMACRO(), row, col)->as_ptr = eval;
   return true;
 }
 
@@ -651,6 +669,8 @@ static bool fail_imp(struct cx_scope *scope) {
 }
 
 struct cx *cx_init(struct cx *cx) {
+  cx->inline_limit1 = 10;
+  cx->inline_limit2 = -1;
   cx->next_sym_tag = cx->next_type_tag = 1;
   cx->bin = NULL;
   cx->op = NULL;

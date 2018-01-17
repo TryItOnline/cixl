@@ -49,10 +49,27 @@ cx_tok_type(CX_TCUT, {
 
 cx_tok_type(CX_TEND);
 
-static bool inline_fimp(struct cx_fimp *imp,
-			struct cx_bin *bin,
-			size_t tok_idx,
-			struct cx *cx) {
+static bool inline_fimp1(struct cx_fimp *imp,
+			 struct cx_bin *bin,
+			 size_t tok_idx,
+			 struct cx *cx) {
+  size_t i = bin->ops.count;
+  struct cx_op *op = cx_op_init(cx_vec_push(&bin->ops),
+				CX_OFIMP(),
+				tok_idx);
+  op->as_fimp.imp = imp;
+  op->as_fimp.start_op = i+1;
+  if (!cx_fimp_compile(imp, tok_idx, true, bin)) { return false; }
+  op = cx_vec_get(&bin->ops, i);
+  op->as_fimp.num_ops = bin->ops.count - op->as_fimp.start_op;
+  op->as_fimp.inline1 = true;
+  return true;
+}
+
+static bool inline_fimp2(struct cx_fimp *imp,
+			 struct cx_bin *bin,
+			 size_t tok_idx,
+			 struct cx *cx) {
   size_t i = bin->ops.count;
 
   struct cx_op *op = cx_op_init(cx_vec_push(&bin->ops),
@@ -60,9 +77,10 @@ static bool inline_fimp(struct cx_fimp *imp,
 				tok_idx);
   op->as_fimp.imp = imp;
   op->as_fimp.start_op = i+1;
-  if (!cx_fimp_compile(imp, tok_idx, bin)) { return false; }
+  if (!cx_fimp_compile(imp, tok_idx, false, bin)) { return false; }
   op = cx_vec_get(&bin->ops, i);
   op->as_fimp.num_ops = bin->ops.count - op->as_fimp.start_op;
+  op->as_fimp.inline1 = false;
   return true;
 }
 
@@ -70,10 +88,14 @@ static ssize_t fimp_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) {
   struct cx_tok *tok = cx_vec_get(&bin->toks, tok_idx);  
   struct cx_fimp *imp = tok->as_ptr;
 
-  if (!imp->ptr &&
-      !cx_bin_get_func(bin, imp) &&
-      !inline_fimp(imp, bin, tok_idx, cx)) {
-    return -1;
+  if (!imp->ptr) {
+    if (cx->inline_limit1 == -1 || imp->toks.count < cx->inline_limit1) {
+      if (!inline_fimp1(imp, bin, tok_idx, cx)) { return -1; }
+      goto exit;
+    } else if ((cx->inline_limit2 == -1 || imp->toks.count < cx->inline_limit2) &&
+	       !cx_bin_get_func(bin, imp)) {
+      if (!inline_fimp2(imp, bin, tok_idx, cx)) { return -1; }
+    }
   }
 
   struct cx_funcall_op *op = &cx_op_init(cx_vec_push(&bin->ops),
@@ -82,7 +104,8 @@ static ssize_t fimp_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) {
   op->func = imp->func;
   op->imp = imp;
   op->jit_imp = NULL;
-	   
+
+ exit:
   return tok_idx+1;
 }
 
@@ -97,11 +120,14 @@ static ssize_t func_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) {
     ? *(struct cx_fimp **)cx_vec_start(&func->imps)
     : NULL;
 
-  if (imp &&
-      !imp->ptr &&
-      !cx_bin_get_func(bin, imp) &&
-      !inline_fimp(imp, bin, tok_idx, cx)) {
-    return -1;
+  if (imp && !imp->ptr) {
+    if (cx->inline_limit1 == -1 || imp->toks.count < cx->inline_limit1) {
+      if (!inline_fimp1(imp, bin, tok_idx, cx)) { return -1; }
+      goto exit;
+    } else if ((cx->inline_limit2 == -1 || imp->toks.count < cx->inline_limit2) &&
+	       !cx_bin_get_func(bin, imp)) {
+      if (!inline_fimp2(imp, bin, tok_idx, cx)) { return -1; }
+    }
   }
 
   struct cx_funcall_op *op = &cx_op_init(cx_vec_push(&bin->ops),
@@ -110,7 +136,8 @@ static ssize_t func_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) {
   op->func = func;
   op->imp = imp;
   op->jit_imp = NULL;
-	   
+
+ exit:
   return tok_idx+1;
 }
 
