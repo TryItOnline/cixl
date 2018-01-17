@@ -14,6 +14,7 @@ struct cx_file;
 struct cx_func;
 struct cx_iter;
 struct cx_lambda;
+struct cx_pair;
 struct cx_scope;
 struct cx_str;
 struct cx_type;
@@ -22,17 +23,18 @@ struct cx_box {
   struct cx_type *type;
   
   union {
-    bool as_bool;
-    char as_char;
+    bool            as_bool;
+    char            as_char;
     struct cx_file *as_file;
-    cx_guid_t as_guid;
-    int64_t as_int;
+    cx_guid_t       as_guid;
+    int64_t         as_int;
     struct cx_iter *as_iter;
-    void *as_ptr;
-    struct cx_rat as_rat;
-    struct cx_str *as_str;
-    struct cx_sym as_sym;
-    struct cx_time as_time;
+    struct cx_pair *as_pair;
+    void           *as_ptr;
+    struct cx_rat   as_rat;
+    struct cx_str  *as_str;
+    struct cx_sym   as_sym;
+    struct cx_time  as_time;
   };
 };
 

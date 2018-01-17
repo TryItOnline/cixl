@@ -25,6 +25,7 @@
 #include "cixl/types/iter.h"
 #include "cixl/types/lambda.h"
 #include "cixl/types/nil.h"
+#include "cixl/types/pair.h"
 #include "cixl/types/rat.h"
 #include "cixl/types/rec.h"
 #include "cixl/types/str.h"
@@ -680,7 +681,7 @@ struct cx *cx_init(struct cx *cx) {
   cx->row = cx->col = -1;
   
   cx_set_init(&cx->separators, sizeof(char), cx_cmp_char);
-  cx_add_separators(cx, " \t\n;,|_?!()[]{}");
+  cx_add_separators(cx, " \t\n;,.|_?!()[]{}");
 
   cx_set_init(&cx->syms, sizeof(struct cx_sym), cx_cmp_str);
   cx->syms.key_offs = offsetof(struct cx_sym, id);
@@ -698,6 +699,7 @@ struct cx *cx_init(struct cx *cx) {
   cx->consts.key_offs = offsetof(struct cx_var, id);
 
   cx_malloc_init(&cx->lambda_alloc, CX_LAMBDA_SLAB_SIZE, sizeof(struct cx_lambda));
+  cx_malloc_init(&cx->pair_alloc, CX_PAIR_SLAB_SIZE, sizeof(struct cx_pair));
   cx_malloc_init(&cx->rec_alloc, CX_REC_SLAB_SIZE, sizeof(struct cx_rec));
   cx_malloc_init(&cx->scope_alloc, CX_SCOPE_SLAB_SIZE, sizeof(struct cx_scope));
   
@@ -729,8 +731,9 @@ struct cx *cx_init(struct cx *cx) {
   cx->nil_type = cx_init_nil_type(cx);
   cx->meta_type = cx_init_meta_type(cx);
   
-  cx->bool_type = cx_init_bool_type(cx);
+  cx->pair_type = cx_init_pair_type(cx);
   cx->iter_type = cx_init_iter_type(cx);
+  cx->bool_type = cx_init_bool_type(cx);
   cx->int_type = cx_init_int_type(cx);
   cx->rat_type = cx_init_rat_type(cx);
   cx->char_type = cx_init_char_type(cx);
@@ -830,6 +833,7 @@ struct cx *cx_deinit(struct cx *cx) {
   cx_set_deinit(&cx->syms);
 
   cx_malloc_deinit(&cx->lambda_alloc);
+  cx_malloc_deinit(&cx->pair_alloc);
   cx_malloc_deinit(&cx->rec_alloc);
   cx_malloc_deinit(&cx->scope_alloc);
   return cx;

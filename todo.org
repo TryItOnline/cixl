@@ -1,13 +1,12 @@
+* add iter zip/unzip
+* change _ to func
+** add stack lib
+*** move |, %, %%, ~ & _
 * meta lib with read-iter
 ** move read and convert to iter
 *** keep bin ref in iter
-* rename unref to deref globally
-* change all nrefs to unsigned
 * add and/or tests
 * add filter tests
-* add pair type
-** add pair alloc
-** add iter zip/unzip
 * extract cond lib with if/?/!
 * extract func lib with func:/call/recall/upcall
 * add Table type
@@ -37,10 +36,6 @@
 ** error if no match 
 * add str interpolation
 * add Ref type
-
-* change _ to func
-** add stack lib
-*** move |, %, %%, ~ & _
 
 * add switch: macro
 ** var is optional

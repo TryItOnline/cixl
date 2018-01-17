@@ -9,8 +9,9 @@
 #define CX_VERSION "0.8"
 
 #define CX_LAMBDA_SLAB_SIZE 20
-#define CX_REC_SLAB_SIZE 20
-#define CX_SCOPE_SLAB_SIZE 10
+#define CX_PAIR_SLAB_SIZE   20
+#define CX_REC_SLAB_SIZE    20
+#define CX_SCOPE_SLAB_SIZE  20
 
 #define cx_add_func(cx, id, ...) ({				\
       struct cx_func_arg args[] = {__VA_ARGS__};		\
@@ -31,13 +32,13 @@ struct cx {
   struct cx_set types;
   struct cx_type *any_type, *bin_type, *bool_type, *char_type, *cmp_type, *file_type,
     *fimp_type, *func_type, *guid_type, *int_type, *iter_type, *lambda_type,
-    *meta_type, *nil_type, *num_type, *opt_type, *rat_type, *rec_type, *rfile_type,
-    *seq_type, *str_type, *sym_type, *time_type, *vect_type, *wfile_type;
+    *meta_type, *nil_type, *num_type, *opt_type, *pair_type, *rat_type, *rec_type,
+    *rfile_type, *seq_type, *str_type, *sym_type, *time_type, *vect_type, *wfile_type;
 
   uint64_t next_sym_tag, next_type_tag;
   struct cx_set syms, macros, funcs, consts;
 
-  struct cx_malloc lambda_alloc, rec_alloc, scope_alloc;
+  struct cx_malloc lambda_alloc, pair_alloc, rec_alloc, scope_alloc;
   
   struct cx_vec scopes;
   struct cx_scope *main, **scope;

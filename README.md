@@ -719,6 +719,19 @@ BAZ
 []
 ```
 
+### Pairs
+Values may be paired by calling ```.```, the result provides reference semantics and access to parts using ```x``` and ```y```.
+
+```
+   | 1.2
+...
+[(1.2)@1]
+
+   % x ~ y
+...
+[1 2]
+```
+
 ### Time
 Cixl provides a single concept to represent points in time and intervals. Internally; time is represented as an absolute, zero-based number of months and nanoseconds. The representation is key to providing dual semantics, since it allows remembering enough information to give sensible answers.
 
@@ -827,6 +840,7 @@ Capitalized names are treated as types, the following list is defined out of the
 - Nil    (Opt)
 - Num    (Cmp)
 - Opt    ()
+- Pair   (A Cmp)
 - Rat    (A Num)
 - Rec    (A)
 - RFile  (A File)
