@@ -61,8 +61,8 @@ bool cx_fimp_match(struct cx_fimp *imp, struct cx_vec *stack) {
 
     if (t) {
       if (!cx_is(j->type, t)) { return false; }
-    } else if (!j->undef) {
-      if (!cx_eqval(&i->value, j)) { return false; }
+    } else if (!cx_eqval(&i->value, j)) {
+      return false;
     }
   }
 
