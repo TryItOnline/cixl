@@ -3,20 +3,28 @@
 
 #include "cixl/macro.h"
 #include "cixl/malloc.h"
+#include "cixl/parse.h"
 #include "cixl/set.h"
 #include "cixl/type.h"
 
-#define CX_VERSION "0.8"
+#define CX_VERSION "0.8.5"
 
 #define CX_LAMBDA_SLAB_SIZE 20
 #define CX_PAIR_SLAB_SIZE   20
 #define CX_REC_SLAB_SIZE    20
 #define CX_SCOPE_SLAB_SIZE  20
 
-#define cx_add_func(cx, id, ...) ({				\
+#define cx_add_func(cx, id, body, ...) ({			\
       struct cx_func_arg args[] = {__VA_ARGS__};		\
       int nargs = sizeof(args)/sizeof(struct cx_func_arg);	\
-      _cx_add_func(cx, id, nargs, args);			\
+      struct cx_fimp *imp = _cx_add_func(cx, id, nargs, args);	\
+      cx_parse_str(cx, body, &imp->toks);			\
+    })								\
+
+#define cx_add_cfunc(cx, id, p, ...) ({				\
+      struct cx_func_arg args[] = {__VA_ARGS__};		\
+      int nargs = sizeof(args)/sizeof(struct cx_func_arg);	\
+      _cx_add_func(cx, id, nargs, args)->ptr = p;		\
     })								\
 
 #define cx_add_type(cx, id, ...)		\

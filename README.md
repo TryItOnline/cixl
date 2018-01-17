@@ -15,7 +15,7 @@ cmake ..
 make
 rlwrap ./cixl
 
-cixl v0.8, 18765 bmips
+cixl v0.8.5, 18765 bmips
 
 Press Return twice to evaluate.
 
@@ -987,7 +987,11 @@ int main() {
   t->fprint = fprint_imp;
   t->deinit = deinit_imp;
   
-  cx_add_func(&cx, "len", cx_arg(t))->ptr = len_imp;
+  cx_add_cfunc(&cx, "len", len_imp, cx_arg("s", t));
+
+  cx_add_func(cx, "upper",
+	      "$s map &upper str",
+	      cx_arg("s", t));
 
   ...
 

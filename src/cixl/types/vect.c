@@ -201,10 +201,10 @@ struct cx_type *cx_init_vect_type(struct cx *cx) {
   t->print = print_imp;
   t->deinit = deinit_imp;
   
-  cx_add_func(cx, "len", cx_arg(t))->ptr = len_imp;
-  cx_add_func(cx, "push", cx_arg(t), cx_arg(cx->any_type))->ptr = push_imp;
-  cx_add_func(cx, "pop", cx_arg(t))->ptr = pop_imp;
-  cx_add_func(cx, "vect", cx_arg(cx->seq_type))->ptr = seq_imp;
+  cx_add_cfunc(cx, "len", len_imp, cx_arg("vec", t));
+  cx_add_cfunc(cx, "push", push_imp, cx_arg("vec", t), cx_arg("val", cx->any_type));
+  cx_add_cfunc(cx, "pop", pop_imp, cx_arg("vec", t));
+  cx_add_cfunc(cx, "vect", seq_imp, cx_arg("in", cx->seq_type));
   
   return t;
 }

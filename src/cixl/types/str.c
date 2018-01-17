@@ -135,7 +135,7 @@ struct cx_type *cx_init_str_type(struct cx *cx) {
   t->print = print_imp;
   t->deinit = deinit_imp;
 
-  cx_add_func(cx, "int", cx_arg(t))->ptr = int_imp;
+  cx_add_cfunc(cx, "int", int_imp, cx_arg("s", t));
 
   return t;
 }

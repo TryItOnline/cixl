@@ -151,10 +151,10 @@ static bool del_imp(struct cx_scope *scope) {
 void cx_init_var(struct cx *cx) {
   cx_add_macro(cx, "let:", let_parse);
 
-  cx_add_func(cx, "put-var",
-	      cx_arg(cx->sym_type),
-	      cx_arg(cx->any_type))->ptr = put_imp;
-  cx_add_func(cx, "get-var", cx_arg(cx->sym_type))->ptr = get_imp;
-  cx_add_func(cx, "is-var", cx_arg(cx->sym_type))->ptr = is_imp;
-  cx_add_func(cx, "del-var", cx_arg(cx->sym_type))->ptr = del_imp;
+  cx_add_cfunc(cx, "put-var", put_imp,
+	       cx_arg("id", cx->sym_type), cx_arg("val", cx->any_type));
+  
+  cx_add_cfunc(cx, "get-var", get_imp, cx_arg("id", cx->sym_type));
+  cx_add_cfunc(cx, "is-var", is_imp, cx_arg("id", cx->sym_type));
+  cx_add_cfunc(cx, "del-var", del_imp, cx_arg("id", cx->sym_type));
 }

@@ -40,22 +40,23 @@ struct cx_func *cx_func_deinit(struct cx_func *func) {
 }
 
 struct cx_func_arg *cx_func_arg_deinit(struct cx_func_arg *arg) {
+  if (arg->id) { free(arg->id); }
   if (!arg->type && arg->narg == -1) { cx_box_deinit(&arg->value); }
   return arg;
 }
 
-struct cx_func_arg cx_arg(struct cx_type *type) {
-  return (struct cx_func_arg) { .type = type };
+struct cx_func_arg cx_arg(const char *id, struct cx_type *type) {
+  return (struct cx_func_arg) { .id = strdup(id), .type = type };
 }
 
 struct cx_func_arg cx_varg(struct cx_box *value) {
-  struct cx_func_arg arg = { .type = NULL, .narg = -1};
+  struct cx_func_arg arg = { .id = NULL, .type = NULL, .narg = -1};
   cx_copy(&arg.value, value);
   return arg;
 }
 
-struct cx_func_arg cx_narg(int n) {
-  return (struct cx_func_arg) { .type = NULL, .narg = n };
+struct cx_func_arg cx_narg(const char *id, int n) {
+  return (struct cx_func_arg) { .id = strdup(id), .type = NULL, .narg = n };
 }
 
 static void print_arg_id(struct cx_func_arg *a,
@@ -180,7 +181,7 @@ struct cx_type *cx_init_func_type(struct cx *cx) {
   t->write = write_imp;
   t->print = print_imp;
 
-  cx_add_func(cx, "imps", cx_arg(t))->ptr = imps_imp;
+  cx_add_cfunc(cx, "imps", imps_imp, cx_arg("f", t));
 
   return t;
 }

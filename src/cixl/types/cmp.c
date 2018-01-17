@@ -90,11 +90,11 @@ struct cx_type *cx_init_cmp_type(struct cx *cx) {
   struct cx_type *t = cx_add_type(cx, "Cmp");
   t->trait = true;
 
-  cx_add_func(cx, "cmp", cx_arg(t), cx_narg(0))->ptr = cmp_imp;
-  cx_add_func(cx, "<", cx_arg(t), cx_narg(0))->ptr = lt_imp;
-  cx_add_func(cx, ">", cx_arg(t), cx_narg(0))->ptr = gt_imp;
-  cx_add_func(cx, "<=", cx_arg(t), cx_narg(0))->ptr = lte_imp;
-  cx_add_func(cx, ">=", cx_arg(t), cx_narg(0))->ptr = gte_imp;
+  cx_add_cfunc(cx, "cmp", cmp_imp, cx_arg("x", t), cx_narg("y", 0));
+  cx_add_cfunc(cx, "<", lt_imp, cx_arg("x", t), cx_narg("y", 0));
+  cx_add_cfunc(cx, ">", gt_imp, cx_arg("x", t), cx_narg("y", 0));
+  cx_add_cfunc(cx, "<=", lte_imp, cx_arg("x", t), cx_narg("y", 0));
+  cx_add_cfunc(cx, ">=", gte_imp, cx_arg("x", t), cx_narg("y", 0));
   
   return t;
 }

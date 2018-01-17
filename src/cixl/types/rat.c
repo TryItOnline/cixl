@@ -114,7 +114,7 @@ struct cx_type *cx_init_rat_type(struct cx *cx) {
   t->write = write_imp;
   t->print = print_imp;
 
-  cx_add_func(cx, "int", cx_arg(t))->ptr = int_imp;
+  cx_add_cfunc(cx, "int", int_imp, cx_arg("r", t));
   
   return t;
 }

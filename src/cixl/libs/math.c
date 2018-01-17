@@ -82,25 +82,33 @@ static bool rat_mul_imp(struct cx_scope *scope) {
 }
 
 void cx_init_math(struct cx *cx) {
-  cx_add_func(cx, "+", cx_arg(cx->int_type), cx_arg(cx->int_type))->ptr = int_add_imp;
-  cx_add_func(cx, "-", cx_arg(cx->int_type), cx_arg(cx->int_type))->ptr = int_sub_imp;
-  cx_add_func(cx, "*", cx_arg(cx->int_type), cx_arg(cx->int_type))->ptr = int_mul_imp;
-  cx_add_func(cx, "/", cx_arg(cx->int_type), cx_arg(cx->int_type))->ptr = int_div_imp;
+  cx_add_cfunc(cx, "+", int_add_imp,
+	       cx_arg("x", cx->int_type), cx_arg("y", cx->int_type));
+  cx_add_cfunc(cx, "-", int_sub_imp,
+	       cx_arg("x", cx->int_type), cx_arg("y", cx->int_type));
+  cx_add_cfunc(cx, "*", int_mul_imp,
+	       cx_arg("x", cx->int_type), cx_arg("y", cx->int_type));
+  cx_add_cfunc(cx, "/", int_div_imp,
+	       cx_arg("x", cx->int_type), cx_arg("y", cx->int_type));
 
-  cx_add_func(cx, "rand", cx_arg(cx->int_type))->ptr = rand_imp;
+  cx_add_cfunc(cx, "rand", rand_imp, cx_arg("n", cx->int_type));
 
-  cx_add_func(cx, "+", cx_arg(cx->rat_type), cx_arg(cx->rat_type))->ptr = rat_add_imp;
-  cx_add_func(cx, "*", cx_arg(cx->rat_type), cx_arg(cx->rat_type))->ptr = rat_mul_imp;
+  cx_add_cfunc(cx, "+", rat_add_imp,
+	       cx_arg("x", cx->rat_type), cx_arg("y", cx->rat_type));
+  cx_add_cfunc(cx, "*", rat_mul_imp,
+	       cx_arg("x", cx->rat_type), cx_arg("y", cx->rat_type));
 
-  cx_test(cx_eval_str(cx,
-		      "func: fib-rec(a b n Int) "
-		      "  $n? if-else {$b $a $b + $n -- recall} $a;"));
+  cx_add_func(cx, "fib-rec",
+	      "$n? if-else {$b $a $b + $n -- recall} $a",
+	      cx_arg("a", cx->int_type),
+	      cx_arg("b", cx->int_type),
+	      cx_arg("n", cx->int_type));
 
-  cx_test(cx_eval_str(cx,
-		      "func: fib(n Int) "
-		      "  0 1 $n fib-rec;"));
+  cx_add_func(cx, "fib",
+	      "0 1 $n fib-rec",
+	      cx_arg("n", cx->int_type));
 
-  cx_test(cx_eval_str(cx,
-		      "func: sum(in Seq) "
-		      "  0, $in for &+;"));
+  cx_add_func(cx, "sum",
+	      "0, $in for &+",
+	      cx_arg("in", cx->seq_type));
 }

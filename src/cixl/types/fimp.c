@@ -76,11 +76,26 @@ bool cx_fimp_compile(struct cx_fimp *imp, size_t tok_idx, struct cx_bin *out) {
   cx_op_init(cx_vec_push(&out->ops),
 	     CX_OBEGIN(),
 	     tok_idx)->as_begin.child = false;  
-  
-  if (imp->toks.count &&
-      !cx_compile(cx, cx_vec_start(&imp->toks), cx_vec_end(&imp->toks), out)) {
-    cx_error(cx, cx->row, cx->col, "Failed compiling fimp");
-    return false;
+
+  if (imp->toks.count) {
+    if (imp->args.count) {
+      for (struct cx_func_arg *a = cx_vec_peek(&imp->args, 0);
+	   a >= (struct cx_func_arg *)imp->args.items;
+	   a--) {
+	if (a->id) {
+	  cx_op_init(cx_vec_push(&out->ops),
+		     CX_OPUT_ARG(),
+		     tok_idx)->as_put_arg.id = cx_sym(cx, a->id);
+	} else {
+	  cx_op_init(cx_vec_push(&out->ops), CX_OZAP_ARG(), tok_idx);
+	}
+      }
+    }
+    
+    if (!cx_compile(cx, cx_vec_start(&imp->toks), cx_vec_end(&imp->toks), out)) {
+      cx_error(cx, cx->row, cx->col, "Failed compiling fimp");
+      return false;
+    }
   }
   
   cx_op_init(cx_vec_push(&out->ops), CX_ORETURN(), out->toks.count-1);

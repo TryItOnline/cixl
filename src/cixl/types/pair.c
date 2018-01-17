@@ -111,8 +111,11 @@ struct cx_type *cx_init_pair_type(struct cx *cx) {
   t->print = print_imp;
   t->deinit = deinit_imp;
 
-  cx_add_func(cx, ".", cx_arg(cx->opt_type), cx_arg(cx->opt_type))->ptr = cons_imp;
-  cx_add_func(cx, "x", cx_arg(t))->ptr = x_imp;
-  cx_add_func(cx, "y", cx_arg(t))->ptr = y_imp;
+  cx_add_cfunc(cx, ".", cons_imp, 
+	       cx_arg("x", cx->opt_type), cx_arg("y", cx->opt_type));
+  
+  cx_add_cfunc(cx, "x", x_imp, cx_arg("p", t));
+  cx_add_cfunc(cx, "y", y_imp, cx_arg("p", t));
+
   return t;
 }

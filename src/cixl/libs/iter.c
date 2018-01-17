@@ -204,23 +204,19 @@ static bool drop_imp(struct cx_scope *scope) {
 }
 
 void cx_init_iter(struct cx *cx) {
-  cx_add_func(cx, "iter", cx_arg(cx->seq_type))->ptr = iter_imp;
+  cx_add_cfunc(cx, "iter", iter_imp, cx_arg("seq", cx->seq_type));
 
-  cx_add_func(cx, "for",
-	      cx_arg(cx->seq_type),
-	      cx_arg(cx->any_type))->ptr = for_imp;
+  cx_add_cfunc(cx, "for", for_imp,
+	       cx_arg("seq", cx->seq_type), cx_arg("act", cx->any_type));
+  
+  cx_add_cfunc(cx, "map", map_imp,
+	       cx_arg("seq", cx->seq_type), cx_arg("act", cx->any_type));
+  
+  cx_add_cfunc(cx, "filter", filter_imp,
+	       cx_arg("seq", cx->seq_type), cx_arg("act", cx->any_type));
+  
+  cx_add_cfunc(cx, "next", next_imp, cx_arg("it", cx->iter_type));
 
-  cx_add_func(cx, "map",
-	      cx_arg(cx->seq_type),
-	      cx_arg(cx->any_type))->ptr = map_imp;
-
-  cx_add_func(cx, "filter",
-	      cx_arg(cx->seq_type),
-	      cx_arg(cx->any_type))->ptr = filter_imp;
-
-  cx_add_func(cx, "next", cx_arg(cx->iter_type))->ptr = next_imp;
-
-  cx_add_func(cx, "drop",
-	      cx_arg(cx->iter_type),
-	      cx_arg(cx->int_type))->ptr = drop_imp;
+  cx_add_cfunc(cx, "drop", drop_imp, 
+	       cx_arg("it", cx->iter_type), cx_arg("n", cx->int_type));
 }

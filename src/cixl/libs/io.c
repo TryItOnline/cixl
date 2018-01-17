@@ -42,7 +42,7 @@ static bool load_imp(struct cx_scope *scope) {
 }
 
 void cx_init_io(struct cx *cx) {
-  cx_add_func(cx, "say", cx_arg(cx->str_type))->ptr = say_imp;
-  cx_add_func(cx, "ask", cx_arg(cx->str_type))->ptr = ask_imp;
-  cx_add_func(cx, "load", cx_arg(cx->str_type))->ptr = load_imp;  
+  cx_add_cfunc(cx, "say", say_imp, cx_arg("s", cx->str_type));
+  cx_add_cfunc(cx, "ask", ask_imp, cx_arg("prompt", cx->str_type));
+  cx_add_cfunc(cx, "load", load_imp, cx_arg("path", cx->str_type));  
 }

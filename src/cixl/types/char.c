@@ -65,9 +65,9 @@ struct cx_type *cx_init_char_type(struct cx *cx) {
   t->write = print_imp;
   t->print = print_imp;
   
-  cx_add_func(cx, "upper", cx_arg(t))->ptr = upper_imp;
-  cx_add_func(cx, "lower", cx_arg(t))->ptr = lower_imp;
-  cx_add_func(cx, "int", cx_arg(t))->ptr = int_imp;
+  cx_add_cfunc(cx, "upper", upper_imp, cx_arg("c", t));
+  cx_add_cfunc(cx, "lower", lower_imp, cx_arg("c", t));
+  cx_add_cfunc(cx, "int", int_imp, cx_arg("c", t));
  
   return t;
 }

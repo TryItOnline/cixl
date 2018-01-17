@@ -71,15 +71,18 @@ static bool seq_imp(struct cx_scope *scope) {
 }
 
 void cx_init_str(struct cx *cx) {
-  cx_add_func(cx, "len", cx_arg(cx->str_type))->ptr = len_imp;
-  cx_add_func(cx, "get", cx_arg(cx->str_type), cx_arg(cx->int_type))->ptr = get_imp;
-  cx_add_func(cx, "str", cx_arg(cx->seq_type))->ptr = seq_imp;
-  
-  cx_test(cx_eval_str(cx,
-		      "func: upper(s Str) "
-		      "  $s map &upper str;"));
+  cx_add_cfunc(cx, "len", len_imp, cx_arg("s", cx->str_type));
 
-  cx_test(cx_eval_str(cx,
-		      "func: lower(s Str) "
-		      "  $s map &lower str;"));
+  cx_add_cfunc(cx, "get", get_imp,
+	       cx_arg("s", cx->str_type), cx_arg("i", cx->int_type));
+
+  cx_add_cfunc(cx, "str", seq_imp, cx_arg("s", cx->seq_type));
+  
+  cx_add_func(cx, "upper",
+	      "$s map &upper str",
+	      cx_arg("s", cx->str_type));
+
+  cx_add_func(cx, "lower",
+	      "$s map &lower str",
+	      cx_arg("s", cx->str_type));
 }

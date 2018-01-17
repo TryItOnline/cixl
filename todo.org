@@ -1,7 +1,12 @@
-* add iter zip/unzip
+* move func_eval to imp_compile
+** commit
+* add second level of inlining
+** add ssize_t cx.inline_limit1/2
+*** default 10 -1
 * change _ to func
 ** add stack lib
 *** move |, %, %%, ~ & _
+* add iter zip/unzip
 * meta lib with read-iter
 ** move read and convert to iter
 *** keep bin ref in iter

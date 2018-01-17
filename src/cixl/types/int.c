@@ -126,12 +126,12 @@ struct cx_type *cx_init_int_type(struct cx *cx) {
   t->write = print_imp;
   t->print = print_imp;
   
-  cx_add_func(cx, "++", cx_arg(t))->ptr = inc_imp;
-  cx_add_func(cx, "--", cx_arg(t))->ptr = dec_imp;
+  cx_add_cfunc(cx, "++", inc_imp, cx_arg("v", t));
+  cx_add_cfunc(cx, "--", dec_imp, cx_arg("v", t));
   
-  cx_add_func(cx, "char", cx_arg(t))->ptr = char_imp;
-  cx_add_func(cx, "str", cx_arg(t))->ptr = str_imp;
-  cx_add_func(cx, "times", cx_arg(t), cx_arg(cx->any_type))->ptr = times_imp;
+  cx_add_cfunc(cx, "char", char_imp, cx_arg("v", t));
+  cx_add_cfunc(cx, "str", str_imp, cx_arg("v", t));
+  cx_add_cfunc(cx, "times", times_imp, cx_arg("n", t), cx_arg("act", cx->any_type));
   
   return t;
 }

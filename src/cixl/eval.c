@@ -102,7 +102,6 @@ bool cx_scan_args(struct cx *cx, struct cx_func *func) {
 
 bool cx_eval_args(struct cx *cx,
 		  struct cx_vec *toks,
-		  struct cx_vec *ids,
 		  struct cx_vec *args) {
   struct cx_vec tmp_ids;
   cx_vec_init(&tmp_ids, sizeof(struct cx_tok));
@@ -126,32 +125,27 @@ bool cx_eval_args(struct cx *cx,
 	}
 	
 	cx_do_vec(&tmp_ids, struct cx_tok, id) {
-	  *(struct cx_tok *)cx_vec_push(ids) = *id;
-	  *(struct cx_func_arg *)cx_vec_push(args) = cx_narg(i);      
+	  *(struct cx_func_arg *)cx_vec_push(args) = cx_narg(id->as_ptr, i);      
 	}
 
 	cx_vec_clear(&tmp_ids);
       } else {
-	cx_tok_copy(cx_vec_push(&tmp_ids), t);
+	*(struct cx_tok *)cx_vec_push(&tmp_ids) = *t;
       }
     } else if (t->type == CX_TLITERAL()) {
-      struct cx_box *v = &t->as_box;
-      *(struct cx_tok *)cx_vec_push(ids) = *t;
-      *(struct cx_func_arg *)cx_vec_push(args) = cx_varg(v);        
+      *(struct cx_func_arg *)cx_vec_push(args) = cx_varg(&t->as_box);        
     } else if (t->type == CX_TTYPE()) {
       struct cx_type *type = t->as_ptr;
 
       if (tmp_ids.count) {
 	cx_do_vec(&tmp_ids, struct cx_tok, id) {
-	  *(struct cx_tok *)cx_vec_push(ids) = *id;
-	  *(struct cx_func_arg *)cx_vec_push(args) = cx_arg(type);      
+	  *(struct cx_func_arg *)cx_vec_push(args) = cx_arg(id->as_ptr, type);      
 	}
       
 	cx_vec_clear(&tmp_ids);
       } else {
 	struct cx_box box;
 	cx_box_init(&box, cx->meta_type)->as_ptr = type;
-	*(struct cx_tok *)cx_vec_push(ids) = *t;
 	*(struct cx_func_arg *)cx_vec_push(args) = cx_varg(&box);
       }
     } else {

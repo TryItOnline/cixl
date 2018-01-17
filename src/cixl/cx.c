@@ -10,7 +10,6 @@
 #include "cixl/error.h"
 #include "cixl/eval.h"
 #include "cixl/op.h"
-#include "cixl/parse.h"
 #include "cixl/scope.h"
 #include "cixl/timer.h"
 #include "cixl/types/bin.h"
@@ -118,25 +117,6 @@ static bool trait_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   }
 }
 
-static ssize_t func_eval(struct cx_macro_eval *eval,
-			 struct cx_bin *bin,
-			 size_t tok_idx,
-			 struct cx *cx) {
-  for (int i = eval->toks.count-1; i >= 0; i--) {
-    struct cx_tok *t = cx_vec_get(&eval->toks, i);
-
-    if (t->type == CX_TID()) {
-      cx_op_init(cx_vec_push(&bin->ops),
-		 CX_OPUT_ARG(),
-		 tok_idx)->as_put_arg.id = cx_sym(cx, t->as_ptr);
-    } else {
-      cx_op_init(cx_vec_push(&bin->ops), CX_OZAP_ARG(), tok_idx);
-    }
-  }
-
-  return tok_idx+1;
-}
-
 static bool func_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   struct cx_vec toks;
   cx_vec_init(&toks, sizeof(struct cx_tok));
@@ -179,13 +159,10 @@ static bool func_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
     return false;
   }
   
-  struct cx_macro_eval *eval = cx_macro_eval_new(func_eval);
-  cx_tok_init(cx_vec_push(&toks), CX_TMACRO(), row, col)->as_ptr = eval;
-  
   struct cx_vec func_args;
   cx_vec_init(&func_args, sizeof(struct cx_func_arg));
 
-  if (!cx_eval_args(cx, &args.as_vec, &eval->toks, &func_args)) {
+  if (!cx_eval_args(cx, &args.as_vec, &func_args)) {
     cx_tok_deinit(&id);
     cx_tok_deinit(&args);
     cx_do_vec(&toks, struct cx_tok, t) { cx_tok_deinit(t); }
@@ -247,13 +224,13 @@ static bool repeat_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   struct cx_macro_eval *eval = cx_macro_eval_new(repeat_eval);
 
   void push_prefix(struct cx_vec *out) {
-      if (prefix->type == CX_TGROUP()) {
-	cx_do_vec(&prefix->as_vec, struct cx_tok, t) {
-	  cx_tok_copy(cx_vec_push(out), t);
-	}
-      } else {
-	cx_tok_copy(cx_vec_push(out), prefix);
+    if (prefix->type == CX_TGROUP()) {
+      cx_do_vec(&prefix->as_vec, struct cx_tok, t) {
+	cx_tok_copy(cx_vec_push(out), t);
       }
+    } else {
+      cx_tok_copy(cx_vec_push(out), prefix);
+    }
   }
   
   for (struct cx_tok *t = cx_vec_get(&toks, 1), *pt = NULL;
@@ -757,46 +734,49 @@ struct cx *cx_init(struct cx *cx) {
   cx_box_init(cx_set_const(cx, cx_sym(cx, "out"), false),
 	      cx->wfile_type)->as_file = cx_file_new(stdout);
   
-  cx_add_func(cx, "|")->ptr = reset_imp;
-  cx_add_func(cx, "%", cx_arg(cx->opt_type))->ptr = copy_imp;
-  cx_add_func(cx, "%%", cx_arg(cx->opt_type))->ptr = clone_imp;
-  cx_add_func(cx, "~", cx_arg(cx->opt_type))->ptr = flip_imp;
+  cx_add_cfunc(cx, "|", reset_imp);
+  cx_add_cfunc(cx, "%", copy_imp, cx_arg("v", cx->opt_type));
+  cx_add_cfunc(cx, "%%", clone_imp, cx_arg("v", cx->opt_type));
+  cx_add_cfunc(cx, "~", flip_imp, cx_arg("v", cx->opt_type));
   
-  cx_add_func(cx, "=", cx_arg(cx->opt_type), cx_narg(0))->ptr = eqval_imp;
-  cx_add_func(cx, "==", cx_arg(cx->opt_type), cx_narg(0))->ptr = equid_imp;
+  cx_add_cfunc(cx, "=", eqval_imp, cx_arg("x", cx->opt_type), cx_narg("y", 0));
+  cx_add_cfunc(cx, "==", equid_imp, cx_arg("x", cx->opt_type), cx_narg("y", 0));
 
-  cx_add_func(cx, "?", cx_arg(cx->opt_type))->ptr = ok_imp;
-  cx_add_func(cx, "!", cx_arg(cx->opt_type))->ptr = not_imp;
+  cx_add_cfunc(cx, "?", ok_imp, cx_arg("v", cx->opt_type));
+  cx_add_cfunc(cx, "!", not_imp, cx_arg("v", cx->opt_type));
   
-  cx_add_func(cx, "and", cx_arg(cx->opt_type), cx_arg(cx->opt_type))->ptr = and_imp;
-  cx_add_func(cx, "or", cx_arg(cx->opt_type), cx_arg(cx->opt_type))->ptr = or_imp;
+  cx_add_cfunc(cx, "and", and_imp,
+	       cx_arg("x", cx->opt_type), cx_arg("y", cx->opt_type));
   
-  cx_add_func(cx, "if", cx_arg(cx->opt_type), cx_arg(cx->any_type))->ptr = if_imp;
-  cx_add_func(cx, "else", cx_arg(cx->opt_type), cx_arg(cx->any_type))->ptr = else_imp;
-
-  cx_add_func(cx, "if-else",
-	      cx_arg(cx->opt_type),
-	      cx_arg(cx->any_type),
-	      cx_arg(cx->any_type))->ptr = if_else_imp;
-
-  cx_add_func(cx, "read", cx_arg(cx->rfile_type))->ptr = read_imp;
-
-  cx_add_func(cx, "write",
-	      cx_arg(cx->opt_type),
-	      cx_arg(cx->wfile_type))->ptr = write_imp;
-
-  cx_add_func(cx, "compile",
-	      cx_arg(cx->bin_type),
-	      cx_arg(cx->str_type))->ptr = compile_imp;
-
-  cx_add_func(cx, "call", cx_arg(cx->any_type))->ptr = call_imp;
-  cx_add_func(cx, "recall")->ptr = recall_imp;
-  cx_add_func(cx, "upcall")->ptr = upcall_imp;
-  cx_add_func(cx, "new", cx_arg(cx->meta_type))->ptr = new_imp;
+  cx_add_cfunc(cx, "or", or_imp,
+	       cx_arg("x", cx->opt_type), cx_arg("y", cx->opt_type));
   
-  cx_add_func(cx, "clock", cx_arg(cx->any_type))->ptr = clock_imp;
-  cx_add_func(cx, "test", cx_arg(cx->opt_type))->ptr = test_imp;
-  cx_add_func(cx, "fail", cx_arg(cx->str_type))->ptr = fail_imp;
+  cx_add_cfunc(cx, "if", if_imp,
+	       cx_arg("cnd", cx->opt_type), cx_arg("act", cx->any_type));
+
+  cx_add_cfunc(cx, "else", else_imp,
+	       cx_arg("cnd", cx->opt_type), cx_arg("act", cx->any_type));
+
+  cx_add_cfunc(cx, "if-else", if_else_imp,
+	       cx_arg("cnd", cx->opt_type),
+	       cx_arg("tact", cx->any_type), cx_arg("fact", cx->any_type));
+
+  cx_add_cfunc(cx, "read", read_imp, cx_arg("f", cx->rfile_type));
+
+  cx_add_cfunc(cx, "write", write_imp,
+	       cx_arg("v", cx->opt_type), cx_arg("f", cx->wfile_type));
+
+  cx_add_cfunc(cx, "compile", compile_imp,
+	       cx_arg("out", cx->bin_type), cx_arg("in", cx->str_type));
+
+  cx_add_cfunc(cx, "call", call_imp, cx_arg("act", cx->any_type));
+  cx_add_cfunc(cx, "recall", recall_imp);
+  cx_add_cfunc(cx, "upcall", upcall_imp);
+  cx_add_cfunc(cx, "new", new_imp, cx_arg("t", cx->meta_type));
+  
+  cx_add_cfunc(cx, "clock", clock_imp, cx_arg("act", cx->any_type));
+  cx_add_cfunc(cx, "test", test_imp, cx_arg("v", cx->opt_type));
+  cx_add_cfunc(cx, "fail", fail_imp, cx_arg("msg", cx->str_type));
 
   cx->scope = NULL;
   cx->main = cx_begin(cx, NULL);
