@@ -74,18 +74,15 @@ static bool int_imp(struct cx_scope *scope) {
   struct cx_box v = *cx_test(cx_pop(scope, false));
   struct cx_str *s = v.as_str;
   int64_t iv = strtoimax(s->data, NULL, 10);
-  bool ok = false;
   
   if (!iv && (!s->data[0] || s->data[0] != '0' || s->data[1])) {
-    cx_error(cx, cx->row, cx->col, "Failed parsing int: '%s'", s);
-    goto exit;
+    cx_box_init(cx_push(scope), cx->nil_type);
+  } else {
+    cx_box_init(cx_push(scope), cx->int_type)->as_int = iv;
   }
   
-  cx_box_init(cx_push(scope), cx->int_type)->as_int = iv;
-  ok = true;
- exit:
   cx_box_deinit(&v);
-  return ok;
+  return true;
 }
 
 static bool equid_imp(struct cx_box *x, struct cx_box *y) {

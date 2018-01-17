@@ -983,7 +983,7 @@ int main() {
 ```
 
 ### Modularity
-The core language is split into libraries, or libs in Cixl jargon; and may be custom tailored to any level of functionality from C. This is an ongoing process, but you may get an idea of where it's going by having a look on existing [libs](https://github.com/basic-gongfu/cixl/tree/master/src/cixl/libs).
+The core language is split into libraries, and may be custom tailored to any level of functionality from C. This is an ongoing process, but you may get an idea of where it's going by having a look on existing [libs](https://github.com/basic-gongfu/cixl/tree/master/src/cixl/libs).
 
 ### Performance
 There is still plenty of work remaining in the profiling and benchmarking departments, but preliminary indications puts Cixl at around 1-3 times slower than Python. Measured time is displayed in milliseconds.
