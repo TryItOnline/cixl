@@ -110,6 +110,17 @@ static bool funcall_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
   }
     
   op->as_funcall.jit_imp = imp;
+
+  if (!imp->ptr) {
+    struct cx_bin_func *f = cx_bin_get_func(cx->bin, imp);
+
+    if (f) {
+      cx_call_init(cx_vec_push(&cx->calls), cx->row, cx->col, imp, cx->op);
+      cx->op = cx_vec_get(&cx->bin->ops, f->start_op);
+      return true;
+    }
+  }
+  
   return cx_fimp_call(imp, s);
 }
 
@@ -117,21 +128,21 @@ cx_op_type(CX_OFUNCALL, {
     type.eval = funcall_eval;
   });
 
-static bool get_const_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
-  struct cx_box *v = cx_get_const(cx, op->as_get_const.id, false);
+static bool getconst_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
+  struct cx_box *v = cx_get_const(cx, op->as_getconst.id, false);
   if (!v) { return false; }
   cx_copy(cx_push(cx_scope(cx, 0)), v);
   return true;
 }
 
-cx_op_type(CX_OGET_CONST, {
-    type.eval = get_const_eval;
+cx_op_type(CX_OGETCONST, {
+    type.eval = getconst_eval;
   });
 
-static bool get_var_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
+static bool getvar_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
   struct cx_scope *s = cx_scope(cx, 0);
   
-  if (!op->as_get_var.id.id[0]) {
+  if (!op->as_getvar.id.id[0]) {
     if (!s->cut_offs.count) {
       cx_error(cx, tok->row, tok->col, "Nothing to uncut");
       return false;
@@ -141,7 +152,7 @@ static bool get_var_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
     (*cut_offs)--;
     if (!(*cut_offs)) { cx_vec_pop(&s->cut_offs); }
   } else {
-    struct cx_box *v = cx_get_var(s, op->as_get_var.id, false);
+    struct cx_box *v = cx_get_var(s, op->as_getvar.id, false);
     if (!v) { return false; }
     cx_copy(cx_push(s), v);
   }
@@ -149,8 +160,8 @@ static bool get_var_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
   return true;
 }
 
-cx_op_type(CX_OGET_VAR, {
-    type.eval = get_var_eval;
+cx_op_type(CX_OGETVAR, {
+    type.eval = getvar_eval;
   });
 
 static bool lambda_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
@@ -176,43 +187,43 @@ cx_op_type(CX_OPUSH, {
     type.eval = push_eval;
   });
 
-static bool put_arg_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
+static bool putarg_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
   struct cx_scope *s = cx_scope(cx, 0);
   
   struct cx_box *src = cx_pop(s->stack.count ? s : cx_scope(cx, 1), false);
   if (!src) { return false; }
 
-  struct cx_box *dst = cx_put_var(s, op->as_put_arg.id, true);
+  struct cx_box *dst = cx_put_var(s, op->as_putarg.id, true);
   if (!dst) { return false; }
 
   *dst = *src;
   return true;
 }
 
-cx_op_type(CX_OPUT_ARG, {
-    type.eval = put_arg_eval;
+cx_op_type(CX_OPUTARG, {
+    type.eval = putarg_eval;
   });
 
-static bool put_var_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
+static bool putvar_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
   struct cx_box *src = cx_pop(cx_scope(cx, 0), false);
   if (!src) { return false; }
 
-  if (op->as_put_var.type && !cx_is(src->type, op->as_put_var.type)) {
+  if (op->as_putvar.type && !cx_is(src->type, op->as_putvar.type)) {
     cx_error(cx, tok->row, tok->col,
 	     "Expected type %s, actual: %s",
-	     op->as_put_var.type->id, src->type->id);
+	     op->as_putvar.type->id, src->type->id);
     return false;
   }
   
-  struct cx_box *dst = cx_put_var(cx_scope(cx, 1), op->as_put_var.id, true);
+  struct cx_box *dst = cx_put_var(cx_scope(cx, 1), op->as_putvar.id, true);
 
   if (!dst) { return false; }
   *dst = *src;
   return true;
 }
 
-cx_op_type(CX_OPUT_VAR, {
-    type.eval = put_var_eval;
+cx_op_type(CX_OPUTVAR, {
+    type.eval = putvar_eval;
   });
 
 static bool return_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
@@ -285,7 +296,7 @@ cx_op_type(CX_OZAP, {
     type.eval = zap_eval;
   });
 
-static bool zap_arg_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
+static bool zaparg_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
   struct cx_scope *s = cx_scope(cx, 0);
   struct cx_box *v = cx_pop(s->stack.count ? s : cx_scope(cx, 1), true);
 
@@ -298,6 +309,6 @@ static bool zap_arg_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
   return true;
 }
 
-cx_op_type(CX_OZAP_ARG, {
-    type.eval = zap_arg_eval;
+cx_op_type(CX_OZAPARG, {
+    type.eval = zaparg_eval;
   });

@@ -89,10 +89,10 @@ bool cx_fimp_compile(struct cx_fimp *imp,
 	   a--) {
 	if (a->id) {
 	  cx_op_init(cx_vec_push(&out->ops),
-		     CX_OPUT_ARG(),
-		     tok_idx)->as_put_arg.id = cx_sym(cx, a->id);
+		     CX_OPUTARG(),
+		     tok_idx)->as_putarg.id = cx_sym(cx, a->id);
 	} else {
-	  cx_op_init(cx_vec_push(&out->ops), CX_OZAP_ARG(), tok_idx);
+	  cx_op_init(cx_vec_push(&out->ops), CX_OZAPARG(), tok_idx);
 	}
       }
     }

@@ -91,9 +91,14 @@ struct cx_box *cx_get_var(struct cx_scope *scope, struct cx_sym id, bool silent)
 }
 
 struct cx_box *cx_put_var(struct cx_scope *scope, struct cx_sym id, bool force) {
-  struct cx_var *var = cx_set_get(&scope->env, &id);
+  struct cx_var *var = NULL;
 
-  if (var) {
+  void *found = NULL;
+  size_t i = cx_set_find(&scope->env, &id, 0, &found);
+  
+  if (found) {
+    var = found;
+
     if (!force) {
       struct cx *cx = scope->cx;
       cx_error(cx, cx->row, cx->col, "Attempt to rebind var: %s", id.id);
@@ -102,7 +107,7 @@ struct cx_box *cx_put_var(struct cx_scope *scope, struct cx_sym id, bool force) 
       
     cx_box_deinit(&var->value);
   } else {
-    var = cx_var_init(cx_set_insert(&scope->env, &id), id);
+    var = cx_var_init(cx_vec_insert(&scope->env.members, i), id);
   }
 
   return &var->value;

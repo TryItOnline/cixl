@@ -27,9 +27,9 @@ static ssize_t let_eval(struct cx_macro_eval *eval,
   }
   
   void put(const char *id, struct cx_type *type) {
-    struct cx_op * op = cx_op_init(cx_vec_push(&bin->ops), CX_OPUT_VAR(), tok_idx);
-    op->as_put_var.id = cx_sym(cx, id);
-    op->as_put_var.type = type;
+    struct cx_op * op = cx_op_init(cx_vec_push(&bin->ops), CX_OPUTVAR(), tok_idx);
+    op->as_putvar.id = cx_sym(cx, id);
+    op->as_putvar.type = type;
   }
 
   struct cx_tok *id_tok = cx_vec_get(&eval->toks, 0);
