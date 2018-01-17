@@ -12,12 +12,12 @@ struct cx_scope {
   struct cx_scope *parent;
   struct cx_vec stack, cut_offs;
   struct cx_set env;
-  int nrefs;
+  unsigned int nrefs;
 };
 
 struct cx_scope *cx_scope_new(struct cx *cx, struct cx_scope *parent);
 struct cx_scope *cx_scope_ref(struct cx_scope *scope);
-void cx_scope_unref(struct cx_scope *scope);
+void cx_scope_deref(struct cx_scope *scope);
 
 struct cx_box *cx_push(struct cx_scope *scope);
 struct cx_box *cx_pop(struct cx_scope *scope, bool silent);

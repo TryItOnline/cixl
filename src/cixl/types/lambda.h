@@ -10,7 +10,7 @@ struct cx_lambda {
   struct cx_scope *scope;
   struct cx_bin *bin;  
   size_t start_op, num_ops;
-  int nrefs;
+  unsigned int nrefs;
 };
 
 struct cx_lambda *cx_lambda_new(struct cx_scope *scope,
@@ -18,7 +18,7 @@ struct cx_lambda *cx_lambda_new(struct cx_scope *scope,
 				size_t num_ops);
 
 struct cx_lambda *cx_lambda_ref(struct cx_lambda *lambda);
-void cx_lambda_unref(struct cx_lambda *lambda);
+void cx_lambda_deref(struct cx_lambda *lambda);
 
 struct cx_type *cx_init_lambda_type(struct cx *cx);
 

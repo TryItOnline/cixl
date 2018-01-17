@@ -64,7 +64,7 @@ static void print_imp(struct cx_box *v, FILE *out) {
 }
 
 static void deinit_imp(struct cx_box *v) {
-  cx_rec_unref(v->as_ptr, v->type->cx);
+  cx_rec_deref(v->as_ptr, v->type->cx);
 }
 
 static void type_deinit_imp(struct cx_type *t) {
@@ -159,9 +159,10 @@ struct cx_rec *cx_rec_ref(struct cx_rec *rec) {
   return rec;
 }
 
-void cx_rec_unref(struct cx_rec *rec, struct cx *cx) {
-  cx_test(rec->nrefs > 0);
+void cx_rec_deref(struct cx_rec *rec, struct cx *cx) {
+  cx_test(rec->nrefs);
   rec->nrefs--;
+  
   if (!rec->nrefs) {
     cx_do_set(&rec->values, struct cx_field_value, v) { cx_box_deinit(&v->box); }
     cx_set_deinit(&rec->values);

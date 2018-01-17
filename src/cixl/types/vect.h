@@ -8,12 +8,12 @@ struct cx_type;
 
 struct cx_vect {
   struct cx_vec imp;
-  int nrefs;
+  unsigned int nrefs;
 };
 
 struct cx_vect *cx_vect_new();
 struct cx_vect *cx_vect_ref(struct cx_vect *vect);
-void cx_vect_unref(struct cx_vect *vect);
+void cx_vect_deref(struct cx_vect *vect);
 void cx_vect_print(struct cx_vec *imp, FILE *out);
 
 struct cx_type *cx_init_vect_type(struct cx *cx);

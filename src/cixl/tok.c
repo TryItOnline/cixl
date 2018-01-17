@@ -267,7 +267,7 @@ static void macro_copy(struct cx_tok *dst, struct cx_tok *src) {
 }
   
 static void macro_deinit(struct cx_tok *tok) {
-  cx_macro_eval_unref(tok->as_ptr);
+  cx_macro_eval_deref(tok->as_ptr);
 }
 
 cx_tok_type(CX_TMACRO, {

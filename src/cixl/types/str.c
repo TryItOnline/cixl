@@ -32,7 +32,7 @@ bool str_next(struct cx_iter *iter, struct cx_box *out, struct cx_scope *scope) 
 
 void *str_deinit(struct cx_iter *iter) {
   struct cx_str_iter *it = cx_baseof(iter, struct cx_str_iter, iter);
-  cx_str_unref(it->str);
+  cx_str_deref(it->str);
   return it;
 }
 
@@ -63,8 +63,8 @@ struct cx_str *cx_str_ref(struct cx_str *str) {
   return str;
 }
 
-void cx_str_unref(struct cx_str *str) {
-  cx_test(str->nrefs > 0);
+void cx_str_deref(struct cx_str *str) {
+  cx_test(str->nrefs);
   str->nrefs--;
   if (!str->nrefs) { free(str); }
 }
@@ -119,7 +119,7 @@ static void print_imp(struct cx_box *v, FILE *out) {
 }
 
 static void deinit_imp(struct cx_box *v) {
-  cx_str_unref(v->as_str);
+  cx_str_deref(v->as_str);
 }
 
 struct cx_type *cx_init_str_type(struct cx *cx) {

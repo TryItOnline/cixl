@@ -36,7 +36,7 @@ bool cx_add_field(struct cx_rec_type *type,
 
 struct cx_rec {
   struct cx_set values;
-  int nrefs;
+  unsigned int nrefs;
 };
 
 struct cx_field_value {
@@ -46,7 +46,7 @@ struct cx_field_value {
 
 struct cx_rec *cx_rec_new(struct cx *cx);
 struct cx_rec *cx_rec_ref(struct cx_rec *rec);
-void cx_rec_unref(struct cx_rec *rec, struct cx *cx);
+void cx_rec_deref(struct cx_rec *rec, struct cx *cx);
 
 struct cx_box *cx_rec_get(struct cx_rec *rec, struct cx_sym fid);
 void cx_rec_put(struct cx_rec *rec, struct cx_sym fid, struct cx_box *v);

@@ -37,7 +37,7 @@ struct cx_iter {
 struct cx_iter *cx_iter_init(struct cx_iter *iter, struct cx_iter_type *type);
 void cx_iter_free(struct cx_iter *iter);
 struct cx_iter *cx_iter_ref(struct cx_iter *iter);
-void cx_iter_unref(struct cx_iter *iter);
+void cx_iter_deref(struct cx_iter *iter);
 bool cx_iter_next(struct cx_iter *iter, struct cx_box *out, struct cx_scope *scope);
 
 struct cx_type *cx_init_iter_type(struct cx *cx);

@@ -40,7 +40,7 @@ bool map_next(struct cx_iter *iter, struct cx_box *out, struct cx_scope *scope) 
 
 void *map_deinit(struct cx_iter *iter) {
   struct cx_map_iter *it = cx_baseof(iter, struct cx_map_iter, iter);
-  cx_iter_unref(it->in);
+  cx_iter_deref(it->in);
   cx_box_deinit(&it->act);
   return it;
 }
@@ -102,7 +102,7 @@ bool filter_next(struct cx_iter *iter, struct cx_box *out, struct cx_scope *scop
 
 void *filter_deinit(struct cx_iter *iter) {
   struct cx_filter_iter *it = cx_baseof(iter, struct cx_filter_iter, iter);
-  cx_iter_unref(it->in);
+  cx_iter_deref(it->in);
   cx_box_deinit(&it->act);
   return it;
 }
@@ -143,7 +143,7 @@ static bool for_imp(struct cx_scope *scope) {
  exit:
   cx_box_deinit(&act);
   cx_box_deinit(&in);
-  cx_iter_unref(it);
+  cx_iter_deref(it);
   return ok;
 }
 

@@ -30,14 +30,14 @@ struct cx_lambda *cx_lambda_ref(struct cx_lambda *lambda) {
   return lambda;
 }
 
-void cx_lambda_unref(struct cx_lambda *lambda) {
-  cx_test(lambda->nrefs > 0);
+void cx_lambda_deref(struct cx_lambda *lambda) {
+  cx_test(lambda->nrefs);
   lambda->nrefs--;
   
   if (!lambda->nrefs) {
     struct cx *cx = lambda->scope->cx;
-    cx_bin_unref(lambda->bin);
-    cx_scope_unref(lambda->scope);
+    cx_bin_deref(lambda->bin);
+    cx_scope_deref(lambda->scope);
     cx_free(&cx->lambda_alloc, lambda);
   }
 }
@@ -75,7 +75,7 @@ static void print_imp(struct cx_box *value, FILE *out) {
 }
 
 static void deinit_imp(struct cx_box *value) {
-  cx_lambda_unref(value->as_ptr);
+  cx_lambda_deref(value->as_ptr);
 }
 
 struct cx_type *cx_init_lambda_type(struct cx *cx) {

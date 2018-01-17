@@ -31,8 +31,8 @@ struct cx_bin *cx_bin_ref(struct cx_bin *bin) {
   return bin;
 }
 
-void cx_bin_unref(struct cx_bin *bin) {
-  cx_test(bin->nrefs > 0);
+void cx_bin_deref(struct cx_bin *bin) {
+  cx_test(bin->nrefs);
   bin->nrefs--;
   if (!bin->nrefs) { free(cx_bin_deinit(bin)); }
 }

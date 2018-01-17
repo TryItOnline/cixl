@@ -30,11 +30,11 @@ typedef ssize_t (*cx_macro_eval_t)(struct cx_macro_eval *eval,
 struct cx_macro_eval {
   struct cx_vec toks;
   cx_macro_eval_t imp;
-  int nrefs;
+  unsigned int nrefs;
 };
 
 struct cx_macro_eval *cx_macro_eval_new(cx_macro_eval_t imp);
 struct cx_macro_eval *cx_macro_eval_ref(struct cx_macro_eval *eval);
-void cx_macro_eval_unref(struct cx_macro_eval *eval);
+void cx_macro_eval_deref(struct cx_macro_eval *eval);
 
 #endif

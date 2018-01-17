@@ -66,7 +66,7 @@ static bool seq_imp(struct cx_scope *scope) {
  exit:
   free(out.data);
   cx_box_deinit(&in);
-  cx_iter_unref(it);
+  cx_iter_deref(it);
   return ok;
 }
 

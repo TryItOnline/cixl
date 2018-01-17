@@ -25,12 +25,12 @@ struct cx_scope *cx_scope_ref(struct cx_scope *scope) {
   return scope;
 }
 
-void cx_scope_unref(struct cx_scope *scope) {
-  cx_test(scope->nrefs > 0);
+void cx_scope_deref(struct cx_scope *scope) {
+  cx_test(scope->nrefs);
   scope->nrefs--;
   
   if (!scope->nrefs) {
-    if (scope->parent) { cx_scope_unref(scope->parent); }
+    if (scope->parent) { cx_scope_deref(scope->parent); }
 
     cx_do_vec(&scope->stack, struct cx_box, b) { cx_box_deinit(b); }
     cx_vec_deinit(&scope->stack);

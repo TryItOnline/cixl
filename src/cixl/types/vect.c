@@ -29,7 +29,7 @@ bool vect_next(struct cx_iter *iter, struct cx_box *out, struct cx_scope *scope)
 
 void *vect_deinit(struct cx_iter *iter) {
   struct cx_vect_iter *it = cx_baseof(iter, struct cx_vect_iter, iter);
-  cx_vect_unref(it->vect);
+  cx_vect_deref(it->vect);
   return it;
 }
 
@@ -58,8 +58,8 @@ struct cx_vect *cx_vect_ref(struct cx_vect *vect) {
   return vect;
 }
 
-void cx_vect_unref(struct cx_vect *vect) {
-  cx_test(vect->nrefs > 0);
+void cx_vect_deref(struct cx_vect *vect) {
+  cx_test(vect->nrefs);
   vect->nrefs--;
 
   if (!vect->nrefs) {
@@ -121,7 +121,7 @@ static bool seq_imp(struct cx_scope *scope) {
 
   cx_box_init(cx_push(scope), scope->cx->vect_type)->as_ptr = out;
   cx_box_deinit(&in);
-  cx_iter_unref(it);
+  cx_iter_deref(it);
   return true;
 }
 
@@ -186,7 +186,7 @@ static void print_imp(struct cx_box *b, FILE *out) {
 }
 
 static void deinit_imp(struct cx_box *v) {
-  cx_vect_unref(v->as_ptr);
+  cx_vect_deref(v->as_ptr);
 }
 
 struct cx_type *cx_init_vect_type(struct cx *cx) {

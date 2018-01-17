@@ -37,7 +37,7 @@ static void print_imp(struct cx_box *value, FILE *out) {
 
 static void deinit_imp(struct cx_box *value) {
   struct cx_bin *b = value->as_ptr;
-  cx_bin_unref(b);
+  cx_bin_deref(b);
 }
 
 struct cx_type *cx_init_bin_type(struct cx *cx) {

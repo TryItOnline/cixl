@@ -811,7 +811,7 @@ struct cx *cx_deinit(struct cx *cx) {
   cx_do_vec(&cx->calls, struct cx_call, c) { cx_call_deinit(c); }
   cx_vec_deinit(&cx->calls);
 
-  cx_do_vec(&cx->scopes, struct cx_scope *, s) { cx_scope_unref(*s); }
+  cx_do_vec(&cx->scopes, struct cx_scope *, s) { cx_scope_deref(*s); }
   cx_vec_deinit(&cx->scopes);
 
   cx_do_set(&cx->consts, struct cx_var, v) { cx_var_deinit(v); }
@@ -1017,7 +1017,7 @@ struct cx_scope *cx_pop_scope(struct cx *cx, bool silent) {
     *cx_push(cx_scope(cx, 0)) = *v;   
   }
 
-  cx_scope_unref(s);
+  cx_scope_deref(s);
   return s;
 }
 

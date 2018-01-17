@@ -37,8 +37,8 @@ struct cx_fimp *cx_fimp_deinit(struct cx_fimp *imp) {
   cx_do_vec(&imp->toks, struct cx_tok, t) { cx_tok_deinit(t); }
   cx_vec_deinit(&imp->toks);
 
-  if (imp->scope) { cx_scope_unref(imp->scope); }
-  if (imp->bin) { cx_bin_unref(imp->bin); }
+  if (imp->scope) { cx_scope_deref(imp->scope); }
+  if (imp->bin) { cx_bin_deref(imp->bin); }
   return imp;
 }
 

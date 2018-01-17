@@ -113,7 +113,7 @@ static bool let_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   cx_tok_init(cx_vec_push(out), CX_TMACRO(), row, col)->as_ptr = eval;
   return true;
  error:
-  cx_macro_eval_unref(eval);
+  cx_macro_eval_deref(eval);
   return false;  
 }
 

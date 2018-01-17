@@ -22,7 +22,7 @@ struct cx_iter *cx_iter_ref(struct cx_iter *iter) {
   return iter;
 }
 
-void cx_iter_unref(struct cx_iter *iter) {
+void cx_iter_deref(struct cx_iter *iter) {
   cx_test(iter->nrefs);
   iter->nrefs--;
 
@@ -56,7 +56,7 @@ static void print_imp(struct cx_box *v, FILE *out) {
 }
 
 static void deinit_imp(struct cx_box *v) {
-  cx_iter_unref(v->as_iter);
+  cx_iter_deref(v->as_iter);
 }
 
 struct cx_type *cx_init_iter_type(struct cx *cx) {

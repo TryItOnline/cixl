@@ -16,8 +16,8 @@ struct cx_file *cx_file_ref(struct cx_file *file) {
   return file;
 }
 
-void cx_file_unref(struct cx_file *file) {
-  cx_test(file->nrefs > 0);
+void cx_file_deref(struct cx_file *file) {
+  cx_test(file->nrefs);
   file->nrefs--;
   
   if (!file->nrefs) {
@@ -43,7 +43,7 @@ static void print_imp(struct cx_box *v, FILE *out) {
 }
 
 static void deinit_imp(struct cx_box *v) {
-  cx_file_unref(v->as_file);
+  cx_file_deref(v->as_file);
 }
 
 struct cx_type *_cx_init_file_type(struct cx *cx, const char *name, ...) {

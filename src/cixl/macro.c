@@ -31,8 +31,8 @@ struct cx_macro_eval *cx_macro_eval_ref(struct cx_macro_eval *eval) {
   return eval;
 }
 
-void cx_macro_eval_unref(struct cx_macro_eval *eval) {
-  cx_test(eval->nrefs > 0);
+void cx_macro_eval_deref(struct cx_macro_eval *eval) {
+  cx_test(eval->nrefs);
   eval->nrefs--;
 
   if (!eval->nrefs) {

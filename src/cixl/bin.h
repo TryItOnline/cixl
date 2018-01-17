@@ -18,7 +18,7 @@ struct cx_bin_func {
 struct cx_bin {
   struct cx_vec toks, ops;
   struct cx_set funcs;
-  int nrefs;
+  unsigned int nrefs;
 };
 
 struct cx_bin *cx_bin_new();
@@ -27,7 +27,7 @@ struct cx_bin *cx_bin_init(struct cx_bin *bin);
 struct cx_bin *cx_bin_deinit(struct cx_bin *bin);
 
 struct cx_bin *cx_bin_ref(struct cx_bin *bin);
-void cx_bin_unref(struct cx_bin *bin);
+void cx_bin_deref(struct cx_bin *bin);
 
 struct cx_bin_func *cx_bin_add_func(struct cx_bin *bin,
 				    struct cx_fimp *imp,
