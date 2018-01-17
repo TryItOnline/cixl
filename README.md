@@ -15,7 +15,7 @@ cmake ..
 make
 rlwrap ./cixl
 
-cixl v0.8.5, 18765 bmips
+Cixl v0.8.5, 18765 bmips
 
 Press Return twice to evaluate.
 

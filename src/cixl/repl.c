@@ -12,7 +12,7 @@
 #include "cixl/scope.h"
 
 void cx_repl(struct cx *cx, FILE *in, FILE *out) {
-  fprintf(out, "cixl v%s, ", CX_VERSION);
+  fprintf(out, "Cixl v%s, ", CX_VERSION);
 
   if (cx_eval_str(cx, "1000000000, clock {30 fib _} / int")) {
     struct cx_box bmips = *cx_pop(cx->main, false);
