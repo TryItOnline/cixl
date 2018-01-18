@@ -19,8 +19,6 @@ static ssize_t let_eval(struct cx_macro_eval *eval,
 			struct cx_bin *bin,
 			size_t tok_idx,
 			struct cx *cx) {
-  cx_op_init(cx_vec_push(&bin->ops), CX_OBEGIN(), tok_idx)->as_begin.child = true;  
-
   if (!cx_compile(cx, cx_vec_get(&eval->toks, 1), cx_vec_end(&eval->toks), bin)) {
     cx_error(cx, cx->row, cx->col, "Failed compiling let");
     return -1;
@@ -80,10 +78,6 @@ static ssize_t let_eval(struct cx_macro_eval *eval,
     cx_vec_deinit(&types);
     if (!ok) { return -1; }
   }
-
-  cx_op_init(cx_vec_push(&bin->ops),
-	     CX_OEND(),
-	     tok_idx)->as_end.push_result = false;
 
   return tok_idx+1;
 }

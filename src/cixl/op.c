@@ -205,7 +205,9 @@ cx_op_type(CX_OPUTARG, {
   });
 
 static bool putvar_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
-  struct cx_box *src = cx_pop(cx_scope(cx, 0), false);
+  struct cx_scope *s = cx_scope(cx, 0);
+  struct cx_box *src = cx_pop(s, false);
+  
   if (!src) { return false; }
 
   if (op->as_putvar.type && !cx_is(src->type, op->as_putvar.type)) {
@@ -215,7 +217,7 @@ static bool putvar_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
     return false;
   }
   
-  struct cx_box *dst = cx_put_var(cx_scope(cx, 1), op->as_putvar.id, true);
+  struct cx_box *dst = cx_put_var(s, op->as_putvar.id, true);
 
   if (!dst) { return false; }
   *dst = *src;
