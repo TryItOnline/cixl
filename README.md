@@ -143,19 +143,14 @@ Variables pull values from the current stack, which means that the same construc
 The same functionality may be accessed symbolically.
 
 ```
-   | is-var `foo
-...
-[#f]
-
    | get-var `foo
 ...
-Error in row 1, col 12:
-Unknown var: foo
+[#nil]
 
    | let: foo 42;
-...is-var `foo, get-var `foo
+...get-var `foo
 ...
-[#t 42]
+[42]
 ```
 
 Bindings in the current scope may be explicitly removed.
@@ -303,6 +298,20 @@ While calling ```read``` will parse and evaluate one value at a time from the sp
 ...
 ([2018 0 12 1 25 12 123436182] time)
 [Time(2018/0/12 1:25:12.123436182)]
+```
+
+### Files
+
+Files may be opened for reading/writing by calling ```fopen```, the type of the returned file depends on the specified mode. Valid modes are the same as in C, r/w/a(+). Files are closed automatically when the last reference is dropped.
+
+```
+   | fopen 'test.out' `a+
+...
+[RWFile(0x5361130)@1]
+
+   now ~ write
+...
+[]
 ```
 
 ### Comments

@@ -1,14 +1,25 @@
+* add seek(File offs)
+** seek from start
+* add len(File)
+*** save offs end seek 0 from end
+* write records to file in bookings
+** add trans vect
+*** store pairs of action/record
+** add function get-file rec
+*** overload to return file
+** add commit/rollback
 * change _ to func
 ** add stack lib
 *** move |, %, %%, ~ & _
+* meta lib with read-iter
+** move read and convert to iter
+*** keep bin ref in iter
+* read records in bookings init
 * add iter zip/unzip
 * add defer(any) fn
 ** add scope.deferred
 *** vec of boxes
 *** call in cx_end()
-* meta lib with read-iter
-** move read and convert to iter
-*** keep bin ref in iter
 * add and/or tests
 * add filter tests
 * extract cond lib with if/?/!

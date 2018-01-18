@@ -747,12 +747,7 @@ struct cx *cx_init(struct cx *cx) {
   cx->file_type = cx_init_file_type(cx, "File");
   cx->rfile_type = cx_init_file_type(cx, "RFile", cx->any_type, cx->file_type);
   cx->wfile_type = cx_init_file_type(cx, "WFile", cx->any_type, cx->file_type);
-
-  cx_box_init(cx_set_const(cx, cx_sym(cx, "in"), false),
-	      cx->rfile_type)->as_file = cx_file_new(stdin);
-
-  cx_box_init(cx_set_const(cx, cx_sym(cx, "out"), false),
-	      cx->wfile_type)->as_file = cx_file_new(stdout);
+  cx->rwfile_type = cx_init_file_type(cx, "RWFile", cx->rfile_type, cx->wfile_type);
   
   cx_add_cfunc(cx, "|", reset_imp);
   cx_add_cfunc(cx, "%", copy_imp, cx_arg("v", cx->opt_type));
@@ -884,7 +879,6 @@ struct cx_rec_type *cx_add_rec_type(struct cx *cx, const char *id) {
   
   struct cx_rec_type *t = cx_rec_type_new(cx, id);
   *(struct cx_type **)cx_test(cx_set_insert(&cx->types, &id)) = &t->imp;
-  cx_derive(&t->imp, cx->rec_type);
   return t;
 }
 

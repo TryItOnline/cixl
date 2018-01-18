@@ -6,6 +6,13 @@
   https://github.com/basic-gongfu/cixl#getting-started
 */
 
+get-var `init else {
+  let: init #t;
+  let: resources  fopen 'resources.db'  `a+;     
+  let: capacities fopen 'capacities.db' `a+;     
+  let: bookings   fopen 'bookings.db'   `a+;     
+}
+
 /*
   Resources support tracking availability in time.
 */
@@ -51,7 +58,7 @@ func: new-resource(q Int)
 
 func: update-capacity(in Capacity start end Time total used Int out Vect)
   $in get `start < $start if {(
-    let: head $in %%;
+    let: head $in %% ~ _;
     $head put `end $start
     $in put `start $start
     $out push $head
@@ -60,7 +67,7 @@ func: update-capacity(in Capacity start end Time total used Int out Vect)
   $out push $in
 
   $in get `end > $end if {(
-    let: tail $in %%;
+    let: tail $in %% ~ _;
     $tail put `start $end
     $in put `end $end
     $out push $tail
@@ -92,8 +99,7 @@ func: update-calendar(in Vect start end Time total used Int)
 
 func: update-resource(r Resource start end Time total used Int)
   let: c $r get `calendar;
-  $r put `calendar,
-  update-calendar $c $start $end $total $used;
+  $r put `calendar (update-calendar $c $start $end $total $used);
 
 /*
   Bookings represent used quantity for a specific resource and interval.

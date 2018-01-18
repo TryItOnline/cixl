@@ -76,6 +76,7 @@ struct cx_rec_type *cx_rec_type_init(struct cx_rec_type *type,
 				     struct cx *cx,
 				     const char *id) {
   cx_type_init(&type->imp, cx, id);
+  cx_derive(&type->imp, cx->rec_type);
 
   type->imp.new = new_imp;
   type->imp.equid = equid_imp;

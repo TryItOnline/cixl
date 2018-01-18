@@ -123,16 +123,14 @@ static bool put_imp(struct cx_scope *scope) {
 
 static bool get_imp(struct cx_scope *scope) {
   struct cx_sym s = cx_test(cx_pop(scope, false))->as_sym;
-  struct cx_box *v = cx_get_var(scope, s, false);
-  if (!v) { return false; }
-  cx_copy(cx_push(scope), v);
-  return true;
-}
+  struct cx_box *v = cx_get_var(scope, s, true);
 
-static bool is_imp(struct cx_scope *scope) {
-  struct cx_sym s = cx_test(cx_pop(scope, false))->as_sym;
-  cx_box_init(cx_push(scope),
-	      scope->cx->bool_type)->as_bool = cx_get_var(scope, s, true);
+  if (!v) {
+    cx_box_init(cx_push(scope), scope->cx->nil_type);
+  } else {
+    cx_copy(cx_push(scope), v);
+  }
+  
   return true;
 }
 
@@ -149,6 +147,5 @@ void cx_init_var(struct cx *cx) {
 	       cx_arg("id", cx->sym_type), cx_arg("val", cx->any_type));
   
   cx_add_cfunc(cx, "get-var", get_imp, cx_arg("id", cx->sym_type));
-  cx_add_cfunc(cx, "is-var", is_imp, cx_arg("id", cx->sym_type));
   cx_add_cfunc(cx, "del-var", del_imp, cx_arg("id", cx->sym_type));
 }
