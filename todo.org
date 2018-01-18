@@ -2,6 +2,10 @@
 ** add stack lib
 *** move |, %, %%, ~ & _
 * add iter zip/unzip
+* add defer(any) fn
+** add scope.deferred
+*** vec of boxes
+*** call in cx_end()
 * meta lib with read-iter
 ** move read and convert to iter
 *** keep bin ref in iter
