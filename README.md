@@ -74,8 +74,7 @@ But unlike Forth, functions scan forward until enough arguments are on the stack
 The ```,``` operator may be used to cut the stack into discrete pieces and force functions to scan forward.
 
 ```
-   |
-...1 + 2
+   | 1 + 2
 ...3 + 4
 ...
 [6 4]
@@ -116,8 +115,7 @@ Attempt to rebind variable: 'foo'
 Multiple names may be bound at the same time by enclosing them in parens.
 
 ```
-   |
-...let: (x y z) 1 2, 3 + 4;
+   | let: (x y z) 1 2, 3 + 4;
 ...$x $y $z
 ...
 [1 2 7]
@@ -126,12 +124,20 @@ Multiple names may be bound at the same time by enclosing them in parens.
 Types may be specified for documentation and type checking.
 
 ```
-   |
-...let: (x y Int z Str) 1 2 3;
+   | let: (x y Int z Str) 1 2 3;
 ...$x $y $z
 ...
 Error in row 1, col 5:
 Expected type Str, actual: Int
+```
+
+Variables pull values from the current stack, which means that the same construct may be used to name existing values.
+
+```
+   | 1 2 3
+...let: (x y z);
+...$z $y $x
+[3 2 1]
 ```
 
 The same functionality may be accessed symbolically.
@@ -146,8 +152,7 @@ The same functionality may be accessed symbolically.
 Error in row 1, col 12:
 Unknown var: foo
 
-   |
-...let: foo 42;
+   | let: foo 42;
 ...is-var `foo, get-var `foo
 ...
 [#t 42]
@@ -156,11 +161,10 @@ Unknown var: foo
 Bindings in the current scope may be explicitly removed.
 
 ```
-   |
-   let: x 42;
-   del-var `x
-   let: x 'foo';
-   $x
+   | let: x 42;
+...del-var `x
+...let: x 'foo';
+...$x
 ...
 ['foo'@2]
 ```
@@ -246,8 +250,7 @@ Code enclosed in parens is evaluated in a separate scope, the last value on the 
 Variables in the parent scope may be referenced from within, but variables defined inside are not visible from the outside.
 
 ```
-   |
-...let: foo 1;
+   | let: foo 1;
 ...(let: foo 2; $foo)
 ...$foo
 ...
@@ -258,8 +261,7 @@ Variables in the parent scope may be referenced from within, but variables defin
 ```say``` and ```ask``` may be used to perform basic console IO.
 
 ```
-   |
-...say 'Hello'  
+   | say 'Hello'  
 ...ask 'What\'s your name? '
 ...
 Hello
@@ -307,13 +309,11 @@ While calling ```read``` will parse and evaluate one value at a time from the sp
 Two kinds of code comments are supported, line comments and block comments.
 
 ```
-   |
-...1 // Line comments terminate on line breaks
+   | 1 // Line comments terminate on line breaks
 ...+ 2
 [3]
 
-   |
-...1 /* While block comments may span
+   | 1 /* While block comments may span
 ...multiple lines */
 ...+ 2
 ...
@@ -426,9 +426,8 @@ Lambdas may be used to to prevent evaluating unused arguments when chaining.
 The ```func:``` macro may be used to define named functions. Several implementations may be defined for the same name as long as they have the same arity and different argument types. Each function captures its defining environment and opens an implicit child scope that is closed on exit. Functions are allowed anywhere in the code, but are defined in order of appearance during compilation.
 
 ```
-   |
-...func: foo() 42;
-...foo
+   func: foo() 42;
+...| foo
 ...
 [42]
 ```
@@ -436,9 +435,8 @@ The ```func:``` macro may be used to define named functions. Several implementat
 Prefixing a function name with ```&``` pushes a reference on the stack.
 
 ```
-   |
-...func: foo() 42;
-...&foo
+   func: foo() 42;
+...| &foo
 ...
 [Func(foo)]
 
@@ -450,9 +448,8 @@ Prefixing a function name with ```&``` pushes a reference on the stack.
 Each argument needs a type, ```A``` may be used to accept any type.
 
 ```
-   |
-...func: bar(x A) $x + 35;
-...bar 7
+   func: bar(x A) $x + 35;
+...| bar 7
 ...
 [42]
 ```
@@ -460,9 +457,8 @@ Each argument needs a type, ```A``` may be used to accept any type.
 Several parameters may share the same type.
 
 ```
-   |
-...func: baz(x y Int) $x + $y;
-...baz 7 35
+   func: baz(x y Int) $x + $y;
+...| baz 7 35
 ...
 [42]
 ```
@@ -471,10 +467,8 @@ Several parameters may share the same type.
 An index may may be specified instead of type to refer to previous arguments, it is substituted for the actual type on evaluation.
 
 ```
-   |
-...func: baz(x A y T0)
-...  $x + $y;
-...baz 1 2
+   func: baz(x A y T0) $x + $y;
+...| baz 1 2
 ...
 [3]
 
@@ -487,10 +481,9 @@ Func not applicable: baz
 It's possible to specify literal values for arguments instead of names and types.
 
 ```
-   |
-...func: bar(x Int) #f;
+   func: bar(x Int) #f;
 ...func: bar(42) #t;
-...bar 41, bar 42
+...| bar 41, bar 42
 ...
 [#f #t]
 ```
@@ -498,9 +491,9 @@ It's possible to specify literal values for arguments instead of names and types
 Overriding existing implementations is as easy as defining a function with identical argument list.
 
 ```
-   |
-...func: +(x y Int) 42;
-...1 + 2
+
+   func: +(x y Int) 42;
+...| 1 + 2
 ...
 [42]
 ```
@@ -508,12 +501,12 @@ Overriding existing implementations is as easy as defining a function with ident
 ```recall``` may be used to call the current function recursively in the same scope, it supports scanning for arguments just like a regular function call.
 
 ```
-   |
-...func: fib-rec(a b n Int)
+  
+   func: fib-rec(a b n Int)
 ...  $n? if {, recall $b, $a + $b, -- $n} $a;
 ...func: fib(n Int)
 ...  fib-rec 0 1 $n;
-...fib 50
+...| fib 50
 ...
 [12586269025]
 ```
@@ -546,10 +539,10 @@ A vector containing all implementations for a specific function in the order the
 ```upcall``` provides an easy way to call the next matching implementation, it also supports scanning for arguments.
 
 ```
-   |
-...func: maybe-add(x y Num) $x + $y;
+   
+   func: maybe-add(x y Num) $x + $y;
 ...func: maybe-add(x y Int) $x = 42 if 42 {upcall $x $y};
-...maybe-add 1 2 , maybe-add 42 2
+...| maybe-add 1 2 , maybe-add 42 2
 ...
 [3 42]
 ```
@@ -596,13 +589,9 @@ Basic rational arithmetics is supported out of the box.
 The ```#nil``` value may be used to represent missing values. Since ```Nil``` isn't derived from ```A```, stray ```#nil``` values never get far before being trapped in a function call; ```Opt``` may be used instead where ```#nil``` is allowed.
 
 ```
-   |
 ...func: foo(x A);
 ...func: bar(x Opt) 42;
-..
-[]
-
-   foo #nil
+...| foo #nil
 ...
 Error in row 1, col 1:
 Func not applicable: 'foo'
@@ -701,8 +690,8 @@ Iterators may be created manually by calling ```iter``` on any sequence and cons
 Functions and lambdas are sequences, calling ```iter``` creates an iterator that keeps returning values until the target returns ```#nil```.
 
 ```
-   | func: forever(n Int) {$n};
-...42 forever iter
+   func: forever(n Int) {$n};
+...| 42 forever iter
 ...% next ~ next
 ...
 [42 42]
@@ -863,22 +852,14 @@ Capitalized names are treated as types, the following list is defined out of the
 ```
 
 ### Records
-Records map finite sets of typed fields to values. Record types are required to specify an (optionally empty) list of parent types and traits; and will inherit any fields that don't clash with its own. Records are allowed anywhere in the code, but are defined in order of appearance during compilation.
+Records map finite sets of typed fields to values. Record types are required to specify an (optionally empty) list of parent types and traits; and will inherit any fields that don't clash with its own. Records are allowed anywhere in the code, but are defined in order of appearance during compilation. ```new``` may be used to create new record instances. Getting and putting field values is accomplished using symbols, uninitialized fields return ```#nil```.
+
 
 ```
-   |
    rec: Node()
-     left right Node
-     value A;
-...
-[]
-```
-
-```new``` may be used to create new record instances. Getting and putting field values is accomplished using symbols, uninitialized fields return ```#nil```.
-
-```
-   |
-...let: n Node new;
+...  left right Node
+...  value A;
+...| let: n Node new;
 ...$n put `value 42
 ...$n
 ...
@@ -896,9 +877,8 @@ Records map finite sets of typed fields to values. Record types are required to 
 Records support full deep equality by default, but ```=``` may be implemented to customize the behavior.
 
 ```
-   |
-...rec: Foo() x Int y Str;
-...let: (bar baz) Foo new %%;
+   rec: Foo() x Int y Str;
+...| let: (bar baz) Foo new %%;
 ...$bar put `x 42
 ...$bar put `y 'bar'
 ...$baz put `x 42
@@ -907,9 +887,8 @@ Records support full deep equality by default, but ```=``` may be implemented to
 ...
 [#f]
 
-   |
    func: =(a b Foo) $a get `x =, $b get `x;
-...$bar = $baz
+...| $bar = $baz
 ...
 [#t]
 ```
@@ -918,9 +897,8 @@ Records support full deep equality by default, but ```=``` may be implemented to
 Traits are abstract types that may be used to simplify type checking and/or function dispatch. Besides the standard offering; ```A```, ```Cmp```, ```Num```, ```Opt```, ```Rec``` and ```Seq```; new traits may be defined using the ```trait:``` macro. Traits are allowed anywhere in the code, but are defined in order of appearance during compilation.
 
 ```
-   |
    trait: StrInt Str Int;
-...Str is StrInt, Int is StrInt, Sym is StrInt
+...| Str is StrInt, Int is StrInt, Sym is StrInt
 ...
 [#t #t #f]
 ```
@@ -1009,12 +987,12 @@ There is still plenty of work remaining in the profiling and benchmarking depart
 Let's start with a tail-recursive fibonacci to exercise the interpreter loop, it's worth mentioning that Cixl uses 64-bit integers while Python settles for 32-bit.
 
 ```
-   |
-...func: fib-rec(a b n Int)
+ 
+   func: fib-rec(a b n Int)
 ...  $n? if-else {$b $a $b + $n -- recall} $a;
 ...func: fib(n Int)
 ...  fib-rec 0 1 $n;
-...clock {10000 times {50 fib _}} / 1000000 int
+...| clock {10000 times {50 fib _}} / 1000000 int
 ...
 [415]
 ```
@@ -1064,8 +1042,8 @@ $ python3 vect.py
 Moving on to instantiating records.
 
 ```
-   | rec: Foo() x Int y Str;
-...clock {10000000 times {Foo new % `x 42 put `y 'bar' put}} / 1000000 int
+   rec: Foo() x Int y Str;
+...| clock {10000000 times {Foo new % `x 42 put `y 'bar' put}} / 1000000 int
 ...
 [5702]
 ```

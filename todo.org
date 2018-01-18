@@ -1,6 +1,3 @@
-* replace oput/zaparg with oputargs
-** create with imp
-** move loop to op 
 * change _ to func
 ** add stack lib
 *** move |, %, %%, ~ & _
