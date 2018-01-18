@@ -1,13 +1,12 @@
-* add seek(File offs)
-** seek from start
-* add len(File)
-*** save offs end seek 0 from end
-* write records to file in bookings
-** add trans vect
-*** store pairs of action/record
-** add function get-file rec
-*** overload to return file
-** add commit/rollback
+* add qdb.cx
+** QDBTable with key, rec-keys & key-recs
+*** new-table takes vect of key callables
+*** rec-keys uses recs as keys
+*** key-recs vectors
+** implement Rec Cmp to compare pointers
+** implement Vec Cmp to compare values
+** add built-in Table type
+*** use instead of files in bookings
 * change _ to func
 ** add stack lib
 *** move |, %, %%, ~ & _
@@ -35,7 +34,12 @@
 * add ^ (pow)
 ** add as separator
 ** implement for int/rat in math
-* add vect get fn
+* add seek(File offs)
+** seek from start
+* add len(File)
+*** save offs end seek 0 from end
+
+* add vect put/get fns
 * add rat sub/div
 ** move fns to math lib
 
