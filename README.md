@@ -830,6 +830,7 @@ and scaled.
 ### Types
 Capitalized names are treated as types, the following list is defined out of the box:
 
+| Type   | Parents     |
 | ------ | ----------- |
 | A      | Opt         |
 | Bin    | A           |
