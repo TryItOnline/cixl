@@ -830,33 +830,59 @@ and scaled.
 ### Types
 Capitalized names are treated as types, the following list is defined out of the box:
 
-- A      (Opt)
-- Bin    (A)
-- Bool   (A)
-- Cmp    ()
-- File   ()
-- Fimp   (A Seq)
-- Func   (A Seq)
-- Guid   (A)
-- Int    (Num Seq)
-- Iter   (A Seq)
-- Lambda (A Seq)
-- Nil    (Opt)
-- Num    (Cmp)
-- Opt    ()
-- Pair   (A Cmp)
-- Rat    (A Num)
-- Rec    (A Cmp)
-- RFile  (A File)
-- RWFile (RFile WFile)
-- Seq    ()
-- Str    (A Cmp Seq)
-- Sym    (A)
-- Table  (A Seq)
-- Time   (A Cmp)
-- Type   (A)
-- Vect   (A Cmp Seq)
-- WFile  (A File)
+| A      | Opt         |
+|--------|-------------|
+| Bin    | A           |
+|--------|-------------|
+| Bool   | A           |
+|--------|-------------|
+| Cmp    |             |
+|--------|-------------|
+| File   |             |
+|--------|-------------|
+| Fimp   | A Seq       |
+|--------|-------------|
+| Func   | A Seq       |
+|--------|-------------|
+| Guid   | A           |
+|--------|-------------|
+| Int    | Num Seq     |
+|--------|-------------|
+| Iter   | A Seq       |
+|--------|-------------|
+| Lambda | A Seq       |
+|--------|-------------|
+| Nil    | Opt         |
+|--------|-------------|
+| Num    | Cmp         |
+|--------|-------------|
+| Opt    |             |
+|--------|-------------|
+| Pair   | A Cmp       |
+|--------|-------------|
+| Rat    | A Num       |
+|--------|-------------|
+| Rec    | A Cmp       |
+|--------|-------------|
+| RFile  | A File      |
+|--------|-------------|
+| RWFile | RFile WFile |
+|--------|-------------|
+| Seq    |             |
+|--------|-------------|
+| Str    | A Cmp Seq   |
+|--------|-------------|
+| Sym    | A           |
+|--------|-------------|
+| Table  | A Seq       |
+|--------|-------------|
+| Time   | A Cmp       |
+|--------|-------------|
+| Type   | A           |
+|--------|-------------|
+| Vect   | A Cmp Seq   |
+|--------|-------------|
+| WFile  | A File      |
 
 ```
    | type 42
