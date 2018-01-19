@@ -879,7 +879,7 @@ Records map finite sets of typed fields to values. Record types are required to 
 ...$n put `value 42
 ...$n
 ...
-[Node(0x615b2e0)@2]
+[Node((value 42))@2]
 
    get `value
 ...

@@ -1,5 +1,3 @@
-* implement Rec print like Table
-** update readme
 * implement Rec Cmp to compare pointers
 * implement Vec Cmp to compare values
 * improve cut
