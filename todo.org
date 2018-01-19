@@ -1,10 +1,13 @@
 * implement Rec print like Table
+** update readme
 * implement Rec Cmp to compare pointers
 * implement Vec Cmp to compare values
 * improve cut
-** add struct cx_cut
-** tag with func in scan if empty
-** only remove if same func
+** add cx.scan_depth
+*** inc/dec in scan_args
+*** add cx_cut struct
+**** stack_size & scan_depth
+*** only remove cut if same scan_depth
 ** replace parens in bookings
 * rename test to check
 * rename type.print to dump
@@ -14,19 +17,15 @@
 * meta lib with read-iter
 ** move read and convert to iter
 *** keep bin ref in iter
-* add iter zip/unzip
 * add defer(any) fn
 ** add scope.deferred
 *** vec of boxes
 *** call in cx_end()
+* add iter zip/unzip
 * add and/or tests
 * add filter tests
 * extract cond lib with if/?/!
 * extract func lib with func:/call/recall/upcall
-* add Table type
-** extract cx_table from Rec
-** allow specifying key
-** add $resources table
 * add type: macro
 ** type: Size Int
 *** size 42 -> Size(42)
