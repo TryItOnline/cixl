@@ -18,8 +18,8 @@ static bool equid_imp(struct cx_box *x, struct cx_box *y) {
 }
 
 
-static enum cx_cmp cmp_imp(struct cx_box *x, struct cx_box *y) {
-  struct cx_time *xt = &x->as_time, *yt = &y->as_time;
+static enum cx_cmp cmp_imp(const struct cx_box *x, const struct cx_box *y) {
+  const struct cx_time *xt = &x->as_time, *yt = &y->as_time;
   
   if (xt->months < yt->months ||
       (xt->months == yt->months && xt->ns < yt->ns)) {

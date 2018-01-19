@@ -1,17 +1,15 @@
 /*
   The humble beginnings of a booking system written in Cixl for demonstration
   purposes. Once Cixl is installed, the tests may be run by executing
-  "load '../examples/bookings.cx'" followed by "run-tests".
+  "load '../examples/qdb.cx'" and "load '../examples/bookings.cx'" followed by
+  "run-tests".
 
   https://github.com/basic-gongfu/cixl#getting-started
 */
 
-get-var `init else {
-  let: init #t;
-  let: resources  fopen 'resources.db'  `a+;     
-  let: capacities fopen 'capacities.db' `a+;     
-  let: bookings   fopen 'bookings.db'   `a+;     
-}
+let: resources  new-qdb-table 'resource.db' [];
+let: capacities new-qdb-table 'capacity.db' [];
+let: bookings   new-qdb-table 'booking.db'  [];     
 
 /*
   Resources support tracking availability in time.
@@ -33,11 +31,10 @@ rec: Capacity()
 
 func: new-capacity(start end Time total used Int)
   let: c Capacity new;
-  repeat: ($c put)
-    `start    $start,
-    `end      $end,
-    `total    $total,
-    `used     $used;
+  $c put `start $start
+  $c put `end   $end
+  $c put `total $total
+  $c put `used  $used
   $c;
 
 /*
@@ -46,10 +43,9 @@ func: new-capacity(start end Time total used Int)
 
 func: new-resource(q Int)
   let: r Resource new;
-  repeat: ($r put)
-    `id       (Guid new),
-    `quantity $q,
-    `calendar [new-capacity #min-time #max-time $q 0];
+  $r put `id,      Guid new
+  $r put `quantity $q
+  $r put `calendar [new-capacity #min-time #max-time $q 0]
   $r;
 
 /*
@@ -76,7 +72,8 @@ func: update-capacity(in Capacity start end Time total used Int out Vect)
   let: t get $in `total + $total;
   let: u get $in `used + $used;
   if $u > $t {fail 'Overbook'}
-  repeat: ($in put) `total $t, `used  $u;;
+  $in put `total $t
+  $in put `used  $u;
 
 func: intersects(in Capacity start end Time)
   {$in get `start < $end} and {($in get `end > $start)};
@@ -114,12 +111,11 @@ rec: Booking()
 func: new-booking(r Resource start end Time q Int)
   $start < $end else {fail 'Invalid booking length'}
   let: b Booking new;
-  repeat: ($b put)
-    `id       (Guid new),
-    `resource $r,
-    `start    $start,
-    `end      $end,
-    `quantity $q;
+  $b put `id,      Guid new
+  $b put `resource $r
+  $b put `start    $start
+  $b put `end      $end
+  $b put `quantity $q
   update-resource $r $start $end 0 $q
   $b;
 
@@ -130,6 +126,5 @@ func: new-booking(r Resource start end Time q Int)
 
 func: run-tests()
   let: r new-resource 10;
-  repeat: (new-booking $r)
-    (today today ,+ 1 days 5),
-    (now   now ,+ 1h       6);;
+  (new-booking $r today today ,+ 1 days 5)
+  (new-booking $r now   now ,+ 1h       6);

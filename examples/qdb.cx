@@ -1,0 +1,38 @@
+/*
+  A simple log-based relational database.
+  See https://github.com/basic-gongfu/cixl/blob/master/examples/bookings.cx for
+  example of usage.
+
+  https://github.com/basic-gongfu/cixl#getting-started
+*/
+
+rec: QDBTable()
+  file     RWFile
+  key      Vect
+  key-recs Table
+  rec-keys Table;
+
+func: new-qdb-table(n Str k Vect)
+  let: t QDBTable new;
+  $t put `file,     fopen $n `a+
+  $t put `key       $k
+  $t put `rec-keys  Table new
+  $t put `key-recs  Table new
+  $t;
+
+func: get-rec-key(t QDBTable r Rec)
+  $t get `key map {, $r get $} vect;
+  
+func: upsert(t QDBTable r Rec)
+  let: krs $t get `key-recs;
+  let: rks $t get `rec-keys;  
+  let: tk $rks get $r;
+
+  $tk if {
+    delete $krs $tk
+    delete $rks $r
+  }
+  
+  let: k get-rec-key $t $r;
+  $krs put $k ($r %%)
+  $rks put $r $k;

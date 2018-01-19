@@ -157,7 +157,7 @@ Bindings in the current scope may be explicitly removed.
 
 ```
    | let: x 42;
-...del-var `x
+...delete-var `x
 ...let: x 'foo';
 ...$x
 ...
@@ -631,6 +631,23 @@ A vector is a one dimensional dynamic array that supports efficient pushing / po
 [2 4 14]
 ```
 
+### Tables
+Tables may be used to map ```Cmp``` keys to values, entries are ordered by key.
+
+```
+   let: t Table new;
+...$t put 2 'bar'
+...$t put 1 'foo'
+...$t
+...
+[Table(1.'foo'@1 2.'bar'@1)@2]
+
+...put 1 'baz'
+...$t delete 2
+...$t
+[Table(1.'baz'@1)@2]
+```
+
 ### Iteration
 The ```times``` function may be used to repeat an action N times.
 
@@ -704,17 +721,6 @@ Functions and lambdas are sequences, calling ```iter``` creates an iterator that
 ...% next ~ next
 ...
 [42 42]
-```
-
-If you find repeating patterns in the code, ```repeat:``` may allow isolating common parts without breaking the flow.
-
-```
-   | repeat: (say upper) 'foo', 'bar', 'baz';
-...
-FOO
-BAR
-BAZ
-[]
 ```
 
 ### Pairs
@@ -845,6 +851,7 @@ Capitalized names are treated as types, the following list is defined out of the
 - Seq    ()
 - Str    (A Cmp Seq)
 - Sym    (A)
+- Table  (A Seq)
 - Time   (A Cmp)
 - Type   (A)
 - Vect   (A Seq)

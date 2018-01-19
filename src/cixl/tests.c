@@ -5,6 +5,7 @@
 #include "cixl/libs/math.h"
 #include "cixl/libs/rec.h"
 #include "cixl/libs/str.h"
+#include "cixl/libs/table.h"
 #include "cixl/libs/time.h"
 #include "cixl/libs/type.h"
 #include "cixl/libs/var.h"
@@ -102,7 +103,7 @@ static void let_tests() {
 
   run(&cx,
       "(let: foo 42; "
-      " del-var `foo "
+      " delete-var `foo "
       " let: foo 'foo'; "
       " $foo = 'foo' test)");
   
@@ -257,6 +258,24 @@ static void vect_tests() {
   cx_deinit(&cx);
 }
 
+static void table_tests() {
+  struct cx cx;
+  cx_init(&cx);
+  cx_init_table(&cx);
+  cx_init_var(&cx);
+
+  run(&cx, "(let: t Table new;"
+           " $t put 1 'foo'"
+           " $t put 2 'bar'"
+           " $t put 1 'baz'"
+           " $t get 1 = 'baz' test"
+           " $t len = 2 test"
+           " $t delete 2"
+           " $t len = 1 test)");
+
+  cx_deinit(&cx);
+}
+
 static void math_tests() {
   struct cx cx;
   cx_init(&cx);
@@ -329,6 +348,7 @@ void cx_tests() {
   time_tests();
   guid_tests();
   vect_tests();
+  table_tests();
   math_tests();
   rec_tests();
   compile_tests();

@@ -100,7 +100,7 @@ static bool let_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   }
 
   if (!cx_parse_end(cx, in, &eval->toks, true)) {
-    cx_error(cx, cx->row, cx->col, "Missing let end");
+    if (!cx->errors.count) { cx_error(cx, cx->row, cx->col, "Missing let end"); }
     goto error;
   }
   
@@ -134,9 +134,9 @@ static bool get_imp(struct cx_scope *scope) {
   return true;
 }
 
-static bool del_imp(struct cx_scope *scope) {
+static bool delete_imp(struct cx_scope *scope) {
   struct cx_sym s = cx_test(cx_pop(scope, false))->as_sym;
-  cx_del_var(scope, s, false);
+  cx_delete_var(scope, s, false);
   return true;
 }
 
@@ -147,5 +147,5 @@ void cx_init_var(struct cx *cx) {
 	       cx_arg("id", cx->sym_type), cx_arg("val", cx->any_type));
   
   cx_add_cfunc(cx, "get-var", get_imp, cx_arg("id", cx->sym_type));
-  cx_add_cfunc(cx, "del-var", del_imp, cx_arg("id", cx->sym_type));
+  cx_add_cfunc(cx, "delete-var", delete_imp, cx_arg("id", cx->sym_type));
 }

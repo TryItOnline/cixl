@@ -94,7 +94,7 @@ static bool eqval_imp(struct cx_box *x, struct cx_box *y) {
   return strcmp(x->as_str->data, y->as_str->data) == 0;
 }
 
-static enum cx_cmp cmp_imp(struct cx_box *x, struct cx_box *y) {
+static enum cx_cmp cmp_imp(const struct cx_box *x, const struct cx_box *y) {
   return cx_cmp_str(&x->as_str->data, &y->as_str->data);
 }
 

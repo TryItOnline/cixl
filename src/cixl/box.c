@@ -26,7 +26,7 @@ bool cx_equid(struct cx_box *x, struct cx_box *y) {
   return cx_test(x->type->equid)(x, y);
 }
 
-enum cx_cmp cx_cmp(struct cx_box *x, struct cx_box *y) {
+enum cx_cmp cx_cmp(const struct cx_box *x, const struct cx_box *y) {
   return cx_test(x->type->cmp)(x, y);
 }
 
@@ -81,4 +81,8 @@ bool cx_write(struct cx_box *box, FILE *out) {
 
 void cx_print(struct cx_box *box, FILE *out) {
   cx_test(box->type->print)(box, out);
+}
+
+enum cx_cmp cx_cmp_box(const void *x, const void *y) {
+  return cx_cmp(x, y);
 }

@@ -6,7 +6,7 @@
 #include "cixl/types/rec.h"
 
 static void new_imp(struct cx_box *out) {
-  out->as_ptr = cx_rec_new(out->type->cx);
+  out->as_ptr = cx_rec_new(cx_baseof(out->type, struct cx_rec_type, imp));
 }
 
 static bool equid_imp(struct cx_box *x, struct cx_box *y) {
@@ -35,7 +35,10 @@ static void copy_imp(struct cx_box *dst, struct cx_box *src) {
 }
 
 static void clone_imp(struct cx_box *dst, struct cx_box *src) {
-  struct cx_rec *src_rec = src->as_ptr, *dst_rec = cx_rec_new(src->type->cx);
+  struct cx_rec
+    *src_rec = src->as_ptr,
+    *dst_rec = cx_rec_new(cx_baseof(src->type, struct cx_rec_type, imp));
+  
   dst->as_ptr = dst_rec;
 
   cx_do_set(&src_rec->values, struct cx_field_value, sv) {
@@ -64,7 +67,7 @@ static void print_imp(struct cx_box *v, FILE *out) {
 }
 
 static void deinit_imp(struct cx_box *v) {
-  cx_rec_deref(v->as_ptr, v->type->cx);
+  cx_rec_deref(v->as_ptr);
 }
 
 static void type_deinit_imp(struct cx_type *t) {
@@ -148,9 +151,11 @@ bool cx_add_field(struct cx_rec_type *type,
   return true;
 }
 
-struct cx_rec *cx_rec_new(struct cx *cx) {
-  struct cx_rec *rec = cx_malloc(&cx->rec_alloc);
+struct cx_rec *cx_rec_new(struct cx_rec_type *type) {
+  struct cx_rec *rec = cx_malloc(&type->imp.cx->rec_alloc);
+  rec->type = type;
   cx_set_init(&rec->values, sizeof(struct cx_field_value), cx_cmp_sym);
+  rec->values.key_offs = offsetof(struct cx_field_value, id);
   rec->nrefs = 1;
   return rec;
 }
@@ -160,14 +165,14 @@ struct cx_rec *cx_rec_ref(struct cx_rec *rec) {
   return rec;
 }
 
-void cx_rec_deref(struct cx_rec *rec, struct cx *cx) {
+void cx_rec_deref(struct cx_rec *rec) {
   cx_test(rec->nrefs);
   rec->nrefs--;
   
   if (!rec->nrefs) {
     cx_do_set(&rec->values, struct cx_field_value, v) { cx_box_deinit(&v->box); }
     cx_set_deinit(&rec->values);
-    cx_free(&cx->rec_alloc, rec);
+    cx_free(&rec->type->imp.cx->rec_alloc, rec);
   }
 }
 
@@ -181,7 +186,7 @@ void cx_rec_put(struct cx_rec *rec, struct cx_sym fid, struct cx_box *v) {
 
   if (f) {
     cx_box_deinit(&f->box);
-  } else if (!f) {
+  } else {
     f = cx_set_insert(&rec->values, &fid);
   }
   

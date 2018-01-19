@@ -113,7 +113,7 @@ struct cx_box *cx_put_var(struct cx_scope *scope, struct cx_sym id, bool force) 
   return &var->value;
 }
 
-bool cx_del_var(struct cx_scope *scope, struct cx_sym id, bool silent) {
+bool cx_delete_var(struct cx_scope *scope, struct cx_sym id, bool silent) {
   struct cx_var *v = cx_set_get(&scope->env, &id);
 
   if (!v) {

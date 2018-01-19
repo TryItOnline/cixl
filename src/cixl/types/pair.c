@@ -66,7 +66,7 @@ static bool eqval_imp(struct cx_box *x, struct cx_box *y) {
     cx_eqval(&x->as_pair->y, &y->as_pair->y);
 }
 
-static enum cx_cmp cmp_imp(struct cx_box *x, struct cx_box *y) {
+static enum cx_cmp cmp_imp(const struct cx_box *x, const struct cx_box *y) {
   enum cx_cmp res = cx_cmp(&x->as_pair->x, &y->as_pair->x);
   if (res == CX_CMP_EQ) { res = cx_cmp(&x->as_pair->y, &y->as_pair->y); }
   return res;

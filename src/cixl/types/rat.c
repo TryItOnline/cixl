@@ -87,7 +87,7 @@ static bool equid_imp(struct cx_box *x, struct cx_box *y) {
   return xr->num == yr->num && xr->den == yr->den;
 }
 
-static enum cx_cmp cmp_imp(struct cx_box *x, struct cx_box *y) {
+static enum cx_cmp cmp_imp(const struct cx_box *x, const struct cx_box *y) {
   return cx_cmp_rat(&x->as_rat, &y->as_rat);
 }
 

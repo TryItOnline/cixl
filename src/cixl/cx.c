@@ -29,6 +29,7 @@
 #include "cixl/types/rec.h"
 #include "cixl/types/str.h"
 #include "cixl/types/sym.h"
+#include "cixl/types/table.h"
 #include "cixl/types/time.h"
 #include "cixl/types/vect.h"
 #include "cixl/util.h"
@@ -78,7 +79,7 @@ static bool trait_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   }
 
   if (!cx_parse_end(cx, in, &toks, false)) {
-    cx_error(cx, cx->row, cx->col, "Missing trait end");
+    if (!cx->errors.count) { cx_error(cx, cx->row, cx->col, "Missing trait end"); }
     goto exit1;
   }
 
@@ -187,7 +188,8 @@ static bool func_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   cx_tok_deinit(&args);
   
   if (!cx_parse_end(cx, in, &toks, true)) {
-    cx_error(cx, cx->row, cx->col, "Missing func end");
+    if (!cx->errors.count) { cx_error(cx, cx->row, cx->col, "Missing func end"); }
+
     cx_tok_deinit(&id);
     cx_do_vec(&toks, struct cx_tok, t) { cx_tok_deinit(t); }
     cx_vec_deinit(&toks);
@@ -208,78 +210,6 @@ static bool func_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   cx_tok_init(cx_vec_push(&eval->toks), CX_TFIMP(), row, col)->as_ptr = imp;
   cx_tok_init(cx_vec_push(out), CX_TMACRO(), row, col)->as_ptr = eval;
   return true;
-}
-
-static ssize_t repeat_eval(struct cx_macro_eval *eval,
-			   struct cx_bin *bin,
-			   size_t tok_idx,
-			   struct cx *cx) {
-  if (!cx_compile(cx, cx_vec_start(&eval->toks), cx_vec_end(&eval->toks), bin)) {
-    cx_error(cx, cx->row, cx->col, "Failed compiling repeat");
-    return -1;
-  }
-
-  return tok_idx+1;
-}
-
-static bool repeat_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
-  struct cx_vec toks;
-  cx_vec_init(&toks, sizeof(struct cx_tok));
-  int row = cx->row, col = cx->col;
-  bool ok = false;
-  
-  if (!cx_parse_tok(cx, in, &toks, true)) {
-    cx_error(cx, cx->row, cx->col, "Missing repeat prefix");
-    goto exit;
-  }
-  
-  if (!cx_parse_end(cx, in, &toks, true)) {
-    cx_error(cx, cx->row, cx->col, "Missing repeat end");
-    goto exit;
-  }
-  
-  struct cx_tok *prefix = cx_vec_get(&toks, 0);
-  struct cx_macro_eval *eval = cx_macro_eval_new(repeat_eval);
-
-  void push_prefix(struct cx_vec *out) {
-    if (prefix->type == CX_TGROUP()) {
-      cx_do_vec(&prefix->as_vec, struct cx_tok, t) {
-	cx_tok_copy(cx_vec_push(out), t);
-      }
-    } else {
-      cx_tok_copy(cx_vec_push(out), prefix);
-    }
-  }
-  
-  for (struct cx_tok *t = cx_vec_get(&toks, 1), *pt = NULL;
-       t != cx_vec_end(&toks);
-       pt = t, t++) {
-    if (!pt || pt->type == CX_TCUT()) {
-      if (t->type == CX_TGROUP()) {
-	struct cx_vec tmp = t->as_vec;
-	cx_vec_init(&t->as_vec, sizeof(struct cx_tok));
-	push_prefix(&t->as_vec);
-
-	cx_do_vec(&tmp, struct cx_tok, tt) {
-	  *(struct cx_tok *)cx_vec_push(&t->as_vec) = *tt;
-	}
-
-	cx_vec_deinit(&tmp);
-      }
-
-      push_prefix(&eval->toks);
-    }
-    
-    cx_tok_copy(cx_vec_push(&eval->toks), t);
-  }
-					  
-  cx_tok_init(cx_vec_push(out), CX_TMACRO(), row, col)->as_ptr = eval;
-  ok = true;
- exit: {
-    cx_do_vec(&toks, struct cx_tok, t) { cx_tok_deinit(t); }
-    cx_vec_deinit(&toks);
-    return ok;
-  }
 }
 
 static bool reset_imp(struct cx_scope *scope) {
@@ -699,6 +629,7 @@ struct cx *cx_init(struct cx *cx) {
   cx_malloc_init(&cx->pair_alloc, CX_PAIR_SLAB_SIZE, sizeof(struct cx_pair));
   cx_malloc_init(&cx->rec_alloc, CX_REC_SLAB_SIZE, sizeof(struct cx_rec));
   cx_malloc_init(&cx->scope_alloc, CX_SCOPE_SLAB_SIZE, sizeof(struct cx_scope));
+  cx_malloc_init(&cx->table_alloc, CX_TABLE_SLAB_SIZE, sizeof(struct cx_table));
   
   cx_vec_init(&cx->scopes, sizeof(struct cx_scope *));
   cx_vec_init(&cx->calls, sizeof(struct cx_call));
@@ -706,7 +637,6 @@ struct cx *cx_init(struct cx *cx) {
 
   cx_add_macro(cx, "trait:", trait_parse);
   cx_add_macro(cx, "func:", func_parse);
-  cx_add_macro(cx, "repeat:", repeat_parse);
   
   cx->opt_type = cx_add_type(cx, "Opt");
   cx->opt_type->trait = true;
@@ -739,6 +669,7 @@ struct cx *cx_init(struct cx *cx) {
   cx->time_type = cx_init_time_type(cx);
   cx->guid_type = cx_init_guid_type(cx);
   cx->vect_type = cx_init_vect_type(cx);
+  cx->table_type = cx_init_table_type(cx);
   cx->bin_type = cx_init_bin_type(cx);
   cx->func_type = cx_init_func_type(cx);
   cx->fimp_type = cx_init_fimp_type(cx);
@@ -831,6 +762,7 @@ struct cx *cx_deinit(struct cx *cx) {
   cx_malloc_deinit(&cx->pair_alloc);
   cx_malloc_deinit(&cx->rec_alloc);
   cx_malloc_deinit(&cx->scope_alloc);
+  cx_malloc_deinit(&cx->table_alloc);
   return cx;
 }
 

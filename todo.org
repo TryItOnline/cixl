@@ -1,19 +1,18 @@
-* add qdb.cx
-** QDBTable with key, rec-keys & key-recs
-*** new-table takes vect of key callables
-*** rec-keys uses recs as keys
-*** key-recs vectors
-** implement Rec Cmp to compare pointers
-** implement Vec Cmp to compare values
-** add built-in Table type
-*** use instead of files in bookings
+* implement Rec Cmp to compare pointers
+* implement Vec Cmp to compare values
+* improve cut
+** add struct cx_cut
+** tag with func in scan if empty
+** only remove if same func
+** replace parens in bookings
+* rename test to check
+* rename type.print to dump
 * change _ to func
 ** add stack lib
 *** move |, %, %%, ~ & _
 * meta lib with read-iter
 ** move read and convert to iter
 *** keep bin ref in iter
-* read records in bookings init
 * add iter zip/unzip
 * add defer(any) fn
 ** add scope.deferred

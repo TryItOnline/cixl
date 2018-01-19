@@ -100,7 +100,7 @@ static bool equid_imp(struct cx_box *x, struct cx_box *y) {
   return x->as_int == y->as_int;
 }
 
-static enum cx_cmp cmp_imp(struct cx_box *x, struct cx_box *y) {
+static enum cx_cmp cmp_imp(const struct cx_box *x, const struct cx_box *y) {
   return cx_cmp_int(&x->as_int, &y->as_int);
 }
 

@@ -76,7 +76,7 @@ static bool rec_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   }
   
   if (!cx_parse_end(cx, in, &toks, false)) {
-    cx_error(cx, cx->row, cx->col, "Missing rec end");
+    if (!cx->errors.count) { cx_error(cx, cx->row, cx->col, "Missing rec end"); }
     goto exit3;
   }
 
@@ -106,9 +106,10 @@ static bool rec_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   cx_do_vec(&toks, struct cx_tok, t) {
     if (t->type == CX_TID()) {
       char *s = t->as_ptr;
+      
       if (isupper(s[0])) {
 	if (strcmp(s, id.as_ptr) != 0) {
-	  cx_error(cx, t->row, t->col, "Invalid rec field");
+	  cx_error(cx, t->row, t->col, "Invalid field type: %s", s);
 	  goto exit4;
 	}
 	

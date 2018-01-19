@@ -4,6 +4,7 @@
 #include "cixl/libs/math.h"
 #include "cixl/libs/rec.h"
 #include "cixl/libs/str.h"
+#include "cixl/libs/table.h"
 #include "cixl/libs/time.h"
 #include "cixl/libs/type.h"
 #include "cixl/libs/var.h"
@@ -25,6 +26,7 @@ int main() {
   cx_init_type(&cx);
   cx_init_rec(&cx);
   cx_init_str(&cx);
+  cx_init_table(&cx);
   cx_init_time(&cx);
   cx_init_var(&cx);
   cx_repl(&cx, stdin, stdout);
