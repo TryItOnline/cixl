@@ -142,6 +142,21 @@ static bool eqval_imp(struct cx_box *x, struct cx_box *y) {
   return true;
 }
 
+static enum cx_cmp cmp_imp(const struct cx_box *x, const struct cx_box *y) {
+  struct cx_vect *xv = x->as_ptr, *yv = y->as_ptr;
+  struct cx_box *xe = cx_vec_end(&xv->imp), *ye = cx_vec_end(&yv->imp);
+  
+  for (struct cx_box *xp = cx_vec_start(&xv->imp), *yp = cx_vec_start(&yv->imp);
+       xp != xe && yp != ye;
+       xp++, yp++) {
+    enum cx_cmp res = cx_cmp(xp, yp);
+    if (res != CX_CMP_EQ) { return res; }
+  }
+
+  if (xv->imp.count < yv->imp.count) { return CX_CMP_LT; }
+  return (xv->imp.count > yv->imp.count) ? CX_CMP_GT : CX_CMP_EQ;
+}
+
 static bool ok_imp(struct cx_box *b) {
   struct cx_vect *v = b->as_ptr;
   return v->imp.count;
@@ -190,9 +205,11 @@ static void deinit_imp(struct cx_box *v) {
 }
 
 struct cx_type *cx_init_vect_type(struct cx *cx) {
-  struct cx_type *t = cx_add_type(cx, "Vect", cx->any_type, cx->seq_type);
+  struct cx_type *t = cx_add_type(cx, "Vect",
+				  cx->any_type, cx->cmp_type, cx->seq_type);
   t->eqval = eqval_imp;
   t->equid = equid_imp;
+  t->cmp = cmp_imp;
   t->ok = ok_imp;
   t->copy = copy_imp;
   t->clone = clone_imp;

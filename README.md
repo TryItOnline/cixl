@@ -846,15 +846,16 @@ Capitalized names are treated as types, the following list is defined out of the
 - Opt    ()
 - Pair   (A Cmp)
 - Rat    (A Num)
-- Rec    (A)
+- Rec    (A Cmp)
 - RFile  (A File)
+- RWFile (RFile WFile)
 - Seq    ()
 - Str    (A Cmp Seq)
 - Sym    (A)
 - Table  (A Seq)
 - Time   (A Cmp)
 - Type   (A)
-- Vect   (A Seq)
+- Vect   (A Cmp Seq)
 - WFile  (A File)
 
 ```

@@ -254,6 +254,8 @@ static void vect_tests() {
   run(&cx, "[1 2 3] pop 3 = test");
   run(&cx, "[1 2 3] % 4 push<Vect A> len 4 = test");
   run(&cx, "[1 2] for {2 *} + 6 = test");
+  run(&cx, "[1 2] < [3 4] test");
+  run(&cx, "[1 2 3] > [1 2] test");
   
   cx_deinit(&cx);
 }

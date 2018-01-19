@@ -652,7 +652,7 @@ struct cx *cx_init(struct cx *cx) {
   cx->num_type = cx_add_type(cx, "Num", cx->cmp_type);
   cx->num_type->trait = true;
   
-  cx->rec_type = cx_add_type(cx, "Rec", cx->any_type);
+  cx->rec_type = cx_add_type(cx, "Rec", cx->any_type, cx->cmp_type);
   cx->rec_type->trait = true;
 
   cx->nil_type = cx_init_nil_type(cx);

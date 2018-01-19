@@ -22,6 +22,10 @@ static bool eqval_imp(struct cx_box *x, struct cx_box *y) {
   return cx_test(cx_pop(s, false))->as_bool;
 }
 
+static enum cx_cmp cmp_imp(const struct cx_box *x, const struct cx_box *y) {
+  return cx_cmp_ptr(&x->as_ptr, &y->as_ptr);
+}
+
 static bool ok_imp(struct cx_box *v) {
   struct cx *cx = v->type->cx;
   struct cx_scope *s = cx_scope(cx, 0);
@@ -95,6 +99,7 @@ struct cx_rec_type *cx_rec_type_init(struct cx_rec_type *type,
   type->imp.new = new_imp;
   type->imp.equid = equid_imp;
   type->imp.eqval = eqval_imp;
+  type->imp.cmp = cmp_imp;
   type->imp.ok = ok_imp;
   type->imp.copy = copy_imp;
   type->imp.clone = clone_imp;
