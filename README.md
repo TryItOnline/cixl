@@ -640,12 +640,12 @@ Tables may be used to map ```Cmp``` keys to values, entries are ordered by key.
 ...$t put 1 'foo'
 ...$t
 ...
-[Table(1.'foo'@1 2.'bar'@1)@2]
+[Table((1 'foo'@1) (2 'bar'@1))@2]
 
 ...put 1 'baz'
 ...$t delete 2
 ...$t
-[Table(1.'baz'@1)@2]
+[Table((1 'baz'@1))@2]
 ```
 
 ### Iteration

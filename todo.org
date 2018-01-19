@@ -1,3 +1,4 @@
+* implement Rec print like Table
 * implement Rec Cmp to compare pointers
 * implement Vec Cmp to compare values
 * improve cut
@@ -7,6 +8,7 @@
 ** replace parens in bookings
 * rename test to check
 * rename type.print to dump
+** add dump fn to get str for any value
 * change _ to func
 ** add stack lib
 *** move |, %, %%, ~ & _
