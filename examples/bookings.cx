@@ -7,9 +7,9 @@
   https://github.com/basic-gongfu/cixl#getting-started
 */
 
-let: resources  new-qdb-table 'resource.db' [];
-let: capacities new-qdb-table 'capacity.db' [];
-let: bookings   new-qdb-table 'booking.db'  [];     
+let: resources  new-db-table 'resource.db' [];
+let: capacities new-db-table 'capacity.db' [];
+let: bookings   new-db-table 'booking.db'  [];     
 
 /*
   Resources support tracking availability in time.

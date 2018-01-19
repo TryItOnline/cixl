@@ -6,24 +6,26 @@
   https://github.com/basic-gongfu/cixl#getting-started
 */
 
-rec: QDBTable()
+let: db-trans [];
+
+rec: DBTable()
   file     RWFile
   key      Vect
   key-recs Table
   rec-keys Table;
 
-func: new-qdb-table(n Str k Vect)
-  let: t QDBTable new;
+func: new-db-table(n Str k Vect)
+  let: t DBTable new;
   $t put `file,     fopen $n `a+
   $t put `key       $k
   $t put `rec-keys  Table new
   $t put `key-recs  Table new
   $t;
 
-func: get-rec-key(t QDBTable r Rec)
+func: get-rec-key(t DBTable r Rec)
   $t get `key map {, $r get $} vect;
   
-func: upsert(t QDBTable r Rec)
+func: upsert(t DBTable r Rec)
   let: krs $t get `key-recs;
   let: rks $t get `rec-keys;  
   let: tk $rks get $r;
