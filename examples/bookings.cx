@@ -43,7 +43,7 @@ func: new-capacity(start end Time total used Int)
 
 func: new-resource(q Int)
   let: r Resource new;
-  $r put `id,      Guid new
+  $r put `id,      new Guid
   $r put `quantity $q
   $r put `calendar [new-capacity #min-time #max-time $q 0]
   $r;
@@ -71,7 +71,7 @@ func: update-capacity(in Capacity start end Time total used Int out Vect)
 
   let: t get $in `total + $total;
   let: u get $in `used + $used;
-  if $u > $t {fail 'Overbook'}
+  $u > $t if {fail 'Overbook'}
   $in put `total $t
   $in put `used  $u;
 
@@ -111,7 +111,7 @@ rec: Booking()
 func: new-booking(r Resource start end Time q Int)
   $start < $end else {fail 'Invalid booking length'}
   let: b Booking new;
-  $b put `id,      Guid new
+  $b put `id,      new Guid
   $b put `resource $r
   $b put `start    $start
   $b put `end      $end
@@ -126,5 +126,5 @@ func: new-booking(r Resource start end Time q Int)
 
 func: run-tests()
   let: r new-resource 10;
-  (new-booking $r today today ,+ 1 days 5)
-  (new-booking $r now   now ,+ 1h       6);
+  new-booking $r today (today 1 days +) 5,
+  new-booking $r now   (now 1h +)       6;

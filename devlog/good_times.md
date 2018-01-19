@@ -10,7 +10,7 @@ If you cut the concept of time down to its core, there are really two kinds that
 ### The Middle Way
 [Cixl](https://github.com/basic-gongfu/cixl) chooses the middle way and provides a single type with dual representation and semantics. Internally; time is represented as an absolute, zero-based number of months and nanoseconds. The representation is key to providing dual semantics, since it allows remembering enough information to give sensible answers.
 
-Time may be queried for absolute and relative field values;
+Times may be queried for absolute and relative field values;
 
 ```
    | let: t now; $t
@@ -49,6 +49,7 @@ Time may be queried for absolute and relative field values;
 ...
 [93]
 ```
+
 manually constructed;
 
 ```
@@ -68,19 +69,19 @@ manually constructed;
 compared, added and subtracted;
 
 ```
-   | 2m =, 120s
+   | 2m 120s =
 ...
 [#t]
 
-   | 1 years +, 2 months +, 3 days -, 12h
+   | 1 years 2 months + 3 days + 12h -
 ...
 [Time(1/2/2) 12:0:0.0]
 
-   < now
+   <= now
 ...
 [#t]
 
-   | 10 days -, 1 years
+   | 10 days 1 years -
 ...
 [Time(-1/0/10)]
 
@@ -92,7 +93,7 @@ compared, added and subtracted;
 and scaled.
 
 ```
-   | 1 months +, 1 days * 3
+   | 1 months 1 days + 3 *
 ...
 [Time(0/3/3)]
 ```

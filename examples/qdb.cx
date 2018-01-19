@@ -18,8 +18,8 @@ func: new-db-table(n Str k Vect)
   let: t DBTable new;
   $t put `file,     fopen $n `a+
   $t put `key       $k
-  $t put `rec-keys  Table new
-  $t put `key-recs  Table new
+  $t put `rec-keys, new Table
+  $t put `key-recs, new Table
   $t;
 
 func: get-rec-key(t DBTable r Rec)

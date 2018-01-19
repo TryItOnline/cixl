@@ -57,6 +57,7 @@ struct cx {
   
   struct cx_bin *bin;
   struct cx_op *op;
+  unsigned int scan_depth;
   bool stop;
   
   int row, col;
@@ -64,7 +65,6 @@ struct cx {
 };
 
 struct cx *cx_init(struct cx *cx);
-
 struct cx *cx_deinit(struct cx *cx);
 
 void cx_add_separators(struct cx *cx, const char *cs);

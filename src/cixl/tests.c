@@ -95,7 +95,7 @@ static void let_tests() {
 
   run(&cx, "(let: foo 42; $foo 42 = test)");
   run(&cx, "(let: (x y z) 1 2, 3 + 4; $x + $y + $z 10 = test)");
-  run(&cx, "(let: (foo Int bar Str) 7 '35'; $foo +, $bar int = 42 test)");
+  run(&cx, "(let: (foo Int bar Str) 7 '35'; $foo, int $bar + = 42 test)");
 
   run(&cx, "(get-var `foo !test "
            " put-var `foo 42 "
@@ -227,9 +227,8 @@ static void time_tests() {
 
   run(&cx, "now <= now test");
   run(&cx, "[1 0 0 24] time days = 367 test");
-  run(&cx, "2m =, 120s test");
-  run(&cx, "1 days ,+ 1h * 2h = 50 test");
-  run(&cx, "1 months ,+ 1 days * 3 days = 94");
+  run(&cx, "2m 120s = test");
+  run(&cx, "1 days 1h + 2 * 50h = test");
   
   cx_deinit(&cx);
 }
@@ -317,7 +316,7 @@ static void rec_tests() {
       "$bar = $baz !test");
   
   run(&cx,
-      "func: =(a b Foo) $a get `x =, $b get `x; "
+      "func: =(a b Foo) $a get `x, $b get `x =; "
       "$bar = $baz test");
   
   cx_deinit(&cx);

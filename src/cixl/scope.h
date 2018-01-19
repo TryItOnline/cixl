@@ -10,8 +10,9 @@ struct cx;
 struct cx_scope {
   struct cx *cx;
   struct cx_scope *parent;
-  struct cx_vec stack, cut_offs;
+  struct cx_vec stack;
   struct cx_set env;
+  struct cx_vec cuts;
   unsigned int nrefs;
 };
 
@@ -27,5 +28,12 @@ void cx_fprint_stack(struct cx_scope *scope, FILE *out);
 struct cx_box *cx_get_var(struct cx_scope *scope, struct cx_sym id, bool silent);
 struct cx_box *cx_put_var(struct cx_scope *scope, struct cx_sym id, bool force);
 bool cx_delete_var(struct cx_scope *scope, struct cx_sym id, bool silent);
+
+struct cx_cut {
+  size_t offs;
+  unsigned int scan_depth;
+};
+
+struct cx_cut *cx_cut_init(struct cx_cut *cut, struct cx_scope *scope);
 
 #endif

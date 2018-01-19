@@ -75,29 +75,41 @@ bool cx_scan_args(struct cx *cx, struct cx_func *func) {
   int row = cx->row, col = cx->col;
   struct cx_scope *s = cx_scope(cx, 0);
   struct cx_op *end = cx_vec_end(&cx->bin->ops);
-
-  while (cx->op != end) {
-    if (cx_scope(cx, 0) == s) {
-      size_t cut_offs = s->cut_offs.count
-	? *(size_t *)cx_vec_peek(&s->cut_offs, 0)
-	: 0;
-      
-      if (s->stack.count - cut_offs >= func->nargs) { break; }
+  bool ok = false;
+  cx->scan_depth++;
+  size_t cut_offs = 0;
+  bool uncut = false;
+  
+  if (s->cuts.count) {
+    struct cx_cut *c = cx_vec_peek(&s->cuts, 0);
+    cut_offs = c->offs;
+    
+    if (!c->scan_depth) {
+      c->scan_depth = cx->scan_depth;
+      uncut = true;
+    }
+  }
+  
+  while (cx->op != end && !cx->errors.count) {
+    if (cut_offs) {
+      struct cx_cut *c = cx_vec_peek(&s->cuts, 0);
+      cut_offs = c ? c->offs : 0;
     }
 
-    if (!cx_eval_next(cx)) { return false; }
+    if (cx_scope(cx, 0) == s && s->stack.count - cut_offs >= func->nargs) { break; }
+    if (!cx_eval_next(cx)) { goto exit; }
   }
   
-  size_t cut_offs = s->cut_offs.count ? *(size_t *)cx_vec_peek(&s->cut_offs, 0) : 0;
-
   if (s->stack.count - cut_offs < func->nargs) {
     cx_error(cx, row, col, "Not enough args for func: '%s'", func->id);
-    return false;
+    goto exit;
   }
 
-  if (s->cut_offs.count) { cx_vec_pop(&s->cut_offs); }
-  
-  return true;
+  if (uncut) { cx_vec_pop(&s->cuts); }
+  ok = true;
+ exit:
+  cx->scan_depth--;
+  return ok;
 }
 
 bool cx_eval_args(struct cx *cx,

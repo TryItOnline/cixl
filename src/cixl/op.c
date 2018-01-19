@@ -48,7 +48,13 @@ cx_op_type(CX_OEND, {
 
 static bool cut_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
   struct cx_scope *s = cx_scope(cx, 0);
-  *(size_t *)cx_vec_push(&s->cut_offs) = s->stack.count;
+
+  if (!s->stack.count) {
+    cx_error(cx, cx->row, cx->col, "Nothing to cut");
+    return false;
+  }
+
+  cx_cut_init(cx_vec_push(&s->cuts), s);
   return true;
 }
 
@@ -143,14 +149,14 @@ static bool getvar_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
   struct cx_scope *s = cx_scope(cx, 0);
   
   if (!op->as_getvar.id.id[0]) {
-    if (!s->cut_offs.count) {
+    if (!s->cuts.count) {
       cx_error(cx, tok->row, tok->col, "Nothing to uncut");
       return false;
     }
-    
-    size_t *cut_offs = cx_vec_peek(&s->cut_offs, 0);
-    (*cut_offs)--;
-    if (!(*cut_offs)) { cx_vec_pop(&s->cut_offs); }
+
+    struct cx_cut *c = cx_vec_peek(&s->cuts, 0);
+    c->offs--;
+    if (!c->offs) { cx_vec_pop(&s->cuts); }
   } else {
     struct cx_box *v = cx_get_var(s, op->as_getvar.id, false);
     if (!v) { return false; }

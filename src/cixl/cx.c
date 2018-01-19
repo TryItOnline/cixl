@@ -604,6 +604,7 @@ struct cx *cx_init(struct cx *cx) {
   cx->next_sym_tag = cx->next_type_tag = 1;
   cx->bin = NULL;
   cx->op = NULL;
+  cx->scan_depth = 0;
   cx->stop = false;
   cx->row = cx->col = -1;
   
@@ -933,7 +934,6 @@ void cx_push_scope(struct cx *cx, struct cx_scope *scope) {
 
 struct cx_scope *cx_pop_scope(struct cx *cx, bool silent) {
   if (cx->scopes.count == 1) {
-    cx_test(false);
     if (!silent) { cx_error(cx, cx->row, cx->col, "No open scopes"); }
     return NULL;
   }

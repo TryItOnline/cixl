@@ -798,11 +798,11 @@ manually constructed;
 compared, added and subtracted;
 
 ```
-   | 2m =, 120s
+   | 2m 120s =
 ...
 [#t]
 
-   | 1 years +, 2 months +, 3 days -, 12h
+   | 1 years 2 months + 3 days + 12h -
 ...
 [Time(1/2/2) 12:0:0.0]
 
@@ -810,7 +810,7 @@ compared, added and subtracted;
 ...
 [#t]
 
-   | 10 days -, 1 years
+   | 10 days 1 years -
 ...
 [Time(-1/0/10)]
 
@@ -822,13 +822,13 @@ compared, added and subtracted;
 and scaled.
 
 ```
-   | 1 months +, 1 days * 3
+   | 1 months 1 days + 3 *
 ...
 [Time(0/3/3)]
 ```
 
 ### Types
-Capitalized names are treated as types, the following list is defined out of the box:
+Capitalized names are treated as types, the following types are defined out of the box:
 
 | Type   | Parents     |
 | ------ | ----------- |

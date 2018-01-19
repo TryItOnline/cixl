@@ -146,19 +146,16 @@ static bool parse_func(struct cx *cx, const char *id, FILE *in, struct cx_vec *o
 }
 
 static bool parse_line_comment(struct cx *cx, FILE *in) {
-  int row = cx->row, col = cx->col;
   bool done = false;
   
   while (!done) {
     char c = fgetc(in);
 
     switch(c) {
-    case EOF:
-      cx_error(cx, row, col, "Unterminated comment");
-      return false;
     case '\n':
       cx->row++;
       cx->col = 0;
+    case EOF:
       done = true;
       break;
     default:
