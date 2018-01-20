@@ -871,6 +871,7 @@ Capitalized names are treated as types, the following types are defined out of t
 | Pair   | A Cmp       |
 | Rat    | A Num       |
 | Rec    | A Cmp       |
+| Ref    | A           |
 | RFile  | A File      |
 | RWFile | RFile WFile |
 | Seq    |             |
