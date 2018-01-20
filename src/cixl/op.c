@@ -288,22 +288,6 @@ cx_op_type(CX_OSTOP, {
     type.eval = stop_eval;
   });
 
-static bool zap_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
-  struct cx_box *v = cx_pop(cx_scope(cx, 0), true);
-
-  if (!v) {
-    cx_error(cx, tok->row, tok->col, "Nothing to zap");
-    return false;
-  }
-  
-  cx_box_deinit(v);
-  return true;
-}
-
-cx_op_type(CX_OZAP, {
-    type.eval = zap_eval;
-  });
-
 static bool zaparg_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
   struct cx_scope *s = cx_scope(cx, 0);
   struct cx_box *v = cx_pop(s->stack.count ? s : cx_scope(cx, 1), true);

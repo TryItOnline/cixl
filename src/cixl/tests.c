@@ -4,6 +4,7 @@
 #include "cixl/libs/iter.h"
 #include "cixl/libs/math.h"
 #include "cixl/libs/rec.h"
+#include "cixl/libs/stack.h"
 #include "cixl/libs/str.h"
 #include "cixl/libs/table.h"
 #include "cixl/libs/time.h"
@@ -56,6 +57,7 @@ static void stack_tests() {
   cx_init(&cx);
   cx_init_iter(&cx);
   cx_init_math(&cx);
+  cx_init_stack(&cx);
 
   run(&cx, "7 14 % + 28 = test");
   run(&cx, "7 14 % _ + 21 = test");
@@ -203,7 +205,7 @@ static void sym_tests() {
   run(&cx, "`foo = `bar !test");
   run(&cx, "'foo' sym = `foo test");
   run(&cx, "`foo str = 'foo' test");
-  run(&cx, "Sym new, Sym new = !test");
+  run(&cx, "new Sym, new Sym = !test");
     
   cx_deinit(&cx);
 }
@@ -236,9 +238,10 @@ static void time_tests() {
 static void guid_tests() {
   struct cx cx;
   cx_init(&cx);
+  cx_init_stack(&cx);
 
-  run(&cx, "Guid new, Guid new = !test");
-  run(&cx, "Guid new % str guid = test");
+  run(&cx, "new Guid, new Guid = !test");
+  run(&cx, "new Guid % str guid = test");
   
   cx_deinit(&cx);
 }
@@ -248,6 +251,7 @@ static void vect_tests() {
   cx_init(&cx);
   cx_init_iter(&cx);
   cx_init_math(&cx);
+  cx_init_stack(&cx);
 
   run(&cx, "1 2 3 [4 5] len 2 = test");
   run(&cx, "[1 2 3] pop 3 = test");
@@ -265,7 +269,7 @@ static void table_tests() {
   cx_init_table(&cx);
   cx_init_var(&cx);
 
-  run(&cx, "(let: t Table new;"
+  run(&cx, "(let: t new Table;"
            " $t put 1 'foo'"
            " $t put 2 'bar'"
            " $t put 1 'baz'"
@@ -294,11 +298,12 @@ static void rec_tests() {
   struct cx cx;
   cx_init(&cx);
   cx_init_rec(&cx);
+  cx_init_stack(&cx);
   cx_init_var(&cx);
 
   run(&cx,
       "rec: Foo() x Int y Str; "
-      "(let: foo Foo new; "
+      "(let: foo new Foo; "
       " $foo !test "
       " $foo put `x 42 "
       " $foo test "
@@ -306,7 +311,7 @@ static void rec_tests() {
       " $foo get `y = #nil test)");
 
   run(&cx,
-      "let: (bar baz) Foo new %%; "
+      "let: (bar baz) new Foo %%; "
       "$bar put `x 42 "
       "$baz put `x 42 "
       "$bar = $baz test "
@@ -327,8 +332,9 @@ static void compile_tests() {
   cx_init(&cx);
   cx_init_iter(&cx);
   cx_init_math(&cx);
+  cx_init_stack(&cx);
 
-  run(&cx, "Bin new %, $ compile '1 + 2' call = 3 test");
+  run(&cx, "new Bin %, $ compile '1 + 2' call = 3 test");
   cx_deinit(&cx);
 }
 

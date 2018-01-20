@@ -328,12 +328,3 @@ cx_tok_type(CX_TTYPE, {
 cx_tok_type(CX_TUNGROUP);
 cx_tok_type(CX_TUNLAMBDA);
 cx_tok_type(CX_TUNVECT);
-
-static ssize_t zap_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) {
-  cx_op_init(cx_vec_push(&bin->ops), CX_OZAP(), tok_idx);
-  return tok_idx+1;
-}
-
-cx_tok_type(CX_TZAP, {
-    type.compile = zap_compile;
-  });

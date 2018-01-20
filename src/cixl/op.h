@@ -116,7 +116,6 @@ struct cx_op_type *CX_OPUTVAR();
 struct cx_op_type *CX_ORETURN();
 struct cx_op_type *CX_OSTASH();
 struct cx_op_type *CX_OSTOP();
-struct cx_op_type *CX_OZAP();
 struct cx_op_type *CX_OZAPARG();
 
 #endif

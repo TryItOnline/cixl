@@ -1,15 +1,8 @@
 * rename test to check
 * rename type.print to dump
-* change _ to func
-** add stack lib
-*** move |, %, %%, ~ & _
 * meta lib with read-iter
 ** move read and convert to iter
 *** keep bin ref in iter
-* add defer(any) fn
-** add scope.deferred
-*** vec of boxes
-*** call in cx_end()
 * add iter zip/unzip
 * add and/or tests
 * add filter tests

@@ -50,74 +50,6 @@ static const void *get_func_id(const void *value) {
   return &(*func)->id;
 }
 
-static bool trait_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
-  int row = cx->row, col = cx->col;
-  struct cx_vec toks;
-  cx_vec_init(&toks, sizeof(struct cx_tok));
-  bool ok = false;
-  
-  if (!cx_parse_tok(cx, in, &toks, false)) {
-    cx_error(cx, row, col, "Missing trait id");
-    goto exit2;
-  }
-
-  struct cx_tok id_tok = *(struct cx_tok *)cx_vec_pop(&toks);
-  struct cx_type *type = NULL;
-
-  if (id_tok.type == CX_TTYPE()) {
-    type = id_tok.as_ptr;
-    
-    if (!type->trait) {
-      cx_error(cx, row, col, "Attempt to redefine %s as trait", type->id);
-      goto exit1;
-    }
-  }
-
-  if (id_tok.type != CX_TID() && id_tok.type != CX_TTYPE()) {
-    cx_error(cx, row, col, "Invalid trait id");
-    goto exit1;
-  }
-
-  if (!cx_parse_end(cx, in, &toks, false)) {
-    if (!cx->errors.count) { cx_error(cx, cx->row, cx->col, "Missing trait end"); }
-    goto exit1;
-  }
-
-  cx_do_vec(&toks, struct cx_tok, t) {
-    if (t->type != CX_TTYPE()) {
-      cx_error(cx, row, col, "Invalid trait arg");
-      goto exit1;
-    }
-  }
-
-  if (type) {
-    cx_do_set(&cx->types, struct cx_type *, i) {
-      struct cx_type *t = *i;
-      if (cx_set_delete(&t->parents, &type->id)) {
-	t->tags ^= type->tag;
-      }
-    }
-  } else {
-    type = cx_add_type(cx, id_tok.as_ptr);
-    if (!type) { goto exit1; }
-    type->trait = true;
-  }
-  
-  cx_do_vec(&toks, struct cx_tok, t) {
-    struct cx_type *child = t->as_ptr;
-    cx_derive(child, type);
-  }
-
-  ok = true;
- exit1:
-  cx_tok_deinit(&id_tok);
- exit2: {
-    cx_do_vec(&toks, struct cx_tok, t) { cx_tok_deinit(t); }
-    cx_vec_deinit(&toks);
-    return ok;
-  }
-}
-
 static ssize_t func_eval(struct cx_macro_eval *eval,
 			 struct cx_bin *bin,
 			 size_t tok_idx,
@@ -209,35 +141,6 @@ static bool func_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   struct cx_macro_eval *eval = cx_macro_eval_new(func_eval);
   cx_tok_init(cx_vec_push(&eval->toks), CX_TFIMP(), row, col)->as_ptr = imp;
   cx_tok_init(cx_vec_push(out), CX_TMACRO(), row, col)->as_ptr = eval;
-  return true;
-}
-
-static bool reset_imp(struct cx_scope *scope) {
-  cx_do_vec(&scope->stack, struct cx_box, v) { cx_box_deinit(v); }
-  cx_vec_clear(&scope->stack);
-  return true;
-}
-
-static bool copy_imp(struct cx_scope *scope) {
-  cx_copy(cx_push(scope), cx_test(cx_peek(scope, true)));
-  return true;
-}
-
-static bool clone_imp(struct cx_scope *scope) {
-  cx_clone(cx_push(scope), cx_test(cx_peek(scope, true)));
-  return true;
-}
-
-static bool flip_imp(struct cx_scope *scope) {
-  if (scope->stack.count < 2) {
-    struct cx *cx = scope->cx;
-    cx_error(cx, cx->row, cx->col, "Nothing to flip");
-    return false;
-  }
-
-  struct cx_box *ptr = cx_vec_peek(&scope->stack, 0), tmp = *ptr;
-  *ptr = *(ptr-1);
-  *(ptr-1) = tmp;
   return true;
 }
 
@@ -636,7 +539,6 @@ struct cx *cx_init(struct cx *cx) {
   cx_vec_init(&cx->calls, sizeof(struct cx_call));
   cx_vec_init(&cx->errors, sizeof(struct cx_error));
 
-  cx_add_macro(cx, "trait:", trait_parse);
   cx_add_macro(cx, "func:", func_parse);
   
   cx->opt_type = cx_add_type(cx, "Opt");
@@ -680,12 +582,7 @@ struct cx *cx_init(struct cx *cx) {
   cx->rfile_type = cx_init_file_type(cx, "RFile", cx->any_type, cx->file_type);
   cx->wfile_type = cx_init_file_type(cx, "WFile", cx->any_type, cx->file_type);
   cx->rwfile_type = cx_init_file_type(cx, "RWFile", cx->rfile_type, cx->wfile_type);
-  
-  cx_add_cfunc(cx, "|", reset_imp);
-  cx_add_cfunc(cx, "%", copy_imp, cx_arg("v", cx->opt_type));
-  cx_add_cfunc(cx, "%%", clone_imp, cx_arg("v", cx->opt_type));
-  cx_add_cfunc(cx, "~", flip_imp, cx_arg("v", cx->opt_type));
-  
+    
   cx_add_cfunc(cx, "=", eqval_imp, cx_arg("x", cx->opt_type), cx_narg("y", 0));
   cx_add_cfunc(cx, "==", equid_imp, cx_arg("x", cx->opt_type), cx_narg("y", 0));
 

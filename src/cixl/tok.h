@@ -64,6 +64,5 @@ struct cx_tok_type *CX_TUNGROUP();
 struct cx_tok_type *CX_TUNLAMBDA();
 struct cx_tok_type *CX_TUNVECT();
 struct cx_tok_type *CX_TVECT();
-struct cx_tok_type *CX_TZAP();
 
 #endif

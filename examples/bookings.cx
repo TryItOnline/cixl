@@ -30,7 +30,7 @@ rec: Capacity()
   total used Int;
 
 func: new-capacity(start end Time total used Int)
-  let: c Capacity new;
+  let: c new Capacity;
   $c put `start $start
   $c put `end   $end
   $c put `total $total
@@ -42,7 +42,7 @@ func: new-capacity(start end Time total used Int)
 */
 
 func: new-resource(q Int)
-  let: r Resource new;
+  let: r new Resource;
   $r put `id,      new Guid
   $r put `quantity $q
   $r put `calendar [new-capacity #min-time #max-time $q 0]
@@ -110,7 +110,7 @@ rec: Booking()
 
 func: new-booking(r Resource start end Time q Int)
   $start < $end else {fail 'Invalid booking length'}
-  let: b Booking new;
+  let: b new Booking;
   $b put `id,      new Guid
   $b put `resource $r
   $b put `start    $start

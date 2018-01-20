@@ -502,9 +502,6 @@ bool cx_parse_tok(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
     case ';':
       cx_tok_init(cx_vec_push(out), CX_TEND(), row, col);
       return true;
-    case '_':
-      cx_tok_init(cx_vec_push(out), CX_TZAP(), row, col);
-      return true;
     case '(':
       return parse_group(cx, in, out, lookup);
     case ')':
