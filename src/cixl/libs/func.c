@@ -9,6 +9,7 @@
 #include "cixl/libs/func.h"
 #include "cixl/types/fimp.h"
 #include "cixl/types/func.h"
+#include "cixl/types/vect.h"
 
 static ssize_t func_eval(struct cx_macro_eval *eval,
 			 struct cx_bin *bin,
@@ -104,6 +105,21 @@ static bool func_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   return true;
 }
 
+static bool imps_imp(struct cx_scope *scope) {
+  struct cx *cx = scope->cx;
+  struct cx_func *f = cx_test(cx_pop(scope, false))->as_ptr;
+  struct cx_vect *is = cx_vect_new();
+
+  for (struct cx_fimp **i = cx_vec_peek(&f->imps, 0);
+       i >= (struct cx_fimp **)f->imps.items;
+       i--) {
+    cx_box_init(cx_vec_push(&is->imp), cx->fimp_type)->as_ptr = *i;
+  }
+  
+  cx_box_init(cx_push(scope), scope->cx->vect_type)->as_ptr = is;
+  return true;
+}
+
 static struct cx_call *get_fimp_call(struct cx *cx) {
   for (struct cx_call *c = cx_vec_peek(&cx->calls, 0);
        c >= (struct cx_call *)cx->calls.items;
@@ -161,6 +177,7 @@ static bool upcall_imp(struct cx_scope *scope) {
 void cx_init_func(struct cx *cx) {
   cx_add_macro(cx, "func:", func_parse);
 
+  cx_add_cfunc(cx, "imps", imps_imp, cx_arg("f", cx->func_type));
   cx_add_cfunc(cx, "recall", recall_imp);
   cx_add_cfunc(cx, "upcall", upcall_imp);
 }

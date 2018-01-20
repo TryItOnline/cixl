@@ -1,4 +1,3 @@
-* move imps fn to func lib
 * change Table iter to return pairs
 ** add vect conv example to readme
 * add Table constructor from Seq

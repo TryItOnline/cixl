@@ -1,17 +1,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "cixl/bin.h"
 #include "cixl/buf.h"
 #include "cixl/call_iter.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
-#include "cixl/eval.h"
 #include "cixl/scope.h"
-#include "cixl/tok.h"
 #include "cixl/types/fimp.h"
 #include "cixl/types/func.h"
-#include "cixl/types/vect.h"
 
 static const void *get_imp_id(const void *value) {
   struct cx_fimp *const *imp = value;
@@ -127,21 +123,6 @@ struct cx_fimp *cx_func_get_imp(struct cx_func *func,
   return NULL;
 }
 
-static bool imps_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  struct cx_func *f = cx_test(cx_pop(scope, false))->as_ptr;
-  struct cx_vect *is = cx_vect_new();
-
-  for (struct cx_fimp **i = cx_vec_peek(&f->imps, 0);
-       i >= (struct cx_fimp **)f->imps.items;
-       i--) {
-    cx_box_init(cx_vec_push(&is->imp), cx->fimp_type)->as_ptr = *i;
-  }
-  
-  cx_box_init(cx_push(scope), scope->cx->vect_type)->as_ptr = is;
-  return true;
-}
-
 static bool equid_imp(struct cx_box *x, struct cx_box *y) {
   return x->as_ptr == y->as_ptr;
 }
@@ -180,8 +161,6 @@ struct cx_type *cx_init_func_type(struct cx *cx) {
   t->iter = iter_imp;
   t->write = write_imp;
   t->dump = dump_imp;
-
-  cx_add_cfunc(cx, "imps", imps_imp, cx_arg("f", t));
 
   return t;
 }
