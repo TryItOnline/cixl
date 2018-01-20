@@ -16,7 +16,7 @@ let: bookings   new-db-table 'booking.db'  [];
 */
 
 rec: Resource()
-  id       Guid
+  id       Sym
   quantity Int
   calendar Vect;
 
@@ -41,11 +41,12 @@ func: new-capacity(start end Time total used Int)
   Resources start out with one continous segment of full capacity in the calendar.
 */
 
-func: new-resource(q Int)
+func: new-resource(id Sym q Int)
   let: r new Resource;
-  $r put `id,      new Guid
+  $r put `id       $id
   $r put `quantity $q
   $r put `calendar [new-capacity #min-time #max-time $q 0]
+  upsert $resources $r
   $r;
 
 /*
@@ -117,6 +118,7 @@ func: new-booking(r Resource start end Time q Int)
   $b put `end      $end
   $b put `quantity $q
   update-resource $r $start $end 0 $q
+  upsert $bookings $b
   $b;
 
 /*
@@ -125,6 +127,6 @@ func: new-booking(r Resource start end Time q Int)
 */
 
 func: run-tests()
-  let: r new-resource 10;
+  let: r new-resource new Sym 10;
   new-booking $r today (today 1 days +) 5,
   new-booking $r now   (now 1h +)       6;

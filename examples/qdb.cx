@@ -24,17 +24,36 @@ func: new-db-table(n Str k Vect)
 
 func: get-rec-key(t DBTable r Rec)
   $t get `key map {, $r get $} vect;
+
+rec: DBChange()
+  table DBTable
+  key   Vect
+  rec   Rec
+  op    Sym;
+
+func: push-change(t DBTable k Vect r Rec o Sym)
+  let: c DBChange new;
+  $c put `table $t
+  $c put `key   $k
+  $c put `rec   $r
+  $c put `op    $o
+  $db-trans push $c;
   
 func: upsert(t DBTable r Rec)
   let: krs $t get `key-recs;
   let: rks $t get `rec-keys;  
   let: tk $rks get $r;
-
-  $tk if {
+  let: k get-rec-key $t $r;
+  let: tr $r %% ~ _;
+  
+  $tk if-else {
+    let: tr $krs $tk;
+    push-change $t $k $r `update
     delete $krs $tk
     delete $rks $r
+  } {
+    push-change $t $k $tr `insert
   }
   
-  let: k get-rec-key $t $r;
-  $krs put $k ($r %%)
+  $krs put $k $tr
   $rks put $r $k;

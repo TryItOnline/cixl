@@ -1,13 +1,14 @@
 * add Ref type
 
 * add file writing to bookings
-** change resource id to Sym
 ** change booking id to Int
 *** add Ref $next-booking-id
-** call upsert in constructors
-** add DBChange rec
-*** table rec op
 ** add qdb.commit
+* add type: macro
+** type: Size Int
+*** size 42 -> Size(42)
+*** inherit and register conversion fns
+** add DBKey Vect type
 * meta lib with read-iter
 ** move read and convert to iter
 *** keep bin ref in iter
@@ -30,10 +31,6 @@
 * add iter zip/unzip
 * add and/or tests
 * add filter tests
-* add type: macro
-** type: Size Int
-*** size 42 -> Size(42)
-*** inherit and register conversion fns
 * add ^ (pow)
 ** add as separator
 ** implement for int/rat in math
