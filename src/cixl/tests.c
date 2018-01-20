@@ -1,6 +1,7 @@
 #include "cixl/cx.h"
 #include "cixl/error.h"
 #include "cixl/eval.h"
+#include "cixl/libs/func.h"
 #include "cixl/libs/iter.h"
 #include "cixl/libs/math.h"
 #include "cixl/libs/rec.h"
@@ -31,6 +32,7 @@ static void run(struct cx *cx, const char *in) {
 static void comment_tests() {
   struct cx cx;
   cx_init(&cx);
+  cx_init_func(&cx);
   cx_init_iter(&cx);
   cx_init_math(&cx);
   
@@ -55,6 +57,7 @@ static void type_tests() {
 static void stack_tests() {
   struct cx cx;
   cx_init(&cx);
+  cx_init_func(&cx);
   cx_init_iter(&cx);
   cx_init_math(&cx);
   cx_init_stack(&cx);
@@ -90,6 +93,7 @@ static void if_tests() {
 static void let_tests() {
   struct cx cx;
   cx_init(&cx);
+  cx_init_func(&cx);
   cx_init_iter(&cx);
   cx_init_math(&cx);
   cx_init_str(&cx);
@@ -115,6 +119,7 @@ static void let_tests() {
 static void func_tests() {
   struct cx cx;
   cx_init(&cx);
+  cx_init_func(&cx);
   cx_init_iter(&cx);
   cx_init_math(&cx);
   cx_init_var(&cx);
@@ -144,6 +149,7 @@ static void func_tests() {
 static void iter_tests() {
   struct cx cx;
   cx_init(&cx);
+  cx_init_func(&cx);
   cx_init_iter(&cx);
   cx_init_math(&cx);
 
@@ -155,6 +161,7 @@ static void iter_tests() {
 static void int_tests() {
   struct cx cx;
   cx_init(&cx);
+  cx_init_func(&cx);
   cx_init_iter(&cx);
   cx_init_math(&cx);
 
@@ -170,6 +177,7 @@ static void int_tests() {
 static void char_tests() {
   struct cx cx;
   cx_init(&cx);
+  cx_init_func(&cx);
   cx_init_iter(&cx);
   cx_init_math(&cx);
   
@@ -213,6 +221,7 @@ static void sym_tests() {
 static void rat_tests() {
   struct cx cx;
   cx_init(&cx);
+  cx_init_func(&cx);
   cx_init_iter(&cx);
   cx_init_math(&cx);
 
@@ -249,6 +258,7 @@ static void guid_tests() {
 static void vect_tests() {
   struct cx cx;
   cx_init(&cx);
+  cx_init_func(&cx);
   cx_init_iter(&cx);
   cx_init_math(&cx);
   cx_init_stack(&cx);
@@ -284,6 +294,7 @@ static void table_tests() {
 static void math_tests() {
   struct cx cx;
   cx_init(&cx);
+  cx_init_func(&cx);
   cx_init_iter(&cx);
   cx_init_math(&cx);
 
@@ -297,6 +308,7 @@ static void math_tests() {
 static void rec_tests() {
   struct cx cx;
   cx_init(&cx);
+  cx_init_func(&cx);
   cx_init_rec(&cx);
   cx_init_stack(&cx);
   cx_init_var(&cx);
@@ -330,6 +342,7 @@ static void rec_tests() {
 static void compile_tests() {
   struct cx cx;
   cx_init(&cx);
+  cx_init_func(&cx);
   cx_init_iter(&cx);
   cx_init_math(&cx);
   cx_init_stack(&cx);

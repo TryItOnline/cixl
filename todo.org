@@ -7,7 +7,6 @@
 * add and/or tests
 * add filter tests
 * extract cond lib with if/?/!
-* extract func lib with func:/call/recall/upcall
 * add type: macro
 ** type: Size Int
 *** size 42 -> Size(42)
