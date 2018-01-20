@@ -92,6 +92,11 @@ static bool is_imp(struct cx_scope *scope) {
 void cx_init_type(struct cx *cx) {
   cx_add_macro(cx, "trait:", trait_parse);
   cx_add_cfunc(cx, "type", type_imp, cx_arg("v", cx->opt_type));
+  
+  cx_add_func(cx, "is",
+	      "$x type is $y",
+	       cx_arg("x", cx->opt_type), cx_arg("y", cx->meta_type));
+
   cx_add_cfunc(cx, "is", is_imp,
 	       cx_arg("x", cx->meta_type), cx_arg("y", cx->meta_type));
 }

@@ -891,6 +891,10 @@ Capitalized names are treated as types, the following types are defined out of t
    is A
 ...
 [#t]
+
+   | 42 is Str
+...
+[#f]
 ```
 
 ### Records
