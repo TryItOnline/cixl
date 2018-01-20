@@ -2,6 +2,7 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "cixl/bin.h"
 #include "cixl/box.h"
@@ -520,20 +521,48 @@ bool cx_load(struct cx *cx, const char *path) {
     cx_error(cx, cx->row, cx->col, "Failed opening file '%s': %d", path, errno);
     return false;
   }
-  
-  fseek(f, 0, SEEK_END);
-  size_t len = ftell(f);
-  rewind(f);
 
-  char *buf = malloc(len+1);
+  struct cx_vec toks;
+  cx_vec_init(&toks, sizeof(struct cx_tok));
+  bool ok = false;
   
-  if (fread(buf, len, 1 , f) != 1) {
-    cx_error(cx, cx->row, cx->col, "Failed reading file '%s': %d", path, errno);
+  if (!cx_parse(cx, f, &toks)) { goto exit1; }
+
+  if (!toks.count) {
+    ok = true;
+    goto exit1;
+  }
+
+  struct cx_bin *bin = cx_bin_new();
+  if (!cx_compile(cx, cx_vec_start(&toks), cx_vec_end(&toks), bin)) { goto exit2; }
+
+  char prev_wd[512];
+
+  if (!getcwd(prev_wd, sizeof(prev_wd))) {
+    cx_error(cx, cx->row, cx->col, "Failed getting dir: %d", errno);
+    goto exit2;    
+  }
+
+  char wd[512];
+  cx_get_dir(path, wd, sizeof(wd));
+
+  if (chdir(wd) == -1) {
+    cx_error(cx, cx->row, cx->col, "Failed changing dir: %d", errno);
+    goto exit2;
   }
   
-  fclose(f);
-  buf[len] = 0;
-  bool ok = cx_eval_str(cx, buf);
-  free(buf);
-  return ok;
+  ok = cx_eval(cx, bin, NULL);
+
+
+  if (chdir(prev_wd) == -1) {
+    cx_error(cx, cx->row, cx->col, "Failed changing dir: %d", errno);
+  }
+ exit2:
+  cx_bin_deref(bin);
+ exit1: {
+    cx_do_vec(&toks, struct cx_tok, t) { cx_tok_deinit(t); }
+    cx_vec_deinit(&toks);    
+    fclose(f);
+    return ok;
+  }
 }

@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "cixl/error.h"
 #include "cixl/util.h"
@@ -20,4 +21,13 @@ char *cx_fmt(const char *spec, ...) {
   char *res = cx_vfmt(spec, args);
   va_end(args);
   return res;
+}
+
+char *cx_get_dir(const char *in, char *out, size_t len) {
+  const char *pos = strrchr(in, '/');
+  if (!pos) { pos = strrchr(in, '\\'); }
+  if (!pos) { pos = in+strlen(in); }
+  strncpy(out, in, cx_min(pos-in+1, len));
+  out[pos-in+1] = 0;
+  return out;
 }

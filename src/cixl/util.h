@@ -37,5 +37,6 @@
 
 char *cx_vfmt(const char *spec, va_list args);
 char *cx_fmt(const char *spec, ...);
+char *cx_get_dir(const char *in, char *out, size_t len);
 
 #endif

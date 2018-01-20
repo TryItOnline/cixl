@@ -1,20 +1,36 @@
+* move imps fn to func lib
 * change Table iter to return pairs
 ** add vect conv example to readme
-* add Rec iter
-** copy Table
+* add Table constructor from Seq
 * add Ref type
 
 * add file writing to bookings
 ** change resource id to Sym
 ** change booking id to Int
 *** add Ref $next-booking-id
-** call insert in constructors
+** call upsert in constructors
 ** add DBChange rec
 *** table rec op
 ** add qdb.commit
 * meta lib with read-iter
 ** move read and convert to iter
 *** keep bin ref in iter
+* add switch: macro
+** var is optional
+*** bind if not bound already
+*** push before groups/funcs/fimps
+** add cond lib
+** if cond is group, eval
+*** with g pushed if present
+** if cond is literal, compare with =
+*** only if var is present
+** if cond is func/fimp, call
+** if cond is $id, compare with =
+*** only if var is present
+** if #t, eval unconditionally
+** allow single token actions
+*** call eval_token instead
+
 * add iter zip/unzip
 * add and/or tests
 * add filter tests
@@ -42,18 +58,3 @@
 ** replace with cx_tok.as_str, as_func, as_fimp etc.
 * replace box.as_ptr with as_func/fimp/etc
 * add str interpolation
-* add switch: macro
-** var is optional
-*** bind if not bound already
-*** push before groups/funcs/fimps
-** add cond lib
-** if cond is group, eval
-*** with g pushed if present
-** if cond is literal, compare with =
-*** only if var is present
-** if cond is func/fimp, call
-** if cond is $id, compare with =
-*** only if var is present
-** if #t, eval unconditionally
-** allow single token actions
-*** call eval_token instead
