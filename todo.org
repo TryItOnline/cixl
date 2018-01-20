@@ -1,3 +1,13 @@
+* add Ref type
+
+* add file writing to bookings
+** change resource id to Sym
+** change booking id to Int
+*** add Ref $next-booking-id
+** call insert in constructors
+** add DBChange rec
+*** table rec op
+** add qdb.commit
 * meta lib with read-iter
 ** move read and convert to iter
 *** keep bin ref in iter
@@ -28,8 +38,6 @@
 ** replace with cx_tok.as_str, as_func, as_fimp etc.
 * replace box.as_ptr with as_func/fimp/etc
 * add str interpolation
-* add Ref type
-
 * add switch: macro
 ** var is optional
 *** bind if not bound already
