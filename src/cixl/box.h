@@ -15,6 +15,7 @@ struct cx_func;
 struct cx_iter;
 struct cx_lambda;
 struct cx_pair;
+struct cx_ref;
 struct cx_scope;
 struct cx_str;
 struct cx_table;
@@ -33,6 +34,7 @@ struct cx_box {
     struct cx_pair  *as_pair;
     void            *as_ptr;
     struct cx_rat    as_rat;
+    struct cx_ref   *as_ref;
     struct cx_str   *as_str;
     struct cx_sym    as_sym;
     struct cx_table *as_table;

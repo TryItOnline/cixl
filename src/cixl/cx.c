@@ -28,6 +28,7 @@
 #include "cixl/types/pair.h"
 #include "cixl/types/rat.h"
 #include "cixl/types/rec.h"
+#include "cixl/types/ref.h"
 #include "cixl/types/str.h"
 #include "cixl/types/sym.h"
 #include "cixl/types/table.h"
@@ -201,6 +202,7 @@ struct cx *cx_init(struct cx *cx) {
   cx_malloc_init(&cx->lambda_alloc, CX_LAMBDA_SLAB_SIZE, sizeof(struct cx_lambda));
   cx_malloc_init(&cx->pair_alloc, CX_PAIR_SLAB_SIZE, sizeof(struct cx_pair));
   cx_malloc_init(&cx->rec_alloc, CX_REC_SLAB_SIZE, sizeof(struct cx_rec));
+  cx_malloc_init(&cx->ref_alloc, CX_REF_SLAB_SIZE, sizeof(struct cx_ref));
   cx_malloc_init(&cx->scope_alloc, CX_SCOPE_SLAB_SIZE, sizeof(struct cx_scope));
   cx_malloc_init(&cx->table_alloc, CX_TABLE_SLAB_SIZE, sizeof(struct cx_table));
   
@@ -244,7 +246,8 @@ struct cx *cx_init(struct cx *cx) {
   cx->func_type = cx_init_func_type(cx);
   cx->fimp_type = cx_init_fimp_type(cx);
   cx->lambda_type = cx_init_lambda_type(cx);
-
+  cx->ref_type = NULL;
+  
   cx->file_type = cx_init_file_type(cx, "File");
   cx->rfile_type = cx_init_file_type(cx, "RFile", cx->any_type, cx->file_type);
   cx->wfile_type = cx_init_file_type(cx, "WFile", cx->any_type, cx->file_type);
@@ -301,6 +304,7 @@ struct cx *cx_deinit(struct cx *cx) {
   cx_malloc_deinit(&cx->lambda_alloc);
   cx_malloc_deinit(&cx->pair_alloc);
   cx_malloc_deinit(&cx->rec_alloc);
+  cx_malloc_deinit(&cx->ref_alloc);
   cx_malloc_deinit(&cx->scope_alloc);
   cx_malloc_deinit(&cx->table_alloc);
   return cx;

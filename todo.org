@@ -1,8 +1,6 @@
-* add Ref type
-
 * add file writing to bookings
 ** change booking id to Int
-*** add Ref $next-booking-id
+*** add Ref next-booking-id
 ** add qdb.commit
 * add type: macro
 ** type: Size Int
@@ -28,6 +26,14 @@
 ** allow single token actions
 *** call eval_token instead
 
+* add fimp rets
+** add cx_func_ret like arg except value
+** add cx_args/cx_rets fns
+*** change add_func's to take nargs, args, nrets, rets
+** update func: macro to parse ret types
+*** support TN via a.sym_id
+** check types & move values in CX_ORETURN
+** check types in cx_fimp_call if ptr
 * add iter zip/unzip
 * add and/or tests
 * add filter tests

@@ -5,6 +5,7 @@
 #include "cixl/libs/iter.h"
 #include "cixl/libs/math.h"
 #include "cixl/libs/rec.h"
+#include "cixl/libs/ref.h"
 #include "cixl/libs/stack.h"
 #include "cixl/libs/str.h"
 #include "cixl/libs/table.h"
@@ -30,6 +31,7 @@ int main() {
   cx_init_math(&cx);
   cx_init_type(&cx);
   cx_init_rec(&cx);
+  cx_init_ref(&cx);
   cx_init_stack(&cx);
   cx_init_str(&cx);
   cx_init_table(&cx);

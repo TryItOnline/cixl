@@ -6,6 +6,7 @@
 #include "cixl/libs/iter.h"
 #include "cixl/libs/math.h"
 #include "cixl/libs/rec.h"
+#include "cixl/libs/ref.h"
 #include "cixl/libs/stack.h"
 #include "cixl/libs/str.h"
 #include "cixl/libs/table.h"
@@ -271,6 +272,18 @@ static void guid_tests() {
   cx_deinit(&cx);
 }
 
+static void ref_tests() {
+  struct cx cx;
+  cx_init(&cx);
+  cx_init_cond(&cx);
+  cx_init_ref(&cx);
+  cx_init_stack(&cx);
+
+  run(&cx, "#nil ref %, $ put-ref 42 get-ref = 42 check");
+  
+  cx_deinit(&cx);
+}
+
 static void vect_tests() {
   struct cx cx;
   cx_init(&cx);
@@ -390,6 +403,7 @@ void cx_tests() {
   rat_tests();
   time_tests();
   guid_tests();
+  ref_tests();
   vect_tests();
   table_tests();
   math_tests();

@@ -233,6 +233,24 @@ Some values are reference counted; strings, vectors, lambdas etc. Reference coun
 [[1 2 3]@1 [1 2 3]@1]
 ```
 
+References may be created manually, which enables using reference semantics for value types among other things.
+
+```
+   | let: r #nil ref;
+...$r
+...
+[Ref(#nil)@2]
+
+   put-ref 42
+...$r
+...
+[Ref(42)@2]
+
+   get-ref
+...
+[42]
+```
+
 ### Scopes
 Code enclosed in parens is evaluated in a separate scope, the last value on the stack is automatically returned on scope exit.
 
