@@ -48,7 +48,7 @@ func: upsert(t DBTable r Rec)
   
   $tk if-else {
     let: tr $krs $tk;
-    push-change $t $k $r `update
+    push-change $t $k $tr `update
     delete $krs $tk
     delete $rks $r
   } {
