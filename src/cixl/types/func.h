@@ -28,6 +28,7 @@ struct cx_func *cx_func_deinit(struct cx_func *func);
 			  
 struct cx_func_arg {
   char *id;
+  struct cx_sym sym_id;
   struct cx_type *type;
   struct cx_box value;
   int narg;

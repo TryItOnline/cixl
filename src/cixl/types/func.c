@@ -81,6 +81,7 @@ struct cx_fimp *cx_func_add_imp(struct cx_func *func,
 
     for (int i=0; i < nargs; i++) {
       struct cx_func_arg a = args[i];
+      if (a.id) { a.sym_id = cx_sym(func->cx, a.id); }
       *(struct cx_func_arg *)cx_vec_push(&imp_args) = a;
       if (i) { fputc(' ', id.stream); }
       print_arg_id(&a, &imp_args, id.stream);
