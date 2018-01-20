@@ -6,7 +6,6 @@
 * add iter zip/unzip
 * add and/or tests
 * add filter tests
-* extract cond lib with if/?/!
 * add type: macro
 ** type: Size Int
 *** size 42 -> Size(42)
@@ -30,9 +29,6 @@
 ** remove cx_tok.as_ptr
 ** replace with cx_tok.as_str, as_func, as_fimp etc.
 * replace box.as_ptr with as_func/fimp/etc
-* implement type.new for Int/Str/Rat/Time
-** execute first clause that tests ok
-** error if no match 
 * add str interpolation
 * add Ref type
 

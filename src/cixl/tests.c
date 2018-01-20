@@ -1,6 +1,7 @@
 #include "cixl/cx.h"
 #include "cixl/error.h"
 #include "cixl/eval.h"
+#include "cixl/libs/cond.h"
 #include "cixl/libs/func.h"
 #include "cixl/libs/iter.h"
 #include "cixl/libs/math.h"
@@ -32,6 +33,7 @@ static void run(struct cx *cx, const char *in) {
 static void comment_tests() {
   struct cx cx;
   cx_init(&cx);
+  cx_init_cond(&cx);
   cx_init_func(&cx);
   cx_init_iter(&cx);
   cx_init_math(&cx);
@@ -45,6 +47,7 @@ static void comment_tests() {
 static void type_tests() {
   struct cx cx;
   cx_init(&cx);
+  cx_init_cond(&cx);
   cx_init_type(&cx);
 
   run(&cx, "42 type Int = test");
@@ -57,6 +60,7 @@ static void type_tests() {
 static void stack_tests() {
   struct cx cx;
   cx_init(&cx);
+  cx_init_cond(&cx);
   cx_init_func(&cx);
   cx_init_iter(&cx);
   cx_init_math(&cx);
@@ -71,6 +75,7 @@ static void stack_tests() {
 static void group_tests() {
   struct cx cx;
   cx_init(&cx);
+  cx_init_cond(&cx);
 
   run(&cx, "(7 14 21) 21 = test");
 
@@ -80,6 +85,7 @@ static void group_tests() {
 static void if_tests() {
   struct cx cx;
   cx_init(&cx);
+  cx_init_cond(&cx);
   cx_init_iter(&cx);
   cx_init_str(&cx);
   
@@ -93,6 +99,7 @@ static void if_tests() {
 static void let_tests() {
   struct cx cx;
   cx_init(&cx);
+  cx_init_cond(&cx);
   cx_init_func(&cx);
   cx_init_iter(&cx);
   cx_init_math(&cx);
@@ -119,6 +126,7 @@ static void let_tests() {
 static void func_tests() {
   struct cx cx;
   cx_init(&cx);
+  cx_init_cond(&cx);
   cx_init_func(&cx);
   cx_init_iter(&cx);
   cx_init_math(&cx);
@@ -149,6 +157,7 @@ static void func_tests() {
 static void iter_tests() {
   struct cx cx;
   cx_init(&cx);
+  cx_init_cond(&cx);
   cx_init_func(&cx);
   cx_init_iter(&cx);
   cx_init_math(&cx);
@@ -161,6 +170,7 @@ static void iter_tests() {
 static void int_tests() {
   struct cx cx;
   cx_init(&cx);
+  cx_init_cond(&cx);
   cx_init_func(&cx);
   cx_init_iter(&cx);
   cx_init_math(&cx);
@@ -177,6 +187,7 @@ static void int_tests() {
 static void char_tests() {
   struct cx cx;
   cx_init(&cx);
+  cx_init_cond(&cx);
   cx_init_func(&cx);
   cx_init_iter(&cx);
   cx_init_math(&cx);
@@ -190,6 +201,7 @@ static void char_tests() {
 static void str_tests() {
   struct cx cx;
   cx_init(&cx);
+  cx_init_cond(&cx);
   cx_init_iter(&cx);
   cx_init_str(&cx);
   
@@ -208,6 +220,7 @@ static void str_tests() {
 static void sym_tests() {
   struct cx cx;
   cx_init(&cx);
+  cx_init_cond(&cx);
 
   run(&cx, "`foo = `foo test");
   run(&cx, "`foo = `bar !test");
@@ -221,6 +234,7 @@ static void sym_tests() {
 static void rat_tests() {
   struct cx cx;
   cx_init(&cx);
+  cx_init_cond(&cx);
   cx_init_func(&cx);
   cx_init_iter(&cx);
   cx_init_math(&cx);
@@ -234,6 +248,7 @@ static void rat_tests() {
 static void time_tests() {
   struct cx cx;
   cx_init(&cx);
+  cx_init_cond(&cx);
   cx_init_time(&cx);
 
   run(&cx, "now <= now test");
@@ -247,6 +262,7 @@ static void time_tests() {
 static void guid_tests() {
   struct cx cx;
   cx_init(&cx);
+  cx_init_cond(&cx);
   cx_init_stack(&cx);
 
   run(&cx, "new Guid, new Guid = !test");
@@ -258,6 +274,7 @@ static void guid_tests() {
 static void vect_tests() {
   struct cx cx;
   cx_init(&cx);
+  cx_init_cond(&cx);
   cx_init_func(&cx);
   cx_init_iter(&cx);
   cx_init_math(&cx);
@@ -276,6 +293,7 @@ static void vect_tests() {
 static void table_tests() {
   struct cx cx;
   cx_init(&cx);
+  cx_init_cond(&cx);
   cx_init_table(&cx);
   cx_init_var(&cx);
 
@@ -294,6 +312,7 @@ static void table_tests() {
 static void math_tests() {
   struct cx cx;
   cx_init(&cx);
+  cx_init_cond(&cx);
   cx_init_func(&cx);
   cx_init_iter(&cx);
   cx_init_math(&cx);
@@ -308,6 +327,7 @@ static void math_tests() {
 static void rec_tests() {
   struct cx cx;
   cx_init(&cx);
+  cx_init_cond(&cx);
   cx_init_func(&cx);
   cx_init_rec(&cx);
   cx_init_stack(&cx);
@@ -342,6 +362,7 @@ static void rec_tests() {
 static void compile_tests() {
   struct cx cx;
   cx_init(&cx);
+  cx_init_cond(&cx);
   cx_init_func(&cx);
   cx_init_iter(&cx);
   cx_init_math(&cx);
