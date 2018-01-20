@@ -75,7 +75,7 @@ char *parse_fimp(struct cx *cx,
       struct cx_type *type = tok->as_ptr;
       fputs(type->id, id.stream);
     } else if (tok->type == CX_TLITERAL()) {
-      cx_print(&tok->as_box, id.stream);
+      cx_dump(&tok->as_box, id.stream);
     } else if (tok->type == CX_TID()) {
       char *s = tok->as_ptr;
 

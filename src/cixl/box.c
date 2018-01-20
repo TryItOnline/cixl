@@ -79,8 +79,8 @@ bool cx_write(struct cx_box *box, FILE *out) {
   return true;
 }
 
-void cx_print(struct cx_box *box, FILE *out) {
-  cx_test(box->type->print)(box, out);
+void cx_dump(struct cx_box *box, FILE *out) {
+  cx_test(box->type->dump)(box, out);
 }
 
 enum cx_cmp cx_cmp_box(const void *x, const void *y) {

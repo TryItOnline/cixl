@@ -111,7 +111,7 @@ static void write_imp(struct cx_box *v, FILE *out) {
   fprintf(out, "'%s' guid", cx_guid_str(v->as_guid, s));
 }
 
-static void print_imp(struct cx_box *v, FILE *out) {
+static void dump_imp(struct cx_box *v, FILE *out) {
   char s[CX_GUID_LEN];
   fputs(cx_guid_str(v->as_guid, s), out);
 }
@@ -150,7 +150,7 @@ struct cx_type *cx_init_guid_type(struct cx *cx) {
   t->new = new_imp;
   t->equid = equid_imp;
   t->write = write_imp;
-  t->print = print_imp;
+  t->dump = dump_imp;
 
   cx_add_cfunc(cx, "guid", guid_imp, cx_arg("s", cx->str_type));
   cx_add_cfunc(cx, "str", str_imp, cx_arg("id", t));

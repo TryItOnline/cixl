@@ -88,11 +88,11 @@ static void write_imp(struct cx_box *v, FILE *out) {
   fputs(" .)", out);
 }
 
-static void print_imp(struct cx_box *v, FILE *out) {
+static void dump_imp(struct cx_box *v, FILE *out) {
   fputc('(', out);
-  cx_print(&v->as_pair->x, out);
+  cx_dump(&v->as_pair->x, out);
   fputc('.', out);
-  cx_print(&v->as_pair->y, out);
+  cx_dump(&v->as_pair->y, out);
   fprintf(out, ")@%d", v->as_pair->nrefs);
 }
 
@@ -108,7 +108,7 @@ struct cx_type *cx_init_pair_type(struct cx *cx) {
   t->ok = ok_imp;
   t->copy = copy_imp;
   t->write = write_imp;
-  t->print = print_imp;
+  t->dump = dump_imp;
   t->deinit = deinit_imp;
 
   cx_add_cfunc(cx, ".", cons_imp, 

@@ -112,7 +112,7 @@ static struct cx_iter *iter_imp(struct cx_box *v) {
   return &cx_int_iter_new(v->as_int)->iter;
 }
 
-static void print_imp(struct cx_box *v, FILE *out) {
+static void dump_imp(struct cx_box *v, FILE *out) {
   fprintf(out, "%" PRId64, v->as_int);
 }
 
@@ -123,8 +123,8 @@ struct cx_type *cx_init_int_type(struct cx *cx) {
   t->cmp = cmp_imp;
   t->ok = ok_imp;
   t->iter = iter_imp;
-  t->write = print_imp;
-  t->print = print_imp;
+  t->write = dump_imp;
+  t->dump = dump_imp;
   
   cx_add_cfunc(cx, "++", inc_imp, cx_arg("v", t));
   cx_add_cfunc(cx, "--", dec_imp, cx_arg("v", t));

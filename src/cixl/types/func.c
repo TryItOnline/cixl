@@ -67,7 +67,7 @@ static void print_arg_id(struct cx_func_arg *a,
   } else if (a->narg != -1) {
     fprintf(out, "%d", a->narg);
   } else {
-    cx_print(&a->value, out);
+    cx_dump(&a->value, out);
   }
 }
 
@@ -168,7 +168,7 @@ static void write_imp(struct cx_box *value, FILE *out) {
   fprintf(out, "&%s", func->id);
 }
 
-static void print_imp(struct cx_box *value, FILE *out) {
+static void dump_imp(struct cx_box *value, FILE *out) {
   struct cx_func *func = value->as_ptr;
   fprintf(out, "Func(%s)", func->id);
 }
@@ -179,7 +179,7 @@ struct cx_type *cx_init_func_type(struct cx *cx) {
   t->call = call_imp;
   t->iter = iter_imp;
   t->write = write_imp;
-  t->print = print_imp;
+  t->dump = dump_imp;
 
   cx_add_cfunc(cx, "imps", imps_imp, cx_arg("f", t));
 

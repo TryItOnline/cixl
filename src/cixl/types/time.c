@@ -75,7 +75,7 @@ static void write_imp(struct cx_box *v, FILE *out) {
   fputs("] time)", out);
 }
 
-static void print_imp(struct cx_box *v, FILE *out) {
+static void dump_imp(struct cx_box *v, FILE *out) {
   fputs("Time(", out);
   struct cx_time *t = &v->as_time;
   
@@ -101,7 +101,7 @@ struct cx_type *cx_init_time_type(struct cx *cx) {
   t->cmp = cmp_imp;
   t->ok = ok_imp;
   t->write = write_imp;
-  t->print = print_imp;
+  t->dump = dump_imp;
   return t;
 }
 

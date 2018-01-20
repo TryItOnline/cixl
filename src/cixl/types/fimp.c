@@ -169,7 +169,7 @@ static void write_imp(struct cx_box *value, FILE *out) {
   fprintf(out, "&%s<%s>", imp->func->id, imp->id);
 }
 
-static void print_imp(struct cx_box *value, FILE *out) {
+static void dump_imp(struct cx_box *value, FILE *out) {
   struct cx_fimp *imp = value->as_ptr;
   fprintf(out, "Fimp(%s %s)", imp->func->id, imp->id);
 }
@@ -180,6 +180,6 @@ struct cx_type *cx_init_fimp_type(struct cx *cx) {
   t->call = call_imp;
   t->iter = iter_imp;
   t->write = write_imp;
-  t->print = print_imp;
+  t->dump = dump_imp;
   return t;
 }

@@ -69,8 +69,8 @@ struct cx_box *cx_peek(struct cx_scope *scope, bool silent) {
   return cx_vec_peek(&scope->stack, 0);
 }
 
-void cx_fprint_stack(struct cx_scope *scope, FILE *out) {
-  cx_vect_print(&scope->stack, out);
+void cx_stackdump(struct cx_scope *scope, FILE *out) {
+  cx_vect_dump(&scope->stack, out);
   fputc('\n', out);
 }
 

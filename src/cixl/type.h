@@ -27,7 +27,7 @@ struct cx_type {
   void (*clone)(struct cx_box *dst, struct cx_box *src);
   struct cx_iter *(*iter)(struct cx_box *);
   void (*write)(struct cx_box *, FILE *);
-  void (*print)(struct cx_box *, FILE *);
+  void (*dump)(struct cx_box *, FILE *);
   void (*deinit)(struct cx_box *);
 
   void (*type_deinit)(struct cx_type *);

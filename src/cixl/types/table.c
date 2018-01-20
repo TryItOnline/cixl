@@ -166,7 +166,7 @@ static void write_imp(struct cx_box *v, FILE *out) {
   fputc(')', out);
 }
 
-static void print_imp(struct cx_box *v, FILE *out) {
+static void dump_imp(struct cx_box *v, FILE *out) {
   struct cx_table *t = v->as_table;
   fputs("Table(", out);
   char sep = 0;
@@ -174,9 +174,9 @@ static void print_imp(struct cx_box *v, FILE *out) {
   cx_do_set(&t->entries, struct cx_table_entry, e) {
     if (sep) { fputc(sep, out); }
     fputc('(', out);
-    cx_print(&e->key, out);
+    cx_dump(&e->key, out);
     fputc(' ', out);
-    cx_print(&e->val, out);
+    cx_dump(&e->val, out);
     fputc(')', out);
     sep = ' ';
   }
@@ -198,7 +198,7 @@ struct cx_type *cx_init_table_type(struct cx *cx) {
   t->clone = clone_imp;
   t->iter = iter_imp;
   t->write = write_imp;
-  t->print = print_imp;
+  t->dump = dump_imp;
   t->deinit = deinit_imp;
   
   return t;

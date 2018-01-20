@@ -101,7 +101,7 @@ static void write_imp(struct cx_box *v, FILE *out) {
   fprintf(out, "(%s%" PRIu64 " %" PRIu64 " /)", r->neg ? "-" : "", r->num, r->den);
 }
 
-static void print_imp(struct cx_box *v, FILE *out) {
+static void dump_imp(struct cx_box *v, FILE *out) {
   struct cx_rat *r = &v->as_rat;
   fprintf(out, "%s%" PRIu64 "/%" PRIu64, r->neg ? "-" : "", r->num, r->den);
 }
@@ -112,7 +112,7 @@ struct cx_type *cx_init_rat_type(struct cx *cx) {
   t->cmp = cmp_imp;
   t->ok = ok_imp;
   t->write = write_imp;
-  t->print = print_imp;
+  t->dump = dump_imp;
 
   cx_add_cfunc(cx, "int", int_imp, cx_arg("r", t));
   

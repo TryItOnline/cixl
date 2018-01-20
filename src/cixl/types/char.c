@@ -38,7 +38,7 @@ static void copy_imp(struct cx_box *dst, struct cx_box *src) {
   dst->as_char = src->as_char;
 }
 
-static void print_imp(struct cx_box *v, FILE *out) {
+static void dump_imp(struct cx_box *v, FILE *out) {
   char c = v->as_char;
   
   switch (c) {
@@ -62,8 +62,8 @@ struct cx_type *cx_init_char_type(struct cx *cx) {
   t->equid = equid_imp;
   t->ok = ok_imp;
   t->copy = copy_imp;
-  t->write = print_imp;
-  t->print = print_imp;
+  t->write = dump_imp;
+  t->dump = dump_imp;
   
   cx_add_cfunc(cx, "upper", upper_imp, cx_arg("c", t));
   cx_add_cfunc(cx, "lower", lower_imp, cx_arg("c", t));

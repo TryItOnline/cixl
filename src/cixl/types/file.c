@@ -38,7 +38,7 @@ static void copy_imp(struct cx_box *dst, struct cx_box *src) {
   dst->as_file = cx_file_ref(src->as_file);
 }
 
-static void print_imp(struct cx_box *v, FILE *out) {
+static void dump_imp(struct cx_box *v, FILE *out) {
   fprintf(out, "%s(%p)@%d", v->type->id, v->as_file, v->as_file->nrefs);
 }
 
@@ -55,7 +55,7 @@ struct cx_type *_cx_init_file_type(struct cx *cx, const char *name, ...) {
   t->equid = equid_imp;
   t->ok = ok_imp;
   t->copy = copy_imp;
-  t->print = print_imp;
+  t->dump = dump_imp;
   t->deinit = deinit_imp;
   return t;
 }

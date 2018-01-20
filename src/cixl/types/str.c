@@ -114,7 +114,7 @@ static void write_imp(struct cx_box *v, FILE *out) {
   fprintf(out, "'%s'", v->as_str->data);
 }
 
-static void print_imp(struct cx_box *v, FILE *out) {
+static void dump_imp(struct cx_box *v, FILE *out) {
   fprintf(out, "'%s'@%d", v->as_str->data, v->as_str->nrefs);
 }
 
@@ -132,7 +132,7 @@ struct cx_type *cx_init_str_type(struct cx *cx) {
   t->copy = copy_imp;
   t->iter = iter_imp;
   t->write = write_imp;
-  t->print = print_imp;
+  t->dump = dump_imp;
   t->deinit = deinit_imp;
 
   cx_add_cfunc(cx, "int", int_imp, cx_arg("s", t));

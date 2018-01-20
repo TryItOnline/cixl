@@ -65,7 +65,7 @@ static void write_imp(struct cx_box *v, FILE *out) {
   fputc(')', out);
 }
 
-static void print_imp(struct cx_box *v, FILE *out) {
+static void dump_imp(struct cx_box *v, FILE *out) {
   struct cx_rec *r = v->as_ptr;
   fprintf(out, "%s(", v->type->id);
   char sep = 0;
@@ -73,7 +73,7 @@ static void print_imp(struct cx_box *v, FILE *out) {
   cx_do_set(&r->values, struct cx_field_value, v) {
     if (sep) { fputc(sep, out); }
     fprintf(out, "(%s ", v->id.id);
-    cx_print(&v->box, out);
+    cx_dump(&v->box, out);
     fputc(')', out);
     sep = ' ';
   }
@@ -104,7 +104,7 @@ struct cx_rec_type *cx_rec_type_init(struct cx_rec_type *type,
   type->imp.copy = copy_imp;
   type->imp.clone = clone_imp;
   type->imp.write = write_imp;
-  type->imp.print = print_imp;
+  type->imp.dump = dump_imp;
   type->imp.deinit = deinit_imp;
 
   type->imp.type_deinit = type_deinit_imp;

@@ -1,4 +1,3 @@
-* rename type.print to dump
 * meta lib with read-iter
 ** move read and convert to iter
 *** keep bin ref in iter
@@ -23,7 +22,7 @@
 
 * add lets: macro
 ** typecheck and bind stack to vars
-* implement Cmp for Sym/Guid/Vect/Rec
+* implement Cmp for Sym/Guid
 * use cx_str for CX_TID
 ** remove cx_tok.as_ptr
 ** replace with cx_tok.as_str, as_func, as_fimp etc.

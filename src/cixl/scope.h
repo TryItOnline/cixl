@@ -23,7 +23,7 @@ void cx_scope_deref(struct cx_scope *scope);
 struct cx_box *cx_push(struct cx_scope *scope);
 struct cx_box *cx_pop(struct cx_scope *scope, bool silent);
 struct cx_box *cx_peek(struct cx_scope *scope, bool silent);
-void cx_fprint_stack(struct cx_scope *scope, FILE *out);
+void cx_stackdump(struct cx_scope *scope, FILE *out);
 
 struct cx_box *cx_get_var(struct cx_scope *scope, struct cx_sym id, bool silent);
 struct cx_box *cx_put_var(struct cx_scope *scope, struct cx_sym id, bool force);

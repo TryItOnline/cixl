@@ -69,7 +69,7 @@ static struct cx_iter *iter_imp(struct cx_box *v) {
   return cx_call_iter_new(v);
 }
 
-static void print_imp(struct cx_box *value, FILE *out) {
+static void dump_imp(struct cx_box *value, FILE *out) {
   struct cx_lambda *l = value->as_ptr;
   fprintf(out, "Lambda(%p)@%d", l, l->nrefs);
 }
@@ -84,7 +84,7 @@ struct cx_type *cx_init_lambda_type(struct cx *cx) {
   t->call = call_imp;
   t->copy = copy_imp;
   t->iter = iter_imp;
-  t->print = print_imp;
+  t->dump = dump_imp;
   t->deinit = deinit_imp;
   return t;
 }

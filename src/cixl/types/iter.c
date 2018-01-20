@@ -51,7 +51,7 @@ static struct cx_iter *iter_imp(struct cx_box *v) {
   return cx_iter_ref(v->as_iter);
 }
 
-static void print_imp(struct cx_box *v, FILE *out) {
+static void dump_imp(struct cx_box *v, FILE *out) {
   fprintf(out, "Iter(%p)@%d", v->as_iter, v->as_iter->nrefs);
 }
 
@@ -65,7 +65,7 @@ struct cx_type *cx_init_iter_type(struct cx *cx) {
   t->ok = ok_imp;
   t->copy = copy_imp;
   t->iter = iter_imp;
-  t->print = print_imp;
+  t->dump = dump_imp;
   t->deinit = deinit_imp;
 
   return t;
