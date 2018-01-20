@@ -1,4 +1,3 @@
-* rename test to check
 * rename type.print to dump
 * meta lib with read-iter
 ** move read and convert to iter

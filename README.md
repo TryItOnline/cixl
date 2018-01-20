@@ -339,13 +339,13 @@ Error in row 1, col 6:
 Going down!
 ```
 
-While ```test``` may be used to signal an error when the specified condition doesn't hold.
+While ```check``` may be used to signal an error when the specified condition doesn't hold.
 
 ```
-   | 1 = 2 test
+   | 1 = 2 check
 ...
 Error in row 1, col 7:
-Test failed
+Check failed
 ```
 
 ### Lambdas

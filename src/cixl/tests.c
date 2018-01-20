@@ -38,8 +38,8 @@ static void comment_tests() {
   cx_init_iter(&cx);
   cx_init_math(&cx);
   
-  run(&cx, "1 //testing testing\n+ 2 = 3 test");
-  run(&cx, "1 /*testing\ntesting*/+ 2 = 3 test");
+  run(&cx, "1 //foo bar\n+ 2 = 3 check");
+  run(&cx, "1 /*foo \n bar*/+ 2 = 3 check");
 
   cx_deinit(&cx);
 }
@@ -50,9 +50,9 @@ static void type_tests() {
   cx_init_cond(&cx);
   cx_init_type(&cx);
 
-  run(&cx, "42 type Int = test");
-  run(&cx, "Int is A test");
-  run(&cx, "! (A is Int) test");
+  run(&cx, "42 type Int = check");
+  run(&cx, "Int is A check");
+  run(&cx, "! (A is Int) check");
 
   cx_deinit(&cx);
 }
@@ -66,8 +66,8 @@ static void stack_tests() {
   cx_init_math(&cx);
   cx_init_stack(&cx);
 
-  run(&cx, "7 14 % + 28 = test");
-  run(&cx, "7 14 % _ + 21 = test");
+  run(&cx, "7 14 % + 28 = check");
+  run(&cx, "7 14 % _ + 21 = check");
 
   cx_deinit(&cx);
 }
@@ -77,7 +77,7 @@ static void group_tests() {
   cx_init(&cx);
   cx_init_cond(&cx);
 
-  run(&cx, "(7 14 21) 21 = test");
+  run(&cx, "(7 14 21) 21 = check");
 
   cx_deinit(&cx);
 }
@@ -89,10 +89,10 @@ static void if_tests() {
   cx_init_iter(&cx);
   cx_init_str(&cx);
   
-  run(&cx, "#t if 42 = 42 test");
-  run(&cx, "#f else 42 = 42 test");
-  run(&cx, "#t if-else `yes `no = `yes test");
-  run(&cx, "#f if-else `yes `no = `no test");
+  run(&cx, "#t if 42 = 42 check");
+  run(&cx, "#f else 42 = 42 check");
+  run(&cx, "#t if-else `yes `no = `yes check");
+  run(&cx, "#f if-else `yes `no = `no check");
   cx_deinit(&cx);
 }
 
@@ -106,19 +106,19 @@ static void let_tests() {
   cx_init_str(&cx);
   cx_init_var(&cx);
 
-  run(&cx, "(let: foo 42; $foo 42 = test)");
-  run(&cx, "(let: (x y z) 1 2, 3 + 4; $x + $y + $z 10 = test)");
-  run(&cx, "(let: (foo Int bar Str) 7 '35'; $foo, int $bar + = 42 test)");
+  run(&cx, "(let: foo 42; $foo 42 = check)");
+  run(&cx, "(let: (x y z) 1 2, 3 + 4; $x + $y + $z 10 = check)");
+  run(&cx, "(let: (foo Int bar Str) 7 '35'; $foo, int $bar + = 42 check)");
 
-  run(&cx, "(get-var `foo !test "
+  run(&cx, "(get-var `foo !check "
            " put-var `foo 42 "
-           " get-var `foo = 42 test)");
+           " get-var `foo = 42 check)");
 
   run(&cx,
       "(let: foo 42; "
       " delete-var `foo "
       " let: foo 'foo'; "
-      " $foo = 'foo' test)");
+      " $foo = 'foo' check)");
   
   cx_deinit(&cx);
 }
@@ -132,24 +132,24 @@ static void func_tests() {
   cx_init_math(&cx);
   cx_init_var(&cx);
   
-  run(&cx, "func: foo() 42; foo = 42 test");
-  run(&cx, "(let: x 42; func: foo() $x;) &foo call = 42 test");
-  run(&cx, "func: bar(x A) $x + 35; bar 7 42 = test");
-  run(&cx, "func: baz(x y Int z T0) $x + $y + $z; baz 1 3 5 9 = test");
+  run(&cx, "func: foo() 42; foo = 42 check");
+  run(&cx, "(let: x 42; func: foo() $x;) &foo call = 42 check");
+  run(&cx, "func: bar(x A) $x + 35; bar 7 42 = check");
+  run(&cx, "func: baz(x y Int z T0) $x + $y + $z; baz 1 3 5 9 = check");
 
   run(&cx,
       "func: maybe-add(x y Num) $x + $y; "
       "func: maybe-add(x y Int) $x = 42 if-else 42 {upcall $x $y}; "
-      "maybe-add 1 2 3 = test "
-      "maybe-add 42 2 42 = test");
+      "maybe-add 1 2 3 = check "
+      "maybe-add 42 2 42 = check");
 
   run(&cx,
       "func: answer(0) 0; "
       "func: answer(x Int) $x; "
       "func: answer(42) 'correct'; "
-      "answer 0 0 = test "
-      "answer 1 1 = test "
-      "answer 42 'correct' = test");
+      "answer 0 0 = check "
+      "answer 1 1 = check "
+      "answer 42 'correct' = check");
 
   cx_deinit(&cx);
 }
@@ -162,7 +162,7 @@ static void iter_tests() {
   cx_init_iter(&cx);
   cx_init_math(&cx);
 
-  run(&cx, "0, 5 map &++, $ for &+ test");
+  run(&cx, "0, 5 map &++, $ for &+ check");
   
   cx_deinit(&cx);
 }
@@ -175,11 +175,11 @@ static void int_tests() {
   cx_init_iter(&cx);
   cx_init_math(&cx);
 
-  run(&cx, "42 test");
-  run(&cx, "0! test");
-  run(&cx, "1 = 2! test");
-  run(&cx, "42 str<Int> '42' = test");
-  run(&cx, "0, 5 for &+ = 10 test");
+  run(&cx, "42 check");
+  run(&cx, "0! check");
+  run(&cx, "1 = 2! check");
+  run(&cx, "42 str<Int> '42' = check");
+  run(&cx, "0, 5 for &+ = 10 check");
   
   cx_deinit(&cx);
 }
@@ -192,8 +192,8 @@ static void char_tests() {
   cx_init_iter(&cx);
   cx_init_math(&cx);
   
-  run(&cx, "\\a upper \\A = test");
-  run(&cx, "\\0 int + 7 char \\7 = test");
+  run(&cx, "\\a upper \\A = check");
+  run(&cx, "\\0 int + 7 char \\7 = check");
   
   cx_deinit(&cx);
 }
@@ -205,14 +205,14 @@ static void str_tests() {
   cx_init_iter(&cx);
   cx_init_str(&cx);
   
-  run(&cx, "'foo' test");
-  run(&cx, "''! test");
-  run(&cx, "'foo' = 'foo' test");
-  run(&cx, "'foo' = 'bar' ! test");
-  run(&cx, "'foo' == 'foo' ! test");
-  run(&cx, "'foo' upper = 'FOO' test");
-  run(&cx, "'foobar' 3 get \\b = test");
-  run(&cx, "'42' int 42 = test");
+  run(&cx, "'foo' check");
+  run(&cx, "''! check");
+  run(&cx, "'foo' = 'foo' check");
+  run(&cx, "'foo' = 'bar' ! check");
+  run(&cx, "'foo' == 'foo' ! check");
+  run(&cx, "'foo' upper = 'FOO' check");
+  run(&cx, "'foobar' 3 get \\b = check");
+  run(&cx, "'42' int 42 = check");
   
   cx_deinit(&cx);
 }
@@ -222,11 +222,11 @@ static void sym_tests() {
   cx_init(&cx);
   cx_init_cond(&cx);
 
-  run(&cx, "`foo = `foo test");
-  run(&cx, "`foo = `bar !test");
-  run(&cx, "'foo' sym = `foo test");
-  run(&cx, "`foo str = 'foo' test");
-  run(&cx, "new Sym, new Sym = !test");
+  run(&cx, "`foo = `foo check");
+  run(&cx, "`foo = `bar !check");
+  run(&cx, "'foo' sym = `foo check");
+  run(&cx, "`foo str = 'foo' check");
+  run(&cx, "new Sym, new Sym = !check");
     
   cx_deinit(&cx);
 }
@@ -239,8 +239,8 @@ static void rat_tests() {
   cx_init_iter(&cx);
   cx_init_math(&cx);
 
-  run(&cx, "1 / 2, 5 / 2 *, 5 / 4 = test");
-  run(&cx, "1 / 2, 5 / 2 +, 3 / 1 = test");
+  run(&cx, "1 / 2, 5 / 2 *, 5 / 4 = check");
+  run(&cx, "1 / 2, 5 / 2 +, 3 / 1 = check");
   
   cx_deinit(&cx);
 }
@@ -251,10 +251,10 @@ static void time_tests() {
   cx_init_cond(&cx);
   cx_init_time(&cx);
 
-  run(&cx, "now <= now test");
-  run(&cx, "[1 0 0 24] time days = 367 test");
-  run(&cx, "2m 120s = test");
-  run(&cx, "1 days 1h + 2 * 50h = test");
+  run(&cx, "now <= now check");
+  run(&cx, "[1 0 0 24] time days = 367 check");
+  run(&cx, "2m 120s = check");
+  run(&cx, "1 days 1h + 2 * 50h = check");
   
   cx_deinit(&cx);
 }
@@ -265,8 +265,8 @@ static void guid_tests() {
   cx_init_cond(&cx);
   cx_init_stack(&cx);
 
-  run(&cx, "new Guid, new Guid = !test");
-  run(&cx, "new Guid % str guid = test");
+  run(&cx, "new Guid, new Guid = !check");
+  run(&cx, "new Guid % str guid = check");
   
   cx_deinit(&cx);
 }
@@ -280,12 +280,12 @@ static void vect_tests() {
   cx_init_math(&cx);
   cx_init_stack(&cx);
 
-  run(&cx, "1 2 3 [4 5] len 2 = test");
-  run(&cx, "[1 2 3] pop 3 = test");
-  run(&cx, "[1 2 3] % 4 push<Vect A> len 4 = test");
-  run(&cx, "[1 2] for {2 *} + 6 = test");
-  run(&cx, "[1 2] < [3 4] test");
-  run(&cx, "[1 2 3] > [1 2] test");
+  run(&cx, "1 2 3 [4 5] len 2 = check");
+  run(&cx, "[1 2 3] pop 3 = check");
+  run(&cx, "[1 2 3] % 4 push<Vect A> len 4 = check");
+  run(&cx, "[1 2] for {2 *} + 6 = check");
+  run(&cx, "[1 2] < [3 4] check");
+  run(&cx, "[1 2 3] > [1 2] check");
   
   cx_deinit(&cx);
 }
@@ -301,10 +301,10 @@ static void table_tests() {
            " $t put 1 'foo'"
            " $t put 2 'bar'"
            " $t put 1 'baz'"
-           " $t get 1 = 'baz' test"
-           " $t len = 2 test"
+           " $t get 1 = 'baz' check"
+           " $t len = 2 check"
            " $t delete 2"
-           " $t len = 1 test)");
+           " $t len = 1 check)");
 
   cx_deinit(&cx);
 }
@@ -317,9 +317,9 @@ static void math_tests() {
   cx_init_iter(&cx);
   cx_init_math(&cx);
 
-  run(&cx, "21 +<Int Int> 21 = 42 test");
-  run(&cx, "7 + 14, 7 + 14 + = 42 test");
-  run(&cx, "fib 50 = 12586269025 test");
+  run(&cx, "21 +<Int Int> 21 = 42 check");
+  run(&cx, "7 + 14, 7 + 14 + = 42 check");
+  run(&cx, "fib 50 = 12586269025 check");
 
   cx_deinit(&cx);
 }
@@ -336,25 +336,25 @@ static void rec_tests() {
   run(&cx,
       "rec: Foo() x Int y Str; "
       "(let: foo new Foo; "
-      " $foo !test "
+      " $foo !check "
       " $foo put `x 42 "
-      " $foo test "
-      " $foo get `x = 42 test "
-      " $foo get `y = #nil test)");
+      " $foo check "
+      " $foo get `x = 42 check "
+      " $foo get `y = #nil check)");
 
   run(&cx,
       "let: (bar baz) new Foo %%; "
       "$bar put `x 42 "
       "$baz put `x 42 "
-      "$bar = $baz test "
+      "$bar = $baz check "
       "$bar put `y 'bar' "
-      "$bar = $baz !test "
+      "$bar = $baz !check "
       "$baz put `y 'baz' "
-      "$bar = $baz !test");
+      "$bar = $baz !check");
   
   run(&cx,
       "func: =(a b Foo) $a get `x, $b get `x =; "
-      "$bar = $baz test");
+      "$bar = $baz check");
   
   cx_deinit(&cx);
 }
@@ -368,7 +368,7 @@ static void compile_tests() {
   cx_init_math(&cx);
   cx_init_stack(&cx);
 
-  run(&cx, "new Bin %, $ compile '1 + 2' call = 3 test");
+  run(&cx, "new Bin %, $ compile '1 + 2' call = 3 check");
   cx_deinit(&cx);
 }
 
