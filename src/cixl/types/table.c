@@ -4,6 +4,7 @@
 #include "cixl/error.h"
 #include "cixl/scope.h"
 #include "cixl/types/iter.h"
+#include "cixl/types/pair.h"
 #include "cixl/types/table.h"
 
 struct cx_table_iter {
@@ -13,11 +14,12 @@ struct cx_table_iter {
 };
 
 bool table_next(struct cx_iter *iter, struct cx_box *out, struct cx_scope *scope) {
+  struct cx *cx = scope->cx;
   struct cx_table_iter *it = cx_baseof(iter, struct cx_table_iter, iter);
 
   if (it->i < it->table->entries.members.count) {
     struct cx_table_entry *e = cx_vec_get(&it->table->entries.members, it->i);
-    cx_copy(out, &e->val);
+    cx_box_init(out, cx->pair_type)->as_pair = cx_pair_new(cx, &e->key, &e->val);
     it->i++;
     return true;
   }

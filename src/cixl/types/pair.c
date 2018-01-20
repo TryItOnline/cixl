@@ -22,7 +22,12 @@ struct cx_pair *cx_pair_ref(struct cx_pair *pair) {
 void cx_pair_deref(struct cx_pair *pair, struct cx *cx) {
   cx_test(pair->nrefs);
   pair->nrefs--;
-  if (!pair->nrefs) { cx_free(&cx->pair_alloc, pair); }
+  
+  if (!pair->nrefs) {
+    cx_box_deinit(&pair->x);
+    cx_box_deinit(&pair->y);
+    cx_free(&cx->pair_alloc, pair);
+  }
 }
 
 static bool cons_imp(struct cx_scope *scope) {

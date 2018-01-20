@@ -306,6 +306,8 @@ static void table_tests() {
            " $t delete 2"
            " $t len = 1 check)");
 
+  run(&cx, "([(1.'foo') (2.'bar')] table vect len = 2 check");
+  
   cx_deinit(&cx);
 }
 

@@ -9,6 +9,8 @@
 #include "cixl/tok.h"
 #include "cixl/types/func.h"
 #include "cixl/types/fimp.h"
+#include "cixl/types/iter.h"
+#include "cixl/types/pair.h"
 #include "cixl/types/table.h"
 
 static bool check_key_type(struct cx_table *tbl, struct cx_type *typ) {  
@@ -90,6 +92,32 @@ static bool len_imp(struct cx_scope *scope) {
   return true;
 }
 
+static bool seq_imp(struct cx_scope *scope) {
+  struct cx *cx = scope->cx;
+  struct cx_box in = *cx_test(cx_pop(scope, false));
+  struct cx_iter *it = cx_iter(&in);
+  struct cx_table *out = cx_table_new(cx);
+  bool ok = false;
+  struct cx_box p;
+  
+  while (cx_iter_next(it, &p, scope)) {
+    if (!check_key_type(out, p.as_pair->x.type)) {
+      cx_table_deref(out);
+      goto exit;
+    }
+    
+    cx_table_put(out, &p.as_pair->x, &p.as_pair->y);
+    cx_box_deinit(&p);
+  }
+
+  cx_box_init(cx_push(scope), cx->table_type)->as_ptr = out;
+  ok = true;
+ exit:
+  cx_box_deinit(&in);
+  cx_iter_deref(it);
+  return ok;
+}
+
 void cx_init_table(struct cx *cx) {
   cx_add_cfunc(cx, "get", get_imp,
 	       cx_arg("tbl", cx->table_type), cx_arg("key", cx->cmp_type));
@@ -104,4 +132,6 @@ void cx_init_table(struct cx *cx) {
 
   cx_add_cfunc(cx, "len", len_imp,
 	       cx_arg("tbl", cx->table_type));
+
+  cx_add_cfunc(cx, "table", seq_imp, cx_arg("in", cx->seq_type));
 }
