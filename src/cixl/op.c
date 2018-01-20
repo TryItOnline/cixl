@@ -193,21 +193,27 @@ cx_op_type(CX_OPUSH, {
     type.eval = push_eval;
   });
 
-static bool putarg_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
-  struct cx_scope *s = cx_scope(cx, 0);
+static bool putargs_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
+  struct cx_scope *ds = cx_scope(cx, 0), *ss = ds->stack.count ? ds : cx_scope(cx, 1);
+  struct cx_fimp *imp = op->as_putargs.imp;
   
-  struct cx_box *src = cx_pop(s->stack.count ? s : cx_scope(cx, 1), false);
-  if (!src) { return false; }
+  for (struct cx_func_arg *a = cx_vec_peek(&imp->args, 0);
+       a >= (struct cx_func_arg *)imp->args.items;
+       a--) {
+    struct cx_box *src = cx_test(cx_pop(ss, false));
 
-  struct cx_box *dst = cx_put_var(s, op->as_putarg.id, true);
-  if (!dst) { return false; }
+    if (a->id) {
+      *cx_put_var(ds, a->sym_id, true) = *src;
+    } else {
+      cx_box_deinit(src);
+    }
+  }
 
-  *dst = *src;
   return true;
 }
 
-cx_op_type(CX_OPUTARG, {
-    type.eval = putarg_eval;
+cx_op_type(CX_OPUTARGS, {
+    type.eval = putargs_eval;
   });
 
 static bool putvar_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
@@ -286,21 +292,4 @@ static bool stop_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
 
 cx_op_type(CX_OSTOP, {
     type.eval = stop_eval;
-  });
-
-static bool zaparg_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
-  struct cx_scope *s = cx_scope(cx, 0);
-  struct cx_box *v = cx_pop(s->stack.count ? s : cx_scope(cx, 1), true);
-
-  if (!v) {
-    cx_error(cx, tok->row, tok->col, "Nothing to zap");
-    return false;
-  }
-  
-  cx_box_deinit(v);
-  return true;
-}
-
-cx_op_type(CX_OZAPARG, {
-    type.eval = zaparg_eval;
   });

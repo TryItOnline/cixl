@@ -67,8 +67,8 @@ struct cx_lambda_op {
   size_t start_op, num_ops;
 };
 
-struct cx_putarg_op {
-  struct cx_sym id;
+struct cx_putargs_op {
+  struct cx_fimp *imp;
 };
 
 struct cx_putvar_op {
@@ -93,7 +93,7 @@ struct cx_op {
     struct cx_fimpdef_op as_fimpdef;
     struct cx_funcall_op as_funcall;
     struct cx_lambda_op as_lambda;
-    struct cx_putarg_op as_putarg;
+    struct cx_putargs_op as_putargs;
     struct cx_putvar_op as_putvar;
     struct cx_return_op as_return;
   };
@@ -111,11 +111,10 @@ struct cx_op_type *CX_OFIMPDEF();
 struct cx_op_type *CX_OFUNCALL();
 struct cx_op_type *CX_OLAMBDA();
 struct cx_op_type *CX_OPUSH();
-struct cx_op_type *CX_OPUTARG();
+struct cx_op_type *CX_OPUTARGS();
 struct cx_op_type *CX_OPUTVAR();
 struct cx_op_type *CX_ORETURN();
 struct cx_op_type *CX_OSTASH();
 struct cx_op_type *CX_OSTOP();
-struct cx_op_type *CX_OZAPARG();
 
 #endif

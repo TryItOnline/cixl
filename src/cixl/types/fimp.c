@@ -84,17 +84,9 @@ bool cx_fimp_compile(struct cx_fimp *imp,
 
   if (imp->toks.count) {
     if (imp->args.count) {
-      for (struct cx_func_arg *a = cx_vec_peek(&imp->args, 0);
-	   a >= (struct cx_func_arg *)imp->args.items;
-	   a--) {
-	if (a->id) {
-	  cx_op_init(cx_vec_push(&out->ops),
-		     CX_OPUTARG(),
-		     tok_idx)->as_putarg.id = cx_sym(cx, a->id);
-	} else {
-	  cx_op_init(cx_vec_push(&out->ops), CX_OZAPARG(), tok_idx);
-	}
-      }
+      cx_op_init(cx_vec_push(&out->ops),
+		 CX_OPUTARGS(),
+		 tok_idx)->as_putargs.imp = imp;
     }
     
     if (!cx_compile(cx, cx_vec_start(&imp->toks), cx_vec_end(&imp->toks), out)) {
