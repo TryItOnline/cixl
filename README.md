@@ -964,7 +964,7 @@ static void copy_imp(struct cx_box *dst, struct cx_box *src) {
   dst->as_ptr = strdup(src->as_ptr);
 }
 
-static void fprint_imp(struct cx_box *v, FILE *out) {
+static void dump_imp(struct cx_box *v, FILE *out) {
   fprintf(out, "'%s'", (char *)v->as_ptr);
 }
 
@@ -981,7 +981,8 @@ int main() {
   t->equid = equid_imp;
   t->ok = ok_imp;
   t->copy = copy_imp;
-  t->fprint = fprint_imp;
+  t->write = dump_imp;
+  t->dump = dump_imp;
   t->deinit = deinit_imp;
   
   cx_add_cfunc(&cx, "len", len_imp, cx_arg("s", t));
