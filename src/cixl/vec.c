@@ -34,11 +34,11 @@ void cx_vec_grow(struct cx_vec *vec, size_t capac) {
 }
 
 void *cx_vec_start(struct cx_vec *vec) {
-  return cx_test(vec->items);
+  return vec->items;
 }
 
 void *cx_vec_end(struct cx_vec *vec) {
-  return cx_test(vec->items) + vec->count*vec->item_size;
+  return vec->items ? vec->items+vec->count*vec->item_size : NULL;
 }
 
 void *cx_vec_get(struct cx_vec *vec, size_t i) {

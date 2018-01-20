@@ -11,6 +11,8 @@ let: resources  new-db-table 'resource.db' [];
 let: capacities new-db-table 'capacity.db' [];
 let: bookings   new-db-table 'booking.db'  [];     
 
+let: next-booking-id 1 ref;
+
 /*
   Resources support tracking availability in time.
 */
@@ -104,15 +106,20 @@ func: update-resource(r Resource start end Time total used Int)
 */
 
 rec: Booking()
-  id        Guid   
+  id        Int   
   resource  Resource
   start end Time
   quantity  Int;
 
+func: next-booking-id()
+  let: id get-ref $next-booking-id;
+  $next-booking-id put-ref ($id ++)
+  $id;
+
 func: new-booking(r Resource start end Time q Int)
   $start < $end else {fail 'Invalid booking length'}
   let: b new Booking;
-  $b put `id,      new Guid
+  $b put `id       next-booking-id
   $b put `resource $r
   $b put `start    $start
   $b put `end      $end

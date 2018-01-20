@@ -1,11 +1,13 @@
 * add file writing to bookings
 ** change booking id to Int
 *** add Ref next-booking-id
-** add qdb.commit
+** add qdb.commit/rollback
+*** add vect clear fn
 * add type: macro
 ** type: Size Int
 *** size 42 -> Size(42)
-*** inherit and register conversion fns
+*** inherit and register constructor
+**** replace camelcase with -
 ** add DBKey Vect type
 * meta lib with read-iter
 ** move read and convert to iter
