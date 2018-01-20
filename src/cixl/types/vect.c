@@ -125,6 +125,14 @@ static bool seq_imp(struct cx_scope *scope) {
   return true;
 }
 
+static bool clear_imp(struct cx_scope *scope) {
+  struct cx_box vec = *cx_test(cx_pop(scope, false));
+  struct cx_vect *v = vec.as_ptr;
+  cx_vec_clear(&v->imp);
+  cx_box_deinit(&vec);
+  return true;
+}
+
 static bool equid_imp(struct cx_box *x, struct cx_box *y) {
   return x->as_ptr == y->as_ptr;
 }
@@ -222,6 +230,7 @@ struct cx_type *cx_init_vect_type(struct cx *cx) {
   cx_add_cfunc(cx, "push", push_imp, cx_arg("vec", t), cx_arg("val", cx->any_type));
   cx_add_cfunc(cx, "pop", pop_imp, cx_arg("vec", t));
   cx_add_cfunc(cx, "vect", seq_imp, cx_arg("in", cx->seq_type));
+  cx_add_cfunc(cx, "clear", clear_imp, cx_arg("vec", t));
   
   return t;
 }

@@ -82,8 +82,8 @@ static bool read_imp(struct cx_scope *scope) {
 
 static bool write_imp(struct cx_scope *scope) {
   struct cx_box
-    out = *cx_test(cx_pop(scope, false)),
-    v = *cx_test(cx_pop(scope, false));
+    v = *cx_test(cx_pop(scope, false)),
+    out = *cx_test(cx_pop(scope, false));
   
   bool ok = cx_write(&v, out.as_file->ptr);
   fputc('\n', out.as_file->ptr);
@@ -256,7 +256,7 @@ struct cx *cx_init(struct cx *cx) {
   cx_add_cfunc(cx, "read", read_imp, cx_arg("f", cx->rfile_type));
 
   cx_add_cfunc(cx, "write", write_imp,
-	       cx_arg("v", cx->opt_type), cx_arg("f", cx->wfile_type));
+	       cx_arg("f", cx->wfile_type), cx_arg("v", cx->opt_type));
 
   cx_add_cfunc(cx, "compile", compile_imp,
 	       cx_arg("out", cx->bin_type), cx_arg("in", cx->str_type));

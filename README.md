@@ -303,7 +303,7 @@ Most values support being written to files and read back in. Calling ```write```
 ...
 [Time(2018/0/12 1:25:12.123436182)]
 
-   write #out
+   , #out write $
 ...
 ([2018 0 12 1 25 12 123436182] time)
 []
@@ -858,7 +858,7 @@ Capitalized names are treated as types, the following types are defined out of t
 | Bin    | A           |
 | Bool   | A           |
 | Cmp    |             |
-| File   |             |
+| File   | Cmp         |
 | Fimp   | A Seq       |
 | Func   | A Seq       |
 | Guid   | A           |

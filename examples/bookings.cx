@@ -135,5 +135,6 @@ func: new-booking(r Resource start end Time q Int)
 
 func: run-tests()
   let: r new-resource new Sym 10;
-  new-booking $r today (today 1 days +) 5,
-  new-booking $r now   (now 1h +)       6;
+  new-booking $r today (today 1 days +) 5 _
+  rollback
+  new-booking $r now   (now 1h +)       6 _;

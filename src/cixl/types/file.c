@@ -30,6 +30,10 @@ static bool equid_imp(struct cx_box *x, struct cx_box *y) {
   return x->as_file == y->as_file;
 }
 
+static enum cx_cmp cmp_imp(const struct cx_box *x, const struct cx_box *y) {
+  return cx_cmp_ptr(&x->as_file, &y->as_file);
+}
+
 static bool ok_imp(struct cx_box *v) {
   return feof(v->as_file->ptr);
 }
@@ -51,8 +55,11 @@ struct cx_type *_cx_init_file_type(struct cx *cx, const char *name, ...) {
   va_start(parents, name);				
   struct cx_type *t = cx_vadd_type(cx, name, parents);
   va_end(parents);
+
+  cx_derive(t, cx->cmp_type);
   
   t->equid = equid_imp;
+  t->cmp = cmp_imp;
   t->ok = ok_imp;
   t->copy = copy_imp;
   t->dump = dump_imp;

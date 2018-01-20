@@ -47,13 +47,43 @@ func: upsert(t DBTable r Rec)
   let: tr $r %% ~ _;
   
   $tk if-else {
-    let: tr $krs $tk;
+    let: tr $krs get $tk;
     push-change $t $k $tr `update
     delete $krs $tk
     delete $rks $r
   } {
-    push-change $t $k $tr `insert
+    push-change $t $k $r `insert
   }
   
   $krs put $k $tr
   $rks put $r $k;
+
+func: commit()
+  let: dirty new Table;
+
+  $db-trans for {
+    let: c;
+    let: f $c get `table get `file;
+    $f write [$c get `op, $c get `key, $c get `rec]
+    $dirty put $f #t
+  }
+
+  $dirty map &x for &flush
+  clear $db-trans;
+
+func: rollback()
+  $db-trans for {
+    let: c;
+    let: t $c get `table;
+    let: krs $t get `key-recs;
+    let: rks $t get `rec-keys;
+
+    $c get `op = `insert if-else {
+      $krs delete ($c get `key)
+      $rks delete ($c get `rec)
+    } {
+      $krs put ($c get `key) ($c get `rec)
+    }
+  }
+
+  clear $db-trans;
