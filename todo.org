@@ -1,3 +1,7 @@
+* change Table iter to return pairs
+** add vect conv example to readme
+* add Rec iter
+** copy Table
 * add Ref type
 
 * add file writing to bookings
