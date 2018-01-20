@@ -1,15 +1,13 @@
 /*
-  The humble beginnings of a booking system written in Cixl for demonstration
-  purposes. Once Cixl is installed, the tests may be run by executing
-  "load '../examples/qdb.cx'" and "load '../examples/bookings.cx'" followed by
-  "run-tests".
+  The humble beginnings of a booking system. Once Cixl is installed, tests may be
+  run by executing "load '../examples/qdb.cx'" and "load '../examples/bookings.cx'"
+  followed by "run-tests".
 
   https://github.com/basic-gongfu/cixl#getting-started
 */
 
-let: resources  new-db-table 'resource.db' [];
-let: capacities new-db-table 'capacity.db' [];
-let: bookings   new-db-table 'booking.db'  [];     
+let: resources  new-db-table 'resource.db' [`id];
+let: bookings   new-db-table 'booking.db'  [`id];     
 
 let: next-booking-id 1 ref;
 
@@ -136,5 +134,4 @@ func: new-booking(r Resource start end Time q Int)
 func: run-tests()
   let: r new-resource new Sym 10;
   new-booking $r today (today 1 days +) 5 _
-  rollback
   new-booking $r now   (now 1h +)       6 _;

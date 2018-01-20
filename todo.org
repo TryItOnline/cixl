@@ -1,3 +1,9 @@
+* add find-key(Vect) fn & post
+* add is-dirty fn
+* add revert(table rec) fn
+** add Rec iter
+*** copy Table
+** put all fields
 * add switch: macro
 ** var is optional
 *** bind if not bound already
@@ -14,6 +20,7 @@
 ** allow single token actions
 *** call eval_token instead
 
+* add qdb.delete
 * meta lib with read-iter
 ** move read and convert to iter
 *** keep bin ref in iter
