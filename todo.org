@@ -1,17 +1,3 @@
-* add file writing to bookings
-** change booking id to Int
-*** add Ref next-booking-id
-** add qdb.commit/rollback
-*** add vect clear fn
-* add type: macro
-** type: Size Int
-*** size 42 -> Size(42)
-*** inherit and register constructor
-**** replace camelcase with -
-** add DBKey Vect type
-* meta lib with read-iter
-** move read and convert to iter
-*** keep bin ref in iter
 * add switch: macro
 ** var is optional
 *** bind if not bound already
@@ -28,6 +14,9 @@
 ** allow single token actions
 *** call eval_token instead
 
+* meta lib with read-iter
+** move read and convert to iter
+*** keep bin ref in iter
 * add fimp rets
 ** add cx_func_ret like arg except value
 ** add cx_args/cx_rets fns
