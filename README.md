@@ -453,7 +453,7 @@ Lambdas may be used to to prevent evaluating unused arguments when chaining.
 The ```func:``` macro may be used to define named functions. Several implementations may be defined for the same name as long as they have the same arity and different argument types. Each function captures its defining environment and opens an implicit child scope that is closed on exit. Functions are allowed anywhere in the code, but are defined in order of appearance during compilation.
 
 ```
-   func: foo() 42;
+   func: foo() (Int) 42;
 ...| foo
 ...
 [42]
@@ -462,8 +462,7 @@ The ```func:``` macro may be used to define named functions. Several implementat
 Prefixing a function name with ```&``` pushes a reference on the stack.
 
 ```
-   func: foo() 42;
-...| &foo
+   | &foo
 ...
 [Func(foo)]
 
@@ -475,7 +474,7 @@ Prefixing a function name with ```&``` pushes a reference on the stack.
 Each argument needs a type, ```A``` may be used to accept any type.
 
 ```
-   func: bar(x A) $x + 35;
+   func: bar(x A) (A) $x + 35;
 ...| bar 7
 ...
 [42]
@@ -484,7 +483,7 @@ Each argument needs a type, ```A``` may be used to accept any type.
 Several parameters may share the same type.
 
 ```
-   func: baz(x y Int) $x + $y;
+   func: baz(x y Int) (Int) $x + $y;
 ...| baz 7 35
 ...
 [42]
@@ -494,7 +493,7 @@ Several parameters may share the same type.
 An index may may be specified instead of type to refer to previous arguments, it is substituted for the actual type on evaluation.
 
 ```
-   func: baz(x A y T0) $x + $y;
+   func: baz(x A y T0) (T0) $x + $y;
 ...| baz 1 2
 ...
 [3]
@@ -508,8 +507,8 @@ Func not applicable: baz
 It's possible to specify literal values for arguments instead of names and types.
 
 ```
-   func: bar(x Int) #f;
-...func: bar(42) #t;
+   func: bar(x Int) (Bool) #f;
+...func: bar(42) (Bool) #t;
 ...| bar 41, bar 42
 ...
 [#f #t]
@@ -519,7 +518,7 @@ Overriding existing implementations is as easy as defining a function with ident
 
 ```
 
-   func: +(x y Int) 42;
+   func: +(x y Int) (Int) 42;
 ...| 1 + 2
 ...
 [42]
@@ -529,9 +528,9 @@ Overriding existing implementations is as easy as defining a function with ident
 
 ```
   
-   func: fib-rec(a b n Int)
+   func: fib-rec(a b n Int) (Int)
 ...  $n? if {, recall $b, $a + $b, -- $n} $a;
-...func: fib(n Int)
+...func: fib(n Int) (Int)
 ...  fib-rec 0 1 $n;
 ...| fib 50
 ...
@@ -567,8 +566,10 @@ A vector containing all implementations for a specific function in the order the
 
 ```
    
-   func: maybe-add(x y Num) $x + $y;
-...func: maybe-add(x y Int) $x = 42 if 42 {upcall $x $y};
+   func: maybe-add(x y Num) (T0)
+...  $x + $y;
+...func: maybe-add(x y Int) (Int)
+...  $x = 42 if 42 {upcall $x $y};
 ...| maybe-add 1 2 , maybe-add 42 2
 ...
 [3 42]
@@ -616,8 +617,8 @@ Basic rational arithmetics is supported out of the box.
 The ```#nil``` value may be used to represent missing values. Since ```Nil``` isn't derived from ```A```, stray ```#nil``` values never get far before being trapped in a function call; ```Opt``` may be used instead where ```#nil``` is allowed.
 
 ```
-...func: foo(x A);
-...func: bar(x Opt) 42;
+...func: foo(x A) ();
+...func: bar(x Opt) (Int) 42;
 ...| foo #nil
 ...
 Error in row 1, col 1:
@@ -751,7 +752,7 @@ Iterators may be created manually by calling ```iter``` on any sequence and cons
 Functions and lambdas are sequences, calling ```iter``` creates an iterator that keeps returning values until the target returns ```#nil```.
 
 ```
-   func: forever(n Int) {$n};
+   func: forever(n Int) (Lambda) {$n};
 ...| 42 forever iter
 ...% next ~ next
 ...
@@ -857,31 +858,31 @@ Capitalized names are treated as types, the following types are defined out of t
 | A      | Opt         |
 | Bin    | A           |
 | Bool   | A           |
-| Cmp    |             |
+| Cmp    | A           |
 | File   | Cmp         |
-| Fimp   | A Seq       |
-| Func   | A Seq       |
+| Fimp   | Seq         |
+| Func   | Seq         |
 | Guid   | A           |
 | Int    | Num Seq     |
-| Iter   | A Seq       |
-| Lambda | A Seq       |
+| Iter   | Seq         |
+| Lambda | Seq         |
 | Nil    | Opt         |
 | Num    | Cmp         |
 | Opt    |             |
-| Pair   | A Cmp       |
-| Rat    | A Num       |
-| Rec    | A Cmp       |
+| Pair   | Cmp         |
+| Rat    | Num         |
+| Rec    | Cmp         |
 | Ref    | A           |
-| RFile  | A File      |
+| RFile  | File        |
 | RWFile | RFile WFile |
-| Seq    |             |
-| Str    | A Cmp Seq   |
+| Seq    | A           |
+| Str    | Cmp Seq     |
 | Sym    | A           |
-| Table  | A Seq       |
-| Time   | A Cmp       |
+| Table  | Seq         |
+| Time   | Cmp         |
 | Type   | A           |
-| Vect   | A Cmp Seq   |
-| WFile  | A File      |
+| Vect   | Cmp Seq     |
+| WFile  | File        |
 
 ```
    | type 42
@@ -933,7 +934,7 @@ Records support full deep equality by default, but ```=``` may be implemented to
 ...
 [#f]
 
-   func: =(a b Foo) $a get `x =, $b get `x;
+   func: =(a b Foo) (Bool) $a get `x =, $b get `x;
 ...| $bar = $baz
 ...
 [#t]
@@ -1012,11 +1013,13 @@ int main() {
   t->dump = dump_imp;
   t->deinit = deinit_imp;
   
-  cx_add_cfunc(&cx, "len", len_imp, cx_arg("s", t));
+  cx_add_cfunc(&cx, "len",
+               cx_args(cx_arg("s", t)), cx_rets(cx_ret(cx.int_type)),
+	       len_imp);
 
   cx_add_func(cx, "upper",
-	      "$s map &upper str",
-	      cx_arg("s", t));
+	      cx_args(cx_arg("s", t)), cx_rets(cx_ret(t)),
+	      "$s map &upper str");
 
   ...
 
@@ -1035,9 +1038,9 @@ Let's start with a tail-recursive fibonacci to exercise the interpreter loop, it
 
 ```
  
-   func: fib-rec(a b n Int)
+   func: fib-rec(a b n Int) (Int)
 ...  $n? if-else {$b $a $b + $n -- recall} $a;
-...func: fib(n Int)
+...func: fib(n Int) (Int)
 ...  fib-rec 0 1 $n;
 ...| clock {10000 times {50 fib _}} / 1000000 int
 ...

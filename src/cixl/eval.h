@@ -19,4 +19,9 @@ bool cx_eval_args(struct cx *cx,
 		  struct cx_vec *toks,
 		  struct cx_vec *func_args);
 
+bool cx_eval_rets(struct cx *cx,
+		  struct cx_vec *toks,
+		  struct cx_vec *rets,
+		  size_t nargs);
+
 #endif

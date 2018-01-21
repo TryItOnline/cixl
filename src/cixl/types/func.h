@@ -7,6 +7,16 @@
 #include "cixl/set.h"
 #include "cixl/type.h"
 
+#define cx_args(...)							\
+  sizeof((struct cx_func_arg[]){__VA_ARGS__}) /				\
+  sizeof(struct cx_func_arg),						\
+    (struct cx_func_arg[]){__VA_ARGS__}					\
+
+#define cx_rets(...)							\
+  sizeof((struct cx_func_ret[]){__VA_ARGS__}) /				\
+  sizeof(struct cx_func_ret),						\
+    (struct cx_func_ret[]){__VA_ARGS__}					\
+
 struct cx_fimp;
 struct cx_scope;
 struct cx_type;
@@ -40,9 +50,17 @@ struct cx_func_arg cx_arg(const char *id, struct cx_type *type);
 struct cx_func_arg cx_varg(struct cx_box *value);
 struct cx_func_arg cx_narg(const char *id, int n);
 
+struct cx_func_ret {
+  struct cx_type *type;
+  int narg;
+};
+
+struct cx_func_ret cx_ret(struct cx_type *type);
+struct cx_func_ret cx_nret(int n);
+
 struct cx_fimp *cx_func_add_imp(struct cx_func *func,
-				int nargs,
-				struct cx_func_arg *args);
+				int nargs, struct cx_func_arg *args,
+				int nrets, struct cx_func_ret *rets);
 
 struct cx_fimp *cx_func_get_imp(struct cx_func *func,
 				struct cx_vec *stack,

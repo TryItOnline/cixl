@@ -79,7 +79,7 @@ static void deinit_imp(struct cx_box *value) {
 }
 
 struct cx_type *cx_init_lambda_type(struct cx *cx) {
-  struct cx_type *t = cx_add_type(cx, "Lambda", cx->any_type, cx->seq_type);
+  struct cx_type *t = cx_add_type(cx, "Lambda", cx->seq_type);
   t->equid = equid_imp;
   t->call = call_imp;
   t->copy = copy_imp;

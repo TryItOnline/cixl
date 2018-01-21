@@ -126,11 +126,6 @@ static bool vect_time_imp(struct cx_scope *scope) {
   struct cx_box in = *cx_test(cx_pop(scope, false));
   struct cx_vect *vs = in.as_ptr;
 
-  if (vs->imp.count > 7) {
-    cx_error(cx, cx->row, cx->col, "Too many time values");
-    return false;
-  }
-
   struct cx_time t;
   cx_time_init(&t, 0, 0);
   
@@ -138,8 +133,8 @@ static bool vect_time_imp(struct cx_scope *scope) {
     struct cx_box *v = cx_vec_get(&vs->imp, i);
 
     if (v->type != cx->int_type) {
-      cx_error(cx, cx->row, cx->col, "Invalid time value");
-      return false;
+      cx_box_init(cx_push(scope), cx->nil_type);
+      goto exit;
     }
     
     switch (i) {
@@ -168,6 +163,7 @@ static bool vect_time_imp(struct cx_scope *scope) {
   }
 
   cx_box_init(cx_push(scope), cx->time_type)->as_time = t;
+ exit:
   cx_box_deinit(&in);  
   return true;
 }
@@ -373,48 +369,164 @@ void cx_init_time(struct cx *cx) {
 			    cx->time_type)->as_time,
 	       INT32_MAX, INT64_MAX);
   
-  cx_add_cfunc(cx, "years", years_imp, cx_arg("n", cx->int_type));
-  cx_add_cfunc(cx, "months", months_imp, cx_arg("n", cx->int_type));
-  cx_add_cfunc(cx, "days", days_imp, cx_arg("n", cx->int_type));
-  cx_add_cfunc(cx, "h", h_imp, cx_arg("n", cx->int_type));
-  cx_add_cfunc(cx, "m", m_imp, cx_arg("n", cx->int_type));
-  cx_add_cfunc(cx, "s", s_imp, cx_arg("n", cx->int_type));
-  cx_add_cfunc(cx, "ms", ms_imp, cx_arg("n", cx->int_type));
-  cx_add_cfunc(cx, "us", us_imp, cx_arg("n", cx->int_type));
-  cx_add_cfunc(cx, "ns", ns_imp, cx_arg("n", cx->int_type));  
+  cx_add_cfunc(cx, "years",
+	       cx_args(cx_arg("n", cx->int_type)),
+	       cx_rets(cx_ret(cx->time_type)),
+	       years_imp);
 
-  cx_add_cfunc(cx, "time", vect_time_imp, cx_arg("in", cx->vect_type));
-  cx_add_cfunc(cx, "now", now_imp);
-
-  cx_add_cfunc(cx, "date", time_date_imp, cx_arg("in", cx->time_type));
-  cx_add_cfunc(cx, "time", time_time_imp, cx_arg("in", cx->time_type));
-
-  cx_add_cfunc(cx, "year", time_years_imp, cx_arg("t", cx->time_type));
-  cx_add_cfunc(cx, "years", time_years_imp, cx_arg("t", cx->time_type));
-  cx_add_cfunc(cx, "month", month_imp, cx_arg("t", cx->time_type));
-  cx_add_cfunc(cx, "months", time_months_imp, cx_arg("t", cx->time_type));
-  cx_add_cfunc(cx, "day", time_day_imp, cx_arg("t", cx->time_type));
-  cx_add_cfunc(cx, "days", time_days_imp, cx_arg("t", cx->time_type));
-
-  cx_add_cfunc(cx, "hour", hour_imp, cx_arg("t", cx->time_type));
-  cx_add_cfunc(cx, "minute", minute_imp, cx_arg("t", cx->time_type));
-  cx_add_cfunc(cx, "second", second_imp, cx_arg("t", cx->time_type));
-  cx_add_cfunc(cx, "nsecond", nsecond_imp, cx_arg("t", cx->time_type));
+  cx_add_cfunc(cx, "months",
+	       cx_args(cx_arg("n", cx->int_type)),
+	       cx_rets(cx_ret(cx->time_type)),
+	       months_imp);
   
-  cx_add_cfunc(cx, "h", time_h_imp, cx_arg("t", cx->time_type));
-  cx_add_cfunc(cx, "m", time_m_imp, cx_arg("t", cx->time_type));
-  cx_add_cfunc(cx, "s", time_s_imp, cx_arg("t", cx->time_type));
-
-  cx_add_cfunc(cx, "ms", time_ms_imp, cx_arg("t", cx->time_type));
-  cx_add_cfunc(cx, "us", time_us_imp, cx_arg("t", cx->time_type));
-  cx_add_cfunc(cx, "ns", time_ns_imp, cx_arg("t", cx->time_type));
+  cx_add_cfunc(cx, "days",
+	       cx_args(cx_arg("n", cx->int_type)),
+	       cx_rets(cx_ret(cx->time_type)),
+	       days_imp);
   
-  cx_add_cfunc(cx, "+", add_imp, 
-	       cx_arg("x", cx->time_type), cx_arg("y", cx->time_type));
-  cx_add_cfunc(cx, "-", sub_imp, 
-	       cx_arg("x", cx->time_type), cx_arg("y", cx->time_type));
-  cx_add_cfunc(cx, "*", mul_imp, 
-	       cx_arg("x", cx->time_type), cx_arg("y", cx->int_type));
+  cx_add_cfunc(cx, "h",
+	       cx_args(cx_arg("n", cx->int_type)),
+	       cx_rets(cx_ret(cx->time_type)),
+	       h_imp);
+  
+  cx_add_cfunc(cx, "m",
+	       cx_args(cx_arg("n", cx->int_type)),
+	       cx_rets(cx_ret(cx->time_type)),
+	       m_imp);
 
-  cx_add_func(cx, "today", "now date");
+  cx_add_cfunc(cx, "s",
+	       cx_args(cx_arg("n", cx->int_type)),
+	       cx_rets(cx_ret(cx->time_type)),
+	       s_imp);
+  
+  cx_add_cfunc(cx, "ms",
+	       cx_args(cx_arg("n", cx->int_type)),
+	       cx_rets(cx_ret(cx->time_type)),
+	       ms_imp);
+  
+  cx_add_cfunc(cx, "us",
+	       cx_args(cx_arg("n", cx->int_type)),
+	       cx_rets(cx_ret(cx->time_type)),
+	       us_imp);
+  
+  cx_add_cfunc(cx, "ns",
+	       cx_args(cx_arg("n", cx->int_type)),
+	       cx_rets(cx_ret(cx->time_type)),
+	       ns_imp);  
+
+  cx_add_cfunc(cx, "time",
+	       cx_args(cx_arg("in", cx->vect_type)),
+	       cx_rets(cx_ret(cx->opt_type)),
+	       vect_time_imp);
+  
+  cx_add_cfunc(cx, "now", cx_args(), cx_rets(cx_ret(cx->time_type)), now_imp);
+
+  cx_add_cfunc(cx, "date",
+	       cx_args(cx_arg("in", cx->time_type)),
+	       cx_rets(cx_ret(cx->time_type)),
+	       time_date_imp);
+  
+  cx_add_cfunc(cx, "time",
+	       cx_args(cx_arg("in", cx->time_type)),
+	       cx_rets(cx_ret(cx->time_type)),
+	       time_time_imp);
+
+  cx_add_cfunc(cx, "year",
+	       cx_args(cx_arg("t", cx->time_type)),
+	       cx_rets(cx_ret(cx->int_type)),
+	       time_years_imp);
+  
+  cx_add_cfunc(cx, "years",
+	       cx_args(cx_arg("t", cx->time_type)),
+	       cx_rets(cx_ret(cx->int_type)),
+	       time_years_imp);
+  
+  cx_add_cfunc(cx, "month",
+	       cx_args(cx_arg("t", cx->time_type)),
+	       cx_rets(cx_ret(cx->int_type)),
+	       month_imp);
+  
+  cx_add_cfunc(cx, "months",
+	       cx_args(cx_arg("t", cx->time_type)),
+	       cx_rets(cx_ret(cx->int_type)),
+	       time_months_imp);
+  
+  cx_add_cfunc(cx, "day",
+	       cx_args(cx_arg("t", cx->time_type)),
+	       cx_rets(cx_ret(cx->int_type)),
+	       time_day_imp);
+  
+  cx_add_cfunc(cx, "days",
+	       cx_args(cx_arg("t", cx->time_type)),
+	       cx_rets(cx_ret(cx->int_type)),
+	       time_days_imp);
+
+  cx_add_cfunc(cx, "hour",
+	       cx_args(cx_arg("t", cx->time_type)),
+	       cx_rets(cx_ret(cx->int_type)),	       
+	       hour_imp);
+  
+  cx_add_cfunc(cx, "minute",
+	       cx_args(cx_arg("t", cx->time_type)),
+	       cx_rets(cx_ret(cx->int_type)),
+	       minute_imp);
+  
+  cx_add_cfunc(cx, "second",
+	       cx_args(cx_arg("t", cx->time_type)),
+	       cx_rets(cx_ret(cx->int_type)),
+	       second_imp);
+  
+  cx_add_cfunc(cx, "nsecond",
+	       cx_args(cx_arg("t", cx->time_type)),
+	       cx_rets(cx_ret(cx->int_type)),
+	       nsecond_imp);
+  
+  cx_add_cfunc(cx, "h",
+	       cx_args(cx_arg("t", cx->time_type)),
+	       cx_rets(cx_ret(cx->int_type)),	       
+	       time_h_imp);
+  
+  cx_add_cfunc(cx, "m",
+	       cx_args(cx_arg("t", cx->time_type)),
+	       cx_rets(cx_ret(cx->int_type)),
+	       time_m_imp);
+  
+  cx_add_cfunc(cx, "s",
+	       cx_args(cx_arg("t", cx->time_type)),
+	       cx_rets(cx_ret(cx->int_type)),
+	       time_s_imp);
+
+  cx_add_cfunc(cx, "ms",
+	       cx_args(cx_arg("t", cx->time_type)),
+	       cx_rets(cx_ret(cx->int_type)),	       
+	       time_ms_imp);
+  
+  cx_add_cfunc(cx, "us",
+	       cx_args(cx_arg("t", cx->time_type)),
+	       cx_rets(cx_ret(cx->int_type)),
+	       time_us_imp);
+  
+  cx_add_cfunc(cx, "ns",
+	       cx_args(cx_arg("t", cx->time_type)),
+	       cx_rets(cx_ret(cx->int_type)),
+	       time_ns_imp);
+  
+  cx_add_cfunc(cx, "+", 
+	       cx_args(cx_arg("x", cx->time_type), cx_arg("y", cx->time_type)),
+	       cx_rets(cx_ret(cx->time_type)),
+	       add_imp);
+  
+  cx_add_cfunc(cx, "-", 
+	       cx_args(cx_arg("x", cx->time_type), cx_arg("y", cx->time_type)),
+	       cx_rets(cx_ret(cx->time_type)),
+	       sub_imp);
+  
+  cx_add_cfunc(cx, "*", 
+	       cx_args(cx_arg("x", cx->time_type), cx_arg("y", cx->int_type)),
+	       cx_rets(cx_ret(cx->time_type)),
+	       mul_imp);
+
+  cx_add_func(cx, "today",
+	      cx_args(), cx_rets(cx_ret(cx->time_type)),
+	      "now date");
 }

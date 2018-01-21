@@ -24,6 +24,7 @@ struct cx_fimp *cx_fimp_init(struct cx_fimp *imp,
   imp->scope = NULL;
   imp->bin = NULL;
   cx_vec_init(&imp->args, sizeof(struct cx_func_arg));
+  cx_vec_init(&imp->rets, sizeof(struct cx_func_ret));
   cx_vec_init(&imp->toks, sizeof(struct cx_tok));
   return imp;
 }
@@ -33,6 +34,8 @@ struct cx_fimp *cx_fimp_deinit(struct cx_fimp *imp) {
        
   cx_do_vec(&imp->args, struct cx_func_arg, a) { cx_func_arg_deinit(a); }
   cx_vec_deinit(&imp->args);
+
+  cx_vec_deinit(&imp->rets);
   
   cx_do_vec(&imp->toks, struct cx_tok, t) { cx_tok_deinit(t); }
   cx_vec_deinit(&imp->toks);
@@ -167,7 +170,7 @@ static void dump_imp(struct cx_box *value, FILE *out) {
 }
 
 struct cx_type *cx_init_fimp_type(struct cx *cx) {
-  struct cx_type *t = cx_add_type(cx, "Fimp", cx->any_type, cx->seq_type);
+  struct cx_type *t = cx_add_type(cx, "Fimp", cx->seq_type);
   t->equid = equid_imp;
   t->call = call_imp;
   t->iter = iter_imp;

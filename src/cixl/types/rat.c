@@ -76,12 +76,6 @@ enum cx_cmp cx_cmp_rat(const void *x, const void *y) {
   return (xn > yn) ? CX_CMP_GT : CX_CMP_EQ;
 }
 
-static bool int_imp(struct cx_scope *scope) {
-  struct cx_box v = *cx_test(cx_pop(scope, false));
-  cx_box_init(cx_push(scope), scope->cx->int_type)->as_int = cx_rat_int(&v.as_rat);
-  return true;
-}
-
 static bool equid_imp(struct cx_box *x, struct cx_box *y) {
   struct cx_rat *xr = &x->as_rat, *yr = &y->as_rat;
   return xr->num == yr->num && xr->den == yr->den;
@@ -107,14 +101,11 @@ static void dump_imp(struct cx_box *v, FILE *out) {
 }
 
 struct cx_type *cx_init_rat_type(struct cx *cx) {
-  struct cx_type *t = cx_add_type(cx, "Rat", cx->any_type, cx->num_type);
+  struct cx_type *t = cx_add_type(cx, "Rat", cx->num_type);
   t->equid = equid_imp;
   t->cmp = cmp_imp;
   t->ok = ok_imp;
   t->write = write_imp;
-  t->dump = dump_imp;
-
-  cx_add_cfunc(cx, "int", int_imp, cx_arg("r", t));
-  
+  t->dump = dump_imp;  
   return t;
 }

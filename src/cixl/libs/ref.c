@@ -40,10 +40,18 @@ static bool put_imp(struct cx_scope *scope) {
 void cx_init_ref(struct cx *cx) {
   cx->ref_type = cx_init_ref_type(cx);
   
-  cx_add_cfunc(cx, "ref", ref_imp, cx_arg("val", cx->opt_type));
-  cx_add_cfunc(cx, "get-ref", get_imp, cx_arg("ref", cx->ref_type));
+  cx_add_cfunc(cx, "ref",
+	       cx_args(cx_arg("val", cx->opt_type)),
+	       cx_rets(cx_ret(cx->ref_type)),
+	       ref_imp);
+  
+  cx_add_cfunc(cx, "get-ref",
+	       cx_args(cx_arg("ref", cx->ref_type)),
+	       cx_rets(cx_ret(cx->opt_type)),
+	       get_imp);
 
-  cx_add_cfunc(cx, "put-ref", put_imp,
-	       cx_arg("ref", cx->ref_type),
-	       cx_arg("val", cx->opt_type));
+  cx_add_cfunc(cx, "put-ref",
+	       cx_args(cx_arg("ref", cx->ref_type), cx_arg("val", cx->opt_type)),
+	       cx_rets(),
+	       put_imp);
 }

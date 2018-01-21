@@ -69,22 +69,6 @@ void cx_str_deref(struct cx_str *str) {
   if (!str->nrefs) { free(str); }
 }
 
-static bool int_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  struct cx_box v = *cx_test(cx_pop(scope, false));
-  struct cx_str *s = v.as_str;
-  int64_t iv = strtoimax(s->data, NULL, 10);
-  
-  if (!iv && (!s->data[0] || s->data[0] != '0' || s->data[1])) {
-    cx_box_init(cx_push(scope), cx->nil_type);
-  } else {
-    cx_box_init(cx_push(scope), cx->int_type)->as_int = iv;
-  }
-  
-  cx_box_deinit(&v);
-  return true;
-}
-
 static bool equid_imp(struct cx_box *x, struct cx_box *y) {
   return x->as_str == y->as_str;
 }
@@ -123,8 +107,7 @@ static void deinit_imp(struct cx_box *v) {
 }
 
 struct cx_type *cx_init_str_type(struct cx *cx) {
-  struct cx_type *t = cx_add_type(cx, "Str",
-				  cx->any_type, cx->cmp_type, cx->seq_type);
+  struct cx_type *t = cx_add_type(cx, "Str", cx->cmp_type, cx->seq_type);
   t->eqval = eqval_imp;
   t->equid = equid_imp;
   t->cmp = cmp_imp;
@@ -135,7 +118,6 @@ struct cx_type *cx_init_str_type(struct cx *cx) {
   t->dump = dump_imp;
   t->deinit = deinit_imp;
 
-  cx_add_cfunc(cx, "int", int_imp, cx_arg("s", t));
 
   return t;
 }

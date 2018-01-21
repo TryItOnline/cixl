@@ -64,8 +64,15 @@ struct cx_type *cx_init_sym_type(struct cx *cx) {
   t->write = dump_imp;
   t->dump = dump_imp;
 
-  cx_add_cfunc(cx, "sym", sym_imp, cx_arg("id", cx->str_type));
-  cx_add_cfunc(cx, "str", str_imp, cx_arg("s", t));
+  cx_add_cfunc(cx, "sym",
+	       cx_args(cx_arg("id", cx->str_type)),
+	       cx_rets(cx_ret(t)),
+	       sym_imp);
+  
+  cx_add_cfunc(cx, "str",
+	       cx_args(cx_arg("s", t)),
+	       cx_rets(cx_ret(cx->str_type)),
+	       str_imp);
   
   return t;
 }

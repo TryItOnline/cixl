@@ -55,6 +55,14 @@ struct cx_func_arg cx_narg(const char *id, int n) {
   return (struct cx_func_arg) { .id = strdup(id), .type = NULL, .narg = n };
 }
 
+struct cx_func_ret cx_ret(struct cx_type *type) {
+  return (struct cx_func_ret) { .type = type, .narg = -1 };
+}
+
+struct cx_func_ret cx_nret(int n) {
+  return (struct cx_func_ret) { .type = NULL, .narg = n };
+}
+
 static void print_arg_id(struct cx_func_arg *a,
 			  struct cx_vec *args,
 			  FILE *out) {
@@ -68,8 +76,8 @@ static void print_arg_id(struct cx_func_arg *a,
 }
 
 struct cx_fimp *cx_func_add_imp(struct cx_func *func,
-				int nargs,
-				struct cx_func_arg *args) {
+				int nargs, struct cx_func_arg *args,
+				int nrets, struct cx_func_ret *rets) {
   struct cx_vec imp_args;
   cx_vec_init(&imp_args, sizeof(struct cx_func_arg));
 
@@ -107,6 +115,16 @@ struct cx_fimp *cx_func_add_imp(struct cx_func *func,
   }
   
   imp->args = imp_args;
+
+  if (nrets) {
+    cx_vec_grow(&imp->rets, nrets);
+
+    for (int i=0; i < nrets; i++) {
+      struct cx_func_ret r = rets[i];
+      *(struct cx_func_ret *)cx_vec_push(&imp->rets) = r;
+    }
+  }
+
   return imp;
 }
 

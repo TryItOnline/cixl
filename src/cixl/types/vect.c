@@ -104,7 +104,13 @@ static bool push_imp(struct cx_scope *scope) {
 static bool pop_imp(struct cx_scope *scope) {
   struct cx_box vec = *cx_test(cx_pop(scope, false));
   struct cx_vect *v = vec.as_ptr;
-  *cx_push(scope) = *(struct cx_box *)cx_vec_pop(&v->imp);
+
+  if (v->imp.count) {
+    *cx_push(scope) = *(struct cx_box *)cx_vec_pop(&v->imp);
+  } else {
+    cx_box_init(cx_push(scope), scope->cx->nil_type);
+  }
+  
   cx_box_deinit(&vec);
   return true;
 }
@@ -213,8 +219,7 @@ static void deinit_imp(struct cx_box *v) {
 }
 
 struct cx_type *cx_init_vect_type(struct cx *cx) {
-  struct cx_type *t = cx_add_type(cx, "Vect",
-				  cx->any_type, cx->cmp_type, cx->seq_type);
+  struct cx_type *t = cx_add_type(cx, "Vect", cx->cmp_type, cx->seq_type);
   t->eqval = eqval_imp;
   t->equid = equid_imp;
   t->cmp = cmp_imp;
@@ -226,11 +231,28 @@ struct cx_type *cx_init_vect_type(struct cx *cx) {
   t->dump = dump_imp;
   t->deinit = deinit_imp;
   
-  cx_add_cfunc(cx, "len", len_imp, cx_arg("vec", t));
-  cx_add_cfunc(cx, "push", push_imp, cx_arg("vec", t), cx_arg("val", cx->any_type));
-  cx_add_cfunc(cx, "pop", pop_imp, cx_arg("vec", t));
-  cx_add_cfunc(cx, "vect", seq_imp, cx_arg("in", cx->seq_type));
-  cx_add_cfunc(cx, "clear", clear_imp, cx_arg("vec", t));
+  cx_add_cfunc(cx, "len",
+	       cx_args(cx_arg("vec", t)),
+	       cx_rets(cx_ret(cx->int_type)),
+	       len_imp);
+  
+  cx_add_cfunc(cx, "push",
+	       cx_args(cx_arg("vec", t), cx_arg("val", cx->any_type)),
+	       cx_rets(),
+	       push_imp);
+
+  cx_add_cfunc(cx, "pop",
+	       cx_args(cx_arg("vec", t)), cx_rets(cx_ret(cx->opt_type)),
+	       pop_imp);
+
+  cx_add_cfunc(cx, "vect",
+	       cx_args(cx_arg("in", cx->seq_type)),
+	       cx_rets(cx_ret(t)),
+	       seq_imp);
+
+  cx_add_cfunc(cx, "clear",
+	       cx_args(cx_arg("vec", t)), cx_rets(),
+	       clear_imp);
   
   return t;
 }

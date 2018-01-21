@@ -1,3 +1,7 @@
+* finish fimp rets
+** check types & move values in CX_ORETURN
+*** support TN via a.sym_id
+** check types in cx_fimp_call if ptr
 * add find-key(Vect) fn & post
 * add is-dirty fn
 * add revert(table rec) fn
@@ -24,14 +28,12 @@
 * meta lib with read-iter
 ** move read and convert to iter
 *** keep bin ref in iter
-* add fimp rets
-** add cx_func_ret like arg except value
-** add cx_args/cx_rets fns
-*** change add_func's to take nargs, args, nrets, rets
-** update func: macro to parse ret types
-*** support TN via a.sym_id
-** check types & move values in CX_ORETURN
-** check types in cx_fimp_call if ptr
+* add MemFile based on cx_buf
+** derive RWFile
+* investigate threading cx_eval
+** use computed goto
+** assign labels to ops before loop
+* add Vect alloc
 * add iter zip/unzip
 * add and/or tests
 * add filter tests

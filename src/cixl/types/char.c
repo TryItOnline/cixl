@@ -8,24 +8,6 @@
 #include "cixl/types/fimp.h"
 #include "cixl/types/func.h"
 
-static bool upper_imp(struct cx_scope *scope) {
-  struct cx_box v = *cx_test(cx_pop(scope, false));
-  cx_box_init(cx_push(scope), scope->cx->char_type)->as_char = toupper(v.as_char);
-  return true;
-}
-
-static bool lower_imp(struct cx_scope *scope) {
-  struct cx_box v = *cx_test(cx_pop(scope, false));
-  cx_box_init(cx_push(scope), scope->cx->char_type)->as_char = tolower(v.as_char);
-  return true;
-}
-
-static bool int_imp(struct cx_scope *scope) {
-  struct cx_box v = *cx_test(cx_pop(scope, false));
-  cx_box_init(cx_push(scope), scope->cx->int_type)->as_int = v.as_char;
-  return true;
-}
-
 static bool equid_imp(struct cx_box *x, struct cx_box *y) {
   return x->as_char == y->as_char;
 }
@@ -63,11 +45,6 @@ struct cx_type *cx_init_char_type(struct cx *cx) {
   t->ok = ok_imp;
   t->copy = copy_imp;
   t->write = dump_imp;
-  t->dump = dump_imp;
-  
-  cx_add_cfunc(cx, "upper", upper_imp, cx_arg("c", t));
-  cx_add_cfunc(cx, "lower", lower_imp, cx_arg("c", t));
-  cx_add_cfunc(cx, "int", int_imp, cx_arg("c", t));
- 
+  t->dump = dump_imp; 
   return t;
 }

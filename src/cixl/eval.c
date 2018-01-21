@@ -91,9 +91,11 @@ bool cx_scan_args(struct cx *cx, struct cx_func *func) {
   }
   
   while (cx->op != end && !cx->errors.count) {
-    if (cut_offs) {
+    if (s->cuts.count) { 
       struct cx_cut *c = cx_vec_peek(&s->cuts, 0);
       cut_offs = c ? c->offs : 0;
+    } else {
+      cut_offs = 0;
     }
 
     if (cx_scope(cx, 0) == s && s->stack.count - cut_offs >= func->nargs) { break; }
@@ -105,7 +107,7 @@ bool cx_scan_args(struct cx *cx, struct cx_func *func) {
     goto exit;
   }
 
-  if (uncut) { cx_vec_pop(&s->cuts); }
+  if (uncut && s->cuts.count) { cx_vec_pop(&s->cuts); }
   ok = true;
  exit:
   cx->scan_depth--;
@@ -175,4 +177,36 @@ bool cx_eval_args(struct cx *cx,
  exit:
   cx_vec_deinit(&tmp_ids);
   return ok;
+}
+
+bool cx_eval_rets(struct cx *cx,
+		  struct cx_vec *toks,
+		  struct cx_vec *rets,
+		  size_t nargs) {
+  cx_do_vec(toks, struct cx_tok, t) {
+    if (t->type == CX_TID()) {
+      char *id = t->as_ptr;
+
+      if (id[0] == 'T' && isdigit(id[1])) {
+	int i = strtoimax(id+1, NULL, 10);
+
+	if (i >= nargs || (!i && id[1] != '0')) {
+	  cx_error(cx, t->row, t->col, "Invalid ret: %s", t->as_ptr);
+	  return false;
+	}
+	
+	*(struct cx_func_ret *)cx_vec_push(rets) = cx_nret(i);      
+      } else {
+	  cx_error(cx, t->row, t->col, "Invalid ret: %s", t->as_ptr);
+	  return false;	
+      }
+    } else if (t->type == CX_TTYPE()) {
+      *(struct cx_func_ret *)cx_vec_push(rets) = cx_ret(t->as_ptr);      
+    } else {
+      cx_error(cx, t->row, t->col, "Unexpected tok: %d", t->type);
+      return false;
+    }
+  }
+
+  return true;
 }

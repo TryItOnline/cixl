@@ -29,7 +29,7 @@ rec: Capacity()
   start end  Time
   total used Int;
 
-func: new-capacity(start end Time total used Int)
+func: new-capacity(start end Time total used Int) (Capacity)
   let: c new Capacity;
   $c put `start $start
   $c put `end   $end
@@ -41,7 +41,7 @@ func: new-capacity(start end Time total used Int)
   Resources start out with one continous segment of full capacity in the calendar.
 */
 
-func: new-resource(id Sym q Int)
+func: new-resource(id Sym q Int) (Resource)
   let: r new Resource;
   $r put `id       $id
   $r put `quantity $q
@@ -53,7 +53,7 @@ func: new-resource(id Sym q Int)
   Capacities are split as needed during update.
 */
 
-func: update-capacity(in Capacity start end Time total used Int out Vect)
+func: update-capacity(in Capacity start end Time total used Int out Vect) ()
   $in get `start < $start if {(
     let: head $in %% ~ _;
     $head put `end $start
@@ -76,7 +76,7 @@ func: update-capacity(in Capacity start end Time total used Int out Vect)
   $in put `total $t
   $in put `used  $u;
 
-func: intersects(in Capacity start end Time)
+func: intersects(in Capacity start end Time) (Bool)
   {$in get `start < $end} and {($in get `end > $start)};
 
 /*
@@ -84,7 +84,7 @@ func: intersects(in Capacity start end Time)
   inconsistent calendars on failure.
 */
 
-func: update-calendar(in Vect start end Time total used Int)
+func: update-calendar(in Vect start end Time total used Int) (Vect)
   let: out [];
 
   $in for {
@@ -95,7 +95,7 @@ func: update-calendar(in Vect start end Time total used Int)
   
   $out;
 
-func: update-resource(r Resource start end Time total used Int)
+func: update-resource(r Resource start end Time total used Int) ()
   let: c $r get `calendar;
   $r put `calendar (update-calendar $c $start $end $total $used);
 
@@ -109,12 +109,12 @@ rec: Booking()
   start end Time
   quantity  Int;
 
-func: next-booking-id()
+func: next-booking-id() (Int)
   let: id get-ref $next-booking-id;
   $next-booking-id put-ref ($id ++)
   $id;
 
-func: new-booking(r Resource start end Time q Int)
+func: new-booking(r Resource start end Time q Int) (Booking)
   $start < $end else {fail 'Invalid booking length'}
   let: b new Booking;
   $b put `id       next-booking-id
@@ -131,7 +131,7 @@ func: new-booking(r Resource start end Time q Int)
   the next hour.
 */
 
-func: run-tests()
+func: run-tests() ()
   let: r new-resource new Sym 10;
   new-booking $r today (today 1 days +) 5 _
   new-booking $r now   (now 1h +)       6 _;

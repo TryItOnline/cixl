@@ -58,27 +58,6 @@ static bool dec_imp(struct cx_scope *scope) {
   return true;
 }
 
-static bool char_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  struct cx_box v = *cx_test(cx_pop(scope, false));
-  
-  if (v.as_int < 0 || v.as_int > 255) {
-    cx_error(cx, cx->row, cx->col, "Invalid char: %" PRId64, v.as_int);
-    return false;
-  }
-  
-  cx_box_init(cx_push(scope), cx->char_type)->as_char = v.as_int;
-  return true;
-}
-
-static bool str_imp(struct cx_scope *scope) {
-  struct cx_box v = *cx_test(cx_pop(scope, false));
-  char *s = cx_fmt("%" PRId64, v.as_int);
-  cx_box_init(cx_push(scope), scope->cx->str_type)->as_str = cx_str_new(s);
-  free(s);
-  return true;
-}
-
 static bool times_imp(struct cx_scope *scope) {
   struct cx_box
     v = *cx_test(cx_pop(scope, false)),
@@ -117,8 +96,7 @@ static void dump_imp(struct cx_box *v, FILE *out) {
 }
 
 struct cx_type *cx_init_int_type(struct cx *cx) {
-  struct cx_type *t = cx_add_type(cx, "Int",
-				  cx->any_type, cx->num_type, cx->seq_type);
+  struct cx_type *t = cx_add_type(cx, "Int", cx->num_type, cx->seq_type);
   t->equid = equid_imp;
   t->cmp = cmp_imp;
   t->ok = ok_imp;
@@ -126,12 +104,18 @@ struct cx_type *cx_init_int_type(struct cx *cx) {
   t->write = dump_imp;
   t->dump = dump_imp;
   
-  cx_add_cfunc(cx, "++", inc_imp, cx_arg("v", t));
-  cx_add_cfunc(cx, "--", dec_imp, cx_arg("v", t));
+  cx_add_cfunc(cx, "++",
+	       cx_args(cx_arg("v", t)), cx_rets(cx_ret(t)),
+	       inc_imp);
   
-  cx_add_cfunc(cx, "char", char_imp, cx_arg("v", t));
-  cx_add_cfunc(cx, "str", str_imp, cx_arg("v", t));
-  cx_add_cfunc(cx, "times", times_imp, cx_arg("n", t), cx_arg("act", cx->any_type));
+  cx_add_cfunc(cx, "--",
+	       cx_args(cx_arg("v", t)), cx_rets(cx_ret(t)),
+	       dec_imp);
+    
+  cx_add_cfunc(cx, "times",
+	       cx_args(cx_arg("n", t), cx_arg("act", cx->any_type)),
+	       cx_rets(),
+	       times_imp);
   
   return t;
 }

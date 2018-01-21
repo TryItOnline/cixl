@@ -250,16 +250,24 @@ static bool ok_imp(struct cx_scope *scope) {
 void cx_init_rec(struct cx *cx) {
   cx_add_macro(cx, "rec:", rec_parse); 
 
-  cx_add_cfunc(cx, "=", eqval_imp,
-	       cx_arg("x", cx->rec_type), cx_arg("y", cx->rec_type));
+  cx_add_cfunc(cx, "=",
+	       cx_args(cx_arg("x", cx->rec_type), cx_arg("y", cx->rec_type)),
+	       cx_rets(cx_ret(cx->bool_type)),
+	       eqval_imp);
 
-  cx_add_cfunc(cx, "?", ok_imp, cx_arg("rec", cx->rec_type));
+  cx_add_cfunc(cx, "?",
+	       cx_args(cx_arg("rec", cx->rec_type)), cx_rets(cx_ret(cx->bool_type)),
+	       ok_imp);
 
-  cx_add_cfunc(cx, "get", get_imp,
-	       cx_arg("rec", cx->rec_type), cx_arg("fld", cx->sym_type));
+  cx_add_cfunc(cx, "get",
+	       cx_args(cx_arg("rec", cx->rec_type), cx_arg("fld", cx->sym_type)),
+	       cx_rets(cx_ret(cx->opt_type)),
+	       get_imp);
 
-  cx_add_cfunc(cx, "put", put_imp,
-	       cx_arg("rec", cx->rec_type),
-	       cx_arg("fld", cx->sym_type),
-	       cx_arg("val", cx->any_type));
+  cx_add_cfunc(cx, "put",
+	       cx_args(cx_arg("rec", cx->rec_type),
+		       cx_arg("fld", cx->sym_type),
+		       cx_arg("val", cx->any_type)),
+	       cx_rets(),
+	       put_imp);
 }

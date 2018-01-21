@@ -16,9 +16,7 @@
 #include "cixl/types/bin.h"
 #include "cixl/types/bool.h"
 #include "cixl/types/char.h"
-#include "cixl/types/cmp.h"
 #include "cixl/types/file.h"
-#include "cixl/types/fimp.h"
 #include "cixl/types/func.h"
 #include "cixl/types/guid.h"
 #include "cixl/types/int.h"
@@ -216,15 +214,16 @@ struct cx *cx_init(struct cx *cx) {
   cx->any_type = cx_add_type(cx, "A", cx->opt_type);
   cx->any_type->trait = true;
 
-  cx->cmp_type = cx_init_cmp_type(cx);
+  cx->cmp_type = cx_add_type(cx, "Cmp", cx->any_type);
+  cx->cmp_type->trait = true;  
 
-  cx->seq_type = cx_add_type(cx, "Seq");
+  cx->seq_type = cx_add_type(cx, "Seq", cx->any_type);
   cx->seq_type->trait = true;
 
   cx->num_type = cx_add_type(cx, "Num", cx->cmp_type);
   cx->num_type->trait = true;
   
-  cx->rec_type = cx_add_type(cx, "Rec", cx->any_type, cx->cmp_type);
+  cx->rec_type = cx_add_type(cx, "Rec", cx->cmp_type);
   cx->rec_type->trait = true;
 
   cx->nil_type = cx_init_nil_type(cx);
@@ -232,8 +231,8 @@ struct cx *cx_init(struct cx *cx) {
   
   cx->pair_type = cx_init_pair_type(cx);
   cx->iter_type = cx_init_iter_type(cx);
-  cx->bool_type = cx_init_bool_type(cx);
   cx->int_type = cx_init_int_type(cx);
+  cx->bool_type = cx_init_bool_type(cx);
   cx->rat_type = cx_init_rat_type(cx);
   cx->char_type = cx_init_char_type(cx);
   cx->str_type = cx_init_str_type(cx);
@@ -253,19 +252,37 @@ struct cx *cx_init(struct cx *cx) {
   cx->wfile_type = cx_init_file_type(cx, "WFile", cx->any_type, cx->file_type);
   cx->rwfile_type = cx_init_file_type(cx, "RWFile", cx->rfile_type, cx->wfile_type);
   
-  cx_add_cfunc(cx, "read", read_imp, cx_arg("f", cx->rfile_type));
+  cx_add_cfunc(cx, "read",
+	       cx_args(cx_arg("f", cx->rfile_type)), cx_rets(cx_ret(cx->opt_type)),
+	       read_imp);
 
-  cx_add_cfunc(cx, "write", write_imp,
-	       cx_arg("f", cx->wfile_type), cx_arg("v", cx->opt_type));
+  cx_add_cfunc(cx, "write",
+	       cx_args(cx_arg("f", cx->wfile_type), cx_arg("v", cx->opt_type)),
+	       cx_rets(),
+	       write_imp);
 
-  cx_add_cfunc(cx, "compile", compile_imp,
-	       cx_arg("out", cx->bin_type), cx_arg("in", cx->str_type));
+  cx_add_cfunc(cx, "compile",
+	       cx_args(cx_arg("out", cx->bin_type), cx_arg("in", cx->str_type)),
+	       cx_rets(),
+	       compile_imp);
 
-  cx_add_cfunc(cx, "call", call_imp, cx_arg("act", cx->any_type));
-  cx_add_cfunc(cx, "new", new_imp, cx_arg("t", cx->meta_type));
-  cx_add_cfunc(cx, "clock", clock_imp, cx_arg("act", cx->any_type));
-  cx_add_cfunc(cx, "check", check_imp, cx_arg("v", cx->opt_type));
-  cx_add_cfunc(cx, "fail", fail_imp, cx_arg("msg", cx->str_type));
+  cx_add_cfunc(cx, "call", cx_args(cx_arg("act", cx->any_type)), cx_rets(), call_imp);
+
+  cx_add_cfunc(cx, "new",
+	       cx_args(cx_arg("t", cx->meta_type)), cx_rets(cx_ret(cx->any_type)),
+	       new_imp);
+
+  cx_add_cfunc(cx, "clock",
+	       cx_args(cx_arg("act", cx->any_type)), cx_rets(cx_ret(cx->int_type)),
+	       clock_imp);
+  
+  cx_add_cfunc(cx, "check",
+	       cx_args(cx_arg("v", cx->opt_type)), cx_rets(),
+	       check_imp);
+  
+  cx_add_cfunc(cx, "fail",
+	       cx_args(cx_arg("msg", cx->str_type)), cx_rets(),
+	       fail_imp);
 
   cx->scope = NULL;
   cx->main = cx_begin(cx, NULL);
@@ -368,10 +385,10 @@ struct cx_type *cx_get_type(struct cx *cx, const char *id, bool silent) {
   return t ? *t : NULL;
 }
 
-struct cx_fimp *_cx_add_func(struct cx *cx,
-			     const char *id,
-			     int nargs,
-			     struct cx_func_arg *args) {
+struct cx_fimp *cx_add_fimp(struct cx *cx,
+			    const char *id,
+			    int nargs, struct cx_func_arg *args,
+			    int nrets, struct cx_func_ret *rets) {
   struct cx_func **f = cx_set_get(&cx->funcs, &id);
 
   if (f) {
@@ -386,17 +403,27 @@ struct cx_fimp *_cx_add_func(struct cx *cx,
     *f = cx_func_init(malloc(sizeof(struct cx_func)), cx, id, nargs);
   }
   
-  return cx_func_add_imp(*f, nargs, args);
+  return cx_func_add_imp(*f, nargs, args, nrets, rets);
 }
 
-bool cx_add_mixl_func(struct cx *cx,
-		      const char *id,
-		      const char *args,
-		      const char *body) {
-  char *in = cx_fmt("func: %s(%s) %s;", id, args, body);
-  bool ok = cx_eval_str(cx, in);
-  free(in);
-  return ok;
+struct cx_fimp *cx_add_func(struct cx *cx,
+			    const char *id,
+			    int nargs, struct cx_func_arg *args,
+			    int nrets, struct cx_func_ret *rets,
+			    const char *body) {
+  struct cx_fimp *imp = cx_add_fimp(cx, id, nargs, args, nrets, rets);
+  cx_parse_str(cx, body, &imp->toks);
+  return imp;
+}
+
+struct cx_fimp *cx_add_cfunc(struct cx *cx,
+			     const char *id,
+			     int nargs, struct cx_func_arg *args,
+			     int nrets, struct cx_func_ret *rets,
+			     cx_fimp_ptr_t ptr) {
+  struct cx_fimp *imp = cx_add_fimp(cx, id, nargs, args, nrets, rets);
+  imp->ptr = ptr;
+  return imp;
 }
 
 struct cx_func *cx_get_func(struct cx *cx, const char *id, bool silent) {
@@ -408,7 +435,6 @@ struct cx_func *cx_get_func(struct cx *cx, const char *id, bool silent) {
 
   return f ? *f : NULL;
 }
-
 
 struct cx_macro *cx_add_macro(struct cx *cx, const char *id, cx_macro_parse_t imp) {
   struct cx_macro **m = cx_test(cx_set_insert(&cx->macros, &id));

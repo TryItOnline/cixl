@@ -6,6 +6,7 @@
 #include "cixl/parse.h"
 #include "cixl/set.h"
 #include "cixl/type.h"
+#include "cixl/types/fimp.h"
 
 #define CX_VERSION "0.8.5"
 
@@ -16,23 +17,11 @@
 #define CX_SCOPE_SLAB_SIZE  20
 #define CX_TABLE_SLAB_SIZE  20
 
-#define cx_add_func(cx, id, body, ...) ({			\
-      struct cx_func_arg args[] = {__VA_ARGS__};		\
-      int nargs = sizeof(args)/sizeof(struct cx_func_arg);	\
-      struct cx_fimp *imp = _cx_add_func(cx, id, nargs, args);	\
-      cx_parse_str(cx, body, &imp->toks);			\
-    })								\
-
-#define cx_add_cfunc(cx, id, p, ...) ({				\
-      struct cx_func_arg args[] = {__VA_ARGS__};		\
-      int nargs = sizeof(args)/sizeof(struct cx_func_arg);	\
-      _cx_add_func(cx, id, nargs, args)->ptr = p;		\
-    })								\
-
 #define cx_add_type(cx, id, ...)		\
   _cx_add_type(cx, id, ##__VA_ARGS__, NULL)	\
 
 struct cx_func_arg;
+struct cx_func_ret;
 struct cx_scope;
 struct cx_sym;
 
@@ -80,16 +69,23 @@ struct cx_type *cx_get_type(struct cx *cx, const char *id, bool silent);
 struct cx_macro *cx_add_macro(struct cx *cx, const char *id, cx_macro_parse_t imp);
 struct cx_macro *cx_get_macro(struct cx *cx, const char *id, bool silent);
 
-struct cx_fimp *_cx_add_func(struct cx *cx,
+struct cx_fimp *cx_add_fimp(struct cx *cx,
+			    const char *id,
+			    int nargs, struct cx_func_arg *args,
+			    int nrets, struct cx_func_ret *rets);
+
+struct cx_fimp *cx_add_func(struct cx *cx,
+			    const char *id,
+			    int nargs, struct cx_func_arg *args,
+			    int nrets, struct cx_func_ret *rets,
+			    const char *body);
+
+struct cx_fimp *cx_add_cfunc(struct cx *cx,
 			     const char *id,
-			     int nargs,
-			     struct cx_func_arg *args);
-
-bool cx_add_mixl_func(struct cx *cx,
-		      const char *id,
-		      const char *args,
-		      const char *body);
-
+			     int nargs, struct cx_func_arg *args,
+			     int nrets, struct cx_func_ret *rets,
+			     cx_fimp_ptr_t ptr);
+ 
 struct cx_func *cx_get_func(struct cx *cx, const char *id, bool silent);
 
 struct cx_box *cx_get_const(struct cx *cx, struct cx_sym id, bool silent);

@@ -106,7 +106,7 @@ static void deinit_imp(struct cx_box *v) {
 }
 
 struct cx_type *cx_init_pair_type(struct cx *cx) {
-  struct cx_type *t = cx_add_type(cx, "Pair", cx->any_type, cx->cmp_type);
+  struct cx_type *t = cx_add_type(cx, "Pair", cx->cmp_type);
   t->eqval = eqval_imp;
   t->equid = equid_imp;
   t->cmp = cmp_imp;
@@ -116,11 +116,20 @@ struct cx_type *cx_init_pair_type(struct cx *cx) {
   t->dump = dump_imp;
   t->deinit = deinit_imp;
 
-  cx_add_cfunc(cx, ".", cons_imp, 
-	       cx_arg("x", cx->opt_type), cx_arg("y", cx->opt_type));
+  cx_add_cfunc(cx, ".", 
+	       cx_args(cx_arg("x", cx->opt_type), cx_arg("y", cx->opt_type)),
+	       cx_rets(cx_ret(t)),
+	       cons_imp);
   
-  cx_add_cfunc(cx, "x", x_imp, cx_arg("p", t));
-  cx_add_cfunc(cx, "y", y_imp, cx_arg("p", t));
+  cx_add_cfunc(cx, "x",
+	       cx_args(cx_arg("p", t)),
+	       cx_rets(cx_ret(cx->any_type)),
+	       x_imp);
+
+  cx_add_cfunc(cx, "y",
+	       cx_args(cx_arg("p", t)),
+	       cx_rets(cx_ret(cx->any_type)),
+	       y_imp);
 
   return t;
 }

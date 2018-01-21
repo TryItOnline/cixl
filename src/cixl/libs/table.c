@@ -119,19 +119,30 @@ static bool seq_imp(struct cx_scope *scope) {
 }
 
 void cx_init_table(struct cx *cx) {
-  cx_add_cfunc(cx, "get", get_imp,
-	       cx_arg("tbl", cx->table_type), cx_arg("key", cx->cmp_type));
+  cx_add_cfunc(cx, "get",
+	       cx_args(cx_arg("tbl", cx->table_type), cx_arg("key", cx->cmp_type)),
+	       cx_rets(cx_ret(cx->opt_type)),
+	       get_imp);
 
-  cx_add_cfunc(cx, "put", put_imp,
-	       cx_arg("tbl", cx->table_type),
-	       cx_arg("key", cx->cmp_type),
-	       cx_arg("val", cx->any_type));
+  cx_add_cfunc(cx, "put",
+	       cx_args(cx_arg("tbl", cx->table_type),
+		       cx_arg("key", cx->cmp_type),
+		       cx_arg("val", cx->any_type)),
+	       cx_rets(),
+	       put_imp);
 
-  cx_add_cfunc(cx, "delete", delete_imp,
-	       cx_arg("tbl", cx->table_type), cx_arg("key", cx->cmp_type));
+  cx_add_cfunc(cx, "delete",
+	       cx_args(cx_arg("tbl", cx->table_type), cx_arg("key", cx->cmp_type)),
+	       cx_rets(),
+	       delete_imp);
 
-  cx_add_cfunc(cx, "len", len_imp,
-	       cx_arg("tbl", cx->table_type));
+  cx_add_cfunc(cx, "len",
+	       cx_args(cx_arg("tbl", cx->table_type)),
+	       cx_rets(cx_ret(cx->int_type)),
+	       len_imp);
 
-  cx_add_cfunc(cx, "table", seq_imp, cx_arg("in", cx->seq_type));
+  cx_add_cfunc(cx, "table",
+	       cx_args(cx_arg("in", cx->seq_type)),
+	       cx_rets(cx_ret(cx->table_type)),
+	       seq_imp);
 }

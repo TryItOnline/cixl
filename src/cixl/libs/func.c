@@ -40,7 +40,7 @@ static bool func_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   struct cx_tok id = *(struct cx_tok *)cx_vec_pop(&toks);
 
   if (id.type != CX_TID()) {
-    cx_error(cx, row, col, "Invalid func id");
+    cx_error(cx, row, col, "Invalid func id: %s", id.type->id);
     cx_tok_deinit(&id);
     cx_do_vec(&toks, struct cx_tok, t) { cx_tok_deinit(t); }
     cx_vec_deinit(&toks);
@@ -58,7 +58,7 @@ static bool func_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   struct cx_tok args = *(struct cx_tok *)cx_vec_pop(&toks);
 
   if (args.type != CX_TGROUP()) {
-    cx_error(cx, row, col, "Invalid func args");
+    cx_error(cx, row, col, "Invalid func args: %s", args.type->id);
     cx_tok_deinit(&id);
     cx_tok_deinit(&args);
     cx_do_vec(&toks, struct cx_tok, t) { cx_tok_deinit(t); }
@@ -79,6 +79,39 @@ static bool func_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   }
 
   cx_tok_deinit(&args);
+
+  if (!cx_parse_tok(cx, in, &toks, false)) {
+    cx_error(cx, row, col, "Missing func rets");
+    cx_tok_deinit(&id);
+    cx_do_vec(&toks, struct cx_tok, t) { cx_tok_deinit(t); }
+    cx_vec_deinit(&toks);
+    return false;
+  }
+
+  struct cx_tok rets = *(struct cx_tok *)cx_vec_pop(&toks);
+
+  if (rets.type != CX_TGROUP()) {
+    cx_error(cx, row, col, "Invalid func rets: %s", rets.type->id);
+    cx_tok_deinit(&id);
+    cx_tok_deinit(&rets);
+    cx_do_vec(&toks, struct cx_tok, t) { cx_tok_deinit(t); }
+    cx_vec_deinit(&toks);
+    return false;
+  }
+  
+  struct cx_vec func_rets;
+  cx_vec_init(&func_rets, sizeof(struct cx_func_ret));
+
+  if (!cx_eval_rets(cx, &rets.as_vec, &func_rets, func_args.count)) {
+    cx_tok_deinit(&id);
+    cx_tok_deinit(&rets);
+    cx_do_vec(&toks, struct cx_tok, t) { cx_tok_deinit(t); }
+    cx_vec_deinit(&toks);
+    cx_vec_deinit(&func_rets);
+    return false;
+  }
+
+  cx_tok_deinit(&rets);
   
   if (!cx_parse_end(cx, in, &toks, true)) {
     if (!cx->errors.count) { cx_error(cx, cx->row, cx->col, "Missing func end"); }
@@ -90,14 +123,17 @@ static bool func_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
     return false;
   }
 
-  struct cx_fimp *imp = _cx_add_func(cx,
-				     id.as_ptr,
-				     func_args.count,
-				     (void *)func_args.items);
+  struct cx_fimp *imp = cx_add_fimp(cx,
+				    id.as_ptr,
+				    func_args.count,
+				    (void *)func_args.items,
+				    func_rets.count,
+				    (void *)func_rets.items);
   imp->toks = toks;
 
   cx_tok_deinit(&id);
   cx_vec_deinit(&func_args);
+  cx_vec_deinit(&func_rets);
 
   struct cx_macro_eval *eval = cx_macro_eval_new(func_eval);
   cx_tok_init(cx_vec_push(&eval->toks), CX_TFIMP(), row, col)->as_ptr = imp;
@@ -177,7 +213,10 @@ static bool upcall_imp(struct cx_scope *scope) {
 void cx_init_func(struct cx *cx) {
   cx_add_macro(cx, "func:", func_parse);
 
-  cx_add_cfunc(cx, "imps", imps_imp, cx_arg("f", cx->func_type));
-  cx_add_cfunc(cx, "recall", recall_imp);
-  cx_add_cfunc(cx, "upcall", upcall_imp);
+  cx_add_cfunc(cx, "imps",
+	       cx_args(cx_arg("f", cx->func_type)), cx_rets(cx_ret(cx->vect_type)),
+	       imps_imp);
+  
+  cx_add_cfunc(cx, "recall", cx_args(), cx_rets(), recall_imp);
+  cx_add_cfunc(cx, "upcall", cx_args(), cx_rets(), upcall_imp);
 }

@@ -8,12 +8,14 @@ struct cx;
 struct cx_func;
 struct cx_scope;
 
+typedef bool (*cx_fimp_ptr_t)(struct cx_scope *);
+
 struct cx_fimp {
   struct cx_func *func;
   char *id;
   size_t i;
-  struct cx_vec args;
-  bool (*ptr)(struct cx_scope *);
+  struct cx_vec args, rets;
+  cx_fimp_ptr_t ptr;
   struct cx_vec toks;
   struct cx_scope *scope;
   struct cx_bin *bin;

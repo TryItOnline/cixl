@@ -41,9 +41,19 @@ static bool flip_imp(struct cx_scope *scope) {
 }
 
 void cx_init_stack(struct cx *cx) {
-  cx_add_cfunc(cx, "|", reset_imp);
-  cx_add_cfunc(cx, "_", zap_imp);
-  cx_add_cfunc(cx, "%", copy_imp, cx_arg("v", cx->opt_type));
-  cx_add_cfunc(cx, "%%", clone_imp, cx_arg("v", cx->opt_type));
-  cx_add_cfunc(cx, "~", flip_imp, cx_arg("v", cx->opt_type));
+  cx_add_cfunc(cx, "|", cx_args(), cx_rets(), reset_imp);
+  cx_add_cfunc(cx, "_", cx_args(), cx_rets(), zap_imp);
+
+  cx_add_cfunc(cx, "%",
+	       cx_args(cx_arg("v", cx->opt_type)), cx_rets(cx_nret(0)),
+	       copy_imp);
+
+  cx_add_cfunc(cx, "%%",
+	       cx_args(cx_arg("v", cx->opt_type)), cx_rets(cx_nret(0)),
+	       clone_imp);
+  
+  cx_add_cfunc(cx, "~",
+	       cx_args(cx_arg("x", cx->opt_type), cx_arg("y", cx->opt_type)),
+	       cx_rets(cx_nret(1), cx_nret(0)),
+	       flip_imp);
 }

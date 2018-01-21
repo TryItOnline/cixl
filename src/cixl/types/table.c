@@ -191,7 +191,7 @@ static void deinit_imp(struct cx_box *v) {
 }
 
 struct cx_type *cx_init_table_type(struct cx *cx) {
-  struct cx_type *t = cx_add_type(cx, "Table", cx->any_type, cx->seq_type);
+  struct cx_type *t = cx_add_type(cx, "Table", cx->seq_type);
   t->new = new_imp;
   t->eqval = eqval_imp;
   t->equid = equid_imp;

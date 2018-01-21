@@ -133,24 +133,24 @@ static void func_tests() {
   cx_init_math(&cx);
   cx_init_var(&cx);
   
-  run(&cx, "func: foo() 42; foo = 42 check");
-  run(&cx, "(let: x 42; func: foo() $x;) &foo call = 42 check");
-  run(&cx, "func: bar(x A) $x + 35; bar 7 42 = check");
-  run(&cx, "func: baz(x y Int z T0) $x + $y + $z; baz 1 3 5 9 = check");
+  run(&cx, "func: foo() (Int) 42; foo = 42 check");
+  run(&cx, "(let: x 42; func: foo() (Int) $x;) &foo call = 42 check");
+  run(&cx, "func: bar(x A) (Int) $x + 35; bar 7 42 = check");
+  run(&cx, "func: baz(x y Int z T0) (Int) $x + $y + $z; baz 1 3 5 9 = check");
 
   run(&cx,
-      "func: maybe-add(x y Num) $x + $y; "
-      "func: maybe-add(x y Int) $x = 42 if-else 42 {upcall $x $y}; "
+      "func: maybe-add(x y Num) (T0) $x + $y; "
+      "func: maybe-add(x y Int) (Int) $x = 42 if-else 42 {upcall $x $y}; "
       "maybe-add 1 2 3 = check "
       "maybe-add 42 2 42 = check");
 
   run(&cx,
-      "func: answer(0) 0; "
-      "func: answer(x Int) $x; "
-      "func: answer(42) 'correct'; "
+      "func: answer(0) (Int) 0; "
+      "func: answer(x Int) (Int) $x; "
+      "func: answer(42) (Sym) `correct; "
       "answer 0 0 = check "
       "answer 1 1 = check "
-      "answer 42 'correct' = check");
+      "answer 42 `correct = check");
 
   cx_deinit(&cx);
 }
@@ -175,7 +175,8 @@ static void int_tests() {
   cx_init_func(&cx);
   cx_init_iter(&cx);
   cx_init_math(&cx);
-
+  cx_init_str(&cx);
+  
   run(&cx, "42 check");
   run(&cx, "0! check");
   run(&cx, "1 = 2! check");
@@ -192,6 +193,7 @@ static void char_tests() {
   cx_init_func(&cx);
   cx_init_iter(&cx);
   cx_init_math(&cx);
+  cx_init_str(&cx);
   
   run(&cx, "\\a upper \\A = check");
   run(&cx, "\\0 int + 7 char \\7 = check");
@@ -368,7 +370,7 @@ static void rec_tests() {
       "$bar = $baz !check");
   
   run(&cx,
-      "func: =(a b Foo) $a get `x, $b get `x =; "
+      "func: =(a b Foo) (Bool) $a get `x, $b get `x =; "
       "$bar = $baz check");
   
   cx_deinit(&cx);

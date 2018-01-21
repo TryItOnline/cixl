@@ -152,8 +152,14 @@ struct cx_type *cx_init_guid_type(struct cx *cx) {
   t->write = write_imp;
   t->dump = dump_imp;
 
-  cx_add_cfunc(cx, "guid", guid_imp, cx_arg("s", cx->str_type));
-  cx_add_cfunc(cx, "str", str_imp, cx_arg("id", t));
+  cx_add_cfunc(cx, "guid",
+	       cx_args(cx_arg("s", cx->str_type)), cx_rets(cx_ret(t)),
+	       guid_imp);
+  
+  cx_add_cfunc(cx, "str",
+	       cx_args(cx_arg("id", t)),
+	       cx_rets(cx_ret(cx->str_type)),
+	       str_imp);
 
   return t;
 }

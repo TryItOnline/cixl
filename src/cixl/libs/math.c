@@ -81,34 +81,66 @@ static bool rat_mul_imp(struct cx_scope *scope) {
   return true;
 }
 
+static bool rat_int_imp(struct cx_scope *scope) {
+  struct cx_box v = *cx_test(cx_pop(scope, false));
+  cx_box_init(cx_push(scope), scope->cx->int_type)->as_int = cx_rat_int(&v.as_rat);
+  return true;
+}
+
 void cx_init_math(struct cx *cx) {
-  cx_add_cfunc(cx, "+", int_add_imp,
-	       cx_arg("x", cx->int_type), cx_arg("y", cx->int_type));
-  cx_add_cfunc(cx, "-", int_sub_imp,
-	       cx_arg("x", cx->int_type), cx_arg("y", cx->int_type));
-  cx_add_cfunc(cx, "*", int_mul_imp,
-	       cx_arg("x", cx->int_type), cx_arg("y", cx->int_type));
-  cx_add_cfunc(cx, "/", int_div_imp,
-	       cx_arg("x", cx->int_type), cx_arg("y", cx->int_type));
+  cx_add_cfunc(cx, "+",
+	       cx_args(cx_arg("x", cx->int_type), cx_arg("y", cx->int_type)),
+	       cx_rets(cx_ret(cx->int_type)),
+	       int_add_imp);
+  
+  cx_add_cfunc(cx, "-",
+	       cx_args(cx_arg("x", cx->int_type), cx_arg("y", cx->int_type)),
+	       cx_rets(cx_ret(cx->int_type)),
+	       int_sub_imp);
+  
+  cx_add_cfunc(cx, "*",
+	       cx_args(cx_arg("x", cx->int_type), cx_arg("y", cx->int_type)),
+	       cx_rets(cx_ret(cx->int_type)),
+	       int_mul_imp);
+  
+  cx_add_cfunc(cx, "/",
+	       cx_args(cx_arg("x", cx->int_type), cx_arg("y", cx->int_type)),
+	       cx_rets(cx_ret(cx->rat_type)),
+	       int_div_imp);
 
-  cx_add_cfunc(cx, "rand", rand_imp, cx_arg("n", cx->int_type));
+  cx_add_cfunc(cx, "rand",
+	       cx_args(cx_arg("n", cx->int_type)), cx_rets(cx_ret(cx->int_type)),
+	       rand_imp);
 
-  cx_add_cfunc(cx, "+", rat_add_imp,
-	       cx_arg("x", cx->rat_type), cx_arg("y", cx->rat_type));
-  cx_add_cfunc(cx, "*", rat_mul_imp,
-	       cx_arg("x", cx->rat_type), cx_arg("y", cx->rat_type));
+  cx_add_cfunc(cx, "+",
+	       cx_args(cx_arg("x", cx->rat_type), cx_arg("y", cx->rat_type)),
+	       cx_rets(cx_ret(cx->rat_type)),
+	       rat_add_imp);
+  
+  cx_add_cfunc(cx, "*",
+	       cx_args(cx_arg("x", cx->rat_type), cx_arg("y", cx->rat_type)),
+	       cx_rets(cx_ret(cx->rat_type)),
+	       rat_mul_imp);
 
+  cx_add_cfunc(cx, "int",
+	       cx_args(cx_arg("r", cx->rat_type)),
+	       cx_rets(cx_ret(cx->int_type)),
+	       rat_int_imp);
+  
   cx_add_func(cx, "fib-rec",
-	      "$n? if-else {$b $a $b + $n -- recall} $a",
-	      cx_arg("a", cx->int_type),
-	      cx_arg("b", cx->int_type),
-	      cx_arg("n", cx->int_type));
+	      cx_args(cx_arg("a", cx->int_type),
+		      cx_arg("b", cx->int_type),
+		      cx_arg("n", cx->int_type)),
+	      cx_rets(cx_ret(cx->int_type)),
+	      "$n? if-else {$b $a $b + $n -- recall} $a");
 
   cx_add_func(cx, "fib",
-	      "0 1 $n fib-rec",
-	      cx_arg("n", cx->int_type));
+	      cx_args(cx_arg("n", cx->int_type)),
+	      cx_rets(cx_ret(cx->int_type)),
+	      "0 1 $n fib-rec");
 
   cx_add_func(cx, "sum",
-	      "0, $in for &+",
-	      cx_arg("in", cx->seq_type));
+	      cx_args(cx_arg("in", cx->seq_type)),
+	      cx_rets(cx_ret(cx->any_type)),
+	      "0, $in for &+");
 }

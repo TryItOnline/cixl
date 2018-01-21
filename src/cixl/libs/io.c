@@ -103,13 +103,24 @@ void cx_init_io(struct cx *cx) {
   cx_box_init(cx_set_const(cx, cx_sym(cx, "out"), false),
 	      cx->wfile_type)->as_file = cx_file_new(stdout);
 
-  cx_add_cfunc(cx, "say", say_imp, cx_arg("s", cx->str_type));
-  cx_add_cfunc(cx, "ask", ask_imp, cx_arg("prompt", cx->str_type));
-  cx_add_cfunc(cx, "load", load_imp, cx_arg("path", cx->str_type));  
+  cx_add_cfunc(cx, "say",
+	       cx_args(cx_arg("s", cx->str_type)), cx_rets(),
+	       say_imp);
+  
+  cx_add_cfunc(cx, "ask",
+	       cx_args(cx_arg("prompt", cx->str_type)), cx_rets(),
+	       ask_imp);
+  
+  cx_add_cfunc(cx, "load",
+	       cx_args(cx_arg("path", cx->str_type)), cx_rets(),
+	       load_imp);  
 
-  cx_add_cfunc(cx, "fopen", fopen_imp,
-	       cx_arg("path", cx->str_type),
-	       cx_arg("mode", cx->sym_type));  
+  cx_add_cfunc(cx, "fopen",
+	       cx_args(cx_arg("path", cx->str_type), cx_arg("mode", cx->sym_type)),
+	       cx_rets(cx_ret(cx->file_type)),
+	       fopen_imp);  
 
-  cx_add_cfunc(cx, "flush", flush_imp, cx_arg("file", cx->wfile_type));
+  cx_add_cfunc(cx, "flush",
+	       cx_args(cx_arg("file", cx->wfile_type)), cx_rets(),
+	       flush_imp);
 }
