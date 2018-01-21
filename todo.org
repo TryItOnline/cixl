@@ -9,6 +9,13 @@
 ** add Rec iter
 *** copy Table
 ** put all fields
+* linearize scan_args
+** add cx_scan struct
+** add cx.scans vec
+** func & opt return_op
+** check in cx_push and call if enough args
+** change funcall to call scan_args
+** change scan_args to push struct
 * add switch: macro
 ** var is optional
 *** bind if not bound already
