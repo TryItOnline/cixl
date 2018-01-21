@@ -514,6 +514,16 @@ It's possible to specify literal values for arguments instead of names and types
 [#f #t]
 ```
 
+Multiple return types may be specified.
+
+```
+   func: flip(x y Opt) (T1 T0)
+...  $y $x;
+...1 2 flip
+...
+[2 1]
+```
+
 Overriding existing implementations is as easy as defining a function with identical argument list.
 
 ```
