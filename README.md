@@ -534,7 +534,7 @@ Overriding existing implementations is as easy as defining a function with ident
 [42]
 ```
 
-```recall``` may be used to call the current function recursively in the same scope, it supports scanning for arguments just like a regular function call. The call may be placed anywhere in the function body, but the actual calling doesn't take place until it finishes; it's even possible to schedule several recalls at a time by repeating ```recall```. This behavior is intentional and not subject to change, feel free to take advantage of the possibilities.
+```recall``` may be used to call the current function recursively in the same scope, it supports scanning for arguments just like a regular function call. The call may be placed anywhere in the function body, but the actual calling doesn't take place until it finishes; it's even possible to schedule several recalls at a time by repeating ```recall```.
 
 ```  
    func: fib-rec(a b n Int) (Int)

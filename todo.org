@@ -11,6 +11,13 @@
 ** check in cx_push and call if enough args
 ** change funcall to call scan_args
 ** change scan_args to push struct
+* add error traps
+** add cx.error_type 
+** switch errors to reference counting
+** add cx.error_alloc
+** add scope.traps
+*** vec of call targets
+*** scan and call for each error in eval
 * add switch: macro
 ** var is optional
 *** bind if not bound already
