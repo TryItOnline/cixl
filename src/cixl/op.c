@@ -37,7 +37,12 @@ cx_op_type(CX_OBEGIN, {
   });
 
 static bool end_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
-  if (!op->as_end.push_result) { cx_vec_clear(&cx_scope(cx, 0)->stack); }
+  if (!op->as_end.push_result) {
+    struct cx_scope *s = cx_scope(cx, 0);
+    cx_do_vec(&s->stack, struct cx_box, v) { cx_box_deinit(v); }
+    cx_vec_clear(&s->stack);
+  }
+  
   cx_end(cx);
   return true;
 }
@@ -294,7 +299,7 @@ static bool return_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
 	return false;
       }
       
-      cx_copy(cx_vec_push(&ds->stack), v);
+      *(struct cx_box *)cx_vec_push(&ds->stack) = *v;
     }    
 
     cx_vec_clear(&ss->stack);
