@@ -1,8 +1,5 @@
 * finish fimp rets
-** check types & move ret values in CX_ORETURN
-*** signal error if values on stack after move
-*** support TN via a.sym_id
-** check types in cx_fimp_call if ptr
+** support TN via a.sym_id in ORETURN
 * add find-key(Vect) fn & post
 * add is-dirty fn
 * add revert(table rec) fn

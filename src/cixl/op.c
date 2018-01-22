@@ -242,9 +242,9 @@ cx_op_type(CX_OPUTVAR, {
 
 static bool return_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
   struct cx_call *call = cx_test(cx_vec_peek(&cx->calls, 0));
+  struct cx_fimp *imp = call->target;
 
   if (call->recalls) {
-    struct cx_fimp *imp = call->target;
     if (!cx_scan_args(cx, imp->func)) { return false; }
 
     if (!cx_fimp_match(imp, &cx_scope(cx, 0)->stack)) {
@@ -260,7 +260,44 @@ static bool return_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
     } else {
       cx->stop = true;
     }
+
+    struct cx_scope *ss = cx_scope(cx, 0), *ds = cx_scope(cx, 1);
+
+    if (ss->stack.count < imp->rets.count) {
+      cx_error(cx, cx->row, cx->col,
+	       "Not enough return values on stack: %s",
+	       imp->func->id);
+      
+      return false;
+    }
+
+    if (ss->stack.count > imp->rets.count) {
+      cx_error(cx, cx->row, cx->col,
+	       "Stack not empty (%zd/%zd) on return: %s",
+	       ss->stack.count, imp->rets.count, imp->func->id);
+
+      return false;
+    }
+
+    cx_vec_grow(&ds->stack, ds->stack.count+imp->rets.count);
+    size_t i = 0;
+    struct cx_func_ret *r = cx_vec_peek(&imp->rets, i);
     
+    for (struct cx_box *v = cx_vec_start(&ss->stack);
+	 i < ss->stack.count;
+	 i++, v++, r++) {
+      if (r->type && !cx_is(v->type, r->type)) {
+	cx_error(cx, cx->row, cx->col,
+		 "Invalid return type.\nExpected %s, actual: %s",
+		 r->type->id, v->type->id);
+
+	return false;
+      }
+      
+      cx_copy(cx_vec_push(&ds->stack), v);
+    }    
+
+    cx_vec_clear(&ss->stack);
     cx_call_deinit(cx_vec_pop(&cx->calls));
     cx_end(cx);
   }

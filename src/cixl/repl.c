@@ -10,6 +10,7 @@
 #include "cixl/eval.h"
 #include "cixl/repl.h"
 #include "cixl/scope.h"
+#include "cixl/types/vect.h"
 
 void cx_repl(struct cx *cx, FILE *in, FILE *out) {
   fprintf(out, "Cixl v%s, ", CX_VERSION);
@@ -41,6 +42,8 @@ void cx_repl(struct cx *cx, FILE *in, FILE *out) {
       } else {
 	cx_do_vec(&cx->errors, struct cx_error, e) {
 	  fprintf(out, "Error in row %d, col %d:\n%s\n", e->row, e->col, e->msg);
+	  cx_vect_dump(&e->stack, out);
+	  fputs("\n\n", out);
 	  cx_error_deinit(e);
 	}
 	

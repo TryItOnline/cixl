@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "cixl/vec.h"
+
 #define cx_test(cond) ({				\
       typeof(cond) _cond = cond;			\
 							\
@@ -21,6 +23,7 @@ struct cx;
 
 struct cx_error {
   int row, col;
+  struct cx_vec stack;
   char *msg;
 };
 

@@ -15,6 +15,7 @@
 #include "cixl/libs/var.h"
 #include "cixl/scope.h"
 #include "cixl/tests.h"
+#include "cixl/types/vect.h"
 
 static void run(struct cx *cx, const char *in) {
   cx_vec_clear(&cx_scope(cx, 0)->stack);
@@ -24,6 +25,8 @@ static void run(struct cx *cx, const char *in) {
     
     cx_do_vec(&cx->errors, struct cx_error, e) {
       printf("Error in row %d, col %d:\n%s\n", e->row, e->col, e->msg);
+      cx_vect_dump(&e->stack, stdout);
+      fputs("\n\n", stdout);
       cx_error_deinit(e);
     }
     
