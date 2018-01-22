@@ -269,18 +269,12 @@ static bool return_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
     struct cx_scope *ss = cx_scope(cx, 0), *ds = cx_scope(cx, 1);
 
     if (ss->stack.count < imp->rets.count) {
-      cx_error(cx, cx->row, cx->col,
-	       "Not enough return values on stack: %s",
-	       imp->func->id);
-      
+      cx_error(cx, cx->row, cx->col, "Not enough return values on stack");
       return false;
     }
 
     if (ss->stack.count > imp->rets.count) {
-      cx_error(cx, cx->row, cx->col,
-	       "Stack not empty (%zd/%zd) on return: %s",
-	       ss->stack.count, imp->rets.count, imp->func->id);
-
+      cx_error(cx, cx->row, cx->col, "Stack not empty on return");
       return false;
     }
 
