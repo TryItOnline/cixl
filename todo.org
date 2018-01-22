@@ -1,5 +1,3 @@
-* finish fimp rets
-** support TN via a.sym_id in ORETURN
 * add find-key(Vect) fn & post
 * add is-dirty fn
 * add revert(table rec) fn

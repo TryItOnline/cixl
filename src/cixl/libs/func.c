@@ -102,7 +102,7 @@ static bool func_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   struct cx_vec func_rets;
   cx_vec_init(&func_rets, sizeof(struct cx_func_ret));
 
-  if (!cx_eval_rets(cx, &rets.as_vec, &func_rets, func_args.count)) {
+  if (!cx_eval_rets(cx, &rets.as_vec, &func_args, &func_rets)) {
     cx_tok_deinit(&id);
     cx_tok_deinit(&rets);
     cx_do_vec(&toks, struct cx_tok, t) { cx_tok_deinit(t); }

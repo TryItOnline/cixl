@@ -285,14 +285,22 @@ static bool return_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
     for (struct cx_box *v = cx_vec_start(&ss->stack);
 	 i < ss->stack.count;
 	 i++, v++, r++) {
-      if (r->type && !cx_is(v->type, r->type)) {
-	cx_error(cx, cx->row, cx->col,
-		 "Invalid return type.\nExpected %s, actual: %s",
-		 r->type->id, v->type->id);
-
-	return false;
+      struct cx_type *t = r->type;
+      
+      if (!r->type) {
+	struct cx_func_arg *a = cx_vec_get(&imp->args, r->narg);
+	struct cx_box *av = cx_test(cx_get_var(ss, a->sym_id, false));
+	t = av->type;
       }
       
+      if (!cx_is(v->type, t)) {
+	cx_error(cx, cx->row, cx->col,
+		 "Invalid return type.\nExpected %s, actual: %s",
+		 t->id, v->type->id);
+	
+	return false;
+      }
+
       *(struct cx_box *)cx_vec_push(&ds->stack) = *v;
     }    
 

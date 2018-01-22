@@ -132,6 +132,13 @@ bool cx_eval_args(struct cx *cx,
 	  cx_error(cx, t->row, t->col, "Invalid arg type: %s", t->as_ptr);
 	  goto exit;
 	}
+
+	struct cx_func_arg *a = cx_vec_get(args, i);
+
+	if (!a->type && a->narg == -1) {
+	  cx_error(cx, t->row, t->col, "Value arg referred by index: %d", i);
+	  goto exit;
+	}
 	
 	if (!tmp_ids.count) {
 	  cx_error(cx, t->row, t->col, "Missing args for type: %s", t->as_ptr);
@@ -181,8 +188,8 @@ bool cx_eval_args(struct cx *cx,
 
 bool cx_eval_rets(struct cx *cx,
 		  struct cx_vec *toks,
-		  struct cx_vec *rets,
-		  size_t nargs) {
+		  struct cx_vec *args,
+		  struct cx_vec *rets) {
   cx_do_vec(toks, struct cx_tok, t) {
     if (t->type == CX_TID()) {
       char *id = t->as_ptr;
@@ -190,8 +197,15 @@ bool cx_eval_rets(struct cx *cx,
       if (id[0] == 'T' && isdigit(id[1])) {
 	int i = strtoimax(id+1, NULL, 10);
 
-	if (i >= nargs || (!i && id[1] != '0')) {
+	if (i >= args->count || (!i && id[1] != '0')) {
 	  cx_error(cx, t->row, t->col, "Invalid ret: %s", t->as_ptr);
+	  return false;
+	}
+
+	struct cx_func_arg *a = cx_vec_get(args, i);
+
+	if (!a->type && a->narg == -1) {
+	  cx_error(cx, t->row, t->col, "Value arg referred by index: %d", i);
 	  return false;
 	}
 	
