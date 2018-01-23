@@ -1,9 +1,3 @@
-* finish cx_scan conversion
-** add op_type.scan
-*** set for ops that push
-*** only scan if op->type->scan in cx_eval
-** add scan param to callback
-*** use to get scope/func
 * more qdb
 ** add find-key(Vect) fn
 ** add is-dirty fn

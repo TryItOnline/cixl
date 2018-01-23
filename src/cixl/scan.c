@@ -56,5 +56,5 @@ bool cx_scan_call(struct cx_scan *scan) {
     if (c->scan == scan) { cx_vec_pop(&s->cuts); }
   }
   
-  return scan->callback(scan->data);
+  return scan->callback(scan, scan->data);
 }

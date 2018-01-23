@@ -5,8 +5,9 @@
 
 struct cx;
 struct cx_func;
+struct cx_scan;
 
-typedef bool (*cx_scan_callback_t)(void *);
+typedef bool (*cx_scan_callback_t)(struct cx_scan *, void *);
 
 struct cx_scan {
   struct cx_scope *scope;

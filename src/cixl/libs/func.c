@@ -180,11 +180,11 @@ static bool recall_imp(struct cx_scope *scope) {
   return true;
 }
 
-static bool on_upcall_scan(void *data) {
+static bool on_upcall_scan(struct cx_scan *scan, void *data) {
   struct cx_fimp *imp = data;
   struct cx_func *func = imp->func;
-  struct cx *cx = func->cx;
-  struct cx_scope *s = cx_scope(cx, 0);
+  struct cx_scope *s = scan->scope;
+  struct cx *cx = s->cx;
   
   imp = cx_func_get_imp(func,
 			&s->stack,

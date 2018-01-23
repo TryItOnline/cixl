@@ -68,12 +68,13 @@ cx_op_type(CX_OCUT, {
     type.eval = cut_eval;
   });
 
-static bool on_fimp_scan(void *data) {
+static bool on_fimp_scan(struct cx_scan *scan, void *data) {
   struct cx_op *op = data;
   struct cx_fimp *imp = op->as_fimp.imp;
-  struct cx *cx = imp->func->cx;
+  struct cx_scope *s = scan->scope;
+  struct cx *cx = s->cx;
   
-  if (!cx_fimp_match(imp, &cx_scope(cx, 0)->stack)) {
+  if (!cx_fimp_match(imp, &s->stack)) {
     cx_error(cx, cx->row, cx->col, "Func not applicable: %s", imp->func->id);
     return false;
   }
@@ -110,12 +111,12 @@ cx_op_type(CX_OFIMPDEF, {
     type.eval = fimpdef_eval;
   });
 
-static bool on_funcall_scan(void *data) {
+static bool on_funcall_scan(struct cx_scan *scan, void *data) {
   struct cx_op *op = data;
   struct cx_func *func = op->as_funcall.func;
   struct cx_fimp *imp = op->as_funcall.imp;
-  struct cx *cx = func->cx;
-  struct cx_scope *s = cx_scope(cx, 0);
+  struct cx_scope *s = scan->scope;
+  struct cx *cx = s->cx;
 
   if (imp) {
     if (!cx_fimp_match(imp, &s->stack)) { imp = NULL; }
@@ -261,12 +262,13 @@ cx_op_type(CX_OPUTVAR, {
     type.eval = putvar_eval;
   });
 
-static bool on_recall_scan(void *data) {
+static bool on_recall_scan(struct cx_scan *scan, void *data) {
   struct cx_op *op = data;
   struct cx_fimp *imp = op->as_return.imp;
-  struct cx *cx = imp->func->cx;
+  struct cx_scope *s = scan->scope;
+  struct cx *cx = s->cx;
   
-  if (!cx_fimp_match(imp, &cx_scope(cx, 0)->stack)) {
+  if (!cx_fimp_match(imp, &s->stack)) {
     cx_error(cx, cx->row, cx->col, "Recall not applicable");
     return false;
   }
