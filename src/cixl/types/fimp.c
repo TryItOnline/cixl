@@ -98,9 +98,11 @@ bool cx_fimp_compile(struct cx_fimp *imp,
     }
   }
   
-  cx_op_init(cx_vec_push(&out->ops),
-	     CX_ORETURN(),
-	     out->toks.count-1)->as_return.start_op = start_op;
+  op = cx_op_init(cx_vec_push(&out->ops),
+		  CX_ORETURN(),
+		  out->toks.count-1);
+  op->as_return.imp = imp;
+  op->as_return.start_op = start_op;
   
   if (!inline1) { cx_bin_add_func(out, imp, start_op); }
   return true;

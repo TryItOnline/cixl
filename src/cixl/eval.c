@@ -10,6 +10,7 @@
 #include "cixl/error.h"
 #include "cixl/op.h"
 #include "cixl/parse.h"
+#include "cixl/scan.h"
 #include "cixl/scope.h"
 #include "cixl/types/func.h"
 #include "cixl/types/lambda.h"
@@ -20,18 +21,41 @@ bool cx_eval(struct cx *cx, struct cx_bin *bin, struct cx_op *start) {
   if (!bin->ops.count) { return true; }
   struct cx_bin *prev_bin = cx->bin;
   struct cx_op *prev_op = cx->op;
-
+  size_t prev_nscans = cx->scans.count;
+  
   cx->bin = bin;
   cx->op = start ? start : cx_vec_start(&bin->ops);
   bool ok = false;
   struct cx_op *end = cx_vec_end(&cx->bin->ops);
     
   while (cx->op != end && !cx->stop) {
-    if (!cx_eval_next(cx)) { goto exit; }
+    struct cx_op *op = cx->op++;
+    struct cx_tok *tok = cx_vec_get(&cx->bin->toks, op->tok_idx);
+    cx->row = tok->row;
+    cx->col = tok->col;
+    
+    if (!op->type->eval(op, tok, cx) || cx->errors.count) { goto exit; }
+
+    while (cx->scans.count) {
+      struct cx_scan *s = cx_vec_peek(&cx->scans, 0);
+      if (!cx_scan_ok(s, cx_scope(cx, 0))) { break; }
+      cx_vec_pop(&cx->scans);
+      if (!cx_scan_call(s)) { goto exit; }
+    }
   }
 
+  if (cx->scans.count > prev_nscans) {
+    struct cx_scan *s = cx_vec_peek(&cx->scans, 0);
+    
+    cx_error(cx, cx->row, cx->col,
+	     "Not enough args for func: '%s'", s->func->id);
+
+    cx->scans.count = prev_nscans;
+    goto exit;
+  }
+  
   ok = true;
- exit:
+ exit:  
   cx->bin = prev_bin;
   cx->op = prev_op;
   cx->stop = false;
@@ -61,57 +85,6 @@ bool cx_eval_str(struct cx *cx, const char *in) {
     cx_vec_deinit(&toks);
     return ok;
   }
-}
-
-bool cx_eval_next(struct cx *cx) {
-  struct cx_op *op = cx->op++;
-  struct cx_tok *tok = cx_vec_get(&cx->bin->toks, op->tok_idx);
-  cx->row = tok->row;
-  cx->col = tok->col;
-  return op->type->eval(op, tok, cx) && !cx->errors.count;
-}
-
-bool cx_scan_args(struct cx *cx, struct cx_func *func) {
-  int row = cx->row, col = cx->col;
-  struct cx_scope *s = cx_scope(cx, 0);
-  struct cx_op *end = cx_vec_end(&cx->bin->ops);
-  bool ok = false;
-  cx->scan_depth++;
-  size_t cut_offs = 0;
-  bool uncut = false;
-  
-  if (s->cuts.count) {
-    struct cx_cut *c = cx_vec_peek(&s->cuts, 0);
-    cut_offs = c->offs;
-    
-    if (!c->scan_depth) {
-      c->scan_depth = cx->scan_depth;
-      uncut = true;
-    }
-  }
-  
-  while (cx->op != end && !cx->errors.count) {
-    if (s->cuts.count) { 
-      struct cx_cut *c = cx_vec_peek(&s->cuts, 0);
-      cut_offs = c ? c->offs : 0;
-    } else {
-      cut_offs = 0;
-    }
-
-    if (cx_scope(cx, 0) == s && s->stack.count - cut_offs >= func->nargs) { break; }
-    if (!cx_eval_next(cx)) { goto exit; }
-  }
-  
-  if (s->stack.count - cut_offs < func->nargs) {
-    cx_error(cx, row, col, "Not enough args for func: '%s'", func->id);
-    goto exit;
-  }
-
-  if (uncut && s->cuts.count) { cx_vec_pop(&s->cuts); }
-  ok = true;
- exit:
-  cx->scan_depth--;
-  return ok;
 }
 
 bool cx_eval_args(struct cx *cx,

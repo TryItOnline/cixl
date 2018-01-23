@@ -44,11 +44,10 @@ struct cx {
   
   struct cx_vec scopes;
   struct cx_scope *main, **scope;
-  struct cx_vec calls;
+  struct cx_vec scans, calls;
   
   struct cx_bin *bin;
   struct cx_op *op;
-  unsigned int scan_depth;
   bool stop;
   
   int row, col;

@@ -11,6 +11,7 @@
 #include "cixl/error.h"
 #include "cixl/eval.h"
 #include "cixl/op.h"
+#include "cixl/scan.h"
 #include "cixl/scope.h"
 #include "cixl/timer.h"
 #include "cixl/types/bin.h"
@@ -175,7 +176,6 @@ struct cx *cx_init(struct cx *cx) {
   cx->next_sym_tag = cx->next_type_tag = 1;
   cx->bin = NULL;
   cx->op = NULL;
-  cx->scan_depth = 0;
   cx->stop = false;
   cx->row = cx->col = -1;
   
@@ -205,6 +205,7 @@ struct cx *cx_init(struct cx *cx) {
   cx_malloc_init(&cx->table_alloc, CX_TABLE_SLAB_SIZE, sizeof(struct cx_table));
   
   cx_vec_init(&cx->scopes, sizeof(struct cx_scope *));
+  cx_vec_init(&cx->scans, sizeof(struct cx_scan));
   cx_vec_init(&cx->calls, sizeof(struct cx_call));
   cx_vec_init(&cx->errors, sizeof(struct cx_error));
   
@@ -299,6 +300,8 @@ struct cx *cx_deinit(struct cx *cx) {
 
   cx_do_vec(&cx->calls, struct cx_call, c) { cx_call_deinit(c); }
   cx_vec_deinit(&cx->calls);
+
+  cx_vec_deinit(&cx->scans);
 
   cx_do_vec(&cx->scopes, struct cx_scope *, s) { cx_scope_deref(*s); }
   cx_vec_deinit(&cx->scopes);

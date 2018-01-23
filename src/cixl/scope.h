@@ -6,6 +6,7 @@
 #include "cixl/vec.h"
 
 struct cx;
+struct cx_scan;
 
 struct cx_scope {
   struct cx *cx;
@@ -31,7 +32,7 @@ bool cx_delete_var(struct cx_scope *scope, struct cx_sym id, bool silent);
 
 struct cx_cut {
   size_t offs;
-  unsigned int scan_depth;
+  struct cx_scan *scan;
 };
 
 struct cx_cut *cx_cut_init(struct cx_cut *cut, struct cx_scope *scope);

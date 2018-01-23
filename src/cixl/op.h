@@ -78,6 +78,7 @@ struct cx_putvar_op {
 
 struct cx_return_op {
   size_t start_op;
+  struct cx_fimp *imp;
 };
 
 struct cx_op {

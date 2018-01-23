@@ -5,6 +5,7 @@
 #include "cixl/error.h"
 #include "cixl/eval.h"
 #include "cixl/op.h"
+#include "cixl/scan.h"
 #include "cixl/scope.h"
 #include "cixl/libs/func.h"
 #include "cixl/types/fimp.h"
@@ -179,6 +180,24 @@ static bool recall_imp(struct cx_scope *scope) {
   return true;
 }
 
+static bool on_upcall_scan(void *data) {
+  struct cx_fimp *imp = data;
+  struct cx_func *func = imp->func;
+  struct cx *cx = func->cx;
+  struct cx_scope *s = cx_scope(cx, 0);
+  
+  imp = cx_func_get_imp(func,
+			&s->stack,
+			func->imps.count - imp->i);
+  
+  if (!imp) {
+    cx_error(cx, cx->row, cx->col, "Upcall not applicable");
+    return false;
+  }
+  
+  return cx_fimp_call(imp, s);  
+}
+
 static bool upcall_imp(struct cx_scope *scope) {
   struct cx *cx = scope->cx;
   struct cx_call *call = get_fimp_call(cx);
@@ -195,19 +214,8 @@ static bool upcall_imp(struct cx_scope *scope) {
     return false;
   }
   
-  struct cx_func *func = imp->func;
-  if (!cx_scan_args(cx, func)) { return false; }
-
-  imp = cx_func_get_imp(func,
-			&scope->stack,
-			func->imps.count - imp->i);
-  
-  if (!imp) {
-    cx_error(cx, cx->row, cx->col, "Upcall not applicable");
-    return false;
-  }
-
-  return cx_fimp_call(imp, scope);
+  cx_scan(cx, imp->func, on_upcall_scan, imp);
+  return true;
 }
 
 void cx_init_func(struct cx *cx) {

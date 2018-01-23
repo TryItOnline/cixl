@@ -8,6 +8,7 @@
 #include "cixl/types/lambda.h"
 #include "cixl/types/vect.h"
 #include "cixl/op.h"
+#include "cixl/scan.h"
 #include "cixl/scope.h"
 #include "cixl/tok.h"
 
@@ -67,23 +68,31 @@ cx_op_type(CX_OCUT, {
     type.eval = cut_eval;
   });
 
+static bool on_fimp_scan(void *data) {
+  struct cx_op *op = data;
+  struct cx_fimp *imp = op->as_fimp.imp;
+  struct cx *cx = imp->func->cx;
+  
+  if (!cx_fimp_match(imp, &cx_scope(cx, 0)->stack)) {
+    cx_error(cx, cx->row, cx->col, "Func not applicable: %s", imp->func->id);
+    return false;
+  }
+  
+  cx_call_init(cx_vec_push(&cx->calls), cx->row, cx->col, imp, cx->op);
+  cx->op = op+1;
+  return true;
+}
+
 static bool fimp_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
   struct cx_fimp *imp = op->as_fimp.imp;
   
   if (op->as_fimp.inline1) {
     cx->op += op->as_fimp.num_ops;
-    if (!cx_scan_args(cx, imp->func)) { return false; }
-    
-    if (!cx_fimp_match(imp, &cx_scope(cx, 0)->stack)) {
-      cx_error(cx, cx->row, cx->col, "Func not applicable: %s", imp->func->id);
-      return false;
-    }
-
-    cx_call_init(cx_vec_push(&cx->calls), cx->row, cx->col, imp, cx->op);
-    cx->op = op+1;
+    cx_scan(cx, imp->func, on_fimp_scan, op);
   } else {
     cx->op += op->as_fimp.num_ops;
   }
+  
   return true;
 }
 
@@ -101,11 +110,12 @@ cx_op_type(CX_OFIMPDEF, {
     type.eval = fimpdef_eval;
   });
 
-static bool funcall_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
+static bool on_funcall_scan(void *data) {
+  struct cx_op *op = data;
   struct cx_func *func = op->as_funcall.func;
-  if (!cx_scan_args(cx, func)) { return false; }
-  struct cx_scope *s = cx_scope(cx, 0);
   struct cx_fimp *imp = op->as_funcall.imp;
+  struct cx *cx = func->cx;
+  struct cx_scope *s = cx_scope(cx, 0);
 
   if (imp) {
     if (!cx_fimp_match(imp, &s->stack)) { imp = NULL; }
@@ -133,6 +143,12 @@ static bool funcall_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
   }
   
   return cx_fimp_call(imp, s);
+}
+
+static bool funcall_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
+  struct cx_func *func = op->as_funcall.func;
+  cx_scan(cx, func, on_funcall_scan, op);
+  return true;
 }
 
 cx_op_type(CX_OFUNCALL, {
@@ -245,20 +261,27 @@ cx_op_type(CX_OPUTVAR, {
     type.eval = putvar_eval;
   });
 
+static bool on_recall_scan(void *data) {
+  struct cx_op *op = data;
+  struct cx_fimp *imp = op->as_return.imp;
+  struct cx *cx = imp->func->cx;
+  
+  if (!cx_fimp_match(imp, &cx_scope(cx, 0)->stack)) {
+    cx_error(cx, cx->row, cx->col, "Recall not applicable");
+    return false;
+  }
+  
+  cx->op = cx_vec_get(&cx->bin->ops, op->as_return.start_op+1);
+  return true;
+}
+
 static bool return_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
   struct cx_call *call = cx_test(cx_vec_peek(&cx->calls, 0));
   struct cx_fimp *imp = call->target;
 
   if (call->recalls) {
-    if (!cx_scan_args(cx, imp->func)) { return false; }
-
-    if (!cx_fimp_match(imp, &cx_scope(cx, 0)->stack)) {
-      cx_error(cx, cx->row, cx->col, "Recall not applicable");
-      return false;
-    }
-
-    cx->op = cx_vec_get(&cx->bin->ops, op->as_return.start_op+1);
     call->recalls--;
+    cx_scan(cx, imp->func, on_recall_scan, op);
   } else {
     if (call->return_op) {
       cx->op = call->return_op;
@@ -268,42 +291,44 @@ static bool return_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
 
     struct cx_scope *ss = cx_scope(cx, 0), *ds = cx_scope(cx, 1);
 
-    if (ss->stack.count < imp->rets.count) {
-      cx_error(cx, cx->row, cx->col, "Not enough return values on stack");
-      return false;
-    }
-
     if (ss->stack.count > imp->rets.count) {
       cx_error(cx, cx->row, cx->col, "Stack not empty on return");
       return false;
     }
 
-    cx_vec_grow(&ds->stack, ds->stack.count+imp->rets.count);
-    size_t i = 0;
-    struct cx_func_ret *r = cx_vec_peek(&imp->rets, i);
-    
-    for (struct cx_box *v = cx_vec_start(&ss->stack);
-	 i < ss->stack.count;
-	 i++, v++, r++) {
-      struct cx_type *t = r->type;
-      
-      if (!r->type) {
-	struct cx_func_arg *a = cx_vec_get(&imp->args, r->narg);
-	struct cx_box *av = cx_test(cx_get_var(ss, a->sym_id, false));
-	t = av->type;
-      }
-      
-      if (!cx_is(v->type, t)) {
-	cx_error(cx, cx->row, cx->col,
-		 "Invalid return type.\nExpected %s, actual: %s",
-		 t->id, v->type->id);
-	
+    if (imp->rets.count) {
+      if (ss->stack.count < imp->rets.count) {
+	cx_error(cx, cx->row, cx->col, "Not enough return values on stack");
 	return false;
       }
-
-      *(struct cx_box *)cx_vec_push(&ds->stack) = *v;
-    }    
-
+      
+      cx_vec_grow(&ds->stack, ds->stack.count+imp->rets.count);
+      size_t i = 0;
+      struct cx_func_ret *r = cx_vec_peek(&imp->rets, i);
+      
+      for (struct cx_box *v = cx_vec_start(&ss->stack);
+	   i < ss->stack.count;
+	   i++, v++, r++) {
+	struct cx_type *t = r->type;
+	
+	if (!r->type) {
+	  struct cx_func_arg *a = cx_vec_get(&imp->args, r->narg);
+	  struct cx_box *av = cx_test(cx_get_var(ss, a->sym_id, false));
+	  t = av->type;
+	}
+	
+	if (!cx_is(v->type, t)) {
+	  cx_error(cx, cx->row, cx->col,
+		   "Invalid return type.\nExpected %s, actual: %s",
+		   t->id, v->type->id);
+	  
+	  return false;
+	}
+	
+	*(struct cx_box *)cx_vec_push(&ds->stack) = *v;
+      }    
+    }
+    
     cx_vec_clear(&ss->stack);
     cx_call_deinit(cx_vec_pop(&cx->calls));
     cx_end(cx);

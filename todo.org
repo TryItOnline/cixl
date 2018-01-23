@@ -1,16 +1,12 @@
-* add find-key(Vect) fn & post
-* add is-dirty fn
-* add revert(table rec) fn
-** add Rec iter
-*** copy Table
-** put all fields
-* linearize scan_args
-** add cx_scan struct
-** add cx.scans vec
-** func & opt return_op
-** check in cx_push and call if enough args
-** change funcall to call scan_args
-** change scan_args to push struct
+* finish cx_scan conversion
+** add op_type.scan
+*** set for ops that push
+*** only scan if op->type->scan in cx_eval
+** add scan param to callback
+*** use to get scope/func
+* more qdb
+** add find-key(Vect) fn
+** add is-dirty fn
 * add error traps
 ** add cx.error_type 
 ** switch errors to reference counting
@@ -18,6 +14,8 @@
 ** add scope.traps
 *** vec of call targets
 *** scan and call for each error in eval
+** track scopes in cx_eval
+*** end all new without pushing result on exit
 * add switch: macro
 ** var is optional
 *** bind if not bound already
@@ -43,6 +41,7 @@
 * investigate threading cx_eval
 ** use computed goto
 ** assign labels to ops before loop
+** investigate label stability
 * add Vect alloc
 * add iter zip/unzip
 * add and/or tests

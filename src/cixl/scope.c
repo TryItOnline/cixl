@@ -133,6 +133,6 @@ bool cx_delete_var(struct cx_scope *scope, struct cx_sym id, bool silent) {
 
 struct cx_cut *cx_cut_init(struct cx_cut *cut, struct cx_scope *scope) {
   cut->offs = scope->stack.count;
-  cut->scan_depth = 0;
+  cut->scan = NULL;
   return cut;
 }
