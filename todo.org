@@ -1,15 +1,4 @@
-* more qdb
-** add find-key(Vect) fn
-** add is-dirty fn
-* add error traps
-** add cx.error_type 
-** switch errors to reference counting
-** add cx.error_alloc
-** add scope.traps
-*** vec of call targets
-*** scan and call for each error in eval
-** track scopes in cx_eval
-*** end all new without pushing result on exit
+* add include: macro
 * add switch: macro
 ** var is optional
 *** bind if not bound already
@@ -26,6 +15,19 @@
 ** allow single token actions
 *** call eval_token instead
 
+* add str interpolation
+* more qdb
+** add find-key(Vect) fn
+** add is-dirty fn
+* add error traps
+** add cx.error_type 
+** switch errors to reference counting
+** add cx.error_alloc
+** add scope.traps
+*** vec of call targets
+*** scan and call for each error in eval
+** track scopes in cx_eval
+*** end all new without pushing result on exit
 * add qdb.delete
 * meta lib with read-iter
 ** move read and convert to iter
@@ -48,11 +50,8 @@
 * add rat sub/div
 ** move fns to math lib
 
-* add lets: macro
-** typecheck and bind stack to vars
 * implement Cmp for Sym/Guid
 * use cx_str for CX_TID
 ** remove cx_tok.as_ptr
 ** replace with cx_tok.as_str, as_func, as_fimp etc.
 * replace box.as_ptr with as_func/fimp/etc
-* add str interpolation
