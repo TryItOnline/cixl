@@ -38,8 +38,4 @@ void *cx_vec_insert(struct cx_vec *vec, size_t i);
 void cx_vec_delete(struct cx_vec *vec, size_t i);
 void cx_vec_clear(struct cx_vec *vec);
 
-#define CX_VEC_TEST_MAX 100
-
-void cx_vec_tests();
-
 #endif

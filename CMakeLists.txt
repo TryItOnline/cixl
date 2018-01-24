@@ -14,6 +14,9 @@ set_target_properties(libcixl PROPERTIES PREFIX "")
 add_executable(cixl ${sources} src/main.c)
 target_include_directories(cixl PUBLIC src/)
 
+add_executable(tests EXCLUDE_FROM_ALL ${sources} src/tests.c)
+target_include_directories(tests PUBLIC src/)
+
 install(FILES ${headers} DESTINATION include/cixl)
 install(FILES build/cixl DESTINATION bin)
 install(FILES build/libcixl.a DESTINATION lib)

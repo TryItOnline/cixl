@@ -1,3 +1,4 @@
+* add load from file
 * more qdb
 ** add find-key(Vect) fn
 ** add is-dirty fn

@@ -26,7 +26,12 @@ char *cx_fmt(const char *spec, ...) {
 char *cx_get_dir(const char *in, char *out, size_t len) {
   const char *pos = strrchr(in, '/');
   if (!pos) { pos = strrchr(in, '\\'); }
-  if (!pos) { pos = in+strlen(in); }
+
+  if (!pos) {
+    out[0] = 0;
+    return out;
+  }
+  
   strncpy(out, in, cx_min(pos-in+1, len));
   out[pos-in+1] = 0;
   return out;

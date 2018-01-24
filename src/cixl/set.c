@@ -73,27 +73,3 @@ bool cx_set_delete(struct cx_set *set, const void *key) {
 void cx_set_clear(struct cx_set *set) {
   cx_vec_clear(&set->members);
 }
-
-static void insert_delete_tests() {
-  struct cx_set set;
-  cx_set_init(&set, sizeof(int64_t), cx_cmp_int);
-  
-  for (int64_t i = 0; i < CX_SET_TEST_MAX; i++) {
-    void *p = cx_set_insert(&set, &i);
-    cx_test(p);
-    *(int64_t *)p = i;
-  }
-
-  cx_test(set.members.count == CX_SET_TEST_MAX);
-    
-  for (int64_t i = 0; i < CX_SET_TEST_MAX; i++) {
-    cx_test(cx_set_delete(&set, &i));
-  }
-
-  cx_test(!set.members.count);
-  cx_set_deinit(&set);
-}
-
-void cx_set_tests() {
-  insert_delete_tests();
-}

@@ -295,7 +295,7 @@ struct cx *cx_init(struct cx *cx) {
 struct cx *cx_deinit(struct cx *cx) {
   cx_set_deinit(&cx->separators);
   
-  cx_do_vec(&cx->errors, char *, e) { free(*e); }
+  cx_do_vec(&cx->errors, struct cx_error, e) { cx_error_deinit(e); }
   cx_vec_deinit(&cx->errors);
 
   cx_do_vec(&cx->calls, struct cx_call, c) { cx_call_deinit(c); }
@@ -558,6 +558,21 @@ bool cx_load(struct cx *cx, const char *path) {
   struct cx_vec toks;
   cx_vec_init(&toks, sizeof(struct cx_tok));
   bool ok = false;
+
+  char c = fgetc(f);
+
+  if (c == '#') {
+    c = fgetc(f);
+
+    if (c == '!') {
+      while (fgetc(f) != '\n');
+    } else {
+      ungetc(c, f);
+      ungetc('#', f);
+    }
+  } else {
+    ungetc(c, f);
+  }
   
   if (!cx_parse(cx, f, &toks)) { goto exit1; }
 
@@ -569,25 +584,24 @@ bool cx_load(struct cx *cx, const char *path) {
   struct cx_bin *bin = cx_bin_new();
   if (!cx_compile(cx, cx_vec_start(&toks), cx_vec_end(&toks), bin)) { goto exit2; }
 
-  char prev_wd[512];
-
-  if (!getcwd(prev_wd, sizeof(prev_wd))) {
-    cx_error(cx, cx->row, cx->col, "Failed getting dir: %d", errno);
-    goto exit2;    
-  }
-
-  char wd[512];
+  char prev_wd[512], wd[512];
   cx_get_dir(path, wd, sizeof(wd));
-
-  if (chdir(wd) == -1) {
-    cx_error(cx, cx->row, cx->col, "Failed changing dir: %d", errno);
-    goto exit2;
-  }
   
+  if (wd[0]) {
+    if (!getcwd(prev_wd, sizeof(prev_wd))) {
+      cx_error(cx, cx->row, cx->col, "Failed getting dir: %d", errno);
+      goto exit2;    
+    }
+  
+    if (chdir(wd) == -1) {
+      cx_error(cx, cx->row, cx->col, "Failed changing dir: %d", errno);
+      goto exit2;
+    }
+  }
+
   ok = cx_eval(cx, bin, NULL);
 
-
-  if (chdir(prev_wd) == -1) {
+  if (wd[0] && chdir(prev_wd) == -1) {
     cx_error(cx, cx->row, cx->col, "Failed changing dir: %d", errno);
   }
  exit2:

@@ -13,9 +13,78 @@
 #include "cixl/libs/time.h"
 #include "cixl/libs/type.h"
 #include "cixl/libs/var.h"
+#include "cixl/set.h"
 #include "cixl/scope.h"
-#include "cixl/tests.h"
 #include "cixl/types/vect.h"
+#include "cixl/vec.h"
+
+static void vec_tests() {
+  const int reps = 100;
+  
+  void push_pop_tests() {
+    struct cx_vec vec;
+    cx_vec_init(&vec, sizeof(int));
+    
+    for (int i = 0; i < reps; i++) {
+      *(int *)cx_vec_push(&vec) = i;
+    }
+    
+    cx_test(vec.count == reps);
+    
+    for (int i = 0; i < reps; i++) {
+      cx_vec_pop(&vec);
+  }
+
+    cx_test(!vec.count);
+    cx_vec_deinit(&vec);
+  }
+  
+  void do_tests() {
+    struct cx_vec vec;
+    cx_vec_init(&vec, sizeof(int));
+    
+    for (int i = 0; i < reps; i++) {
+      *(int *)cx_vec_push(&vec) = i;
+    }
+    
+    int expected = 0;
+    
+    cx_do_vec(&vec, int, actual) {
+      cx_test(*actual == expected++);
+    }    
+    
+    cx_vec_deinit(&vec);
+  }
+
+  push_pop_tests();
+  do_tests();
+}
+
+void set_tests() {
+  const int reps = 100;
+  
+  void insert_delete_tests() {
+    struct cx_set set;
+    cx_set_init(&set, sizeof(int64_t), cx_cmp_int);
+    
+    for (int64_t i = 0; i < reps; i++) {
+      void *p = cx_set_insert(&set, &i);
+      cx_test(p);
+      *(int64_t *)p = i;
+    }
+    
+    cx_test(set.members.count == reps);
+    
+    for (int64_t i = 0; i < reps; i++) {
+      cx_test(cx_set_delete(&set, &i));
+    }
+    
+    cx_test(!set.members.count);
+    cx_set_deinit(&set);
+  }
+  
+  insert_delete_tests();
+}
 
 static void run(struct cx *cx, const char *in) {
   cx_vec_clear(&cx_scope(cx, 0)->stack);
@@ -392,7 +461,10 @@ static void compile_tests() {
   cx_deinit(&cx);
 }
 
-void cx_tests() {
+int main() {
+  vec_tests();
+  set_tests();
+  
   comment_tests();
   type_tests();
   stack_tests();
@@ -414,4 +486,5 @@ void cx_tests() {
   math_tests();
   rec_tests();
   compile_tests();
+  return 0;
 }

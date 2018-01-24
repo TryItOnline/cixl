@@ -1,7 +1,10 @@
 ## ![](cixl.png?raw=true) <a href="https://liberapay.com/basic-gongfu/donate"><img alt="Donate using Liberapay" src="https://liberapay.com/assets/widgets/donate.svg"></a>
 #### Cixl - a minimal, decently typed scripting language
 
-This project aims to produce a minimal, decently typed scripting language for embedding in and extending from C. Depending on where you're coming from; it might help to think of Cixl as a Lisp with Forth semantics; or a Forth with Lisp convenience; deeply integrated with C. The language is implemented as a straight forward 3-stage (parse/compile/eval) interpreter that is designed to be as fast as possible without compromising on simplicity, transparency and flexibility. The codebase has no external dependencies and is currently hovering around 7 kloc including tests and standard library.
+This project aims to produce a minimal, decently typed scripting language for embedding in and extending from C. Depending on where you're coming from; it might help to think of Cixl as a Lisp in Forth clothes; or a Forth with Lisp convenience; deeply integrated with C. The language is implemented as a straight forward 3-stage (parse/compile/eval) interpreter that is designed to be as fast as possible without compromising on simplicity, transparency and flexibility. The codebase has no external dependencies and is currently hovering around 7 kloc including tests and standard library.
+
+### Status
+Examples should work in the most recent version and run clean in ```valgrind```, outside of that I can't really promise much at the moment. Current work is focused on profiling and filling obvious gaps in functionality.
 
 ### Getting Started
 To get started, you'll need a reasonably modern C compiler with GNU-extensions and CMake installed. Building on macOS unfortunately doesn't work yet, as it's missing support for POSIX memory streams and timers. Most Linuxes and BSDs should be fine, I don't know enough about Windows to have a clue. A basic REPL is included, it's highly recommended to run it through ```rlwrap``` for a less nerve wrecking experience.
@@ -25,9 +28,6 @@ Press Return twice to evaluate.
 
    quit
 ```
-
-### Status
-Examples should work in the most recent version and run clean in ```valgrind```, outside of that I can't really promise much at the moment. Current work is focused on profiling and filling obvious gaps in functionality.
 
 ### Stack
 The stack is accessible from user code, just like in Forth. Basic stack operations have dedicated operators; ```%``` for copying the last value, ```_``` for dropping it, ```~``` for flipping the last two values and ```|``` for clearing the stack.
@@ -293,6 +293,20 @@ test.cx:
    | 1, load 'test.cx'
 ...
 [3]
+```
+
+### Scripting
+When launched with parameters, Cixl will interpret the first parameter as a filename to load code from, and push remaining parameters on the stack.
+
+test.cx
+```
+#!cixl
+upper say
+```
+
+```
+$ ./cixl test.cx foo
+FOO
 ```
 
 ### Serialization

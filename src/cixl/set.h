@@ -26,8 +26,4 @@ void *cx_set_insert(struct cx_set *set, const void *key);
 bool cx_set_delete(struct cx_set *set, const void *key);
 void cx_set_clear(struct cx_set *set);
 
-#define CX_SET_TEST_MAX 100
-
-void cx_set_tests();
-
 #endif

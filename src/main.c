@@ -1,4 +1,5 @@
 #include "cixl/cx.h"
+#include "cixl/error.h"
 #include "cixl/libs/cond.h"
 #include "cixl/libs/func.h"
 #include "cixl/libs/io.h"
@@ -13,15 +14,11 @@
 #include "cixl/libs/type.h"
 #include "cixl/libs/var.h"
 #include "cixl/repl.h"
-#include "cixl/set.h"
-#include "cixl/tests.h"
-#include "cixl/vec.h"
+#include "cixl/scope.h"
+#include "cixl/types/str.h"
+#include "cixl/types/vect.h"
 
-int main() {
-  cx_vec_tests();
-  cx_set_tests();
-  cx_tests();
-
+int main(int argc, char *argv[]) {
   struct cx cx;
   cx_init(&cx);
   cx_init_cond(&cx);
@@ -37,7 +34,26 @@ int main() {
   cx_init_table(&cx);
   cx_init_time(&cx);
   cx_init_var(&cx);
-  cx_repl(&cx, stdin, stdout);
+
+  if (argc == 1) {
+    cx_repl(&cx, stdin, stdout);
+  } else {
+    for (int i = 2; i < argc; i++) {
+      cx_box_init(cx_push(cx.main), cx.str_type)->as_str = cx_str_new(argv[i]);
+    }
+
+    cx_load(&cx, argv[1]);
+
+    cx_do_vec(&cx.errors, struct cx_error, e) {
+      fprintf(stderr, "Error in row %d, col %d:\n%s\n", e->row, e->col, e->msg);
+      cx_vect_dump(&e->stack, stderr);
+      fputs("\n\n", stderr);
+      cx_error_deinit(e);
+    }
+	
+    cx_vec_clear(&cx.errors);
+  }
+
   cx_deinit(&cx);
   return 0;
 }
