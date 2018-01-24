@@ -7,7 +7,7 @@ This project aims to produce a minimal, decently typed scripting language for em
 Examples should work in the most recent version and run clean in ```valgrind```, outside of that I can't really promise much at the moment. Current work is focused on profiling and filling obvious gaps in functionality.
 
 ### Getting Started
-To get started, you'll need a reasonably modern C compiler with GNU-extensions and CMake installed. Building on macOS unfortunately doesn't work yet, as it's missing support for POSIX memory streams and timers. Most Linuxes and BSDs should be fine, I don't know enough about Windows to have a clue. A basic REPL is included, it's highly recommended to run it through ```rlwrap``` for a less nerve wrecking experience.
+You may try Cixl online [here](https://tio.run/#cixl). To get it running locally, you'll need a reasonably modern C compiler with GNU-extensions and CMake installed. Building on macOS unfortunately doesn't work yet, as it's missing support for POSIX timers. Most Linuxes and BSDs should be fine, I don't know enough about Windows to have a clue. A basic REPL is included, it's highly recommended to run it through ```rlwrap``` for a less nerve wrecking experience.
 
 ```
 git clone https://github.com/basic-gongfu/cixl.git
