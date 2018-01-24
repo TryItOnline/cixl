@@ -1,4 +1,3 @@
-* add load from file
 * more qdb
 ** add find-key(Vect) fn
 ** add is-dirty fn
@@ -33,10 +32,6 @@
 *** keep bin ref in iter
 * add MemFile based on cx_buf
 ** derive RWFile
-* investigate threading cx_eval
-** use computed goto
-** assign labels to ops before loop
-** investigate label stability
 * add Vect alloc
 * add iter zip/unzip
 * add and/or tests
