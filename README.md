@@ -307,6 +307,11 @@ upper say
 ```
 $ ./cixl test.cx foo
 FOO
+
+$ sudo cp ./cixl /usr/local/bin
+$ chmod +x test.cx
+$ ./test.cx foo
+FOO
 ```
 
 ### Serialization
