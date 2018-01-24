@@ -99,6 +99,8 @@ struct cx_scope *cx_begin(struct cx *cx, struct cx_scope *parent);
 void cx_end(struct cx *cx);
 
 bool cx_funcall(struct cx *cx, const char *id);
+
+bool cx_load_toks(struct cx *cx, const char *path, struct cx_vec *out);
 bool cx_load(struct cx *cx, const char *path);
 
 #endif

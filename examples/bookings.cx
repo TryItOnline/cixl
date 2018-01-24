@@ -1,10 +1,11 @@
 /*
   The humble beginnings of a booking system. Once Cixl is installed, tests may be
-  run by executing "load '../examples/qdb.cx'" and "load '../examples/bookings.cx'"
-  followed by "run-tests".
+  run by executing "load '../examples/bookings.cx'" followed by "run-tests".
 
   https://github.com/basic-gongfu/cixl#getting-started
 */
+
+include: 'qdb.cx';
 
 let: resources  new-db-table 'resource.db' [`id];
 let: bookings   new-db-table 'booking.db'  [`id];     

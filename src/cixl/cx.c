@@ -51,6 +51,60 @@ static const void *get_func_id(const void *value) {
   return &(*func)->id;
 }
 
+
+static ssize_t include_eval(struct cx_macro_eval *eval,
+			struct cx_bin *bin,
+			size_t tok_idx,
+			struct cx *cx) {
+  if (!cx_compile(cx, cx_vec_start(&eval->toks), cx_vec_end(&eval->toks), bin)) {
+    cx_error(cx, cx->row, cx->col, "Failed compiling include");
+    return -1;
+  }
+
+  return tok_idx+1;
+}
+
+static bool include_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
+  int row = cx->row, col = cx->col;
+  bool ok = false;
+  
+  struct cx_vec fns;
+  cx_vec_init(&fns, sizeof(struct cx_tok));
+  
+  if (!cx_parse_end(cx, in, &fns, true)) {
+    if (!cx->errors.count) { cx_error(cx, row, col, "Missing include end"); }
+    goto exit1;
+  }
+
+  struct cx_macro_eval *eval = cx_macro_eval_new(include_eval);
+
+  cx_do_vec(&fns, struct cx_tok, t) {
+    if (t->type != CX_TLITERAL()) {
+      cx_error(cx, t->row, t->col, "Invalid include token: %s", t->type->id);
+      goto exit2;
+    }
+
+    if (t->as_box.type != cx->str_type) {
+      cx_error(cx, t->row, t->col,
+	       "Invalid filename: %s", t->as_box.type->id);
+      goto exit2;
+    }
+
+    if (!cx_load_toks(cx, t->as_box.as_str->data, &eval->toks)) { goto exit2; }
+  }
+  
+  cx_tok_init(cx_vec_push(out), CX_TMACRO(), row, col)->as_ptr = eval;
+  ok = true;
+  goto exit1;
+ exit2:
+  cx_macro_eval_deref(eval);
+ exit1: {
+    cx_do_vec(&fns, struct cx_tok, t) { cx_tok_deinit(t); }
+    cx_vec_deinit(&fns);
+    return ok;
+  }
+}
+
 static bool read_imp(struct cx_scope *scope) {
   struct cx *cx = scope->cx;
   struct cx_box in = *cx_test(cx_pop(scope, false));
@@ -253,6 +307,8 @@ struct cx *cx_init(struct cx *cx) {
   cx->wfile_type = cx_init_file_type(cx, "WFile", cx->any_type, cx->file_type);
   cx->rwfile_type = cx_init_file_type(cx, "RWFile", cx->rfile_type, cx->wfile_type);
   
+  cx_add_macro(cx, "include:", include_parse);
+
   cx_add_cfunc(cx, "read",
 	       cx_args(cx_arg("f", cx->rfile_type)), cx_rets(cx_ret(cx->opt_type)),
 	       read_imp);
@@ -547,17 +603,13 @@ bool cx_funcall(struct cx *cx, const char *id) {
   return cx_fimp_call(imp, s);
 }
 
-bool cx_load(struct cx *cx, const char *path) {
+bool cx_load_toks(struct cx *cx, const char *path, struct cx_vec *out) {
   FILE *f = fopen(path , "r");
 
   if (!f) {
     cx_error(cx, cx->row, cx->col, "Failed opening file '%s': %d", path, errno);
     return false;
   }
-
-  struct cx_vec toks;
-  cx_vec_init(&toks, sizeof(struct cx_tok));
-  bool ok = false;
 
   char c = fgetc(f);
 
@@ -574,42 +626,54 @@ bool cx_load(struct cx *cx, const char *path) {
     ungetc(c, f);
   }
   
-  if (!cx_parse(cx, f, &toks)) { goto exit1; }
+  bool ok = cx_parse(cx, f, out);
+  fclose(f);
+  return ok;
+}
 
-  if (!toks.count) {
-    ok = true;
-    goto exit1;
-  }
-
-  struct cx_bin *bin = cx_bin_new();
-  if (!cx_compile(cx, cx_vec_start(&toks), cx_vec_end(&toks), bin)) { goto exit2; }
+bool cx_load(struct cx *cx, const char *path) {
+  bool ok = false;
 
   char prev_wd[512], wd[512];
   cx_get_dir(path, wd, sizeof(wd));
-  
-  if (wd[0]) {
+
+  if (wd[0]) {    
     if (!getcwd(prev_wd, sizeof(prev_wd))) {
       cx_error(cx, cx->row, cx->col, "Failed getting dir: %d", errno);
-      goto exit2;    
+      goto exit1;    
     }
   
     if (chdir(wd) == -1) {
       cx_error(cx, cx->row, cx->col, "Failed changing dir: %d", errno);
-      goto exit2;
+      goto exit1;
     }
   }
 
-  ok = cx_eval(cx, bin, NULL);
+  struct cx_vec toks;
+  cx_vec_init(&toks, sizeof(struct cx_tok));
 
-  if (wd[0] && chdir(prev_wd) == -1) {
-    cx_error(cx, cx->row, cx->col, "Failed changing dir: %d", errno);
+  if (!cx_load_toks(cx, path, &toks)) { goto exit2; }
+
+  if (!toks.count) {
+    ok = true;
+    goto exit2;
   }
- exit2:
+
+  struct cx_bin *bin = cx_bin_new();
+
+  if (cx_compile(cx, cx_vec_start(&toks), cx_vec_end(&toks), bin)) {
+    ok = cx_eval(cx, bin, NULL);
+  }
+  
   cx_bin_deref(bin);
- exit1: {
+ exit2: {
+    if (wd[0] && chdir(prev_wd) == -1) {
+      cx_error(cx, cx->row, cx->col, "Failed changing dir: %d", errno);
+    }
+    
     cx_do_vec(&toks, struct cx_tok, t) { cx_tok_deinit(t); }
     cx_vec_deinit(&toks);    
-    fclose(f);
-    return ok;
   }
+ exit1:
+  return ok;
 }

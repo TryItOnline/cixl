@@ -1,4 +1,3 @@
-* add include: macro
 * add switch: macro
 ** var is optional
 *** bind if not bound already
