@@ -27,6 +27,12 @@ static void dump_imp(struct cx_box *v, FILE *out) {
   case '\n':
     fputs("\\\\n", out);
     break;
+  case '\r':
+    fputs("\\\\r", out);
+    break;
+  case ' ':
+    fputs("\\\\s", out);
+    break;
   case '\t':
     fputs("\\\\t", out);
     break;

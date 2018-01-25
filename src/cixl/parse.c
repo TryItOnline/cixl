@@ -312,6 +312,12 @@ static bool parse_char(struct cx *cx, FILE *in, struct cx_vec *out) {
     case 'n':
       c = '\n';
       break;
+    case 'r':
+      c = '\r';
+      break;
+    case 's':
+      c = ' ';
+      break;
     case 't':
       c = '\t';
       break;
@@ -358,6 +364,9 @@ static bool parse_str(struct cx *cx, FILE *in, struct cx_vec *out) {
       switch (c) {
       case 'n':
 	c = '\n';
+	break;
+      case 'r':
+	c = '\r';
 	break;
       case 't':
 	c = '\t';

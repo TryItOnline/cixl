@@ -14,6 +14,88 @@
 #include "cixl/types/iter.h"
 #include "cixl/types/str.h"
 
+typedef bool (*cx_split_t)(char);
+
+struct cx_split_iter {
+  struct cx_iter iter;
+  struct cx_iter *in;
+  cx_split_t split;
+  struct cx_buf out;
+};
+
+bool split_next(struct cx_iter *iter, struct cx_box *out, struct cx_scope *scope) {
+  struct cx_split_iter *it = cx_baseof(iter, struct cx_split_iter, iter);
+  struct cx *cx = scope->cx;
+  struct cx_box c;
+
+  while (true) {
+    if (!cx_iter_next(it->in, &c, scope)) {
+      iter->done = true;
+      fflush(it->out.stream);
+      if (it->out.data[0]) { break; }
+      return false;
+    }
+
+    if (c.type != cx->char_type) {
+      cx_error(cx, cx->row, cx->col, "Expected type Char, actual: %s", c.type->id);
+      return false;
+    }
+    
+    if (it->split(c.as_char)) {
+      fflush(it->out.stream);
+      if (it->out.data[0]) { break; }
+    } else {
+      fputc(c.as_char, it->out.stream);
+    }
+  }
+
+  cx_box_init(out, cx->str_type)->as_str = cx_str_new(it->out.data);
+  fseek(it->out.stream, 0, SEEK_SET);
+  return true;
+}
+
+void *split_deinit(struct cx_iter *iter) {
+  struct cx_split_iter *it = cx_baseof(iter, struct cx_split_iter, iter);
+  cx_iter_deref(it->in);
+  cx_buf_close(&it->out);
+  free(it->out.data);
+  return it;
+}
+
+cx_iter_type(split_iter, {
+    type.next = split_next;
+    type.deinit = split_deinit;
+  });
+
+struct cx_iter *cx_split_iter_new(struct cx_iter *in, cx_split_t split) {
+  struct cx_split_iter *it = malloc(sizeof(struct cx_split_iter));
+  cx_iter_init(&it->iter, split_iter());
+  it->in = in;
+  it->split = split;
+  cx_buf_open(&it->out);
+  return &it->iter;
+}
+
+bool split_lines(char c) { return c == '\r' || c == '\n'; }
+
+static bool lines_imp(struct cx_scope *scope) {
+  struct cx_box in = *cx_test(cx_pop(scope, false));
+  struct cx_iter *it = cx_split_iter_new(cx_iter(&in), split_lines);
+  cx_box_init(cx_push(scope), scope->cx->iter_type)->as_iter = it;
+  cx_box_deinit(&in);
+  return true;
+}
+
+bool split_words(char c) { return !isalpha(c) && c != '-'; }
+
+static bool words_imp(struct cx_scope *scope) {
+  struct cx_box in = *cx_test(cx_pop(scope, false));
+  struct cx_iter *it = cx_split_iter_new(cx_iter(&in), split_words);
+  cx_box_init(cx_push(scope), scope->cx->iter_type)->as_iter = it;
+  cx_box_deinit(&in);
+  return true;
+}
+
 static bool char_upper_imp(struct cx_scope *scope) {
   struct cx_box v = *cx_test(cx_pop(scope, false));
   cx_box_init(cx_push(scope), scope->cx->char_type)->as_char = toupper(v.as_char);
@@ -127,6 +209,14 @@ static bool str_int_imp(struct cx_scope *scope) {
 }
 
 void cx_init_str(struct cx *cx) {
+  cx_add_cfunc(cx, "lines",
+	       cx_args(cx_arg("in", cx->seq_type)), cx_rets(cx_ret(cx->iter_type)),
+	       lines_imp);
+
+  cx_add_cfunc(cx, "words",
+	       cx_args(cx_arg("in", cx->seq_type)), cx_rets(cx_ret(cx->iter_type)),
+	       words_imp);
+
   cx_add_cfunc(cx, "upper",
 	       cx_args(cx_arg("c", cx->char_type)), cx_rets(cx_ret(cx->char_type)),
 	       char_upper_imp);

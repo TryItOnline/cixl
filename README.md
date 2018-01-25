@@ -270,6 +270,32 @@ Variables in the parent scope may be referenced from within, but variables defin
 [2 1]
 ```
 
+### Strings
+
+Strings are null terminated, reference counted sequences of characters.
+
+```
+   | 'foo' vect
+...
+[[\f \o \o]@1]
+```
+
+Strings may alternatively be iterated by line,
+
+```
+   | 'foo\nbar\r\nbaz' lines vect
+...
+[['foo'@1 'bar'@1 'baz'@1]@1]
+```
+
+or by word.
+
+```
+   | 'foo,bar-baz!?' words vect
+...
+[['foo'@1 'bar-baz'@1]@1]
+```
+
 ### Console
 ```say``` and ```ask``` may be used to perform basic console IO.
 

@@ -1,6 +1,4 @@
-* add words iter to str lib
-** take char seq arg
-* add lines iter to io lib
+* add lines(RFile) iter to io lib
 * add vect lib with (sort Opt)
 ** call arg as cmp if != None
 * improve uncut
