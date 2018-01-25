@@ -367,7 +367,13 @@ static bool parse_str(struct cx *cx, FILE *in, struct cx_vec *out) {
 
     if (c != '\\' || pc == '\\') { fputc(c, value.stream); }
     pc = c;
-    cx->col++;
+
+    if (c == '\n') {
+      cx->row++;
+      cx->col = 0;
+    } else {
+      cx->col++;
+    }
   }
 
   ok = true;
@@ -575,7 +581,8 @@ bool cx_parse_end(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
 }
 
 bool cx_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
-  cx->row = cx->col = 1;
+  cx->row = 1;
+  cx->col = 0;
   
   while (true) {
     if (!cx_parse_tok(cx, in, out, true)) { break; }
