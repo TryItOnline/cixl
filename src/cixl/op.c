@@ -37,21 +37,6 @@ cx_op_type(CX_OBEGIN, {
     type.eval = begin_eval;
   });
 
-static bool end_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
-  if (!op->as_end.push_result) {
-    struct cx_scope *s = cx_scope(cx, 0);
-    cx_do_vec(&s->stack, struct cx_box, v) { cx_box_deinit(v); }
-    cx_vec_clear(&s->stack);
-  }
-  
-  cx_end(cx);
-  return true;
-}
-
-cx_op_type(CX_OEND, {
-    type.eval = end_eval;
-  });
-
 static bool cut_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
   struct cx_scope *s = cx_scope(cx, 0);
 
@@ -66,6 +51,33 @@ static bool cut_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
 
 cx_op_type(CX_OCUT, {
     type.eval = cut_eval;
+  });
+
+static bool else_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
+  struct cx_box *v = cx_pop(cx_scope(cx, 0), false);
+  if (!v) { return false; }
+  if (!cx_ok(v)) { cx->op += op->as_else.nops; }
+  cx_box_deinit(v);
+  return true;
+}
+
+cx_op_type(CX_OELSE, {
+    type.eval = else_eval;
+  });
+
+static bool end_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
+  if (!op->as_end.push_result) {
+    struct cx_scope *s = cx_scope(cx, 0);
+    cx_do_vec(&s->stack, struct cx_box, v) { cx_box_deinit(v); }
+    cx_vec_clear(&s->stack);
+  }
+  
+  cx_end(cx);
+  return true;
+}
+
+cx_op_type(CX_OEND, {
+    type.eval = end_eval;
   });
 
 static bool on_fimp_scan(struct cx_scan *scan, void *data) {
@@ -190,6 +202,15 @@ static bool getvar_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
 
 cx_op_type(CX_OGETVAR, {
     type.eval = getvar_eval;
+  });
+
+static bool jump_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
+  cx->op += op->as_jump.nops;
+  return true;
+}
+
+cx_op_type(CX_OJUMP, {
+    type.eval = jump_eval;
   });
 
 static bool lambda_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {

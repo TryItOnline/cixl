@@ -1,10 +1,77 @@
+#include "cixl/bin.h"
 #include "cixl/box.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
-#include "cixl/scope.h"
 #include "cixl/libs/cond.h"
+#include "cixl/op.h"
+#include "cixl/scope.h"
 #include "cixl/types/fimp.h"
 #include "cixl/types/func.h"
+
+static ssize_t switch_eval(struct cx_macro_eval *eval,
+			struct cx_bin *bin,
+			size_t tok_idx,
+			struct cx *cx) {
+  size_t start = bin->ops.count;
+  
+  for (struct cx_tok *t = cx_vec_start(&eval->toks);
+       t != cx_vec_end(&eval->toks);
+       t++) {
+    struct cx_vec *ts = &t->as_vec;
+    struct cx_tok *c = cx_vec_start(ts);
+    
+    if (c->type == CX_TGROUP()) {
+      struct cx_vec *cts = &c->as_vec;
+      cx_compile(cx, cx_vec_start(cts), cx_vec_end(cts), bin);
+    } else {
+      cx_compile(cx, cx_vec_start(ts), cx_vec_get(ts, 1), bin);
+    }
+    
+    size_t ei = bin->ops.count;
+    cx_op_init(cx_vec_push(&bin->ops), CX_OELSE(), tok_idx);
+    cx_compile(cx, cx_vec_get(ts, 1), cx_vec_end(ts), bin);
+    cx_op_init(cx_vec_push(&bin->ops), CX_OJUMP(), tok_idx);
+
+    struct cx_op *eop = cx_vec_get(&bin->ops, ei);
+    eop->as_else.nops = bin->ops.count-ei-1;
+  }
+
+  for (struct cx_op *op = cx_vec_get(&bin->ops, start);
+       op != cx_vec_end(&bin->ops);
+       op++) {    
+    if (op->type == CX_OJUMP()) {
+      op->as_jump.nops = (struct cx_op *)cx_vec_end(&bin->ops)-op-1;
+    }
+  }
+  
+  return tok_idx+1;
+}
+
+static bool switch_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
+  struct cx_macro_eval *eval = cx_macro_eval_new(switch_eval);
+
+  int row = cx->row, col = cx->col;
+  
+  if (!cx_parse_end(cx, in, &eval->toks, true)) {
+    if (!cx->errors.count) { cx_error(cx, row, col, "Missing switch end"); }
+    goto error;
+  }
+
+  for (struct cx_tok *t = cx_vec_start(&eval->toks);
+       t != cx_vec_end(&eval->toks);
+       t++) {
+    if (t->type != CX_TGROUP()) {
+      cx_error(cx, row, col, "Invalid switch clause: %s", t->type->id);
+      goto error;
+    }
+  }
+  
+  cx_tok_init(cx_vec_push(out), CX_TMACRO(), row, col)->as_ptr = eval;
+  return true;
+ error:
+  cx_macro_eval_deref(eval);
+  return false;  
+}
 
 static bool int_imp(struct cx_scope *scope) {
   struct cx *cx = scope->cx;
@@ -278,6 +345,8 @@ static bool if_else_imp(struct cx_scope *scope) {
 }
 
 void cx_init_cond(struct cx *cx) {  
+  cx_add_macro(cx, "switch:", switch_parse);
+  
   cx_add_cfunc(cx, "int",
 	       cx_args(cx_arg("v", cx->bool_type)), cx_rets(cx_ret(cx->int_type)),
 	       int_imp);

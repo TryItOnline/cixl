@@ -627,6 +627,7 @@ bool cx_load_toks(struct cx *cx, const char *path, struct cx_vec *out) {
   }
   
   bool ok = cx_parse(cx, f, out);
+
   fclose(f);
   return ok;
 }
@@ -660,11 +661,10 @@ bool cx_load(struct cx *cx, const char *path) {
   }
 
   struct cx_bin *bin = cx_bin_new();
-
-  if (cx_compile(cx, cx_vec_start(&toks), cx_vec_end(&toks), bin)) {
-    ok = cx_eval(cx, bin, NULL);
-  }
-  
+  if (!cx_compile(cx, cx_vec_start(&toks), cx_vec_end(&toks), bin)) { goto exit3; }
+  if (!cx_eval(cx, bin, NULL)) { goto exit3; }
+  ok = true;
+ exit3:
   cx_bin_deref(bin);
  exit2: {
     if (wd[0] && chdir(prev_wd) == -1) {

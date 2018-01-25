@@ -1,20 +1,7 @@
-* add switch: macro
-** var is optional
-*** bind if not bound already
-*** push before groups/funcs/fimps
-** add cond lib
-** if cond is group, eval
-*** with g pushed if present
-** if cond is literal, compare with =
-*** only if var is present
-** if cond is func/fimp, call
-** if cond is $id, compare with =
-*** only if var is present
-** if #t, eval unconditionally
-** allow single token actions
-*** call eval_token instead
-
 * add str interpolation
+** separate token type CX_TFMT
+** add struct cx_fmt
+** add cx_token.as_fmt
 * more qdb
 ** add find-key(Vect) fn
 ** add is-dirty fn

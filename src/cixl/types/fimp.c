@@ -132,13 +132,12 @@ bool cx_fimp_call(struct cx_fimp *imp, struct cx_scope *scope) {
   cx_call_init(cx_vec_push(&cx->calls), cx->row, cx->col, imp, NULL);
 
   if (imp->ptr) {
-    imp->ptr(scope);
+    bool ok = imp->ptr(scope);
     cx_call_deinit(cx_vec_pop(&cx->calls));
-    return true;
+    return ok;
   }
 
-  bool ok = cx_fimp_eval(imp, scope);
-  return ok;
+  return cx_fimp_eval(imp, scope);
 }
 
 static bool equid_imp(struct cx_box *x, struct cx_box *y) {

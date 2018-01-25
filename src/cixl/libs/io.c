@@ -35,14 +35,15 @@ static bool ask_imp(struct cx_scope *scope) {
 
   cx_buf_close(&out);
   cx_box_init(cx_push(scope), scope->cx->str_type)->as_str = cx_str_new(out.data);
+  free(out.data);
   return true;
 }
 
 static bool load_imp(struct cx_scope *scope) {
   struct cx_box p = *cx_test(cx_pop(scope, false));
-  cx_load(scope->cx, p.as_str->data);
+  bool ok = cx_load(scope->cx, p.as_str->data);
   cx_box_deinit(&p);
-  return true;
+  return ok;
 }
 
 static bool fopen_imp(struct cx_scope *scope) {

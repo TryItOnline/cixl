@@ -199,13 +199,16 @@ static bool parse_id(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
   cx_buf_open(&id);
   bool ok = true;
   int col = cx->col;
+  char pc = 0;
   
   while (true) {
     char c = fgetc(in);
     if (c == EOF) { goto exit; }
     bool sep = cx_is_separator(cx, c);
-    
-    if (col != cx->col && (sep || c == '<' || c == '>')) {
+
+    if (col != cx->col &&
+	(col-cx->col > 2 || pc != '&') &&
+	(sep || c == '<' || c == '>')) {
       ok = ungetc(c, in) != EOF;
       goto exit;
     }
@@ -213,6 +216,7 @@ static bool parse_id(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
     fputc(c, id.stream);
     col++;
     if (sep) { break; }
+    pc = c;
   }
  exit: {
     cx_buf_close(&id);

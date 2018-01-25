@@ -468,6 +468,39 @@ Lambdas may be used to to prevent evaluating unused arguments when chaining.
 [42]
 ```
 
+When branching on multiple conditions serially, ```switch:``` may be used to simplify the code. The first clause which condition returns a value that's conditionally ```#t``` is executed.
+
+examples/guess.cx:
+```
+(|let: n rand 100++; {
+  ask 'Your guess: '
+  
+  %, $ if-else {
+    let: g int;
+
+    switch:
+      (($g < $n) say 'Too low!'  $g)
+      (($g > $n) say 'Too high!' $g)
+      (#t        say 'Correct!'  #nil);
+  } {
+    _ #nil
+  }
+}) for &_
+```
+
+```
+   | load 'examples/guess.cx'
+...
+Your guess: 50
+Too high!
+Your guess: 25
+Too low!
+Your guess: 37
+Too low!
+Your guess: 43
+Correct!
+```
+
 ### Functions
 The ```func:``` macro may be used to define named functions. Several implementations may be defined for the same name as long as they have the same arity and different argument types. Each function captures its defining environment and opens an implicit child scope that is closed on exit. Functions are allowed anywhere in the code, but are defined in order of appearance during compilation.
 
