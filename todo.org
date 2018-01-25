@@ -1,4 +1,14 @@
 * add lines(RFile) iter to io lib
+* add print (WFile out, opt) fn
+** add type.print/cx_print
+*** default to dump
+** change say to accept opt, use cx_print
+* add str(rFile) fn
+** slurp from current pos to end
+* add seek(file, pos) fn
+* add tell(file)
+* add len(file) fn
+* readme
 * add vect lib with (sort Opt)
 ** call arg as cmp if != None
 * improve uncut
