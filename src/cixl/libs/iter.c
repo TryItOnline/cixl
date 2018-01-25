@@ -140,6 +140,8 @@ static bool for_imp(struct cx_scope *scope) {
     *cx_push(scope) = v; 
     if (!cx_call(&act, scope)) { goto exit; }
   }
+
+  ok = true;
  exit:
   cx_box_deinit(&act);
   cx_box_deinit(&in);

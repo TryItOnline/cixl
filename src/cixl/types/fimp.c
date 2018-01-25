@@ -145,10 +145,10 @@ static bool equid_imp(struct cx_box *x, struct cx_box *y) {
 }
 
 static bool call_imp(struct cx_box *value, struct cx_scope *scope) {
+  struct cx *cx = scope->cx;
   struct cx_fimp *imp = value->as_ptr;
   
-  if (!cx_fimp_match(imp, &scope->stack)) {
-    struct cx *cx = scope->cx;
+  if (cx->checks&CX_CHECK_FIMPS && !cx_fimp_match(imp, &scope->stack)) {
     cx_error(cx, cx->row, cx->col, "Func not applicable: '%s'", imp->func->id);
     return -1;
   }

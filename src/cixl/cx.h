@@ -25,9 +25,14 @@ struct cx_func_ret;
 struct cx_scope;
 struct cx_sym;
 
+enum cx_checks {
+  CX_CHECK_FIMPS = 1, CX_CHECK_RETS = 2
+};
+
 struct cx {
   struct cx_set separators;
   ssize_t inline_limit1, inline_limit2;
+  enum cx_checks checks;
 
   struct cx_set types;
   struct cx_type *any_type, *bin_type, *bool_type, *char_type, *cmp_type, *file_type,

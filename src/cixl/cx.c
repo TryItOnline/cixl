@@ -232,6 +232,7 @@ struct cx *cx_init(struct cx *cx) {
   cx->op = NULL;
   cx->stop = false;
   cx->row = cx->col = -1;
+  cx->checks = CX_CHECK_FIMPS | CX_CHECK_RETS;
   
   cx_set_init(&cx->separators, sizeof(char), cx_cmp_char);
   cx_add_separators(cx, " \t\n;,.|_?!()[]{}");
