@@ -86,7 +86,7 @@ static bool on_fimp_scan(struct cx_scan *scan, void *data) {
   struct cx_scope *s = scan->scope;
   struct cx *cx = s->cx;
   
-  if (cx->checks&CX_CHECK_FIMPS && !cx_fimp_match(imp, &s->stack)) {
+  if (s->safe && !cx_fimp_match(imp, &s->stack)) {
     cx_error(cx, cx->row, cx->col, "Func not applicable: %s", imp->func->id);
     return false;
   }
@@ -131,7 +131,7 @@ static bool on_funcall_scan(struct cx_scan *scan, void *data) {
   struct cx *cx = s->cx;
 
   if (imp) {
-    if (cx->checks&CX_CHECK_FIMPS && !cx_fimp_match(imp, &s->stack)) { imp = NULL; }
+    if (s->safe && !cx_fimp_match(imp, &s->stack)) { imp = NULL; }
   } else {
     imp = op->as_funcall.jit_imp;
     if (imp && !cx_fimp_match(imp, &s->stack)) { imp = NULL; }
@@ -289,7 +289,7 @@ static bool on_recall_scan(struct cx_scan *scan, void *data) {
   struct cx_scope *s = scan->scope;
   struct cx *cx = s->cx;
   
-  if (cx->checks&CX_CHECK_FIMPS && !cx_fimp_match(imp, &s->stack)) {
+  if (s->safe && !cx_fimp_match(imp, &s->stack)) {
     cx_error(cx, cx->row, cx->col, "Recall not applicable");
     return false;
   }
@@ -332,7 +332,7 @@ static bool return_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
       for (struct cx_box *v = cx_vec_start(&ss->stack);
 	   i < ss->stack.count;
 	   i++, v++, r++) {
-	if (cx->checks&CX_CHECK_RETS) {
+	if (ss->safe) {
 	  struct cx_type *t = r->type;
 	  
 	  if (!r->type) {

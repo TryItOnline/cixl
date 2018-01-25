@@ -224,6 +224,16 @@ static bool fail_imp(struct cx_scope *scope) {
   return false;
 }
 
+static bool safe_imp(struct cx_scope *scope) {
+  scope->safe = true;
+  return true;
+}
+
+static bool unsafe_imp(struct cx_scope *scope) {
+  scope->safe = false;
+  return true;
+}
+
 struct cx *cx_init(struct cx *cx) {
   cx->inline_limit1 = 10;
   cx->inline_limit2 = -1;
@@ -232,7 +242,6 @@ struct cx *cx_init(struct cx *cx) {
   cx->op = NULL;
   cx->stop = false;
   cx->row = cx->col = -1;
-  cx->checks = CX_CHECK_FIMPS | CX_CHECK_RETS;
   
   cx_set_init(&cx->separators, sizeof(char), cx_cmp_char);
   cx_add_separators(cx, " \t\n;,.|_?!()[]{}");
@@ -341,6 +350,9 @@ struct cx *cx_init(struct cx *cx) {
   cx_add_cfunc(cx, "fail",
 	       cx_args(cx_arg("msg", cx->str_type)), cx_rets(),
 	       fail_imp);
+
+  cx_add_cfunc(cx, "safe", cx_args(), cx_rets(), safe_imp);
+  cx_add_cfunc(cx, "unsafe", cx_args(), cx_rets(), unsafe_imp);
 
   cx->scope = NULL;
   cx->main = cx_begin(cx, NULL);

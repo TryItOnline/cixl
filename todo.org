@@ -1,3 +1,5 @@
+* add lines iter to io lib
+* add vect lib with sort
 * improve uncut
 ** move uncut value to top of stack
 * add str interpolation

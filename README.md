@@ -1092,13 +1092,30 @@ int main() {
 ### Modularity
 The core language is split into libraries, and may be custom tailored to any level of functionality from C. This is an ongoing process, but you may get an idea of where it's going by having a look on existing [libs](https://github.com/basic-gongfu/cixl/tree/master/src/cixl/libs).
 
+### Safety
+Type checking may be partly disabled for the current scope by calling ```unsafe```, which allows code to run slightly faster. New scopes inherit their safety level from the parent scope. Calling ```safe``` enables all type checks for the current scope.
+
+```
+   | clock {10000 times {50 fib _}} / 1000000 int
+...
+[450]
+
+   | unsafe
+...clock {10000 times {50 fib _}} / 1000000 int
+...
+[415]
+
+   | safe
+...clock {10000 times {50 fib _}} / 1000000 int
+[453]
+```
+
 ### Performance
 There is still plenty of work remaining in the profiling and benchmarking departments, but preliminary indications puts Cixl at around 1-3 times slower than Python. Measured time is displayed in milliseconds.
 
 Let's start with a tail-recursive fibonacci to exercise the interpreter loop, it's worth mentioning that Cixl uses 64-bit integers while Python settles for 32-bit.
 
 ```
- 
    func: fib-rec(a b n Int) (Int)
 ...  $n? if-else {$b $a $b + $n -- recall} $a;
 ...func: fib(n Int) (Int)

@@ -14,6 +14,7 @@ struct cx_scope {
   struct cx_vec stack;
   struct cx_set env;
   struct cx_vec cuts;
+  bool safe;
   unsigned int nrefs;
 };
 
