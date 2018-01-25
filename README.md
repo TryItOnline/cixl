@@ -468,7 +468,7 @@ Lambdas may be used to to prevent evaluating unused arguments when chaining.
 [42]
 ```
 
-When branching on multiple conditions serially, ```switch:``` may be used to simplify the code. The first clause which condition returns a value that's conditionally ```#t``` is executed.
+The ```switch:``` macro may be used to untangle chains of if/-else calls. The first clause which condition returns a value that's conditionally ```#t``` is executed.
 
 examples/guess.cx:
 ```
