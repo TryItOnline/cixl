@@ -296,6 +296,14 @@ or by word.
 [['foo'@1 'bar-baz'@1]@1]
 ```
 
+Subtraction returns the [Levenshtein distance](https://en.wikipedia.org/wiki/Levenshtein_distance).
+
+```
+   | 'fooxxxbar' - 'foobar'
+...
+[3]
+```
+
 ### Console
 ```say``` and ```ask``` may be used to perform basic console IO.
 

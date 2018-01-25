@@ -208,6 +208,20 @@ static bool str_int_imp(struct cx_scope *scope) {
   return true;
 }
 
+static bool str_sub_imp(struct cx_scope *scope) {
+  struct cx_box
+    x = *cx_test(cx_pop(scope, false)),
+    y = *cx_test(cx_pop(scope, false));
+  
+  cx_box_init(cx_push(scope),
+	      scope->cx->int_type)->as_int = cx_str_dist(x.as_str->data,
+							 y.as_str->data);
+  
+  cx_box_deinit(&x);
+  cx_box_deinit(&y);
+  return true;
+}
+
 void cx_init_str(struct cx *cx) {
   cx_add_cfunc(cx, "lines",
 	       cx_args(cx_arg("in", cx->seq_type)), cx_rets(cx_ret(cx->iter_type)),
@@ -256,7 +270,12 @@ void cx_init_str(struct cx *cx) {
 	       cx_args(cx_arg("s", cx->str_type)),
 	       cx_rets(cx_ret(cx->opt_type)),
 	       str_int_imp);
-  
+
+  cx_add_cfunc(cx, "-",
+	       cx_args(cx_arg("x", cx->str_type), cx_arg("y", cx->str_type)),
+	       cx_rets(cx_ret(cx->int_type)),
+	       str_sub_imp);
+
   cx_add_func(cx, "upper",
 	      cx_args(cx_arg("s", cx->str_type)),
 	      cx_rets(cx_ret(cx->str_type)),
