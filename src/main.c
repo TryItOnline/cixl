@@ -13,6 +13,7 @@
 #include "cixl/libs/time.h"
 #include "cixl/libs/type.h"
 #include "cixl/libs/var.h"
+#include "cixl/libs/vect.h"
 #include "cixl/repl.h"
 #include "cixl/scope.h"
 #include "cixl/types/str.h"
@@ -27,6 +28,7 @@ int main(int argc, char *argv[]) {
   cx_init_iter(&cx);
   cx_init_math(&cx);
   cx_init_type(&cx);
+  cx_init_vect(&cx);
   cx_init_rec(&cx);
   cx_init_ref(&cx);
   cx_init_stack(&cx);

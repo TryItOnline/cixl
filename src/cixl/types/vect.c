@@ -82,63 +82,6 @@ void cx_vect_dump(struct cx_vec *imp, FILE *out) {
   fputc(']', out);
 }
 
-static bool len_imp(struct cx_scope *scope) {
-  struct cx_box vec = *cx_test(cx_pop(scope, false));
-  struct cx_vect *v = vec.as_ptr;
-  cx_box_init(cx_push(scope), scope->cx->int_type)->as_int = v->imp.count;
-  cx_box_deinit(&vec);
-  return true;
-}
-
-static bool push_imp(struct cx_scope *scope) {
-  struct cx_box
-    val = *cx_test(cx_pop(scope, false)),
-    vec = *cx_test(cx_pop(scope, false));
-  
-  struct cx_vect *v = vec.as_ptr;
-  *(struct cx_box *)cx_vec_push(&v->imp) = val;
-  cx_box_deinit(&vec);
-  return true;
-}
-
-static bool pop_imp(struct cx_scope *scope) {
-  struct cx_box vec = *cx_test(cx_pop(scope, false));
-  struct cx_vect *v = vec.as_ptr;
-
-  if (v->imp.count) {
-    *cx_push(scope) = *(struct cx_box *)cx_vec_pop(&v->imp);
-  } else {
-    cx_box_init(cx_push(scope), scope->cx->nil_type);
-  }
-  
-  cx_box_deinit(&vec);
-  return true;
-}
-
-static bool seq_imp(struct cx_scope *scope) {
-  struct cx_box in = *cx_test(cx_pop(scope, false));
-  struct cx_iter *it = cx_iter(&in);
-  struct cx_vect *out = cx_vect_new();
-  struct cx_box v;
-  
-  while (cx_iter_next(it, &v, scope)) {
-    *(struct cx_box *)cx_vec_push(&out->imp) = v;
-  }
-
-  cx_box_init(cx_push(scope), scope->cx->vect_type)->as_ptr = out;
-  cx_box_deinit(&in);
-  cx_iter_deref(it);
-  return true;
-}
-
-static bool clear_imp(struct cx_scope *scope) {
-  struct cx_box vec = *cx_test(cx_pop(scope, false));
-  struct cx_vect *v = vec.as_ptr;
-  cx_vec_clear(&v->imp);
-  cx_box_deinit(&vec);
-  return true;
-}
-
 static bool equid_imp(struct cx_box *x, struct cx_box *y) {
   return x->as_ptr == y->as_ptr;
 }
@@ -176,7 +119,7 @@ static bool ok_imp(struct cx_box *b) {
   return v->imp.count;
 }
 
-static void copy_imp(struct cx_box *dst, struct cx_box *src) {
+static void copy_imp(struct cx_box *dst, const struct cx_box *src) {
   dst->as_ptr = cx_vect_ref(src->as_ptr);
 }
 
@@ -238,29 +181,6 @@ struct cx_type *cx_init_vect_type(struct cx *cx) {
   t->dump = dump_imp;
   t->print = print_imp;
   t->deinit = deinit_imp;
-  
-  cx_add_cfunc(cx, "len",
-	       cx_args(cx_arg("vec", t)),
-	       cx_rets(cx_ret(cx->int_type)),
-	       len_imp);
-  
-  cx_add_cfunc(cx, "push",
-	       cx_args(cx_arg("vec", t), cx_arg("val", cx->any_type)),
-	       cx_rets(),
-	       push_imp);
-
-  cx_add_cfunc(cx, "pop",
-	       cx_args(cx_arg("vec", t)), cx_rets(cx_ret(cx->opt_type)),
-	       pop_imp);
-
-  cx_add_cfunc(cx, "vect",
-	       cx_args(cx_arg("in", cx->seq_type)),
-	       cx_rets(cx_ret(t)),
-	       seq_imp);
-
-  cx_add_cfunc(cx, "clear",
-	       cx_args(cx_arg("vec", t)), cx_rets(),
-	       clear_imp);
-  
+    
   return t;
 }

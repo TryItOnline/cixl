@@ -23,7 +23,7 @@ struct cx_type {
   enum cx_cmp (*cmp)(const struct cx_box *, const struct cx_box *);
   bool (*call)(struct cx_box *, struct cx_scope *);
   bool (*ok)(struct cx_box *);
-  void (*copy)(struct cx_box *dst, struct cx_box *src);
+  void (*copy)(struct cx_box *dst, const struct cx_box *src);
   void (*clone)(struct cx_box *dst, struct cx_box *src);
   struct cx_iter *(*iter)(struct cx_box *);
   void (*write)(struct cx_box *, FILE *);
@@ -38,7 +38,7 @@ struct cx_type *cx_type_init(struct cx_type *type, struct cx *cx, const char *id
 struct cx_type *cx_type_reinit(struct cx_type *type);
 struct cx_type *cx_type_deinit(struct cx_type *type);
 void cx_derive(struct cx_type *child, struct cx_type *parent);
-bool cx_is(struct cx_type *child, struct cx_type *parent);
+bool cx_is(const struct cx_type *child, const struct cx_type *parent);
 
 struct cx_type *cx_init_meta_type(struct cx *cx);
 

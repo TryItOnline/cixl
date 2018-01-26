@@ -41,7 +41,7 @@ void *cx_vec_end(struct cx_vec *vec) {
   return vec->items ? vec->items+vec->count*vec->item_size : NULL;
 }
 
-void *cx_vec_get(struct cx_vec *vec, size_t i) {
+void *cx_vec_get(const struct cx_vec *vec, size_t i) {
   return vec->items + i*vec->item_size;
 }
 

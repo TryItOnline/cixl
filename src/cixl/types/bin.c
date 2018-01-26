@@ -25,7 +25,7 @@ static bool call_imp(struct cx_box *value, struct cx_scope *scope) {
   return cx_eval(scope->cx, value->as_ptr, NULL);
 }
 
-static void copy_imp(struct cx_box *dst, struct cx_box *src) {
+static void copy_imp(struct cx_box *dst, const struct cx_box *src) {
   struct cx_bin *b = src->as_ptr;
   dst->as_ptr = cx_bin_ref(b);
 }

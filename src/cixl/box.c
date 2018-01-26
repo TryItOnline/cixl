@@ -43,7 +43,7 @@ bool cx_call(struct cx_box *box, struct cx_scope *scope) {
   return box->type->call(box, scope);
 }
 
-struct cx_box *cx_copy(struct cx_box *dst, struct cx_box *src) {
+struct cx_box *cx_copy(struct cx_box *dst, const struct cx_box *src) {
   if (src->type->copy) {
     dst->type = src->type;
     src->type->copy(dst, src);

@@ -61,7 +61,7 @@ static bool call_imp(struct cx_box *value, struct cx_scope *scope) {
   return ok;
 }
 
-static void copy_imp(struct cx_box *dst, struct cx_box *src) {
+static void copy_imp(struct cx_box *dst, const struct cx_box *src) {
   dst->as_ptr = cx_lambda_ref(src->as_ptr);
 }
 

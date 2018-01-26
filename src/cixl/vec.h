@@ -30,7 +30,7 @@ struct cx_vec *cx_vec_deinit(struct cx_vec *vec);
 void cx_vec_grow(struct cx_vec *vec, size_t capac);
 void *cx_vec_start(struct cx_vec *vec);
 void *cx_vec_end(struct cx_vec *vec);
-void *cx_vec_get(struct cx_vec *vec, size_t i);
+void *cx_vec_get(const struct cx_vec *vec, size_t i);
 void *cx_vec_push(struct cx_vec *vec);
 void *cx_vec_peek(struct cx_vec *vec, size_t i);
 void *cx_vec_pop(struct cx_vec *vec);

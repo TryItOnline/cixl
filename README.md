@@ -776,6 +776,19 @@ A vector is a one dimensional dynamic array that supports efficient pushing / po
 [2 4 14]
 ```
 
+Vectors may be sorted in place by calling ```sort```.
+
+```
+   | [3 2 1] %, $ sort #nil
+...
+[[1 2 3]@1]
+
+   | ['baz'.3, 'bar'.2, 'foo'.1]
+...%, $ sort { y ~ y ~ cmp }
+...
+[[('foo'@1.1)@1 ('bar'@1.2)@1 ('baz'@1.3)@1]@1]
+```
+
 ### Pairs
 Values may be paired by calling ```.```, the result provides reference semantics and access to parts using ```x``` and ```y```.
 

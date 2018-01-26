@@ -88,7 +88,7 @@ static bool ok_imp(struct cx_box *v) {
   return v->as_str->len;
 }
 
-static void copy_imp(struct cx_box *dst, struct cx_box *src) {
+static void copy_imp(struct cx_box *dst, const struct cx_box *src) {
   dst->as_str = cx_str_ref(src->as_str);
 }
 

@@ -1,15 +1,13 @@
-* add seek(file, pos) fn
-* add tell(file)
-* add len(file) fn
-* add vect lib with (sort Opt)
-** call arg as cmp if != None
+* debug histogram error
 * improve uncut
 ** move uncut value to top of stack
-* ---
 * add str interpolation
 ** separate token type CX_TFMT
 ** add struct cx_fmt
 ** add cx_token.as_fmt
+* add seek(file, pos) fn
+* add tell(file)
+* add len(file) fn
 * more qdb
 ** add find-key(Vect) fn
 ** add is-dirty fn

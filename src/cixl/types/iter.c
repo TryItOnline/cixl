@@ -43,7 +43,7 @@ static bool ok_imp(struct cx_box *v) {
   return !v->as_iter->done;
 }
 
-static void copy_imp(struct cx_box *dst, struct cx_box *src) {
+static void copy_imp(struct cx_box *dst, const struct cx_box *src) {
   dst->as_iter = cx_iter_ref(src->as_iter);
 }
 

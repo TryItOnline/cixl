@@ -75,7 +75,7 @@ static bool ok_imp(struct cx_box *v) {
   return feof(v->as_file->ptr);
 }
 
-static void copy_imp(struct cx_box *dst, struct cx_box *src) {
+static void copy_imp(struct cx_box *dst, const struct cx_box *src) {
   dst->as_file = cx_file_ref(src->as_file);
 }
 

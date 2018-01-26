@@ -81,7 +81,7 @@ static bool ok_imp(struct cx_box *v) {
   return cx_ok(&v->as_pair->x) && cx_ok(&v->as_pair->y);
 }
 
-static void copy_imp(struct cx_box *dst, struct cx_box *src) {
+static void copy_imp(struct cx_box *dst, const struct cx_box *src) {
   dst->as_pair = cx_pair_ref(src->as_pair);
 }
 

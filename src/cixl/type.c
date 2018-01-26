@@ -54,14 +54,11 @@ void cx_derive(struct cx_type *child, struct cx_type *parent) {
   child->tags |= parent->tag;
 }
 
-bool cx_is(struct cx_type *child, struct cx_type *parent) {
+bool cx_is(const struct cx_type *child, const struct cx_type *parent) {
   if (child->tags & parent->tag) { return true; }
   
   cx_do_set(&child->parents, struct cx_type *, pt) {
-    if (cx_is(*pt, parent)) {
-      child->tags |= parent->tag;
-      return true;
-    }
+    if (cx_is(*pt, parent)) { return true; }
   }
 
   return false;

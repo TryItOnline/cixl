@@ -35,7 +35,7 @@ static bool ok_imp(struct cx_box *v) {
   return cx_test(cx_pop(s, false))->as_bool;
 }
 
-static void copy_imp(struct cx_box *dst, struct cx_box *src) {
+static void copy_imp(struct cx_box *dst, const struct cx_box *src) {
   dst->as_ptr = cx_rec_ref(src->as_ptr);
 }
 

@@ -39,7 +39,7 @@ static bool ok_imp(struct cx_box *v) {
   return cx_ok(&v->as_ref->value);
 }
 
-static void copy_imp(struct cx_box *dst, struct cx_box *src) {
+static void copy_imp(struct cx_box *dst, const struct cx_box *src) {
   dst->as_ref = cx_ref_ref(src->as_ref);
 }
 

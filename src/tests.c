@@ -13,6 +13,7 @@
 #include "cixl/libs/time.h"
 #include "cixl/libs/type.h"
 #include "cixl/libs/var.h"
+#include "cixl/libs/vect.h"
 #include "cixl/set.h"
 #include "cixl/scope.h"
 #include "cixl/types/vect.h"
@@ -366,6 +367,7 @@ static void vect_tests() {
   cx_init_iter(&cx);
   cx_init_math(&cx);
   cx_init_stack(&cx);
+  cx_init_vect(&cx);
 
   run(&cx, "1 2 3 [4 5] len 2 = check");
   run(&cx, "[1 2 3] pop 3 = check");
@@ -383,6 +385,7 @@ static void table_tests() {
   cx_init_cond(&cx);
   cx_init_table(&cx);
   cx_init_var(&cx);
+  cx_init_vect(&cx);
 
   run(&cx, "(let: t new Table;"
            " $t put 1 'foo'"

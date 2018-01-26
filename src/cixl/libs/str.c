@@ -49,8 +49,10 @@ bool split_next(struct cx_iter *iter, struct cx_box *out, struct cx_scope *scope
     }
   }
 
+  cx_buf_close(&it->out);
   cx_box_init(out, cx->str_type)->as_str = cx_str_new(it->out.data);
-  fseek(it->out.stream, 0, SEEK_SET);
+  free(it->out.data);
+  cx_buf_open(&it->out);
   return true;
 }
 

@@ -134,7 +134,7 @@ static bool ok_imp(struct cx_box *v) {
   return v->as_table->entries.members.count;
 }
 
-static void copy_imp(struct cx_box *dst, struct cx_box *src) {
+static void copy_imp(struct cx_box *dst, const struct cx_box *src) {
   dst->as_table = cx_table_ref(src->as_table);
 }
 

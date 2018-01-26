@@ -1,0 +1,31 @@
+/*
+  Produces a histogram from stdin.
+  https://github.com/basic-gongfu/cixl#getting-started
+*/
+
+let: ws new Table;
+
+#in words for {
+  let: w lower;
+
+  $ws say
+    
+  $ws get $w %, $ if-else {
+    , $ws put $w ($++)
+  } {
+    _ $ws put $w 1
+  }
+}
+
+$ws vect sort {
+  let: (a b);
+  y $a . x $a, y $b . x $b cmp
+}
+
+for {
+  let: w Pair;
+  #out print x $w
+  #out print \\s
+  #out print str y $w
+  #out print \\n
+}
