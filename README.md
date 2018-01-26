@@ -98,7 +98,7 @@ While ```$``` may be used to pull values across cuts.
 ```
 
 ### Variables
-Named variables may be defined once per scope using the ```let:``` macro.
+Variables may be bound once per scope using the ```let:``` macro.
 
 ```
    | let: foo 'bar';
@@ -131,7 +131,7 @@ Error in row 1, col 5:
 Expected type Str, actual: Int
 ```
 
-Variables pull values from the current stack, which means that the same construct may be used to name existing values.
+Since ```let:``` doesn't introduce its own scope, values already on the stack may be bound using the same construct.
 
 ```
    | 1 2 3
@@ -147,7 +147,7 @@ The same functionality may be accessed symbolically.
 ...
 [#nil]
 
-   | let: foo 42;
+   | put-var `foo 42
 ...get-var `foo
 ...
 [42]
