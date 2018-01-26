@@ -313,9 +313,12 @@ struct cx *cx_init(struct cx *cx) {
   cx->ref_type = NULL;
   
   cx->file_type = cx_init_file_type(cx, "File");
-  cx->rfile_type = cx_init_file_type(cx, "RFile", cx->any_type, cx->file_type);
-  cx->wfile_type = cx_init_file_type(cx, "WFile", cx->any_type, cx->file_type);
+  cx->rfile_type = cx_init_file_type(cx, "RFile", cx->file_type, cx->seq_type);
+  cx->rfile_type->iter = cx_file_iter;
+
+  cx->wfile_type = cx_init_file_type(cx, "WFile", cx->file_type);
   cx->rwfile_type = cx_init_file_type(cx, "RWFile", cx->rfile_type, cx->wfile_type);
+  cx->rwfile_type->iter = cx_file_iter;
   
   cx_add_macro(cx, "include:", include_parse);
 

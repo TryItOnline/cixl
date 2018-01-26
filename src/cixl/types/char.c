@@ -21,7 +21,7 @@ static void copy_imp(struct cx_box *dst, struct cx_box *src) {
 }
 
 static void dump_imp(struct cx_box *v, FILE *out) {
-  char c = v->as_char;
+  unsigned char c = v->as_char;
   
   switch (c) {
   case '\n':

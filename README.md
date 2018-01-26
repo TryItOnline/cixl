@@ -385,6 +385,21 @@ Files may be opened for reading/writing by calling ```fopen```, the type of the 
 []
 ```
 
+Files iterate characters by default, which means that string sequence functions may be used directly.
+
+test.txt
+```
+foo, bar
+baz
+```
+
+```
+   let: f fopen 'test.txt' `r;
+...| $f lines vect
+...
+[['foo, bar'@1 'baz'@1]@1]
+```
+
 ### Comments
 Two kinds of code comments are supported, line comments and block comments.
 

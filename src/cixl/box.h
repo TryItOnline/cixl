@@ -26,7 +26,7 @@ struct cx_box {
   
   union {
     bool             as_bool;
-    char             as_char;
+    unsigned char    as_char;
     struct cx_file  *as_file;
     cx_guid_t        as_guid;
     int64_t          as_int;

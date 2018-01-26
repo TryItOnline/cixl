@@ -14,7 +14,7 @@
 #include "cixl/types/iter.h"
 #include "cixl/types/str.h"
 
-typedef bool (*cx_split_t)(char);
+typedef bool (*cx_split_t)(unsigned char);
 
 struct cx_split_iter {
   struct cx_iter iter;
@@ -76,7 +76,7 @@ struct cx_iter *cx_split_iter_new(struct cx_iter *in, cx_split_t split) {
   return &it->iter;
 }
 
-bool split_lines(char c) { return c == '\r' || c == '\n'; }
+bool split_lines(unsigned char c) { return c == '\r' || c == '\n'; }
 
 static bool lines_imp(struct cx_scope *scope) {
   struct cx_box in = *cx_test(cx_pop(scope, false));
@@ -86,7 +86,7 @@ static bool lines_imp(struct cx_scope *scope) {
   return true;
 }
 
-bool split_words(char c) { return !isalpha(c) && c != '-'; }
+bool split_words(unsigned char c) { return !isalpha(c) && c != '-'; }
 
 static bool words_imp(struct cx_scope *scope) {
   struct cx_box in = *cx_test(cx_pop(scope, false));

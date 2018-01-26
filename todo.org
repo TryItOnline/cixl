@@ -1,4 +1,3 @@
-* add lines(RFile) iter to io lib
 * add print (WFile out, opt) fn
 ** add type.print/cx_print
 *** default to dump
@@ -43,11 +42,6 @@
 * add ^ (pow)
 ** add as separator
 ** implement for int/rat in math
-* add seek(File offs)
-** seek from start
-* add len(File)
-*** save offs end seek 0 from end
-
 * add vect put/get fns
 * add rat sub/div
 ** move fns to math lib

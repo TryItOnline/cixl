@@ -3,6 +3,43 @@
 #include "cixl/error.h"
 #include "cixl/scope.h"
 #include "cixl/types/file.h"
+#include "cixl/types/iter.h"
+
+struct char_iter {
+  struct cx_iter iter;
+  struct cx_file *in;
+};
+
+static bool char_next(struct cx_iter *iter, struct cx_box *out, struct cx_scope *scope) {
+  struct char_iter *it = cx_baseof(iter, struct char_iter, iter);
+  int c = fgetc(it->in->ptr);
+  
+  if (c == EOF) {
+    iter->done = true;
+    return false;
+  }
+  
+  cx_box_init(out, scope->cx->char_type)->as_char = c;
+  return true;
+}
+
+static void *char_deinit(struct cx_iter *iter) {
+  struct char_iter *it = cx_baseof(iter, struct char_iter, iter);
+  cx_file_deref(it->in);
+  return it;
+}
+
+static cx_iter_type(char_iter, {
+    type.next = char_next;
+    type.deinit = char_deinit;
+  });
+
+static struct cx_iter *char_iter_new(struct cx_file *in) {
+  struct char_iter *it = malloc(sizeof(struct char_iter));
+  cx_iter_init(&it->iter, char_iter());
+  it->in = cx_file_ref(in);
+  return &it->iter;
+}
 
 struct cx_file *cx_file_new(FILE *ptr) {
   struct cx_file *file = malloc(sizeof(struct cx_file));
@@ -40,6 +77,10 @@ static bool ok_imp(struct cx_box *v) {
 
 static void copy_imp(struct cx_box *dst, struct cx_box *src) {
   dst->as_file = cx_file_ref(src->as_file);
+}
+
+struct cx_iter *cx_file_iter(struct cx_box *v) {
+  return char_iter_new(v->as_file);
 }
 
 static void dump_imp(struct cx_box *v, FILE *out) {
