@@ -86,7 +86,7 @@ static bool on_fimp_scan(struct cx_scan *scan, void *data) {
   struct cx_scope *s = scan->scope;
   struct cx *cx = s->cx;
   
-  if (s->safe && !cx_fimp_match(imp, &s->stack)) {
+  if (s->safe && !cx_fimp_match(imp, s)) {
     cx_error(cx, cx->row, cx->col, "Func not applicable: %s", imp->func->id);
     return false;
   }
@@ -131,11 +131,11 @@ static bool on_funcall_scan(struct cx_scan *scan, void *data) {
   struct cx *cx = s->cx;
 
   if (imp) {
-    if (s->safe && !cx_fimp_match(imp, &s->stack)) { imp = NULL; }
+    if (s->safe && !cx_fimp_match(imp, s)) { imp = NULL; }
   } else {
     imp = op->as_funcall.jit_imp;
-    if (imp && !cx_fimp_match(imp, &s->stack)) { imp = NULL; }
-    if (!imp) { imp = cx_func_get_imp(func, &s->stack, 0); }
+    if (imp && !cx_fimp_match(imp, s)) { imp = NULL; }
+    if (!imp) { imp = cx_func_get_imp(func, s, 0); }
   }
   
   if (!imp) {
@@ -289,7 +289,7 @@ static bool on_recall_scan(struct cx_scan *scan, void *data) {
   struct cx_scope *s = scan->scope;
   struct cx *cx = s->cx;
   
-  if (s->safe && !cx_fimp_match(imp, &s->stack)) {
+  if (s->safe && !cx_fimp_match(imp, s)) {
     cx_error(cx, cx->row, cx->col, "Recall not applicable");
     return false;
   }

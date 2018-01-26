@@ -16,7 +16,7 @@ struct cx_scope *cx_scope_new(struct cx *cx, struct cx_scope *parent) {
   scope->env.key_offs = offsetof(struct cx_var, id);
 
   cx_vec_init(&scope->cuts, sizeof(struct cx_cut));
-  scope->safe = cx->scopes.count ? cx_scope(cx, 0)->safe : true;
+  scope->safe = false; //cx->scopes.count ? cx_scope(cx, 0)->safe : true;
   scope->nrefs = 0;
   return scope;
 }
