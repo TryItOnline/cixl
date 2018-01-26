@@ -1,7 +1,7 @@
 ## ![](cixl.png?raw=true) <a href="https://liberapay.com/basic-gongfu/donate"><img alt="Donate using Liberapay" src="https://liberapay.com/assets/widgets/donate.svg"></a>
 #### Cixl - a minimal, decently typed scripting language
 
-This project aims to produce a minimal, decently typed scripting language for embedding in and extending from C. Depending on where you're coming from; it might help to think of Cixl as a Lisp in Forth clothes; or a Forth with Lisp convenience; deeply integrated with C. The language is implemented as a straight forward 3-stage (parse/compile/eval) interpreter that is designed to be as fast as possible without compromising on simplicity, transparency and flexibility. The codebase has no external dependencies and is currently hovering around 7 kloc including tests and standard library.
+This project aims to produce a minimal, decently typed scripting language for embedding in and extending from C. Cixl shares many ideas with C, Forth, Common Lisp and Perl; as well as the hacker mindset that unites them. The language is implemented as a straight forward 3-stage (parse/compile/eval) interpreter that is designed to be as fast as possible without compromising on simplicity, transparency and flexibility. The codebase has no external dependencies and is currently hovering around 8 kloc including tests and standard library.
 
 ### Status
 Examples should work in the most recent version and run clean in ```valgrind```, outside of that I can't really promise much at the moment. Current work is focused on profiling and filling obvious gaps in functionality.
