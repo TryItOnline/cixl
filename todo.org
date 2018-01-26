@@ -1,3 +1,11 @@
+* rename cmp to <=>
+** change return syms to `< `> or `=
+** update histogram
+* add rezip fn to reverse pair
+** add cx_func rezip for seq
+*** map rezip over contents
+** update histogram
+* ---
 * more qdb
 ** add find-key(Vect) fn
 ** add is-dirty fn
