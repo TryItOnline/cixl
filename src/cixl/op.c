@@ -190,6 +190,13 @@ static bool getvar_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
 
     struct cx_cut *c = cx_vec_peek(&s->cuts, 0);
     c->offs--;
+
+    if (c->offs < s->stack.count-1) {
+      struct cx_box v = *(struct cx_box *)cx_vec_get(&s->stack, c->offs);
+      cx_vec_delete(&s->stack, c->offs);
+      *(struct cx_box *)cx_vec_push(&s->stack) = v;
+    }
+    
     if (!c->offs) { cx_vec_pop(&s->cuts); }
   } else {
     struct cx_box *v = cx_get_var(s, op->as_getvar.id, false);

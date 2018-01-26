@@ -1,5 +1,6 @@
 /*
   A simple log-based database.
+
   See https://github.com/basic-gongfu/cixl/blob/master/examples/bookings.cx for
   example of usage.
 

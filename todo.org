@@ -1,6 +1,3 @@
-* debug histogram error
-* improve uncut
-** move uncut value to top of stack
 * more qdb
 ** add find-key(Vect) fn
 ** add is-dirty fn

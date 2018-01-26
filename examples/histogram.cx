@@ -1,13 +1,16 @@
 /*
-  Produces a histogram from stdin.
+  Produces a word histogram from stdin.
+  
+  Execute ```./cixl ../examples/histogram.cx < file1 ... fileN``` to get a histogram
+  of words in file1-N.
   
   https://github.com/basic-gongfu/cixl#getting-started
 */
 
 let: ws new Table;
 
-['foo' 'bar' 'baz'] for {
-  let: w;
+#in words for {
+  let: w lower;
 
   $ws get $w %, $ if-else {
     ++, $ws put $w $
