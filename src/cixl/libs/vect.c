@@ -118,8 +118,6 @@ static bool sort_imp(struct cx_scope *scope) {
       } else if (out->as_sym.tag == gt.tag) {
 	res = 1;
       }
-
-      cx_box_deinit(out);
     }
     
     return res;

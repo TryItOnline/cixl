@@ -206,16 +206,16 @@ struct cx *cx_init(struct cx *cx) {
   cx_set_init(&cx->separators, sizeof(char), cx_cmp_char);
   cx_add_separators(cx, " \t\n;,.|_?!()[]{}");
 
-  cx_set_init(&cx->syms, sizeof(struct cx_sym), cx_cmp_str);
+  cx_set_init(&cx->syms, sizeof(struct cx_sym), cx_cmp_cstr);
   cx->syms.key_offs = offsetof(struct cx_sym, id);
 
-  cx_set_init(&cx->types, sizeof(struct cx_type *), cx_cmp_str);
+  cx_set_init(&cx->types, sizeof(struct cx_type *), cx_cmp_cstr);
   cx->types.key = get_type_id;
   
-  cx_set_init(&cx->macros, sizeof(struct cx_macro *), cx_cmp_str);
+  cx_set_init(&cx->macros, sizeof(struct cx_macro *), cx_cmp_cstr);
   cx->macros.key = get_macro_id;
 
-  cx_set_init(&cx->funcs, sizeof(struct cx_func *), cx_cmp_str);
+  cx_set_init(&cx->funcs, sizeof(struct cx_func *), cx_cmp_cstr);
   cx->funcs.key = get_func_id;
 
   cx_set_init(&cx->consts, sizeof(struct cx_var), cx_cmp_sym);

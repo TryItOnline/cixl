@@ -36,7 +36,7 @@ static bool get_imp(struct cx_scope *scope) {
     tbl = *cx_test(cx_pop(scope, false));
 
   bool ok = false;
-  if (!check_key_type(tbl.as_table, key.type)) { goto exit; }
+  if (scope->safe && !check_key_type(tbl.as_table, key.type)) { goto exit; }
   struct cx_box *v = cx_table_get(tbl.as_table, &key);
 
   if (v) {
@@ -59,7 +59,7 @@ static bool put_imp(struct cx_scope *scope) {
     tbl = *cx_test(cx_pop(scope, false));
 
   bool ok = false;
-  if (!check_key_type(tbl.as_table, key.type)) { goto exit; }
+  if (scope->safe && !check_key_type(tbl.as_table, key.type)) { goto exit; }
   cx_table_put(tbl.as_table, &key, &val);
   ok = true;
  exit:

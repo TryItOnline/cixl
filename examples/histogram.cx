@@ -1,31 +1,30 @@
 /*
   Produces a histogram from stdin.
+  
   https://github.com/basic-gongfu/cixl#getting-started
 */
 
 let: ws new Table;
 
-#in words for {
-  let: w lower;
+['foo' 'bar' 'baz'] for {
+  let: w;
 
-  $ws say
-    
   $ws get $w %, $ if-else {
-    , $ws put $w ($++)
+    ++, $ws put $w $
   } {
     _ $ws put $w 1
   }
 }
 
-$ws vect sort {
+$ws vect %, $ sort {
   let: (a b);
-  y $a . x $a, y $b . x $b cmp
+  (y $b ., x $b) (y $a ., x $a) cmp
 }
 
 for {
-  let: w Pair;
-  #out print x $w
+  let: w;
+  #out print, x $w
   #out print \\s
-  #out print str y $w
+  #out print, str<Int> y $w
   #out print \\n
 }

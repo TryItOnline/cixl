@@ -21,7 +21,7 @@ enum cx_cmp cx_cmp_ptr(const void *x, const void *y) {
   return (*xv > *yv) ? CX_CMP_GT : CX_CMP_EQ;
 }
 
-enum cx_cmp cx_cmp_str(const void *x, const void *y) {
+enum cx_cmp cx_cmp_cstr(const void *x, const void *y) {
   int res = strcmp(*(const char **)x, *(const char **)y);
   if (res < 0) { return CX_CMP_LT; }
   return res ? CX_CMP_GT : CX_CMP_EQ;

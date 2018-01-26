@@ -88,9 +88,9 @@ void cx_table_put(struct cx_table *table, struct cx_box *key, struct cx_box *val
     cx_box_deinit(&e->val);
   } else {
     e = cx_set_insert(&table->entries, key);
+    cx_copy(&e->key, key);
   }
   
-  cx_copy(&e->key, key);
   cx_copy(&e->val, val);
 }
 

@@ -1,13 +1,6 @@
 * debug histogram error
 * improve uncut
 ** move uncut value to top of stack
-* add str interpolation
-** separate token type CX_TFMT
-** add struct cx_fmt
-** add cx_token.as_fmt
-* add seek(file, pos) fn
-* add tell(file)
-* add len(file) fn
 * more qdb
 ** add find-key(Vect) fn
 ** add is-dirty fn
@@ -42,3 +35,10 @@
 ** remove cx_tok.as_ptr
 ** replace with cx_tok.as_str, as_func, as_fimp etc.
 * replace box.as_ptr with as_func/fimp/etc
+* add str interpolation
+** separate token type CX_TFMT
+** add struct cx_fmt
+** add cx_token.as_fmt
+* add seek(file, pos) fn
+* add tell(file)
+* add len(file) fn

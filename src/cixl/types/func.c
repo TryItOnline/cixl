@@ -20,7 +20,7 @@ struct cx_func *cx_func_init(struct cx_func *func,
 			     int nargs) {
   func->cx = cx;
   func->id = strdup(id);
-  cx_set_init(&func->imp_lookup, sizeof(struct cx_fimp *), cx_cmp_str);
+  cx_set_init(&func->imp_lookup, sizeof(struct cx_fimp *), cx_cmp_cstr);
   func->imp_lookup.key = get_imp_id;
   cx_vec_init(&func->imps, sizeof(struct cx_fimp *));
   func->nargs = nargs;
