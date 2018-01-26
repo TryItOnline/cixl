@@ -233,7 +233,7 @@ Some values are reference counted; strings, vectors, lambdas etc. Reference coun
 [[1 2 3]@1 [1 2 3]@1]
 ```
 
-References may be created manually, which enables using reference semantics for value types among other things.
+References may be created manually, which enables using reference semantics for value types.
 
 ```
    | let: r #nil ref;
