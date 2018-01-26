@@ -92,6 +92,10 @@ static void copy_imp(struct cx_box *dst, const struct cx_box *src) {
   dst->as_str = cx_str_ref(src->as_str);
 }
 
+static void clone_imp(struct cx_box *dst, struct cx_box *src) {
+  dst->as_str = cx_str_new(src->as_str->data);
+}
+
 static struct cx_iter *iter_imp(struct cx_box *v) {
   return char_iter_new(v->as_str);
 }
@@ -119,6 +123,7 @@ struct cx_type *cx_init_str_type(struct cx *cx) {
   t->cmp = cmp_imp;
   t->ok = ok_imp;
   t->copy = copy_imp;
+  t->clone = clone_imp;
   t->iter = iter_imp;
   t->write = write_imp;
   t->dump = dump_imp;
