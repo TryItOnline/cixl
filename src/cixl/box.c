@@ -83,6 +83,14 @@ void cx_dump(struct cx_box *box, FILE *out) {
   cx_test(box->type->dump)(box, out);
 }
 
+void cx_print(struct cx_box *box, FILE *out) {
+  if (box->type->print)
+    box->type->print(box, out);
+  else {
+    cx_dump(box, out);
+  }
+}
+
 enum cx_cmp cx_cmp_box(const void *x, const void *y) {
   return cx_cmp(x, y);
 }

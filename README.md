@@ -380,8 +380,17 @@ Files may be opened for reading/writing by calling ```fopen```, the type of the 
 ...
 [RWFile(0x5361130)@1]
 
-   now ~ write
+   now write
 ...
+[]
+```
+
+Any value may be printed to a ```RWFile``` using ```print```.
+
+```
+   | #out print ['foo' 42 \\n]
+...
+foo42
 []
 ```
 

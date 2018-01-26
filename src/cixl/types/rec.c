@@ -3,6 +3,7 @@
 #include "cixl/cx.h"
 #include "cixl/error.h"
 #include "cixl/scope.h"
+#include "cixl/types/file.h"
 #include "cixl/types/rec.h"
 
 static void new_imp(struct cx_box *out) {
@@ -81,6 +82,14 @@ static void dump_imp(struct cx_box *v, FILE *out) {
   fprintf(out, ")@%d", r->nrefs);
 }
 
+static void print_imp(struct cx_box *v, FILE *out) {
+  struct cx *cx = v->type->cx;
+  struct cx_scope *s = cx_scope(cx, 0);
+  cx_box_init(cx_push(s), cx->wfile_type)->as_file = cx_file_new(out);
+  cx_copy(cx_push(s), v);
+  cx_funcall(cx, "print");
+}
+
 static void deinit_imp(struct cx_box *v) {
   cx_rec_deref(v->as_ptr);
 }
@@ -105,6 +114,7 @@ struct cx_rec_type *cx_rec_type_init(struct cx_rec_type *type,
   type->imp.clone = clone_imp;
   type->imp.write = write_imp;
   type->imp.dump = dump_imp;
+  type->imp.print = print_imp;
   type->imp.deinit = deinit_imp;
 
   type->imp.type_deinit = type_deinit_imp;

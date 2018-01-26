@@ -29,6 +29,7 @@ struct cx_type *cx_type_init(struct cx_type *type, struct cx *cx, const char *id
   type->iter = NULL;
   type->write = NULL;
   type->dump = NULL;
+  type->print = NULL;
   type->deinit = NULL;
 
   type->type_deinit = NULL;

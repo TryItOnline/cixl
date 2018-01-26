@@ -9,8 +9,9 @@
 #include "cixl/parse.h"
 #include "cixl/scope.h"
 #include "cixl/tok.h"
-#include "cixl/types/func.h"
+#include "cixl/types/file.h"
 #include "cixl/types/fimp.h"
+#include "cixl/types/func.h"
 #include "cixl/types/rec.h"
 
 static bool rec_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
@@ -247,6 +248,16 @@ static bool ok_imp(struct cx_scope *scope) {
   return true;
 }
 
+static bool print_imp(struct cx_scope *scope) {
+  struct cx_box
+    r = *cx_test(cx_pop(scope, false)),
+    out = *cx_test(cx_pop(scope, false));
+  cx_dump(&r, out.as_file->ptr);
+  cx_box_deinit(&r);
+  cx_box_deinit(&out);
+  return true;
+}
+
 void cx_init_rec(struct cx *cx) {
   cx_add_macro(cx, "rec:", rec_parse); 
 
@@ -258,6 +269,11 @@ void cx_init_rec(struct cx *cx) {
   cx_add_cfunc(cx, "?",
 	       cx_args(cx_arg("rec", cx->rec_type)), cx_rets(cx_ret(cx->bool_type)),
 	       ok_imp);
+
+  cx_add_cfunc(cx, "print",
+	       cx_args(cx_arg("out", cx->wfile_type), cx_arg("rec", cx->rec_type)),
+	       cx_rets(),
+	       print_imp);
 
   cx_add_cfunc(cx, "get",
 	       cx_args(cx_arg("rec", cx->rec_type), cx_arg("fld", cx->sym_type)),

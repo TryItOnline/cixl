@@ -104,6 +104,10 @@ static void dump_imp(struct cx_box *v, FILE *out) {
   fprintf(out, "'%s'@%d", v->as_str->data, v->as_str->nrefs);
 }
 
+static void print_imp(struct cx_box *v, FILE *out) {
+  fputs(v->as_str->data, out);
+}
+
 static void deinit_imp(struct cx_box *v) {
   cx_str_deref(v->as_str);
 }
@@ -118,8 +122,8 @@ struct cx_type *cx_init_str_type(struct cx *cx) {
   t->iter = iter_imp;
   t->write = write_imp;
   t->dump = dump_imp;
+  t->print = print_imp;
   t->deinit = deinit_imp;
-
 
   return t;
 }

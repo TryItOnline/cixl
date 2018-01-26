@@ -214,6 +214,13 @@ static void dump_imp(struct cx_box *b, FILE *out) {
   fprintf(out, "@%d", v->nrefs);
 }
 
+static void print_imp(struct cx_box *b, FILE *out) {
+  struct cx_vect *vect = b->as_ptr;
+  cx_do_vec(&vect->imp, struct cx_box, v) {
+    cx_print(v, out);
+  }
+}
+
 static void deinit_imp(struct cx_box *v) {
   cx_vect_deref(v->as_ptr);
 }
@@ -229,6 +236,7 @@ struct cx_type *cx_init_vect_type(struct cx *cx) {
   t->iter = iter_imp;
   t->write = write_imp;
   t->dump = dump_imp;
+  t->print = print_imp;
   t->deinit = deinit_imp;
   
   cx_add_cfunc(cx, "len",

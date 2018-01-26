@@ -47,7 +47,7 @@ static void fprint_ns(int64_t ns, FILE *out) {
   int32_t s = ns / CX_SEC;
   ns %= CX_SEC;
   
-  fprintf(out, "%" PRId32 ":%" PRId32 ":%" PRId32 ".%" PRId64, h, m, s, ns);
+  fprintf(out, "%02" PRId32 ":%02" PRId32 ":%02" PRId32 ".%" PRId64, h, m, s, ns);
 }
 
 static void write_imp(struct cx_box *v, FILE *out) {
@@ -81,7 +81,7 @@ static void dump_imp(struct cx_box *v, FILE *out) {
   
   if (t->months) {
     int32_t y = t->months / 12, m = t->months % 12, d = t->ns / CX_DAY; 
-    fprintf(out, "%" PRId32 "/%" PRId32 "/%" PRId32, y, m, d);
+    fprintf(out, "%04" PRId32 "-%02" PRId32 "-%02" PRId32, y, m, d);
     int64_t ns = t->ns % CX_DAY;
 
     if (ns) {
@@ -95,6 +95,23 @@ static void dump_imp(struct cx_box *v, FILE *out) {
   fputc(')', out);
 }
 
+static void print_imp(struct cx_box *v, FILE *out) {
+  struct cx_time *t = &v->as_time;
+  
+  if (t->months) {
+    int32_t y = t->months / 12, m = t->months % 12, d = t->ns / CX_DAY; 
+    fprintf(out, "%04" PRId32 "-%02" PRId32 "-%02" PRId32, y, m+1, d+1);
+    int64_t ns = t->ns % CX_DAY;
+
+    if (ns) {
+      fputc(' ', out);
+      fprint_ns(ns, out);
+    }
+  } else {
+    fprint_ns(t->ns, out);
+  }
+}
+
 struct cx_type *cx_init_time_type(struct cx *cx) {
   struct cx_type *t = cx_add_type(cx, "Time", cx->cmp_type);
   t->equid = equid_imp;
@@ -102,6 +119,7 @@ struct cx_type *cx_init_time_type(struct cx *cx) {
   t->ok = ok_imp;
   t->write = write_imp;
   t->dump = dump_imp;
+  t->print = print_imp;
   return t;
 }
 

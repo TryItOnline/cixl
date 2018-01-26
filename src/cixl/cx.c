@@ -104,46 +104,6 @@ static bool include_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
     return ok;
   }
 }
-
-static bool read_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  struct cx_box in = *cx_test(cx_pop(scope, false));
-
-  struct cx_vec toks;
-  cx_vec_init(&toks, sizeof(struct cx_tok));
-  bool ok = false;
-  
-  if (!cx_parse_tok(cx, in.as_file->ptr, &toks, true)) {
-    if (!cx->errors.count) { cx_box_init(cx_push(scope), cx->nil_type); }
-    goto exit1;
-  }
-  
-  struct cx_bin bin;
-  cx_bin_init(&bin);
-  
-  if (!cx_compile(cx, cx_vec_start(&toks), cx_vec_end(&toks), &bin)) { goto exit2; }
-  if (!cx_eval(cx, &bin, NULL)) { goto exit2; }
-  ok = true;
- exit2:
-  cx_bin_deinit(&bin);
- exit1:
-  cx_box_deinit(&in);
-  cx_do_vec(&toks, struct cx_tok, t) { cx_tok_deinit(t); }
-  cx_vec_deinit(&toks);
-  return ok;
-}
-
-static bool write_imp(struct cx_scope *scope) {
-  struct cx_box
-    v = *cx_test(cx_pop(scope, false)),
-    out = *cx_test(cx_pop(scope, false));
-  
-  bool ok = cx_write(&v, out.as_file->ptr);
-  fputc('\n', out.as_file->ptr);
-  cx_box_deinit(&v);
-  cx_box_deinit(&out);
-  return ok;
-}
   
 static bool compile_imp(struct cx_scope *scope) {
   struct cx *cx = scope->cx;
@@ -321,15 +281,6 @@ struct cx *cx_init(struct cx *cx) {
   cx->rwfile_type->iter = cx_file_iter;
   
   cx_add_macro(cx, "include:", include_parse);
-
-  cx_add_cfunc(cx, "read",
-	       cx_args(cx_arg("f", cx->rfile_type)), cx_rets(cx_ret(cx->opt_type)),
-	       read_imp);
-
-  cx_add_cfunc(cx, "write",
-	       cx_args(cx_arg("f", cx->wfile_type), cx_arg("v", cx->opt_type)),
-	       cx_rets(),
-	       write_imp);
 
   cx_add_cfunc(cx, "compile",
 	       cx_args(cx_arg("out", cx->bin_type), cx_arg("in", cx->str_type)),

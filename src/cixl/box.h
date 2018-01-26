@@ -56,6 +56,7 @@ struct cx_box *cx_clone(struct cx_box *dst, struct cx_box *src);
 struct cx_iter *cx_iter(struct cx_box *box);
 bool cx_write(struct cx_box *box, FILE *out);
 void cx_dump(struct cx_box *box, FILE *out);
+void cx_print(struct cx_box *box, FILE *out);
 
 enum cx_cmp cx_cmp_box(const void *x, const void *y);
 

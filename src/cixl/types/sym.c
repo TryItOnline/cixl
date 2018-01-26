@@ -57,13 +57,18 @@ static void dump_imp(struct cx_box *v, FILE *out) {
   fprintf(out, "`%s", v->as_sym.id);
 }
 
+static void print_imp(struct cx_box *v, FILE *out) {
+  fputs(v->as_sym.id, out);
+}
+
 struct cx_type *cx_init_sym_type(struct cx *cx) {
   struct cx_type *t = cx_add_type(cx, "Sym", cx->any_type);
   t->new = new_imp;
   t->equid = equid_imp;
   t->write = dump_imp;
   t->dump = dump_imp;
-
+  t->print = print_imp;
+  
   cx_add_cfunc(cx, "sym",
 	       cx_args(cx_arg("id", cx->str_type)),
 	       cx_rets(cx_ret(t)),
