@@ -153,17 +153,6 @@ The same functionality may be accessed symbolically.
 [42]
 ```
 
-Bindings in the current scope may be explicitly removed.
-
-```
-   | let: x 42;
-...delete-var `x
-...let: x 'foo';
-...$x
-...
-['foo'@2]
-```
-
 ### Equality
 Two flavors of equality are provided.
 

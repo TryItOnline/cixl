@@ -134,12 +134,6 @@ static bool get_imp(struct cx_scope *scope) {
   return true;
 }
 
-static bool delete_imp(struct cx_scope *scope) {
-  struct cx_sym s = cx_test(cx_pop(scope, false))->as_sym;
-  cx_delete_var(scope, s, false);
-  return true;
-}
-
 void cx_init_var(struct cx *cx) {
   cx_add_macro(cx, "let:", let_parse);
 
@@ -151,8 +145,4 @@ void cx_init_var(struct cx *cx) {
   cx_add_cfunc(cx, "get-var",
 	       cx_args(cx_arg("id", cx->sym_type)), cx_rets(cx_ret(cx->opt_type)),
 	       get_imp);
-  
-  cx_add_cfunc(cx, "delete-var",
-	       cx_args(cx_arg("id", cx->sym_type)), cx_rets(),
-	       delete_imp);
 }

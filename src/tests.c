@@ -188,12 +188,6 @@ static void let_tests() {
            " put-var `foo 42 "
            " get-var `foo = 42 check)");
 
-  run(&cx,
-      "(let: foo 42; "
-      " delete-var `foo "
-      " let: foo 'foo'; "
-      " $foo = 'foo' check)");
-  
   cx_deinit(&cx);
 }
 
