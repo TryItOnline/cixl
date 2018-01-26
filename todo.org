@@ -2,8 +2,6 @@
 ** add type.print/cx_print
 *** default to dump
 ** change say to accept opt, use cx_print
-* add str(rFile) fn
-** slurp from current pos to end
 * add seek(file, pos) fn
 * add tell(file)
 * add len(file) fn

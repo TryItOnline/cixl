@@ -395,9 +395,16 @@ baz
 
 ```
    let: f fopen 'test.txt' `r;
-...| $f lines vect
+...| $f str
 ...
-[['foo, bar'@1 'baz'@1]@1]
+['foo, bar
+baz
+'@1]
+
+let: f fopen 'test.txt' `r;
+...| $f words vect
+...
+[['foo'@1 'bar'@1 'baz'@1]@1]
 ```
 
 ### Comments
