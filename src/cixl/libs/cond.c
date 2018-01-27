@@ -107,14 +107,14 @@ static bool equid_imp(struct cx_scope *scope) {
 static struct cx_sym cmp_sym(struct cx *cx, enum cx_cmp cmp) {
   switch (cmp) {
   case CX_CMP_LT:
-    return cx_sym(cx, "lt");
+    return cx_sym(cx, "<");
   case CX_CMP_EQ:
-    return cx_sym(cx, "eq");
+    return cx_sym(cx, "=");
   default:
     break;
   }
 
-  return cx_sym(cx, "gt");
+  return cx_sym(cx, ">");
 }
 
 static bool cmp_imp(struct cx_scope *scope) {
@@ -361,7 +361,7 @@ void cx_init_cond(struct cx *cx) {
 	       cx_rets(cx_ret(cx->bool_type)),
 	       equid_imp);
 
-  cx_add_cfunc(cx, "cmp",
+  cx_add_cfunc(cx, "<=>",
 	       cx_args(cx_arg("x", cx->cmp_type), cx_narg("y", 0)),
 	       cx_rets(cx_ret(cx->sym_type)),
 	       cmp_imp);

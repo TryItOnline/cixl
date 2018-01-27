@@ -772,10 +772,9 @@ Vectors may be sorted in place by calling ```sort```.
 ...
 [[1 2 3]@1]
 
-   | ['baz'.3, 'bar'.2, 'foo'.1]
-...%, $ sort { y ~ y ~ cmp }
+   | [1 2 3] %, $ sort {~ <=>}
 ...
-[[('foo'@1.1)@1 ('bar'@1.2)@1 ('baz'@1.3)@1]@1]
+[[3 2 1]@1]
 ```
 
 ### Pairs
@@ -1116,7 +1115,7 @@ static bool ok_imp(struct cx_box *v) {
   return s[0];
 }
 
-static void copy_imp(struct cx_box *dst, struct cx_box *src) {
+static void copy_imp(struct cx_box *dst, const struct cx_box *src) {
   dst->as_ptr = strdup(src->as_ptr);
 }
 

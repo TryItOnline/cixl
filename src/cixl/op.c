@@ -182,7 +182,11 @@ cx_op_type(CX_OGETCONST, {
 static bool getvar_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
   struct cx_scope *s = cx_scope(cx, 0);
   
-  if (!op->as_getvar.id.id[0]) {
+  if (op->as_getvar.id.id[0]) {
+    struct cx_box *v = cx_get_var(s, op->as_getvar.id, false);
+    if (!v) { return false; }
+    cx_copy(cx_push(s), v);
+  } else {
     if (!s->cuts.count) {
       cx_error(cx, tok->row, tok->col, "Nothing to uncut");
       return false;
@@ -198,10 +202,6 @@ static bool getvar_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
     }
     
     if (!c->offs) { cx_vec_pop(&s->cuts); }
-  } else {
-    struct cx_box *v = cx_get_var(s, op->as_getvar.id, false);
-    if (!v) { return false; }
-    cx_copy(cx_push(s), v);
   }
   
   return true;

@@ -76,7 +76,7 @@ static bool sort_imp(struct cx_scope *scope) {
     vec = *cx_test(cx_pop(scope, false));
 
   struct cx_vect *v = vec.as_ptr;
-  struct cx_sym lt = cx_sym(cx, "lt"), gt = cx_sym(cx, "gt");
+  struct cx_sym lt = cx_sym(cx, "<"), gt = cx_sym(cx, ">");
   bool ok = false;
   
   int do_cmp(const void *x, const void *y) {

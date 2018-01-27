@@ -1,14 +1,11 @@
-* rename cmp to <=>
-** change return syms to `< `> or `=
-** update histogram
-* add rezip fn to reverse pair
-** add cx_func rezip for seq
-*** map rezip over contents
-** update histogram
-* ---
+* implement pair clone
 * more qdb
 ** add find-key(Vect) fn
 ** add is-dirty fn
+** add delete
+* add read-iter to io lib
+** convert read to iter
+*** keep bin ref
 * add error traps
 ** add cx.error_type 
 ** switch errors to reference counting
@@ -18,10 +15,6 @@
 *** scan and call for each error in eval
 ** track scopes in cx_eval
 *** end all new without pushing result on exit
-* add qdb.delete
-* meta lib with read-iter
-** move read and convert to iter
-*** keep bin ref in iter
 * add MemFile based on cx_buf
 ** derive RWFile
 * add Vect alloc
@@ -45,5 +38,5 @@
 ** add struct cx_fmt
 ** add cx_token.as_fmt
 * add seek(file, pos) fn
-* add tell(file)
+* add tell(file) fn
 * add len(file) fn

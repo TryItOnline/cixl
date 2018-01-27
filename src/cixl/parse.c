@@ -78,7 +78,23 @@ char *parse_fimp(struct cx *cx,
       cx_dump(&tok->as_box, id.stream);
     } else if (tok->type == CX_TID()) {
       char *s = tok->as_ptr;
+      size_t len = strlen(s);
+      
+      if (s[len-1] == '>') {
+	s[len-1] = 0;
+	struct cx_type *type = cx_get_type(cx, s, false);
 
+	if (!type) {
+	  cx_buf_close(&id);
+	  free(id.data);
+	  return NULL;
+	}
+	
+	fputs(type->id, id.stream);
+	cx_tok_deinit(tok);
+	goto exit;
+      }
+      
       if (s[0] == 'T' && isdigit(s[1])) {
 	fputs(s+1, id.stream);
       } else {
@@ -96,7 +112,8 @@ char *parse_fimp(struct cx *cx,
 
     sep = ' ';
   }
-
+  
+ exit:
   cx_buf_close(&id);
   return id.data;
 }
@@ -208,7 +225,7 @@ static bool parse_id(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
 
     if (col != cx->col &&
 	(col-cx->col > 2 || pc != '&') &&
-	(sep || c == '<' || c == '>')) {
+	(sep || c == '<')) {
       ok = ungetc(c, in) != EOF;
       goto exit;
     }
