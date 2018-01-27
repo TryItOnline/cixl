@@ -14,7 +14,7 @@
 #include "cixl/types/iter.h"
 #include "cixl/types/str.h"
 
-typedef bool (*cx_split_t)(unsigned char c, unsigned char pc);
+typedef bool (*cx_split_t)(unsigned char c);
 
 struct cx_split_iter {
   struct cx_iter iter;
@@ -27,7 +27,6 @@ bool split_next(struct cx_iter *iter, struct cx_box *out, struct cx_scope *scope
   struct cx_split_iter *it = cx_baseof(iter, struct cx_split_iter, iter);
   struct cx *cx = scope->cx;
   struct cx_box c;
-  unsigned char pc = 0;
 
   while (true) {
     if (!cx_iter_next(it->in, &c, scope)) {
@@ -42,14 +41,12 @@ bool split_next(struct cx_iter *iter, struct cx_box *out, struct cx_scope *scope
       return false;
     }
     
-    if (it->split(c.as_char, pc)) {
+    if (it->split(c.as_char)) {
       fflush(it->out.stream);
       if (it->out.data[0]) { break; }
     } else {
       fputc(c.as_char, it->out.stream);
     }
-
-    pc = c.as_char;
   }
 
   cx_buf_close(&it->out);
@@ -81,7 +78,7 @@ struct cx_iter *cx_split_iter_new(struct cx_iter *in, cx_split_t split) {
   return &it->iter;
 }
 
-bool split_lines(unsigned char c, unsigned char pc) { return c == '\r' || c == '\n'; }
+bool split_lines(unsigned char c) { return c == '\r' || c == '\n'; }
 
 static bool lines_imp(struct cx_scope *scope) {
   struct cx_box in = *cx_test(cx_pop(scope, false));
@@ -91,7 +88,7 @@ static bool lines_imp(struct cx_scope *scope) {
   return true;
 }
 
-bool split_words(unsigned char c, unsigned char pc) {
+bool split_words(unsigned char c) {
   return !isalpha(c);
 }
 

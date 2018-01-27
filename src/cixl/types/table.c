@@ -76,13 +76,12 @@ void cx_table_deref(struct cx_table *table) {
   }
 }
 
-struct cx_box *cx_table_get(struct cx_table *table, struct cx_box *key) {
-  struct cx_table_entry *e = cx_set_get(&table->entries, key);
-  return e ? &e->val : NULL;
+struct cx_table_entry *cx_table_get(struct cx_table *table, struct cx_box *key) {
+  return cx_set_get(&table->entries, key);
 }
 
 void cx_table_put(struct cx_table *table, struct cx_box *key, struct cx_box *val) {
-  struct cx_table_entry *e = cx_set_get(&table->entries, key);
+  struct cx_table_entry *e = cx_table_get(table, key);
 
   if (e) {
     cx_box_deinit(&e->val);

@@ -16,13 +16,7 @@
 | let: ws new Table;
 
 #in words for {
-  let: w lower;
-
-  $ws get $w %, $ if-else {
-    ++, $ws put $w $
-  } {
-    _ $ws put $w 1
-  }
+  let: w lower; $ws put-else $w &++ 1
 }
 
 /*

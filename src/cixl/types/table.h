@@ -22,7 +22,7 @@ struct cx_table *cx_table_new(struct cx *cx);
 struct cx_table *cx_table_ref(struct cx_table *table);
 void cx_table_deref(struct cx_table *table);
 
-struct cx_box *cx_table_get(struct cx_table *table, struct cx_box *key);
+struct cx_table_entry *cx_table_get(struct cx_table *table, struct cx_box *key);
 void cx_table_put(struct cx_table *table, struct cx_box *key, struct cx_box *val);
 bool cx_table_delete(struct cx_table *table, struct cx_box *key);
 
