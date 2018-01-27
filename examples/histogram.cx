@@ -1,3 +1,5 @@
+#!cixl
+
 /*
   Produces a word histogram from stdin.
   
