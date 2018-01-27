@@ -1,3 +1,8 @@
+* remove chdir in load
+** replace with cx.load_path
+** set during load
+** use as default path for load/include
+*** is specified path is empty
 * implement pair clone
 * more qdb
 ** add find-key(Vect) fn
