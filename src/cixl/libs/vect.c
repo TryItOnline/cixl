@@ -47,7 +47,7 @@ static bool pop_imp(struct cx_scope *scope) {
 static bool seq_imp(struct cx_scope *scope) {
   struct cx_box in = *cx_test(cx_pop(scope, false));
   struct cx_iter *it = cx_iter(&in);
-  struct cx_vect *out = cx_vect_new();
+  struct cx_vect *out = cx_vect_new(scope->cx);
   struct cx_box v;
   
   while (cx_iter_next(it, &v, scope)) {

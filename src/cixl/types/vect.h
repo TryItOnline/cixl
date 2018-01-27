@@ -7,6 +7,7 @@ struct cx;
 struct cx_type;
 
 struct cx_vect {
+  struct cx *cx;
   struct cx_vec imp;
   unsigned int nrefs;
 };

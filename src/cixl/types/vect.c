@@ -46,8 +46,9 @@ struct cx_vect_iter *cx_vect_iter_new(struct cx_vect *vect) {
   return it;
 }
 
-struct cx_vect *cx_vect_new() {
-  struct cx_vect *v = malloc(sizeof(struct cx_vect));
+struct cx_vect *cx_vect_new(struct cx *cx) {
+  struct cx_vect *v = cx_malloc(&cx->vect_alloc);
+  v->cx = cx;
   cx_vec_init(&v->imp, sizeof(struct cx_box));
   v->nrefs = 1;
   return v;
@@ -65,7 +66,7 @@ void cx_vect_deref(struct cx_vect *vect) {
   if (!vect->nrefs) {
     cx_do_vec(&vect->imp, struct cx_box, b) { cx_box_deinit(b); }
     cx_vec_deinit(&vect->imp);
-    free(vect);
+    cx_free(&vect->cx->vect_alloc, vect);
   }
 }
 
@@ -124,7 +125,8 @@ static void copy_imp(struct cx_box *dst, const struct cx_box *src) {
 }
 
 static void clone_imp(struct cx_box *dst, struct cx_box *src) {
-  struct cx_vect *src_vect = src->as_ptr, *dst_vect = cx_vect_new();
+  struct cx *cx = src->type->cx;
+  struct cx_vect *src_vect = src->as_ptr, *dst_vect = cx_vect_new(cx);
   dst->as_ptr = dst_vect;
 
   cx_do_vec(&src_vect->imp, struct cx_box, v) {

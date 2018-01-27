@@ -227,6 +227,7 @@ struct cx *cx_init(struct cx *cx) {
   cx_malloc_init(&cx->ref_alloc, CX_REF_SLAB_SIZE, sizeof(struct cx_ref));
   cx_malloc_init(&cx->scope_alloc, CX_SCOPE_SLAB_SIZE, sizeof(struct cx_scope));
   cx_malloc_init(&cx->table_alloc, CX_TABLE_SLAB_SIZE, sizeof(struct cx_table));
+  cx_malloc_init(&cx->vect_alloc, CX_VECT_SLAB_SIZE, sizeof(struct cx_vect));
   
   cx_vec_init(&cx->scopes, sizeof(struct cx_scope *));
   cx_vec_init(&cx->scans, sizeof(struct cx_scan));
@@ -350,6 +351,7 @@ struct cx *cx_deinit(struct cx *cx) {
   cx_malloc_deinit(&cx->ref_alloc);
   cx_malloc_deinit(&cx->scope_alloc);
   cx_malloc_deinit(&cx->table_alloc);
+  cx_malloc_deinit(&cx->vect_alloc);
   return cx;
 }
 

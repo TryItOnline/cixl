@@ -1,3 +1,10 @@
+* add Vect alloc
+* implement custom lines for file
+** use getline
+** use in histogram
+* remove implicit vect scope
+** compile body straight to out and end with stash in parse_vect
+** change stash to respect cuts
 * extract count fn from histogram
 * remove chdir in load
 ** replace with cx.load_path
@@ -23,7 +30,6 @@
 *** end all new without pushing result on exit
 * add MemFile based on cx_buf
 ** derive RWFile
-* add Vect alloc
 * add iter zip/unzip
 * add and/or tests
 * add filter tests

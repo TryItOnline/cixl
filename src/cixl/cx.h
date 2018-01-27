@@ -16,6 +16,7 @@
 #define CX_REF_SLAB_SIZE    20
 #define CX_SCOPE_SLAB_SIZE  20
 #define CX_TABLE_SLAB_SIZE  20
+#define CX_VECT_SLAB_SIZE   20
 
 #define cx_add_type(cx, id, ...)		\
   _cx_add_type(cx, id, ##__VA_ARGS__, NULL)	\
@@ -40,7 +41,7 @@ struct cx {
   struct cx_set syms, macros, funcs, consts;
   
   struct cx_malloc lambda_alloc, pair_alloc, rec_alloc, ref_alloc, scope_alloc,
-    table_alloc;
+    table_alloc, vect_alloc;
   
   struct cx_vec scopes;
   struct cx_scope *main, **scope;
