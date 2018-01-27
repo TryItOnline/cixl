@@ -35,5 +35,5 @@ $ws vect %, $ sort {y ~ y <=>}
 */
 
 for {
-  let: w; say [x $w \\s, y $w \\n]
+  let: w; say [x $w \\s, y $w]
 }
