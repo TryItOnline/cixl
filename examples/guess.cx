@@ -11,11 +11,11 @@
   ask 'Your guess: '
   
   %, $ if-else {
-    let: g int;
+    let: c int <=> $n;
 
     switch:
-      (($g < $n) say 'Too low!'  $g)
-      (($g > $n) say 'Too high!' $g)
+      (($c = `<) say 'Too low!'  #t)
+      (($c = `>) say 'Too high!' #t)
       (#t        say 'Correct!'  #nil);
   } {
     _ #nil
