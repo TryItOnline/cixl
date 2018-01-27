@@ -7,6 +7,10 @@
   https://github.com/basic-gongfu/cixl#getting-started
 */
 
+/*
+  Split stdin into lowercase words and count them using a table.
+*/
+
 let: ws new Table;
 
 #in words for {
@@ -19,10 +23,17 @@ let: ws new Table;
   }
 }
 
-$ws vect %,
-$ sort {y ~ y <=>}
+/*
+  Convert table to vector of pairs and sort by descending value, pairs are already
+  sorted alphabetically since the table is sorted by key.
+*/
+
+$ws vect %, $ sort {y ~ y <=>}
+
+/*
+  Print results to stdout.
+*/
 
 for {
-  let: w;
-  #out print [x $w \\s, y $w \\n]
+  let: w; say [x $w \\s, y $w \\n]
 }
