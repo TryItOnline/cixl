@@ -7,7 +7,6 @@
   https://github.com/basic-gongfu/cixl#getting-started
 */
 
-let: f1 `r fopen;
-let: f2 `r fopen;
+let: (f1 f2) ,2 times {`r fopen ~};
 
-| say (str $f1 -, str $f2)
+say (str $f1 -, str $f2)
