@@ -1,4 +1,4 @@
-#!cixl
+#!/usr/local/bin/cixl
 
 /*
   Produces a word histogram from stdin.

@@ -323,7 +323,7 @@ When launched with parameters, Cixl will interpret the first parameter as a file
 
 test.cx
 ```
-#!cixl
+#!/usr/local/bin/cixl
 upper say
 ```
 
