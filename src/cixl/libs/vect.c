@@ -157,5 +157,5 @@ void cx_init_vect(struct cx *cx) {
   cx_add_cfunc(cx, "sort",
 	       cx_args(cx_arg("vec", cx->vect_type), cx_arg("cmp", cx->opt_type)),
 	       cx_rets(),
-	       sort_imp);  
+	       sort_imp);
 }

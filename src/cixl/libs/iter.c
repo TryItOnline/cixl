@@ -25,7 +25,7 @@ bool map_next(struct cx_iter *iter, struct cx_box *out, struct cx_scope *scope) 
   }
 
   *cx_push(scope) = iv;
-  cx_call(&it->act, scope);
+  if (!cx_call(&it->act, scope)) { return false; }
   struct cx_box *ov = cx_pop(scope, true);
 
   if (!ov) {

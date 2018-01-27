@@ -19,15 +19,14 @@ let: ws new Table;
   }
 }
 
-$ws vect %, $ sort {
-  let: (a b);
-  (y $b ., x $b) (y $a ., x $a) cmp
-}
+$ws vect
+% rezip
+%, $ sort {~ cmp}
 
 for {
   let: w;
-  #out print, x $w
+  #out print, y $w
   #out print \\s
-  #out print, str<Int> y $w
+  #out print, str<Int> x $w
   #out print \\n
 }

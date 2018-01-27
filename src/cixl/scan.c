@@ -31,7 +31,6 @@ void cx_scan(struct cx *cx,
   
   if (s->cuts.count) {
     struct cx_cut *c = cx_vec_peek(&s->cuts, 0);
-
     if (!c->scan) { c->scan = scan; }
   }
 }

@@ -5,6 +5,7 @@
 #include "cixl/libs/func.h"
 #include "cixl/libs/iter.h"
 #include "cixl/libs/math.h"
+#include "cixl/libs/pair.h"
 #include "cixl/libs/rec.h"
 #include "cixl/libs/ref.h"
 #include "cixl/libs/stack.h"
@@ -377,6 +378,8 @@ static void table_tests() {
   struct cx cx;
   cx_init(&cx);
   cx_init_cond(&cx);
+  cx_init_iter(&cx);
+  cx_init_pair(&cx);
   cx_init_table(&cx);
   cx_init_var(&cx);
   cx_init_vect(&cx);

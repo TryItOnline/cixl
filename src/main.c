@@ -5,6 +5,7 @@
 #include "cixl/libs/io.h"
 #include "cixl/libs/iter.h"
 #include "cixl/libs/math.h"
+#include "cixl/libs/pair.h"
 #include "cixl/libs/rec.h"
 #include "cixl/libs/ref.h"
 #include "cixl/libs/stack.h"
@@ -26,12 +27,13 @@ int main(int argc, char *argv[]) {
   cx_init_func(&cx);
   cx_init_io(&cx);
   cx_init_iter(&cx);
+  cx_init_stack(&cx);
+  cx_init_pair(&cx);
   cx_init_math(&cx);
   cx_init_type(&cx);
   cx_init_vect(&cx);
   cx_init_rec(&cx);
   cx_init_ref(&cx);
-  cx_init_stack(&cx);
   cx_init_str(&cx);
   cx_init_table(&cx);
   cx_init_time(&cx);
