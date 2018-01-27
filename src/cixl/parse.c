@@ -474,22 +474,17 @@ static bool parse_group(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup
 }
 
 static bool parse_vect(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
-  struct cx_vec *body = &cx_tok_init(cx_vec_push(out),
-				     CX_TGROUP(),
-				     cx->row, cx->col)->as_vec;
-  cx_vec_init(body, sizeof(struct cx_tok));
-
   while (true) {
-    if (!cx_parse_tok(cx, in, body, lookup)) { return false; }
-    struct cx_tok *tok = cx_vec_peek(body, 0);
+    if (!cx_parse_tok(cx, in, out, lookup)) { return false; }
+    struct cx_tok *tok = cx_vec_peek(out, 0);
     
     if (tok->type == CX_TUNVECT()) {
-      cx_tok_deinit(cx_vec_pop(body));
+      cx_tok_deinit(cx_vec_pop(out));
       break;
     }
   }
 
-  cx_tok_init(cx_vec_push(body), CX_TSTASH(), cx->row, cx->col);
+  cx_tok_init(cx_vec_push(out), CX_TSTASH(), cx->row, cx->col);
   return true;
 }
 

@@ -158,7 +158,7 @@ Two flavors of equality are provided.
 
 Value equality:
 ```
-   | [1 2 3] = [1 2 3]
+   | [1 2 3] = ([1 2 3])
 ...
 [#t]
 ```
@@ -377,7 +377,7 @@ Files may be opened for reading/writing by calling ```fopen```, the type of the 
 Any value may be printed to a ```RWFile``` using ```print```.
 
 ```
-   | #out print ['foo' 42 \\n]
+   | say ['foo' 42 \\n]
 ...
 foo42
 []

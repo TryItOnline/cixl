@@ -1,10 +1,6 @@
-* add Vect alloc
 * implement custom lines for file
 ** use getline
 ** use in histogram
-* remove implicit vect scope
-** compile body straight to out and end with stash in parse_vect
-** change stash to respect cuts
 * extract count fn from histogram
 * remove chdir in load
 ** replace with cx.load_path
