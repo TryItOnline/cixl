@@ -1,3 +1,6 @@
+* add put-else for table
+* extract count fn from histogram
+* use times to bind files in edist.cx
 * remove chdir in load
 ** replace with cx.load_path
 ** set during load
