@@ -10,4 +10,4 @@
 let: f1 `r fopen;
 let: f2 `r fopen;
 
-say (str $f1 -, str $f2)
+| say (str $f1 -, str $f2)

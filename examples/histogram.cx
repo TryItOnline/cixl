@@ -13,7 +13,7 @@
   Split stdin into lowercase words and count them using a table.
 */
 
-let: ws new Table;
+| let: ws new Table;
 
 #in words for {
   let: w lower;

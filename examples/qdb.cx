@@ -12,6 +12,8 @@
   composite and are implemented as vectors of values.
 */
 
+|
+
 rec: DBTable()
   file     RWFile
   key      Vect

@@ -7,6 +7,8 @@
   https://github.com/basic-gongfu/cixl#getting-started
 */
 
+|
+
 include: 'qdb.cx';
 
 let: resources  new-db-table 'resource.db' [`id];
