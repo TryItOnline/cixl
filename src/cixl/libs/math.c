@@ -53,6 +53,12 @@ static bool int_div_imp(struct cx_scope *scope) {
   return true;
 }
 
+static bool int_abs_imp(struct cx_scope *scope) {
+  struct cx_box *n = cx_test(cx_peek(scope, false));
+  if (n->as_int < 0) { n->as_int = -n->as_int; }
+  return true;
+}
+
 static bool rand_imp(struct cx_scope *scope) {
   struct cx_box max = *cx_test(cx_pop(scope, false));
   int64_t out = 0;
@@ -116,6 +122,11 @@ void cx_init_math(struct cx *cx) {
 	       cx_args(cx_arg("x", cx->int_type), cx_arg("y", cx->int_type)),
 	       cx_rets(cx_ret(cx->rat_type)),
 	       int_div_imp);
+
+  cx_add_cfunc(cx, "abs",
+	       cx_args(cx_arg("n", cx->int_type)),
+	       cx_rets(cx_ret(cx->int_type)),
+	       int_abs_imp);
 
   cx_add_cfunc(cx, "rand",
 	       cx_args(cx_arg("n", cx->int_type)), cx_rets(cx_ret(cx->int_type)),
