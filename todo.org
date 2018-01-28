@@ -1,3 +1,6 @@
+* remove type tags
+** traverse chain on derivation and add parents
+** change cx_is to only check parents
 * remove chdir in load
 ** replace with cx.load_path
 ** set during load
@@ -34,7 +37,6 @@
 * add vect put/get fns
 * add rat sub/div
 ** move fns to math lib
-
 * implement Cmp for Sym/Guid
 * use cx_str for CX_TID
 ** remove cx_tok.as_ptr
