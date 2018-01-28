@@ -11,8 +11,8 @@
 
 include: 'qdb.cx';
 
-let: resources  new-db-table 'resource.db' ([`id]);
-let: bookings   new-db-table 'booking.db' ([`id]);     
+let: resources  new-db-table 'resource.db', [`id];
+let: bookings   new-db-table 'booking.db', [`id];     
 
 let: next-booking-id 1 ref;
 
@@ -50,7 +50,7 @@ func: new-resource(id Sym q Int) (Resource)
   let: r new Resource;
   $r put `id       $id
   $r put `quantity $q
-  $r put `calendar ([new-capacity #min-time #max-time $q 0])
+  $r put `calendar, [new-capacity #min-time #max-time $q 0]
   upsert $resources $r
   $r;
 

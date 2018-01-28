@@ -22,16 +22,7 @@ void cx_scan(struct cx_scope *scope,
 	     struct cx_func *func,
 	     cx_scan_callback_t callback,
 	     void *data) {  
-  struct cx_scan *scan = cx_scan_init(cx_vec_push(&scope->cx->scans),
-				      scope,
-				      func,
-				      callback,
-				      data);
-
-  if (scope->cuts.count) {
-    struct cx_cut *c = cx_vec_peek(&scope->cuts, 0);
-    if (!c->scan) { c->scan = scan; }
-  }
+  cx_scan_init(cx_vec_push(&scope->cx->scans), scope, func, callback, data);
 }
 
 bool cx_scan_ok(struct cx_scan *scan) {
@@ -50,10 +41,8 @@ bool cx_scan_ok(struct cx_scan *scan) {
 bool cx_scan_call(struct cx_scan *scan) {
   struct cx_scope *s = scan->scope;
 
-  if (s->cuts.count) {
-    struct cx_cut *c = cx_vec_peek(&s->cuts, 0);
-    if (c->scan == scan) { cx_cut_deinit(cx_vec_pop(&s->cuts)); }
-  }
+  struct cx_cut *c = s->cuts.count ? cx_vec_peek(&s->cuts, 0) : NULL;
+  if (c && c->scan_level == scan->level) { cx_cut_deinit(cx_vec_pop(&s->cuts)); }
   
   return scan->callback(scan, scan->data);
 }

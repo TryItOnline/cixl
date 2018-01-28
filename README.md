@@ -158,7 +158,7 @@ Two flavors of equality are provided.
 
 Value equality:
 ```
-   | [1 2 3] = ([1 2 3])
+   | [1 2 3] =, [1 2 3]
 ...
 [#t]
 ```
@@ -526,7 +526,7 @@ The ```switch:``` macro may be used to untangle chains of if/-else calls. The fi
 
 examples/guess.cx:
 ```
-(|let: n rand 100++; {
+|(let: n rand 100++; {
   ask 'Your guess: '
   
   %, $ if-else {

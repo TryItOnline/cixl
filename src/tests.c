@@ -369,8 +369,8 @@ static void vect_tests() {
   run(&cx, "[1 2 3] pop 3 = check");
   run(&cx, "[1 2 3] % 4 push<Vect A> len 4 = check");
   run(&cx, "[1 2] for {2 *} + 6 = check");
-  run(&cx, "[1 2] < ([3 4]) check");
-  run(&cx, "[1 2 3] > ([1 2]) check");
+  run(&cx, "[1 2] <, [3 4] check");
+  run(&cx, "[1 2 3] >, [1 2] check");
   run(&cx, "[3 2 1] %, $ sort #nil for {} + - = -4 check");
   run(&cx, "[1 2 3] %, $ sort {~ <=>} for {} + - = 0 check");
   

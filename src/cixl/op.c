@@ -69,6 +69,9 @@ static bool end_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
   
   cx_end(cx);
   cx->scan_level--;
+  struct cx_scope *s = cx_scope(cx, 0);
+  struct cx_cut *c = s->cuts.count ? cx_vec_peek(&s->cuts, 0) : NULL;
+  if (c && c->scan_level == cx->scan_level) { cx_cut_deinit(cx_vec_pop(&s->cuts)); }
   return true;
 }
 
@@ -78,6 +81,12 @@ cx_op_type(CX_OEND, {
 
 static bool fence_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
   cx->scan_level += op->as_fence.delta_level;
+
+  if (op->as_fence.delta_level < 0) {
+    struct cx_scope *s = cx_scope(cx, 0);
+    struct cx_cut *c = s->cuts.count ? cx_vec_peek(&s->cuts, 0) : NULL;
+    if (c && c->scan_level == cx->scan_level) { cx_cut_deinit(cx_vec_pop(&s->cuts)); }
+  }
   return true;
 }
 

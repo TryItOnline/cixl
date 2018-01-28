@@ -34,7 +34,7 @@ bool cx_delete_var(struct cx_scope *scope, struct cx_sym id, bool silent);
 struct cx_cut {
   struct cx_scope *scope;
   size_t offs;
-  struct cx_scan *scan;
+  int scan_level;
 };
 
 struct cx_cut *cx_cut_init(struct cx_cut *cut, struct cx_scope *scope);
