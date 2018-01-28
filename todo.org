@@ -1,13 +1,11 @@
 * add scan contexts
-** CX_OFENCE, CX_OUNFENCE
-*** inc/dec cx.scan_level
+** CX_OFENCE with delta_level
+*** inc cx.scan_level by delta
 **** copy to cx_scan on init
 **** check in cx_scan_ok instead of scope
 **** inc on cut and dec on uncut
-**** inc on start of vect 
-***** emit fence into stream
-**** inc on start of lambda 
-***** emit fence into stream
+**** inc on start of vect/lambda 
+***** emit fences into stream
 ** remove say parens in edist.cx
 * remove chdir in load
 ** replace with cx.load_path
