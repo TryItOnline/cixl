@@ -1,3 +1,14 @@
+* add scan contexts
+** CX_OINCSCAN, CX_DECSCAN
+*** inc/dec cx.scan_depth
+**** copy to cx_scan on init
+**** check in cx_scan_ok instead of scope
+**** inc on cut and dec on uncut
+**** inc on start of vect 
+***** emit DEC/INCSCAN into stream
+**** inc on start of lambda 
+***** emit DEC/INCSCAN into stream
+** remove say parens in edist.cx
 * remove chdir in load
 ** replace with cx.load_path
 ** set during load
