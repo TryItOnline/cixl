@@ -3,10 +3,14 @@
   
   Execute ```./cixl ../examples/histogram.cx file1 file2``` to get the edit distance
   between file1 and file2.
-  
+
   https://github.com/basic-gongfu/cixl#getting-started
 */
 
 let: (s1 s2) ,2 times {`r fopen str ~};
+let: (l1 l2) len $s1, len $s2;
+let: d $s1 - $s2;
+let: p1 $d / $l1 * 100 int;
+let: p2 $d / $l2 * 100 int;
 
-say ($s1 - $s2)
+say ([$d \\n $l1 \\s $l2 \\n $p1 \% \\s $p2 \%])

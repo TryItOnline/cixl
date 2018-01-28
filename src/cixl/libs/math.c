@@ -81,6 +81,15 @@ static bool rat_mul_imp(struct cx_scope *scope) {
   return true;
 }
 
+static bool rat_scale_imp(struct cx_scope *scope) {
+  struct cx_box
+    y = *cx_test(cx_pop(scope, false)),
+    *x = cx_test(cx_peek(scope, false));
+
+  x->as_rat.num *= y.as_int;
+  return true;
+}
+
 static bool rat_int_imp(struct cx_scope *scope) {
   struct cx_box v = *cx_test(cx_pop(scope, false));
   cx_box_init(cx_push(scope), scope->cx->int_type)->as_int = cx_rat_int(&v.as_rat);
@@ -121,6 +130,11 @@ void cx_init_math(struct cx *cx) {
 	       cx_args(cx_arg("x", cx->rat_type), cx_arg("y", cx->rat_type)),
 	       cx_rets(cx_ret(cx->rat_type)),
 	       rat_mul_imp);
+
+  cx_add_cfunc(cx, "*",
+	       cx_args(cx_arg("x", cx->rat_type), cx_arg("y", cx->int_type)),
+	       cx_rets(cx_ret(cx->rat_type)),
+	       rat_scale_imp);
 
   cx_add_cfunc(cx, "int",
 	       cx_args(cx_arg("r", cx->rat_type)),
