@@ -44,6 +44,10 @@ struct cx_end_op {
   bool push_result;
 };
 
+struct cx_fence_op {
+  int delta_level;
+};
+
 struct cx_fimp_op {
   struct cx_fimp *imp;
   size_t start_op, num_ops;
@@ -97,6 +101,7 @@ struct cx_op {
     struct cx_begin_op as_begin;
     struct cx_else_op as_else;
     struct cx_end_op as_end;
+    struct cx_fence_op as_fence;
     struct cx_fimp_op as_fimp;
     struct cx_fimpdef_op as_fimpdef;
     struct cx_funcall_op as_funcall;
@@ -116,6 +121,7 @@ struct cx_op_type *CX_OBEGIN();
 struct cx_op_type *CX_OCUT();
 struct cx_op_type *CX_OEND();
 struct cx_op_type *CX_OELSE();
+struct cx_op_type *CX_OFENCE();
 struct cx_op_type *CX_OFIMP();
 struct cx_op_type *CX_OFIMPDEF();
 struct cx_op_type *CX_OFUNCALL();

@@ -27,7 +27,7 @@ static bool line_next(struct cx_iter *iter,
 		      struct cx_scope *scope) {
   struct line_iter *it = cx_baseof(iter, struct line_iter, iter);
 
-  if (getline(&it->line, &it->len, it->in->ptr) == -1) {
+  if (!cx_get_line(&it->line, &it->len, it->in->ptr)) {
     iter->done = true;
     return false;
   }
@@ -75,7 +75,7 @@ static bool ask_imp(struct cx_scope *scope) {
   char *line = NULL;
   size_t len = 0;
   
-  if (getline(&line, &len, stdin) == -1) { return false; }
+  if (!cx_get_line(&line, &len, stdin)) { return false; }
   cx_box_init(cx_push(scope), scope->cx->str_type)->as_str = cx_str_new(line);
   free(line);
   return true;

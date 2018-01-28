@@ -2,6 +2,7 @@
 #define CX_UTIL_H
 
 #include <stdarg.h>
+#include <stdbool.h>
 #include <stddef.h>
 
 #define _cx_cid(x, y)				\
@@ -39,5 +40,6 @@ char *cx_vfmt(const char *spec, va_list args);
 char *cx_fmt(const char *spec, ...);
 char *cx_get_dir(const char *in, char *out, size_t len);
 size_t cx_str_dist(const char *x, const char *y);
+bool cx_get_line(char **out, size_t *len, FILE *in);
 
 #endif

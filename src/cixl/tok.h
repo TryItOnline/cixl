@@ -36,6 +36,7 @@ struct cx_tok {
 
   union {
     struct cx_box as_box;
+    int64_t as_int;
     struct cx_vec as_vec;
     void *as_ptr;
   };
@@ -51,6 +52,7 @@ void cx_tok_copy(struct cx_tok *dst, struct cx_tok *src);
 
 struct cx_tok_type *CX_TCUT();
 struct cx_tok_type *CX_TEND();
+struct cx_tok_type *CX_TFENCE();
 struct cx_tok_type *CX_TFIMP();
 struct cx_tok_type *CX_TFUNC();
 struct cx_tok_type *CX_TGROUP();

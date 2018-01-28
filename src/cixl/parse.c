@@ -474,6 +474,8 @@ static bool parse_group(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup
 }
 
 static bool parse_vect(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
+  cx_tok_init(cx_vec_push(out), CX_TFENCE(), cx->row, cx->col)->as_int = 1;
+  
   while (true) {
     if (!cx_parse_tok(cx, in, out, lookup)) { return false; }
     struct cx_tok *tok = cx_vec_peek(out, 0);
@@ -485,6 +487,7 @@ static bool parse_vect(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup)
   }
 
   cx_tok_init(cx_vec_push(out), CX_TSTASH(), cx->row, cx->col);
+  cx_tok_init(cx_vec_push(out), CX_TFENCE(), cx->row, cx->col)->as_int = -1;
   return true;
 }
 
@@ -495,6 +498,7 @@ static bool parse_lambda(struct cx *cx, FILE *in, struct cx_vec *out, bool looku
 				     CX_TLAMBDA(),
 				     row, col)->as_vec;
   cx_vec_init(body, sizeof(struct cx_tok));
+  cx_tok_init(cx_vec_push(body), CX_TFENCE(), cx->row, cx->col)->as_int = 1;
 
   while (true) {
     if (!cx_parse_tok(cx, in, body, lookup)) { return false; }
@@ -506,6 +510,7 @@ static bool parse_lambda(struct cx *cx, FILE *in, struct cx_vec *out, bool looku
     }
   }
 
+  cx_tok_init(cx_vec_push(body), CX_TFENCE(), cx->row, cx->col)->as_int = -1;
   return true;
 }
 

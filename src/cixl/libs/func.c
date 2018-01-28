@@ -212,7 +212,7 @@ static bool upcall_imp(struct cx_scope *scope) {
     return false;
   }
   
-  cx_scan(cx, imp->func, on_upcall_scan, imp);
+  cx_scan(scope, imp->func, on_upcall_scan, imp);
   return true;
 }
 

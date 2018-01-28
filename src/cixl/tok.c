@@ -49,6 +49,20 @@ cx_tok_type(CX_TCUT, {
 
 cx_tok_type(CX_TEND);
 
+static ssize_t fence_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) {
+  struct cx_tok *tok = cx_vec_get(&bin->toks, tok_idx);
+
+  cx_op_init(cx_vec_push(&bin->ops),
+	     CX_OFENCE(),
+	     tok_idx)->as_fence.delta_level = tok->as_int;
+  
+  return tok_idx+1;
+}
+
+cx_tok_type(CX_TFENCE, {
+    type.compile = fence_compile;
+  });
+
 static bool inline_fimp1(struct cx_fimp *imp,
 			 struct cx_bin *bin,
 			 size_t tok_idx,

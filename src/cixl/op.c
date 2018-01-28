@@ -30,6 +30,7 @@ static bool begin_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
     : op->as_begin.parent;
   
   cx_begin(cx, parent);
+  cx->scan_level++;
   return true;
 }
 
@@ -39,12 +40,6 @@ cx_op_type(CX_OBEGIN, {
 
 static bool cut_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
   struct cx_scope *s = cx_scope(cx, 0);
-
-  if (!s->stack.count) {
-    cx_error(cx, cx->row, cx->col, "Nothing to cut");
-    return false;
-  }
-
   cx_cut_init(cx_vec_push(&s->cuts), s);
   return true;
 }
@@ -73,11 +68,21 @@ static bool end_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
   }
   
   cx_end(cx);
+  cx->scan_level--;
   return true;
 }
 
 cx_op_type(CX_OEND, {
     type.eval = end_eval;
+  });
+
+static bool fence_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
+  cx->scan_level += op->as_fence.delta_level;
+  return true;
+}
+
+cx_op_type(CX_OFENCE, {
+    type.eval = fence_eval;
   });
 
 static bool on_fimp_scan(struct cx_scan *scan, void *data) {
@@ -101,7 +106,7 @@ static bool fimp_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
   
   if (op->as_fimp.inline1) {
     cx->op += op->as_fimp.num_ops;
-    cx_scan(cx, imp->func, on_fimp_scan, op);
+    cx_scan(cx_scope(cx, 0), imp->func, on_fimp_scan, op);
   } else {
     cx->op += op->as_fimp.num_ops;
   }
@@ -160,7 +165,7 @@ static bool on_funcall_scan(struct cx_scan *scan, void *data) {
 
 static bool funcall_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
   struct cx_func *func = op->as_funcall.func;
-  cx_scan(cx, func, on_funcall_scan, op);
+  cx_scan(cx_scope(cx, 0), func, on_funcall_scan, op);
   return true;
 }
 
@@ -193,6 +198,12 @@ static bool getvar_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
     }
 
     struct cx_cut *c = cx_vec_peek(&s->cuts, 0);
+
+    if (!c->offs) {
+      cx_error(cx, tok->row, tok->col, "Nothing to uncut");
+      return false;
+    }
+
     c->offs--;
 
     if (c->offs < s->stack.count-1) {
@@ -201,7 +212,7 @@ static bool getvar_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
       *(struct cx_box *)cx_vec_push(&s->stack) = v;
     }
     
-    if (!c->offs) { cx_vec_pop(&s->cuts); }
+    if (!c->offs) { cx_cut_deinit(cx_vec_pop(&s->cuts)); }
   }
   
   return true;
@@ -311,7 +322,7 @@ static bool return_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
 
   if (call->recalls) {
     call->recalls--;
-    cx_scan(cx, imp->func, on_recall_scan, op);
+    cx_scan(cx_scope(cx, 0), imp->func, on_recall_scan, op);
   } else {
     if (call->return_op) {
       cx->op = call->return_op;
@@ -364,6 +375,7 @@ static bool return_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
     cx_vec_clear(&ss->stack);
     cx_call_deinit(cx_vec_pop(&cx->calls));
     cx_end(cx);
+    cx->scan_level--;
   }
   
   return true;
@@ -375,10 +387,24 @@ cx_op_type(CX_ORETURN, {
 
 static bool stash_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
   struct cx_scope *s = cx_scope(cx, 0);
-  struct cx_vect *v = cx_vect_new();
-  v->imp = s->stack;
-  cx_vec_init(&s->stack, sizeof(struct cx_box));
-  cx_box_init(cx_push(s), s->cx->vect_type)->as_ptr = v;
+  struct cx_vect *out = cx_vect_new();
+
+  struct cx_cut *c = s->cuts.count ? cx_vec_peek(&s->cuts, 0) : NULL;
+
+  if (c && c->offs) {
+    for (struct cx_box *v = cx_vec_get(&s->stack, c->offs);
+	 v != cx_vec_end(&s->stack);
+	 v++) {
+      *(struct cx_box *)cx_vec_push(&out->imp) = *v;
+    }
+
+    s->stack.count = c->offs;
+  } else {
+    out->imp = s->stack;
+    cx_vec_init(&s->stack, sizeof(struct cx_box));
+  }
+  
+  cx_box_init(cx_push(s), s->cx->vect_type)->as_ptr = out;
   return true;
 }
 

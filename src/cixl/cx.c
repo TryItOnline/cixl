@@ -200,6 +200,7 @@ struct cx *cx_init(struct cx *cx) {
   cx->next_sym_tag = cx->next_type_tag = 1;
   cx->bin = NULL;
   cx->op = NULL;
+  cx->scan_level = 0;
   cx->stop = false;
   cx->row = cx->col = -1;
   

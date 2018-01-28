@@ -49,6 +49,7 @@ struct cx {
   
   struct cx_bin *bin;
   struct cx_op *op;
+  int scan_level;
   bool stop;
   
   int row, col;

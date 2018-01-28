@@ -38,7 +38,7 @@ bool cx_eval(struct cx *cx, struct cx_bin *bin, struct cx_op *start) {
 
     while (cx->scans.count) {
       struct cx_scan *s = cx_vec_peek(&cx->scans, 0);
-      if (!cx_scan_ok(s, cx_scope(cx, 0))) { break; }
+      if (!cx_scan_ok(s)) { break; }
       cx_vec_pop(&cx->scans);
       if (!cx_scan_call(s)) { goto exit; }
     }

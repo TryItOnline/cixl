@@ -63,3 +63,16 @@ size_t cx_str_dist(const char *x, const char *y) {
   free(d);
   return res;
 }
+
+bool cx_get_line(char **out, size_t *len, FILE *in) {
+  if (getline(out, len, in) == -1) { return false; }
+
+  for (char *c = *out; c < *out+*len; c++) {
+    if (!*c) {
+      *(c-1) = 0;
+      break;
+    }
+  }
+
+  return true;
+}

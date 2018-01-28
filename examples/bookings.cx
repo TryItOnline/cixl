@@ -12,7 +12,7 @@
 include: 'qdb.cx';
 
 let: resources  new-db-table 'resource.db' ([`id]);
-let: bookings   new-db-table 'booking.db'  ([`id]);     
+let: bookings   new-db-table 'booking.db' ([`id]);     
 
 let: next-booking-id 1 ref;
 
