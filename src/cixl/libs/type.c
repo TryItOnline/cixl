@@ -47,12 +47,7 @@ static bool trait_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   }
 
   if (type) {
-    cx_do_set(&cx->types, struct cx_type *, i) {
-      struct cx_type *t = *i;
-      if (cx_set_delete(&t->parents, &type->id)) {
-	t->tags ^= type->tag;
-      }
-    }
+    cx_type_reinit(type);
   } else {
     type = cx_add_type(cx, id_tok.as_ptr);
     if (!type) { goto exit1; }

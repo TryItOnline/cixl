@@ -14,12 +14,15 @@ struct cx_set *cx_set_deinit(struct cx_set *set) {
   return set;
 }
 
-const void *cx_set_key(struct cx_set *set, const void *value) {
+const void *cx_set_key(const struct cx_set *set, const void *value) {
   const char *key = set->key ? set->key(value) : value;
   return key + set->key_offs;
 }
 
-size_t cx_set_find(struct cx_set *set, const void *key, size_t min, void **found) {
+size_t cx_set_find(const struct cx_set *set,
+		   const void *key,
+		   size_t min,
+		   void **found) {
   size_t max = set->members.count;
   
   while (min < max) {
@@ -43,7 +46,7 @@ size_t cx_set_find(struct cx_set *set, const void *key, size_t min, void **found
   return min;
 }
 
-void *cx_set_get(struct cx_set *set, const void *key) {
+void *cx_set_get(const struct cx_set *set, const void *key) {
   void *found = NULL;
   cx_set_find(set, key, 0, &found);
   return found;

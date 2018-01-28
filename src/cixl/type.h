@@ -13,8 +13,7 @@ struct cx_scope;
 struct cx_type {
   struct cx *cx;
   char *id;
-  uint64_t tag, tags;
-  struct cx_set parents;
+  struct cx_set parents, children;
   bool trait;
 
   void (*new)(struct cx_box *);
