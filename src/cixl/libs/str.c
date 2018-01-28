@@ -101,48 +101,49 @@ static bool words_imp(struct cx_scope *scope) {
 }
 
 static bool char_upper_imp(struct cx_scope *scope) {
-  struct cx_box v = *cx_test(cx_pop(scope, false));
-  cx_box_init(cx_push(scope), scope->cx->char_type)->as_char = toupper(v.as_char);
+  struct cx_box *v = cx_test(cx_peek(scope, false));
+  v->as_char = toupper(v->as_char);
   return true;
 }
 
 static bool char_lower_imp(struct cx_scope *scope) {
-  struct cx_box v = *cx_test(cx_pop(scope, false));
-  cx_box_init(cx_push(scope), scope->cx->char_type)->as_char = tolower(v.as_char);
+  struct cx_box *v = cx_test(cx_peek(scope, false));
+  v->as_char = tolower(v->as_char);
   return true;
 }
 
 static bool char_int_imp(struct cx_scope *scope) {
-  struct cx_box v = *cx_test(cx_pop(scope, false));
-  cx_box_init(cx_push(scope), scope->cx->int_type)->as_int = v.as_char;
+  struct cx_box *v = cx_test(cx_peek(scope, false));
+  cx_box_init(v, scope->cx->int_type)->as_int = v->as_char;
   return true;
 }
 
 static bool int_char_imp(struct cx_scope *scope) {
   struct cx *cx = scope->cx;
-  struct cx_box v = *cx_test(cx_pop(scope, false));
+  struct cx_box *v = cx_test(cx_peek(scope, false));
   
-  if (v.as_int < 0 || v.as_int > 255) {
-    cx_error(cx, cx->row, cx->col, "Invalid char: %" PRId64, v.as_int);
+  if (v->as_int < 0 || v->as_int > 255) {
+    cx_error(cx, cx->row, cx->col, "Invalid char: %" PRId64, v->as_int);
     return false;
   }
   
-  cx_box_init(cx_push(scope), cx->char_type)->as_char = v.as_int;
+  cx_box_init(v, cx->char_type)->as_char = v->as_int;
   return true;
 }
 
 static bool int_str_imp(struct cx_scope *scope) {
-  struct cx_box v = *cx_test(cx_pop(scope, false));
-  char *s = cx_fmt("%" PRId64, v.as_int);
-  cx_box_init(cx_push(scope), scope->cx->str_type)->as_str = cx_str_new(s);
+  struct cx_box *v = cx_test(cx_peek(scope, false));
+  char *s = cx_fmt("%" PRId64, v->as_int);
+  cx_box_init(v, scope->cx->str_type)->as_str = cx_str_new(s);
   free(s);
   return true;
 }
 
 static bool len_imp(struct cx_scope *scope) {
-  struct cx_box v = *cx_test(cx_pop(scope, false));
-  cx_box_init(cx_push(scope), scope->cx->int_type)->as_int = v.as_str->len;
-  cx_box_deinit(&v);
+  struct cx_box *v = cx_test(cx_peek(scope, false));
+  size_t len = v->as_str->len;
+  cx_box_deinit(v);
+  cx_box_init(v, scope->cx->int_type)->as_int = len;
   return true;
 }
 
@@ -226,6 +227,20 @@ static bool str_sub_imp(struct cx_scope *scope) {
   return true;
 }
 
+static bool str_upper_imp(struct cx_scope *scope) {
+  struct cx_box s = *cx_test(cx_pop(scope, false));
+  for (char *c = s.as_str->data; *c; c++) { *c = toupper(*c); }
+  cx_box_deinit(&s);
+  return true;
+}
+
+static bool str_lower_imp(struct cx_scope *scope) {
+  struct cx_box s = *cx_test(cx_pop(scope, false));
+  for (char *c = s.as_str->data; *c; c++) { *c = tolower(*c); }
+  cx_box_deinit(&s);
+  return true;
+}
+
 void cx_init_str(struct cx *cx) {
   cx_add_cfunc(cx, "lines",
 	       cx_args(cx_arg("in", cx->seq_type)), cx_rets(cx_ret(cx->iter_type)),
@@ -280,13 +295,11 @@ void cx_init_str(struct cx *cx) {
 	       cx_rets(cx_ret(cx->int_type)),
 	       str_sub_imp);
 
-  cx_add_func(cx, "upper",
-	      cx_args(cx_arg("s", cx->str_type)),
-	      cx_rets(cx_ret(cx->str_type)),
-	      "$s map &upper str");
+  cx_add_cfunc(cx, "upper",
+	       cx_args(cx_arg("s", cx->str_type)), cx_rets(),
+	       str_upper_imp);
 
-  cx_add_func(cx, "lower",
-	      cx_args(cx_arg("s", cx->str_type)),
-	      cx_rets(cx_ret(cx->str_type)),
-	      "$s map &lower str");
+  cx_add_cfunc(cx, "lower",
+	       cx_args(cx_arg("s", cx->str_type)), cx_rets(),
+	       str_lower_imp);
 }

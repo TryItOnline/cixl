@@ -274,6 +274,7 @@ static void str_tests() {
   cx_init(&cx);
   cx_init_cond(&cx);
   cx_init_iter(&cx);
+  cx_init_stack(&cx);
   cx_init_str(&cx);
   
   run(&cx, "'foo' check");
@@ -281,7 +282,7 @@ static void str_tests() {
   run(&cx, "'foo' = 'foo' check");
   run(&cx, "'foo' = 'bar' ! check");
   run(&cx, "'foo' == 'foo' ! check");
-  run(&cx, "'foo' upper = 'FOO' check");
+  run(&cx, "'foo' % upper = 'FOO' check");
   run(&cx, "'foobar' 3 get \\b = check");
   run(&cx, "'42' int 42 = check");
   

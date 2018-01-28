@@ -25,6 +25,15 @@ static bool zip_imp(struct cx_scope *scope) {
   return true;
 }
 
+static bool unzip_imp(struct cx_scope *scope) {
+  struct cx_box *p = cx_test(cx_peek(scope, false)), x, y;
+  cx_copy(&x, &p->as_pair->x);
+  cx_copy(&y, &p->as_pair->y);
+  *cx_box_deinit(p) = x;
+  *cx_push(scope) = y;
+  return true;
+}
+
 static bool x_imp(struct cx_scope *scope) {
   struct cx_box p = *cx_test(cx_pop(scope, false));
   cx_copy(cx_push(scope), &p.as_pair->x);
@@ -53,7 +62,12 @@ void cx_init_pair(struct cx *cx) {
 	       cx_args(cx_arg("x", cx->opt_type), cx_arg("y", cx->opt_type)),
 	       cx_rets(cx_ret(cx->pair_type)),
 	       zip_imp);
-  
+
+  cx_add_cfunc(cx, "unzip", 
+	       cx_args(cx_arg("p", cx->pair_type)),
+	       cx_rets(cx_ret(cx->opt_type), cx_ret(cx->opt_type)),
+	       unzip_imp);
+
   cx_add_cfunc(cx, "x",
 	       cx_args(cx_arg("p", cx->pair_type)),
 	       cx_rets(cx_ret(cx->any_type)),

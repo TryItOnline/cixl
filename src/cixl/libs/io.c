@@ -12,7 +12,50 @@
 #include "cixl/types/file.h"
 #include "cixl/types/fimp.h"
 #include "cixl/types/func.h"
+#include "cixl/types/iter.h"
 #include "cixl/types/str.h"
+
+struct line_iter {
+  struct cx_iter iter;
+  struct cx_file *in;
+  char *line;
+  size_t len; 
+};
+
+static bool line_next(struct cx_iter *iter,
+		      struct cx_box *out,
+		      struct cx_scope *scope) {
+  struct line_iter *it = cx_baseof(iter, struct line_iter, iter);
+
+  if (getline(&it->line, &it->len, it->in->ptr) == -1) {
+    iter->done = true;
+    return false;
+  }
+  
+  cx_box_init(out, scope->cx->str_type)->as_str = cx_str_new(it->line);
+  return true;
+}
+
+static void *line_deinit(struct cx_iter *iter) {
+  struct line_iter *it = cx_baseof(iter, struct line_iter, iter);
+  cx_file_deref(it->in);
+  if (it->line) { free(it->line); }
+  return it;
+}
+
+static cx_iter_type(line_iter, {
+    type.next = line_next;
+    type.deinit = line_deinit;
+  });
+
+static struct cx_iter *line_iter_new(struct cx_file *in) {
+  struct line_iter *it = malloc(sizeof(struct line_iter));
+  cx_iter_init(&it->iter, line_iter());
+  it->in = cx_file_ref(in);
+  it->line = NULL;
+  it->len = 0;
+  return &it->iter;
+}
 
 static bool print_imp(struct cx_scope *scope) {
   struct cx_box
@@ -29,19 +72,12 @@ static bool ask_imp(struct cx_scope *scope) {
   struct cx_box p = *cx_test(cx_pop(scope, false));
   fputs(p.as_str->data, stdout);
   cx_box_deinit(&p);
+  char *line = NULL;
+  size_t len = 0;
   
-  struct cx_buf out;
-  cx_buf_open(&out);
-  
-  while (true) {
-    char c = getc(stdin);
-    if (c == '\n' || c == EOF) { break; }
-    fputc(c, out.stream);
-  }
-
-  cx_buf_close(&out);
-  cx_box_init(cx_push(scope), scope->cx->str_type)->as_str = cx_str_new(out.data);
-  free(out.data);
+  if (getline(&line, &len, stdin) == -1) { return false; }
+  cx_box_init(cx_push(scope), scope->cx->str_type)->as_str = cx_str_new(line);
+  free(line);
   return true;
 }
 
@@ -143,6 +179,16 @@ static bool write_imp(struct cx_scope *scope) {
   return ok;
 }
 
+static bool lines_imp(struct cx_scope *scope) {
+  struct cx_box
+    in = *cx_test(cx_pop(scope, false));
+
+  struct cx_iter *it = line_iter_new(in.as_file);
+  cx_box_init(cx_push(scope), scope->cx->iter_type)->as_iter = it;
+  cx_box_deinit(&in);
+  return true;
+}
+
 void cx_init_io(struct cx *cx) {
   cx_box_init(cx_set_const(cx, cx_sym(cx, "in"), false),
 	      cx->rfile_type)->as_file = cx_file_new(stdin);
@@ -180,6 +226,11 @@ void cx_init_io(struct cx *cx) {
 	       cx_args(cx_arg("f", cx->wfile_type), cx_arg("v", cx->opt_type)),
 	       cx_rets(),
 	       write_imp);
+
+  cx_add_cfunc(cx, "lines",
+	       cx_args(cx_arg("f", cx->rfile_type)),
+	       cx_rets(cx_ret(cx->iter_type)),
+	       lines_imp);
 
   cx_add_func(cx, "say",
 	      cx_args(cx_arg("v", cx->any_type)), cx_rets(),

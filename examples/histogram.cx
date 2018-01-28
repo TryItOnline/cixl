@@ -15,7 +15,7 @@
 
 | let: ws new Table;
 
-#in words for { let: w lower; $ws put-else $w &++ 1 }
+#in words for { % lower $ws ~ put-else &++ 1 }
 
 /*
   Convert table to vector of pairs and sort by descending value, pairs are already
@@ -28,4 +28,4 @@ $ws vect %, $ sort {y ~ y <=>}
   Print results to stdout.
 */
 
-for { let: w; say [x $w \\s, y $w] }
+for { [unzip \\s ~] say }

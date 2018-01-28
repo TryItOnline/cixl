@@ -141,7 +141,7 @@ static struct cx_iter *iter_imp(struct cx_box *v) {
 static void write_imp(struct cx_box *b, FILE *out) {
   struct cx_vect *v = b->as_ptr;
 
-  fputc('[', out);
+  fputs("([", out);
   char sep = 0;
   
   cx_do_vec(&v->imp, struct cx_box, b) {
@@ -150,7 +150,7 @@ static void write_imp(struct cx_box *b, FILE *out) {
     sep = ' ';
   }
 
-  fputc(']', out);
+  fputs("])", out);
 }
 
 static void dump_imp(struct cx_box *b, FILE *out) {
