@@ -56,6 +56,12 @@ static void copy_imp(struct cx_box *dst, const struct cx_box *src) {
   dst->as_pair = cx_pair_ref(src->as_pair);
 }
 
+static void clone_imp(struct cx_box *dst, struct cx_box *src) {
+  dst->as_pair = cx_pair_new(src->type->cx, NULL, NULL);
+  cx_clone(&dst->as_pair->x, &src->as_pair->x);
+  cx_clone(&dst->as_pair->y, &src->as_pair->y);
+}
+
 static void write_imp(struct cx_box *v, FILE *out) {
   fputc('(', out);
   cx_write(&v->as_pair->x, out);
@@ -82,6 +88,7 @@ struct cx_type *cx_init_pair_type(struct cx *cx) {
   t->equid = equid_imp;
   t->cmp = cmp_imp;
   t->ok = ok_imp;
+  t->clone = clone_imp;
   t->copy = copy_imp;
   t->write = write_imp;
   t->dump = dump_imp;

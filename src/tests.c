@@ -355,6 +355,23 @@ static void ref_tests() {
   cx_deinit(&cx);
 }
 
+static void pair_tests() {
+  struct cx cx;
+  cx_init(&cx);
+  cx_init_cond(&cx);
+  cx_init_iter(&cx);
+  cx_init_func(&cx);
+  cx_init_math(&cx);
+  cx_init_pair(&cx);
+  cx_init_stack(&cx);
+
+  run(&cx, "1.2 % rezip unzip - = 1 check");
+  run(&cx, "1.2 %% rezip unzip - = -1 check");
+  
+  cx_deinit(&cx);
+}
+
+
 static void vect_tests() {
   struct cx cx;
   cx_init(&cx);
@@ -484,6 +501,7 @@ int main() {
   time_tests();
   guid_tests();
   ref_tests();
+  pair_tests();
   vect_tests();
   table_tests();
   math_tests();

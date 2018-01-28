@@ -6,7 +6,6 @@
 * reuse stack values in imps
 ** go through all fns used in fib
 ** go through libs
-* implement pair clone
 * more qdb
 ** add find-key(Vect) fn
 ** add is-dirty fn
