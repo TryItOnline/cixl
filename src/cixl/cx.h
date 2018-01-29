@@ -8,7 +8,7 @@
 #include "cixl/type.h"
 #include "cixl/types/fimp.h"
 
-#define CX_VERSION "0.8.7"
+#define CX_VERSION "0.8.8"
 
 #define CX_LAMBDA_SLAB_SIZE 20
 #define CX_PAIR_SLAB_SIZE   20
