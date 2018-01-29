@@ -51,6 +51,23 @@ static const void *get_func_id(const void *value) {
   return &(*func)->id;
 }
 
+static char *get_full_path(struct cx *cx, const char *path) {
+  char *full_path = (path[0] == '/' || !cx->load_paths.count)
+    ? strdup(path)
+    : cx_fmt("%s%s", *(char **)cx_vec_peek(&cx->load_paths, 0), path);
+
+  char dir[strlen(path)+1];
+  cx_get_dir(path, dir, sizeof(dir));
+  
+  if (dir[0] == '/' || !cx->load_paths.count) {
+    *(char **)cx_vec_push(&cx->load_paths) = strdup(*dir ? dir : "./");
+  } else {
+    char *prev = *(char **)cx_vec_peek(&cx->load_paths, 0);
+    *(char **)cx_vec_push(&cx->load_paths) = cx_fmt("%s%s", prev, dir);
+  }
+
+  return full_path;
+}
 
 static ssize_t include_eval(struct cx_macro_eval *eval,
 			struct cx_bin *bin,
@@ -90,7 +107,11 @@ static bool include_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
       goto exit2;
     }
 
-    if (!cx_load_toks(cx, t->as_box.as_str->data, &eval->toks)) { goto exit2; }
+    char *full_path = get_full_path(cx, t->as_box.as_str->data);
+    bool ok = cx_load_toks(cx, full_path, &eval->toks);
+    free(full_path);
+    free(*(char **)cx_vec_pop(&cx->load_paths));
+    if (!ok) { goto exit2; }
   }
   
   cx_tok_init(cx_vec_push(out), CX_TMACRO(), row, col)->as_ptr = eval;
@@ -230,6 +251,7 @@ struct cx *cx_init(struct cx *cx) {
   cx_malloc_init(&cx->table_alloc, CX_TABLE_SLAB_SIZE, sizeof(struct cx_table));
   cx_malloc_init(&cx->vect_alloc, CX_VECT_SLAB_SIZE, sizeof(struct cx_vect));
   
+  cx_vec_init(&cx->load_paths, sizeof(char *));
   cx_vec_init(&cx->scopes, sizeof(struct cx_scope *));
   cx_vec_init(&cx->scans, sizeof(struct cx_scan));
   cx_vec_init(&cx->calls, sizeof(struct cx_call));
@@ -330,6 +352,9 @@ struct cx *cx_deinit(struct cx *cx) {
 
   cx_do_vec(&cx->scopes, struct cx_scope *, s) { cx_scope_deref(*s); }
   cx_vec_deinit(&cx->scopes);
+
+  cx_do_vec(&cx->load_paths, char *, p) { free(*p); }
+  cx_vec_deinit(&cx->load_paths);
 
   cx_do_set(&cx->consts, struct cx_var, v) { cx_var_deinit(v); }
   cx_set_deinit(&cx->consts);
@@ -575,7 +600,7 @@ bool cx_funcall(struct cx *cx, const char *id) {
 
 bool cx_load_toks(struct cx *cx, const char *path, struct cx_vec *out) {
   FILE *f = fopen(path , "r");
-
+  
   if (!f) {
     cx_error(cx, cx->row, cx->col, "Failed opening file '%s': %d", path, errno);
     return false;
@@ -597,7 +622,6 @@ bool cx_load_toks(struct cx *cx, const char *path, struct cx_vec *out) {
   }
   
   bool ok = cx_parse(cx, f, out);
-
   fclose(f);
   return ok;
 }
@@ -605,45 +629,28 @@ bool cx_load_toks(struct cx *cx, const char *path, struct cx_vec *out) {
 bool cx_load(struct cx *cx, const char *path) {
   bool ok = false;
 
-  char prev_wd[512], wd[512];
-  cx_get_dir(path, wd, sizeof(wd));
-
-  if (wd[0]) {    
-    if (!getcwd(prev_wd, sizeof(prev_wd))) {
-      cx_error(cx, cx->row, cx->col, "Failed getting dir: %d", errno);
-      goto exit1;    
-    }
-  
-    if (chdir(wd) == -1) {
-      cx_error(cx, cx->row, cx->col, "Failed changing dir: %d", errno);
-      goto exit1;
-    }
-  }
-
+  char *full_path = get_full_path(cx, path);
   struct cx_vec toks;
   cx_vec_init(&toks, sizeof(struct cx_tok));
 
-  if (!cx_load_toks(cx, path, &toks)) { goto exit2; }
+  if (!cx_load_toks(cx, full_path, &toks)) { goto exit1; }
 
   if (!toks.count) {
     ok = true;
-    goto exit2;
+    goto exit1;
   }
 
   struct cx_bin *bin = cx_bin_new();
-  if (!cx_compile(cx, cx_vec_start(&toks), cx_vec_end(&toks), bin)) { goto exit3; }
-  if (!cx_eval(cx, bin, NULL)) { goto exit3; }
+  if (!cx_compile(cx, cx_vec_start(&toks), cx_vec_end(&toks), bin)) { goto exit2; }
+  if (!cx_eval(cx, bin, NULL)) { goto exit2; }
   ok = true;
- exit3:
+ exit2:
   cx_bin_deref(bin);
- exit2: {
-    if (wd[0] && chdir(prev_wd) == -1) {
-      cx_error(cx, cx->row, cx->col, "Failed changing dir: %d", errno);
-    }
-    
+ exit1: {
+    free(*(char **)cx_vec_pop(&cx->load_paths));
     cx_do_vec(&toks, struct cx_tok, t) { cx_tok_deinit(t); }
-    cx_vec_deinit(&toks);    
+    cx_vec_deinit(&toks);
+    free(full_path);
+    return ok;
   }
- exit1:
-  return ok;
 }

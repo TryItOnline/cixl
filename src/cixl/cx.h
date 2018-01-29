@@ -42,7 +42,8 @@ struct cx {
   
   struct cx_malloc lambda_alloc, pair_alloc, rec_alloc, ref_alloc, scope_alloc,
     table_alloc, vect_alloc;
-  
+
+  struct cx_vec load_paths;
   struct cx_vec scopes;
   struct cx_scope *main, **scope;
   struct cx_vec scans, calls;
