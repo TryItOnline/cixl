@@ -1,11 +1,3 @@
-* remove chdir in load
-** replace with cx.load_path
-** set during load
-** use as default path for load/include
-*** is specified path is empty
-* reuse stack values in imps
-** go through all fns used in fib
-** go through libs
 * more qdb
 ** add find-key(Vect) fn
 ** add is-dirty fn
@@ -45,3 +37,6 @@
 * add seek(file, pos) fn
 * add tell(file) fn
 * add len(file) fn
+* reuse stack values in imps
+** go through all fns used in fib
+** go through libs
