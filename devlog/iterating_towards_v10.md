@@ -37,7 +37,7 @@ Sequences may be filtered, which also results in a new iterator.
 [6 7 8 9]
 ```
 
-```for``` plays the combined role of for loop and reduce mechanism by pushing each value in a sequence on the stack and calling the specified action
+```for``` plays the combined role of for, for-each and and reduce by pushing each value in a sequence on the stack and calling the specified action.
 
 ```
    | 0 [1 2 3] for &+
@@ -75,7 +75,7 @@ Library facilities need to be put fully into code; the basic structure is there,
 When it comes to error handling, it seems like we've gotten mostly stuck in the mindset of finding the one strategy to rule them all. But not all errors are created equal, some need to be handled immediately; some are more optional. What is often needed regardless is a way to pass information out of band. I don't consider encoding the error in the return value a viable approach. It's fine to return a value indicating that something went wrong, but the specifics are better dealt with using other means. The idea is to add two sets of operations for dealing with errors, ```fail``` for errors that unwind the stack until dealt with, and ```throw```/```catch``` for passing specifics out of band; both failures and thrown errors are trapped by catch.
 
 ### Emitting C
-At the moment; Cixl compiles to an internal instruction set, where each instruction is implemented as a C function. To gain some speed, how much remains to be seen; and to allow compiling static executables; facilities for emitting the resulting instructions inline as one big C function that may be manually called or compiled with a harness into an executable in one step. The beauty of this approach is that much of the code is shared, and that it's possible to compile multiple segments of Cixl code into C functions and manually stitch them together.
+At the moment; Cixl compiles to an internal instruction set, where each instruction is implemented as a C function. To gain some speed, how much remains to be seen; and to allow compiling static executables; facilities for emitting the resulting instructions inline as one big C function that may be manually called or compiled with a harness into an executable in one step will be added. The beauty of this approach is that much of the code is shared, and that it's possible to compile multiple segments of Cixl code into C functions and manually stitch them together from the outside; the opposite approach is already [supported](https://github.com/basic-gongfu/cixl#embedding--extending).
 
 That's all for now.
 
