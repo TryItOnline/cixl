@@ -856,7 +856,7 @@ Sequences support mapping actions over their values, ```map``` returns an iterat
 Sequences may be filtered, which also results in a new iterator.
 
 ```
-10 filter {, $ > 5}
+   | 10 filter {, $ > 5}
 ...
 [Iter(0x54dfd80)@1]
 
