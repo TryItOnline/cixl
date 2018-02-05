@@ -111,7 +111,7 @@ Library facilities need to be put fully into code; the basic structure is there,
 When it comes to error handling, it seems like we've gotten mostly stuck in the mindset of finding the one strategy to rule them all. But not all errors are created equal, some need to be handled immediately; some are more optional. What is often needed regardless is a way to pass information out of band. I don't consider encoding the error in the return value a viable approach, it's too cumbersome to use and doesn't allow mixing strategies. It's fine to return #nil, indicating that something went wrong; but the specifics are better dealt with using other means. The idea is to add two kinds of errors, ```fail``` for errors that unwind the stack until dealt with, and ```throw```/```catch``` for passing specifics out of band. Any value may be used as an error and both failures and thrown values are trapped by catch. In combination with ```always``` for making sure that an action is run regardless of errors, this covers all requirements without adding much complexity.
 
 ```
-   |(catch A {, say ['Caught: ' ~ @@n] #t} fail 42)
+   |(catch A {, say ['Caught: ' $ @@n] #t} fail 42)
 ...
 Caught: 42
 [#t]
