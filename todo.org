@@ -1,6 +1,7 @@
 * add read-iter to io lib
 ** convert read to iter
 *** keep bin ref
+** update example and add to post
 * remove definition order requirement
 ** add separate cx_link(cx_vec *toks)
 *** rename lookup param to link
@@ -35,3 +36,6 @@
 * reuse stack values in imps
 ** go through all fns used in fib
 ** go through libs
+* convert repl to use getline
+
+| 'foo@10bar@nbaz'

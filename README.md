@@ -273,7 +273,7 @@ Strings are null terminated, reference counted sequences of characters.
 Strings may alternatively be iterated by line,
 
 ```
-   | 'foo@nbar@@r@nbaz' lines vect
+   | 'foo@nbar@r@nbaz' lines vect
 ...
 [['foo'r1 'bar'r1 'baz'r1]r1]
 ```
@@ -292,6 +292,21 @@ Subtraction returns the [Levenshtein distance](https://en.wikipedia.org/wiki/Lev
    | 'fooxxxbar' - 'foobar'
 ...
 [3]
+```
+
+### Characters
+Characters are single bytes, a separate unicode type might be added eventually. Literals are preceded by ```@```, or ```@@``` for non-printable characters outside of strings. 
+
+```
+   | 'foo@10bar@nbaz'
+...
+['foo
+bar
+baz'r1]
+
+   get 3
+...
+[@@n]
 ```
 
 ### Console
