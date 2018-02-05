@@ -466,7 +466,7 @@ struct cx_fimp *cx_add_func(struct cx *cx,
 			    int nrets, struct cx_func_ret *rets,
 			    const char *body) {
   struct cx_fimp *imp = cx_add_fimp(cx, id, nargs, args, nrets, rets);
-  cx_parse_str(cx, body, &imp->toks);
+  cx_test(cx_parse_str(cx, body, &imp->toks));
   return imp;
 }
 
