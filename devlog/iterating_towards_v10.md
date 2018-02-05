@@ -69,7 +69,7 @@ One final example before we leave iterators behind and move on into the future, 
 
 [examples/guess.cx](https://github.com/basic-gongfu/cixl/blob/master/examples/guess.cx)
 ```
-|(let: n rand 100++; {
+((let: n rand 100++; {
   ask 'Your guess: '
   
   %, $ if-else {
@@ -82,11 +82,11 @@ One final example before we leave iterators behind and move on into the future, 
   } {
     _ #nil
   }
-}) for &_
+}) for &_)
 ```
 
 ```
-   | load 'examples/guess.cx'
+   |load 'examples/guess.cx'
 ...
 Your guess: 50
 Too high!

@@ -12,7 +12,7 @@
   composite and are implemented as vectors of values.
 */
 
-|
+(
 
 rec: DBTable()
   file     RWFile
@@ -117,3 +117,5 @@ func: rollback() ()
   }
 
   clear $db-trans;
+
+)

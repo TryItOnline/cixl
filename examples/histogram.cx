@@ -28,4 +28,4 @@ $ws vect %, $ sort {y ~ y <=>}
   Print results to stdout.
 */
 
-for { [unzip \\s ~] say }
+for { [unzip @ ~] say }

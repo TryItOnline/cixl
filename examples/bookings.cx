@@ -7,9 +7,9 @@
   https://github.com/basic-gongfu/cixl#getting-started
 */
 
-|
-
 include: 'qdb.cx';
+
+(
 
 let: resources  new-db-table 'resource.db', [`id];
 let: bookings   new-db-table 'booking.db', [`id];     
@@ -140,3 +140,5 @@ func: run-tests() ()
   let: r new-resource new Sym 10;
   new-booking $r today (today 1 days +) 5 _
   new-booking $r now   (now 1h +)       6 _;
+
+)

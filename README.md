@@ -542,7 +542,7 @@ The ```switch:``` macro may be used to untangle chains of if/-else calls. The fi
 
 [examples/guess.cx](https://github.com/basic-gongfu/cixl/blob/master/examples/guess.cx)
 ```
-|(let: n rand 100++; {
+((let: n rand 100++; {
   ask 'Your guess: '
   
   %, $ if-else {
@@ -555,11 +555,11 @@ The ```switch:``` macro may be used to untangle chains of if/-else calls. The fi
   } {
     _ #nil
   }
-}) for &_
+}) for &_)
 ```
 
 ```
-   | load 'examples/guess.cx'
+   |load 'examples/guess.cx'
 ...
 Your guess: 50
 Too high!

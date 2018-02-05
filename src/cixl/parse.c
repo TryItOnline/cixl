@@ -454,11 +454,14 @@ static bool parse_group(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup
 
   while (true) {
     if (!cx_parse_tok(cx, in, body, lookup)) { return false; }
-    struct cx_tok *tok = cx_vec_peek(body, 0);
+
+    if (body->count) {
+      struct cx_tok *tok = cx_vec_peek(body, 0);
     
-    if (tok->type == CX_TUNGROUP()) {
-      cx_tok_deinit(cx_vec_pop(body));
-      break;
+      if (tok->type == CX_TUNGROUP()) {
+	cx_tok_deinit(cx_vec_pop(body));
+	break;
+      }
     }
   }
 

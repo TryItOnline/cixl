@@ -15,4 +15,4 @@ let: dd $d - ($l1 - $l2 abs);
 let: p1 $dd / $l1 * 100 int;
 let: p2 $dd / $l2 * 100 int;
 
-say [$d \\n $l1 \\s $l2 \\n $p1 \% \\s $p2 \%]
+say [$d @@n $l1 @ $l2 @@n $p1 @% @ $p2 @%]
