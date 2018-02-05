@@ -540,7 +540,7 @@ Lambdas may be used to to prevent evaluating unused arguments when chaining.
 
 The ```switch:``` macro may be used to untangle chains of if/-else calls. The first clause which condition returns a value that's conditionally ```#t``` is executed.
 
-examples/guess.cx:
+[examples/guess.cx](https://github.com/basic-gongfu/cixl/blob/master/examples/guess.cx)
 ```
 |(let: n rand 100++; {
   ask 'Your guess: '

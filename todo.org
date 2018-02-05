@@ -26,10 +26,6 @@
 ** remove cx_tok.as_ptr
 ** replace with cx_tok.as_str, as_func, as_fimp etc.
 * replace box.as_ptr with as_func/fimp/etc
-* add str interpolation
-** separate token type CX_TFMT
-** add struct cx_fmt
-** add cx_token.as_fmt
 * add seek(file, pos) fn
 * add tell(file) fn
 * add len(file) fn
@@ -37,5 +33,3 @@
 ** go through all fns used in fib
 ** go through libs
 * convert repl to use getline
-
-| 'foo@10bar@nbaz'

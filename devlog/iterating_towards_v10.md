@@ -68,6 +68,39 @@ Calling ```iter``` on functions and lambdas creates an iterator that keeps retur
 [42 42]
 ```
 
+One final example before we leave iterators behind and move on into the future, a number guessing game implemented as a lambda iterator.
+
+[examples/guess.cx](https://github.com/basic-gongfu/cixl/blob/master/examples/guess.cx)
+```
+|(let: n rand 100++; {
+  ask 'Your guess: '
+  
+  %, $ if-else {
+    let: c int <=> $n;
+
+    switch:
+      (($c = `<) say 'Too low!'  #t)
+      (($c = `>) say 'Too high!' #t)
+      (#t        say 'Correct!'  #nil);
+  } {
+    _ #nil
+  }
+}) for &_
+```
+
+```
+   | load 'examples/guess.cx'
+...
+Your guess: 50
+Too high!
+Your guess: 25
+Too low!
+Your guess: 37
+Too low!
+Your guess: 43
+Correct!
+```
+
 ### Declaration Disorder
 One of the remaining language warts in Cixl is the declaration order requirement. To get rid of that, a separate linking stage will be added to link parsed symbols to definitions; this is currently performed as an optional part of parsing.
 
