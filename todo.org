@@ -1,10 +1,16 @@
 * add read-iter to io lib
 ** convert read to iter
 *** keep bin ref
+* change char symbol from \ and \\ to @ and @@
+** update parser, tests, readme
+* remove definition order requirement
+** add separate cx_link(cx_vec *toks)
+*** remove lookup param to cx_parse
+**** call cx_link if true
 * more qdb
 ** add find-key(Vect) fn
 ** add is-dirty fn
-** add delete
+** add delete fn
 * add MFile based on cx_buf
 ** derive RWFile
 * add seq zip/unzip fns

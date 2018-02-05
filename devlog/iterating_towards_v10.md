@@ -68,6 +68,9 @@ Calling ```iter``` on functions and lambdas creates an iterator that keeps retur
 [42 42]
 ```
 
+### Declaration Disorder
+One of the remaining language warts in Cixl is the declaration order requirement. To get rid of that, a separate linking stage will be added to link parsed symbols to definitions; this is currently performed as an optional part of parsing.
+
 ### Libraries
 Library facilities need to be put fully into code; the basic structure is there, but much remains to be done. The idea is that definitions are tagged with the categories they belong to, and only definitions for which all categories have been imported are even parsed. It's libraries in most other languages turned inside out, if that makes any sense. This solves the dependency problem; and in combination with most language features being definitions, and a finely grained division into categories; it provides a convenient and flexible method for customizing the language to fit the needs of each application/use. Imagine a function that takes a string parameter and returns an iterator; it would need to be tagged with both ```Str``` and ```Iter```; and would only be visible, even parsed; once both categories are imported. Any categories that the function uses internally would also be listed as tags. Same goes for any other kind of definition.
 
