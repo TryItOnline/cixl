@@ -243,13 +243,13 @@ struct cx *cx_init(struct cx *cx) {
   cx_set_init(&cx->consts, sizeof(struct cx_var), cx_cmp_sym);
   cx->consts.key_offs = offsetof(struct cx_var, id);
 
-  cx_malloc_init(&cx->lambda_alloc, CX_LAMBDA_SLAB_SIZE, sizeof(struct cx_lambda));
-  cx_malloc_init(&cx->pair_alloc, CX_PAIR_SLAB_SIZE, sizeof(struct cx_pair));
-  cx_malloc_init(&cx->rec_alloc, CX_REC_SLAB_SIZE, sizeof(struct cx_rec));
-  cx_malloc_init(&cx->ref_alloc, CX_REF_SLAB_SIZE, sizeof(struct cx_ref));
-  cx_malloc_init(&cx->scope_alloc, CX_SCOPE_SLAB_SIZE, sizeof(struct cx_scope));
-  cx_malloc_init(&cx->table_alloc, CX_TABLE_SLAB_SIZE, sizeof(struct cx_table));
-  cx_malloc_init(&cx->vect_alloc, CX_VECT_SLAB_SIZE, sizeof(struct cx_vect));
+  cx_malloc_init(&cx->lambda_alloc, CX_SLAB_SIZE, sizeof(struct cx_lambda));
+  cx_malloc_init(&cx->pair_alloc, CX_SLAB_SIZE, sizeof(struct cx_pair));
+  cx_malloc_init(&cx->rec_alloc, CX_SLAB_SIZE, sizeof(struct cx_rec));
+  cx_malloc_init(&cx->ref_alloc, CX_SLAB_SIZE, sizeof(struct cx_ref));
+  cx_malloc_init(&cx->scope_alloc, CX_SLAB_SIZE, sizeof(struct cx_scope));
+  cx_malloc_init(&cx->table_alloc, CX_SLAB_SIZE, sizeof(struct cx_table));
+  cx_malloc_init(&cx->vect_alloc, CX_SLAB_SIZE, sizeof(struct cx_vect));
   
   cx_vec_init(&cx->load_paths, sizeof(char *));
   cx_vec_init(&cx->scopes, sizeof(struct cx_scope *));

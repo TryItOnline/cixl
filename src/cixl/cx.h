@@ -8,15 +8,8 @@
 #include "cixl/type.h"
 #include "cixl/types/fimp.h"
 
-#define CX_VERSION "0.8.8"
-
-#define CX_LAMBDA_SLAB_SIZE 20
-#define CX_PAIR_SLAB_SIZE   20
-#define CX_REC_SLAB_SIZE    20
-#define CX_REF_SLAB_SIZE    20
-#define CX_SCOPE_SLAB_SIZE  20
-#define CX_TABLE_SLAB_SIZE  20
-#define CX_VECT_SLAB_SIZE   20
+#define CX_VERSION "0.8.9"
+#define CX_SLAB_SIZE 20
 
 #define cx_add_type(cx, id, ...)		\
   _cx_add_type(cx, id, ##__VA_ARGS__, NULL)	\
