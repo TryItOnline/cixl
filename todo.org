@@ -3,8 +3,8 @@
 *** keep bin ref
 * remove definition order requirement
 ** add separate cx_link(cx_vec *toks)
-*** remove lookup param to cx_parse
-**** call cx_link if true
+*** rename lookup param to link
+**** call cx_link after parse if true
 * more qdb
 ** add find-key(Vect) fn
 ** add is-dirty fn

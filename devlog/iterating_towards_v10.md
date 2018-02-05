@@ -82,4 +82,4 @@ At the moment; Cixl compiles to an internal instruction set, where each instruct
 
 That's all for now.
 
-Happy Cixl pushing!
+Happy [Cixl](https://github.com/basic-gongfu/cixl) pushing!
