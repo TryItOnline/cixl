@@ -1,9 +1,6 @@
 * add read-iter to io lib
 ** convert read to iter
 *** keep bin ref
-* change char symbol from \ and \\ to @ and @@
-** call parse_char from parse_str
-** update parser, tests, readme
 * remove definition order requirement
 ** add separate cx_link(cx_vec *toks)
 *** remove lookup param to cx_parse

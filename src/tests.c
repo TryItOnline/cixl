@@ -263,8 +263,8 @@ static void char_tests() {
   cx_init_math(&cx);
   cx_init_str(&cx);
   
-  run(&cx, "\\a upper \\A = check");
-  run(&cx, "\\0 int + 7 char \\7 = check");
+  run(&cx, "@a upper @A = check");
+  run(&cx, "@0 int + 7 char @7 = check");
   
   cx_deinit(&cx);
 }
@@ -283,9 +283,10 @@ static void str_tests() {
   run(&cx, "'foo' = 'bar' ! check");
   run(&cx, "'foo' == 'foo' ! check");
   run(&cx, "'foo' % upper = 'FOO' check");
-  run(&cx, "'foobar' 3 get \\b = check");
+  run(&cx, "'foobar' 3 get @b = check");
   run(&cx, "'42' int 42 = check");
-  
+  run(&cx, "'@n' get 0 @@n = check");
+
   cx_deinit(&cx);
 }
 

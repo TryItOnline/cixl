@@ -21,22 +21,22 @@ static void dump_imp(struct cx_box *v, FILE *out) {
   
   switch (c) {
   case '\n':
-    fputs("\\\\n", out);
+    fputs("@@n", out);
     break;
   case '\r':
-    fputs("\\\\r", out);
+    fputs("@@r", out);
     break;
   case ' ':
-    fputs("\\\\s", out);
+    fputs("@@s", out);
     break;
   case '\t':
-    fputs("\\\\t", out);
+    fputs("@@t", out);
     break;
   default:
     if (isgraph(c)) {
-      fprintf(out, "\\%c", v->as_char);
+      fprintf(out, "@%c", v->as_char);
     } else {
-      fprintf(out, "\\\\%d", v->as_char);
+      fprintf(out, "@@%d", v->as_char);
     }
   }
 }

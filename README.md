@@ -267,13 +267,13 @@ Strings are null terminated, reference counted sequences of characters.
 ```
    | 'foo' vect
 ...
-[[\f \o \o]r1]
+[[@f @o @o]r1]
 ```
 
 Strings may alternatively be iterated by line,
 
 ```
-   | 'foo\nbar\r\nbaz' lines vect
+   | 'foo@nbar@@r@nbaz' lines vect
 ...
 [['foo'r1 'bar'r1 'baz'r1]r1]
 ```
@@ -299,7 +299,7 @@ Subtraction returns the [Levenshtein distance](https://en.wikipedia.org/wiki/Lev
 
 ```
    | say 'Hello'  
-...ask 'What\'s your name? '
+...ask 'What@'s your name? '
 ...
 Hello
 What's your name? Sifoo
@@ -378,7 +378,7 @@ Files may be opened for reading/writing by calling ```fopen```, the type of the 
 Any value may be printed to a ```RWFile``` using ```print```.
 
 ```
-   | say ['foo' 42 \\n]
+   | say ['foo' 42 @@n]
 ...
 foo42
 []
@@ -705,7 +705,7 @@ Where conversions to other types make sense, a function named after the target t
 
    1 get
 ...
-[\2]
+[@2]
 
    int
 ...
@@ -713,7 +713,7 @@ Where conversions to other types make sense, a function named after the target t
 
    + 5 char
 ...
-[\7]
+[@7]
 ```
 
 ### Rationals
@@ -838,7 +838,7 @@ While ```for``` loop repeats an action once for each value in any sequence.
 ```
    | 'foo' for &upper
 ...
-[\F \O \O]
+[@F @O @O]
 ```
 
 Sequences support mapping actions over their values, ```map``` returns an iterator that may be chained further or consumed.

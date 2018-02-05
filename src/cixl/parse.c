@@ -322,7 +322,7 @@ static bool parse_char(struct cx *cx, FILE *in, struct cx_vec *out) {
     return false;
   }
 
-  if (c == '\\') {
+  if (c == '@') {
     c = fgetc(in);
     
     switch(c) {
@@ -365,7 +365,6 @@ static bool parse_str(struct cx *cx, FILE *in, struct cx_vec *out) {
   cx_buf_open(&value);
   int row = cx->row, col = cx->col;
   bool ok = false;
-  char pc = 0;
   
   while (true) {
     char c = fgetc(in);
@@ -374,32 +373,25 @@ static bool parse_str(struct cx *cx, FILE *in, struct cx_vec *out) {
       cx_error(cx, row, col, "Unterminated str literal");
       goto exit;
     }
-    
-    if (c == '\'' && pc != '\\') { break; }
 
-    if (pc == '\\' && c != '\\') {
-      switch (c) {
-      case 'n':
-	c = '\n';
-	break;
-      case 'r':
-	c = '\r';
-	break;
-      case 't':
-	c = '\t';
-	break;
-      }
+    if (c == '\'') {
+      cx->col++;
+      break;
     }
-
-    if (c != '\\' || pc == '\\') { fputc(c, value.stream); }
-    pc = c;
 
     if (c == '\n') {
       cx->row++;
       cx->col = 0;
+    } else if (c == '@') {
+      ungetc(c, in);
+      if (!parse_char(cx, in, out)) { goto exit; }
+      struct cx_tok *t = cx_vec_pop(out);
+      c = t->as_box.as_char;
     } else {
       cx->col++;
     }
+
+    fputc(c, value.stream);
   }
 
   ok = true;
@@ -553,7 +545,7 @@ bool cx_parse_tok(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
     case '}':
       cx_tok_init(cx_vec_push(out), CX_TUNLAMBDA(), row, col);
       return true;
-    case '\\':
+    case '@':
       return parse_char(cx, in, out);
     case '\'':
       return parse_str(cx, in, out);
