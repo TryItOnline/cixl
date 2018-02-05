@@ -1,22 +1,13 @@
+* add read-iter to io lib
+** convert read to iter
+*** keep bin ref
 * more qdb
 ** add find-key(Vect) fn
 ** add is-dirty fn
 ** add delete
-* add read-iter to io lib
-** convert read to iter
-*** keep bin ref
-* add error traps
-** add cx.error_type 
-** switch errors to reference counting
-** add cx.error_alloc
-** add scope.traps
-*** vec of call targets
-*** scan and call for each error in eval
-** track scopes in cx_eval
-*** end all new without pushing result on exit
-* add MemFile based on cx_buf
+* add MFile based on cx_buf
 ** derive RWFile
-* add iter zip/unzip
+* add seq zip/unzip fns
 * add and/or tests
 * add filter tests
 * add ^ (pow)
