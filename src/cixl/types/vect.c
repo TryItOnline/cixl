@@ -156,7 +156,7 @@ static void write_imp(struct cx_box *b, FILE *out) {
 static void dump_imp(struct cx_box *b, FILE *out) {
   struct cx_vect *v = b->as_ptr;
   cx_vect_dump(&v->imp, out);
-  fprintf(out, "@%d", v->nrefs);
+  fprintf(out, "r%d", v->nrefs);
 }
 
 static void print_imp(struct cx_box *b, FILE *out) {

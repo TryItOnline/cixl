@@ -32,7 +32,7 @@ static void copy_imp(struct cx_box *dst, const struct cx_box *src) {
 
 static void dump_imp(struct cx_box *value, FILE *out) {
   struct cx_bin *b = value->as_ptr;
-  fprintf(out, "Bin(%p)@%d", b, b->nrefs);
+  fprintf(out, "Bin(%p)r%d", b, b->nrefs);
 }
 
 static void deinit_imp(struct cx_box *value) {

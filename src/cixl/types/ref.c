@@ -53,7 +53,7 @@ static void dump_imp(struct cx_box *v, FILE *out) {
   fputs("Ref(", out);
   cx_dump(&v->as_ref->value, out);
   
-  fprintf(out, ")@%d", v->as_ref->nrefs);
+  fprintf(out, ")r%d", v->as_ref->nrefs);
 }
 
 static void deinit_imp(struct cx_box *v) {

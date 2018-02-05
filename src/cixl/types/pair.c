@@ -75,7 +75,7 @@ static void dump_imp(struct cx_box *v, FILE *out) {
   cx_dump(&v->as_pair->x, out);
   fputc('.', out);
   cx_dump(&v->as_pair->y, out);
-  fprintf(out, ")@%d", v->as_pair->nrefs);
+  fprintf(out, ")r%d", v->as_pair->nrefs);
 }
 
 static void deinit_imp(struct cx_box *v) {

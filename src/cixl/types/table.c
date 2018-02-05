@@ -182,7 +182,7 @@ static void dump_imp(struct cx_box *v, FILE *out) {
     sep = ' ';
   }
 
-  fprintf(out, ")@%d", t->nrefs);
+  fprintf(out, ")r%d", t->nrefs);
 }
 
 static void deinit_imp(struct cx_box *v) {

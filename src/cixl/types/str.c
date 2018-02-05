@@ -106,7 +106,7 @@ static void write_imp(struct cx_box *v, FILE *out) {
 }
 
 static void dump_imp(struct cx_box *v, FILE *out) {
-  fprintf(out, "'%s'@%d", v->as_str->data, v->as_str->nrefs);
+  fprintf(out, "'%s'r%d", v->as_str->data, v->as_str->nrefs);
 }
 
 static void print_imp(struct cx_box *v, FILE *out) {

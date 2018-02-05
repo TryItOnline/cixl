@@ -84,7 +84,7 @@ struct cx_iter *cx_file_iter(struct cx_box *v) {
 }
 
 static void dump_imp(struct cx_box *v, FILE *out) {
-  fprintf(out, "%s(%p)@%d", v->type->id, v->as_file, v->as_file->nrefs);
+  fprintf(out, "%s(%p)r%d", v->type->id, v->as_file, v->as_file->nrefs);
 }
 
 static void deinit_imp(struct cx_box *v) {

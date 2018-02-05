@@ -79,7 +79,7 @@ static void dump_imp(struct cx_box *v, FILE *out) {
     sep = ' ';
   }
 
-  fprintf(out, ")@%d", r->nrefs);
+  fprintf(out, ")r%d", r->nrefs);
 }
 
 static void print_imp(struct cx_box *v, FILE *out) {
