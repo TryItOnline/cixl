@@ -114,12 +114,13 @@ When it comes to error handling, it seems like we've gotten mostly stuck in the 
    |(
      catch:
        Int `int ~ .
-       Opt `other ~ .;
-     fail 'foo'
-     42
+       Opt `opt ~ .
+       Nil `nil ;
+     (fail 42 `foo)
+     `bar
    )
 ...
-[(`other 'foo') 42]
+[(`int 42)r1 (`opt 42)r1 `bar]
 ```
 
 ### Emitting C
