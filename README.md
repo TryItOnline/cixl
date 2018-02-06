@@ -799,7 +799,7 @@ Values may be paired by calling ```.```, the result provides reference semantics
 ```
    | 1.2
 ...
-[(1.2)r1]
+[(1 2)r1]
 
    % x ~ y
 ...
@@ -819,7 +819,7 @@ Tables may be used to map ```Cmp``` keys to values, entries are ordered by key.
 
    vect
 ...
-[[(1.'foo'r2)r1 (2.'bar'r2)r1]r1]
+[[(1 'foo'r2)r1 (2 'bar'r2)r1]r1]
 
 ...put 1 'baz'
 ...$t delete 2
