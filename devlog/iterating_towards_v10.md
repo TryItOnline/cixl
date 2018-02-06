@@ -115,7 +115,7 @@ When it comes to error handling, it seems like we've gotten mostly stuck in the 
      catch:
        Int `int ~ .
        Opt `opt ~ .
-       Nil `nil ;
+       Nil `nil;
      (fail 42 `foo)
      `bar
    )
