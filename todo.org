@@ -1,3 +1,5 @@
+* add TN to generated ids
+** add/parse_fimp
 * add read-iter to io lib
 ** convert read to iter
 *** keep bin ref
