@@ -1,8 +1,6 @@
-* add emit(bin) fn
-** add op->emit
-** add type->emit
-*** default error
-** generate nested C fn with pc switch
+* add op->emit
+* add type->emit
+** default error
 * --
 * change funcs to take cx instead of scope
 ** grep all cx_scope *

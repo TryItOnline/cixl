@@ -12,6 +12,30 @@
 #include "cixl/scope.h"
 #include "cixl/tok.h"
 
+bool emit_test(struct cx *cx) {
+  bool eval(struct cx *cx) {
+    while (!cx->stop) {
+      switch (cx->pc) {
+      default:
+	return true;
+      }
+
+      while (cx->scans.count) {
+	struct cx_scan *s = cx_vec_peek(&cx->scans, 0);
+	if (!cx_scan_ok(s)) { break; }
+	cx_vec_pop(&cx->scans);
+	if (!cx_scan_call(s)) { return false; }
+      }
+    }
+
+    return true;
+  }
+
+  struct cx_bin *bin = cx_bin_new();
+  bin->eval = eval;
+  return cx_eval(bin, 0, cx);
+}
+
 struct cx_op_type *cx_op_type_init(struct cx_op_type *type, const char *id) {
   type->id = id;
   type->eval = NULL;

@@ -11,48 +11,26 @@ struct cx_bin *cx_bin_new() {
   return cx_bin_init(malloc(sizeof(struct cx_bin)));
 }
 
-static bool eval(struct cx_bin *bin, size_t start_pc, struct cx *cx) {
-  if (!bin->ops.count) { return true; }
-  struct cx_bin *prev_bin = cx->bin;
-  size_t prev_pc = cx->pc;
-  size_t prev_nscans = cx->scans.count;
-  
-  cx->bin = bin;
-  cx->pc = start_pc;
-  bool ok = false;
-    
+static bool eval(struct cx *cx) {
+  if (!cx->bin->ops.count) { return true; }
+      
   while (cx->pc < cx->bin->ops.count && !cx->stop) {
-    struct cx_op *op = cx_vec_get(&bin->ops, cx->pc++);
+    struct cx_op *op = cx_vec_get(&cx->bin->ops, cx->pc++);
     struct cx_tok *tok = cx_vec_get(&cx->bin->toks, op->tok_idx);
     cx->row = tok->row;
     cx->col = tok->col;
     
-    if (!op->type->eval(op, tok, cx) || cx->errors.count) { goto exit; }
+    if (!op->type->eval(op, tok, cx) || cx->errors.count) { return false; }
 
     while (cx->scans.count) {
       struct cx_scan *s = cx_vec_peek(&cx->scans, 0);
       if (!cx_scan_ok(s)) { break; }
       cx_vec_pop(&cx->scans);
-      if (!cx_scan_call(s)) { goto exit; }
+      if (!cx_scan_call(s)) { return false; }
     }
   }
-
-  if (cx->scans.count > prev_nscans) {
-    struct cx_scan *s = cx_vec_peek(&cx->scans, 0);
-    
-    cx_error(cx, cx->row, cx->col,
-	     "Not enough args for func: '%s'", s->func->id);
-
-    cx->scans.count = prev_nscans;
-    goto exit;
-  }
   
-  ok = true;
- exit:  
-  cx->bin = prev_bin;
-  cx->pc = prev_pc;
-  cx->stop = false;
-  return ok;
+  return true;
 }
 
 struct cx_bin *cx_bin_init(struct cx_bin *bin) {
@@ -124,5 +102,24 @@ bool cx_compile(struct cx *cx,
 }
 
 bool cx_eval(struct cx_bin *bin, size_t start_pc, struct cx *cx) {
-  return cx_test(bin->eval)(bin, start_pc, cx);
+  struct cx_bin *prev_bin = cx->bin;
+  size_t prev_pc = cx->pc, prev_nscans = cx->scans.count;
+  cx->bin = bin;
+  cx->pc = start_pc;
+  bool ok = cx_test(bin->eval)(cx);
+
+  if (ok && cx->scans.count > prev_nscans) {
+    struct cx_scan *s = cx_vec_peek(&cx->scans, 0);
+    
+    cx_error(cx, cx->row, cx->col,
+	     "Not enough args for func: '%s'", s->func->id);
+
+    cx->scans.count = prev_nscans;
+    ok = false;
+  }
+
+  cx->bin = prev_bin;
+  cx->pc = prev_pc;
+  cx->stop = false;
+  return ok;
 }

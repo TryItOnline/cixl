@@ -8,7 +8,7 @@ add_compile_options(-std=gnu1x -Wall -Werror -O2 -g)
 file(GLOB_RECURSE sources src/cixl/*.c)
 file(GLOB_RECURSE headers src/cixl/*.h)
 
-add_library(libcixl EXCLUDE_FROM_ALL STATIC ${sources})
+add_library(libcixl STATIC ${sources})
 target_include_directories(libcixl PUBLIC src/)
 set_target_properties(libcixl PROPERTIES PREFIX "")
 

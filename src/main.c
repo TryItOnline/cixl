@@ -17,6 +17,7 @@
 #include "cixl/libs/vect.h"
 #include "cixl/repl.h"
 #include "cixl/scope.h"
+#include "cixl/scope.h"
 #include "cixl/types/str.h"
 #include "cixl/types/vect.h"
 
@@ -39,23 +40,40 @@ int main(int argc, char *argv[]) {
   cx_init_time(&cx);
   cx_init_var(&cx);
 
+  bool emit = false;
+  
+  for (int i=0; i < argc && *argv[i] == '-'; i++, argc--) {
+    switch(argv[i][1]) {
+    case 'e':
+      emit = true;
+      break;
+    default:
+      printf("Invalid option %s\n", argv[i]);
+      argc = 0;
+      break;
+    }
+  }
+  
   if (argc == 1) {
     cx_repl(&cx, stdin, stdout);
   } else {
-    for (int i = 2; i < argc; i++) {
-      cx_box_init(cx_push(cx.main), cx.str_type)->as_str = cx_str_new(argv[i]);
-    }
-
-    cx_load(&cx, argv[1]);
-
-    cx_do_vec(&cx.errors, struct cx_error, e) {
-      fprintf(stderr, "Error in row %d, col %d:\n%s\n", e->row, e->col, e->msg);
-      cx_vect_dump(&e->stack, stderr);
-      fputs("\n\n", stderr);
-      cx_error_deinit(e);
-    }
+    if (emit) {
+    } else {
+      for (int i = 2; i < argc; i++) {
+	cx_box_init(cx_push(cx.main), cx.str_type)->as_str = cx_str_new(argv[i]);
+      }
+      
+      cx_load(&cx, argv[1]);
+      
+      cx_do_vec(&cx.errors, struct cx_error, e) {
+	fprintf(stderr, "Error in row %d, col %d:\n%s\n", e->row, e->col, e->msg);
+	cx_vect_dump(&e->stack, stderr);
+	fputs("\n\n", stderr);
+	cx_error_deinit(e);
+      }
 	
-    cx_vec_clear(&cx.errors);
+      cx_vec_clear(&cx.errors);
+    }
   }
 
   cx_deinit(&cx);

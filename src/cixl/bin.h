@@ -19,7 +19,7 @@ struct cx_bin {
   struct cx_vec toks, ops;
   struct cx_set funcs;
   unsigned int nrefs;
-  bool (*eval)(struct cx_bin *, size_t, struct cx *);
+  bool (*eval)(struct cx *);
 };
 
 struct cx_bin *cx_bin_new();
