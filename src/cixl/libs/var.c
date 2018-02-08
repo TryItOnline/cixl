@@ -19,7 +19,7 @@ static ssize_t let_eval(struct cx_macro_eval *eval,
 			struct cx_bin *bin,
 			size_t tok_idx,
 			struct cx *cx) {
-  cx_op_init(cx_vec_push(&bin->ops),
+  cx_op_init(bin,
 	     CX_OFENCE(),
 	     tok_idx)->as_fence.delta_level = 1;
 
@@ -29,7 +29,7 @@ static ssize_t let_eval(struct cx_macro_eval *eval,
   }
   
   void put(const char *id, struct cx_type *type) {
-    struct cx_op * op = cx_op_init(cx_vec_push(&bin->ops), CX_OPUTVAR(), tok_idx);
+    struct cx_op * op = cx_op_init(bin, CX_OPUTVAR(), tok_idx);
     op->as_putvar.id = cx_sym(cx, id);
     op->as_putvar.type = type;
   }
@@ -83,7 +83,7 @@ static ssize_t let_eval(struct cx_macro_eval *eval,
     if (!ok) { return -1; }
   }
 
-  cx_op_init(cx_vec_push(&bin->ops),
+  cx_op_init(bin,
 	     CX_OFENCE(),
 	     tok_idx)->as_fence.delta_level = -1;
 

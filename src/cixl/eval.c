@@ -17,51 +17,6 @@
 #include "cixl/util.h"
 #include "cixl/vec.h"
 
-bool cx_eval(struct cx *cx, struct cx_bin *bin, struct cx_op *start) {
-  if (!bin->ops.count) { return true; }
-  struct cx_bin *prev_bin = cx->bin;
-  struct cx_op *prev_op = cx->op;
-  size_t prev_nscans = cx->scans.count;
-  
-  cx->bin = bin;
-  cx->op = start ? start : cx_vec_start(&bin->ops);
-  bool ok = false;
-  struct cx_op *end = cx_vec_end(&cx->bin->ops);
-    
-  while (cx->op != end && !cx->stop) {
-    struct cx_op *op = cx->op++;
-    struct cx_tok *tok = cx_vec_get(&cx->bin->toks, op->tok_idx);
-    cx->row = tok->row;
-    cx->col = tok->col;
-    
-    if (!op->type->eval(op, tok, cx) || cx->errors.count) { goto exit; }
-
-    while (cx->scans.count) {
-      struct cx_scan *s = cx_vec_peek(&cx->scans, 0);
-      if (!cx_scan_ok(s)) { break; }
-      cx_vec_pop(&cx->scans);
-      if (!cx_scan_call(s)) { goto exit; }
-    }
-  }
-
-  if (cx->scans.count > prev_nscans) {
-    struct cx_scan *s = cx_vec_peek(&cx->scans, 0);
-    
-    cx_error(cx, cx->row, cx->col,
-	     "Not enough args for func: '%s'", s->func->id);
-
-    cx->scans.count = prev_nscans;
-    goto exit;
-  }
-  
-  ok = true;
- exit:  
-  cx->bin = prev_bin;
-  cx->op = prev_op;
-  cx->stop = false;
-  return ok;
-}
-
 bool cx_eval_str(struct cx *cx, const char *in) {
   struct cx_vec toks;
   cx_vec_init(&toks, sizeof(struct cx_tok));
@@ -76,7 +31,7 @@ bool cx_eval_str(struct cx *cx, const char *in) {
 
   struct cx_bin *bin = cx_bin_new();
   if (!cx_compile(cx, cx_vec_start(&toks), cx_vec_end(&toks), bin)) { goto exit2; }
-  if (!cx_eval(cx, bin, NULL)) { goto exit2; }
+  if (!cx_eval(bin, 0, cx)) { goto exit2; }
   ok = true;
  exit2:
   cx_bin_deref(bin);

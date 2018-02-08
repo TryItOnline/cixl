@@ -13,14 +13,14 @@
 #include "cixl/types/lambda.h"
 
 struct cx_lambda *cx_lambda_new(struct cx_scope *scope,
-				size_t start_op,
-				size_t num_ops) {
+				size_t start_pc,
+				size_t nops) {
   struct cx *cx = scope->cx;
   struct cx_lambda *l = cx_malloc(&cx->lambda_alloc);
   l->scope = cx_scope_ref(scope);
   l->bin = cx_bin_ref(cx->bin);
-  l->start_op = start_op;
-  l->num_ops = num_ops;
+  l->start_pc = start_pc;
+  l->nops = nops;
   l->nrefs = 1;
   return l;
 }
@@ -56,7 +56,7 @@ static bool call_imp(struct cx_box *value, struct cx_scope *scope) {
     pop_scope = true;
   }
 
-  bool ok = cx_eval(cx, l->bin, cx_vec_get(&l->bin->ops, l->start_op));
+  bool ok = cx_eval(l->bin, l->start_pc, cx);
   if (pop_scope) { cx_pop_scope(cx, false); }
   return ok;
 }

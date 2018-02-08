@@ -18,7 +18,7 @@ static ssize_t func_eval(struct cx_macro_eval *eval,
 			 struct cx *cx) {
   struct cx_tok *f = cx_vec_get(&eval->toks, 0);
 
-  cx_op_init(cx_vec_push(&bin->ops),
+  cx_op_init(bin,
 	     CX_OFIMPDEF(),
 	     tok_idx)->as_fimpdef.imp = f->as_ptr;
   

@@ -78,19 +78,15 @@ bool cx_fimp_compile(struct cx_fimp *imp,
 		     bool inline1,
 		     struct cx_bin *out) {
   struct cx *cx = imp->func->cx;
-  size_t start_op = out->ops.count;
+  size_t start_pc = out->ops.count;
   
-  struct cx_op *op = cx_op_init(cx_vec_push(&out->ops),
-				CX_OBEGIN(),
-				tok_idx);
+  struct cx_op *op = cx_op_init(out, CX_OBEGIN(), tok_idx);
   op->as_begin.child = false;
   op->as_begin.parent = imp->scope;
 
   if (imp->toks.count) {
     if (imp->args.count) {
-      cx_op_init(cx_vec_push(&out->ops),
-		 CX_OPUTARGS(),
-		 tok_idx)->as_putargs.imp = imp;
+      cx_op_init(out, CX_OPUTARGS(), tok_idx)->as_putargs.imp = imp;
     }
     
     if (!cx_compile(cx, cx_vec_start(&imp->toks), cx_vec_end(&imp->toks), out)) {
@@ -99,13 +95,13 @@ bool cx_fimp_compile(struct cx_fimp *imp,
     }
   }
   
-  op = cx_op_init(cx_vec_push(&out->ops),
+  op = cx_op_init(out,
 		  CX_ORETURN(),
 		  out->toks.count-1);
   op->as_return.imp = imp;
-  op->as_return.start_op = start_op;
+  op->as_return.pc = start_pc;
   
-  if (!inline1) { cx_bin_add_func(out, imp, start_op); }
+  if (!inline1) { cx_bin_add_func(out, imp, start_pc); }
   return true;
 }
 
@@ -115,14 +111,14 @@ bool cx_fimp_eval(struct cx_fimp *imp, struct cx_scope *scope) {
   bool ok = false;
 
   if (bin) {
-    ok = cx_eval(cx, cx->bin, cx_vec_get(&cx->bin->ops, bin->start_op));
+    ok = cx_eval(cx->bin, bin->start_pc, cx);
   } else {
     if (!imp->bin) {
       imp->bin = cx_bin_new();
       if (!cx_fimp_compile(imp, 0, false, imp->bin)) { return false; }
     }
     
-    ok = cx_eval(cx, imp->bin, NULL);
+    ok = cx_eval(imp->bin, 0, cx);
   }
   
   return ok;
@@ -130,7 +126,7 @@ bool cx_fimp_eval(struct cx_fimp *imp, struct cx_scope *scope) {
 
 bool cx_fimp_call(struct cx_fimp *imp, struct cx_scope *scope) {
   struct cx *cx = scope->cx;
-  cx_call_init(cx_vec_push(&cx->calls), cx->row, cx->col, imp, NULL);
+  cx_call_init(cx_vec_push(&cx->calls), cx->row, cx->col, imp, -1);
 
   if (imp->ptr) {
     bool ok = imp->ptr(scope);

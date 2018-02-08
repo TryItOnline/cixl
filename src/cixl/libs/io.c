@@ -156,7 +156,7 @@ static bool read_imp(struct cx_scope *scope) {
   cx_bin_init(&bin);
   
   if (!cx_compile(cx, cx_vec_start(&toks), cx_vec_end(&toks), &bin)) { goto exit2; }
-  if (!cx_eval(cx, &bin, NULL)) { goto exit2; }
+  if (!cx_eval(&bin, 0, cx)) { goto exit2; }
   ok = true;
  exit2:
   cx_bin_deinit(&bin);

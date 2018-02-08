@@ -89,12 +89,12 @@ struct cx_putvar_op {
 };
 
 struct cx_return_op {
-  size_t start_op;
+  size_t pc;
   struct cx_fimp *imp;
 };
 
 struct cx_op {
-  size_t tok_idx;
+  size_t tok_idx, pc;
   struct cx_op_type *type;
   
   union {
@@ -115,7 +115,7 @@ struct cx_op {
   };
 };
 
-struct cx_op *cx_op_init(struct cx_op *op, struct cx_op_type *type, size_t tok_idx);
+struct cx_op *cx_op_init(struct cx_bin *bin, struct cx_op_type *type, size_t tok_idx);
 
 struct cx_op_type *CX_OBEGIN();
 struct cx_op_type *CX_OCUT();

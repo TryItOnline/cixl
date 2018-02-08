@@ -42,7 +42,7 @@ struct cx {
   struct cx_vec scans, calls;
   
   struct cx_bin *bin;
-  struct cx_op *op;
+  size_t pc;
   int scan_level;
   bool stop;
   

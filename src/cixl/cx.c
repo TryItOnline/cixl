@@ -220,7 +220,7 @@ struct cx *cx_init(struct cx *cx) {
   cx->inline_limit2 = -1;
   cx->next_sym_tag = 1;
   cx->bin = NULL;
-  cx->op = NULL;
+  cx->pc = 0;
   cx->scan_level = 0;
   cx->stop = false;
   cx->row = cx->col = -1;
@@ -642,7 +642,7 @@ bool cx_load(struct cx *cx, const char *path) {
 
   struct cx_bin *bin = cx_bin_new();
   if (!cx_compile(cx, cx_vec_start(&toks), cx_vec_end(&toks), bin)) { goto exit2; }
-  if (!cx_eval(cx, bin, NULL)) { goto exit2; }
+  if (!cx_eval(bin, 0, cx)) { goto exit2; }
   ok = true;
  exit2:
   cx_bin_deref(bin);

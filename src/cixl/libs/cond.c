@@ -28,9 +28,9 @@ static ssize_t switch_eval(struct cx_macro_eval *eval,
     }
     
     size_t ei = bin->ops.count;
-    cx_op_init(cx_vec_push(&bin->ops), CX_OELSE(), tok_idx);
+    cx_op_init(bin, CX_OELSE(), tok_idx);
     cx_compile(cx, cx_vec_get(ts, 1), cx_vec_end(ts), bin);
-    cx_op_init(cx_vec_push(&bin->ops), CX_OJUMP(), tok_idx);
+    cx_op_init(bin, CX_OJUMP(), tok_idx);
 
     struct cx_op *eop = cx_vec_get(&bin->ops, ei);
     eop->as_else.nops = bin->ops.count-ei-1;

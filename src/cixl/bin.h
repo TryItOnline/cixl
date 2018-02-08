@@ -12,13 +12,14 @@ struct cx_tok;
 
 struct cx_bin_func {
   struct cx_fimp *imp;
-  size_t start_op;
+  size_t start_pc;
 };
 
 struct cx_bin {
   struct cx_vec toks, ops;
   struct cx_set funcs;
   unsigned int nrefs;
+  bool (*eval)(struct cx_bin *, size_t, struct cx *);
 };
 
 struct cx_bin *cx_bin_new();
@@ -39,5 +40,7 @@ bool cx_compile(struct cx *cx,
 		struct cx_tok *start,
 		struct cx_tok *end,
 		struct cx_bin *out);
+
+bool cx_eval(struct cx_bin *bin, size_t start_pc, struct cx *cx);
 
 #endif

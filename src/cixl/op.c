@@ -18,8 +18,12 @@ struct cx_op_type *cx_op_type_init(struct cx_op_type *type, const char *id) {
   return type;
 }
 
-struct cx_op *cx_op_init(struct cx_op *op, struct cx_op_type *type, size_t tok_idx) {
+struct cx_op *cx_op_init(struct cx_bin *bin,
+			 struct cx_op_type *type,
+			 size_t tok_idx) {
+  struct cx_op *op = cx_vec_push(&bin->ops);
   op->tok_idx = tok_idx;
+  op->pc = bin->ops.count-1;
   op->type = type;
   return op;
 }
@@ -51,7 +55,7 @@ cx_op_type(CX_OCUT, {
 static bool else_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
   struct cx_box *v = cx_pop(cx_scope(cx, 0), false);
   if (!v) { return false; }
-  if (!cx_ok(v)) { cx->op += op->as_else.nops; }
+  if (!cx_ok(v)) { cx->pc += op->as_else.nops; }
   cx_box_deinit(v);
   return true;
 }
@@ -105,8 +109,8 @@ static bool on_fimp_scan(struct cx_scan *scan, void *data) {
     return false;
   }
   
-  cx_call_init(cx_vec_push(&cx->calls), cx->row, cx->col, imp, cx->op);
-  cx->op = op+1;
+  cx_call_init(cx_vec_push(&cx->calls), cx->row, cx->col, imp, cx->pc);
+  cx->pc = op->pc+1;
   return true;
 }
 
@@ -114,10 +118,10 @@ static bool fimp_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
   struct cx_fimp *imp = op->as_fimp.imp;
   
   if (op->as_fimp.inline1) {
-    cx->op += op->as_fimp.num_ops;
+    cx->pc += op->as_fimp.num_ops;
     cx_scan(cx_scope(cx, 0), imp->func, on_fimp_scan, op);
   } else {
-    cx->op += op->as_fimp.num_ops;
+    cx->pc += op->as_fimp.num_ops;
   }
   
   return true;
@@ -163,8 +167,8 @@ static bool on_funcall_scan(struct cx_scan *scan, void *data) {
     struct cx_bin_func *f = cx_bin_get_func(cx->bin, imp);
 
     if (f) {
-      cx_call_init(cx_vec_push(&cx->calls), cx->row, cx->col, imp, cx->op);
-      cx->op = cx_vec_get(&cx->bin->ops, f->start_op);
+      cx_call_init(cx_vec_push(&cx->calls), cx->row, cx->col, imp, cx->pc);
+      cx->pc = f->start_pc;
       return true;
     }
   }
@@ -232,7 +236,7 @@ cx_op_type(CX_OGETVAR, {
   });
 
 static bool jump_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
-  cx->op += op->as_jump.nops;
+  cx->pc += op->as_jump.nops;
   return true;
 }
 
@@ -246,7 +250,7 @@ static bool lambda_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
 				      op->as_lambda.start_op,
 				      op->as_lambda.num_ops);
   cx_box_init(cx_push(scope), cx->lambda_type)->as_ptr = l;
-  cx->op += l->num_ops;
+  cx->pc += l->nops;
   return true;
 }
 
@@ -321,7 +325,7 @@ static bool on_recall_scan(struct cx_scan *scan, void *data) {
     return false;
   }
   
-  cx->op = cx_vec_get(&cx->bin->ops, op->as_return.start_op+1);
+  cx->pc = op->as_return.pc+1;
   return true;
 }
 
@@ -333,8 +337,8 @@ static bool return_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
     call->recalls--;
     cx_scan(cx_scope(cx, 0), imp->func, on_recall_scan, op);
   } else {
-    if (call->return_op) {
-      cx->op = call->return_op;
+    if (call->return_pc > -1) {
+      cx->pc = call->return_pc;
     } else {
       cx->stop = true;
     }

@@ -9,7 +9,6 @@ struct cx_func;
 struct cx_op;
 struct cx_vec;
 
-bool cx_eval(struct cx *cx, struct cx_bin *bin, struct cx_op *start);
 bool cx_eval_str(struct cx *cx, const char *in);
 
 bool cx_eval_args(struct cx *cx,

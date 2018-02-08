@@ -1,3 +1,12 @@
+* add emit(bin) fn
+** add op->emit
+** add type->emit
+*** default error
+** generate nested C fn with pc switch
+* --
+* change funcs to take cx instead of scope
+** grep all cx_scope *
+** use cx_scope to get current
 * add TN to generated ids
 ** add/parse_fimp
 * add read-iter to io lib

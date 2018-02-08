@@ -22,7 +22,7 @@ static bool equid_imp(struct cx_box *x, struct cx_box *y) {
 }
 
 static bool call_imp(struct cx_box *value, struct cx_scope *scope) {
-  return cx_eval(scope->cx, value->as_ptr, NULL);
+  return cx_eval(value->as_ptr, 0, scope->cx);
 }
 
 static void copy_imp(struct cx_box *dst, const struct cx_box *src) {
