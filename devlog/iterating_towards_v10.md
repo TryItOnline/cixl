@@ -101,9 +101,6 @@ Correct!
 ### Support
 Due to health and logistic reasons outside of my control; I'm currently unemployed, have been for quite a while. While this gives me time to think longer thoughts, and write more code; it also means that Cixl depends on your support to get to the next level. If you feel like this is worth pursuing; please consider helping out via [paypal](https://paypal.me/basicgongfu) or [liberapay](https://liberapay.com/basic-gongfu/donate). Should I by any chance receive more than what I need for essentials, which is around €400/month; I'll happily pass that on to other projects in need of support.
 
-### Declaration Disorder
-One of the remaining warts in Cixl is the declaration order requirement. To solve that problem, a separate linking stage will be added to link parsed symbols to definitions; this is currently performed while parsing.
-
 ### Modularity
 Library facilities need to be put into code; the basic structure is there, but much remains to be done. The idea is that definitions are tagged with the categories they belong to, and only definitions for which all categories have been imported are even parsed. It's libraries in most other languages turned inside out, if that makes any sense. This solves the dependency problem; and in combination with most language features being definitions, and a finely grained division into categories; it provides a convenient and flexible method for customizing the language to fit the needs of each application/use. Imagine a function that takes a string parameter and returns an iterator, and uses; it would need to be tagged with both ```Str``` and ```Iter```; and would only be visible, even parsed; once both categories are imported. Any categories that the function uses internally would also have to be tagged.
 

@@ -4,10 +4,6 @@
 ** convert read to iter
 *** keep bin ref
 ** update example and add to post
-* remove definition order requirement
-** add separate cx_link(cx_vec *toks)
-*** rename lookup param to link
-**** call cx_link after parse if true
 * more qdb
 ** add find-key(Vect) fn
 ** add is-dirty fn
