@@ -113,7 +113,6 @@ static ssize_t fimp_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) {
 					 tok_idx)->as_funcall;
   op->func = imp->func;
   op->imp = imp;
-  op->jit_imp = NULL;
 
  exit:
   return tok_idx+1;
@@ -145,7 +144,6 @@ static ssize_t func_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) {
 					 tok_idx)->as_funcall;
   op->func = func;
   op->imp = imp;
-  op->jit_imp = NULL;
 
  exit:
   return tok_idx+1;

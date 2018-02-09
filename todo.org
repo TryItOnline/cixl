@@ -1,6 +1,9 @@
-* add op->emit
-* add type->emit
-** default error
+* implement obegin/end emit
+* implement fib emit
+* implement func: emit
+* implement trait: emit
+* implement rec: emit
+* implement include: emit
 * --
 * change funcs to take cx instead of scope
 ** grep all cx_scope *
@@ -38,3 +41,7 @@
 ** go through all fns used in fib
 ** go through libs
 * convert repl to use getline
+
+| Bin new %, $ compile '#out print<WFile A> 42' emit
+| Bin new %, $ compile 'say 42' emit
+| Bin new %, $ compile 'say (clock {10000 times {50 fib _}} / 1000000 int)' emit

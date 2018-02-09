@@ -22,11 +22,13 @@
 struct cx_func;
 struct cx_fimp;
 struct cx_op;
+struct cx_scan;
 struct cx_tok;
 
 struct cx_op_type {
   const char *id;
   bool (*eval)(struct cx_op *, struct cx_tok *, struct cx *);
+  bool (*emit)(struct cx_op *, struct cx_tok *, FILE *out, struct cx *);
 };
 
 struct cx_op_type *cx_op_type_init(struct cx_op_type *type, const char *id);
@@ -60,7 +62,7 @@ struct cx_fimpdef_op {
 
 struct cx_funcall_op {
   struct cx_func *func;
-  struct cx_fimp *imp, *jit_imp;
+  struct cx_fimp *imp;
 };
 
 struct cx_getconst_op {
@@ -89,8 +91,8 @@ struct cx_putvar_op {
 };
 
 struct cx_return_op {
-  size_t pc;
   struct cx_fimp *imp;
+  size_t pc;
 };
 
 struct cx_op {
@@ -135,5 +137,11 @@ struct cx_op_type *CX_OPUTVAR();
 struct cx_op_type *CX_ORETURN();
 struct cx_op_type *CX_OSTASH();
 struct cx_op_type *CX_OSTOP();
+
+bool cx_fimp_scan(struct cx_scan *scan);
+bool cx_funcall_scan(struct cx_scan *scan);
+bool cx_recall_scan(struct cx_scan *scan);
+
+bool cx_emit_tests(struct cx *cx);
 
 #endif

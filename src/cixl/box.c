@@ -18,6 +18,10 @@ struct cx_box *cx_box_deinit(struct cx_box *box) {
   return box;
 }
 
+bool cx_box_emit(struct cx_box *box, FILE *out) {
+  return cx_test(box->type->emit)(box, out);
+}
+
 bool cx_eqval(struct cx_box *x, struct cx_box *y) {
   return x->type->eqval ? x->type->eqval(x, y) : cx_equid(x, y);
 }

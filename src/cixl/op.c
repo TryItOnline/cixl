@@ -12,10 +12,36 @@
 #include "cixl/scope.h"
 #include "cixl/tok.h"
 
-bool emit_test(struct cx *cx) {
+bool cx_emit_tests(struct cx *cx) {
   bool eval(struct cx *cx) {
     while (!cx->stop) {
       switch (cx->pc) {
+
+      case 0: {
+	cx->row = 1; cx->col = 0;
+	struct cx_box *v = cx_get_const(cx, cx_sym(cx, "out"), false);
+	if (!v) { return false; }
+	cx_copy(cx_push(cx_scope(cx, 0)), v);
+	cx->pc++;
+	break;
+      }
+      case 1: {
+	cx->row = 1; cx->col = 13;
+	struct cx_func *func = cx_get_func(cx, "print", false);
+	struct cx_scan *scan = cx_scan(cx_scope(cx, 0), func, cx_funcall_scan);
+	char *imp_id = "WFile A";
+	scan->as_funcall.imp = *(struct cx_fimp **)
+	  cx_set_get(&func->imp_lookup, &imp_id);
+	cx->pc++;
+	break;
+      }
+      case 2: {
+	cx->row = 1; cx->col = 11;
+	cx_box_init(cx_push(cx_scope(cx, 0)), cx->int_type)->as_int = 42;
+	cx->pc++;
+	break;
+      }
+	
       default:
 	return true;
       }
@@ -36,9 +62,15 @@ bool emit_test(struct cx *cx) {
   return cx_eval(bin, 0, cx);
 }
 
+static bool emit(struct cx_op *op, struct cx_tok *tok, FILE *out, struct cx *cx) {
+  cx_error(cx, tok->row, tok->col, "Emit not implemented: %s", op->type->id);
+  return false;
+}
+
 struct cx_op_type *cx_op_type_init(struct cx_op_type *type, const char *id) {
   type->id = id;
   type->eval = NULL;
+  type->emit = emit;
   return type;
 }
 
@@ -122,9 +154,8 @@ cx_op_type(CX_OFENCE, {
     type.eval = fence_eval;
   });
 
-static bool on_fimp_scan(struct cx_scan *scan, void *data) {
-  struct cx_op *op = data;
-  struct cx_fimp *imp = op->as_fimp.imp;
+bool cx_fimp_scan(struct cx_scan *scan) {
+  struct cx_fimp *imp = scan->as_fimp.imp;
   struct cx_scope *s = scan->scope;
   struct cx *cx = s->cx;
   
@@ -134,7 +165,7 @@ static bool on_fimp_scan(struct cx_scan *scan, void *data) {
   }
   
   cx_call_init(cx_vec_push(&cx->calls), cx->row, cx->col, imp, cx->pc);
-  cx->pc = op->pc+1;
+  cx->pc = scan->as_fimp.pc+1;
   return true;
 }
 
@@ -142,17 +173,40 @@ static bool fimp_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
   struct cx_fimp *imp = op->as_fimp.imp;
   
   if (op->as_fimp.inline1) {
-    cx->pc += op->as_fimp.num_ops;
-    cx_scan(cx_scope(cx, 0), imp->func, on_fimp_scan, op);
-  } else {
-    cx->pc += op->as_fimp.num_ops;
+    struct cx_scan *scan = cx_scan(cx_scope(cx, 0), imp->func, cx_fimp_scan);
+    scan->as_fimp.imp = imp;
+    scan->as_fimp.pc = op->pc;
   }
   
+  cx->pc += op->as_fimp.num_ops;
+  return true;
+}
+
+static bool fimp_emit(struct cx_op *op,
+		      struct cx_tok *tok,
+		      FILE *out,
+		      struct cx *cx) {
+  if (op->as_fimp.inline1) {
+    struct cx_fimp *imp = op->as_fimp.imp;
+    fprintf(out, "struct cx_func *func = cx_get_func(cx, \"%s\", false);\n",
+	    imp->func->id);
+    fputs("struct cx_scan *scan = cx_scan(cx_scope(cx, 0), func, cx_fimp_scan);\n",
+	  out);
+    fprintf(out, "char *imp_id = \"%s\";\n", imp->id);
+    fputs("scan->as_fimp.imp = *(struct cx_fimp **)"
+	  "cx_set_get(&func->imp_lookup, &imp_id);\n",
+	  out);
+    fprintf(out, "scan->as_fimp.pc = %zd;\n", op->pc+1);
+  }
+
+  fprintf(out, "cx->pc += %zd;\n", op->as_fimp.num_ops);
+  fputs("break;\n", out);
   return true;
 }
 
 cx_op_type(CX_OFIMP, {
     type.eval = fimp_eval;
+    type.emit = fimp_emit;
   });
 
 static bool fimpdef_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
@@ -165,19 +219,16 @@ cx_op_type(CX_OFIMPDEF, {
     type.eval = fimpdef_eval;
   });
 
-static bool on_funcall_scan(struct cx_scan *scan, void *data) {
-  struct cx_op *op = data;
-  struct cx_func *func = op->as_funcall.func;
-  struct cx_fimp *imp = op->as_funcall.imp;
+bool cx_funcall_scan(struct cx_scan *scan) {
+  struct cx_func *func = scan->func;
+  struct cx_fimp *imp = scan->as_funcall.imp;
   struct cx_scope *s = scan->scope;
   struct cx *cx = s->cx;
 
   if (imp) {
     if (s->safe && !cx_fimp_match(imp, s)) { imp = NULL; }
   } else {
-    imp = op->as_funcall.jit_imp;
-    if (imp && !cx_fimp_match(imp, s)) { imp = NULL; }
-    if (!imp) { imp = cx_func_get_imp(func, s, 0); }
+    imp = cx_func_get_imp(func, s, 0);
   }
   
   if (!imp) {
@@ -185,8 +236,6 @@ static bool on_funcall_scan(struct cx_scan *scan, void *data) {
     return false;
   }
     
-  op->as_funcall.jit_imp = imp;
-
   if (!imp->ptr) {
     struct cx_bin_func *f = cx_bin_get_func(cx->bin, imp);
 
@@ -202,12 +251,39 @@ static bool on_funcall_scan(struct cx_scan *scan, void *data) {
 
 static bool funcall_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
   struct cx_func *func = op->as_funcall.func;
-  cx_scan(cx_scope(cx, 0), func, on_funcall_scan, op);
+  struct cx_scan *scan = cx_scan(cx_scope(cx, 0), func, cx_funcall_scan);
+  scan->as_funcall.imp = op->as_funcall.imp;
+  return true;
+}
+
+static bool cx_funcall_emit(struct cx_op *op,
+			    struct cx_tok *tok,
+			    FILE *out,
+			    struct cx *cx) {
+  struct cx_func *func = op->as_funcall.func;
+  fprintf(out, "struct cx_func *func = cx_get_func(cx, \"%s\", false);\n", func->id);
+  fputs("struct cx_scan *scan = cx_scan(cx_scope(cx, 0), func, cx_funcall_scan);\n",
+	out);
+
+  struct cx_fimp *imp = op->as_funcall.imp;
+
+  if (imp) {
+    fprintf(out, "char *imp_id = \"%s\";\n", imp->id);
+    fputs("scan->as_funcall.imp = *(struct cx_fimp **)"
+	  "cx_set_get(&func->imp_lookup, &imp_id);\n",
+	  out);
+  } else {
+    fputs("scan->as_funcall.imp = NULL;\n", out);
+  }
+  
+  fputs("cx->pc++;\n", out);
+  fputs("break;\n", out);
   return true;
 }
 
 cx_op_type(CX_OFUNCALL, {
     type.eval = funcall_eval;
+    type.emit = cx_funcall_emit;
   });
 
 static bool getconst_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
@@ -217,8 +293,22 @@ static bool getconst_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
   return true;
 }
 
+static bool getconst_emit(struct cx_op *op,
+			  struct cx_tok *tok,
+			  FILE *out,
+			  struct cx *cx) {
+  fprintf(out, "struct cx_box *v = cx_get_const(cx, cx_sym(cx, \"%s\"), false);\n",
+	  op->as_getconst.id.id);
+  fputs("if (!v) { return false; }\n", out);
+  fputs("cx_copy(cx_push(cx_scope(cx, 0)), v);\n", out);
+  fputs("cx->pc++;\n", out);
+  fputs("break;\n", out);
+  return true;
+}
+
 cx_op_type(CX_OGETCONST, {
     type.eval = getconst_eval;
+    type.emit = getconst_emit;
   });
 
 static bool getvar_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
@@ -287,8 +377,19 @@ static bool push_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
   return true;
 }
 
+static bool push_emit(struct cx_op *op,
+		      struct cx_tok *tok,
+		      FILE *out,
+		      struct cx *cx) {
+  cx_box_emit(&tok->as_box, out);
+  fputs("cx->pc++;\n", out);
+  fputs("break;\n", out);  
+  return true;
+}
+
 cx_op_type(CX_OPUSH, {
     type.eval = push_eval;
+    type.emit = push_emit;
   });
 
 static bool putargs_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
@@ -338,9 +439,8 @@ cx_op_type(CX_OPUTVAR, {
     type.eval = putvar_eval;
   });
 
-static bool on_recall_scan(struct cx_scan *scan, void *data) {
-  struct cx_op *op = data;
-  struct cx_fimp *imp = op->as_return.imp;
+bool cx_recall_scan(struct cx_scan *scan) {
+  struct cx_fimp *imp = scan->as_recall.imp;
   struct cx_scope *s = scan->scope;
   struct cx *cx = s->cx;
   
@@ -349,7 +449,7 @@ static bool on_recall_scan(struct cx_scan *scan, void *data) {
     return false;
   }
   
-  cx->pc = op->as_return.pc+1;
+  cx->pc = scan->as_recall.pc+1;
   return true;
 }
 
@@ -359,7 +459,9 @@ static bool return_eval(struct cx_op *op, struct cx_tok *tok, struct cx *cx) {
 
   if (call->recalls) {
     call->recalls--;
-    cx_scan(cx_scope(cx, 0), imp->func, on_recall_scan, op);
+    struct cx_scan *scan = cx_scan(cx_scope(cx, 0), imp->func, cx_recall_scan);
+    scan->as_recall.imp = op->as_return.imp;
+    scan->as_recall.pc = op->as_return.pc;
   } else {
     if (call->return_pc > -1) {
       cx->pc = call->return_pc;

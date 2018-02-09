@@ -42,5 +42,6 @@ bool cx_compile(struct cx *cx,
 		struct cx_bin *out);
 
 bool cx_eval(struct cx_bin *bin, size_t start_pc, struct cx *cx);
+bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx);
 
 #endif

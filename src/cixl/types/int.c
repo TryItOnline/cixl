@@ -95,6 +95,14 @@ static void dump_imp(struct cx_box *v, FILE *out) {
   fprintf(out, "%" PRId64, v->as_int);
 }
 
+static bool emit_imp(struct cx_box *v, FILE *out) {
+  fprintf(out,
+	  "cx_box_init(cx_push(cx_scope(cx, 0)), cx->int_type)->as_int "
+	  "= %" PRId64 ";\n",
+	  v->as_int);
+  return true;
+}
+
 struct cx_type *cx_init_int_type(struct cx *cx) {
   struct cx_type *t = cx_add_type(cx, "Int", cx->num_type, cx->seq_type);
   t->equid = equid_imp;
@@ -103,6 +111,7 @@ struct cx_type *cx_init_int_type(struct cx *cx) {
   t->iter = iter_imp;
   t->write = dump_imp;
   t->dump = dump_imp;
+  t->emit = emit_imp;
   
   cx_add_cfunc(cx, "++",
 	       cx_args(cx_arg("v", t)), cx_rets(cx_ret(t)),

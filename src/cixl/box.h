@@ -45,6 +45,7 @@ struct cx_box {
 struct cx_box *cx_box_new(struct cx_type *type);
 struct cx_box *cx_box_init(struct cx_box *box, struct cx_type *type);
 struct cx_box *cx_box_deinit(struct cx_box *box);
+bool cx_box_emit(struct cx_box *box, FILE *out);
 
 bool cx_eqval(struct cx_box *x, struct cx_box *y);
 bool cx_equid(struct cx_box *x, struct cx_box *y);

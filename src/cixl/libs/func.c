@@ -180,8 +180,8 @@ static bool recall_imp(struct cx_scope *scope) {
   return true;
 }
 
-static bool on_upcall_scan(struct cx_scan *scan, void *data) {
-  struct cx_fimp *imp = data;
+static bool upcall_scan(struct cx_scan *scan) {
+  struct cx_fimp *imp = scan->as_upcall.imp;
   struct cx_func *func = imp->func;
   struct cx_scope *s = scan->scope;
   struct cx *cx = s->cx;
@@ -212,7 +212,8 @@ static bool upcall_imp(struct cx_scope *scope) {
     return false;
   }
   
-  cx_scan(scope, imp->func, on_upcall_scan, imp);
+  struct cx_scan *scan = cx_scan(scope, imp->func, upcall_scan);
+  scan->as_upcall.imp = imp;
   return true;
 }
 

@@ -1,3 +1,5 @@
+#include <string.h>
+
 #include "cixl/cx.h"
 #include "cixl/error.h"
 #include "cixl/libs/cond.h"
@@ -5,6 +7,7 @@
 #include "cixl/libs/io.h"
 #include "cixl/libs/iter.h"
 #include "cixl/libs/math.h"
+#include "cixl/libs/meta.h"
 #include "cixl/libs/pair.h"
 #include "cixl/libs/rec.h"
 #include "cixl/libs/ref.h"
@@ -15,6 +18,7 @@
 #include "cixl/libs/type.h"
 #include "cixl/libs/var.h"
 #include "cixl/libs/vect.h"
+#include "cixl/op.h"
 #include "cixl/repl.h"
 #include "cixl/scope.h"
 #include "cixl/scope.h"
@@ -39,25 +43,24 @@ int main(int argc, char *argv[]) {
   cx_init_table(&cx);
   cx_init_time(&cx);
   cx_init_var(&cx);
+  cx_init_meta(&cx);
 
   bool emit = false;
   
-  for (int i=0; i < argc && *argv[i] == '-'; i++, argc--) {
-    switch(argv[i][1]) {
-    case 'e':
+  for (int i=1; i < argc && *argv[i] == '-'; i++, argc--) {
+    if (strcmp(argv[i], "-e") == 0) {
       emit = true;
-      break;
-    default:
+    } else {
       printf("Invalid option %s\n", argv[i]);
-      argc = 0;
-      break;
+      return -1;
     }
   }
   
-  if (argc == 1) {
+  if (argc == 1 && !emit) {
     cx_repl(&cx, stdin, stdout);
   } else {
     if (emit) {
+      cx_emit_tests(&cx);
     } else {
       for (int i = 2; i < argc; i++) {
 	cx_box_init(cx_push(cx.main), cx.str_type)->as_str = cx_str_new(argv[i]);

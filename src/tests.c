@@ -5,6 +5,7 @@
 #include "cixl/libs/func.h"
 #include "cixl/libs/iter.h"
 #include "cixl/libs/math.h"
+#include "cixl/libs/meta.h"
 #include "cixl/libs/pair.h"
 #include "cixl/libs/rec.h"
 #include "cixl/libs/ref.h"
@@ -476,6 +477,7 @@ static void compile_tests() {
   cx_init_func(&cx);
   cx_init_iter(&cx);
   cx_init_math(&cx);
+  cx_init_meta(&cx);
   cx_init_stack(&cx);
 
   run(&cx, "new Bin %, $ compile '1 + 2' call = 3 check");
