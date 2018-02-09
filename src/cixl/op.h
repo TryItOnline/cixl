@@ -139,6 +139,8 @@ struct cx_op_type *CX_ORETURN();
 struct cx_op_type *CX_OSTASH();
 struct cx_op_type *CX_OSTOP();
 
+void cx_putargs(struct cx_fimp *imp, struct cx *cx);
+
 bool cx_fimp_scan(struct cx_scan *scan);
 bool cx_funcall_scan(struct cx_scan *scan);
 bool cx_recall_scan(struct cx_scan *scan);

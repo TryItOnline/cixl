@@ -61,7 +61,8 @@ bool cx_emit_tests(struct cx *cx) {
 }
 
 static bool emit(struct cx_op *op, struct cx_bin *bin, FILE *out, struct cx *cx) {
-  cx_error(cx, op->row, op->col, "Emit not implemented: %s", op->type->id);
+  struct cx_tok *tok = cx_vec_get(&bin->toks, op->tok_idx);
+  cx_error(cx, tok->row, tok->col, "Emit not implemented: %s", op->type->id);
   return false;
 }
 
@@ -78,9 +79,8 @@ struct cx_op *cx_op_init(struct cx_bin *bin,
   struct cx_op *op = cx_vec_push(&bin->ops);
   op->type = type;
   op->tok_idx = tok_idx;
-  struct cx_tok *tok = cx_vec_get(&bin->toks, tok_idx);
-  op->row = tok->row; op->col = tok->col;
   op->pc = bin->ops.count-1;
+  op->row = -1; op->col = -1;
   return op;
 }
 
@@ -342,14 +342,16 @@ static bool getvar_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
     cx_copy(cx_push(s), v);
   } else {
     if (!s->cuts.count) {
-      cx_error(cx, op->row, op->col, "Nothing to uncut");
+      struct cx_tok *tok = cx_vec_get(&bin->toks, op->tok_idx);
+      cx_error(cx, tok->row, tok->col, "Nothing to uncut");
       return false;
     }
 
     struct cx_cut *c = cx_vec_peek(&s->cuts, 0);
 
     if (!c->offs) {
-      cx_error(cx, op->row, op->col, "Nothing to uncut");
+      struct cx_tok *tok = cx_vec_get(&bin->toks, op->tok_idx);
+      cx_error(cx, tok->row, tok->col, "Nothing to uncut");
       return false;
     }
 
@@ -416,10 +418,9 @@ cx_op_type(CX_OPUSH, {
     type.emit = push_emit;
   });
 
-static bool putargs_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
+void cx_putargs(struct cx_fimp *imp, struct cx *cx) {
   struct cx_scope *ds = cx_scope(cx, 0), *ss = ds->stack.count ? ds : cx_scope(cx, 1);
-  struct cx_fimp *imp = op->as_putargs.imp;
-  
+
   for (struct cx_func_arg *a = cx_vec_peek(&imp->args, 0);
        a >= (struct cx_func_arg *)imp->args.items;
        a--) {
@@ -431,12 +432,31 @@ static bool putargs_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
       cx_box_deinit(src);
     }
   }
+}
 
+static bool putargs_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
+  cx_putargs(op->as_putargs.imp, cx);
+  return true;
+}
+
+static bool putargs_emit(struct cx_op *op,
+			 struct cx_bin *bin,
+			 FILE *out,
+			 struct cx *cx) {
+  struct cx_fimp *imp = op->as_putargs.imp;
+  
+  fprintf(out,
+	  "struct cx_func *func = cx_get_func(cx, \"%s\", false);\n",
+	  imp->func->id);
+  fprintf(out, "struct cx_fimp *imp = cx_get_fimp(func, \"%s\");\n", imp->id);
+  fputs("cx_putargs(imp, cx);\n", out);
+  fputs("cx->pc++;\n", out);
   return true;
 }
 
 cx_op_type(CX_OPUTARGS, {
     type.eval = putargs_eval;
+    type.emit = putargs_emit;
   });
 
 static bool putvar_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
@@ -446,9 +466,12 @@ static bool putvar_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
   if (!src) { return false; }
 
   if (op->as_putvar.type && !cx_is(src->type, op->as_putvar.type)) {
-    cx_error(cx, op->row, op->col,
+    struct cx_tok *tok = cx_vec_get(&bin->toks, op->tok_idx);
+
+    cx_error(cx, tok->row, tok->col,
 	     "Expected type %s, actual: %s",
 	     op->as_putvar.type->id, src->type->id);
+
     return false;
   }
   

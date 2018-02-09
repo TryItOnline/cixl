@@ -16,7 +16,13 @@ static bool eval(struct cx *cx) {
       
   while (cx->pc < cx->bin->ops.count && !cx->stop) {
     struct cx_op *op = cx_vec_get(&cx->bin->ops, cx->pc++);
-    cx->row = op->row; cx->col = op->col;
+    
+    if (op->row == -1) {
+      struct cx_tok *tok = cx_vec_get(&cx->bin->toks, op->tok_idx);
+      cx->row = op->row = tok->row; cx->col = op->col = tok->col;
+    } else {
+      cx->row = op->row; cx->col = op->col;
+    }
     
     if (!op->type->eval(op, cx->bin, cx) || cx->errors.count) { return false; }
 
@@ -126,7 +132,8 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
   for (struct cx_op *op = cx_vec_start(&bin->ops);
        op != cx_vec_end(&bin->ops);
        op++) {
-    cx->row = op->row; cx->col = op->col;
+    struct cx_tok *tok = cx_vec_get(&bin->toks, op->tok_idx);
+    cx->row = tok->row; cx->col = tok->col;
 
     fprintf(out, "case %zd: {\n", op->pc);
     fprintf(out, "cx->row = %d; cx->col = %d;\n", cx->row, cx->col);

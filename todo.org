@@ -1,4 +1,4 @@
-* implement oputargs emit
+* implement ogetvar emit
 * implement fib emit
 * add emit init
 ** add cx.emit_inits
