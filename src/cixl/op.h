@@ -27,8 +27,8 @@ struct cx_tok;
 
 struct cx_op_type {
   const char *id;
-  bool (*eval)(struct cx_op *, struct cx_tok *, struct cx *);
-  bool (*emit)(struct cx_op *, struct cx_tok *, FILE *out, struct cx *);
+  bool (*eval)(struct cx_op *, struct cx_bin *, struct cx *);
+  bool (*emit)(struct cx_op *, struct cx_bin *, FILE *out, struct cx *);
 };
 
 struct cx_op_type *cx_op_type_init(struct cx_op_type *type, const char *id);
@@ -96,8 +96,9 @@ struct cx_return_op {
 };
 
 struct cx_op {
-  size_t tok_idx, pc;
   struct cx_op_type *type;
+  size_t tok_idx, pc;
+  int row, col;
   
   union {
     struct cx_begin_op as_begin;

@@ -16,11 +16,9 @@ static bool eval(struct cx *cx) {
       
   while (cx->pc < cx->bin->ops.count && !cx->stop) {
     struct cx_op *op = cx_vec_get(&cx->bin->ops, cx->pc++);
-    struct cx_tok *tok = cx_vec_get(&cx->bin->toks, op->tok_idx);
-    cx->row = tok->row;
-    cx->col = tok->col;
+    cx->row = op->row; cx->col = op->col;
     
-    if (!op->type->eval(op, tok, cx) || cx->errors.count) { return false; }
+    if (!op->type->eval(op, cx->bin, cx) || cx->errors.count) { return false; }
 
     while (cx->scans.count) {
       struct cx_scan *s = cx_vec_peek(&cx->scans, 0);
@@ -128,13 +126,11 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
   for (struct cx_op *op = cx_vec_start(&bin->ops);
        op != cx_vec_end(&bin->ops);
        op++) {
-    struct cx_tok *tok = cx_vec_get(&bin->toks, op->tok_idx);
-    cx->row = tok->row;
-    cx->col = tok->col;
+    cx->row = op->row; cx->col = op->col;
 
     fprintf(out, "case %zd: {\n", op->pc);
     fprintf(out, "cx->row = %d; cx->col = %d;\n", cx->row, cx->col);
-    if (!cx_test(op->type->emit)(op, tok, out, cx)) { return false; }
+    if (!cx_test(op->type->emit)(op, bin, out, cx)) { return false; }
     fputs("}\n", out);
   }
 
