@@ -1,9 +1,19 @@
 * implement obegin/end emit
 * implement fib emit
 * implement func: emit
+** register all funcs from bin in outer eval
 * implement trait: emit
 * implement rec: emit
 * implement include: emit
+* implement -e flag
+** generate nested fns with switch
+** generate main
+*** include all libs
+** link with libcixl.a to a.out
+** add -o X option
+*** pass to gcc
+** add -h option
+*** print usage
 * --
 * add TN to generated ids
 ** add/parse_fimp
