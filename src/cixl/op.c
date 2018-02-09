@@ -113,6 +113,7 @@ static bool begin_emit(struct cx_op *op,
 
   fputs("cx_begin(cx, parent);\n", out);
   fputs("cx->scan_level++;\n", out);
+  fputs("cx->pc++;\n", out);
   return true;
 }
 
