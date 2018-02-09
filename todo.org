@@ -1,10 +1,15 @@
 * implement obegin/end emit
 * implement fib emit
+* add emit init
+** add cx.emit_inits
+*** set of eval ptrs
+*** add bool cx_emit_init(eval) fn
+**** set true & return true if insert ok
+*** check in emit fn before init block
 * implement func: emit
 ** register all funcs from bin in outer eval
-* implement trait: emit
-* implement rec: emit
-* implement include: emit
+* implement trait: & rec: emit
+** register in bin & create in init
 * implement -e flag
 ** generate nested fns with switch
 ** generate main
