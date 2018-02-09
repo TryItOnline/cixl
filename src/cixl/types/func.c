@@ -129,8 +129,22 @@ struct cx_fimp *cx_func_add_imp(struct cx_func *func,
 }
 
 struct cx_fimp *cx_func_get_imp(struct cx_func *func,
-				struct cx_scope *scope,
-				size_t offs) {
+				const char *id,
+				bool silent) {
+  struct cx_fimp **imp = cx_set_get(&func->imp_lookup, &id);
+  
+  if (!imp && silent) {
+    struct cx *cx = func->cx;
+    cx_error(cx, cx->row, cx->col, "Fimp not found: %s<%s>", func->id, id);
+    return NULL;
+  }
+
+  return *imp;
+}
+
+struct cx_fimp *cx_func_match_imp(struct cx_func *func,
+				  struct cx_scope *scope,
+				  size_t offs) {
   if (offs >= func->imps.count) { return NULL; }
 
   for (struct cx_fimp **i = cx_vec_peek(&func->imps, offs);
@@ -152,7 +166,7 @@ static bool equid_imp(struct cx_box *x, struct cx_box *y) {
 static bool call_imp(struct cx_box *value, struct cx_scope *scope) {
   struct cx *cx = scope->cx;
   struct cx_func *func = value->as_ptr;
-  struct cx_fimp *imp = cx_func_get_imp(func, scope, 0);
+  struct cx_fimp *imp = cx_func_match_imp(func, scope, 0);
 
   if (!imp) {
     cx_error(cx, cx->row, cx->col, "Func not applicable: '%s'", func->id);

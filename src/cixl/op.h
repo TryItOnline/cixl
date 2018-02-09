@@ -35,7 +35,7 @@ struct cx_op_type *cx_op_type_init(struct cx_op_type *type, const char *id);
 
 struct cx_begin_op {
   bool child;
-  struct cx_scope *parent;
+  struct cx_fimp *fimp;
 };
 
 struct cx_else_op {

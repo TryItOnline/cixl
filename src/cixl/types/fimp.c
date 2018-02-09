@@ -82,7 +82,7 @@ bool cx_fimp_compile(struct cx_fimp *imp,
   
   struct cx_op *op = cx_op_init(out, CX_OBEGIN(), tok_idx);
   op->as_begin.child = false;
-  op->as_begin.parent = imp->scope;
+  op->as_begin.fimp = imp;
 
   if (imp->toks.count) {
     if (imp->args.count) {
