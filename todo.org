@@ -5,9 +5,6 @@
 * implement rec: emit
 * implement include: emit
 * --
-* change funcs to take cx instead of scope
-** grep all cx_scope *
-** use cx_scope to get current
 * add TN to generated ids
 ** add/parse_fimp
 * add read-iter to io lib
@@ -41,6 +38,9 @@
 ** go through all fns used in fib
 ** go through libs
 * convert repl to use getline
+* change funcs to take cx instead of scope
+** grep all cx_scope *
+** use cx_scope to get current
 
 | Bin new %, $ compile '#out print<WFile A> 42' emit
 | Bin new %, $ compile 'say 42' emit
