@@ -120,9 +120,10 @@ char *parse_fimp(struct cx *cx,
 
 static bool parse_func(struct cx *cx, const char *id, FILE *in, struct cx_vec *out) {
   bool ref = id[0] == '&';
+  int row = cx->row, col = cx->col;
   struct cx_func *f = cx_get_func(cx, ref ? id+1 : id, false);
   if (!f) { return false; }
-
+  
   struct cx_fimp *imp = NULL;
   char *imp_id = parse_fimp(cx, f, in, out);
 	  
@@ -131,7 +132,7 @@ static bool parse_func(struct cx *cx, const char *id, FILE *in, struct cx_vec *o
     free(imp_id);
     
     if (!found) {
-      cx_error(cx, cx->row, cx->col, "Fimp not found");
+      cx_error(cx, row, col, "Fimp not found");
       return false;
     }
 
@@ -141,7 +142,7 @@ static bool parse_func(struct cx *cx, const char *id, FILE *in, struct cx_vec *o
   if (ref) {
     struct cx_box *box = &cx_tok_init(cx_vec_push(out),
 				      CX_TLITERAL(),
-				      cx->row, cx->col)->as_box;
+				      row, col)->as_box;
     if (imp) {
       cx_box_init(box, cx->fimp_type)->as_ptr = imp;
     } else {
@@ -151,11 +152,11 @@ static bool parse_func(struct cx *cx, const char *id, FILE *in, struct cx_vec *o
     if (imp) {
       cx_tok_init(cx_vec_push(out),
 		  CX_TFIMP(),
-		  cx->row, cx->col)->as_ptr = imp;
+		  row, col)->as_ptr = imp;
     } else {
       cx_tok_init(cx_vec_push(out),
 		  CX_TFUNC(),
-		  cx->row, cx->col)->as_ptr = f;
+		  row, col)->as_ptr = f;
     }
   }
 
@@ -300,7 +301,7 @@ static bool parse_int(struct cx *cx, FILE *in, struct cx_vec *out) {
       if (int_value || !errno) {
 	struct cx_box *box = &cx_tok_init(cx_vec_push(out),
 					  CX_TLITERAL(),
-					  cx->row, cx->col)->as_box;
+					  cx->row, col)->as_box;
 	cx_box_init(box, cx->int_type)->as_int = int_value;
 	cx->col = col;
       }
