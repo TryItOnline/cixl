@@ -1,10 +1,11 @@
 * add syms to init
 ** predeclare emit syms
 ** symN
-** add type.emit_syms(vect out)
+** add type.emit_syms(cx_set *out)
 ** update all cx_sym emits
-* inline oputargs loop in emit
+* unroll oputargs loop in emit
 ** add putargs_emit_syms
+* unroll oreturn loop in emit
 * profile fib emit
 * implement func: emit
 ** register all funcs from bin in outer eval
