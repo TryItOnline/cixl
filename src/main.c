@@ -60,7 +60,16 @@ int main(int argc, char *argv[]) {
     cx_repl(&cx, stdin, stdout);
   } else {
     if (emit) {
-      cx_emit_tests(&cx);
+      if (!cx_emit_tests(&cx)) {
+	cx_do_vec(&cx.errors, struct cx_error, e) {
+	  fprintf(stderr, "Error in row %d, col %d:\n%s\n", e->row, e->col, e->msg);
+	  cx_vect_dump(&e->stack, stderr);
+	  fputs("\n\n", stderr);
+	  cx_error_deinit(e);
+	}
+	
+	cx_vec_clear(&cx.errors);
+      }
     } else {
       for (int i = 2; i < argc; i++) {
 	cx_box_init(cx_push(cx.main), cx.str_type)->as_str = cx_str_new(argv[i]);

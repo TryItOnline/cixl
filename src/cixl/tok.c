@@ -166,9 +166,7 @@ static ssize_t group_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) 
     }
   }
   
-  cx_op_init(bin,
-	     CX_OEND(),
-	     tok_idx)->as_end.push_result = true;
+  cx_op_init(bin, CX_OEND(), tok_idx);
   return tok_idx+1;
 }
 

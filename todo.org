@@ -1,11 +1,13 @@
-* finish fib emit
-** implement ostop emit
 * add emit init
 ** add cx.emit_inits
 *** set of eval ptrs
 *** add bool cx_emit_init(eval) fn
 **** set true & return true if insert ok
 *** check in emit fn before init block
+* declare func vars in eval init
+** replaces func/imp lookup
+** func_X and fimpN_X (N = idx)
+* ---
 * implement func: emit
 ** register all funcs from bin in outer eval
 * implement trait: & rec: emit
@@ -19,9 +21,8 @@
 *** pass to gcc
 ** add -h option
 *** print usage
-* declare func vars in eval init
-** replaces func/imp lookup
-** func_X and func_XN (N = idx)
+* add compiled bmips
+** evalN/compileN bmips
 * --
 * add TN to generated ids
 ** add/parse_fimp

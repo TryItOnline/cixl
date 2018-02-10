@@ -46,10 +46,6 @@ struct cx_else_op {
   size_t nops;
 };
 
-struct cx_end_op {
-  bool push_result;
-};
-
 struct cx_fence_op {
   int delta_level;
 };
@@ -111,7 +107,6 @@ struct cx_op {
   union {
     struct cx_begin_op as_begin;
     struct cx_else_op as_else;
-    struct cx_end_op as_end;
     struct cx_fence_op as_fence;
     struct cx_fimp_op as_fimp;
     struct cx_fimpdef_op as_fimpdef;
@@ -148,6 +143,7 @@ struct cx_op_type *CX_ORETURN();
 struct cx_op_type *CX_OSTASH();
 struct cx_op_type *CX_OSTOP();
 
+void cx_oend(struct cx *cx);
 bool cx_ogetvar1(struct cx_sym id, struct cx_scope *scope);
 bool cx_ogetvar2(struct cx_scope *scope);
 void cx_oputargs(struct cx_fimp *imp, struct cx *cx);

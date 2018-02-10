@@ -149,7 +149,7 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
        op != cx_vec_end(&bin->ops);
        op++) {
     cx->row = op->row; cx->col = op->col;
-    fprintf(out, "case %zd: { // %s\n", op->pc, op->type->id);
+    fprintf(out, "case %zd: { /* %s */\n", op->pc, op->type->id);
     fprintf(out, "cx->row = %d; cx->col = %d;\n", cx->row, cx->col);
     if (!cx_test(op->type->emit)(op, bin, out, cx)) { return false; }
     fputs("}\n", out);
