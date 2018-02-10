@@ -1,7 +1,11 @@
-* declare func vars in emit init
-** replaces func/imp lookup
-** func_X and fimpN_X (N = idx)
-* ---
+* add syms to init
+** predeclare emit syms
+** symN
+** add type.emit_syms(vect out)
+** update all cx_sym emits
+* inline oputargs loop in emit
+** add putargs_emit_syms
+* profile fib emit
 * implement func: emit
 ** register all funcs from bin in outer eval
 * implement trait: & rec: emit

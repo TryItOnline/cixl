@@ -16,10 +16,10 @@
 struct cx_fimp *cx_fimp_init(struct cx_fimp *imp,
 			     struct cx_func *func,
 			     char *id,
-			     size_t i) {
+			     size_t idx) {
   imp->func = func;
   imp->id = id;
-  imp->i = i;
+  imp->idx = idx;
   imp->ptr = NULL;
   imp->scope = NULL;
   imp->bin = NULL;

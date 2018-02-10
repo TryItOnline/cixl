@@ -186,7 +186,7 @@ static bool upcall_scan(struct cx_scan *scan) {
   struct cx_scope *s = scan->scope;
   struct cx *cx = s->cx;
   
-  imp = cx_func_match_imp(func, s, func->imps.count - imp->i);
+  imp = cx_func_match_imp(func, s, func->imps.count - imp->idx);
   
   if (!imp) {
     cx_error(cx, cx->row, cx->col, "Upcall not applicable");
@@ -207,7 +207,7 @@ static bool upcall_imp(struct cx_scope *scope) {
 
   struct cx_fimp *imp = call->target;
 
-  if (!imp->i) {
+  if (!imp->idx) {
     cx_error(cx, cx->row, cx->col, "No more fimps");
     return false;
   }

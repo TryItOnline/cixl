@@ -146,8 +146,86 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
   cx_init_ops(bin);
 
   fputs("bool eval(struct cx *cx) {\n"
-	"  if (cx_emit_init(cx, &init_id)) {\n", out);
+        "  static bool init = true;\n",
+	out);
+
+  struct cx_set init_dup;
+  cx_set_init(&init_dup, sizeof(void *), cx_cmp_ptr);
   
+  for (struct cx_op *op = cx_vec_start(&bin->ops);
+       op != cx_vec_end(&bin->ops);
+       op++) {
+    if (op->type->emit_func) {
+      struct cx_func *f = op->type->emit_func(op);
+
+      if (f) {
+	void **ok = cx_set_insert(&init_dup, &f);
+	
+	if (ok) {
+	  *ok = f;
+	  fprintf(out, "  static struct cx_func *func%zd = NULL;\n", f->tag);
+	}
+      }
+    }
+
+    if (op->type->emit_fimp) {
+      struct cx_fimp *f = op->type->emit_fimp(op);
+
+      if (f) {
+	void **ok = cx_set_insert(&init_dup, &f);
+      
+	if (ok) {
+	  *ok = f;
+	  fprintf(out, "  static struct cx_fimp *fimp%zd_%zd = NULL;\n",
+		  f->func->tag, f->idx);
+	}
+      }
+    }
+  }
+  
+  fputs("\n"
+	"  if (init) {\n"
+	"    init = false;\n",
+	out);
+  
+  cx_set_clear(&init_dup);
+  
+  for (struct cx_op *op = cx_vec_start(&bin->ops);
+       op != cx_vec_end(&bin->ops);
+       op++) {
+    if (op->type->emit_func) {
+      struct cx_func *f = op->type->emit_func(op);
+
+      if (f) {
+	void **ok = cx_set_insert(&init_dup, &f);
+	
+	if (ok) {
+	  *ok = f;
+	  
+	  fprintf(out, "    func%zd = cx_get_func(cx, \"%s\", false);\n",
+		  f->tag, f->id);
+	}
+      }
+    }
+    
+    if (op->type->emit_fimp) {
+      struct cx_fimp *f = op->type->emit_fimp(op);
+
+      if (f) {
+	void **ok = cx_set_insert(&init_dup, &f);
+	
+	if (ok) {
+	  *ok = f;
+	
+	  fprintf(out, "    fimp%zd_%zd = cx_func_get_imp(func%zd, \"%s\", false);\n",
+		  f->func->tag, f->idx, f->func->tag, f->id);
+	}
+      }
+    }
+  }  
+
+  cx_set_deinit(&init_dup);
+		
   fputs("  }\n\n"
 	"  while (!cx->stop) {\n"
 	"    switch (cx->pc) {\n",

@@ -23,6 +23,7 @@ struct cx_type;
 
 struct cx_func {
   struct cx *cx;
+  size_t tag;
   char *id;
   struct cx_set imp_lookup;
   struct cx_vec imps;

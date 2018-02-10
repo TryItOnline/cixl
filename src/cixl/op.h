@@ -33,6 +33,9 @@ struct cx_op_type {
 
   bool (*eval)(struct cx_op *, struct cx_bin *, struct cx *);
   bool (*emit)(struct cx_op *, struct cx_bin *, FILE *out, struct cx *);
+
+  struct cx_func *(*emit_func)(struct cx_op *);
+  struct cx_fimp *(*emit_fimp)(struct cx_op *);
 };
 
 struct cx_op_type *cx_op_type_init(struct cx_op_type *type, const char *id);

@@ -30,8 +30,8 @@ struct cx {
     *ref_type, *rfile_type, *rwfile_type, *seq_type, *str_type, *sym_type,
     *table_type, *time_type, *vect_type, *wfile_type;
 
-  uint64_t next_sym_tag;
-  struct cx_set syms, macros, funcs, consts, emits;
+  uint64_t next_func_tag, next_sym_tag;
+  struct cx_set syms, macros, funcs, consts;
   
   struct cx_malloc lambda_alloc, pair_alloc, rec_alloc, ref_alloc, scope_alloc,
     table_alloc, vect_alloc;
@@ -98,6 +98,5 @@ bool cx_funcall(struct cx *cx, const char *id);
 
 bool cx_load_toks(struct cx *cx, const char *path, struct cx_vec *out);
 bool cx_load(struct cx *cx, const char *path);
-bool cx_emit_init(struct cx *cx, void *id);
 
 #endif

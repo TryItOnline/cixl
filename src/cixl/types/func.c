@@ -19,6 +19,7 @@ struct cx_func *cx_func_init(struct cx_func *func,
 			     const char *id,
 			     int nargs) {
   func->cx = cx;
+  func->tag = cx->next_func_tag++;
   func->id = strdup(id);
   cx_set_init(&func->imp_lookup, sizeof(struct cx_fimp *), cx_cmp_cstr);
   func->imp_lookup.key = get_imp_id;
@@ -102,7 +103,7 @@ struct cx_fimp *cx_func_add_imp(struct cx_func *func,
   
   if (found) {
     imp = *found;
-    size_t i = imp->i;
+    size_t i = imp->idx;
     cx_fimp_deinit(imp);
     cx_fimp_init(imp, func, id.data, i);
   } else {
