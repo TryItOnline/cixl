@@ -61,8 +61,7 @@ bool cx_emit_tests(struct cx *cx) {
 }
 
 static bool emit(struct cx_op *op, struct cx_bin *bin, FILE *out, struct cx *cx) {
-  struct cx_tok *tok = cx_vec_get(&bin->toks, op->tok_idx);
-  cx_error(cx, tok->row, tok->col, "Emit not implemented: %s", op->type->id);
+  cx_error(cx, op->row, op->col, "Emit not implemented: %s", op->type->id);
   return false;
 }
 
@@ -333,44 +332,68 @@ cx_op_type(CX_OGETCONST, {
     type.emit = getconst_emit;
   });
 
-static bool getvar_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
-  struct cx_scope *s = cx_scope(cx, 0);
-  
-  if (op->as_getvar.id.id[0]) {
-    struct cx_box *v = cx_get_var(s, op->as_getvar.id, false);
-    if (!v) { return false; }
-    cx_copy(cx_push(s), v);
-  } else {
-    if (!s->cuts.count) {
-      struct cx_tok *tok = cx_vec_get(&bin->toks, op->tok_idx);
-      cx_error(cx, tok->row, tok->col, "Nothing to uncut");
-      return false;
-    }
 
-    struct cx_cut *c = cx_vec_peek(&s->cuts, 0);
-
-    if (!c->offs) {
-      struct cx_tok *tok = cx_vec_get(&bin->toks, op->tok_idx);
-      cx_error(cx, tok->row, tok->col, "Nothing to uncut");
-      return false;
-    }
-
-    c->offs--;
-
-    if (c->offs < s->stack.count-1) {
-      struct cx_box v = *(struct cx_box *)cx_vec_get(&s->stack, c->offs);
-      cx_vec_delete(&s->stack, c->offs);
-      *(struct cx_box *)cx_vec_push(&s->stack) = v;
-    }
-    
-    if (!c->offs) { cx_cut_deinit(cx_vec_pop(&s->cuts)); }
-  }
-  
+bool cx_ogetvar1(struct cx_scope *scope, struct cx_sym id) {
+  struct cx_box *v = cx_get_var(scope, id, false);
+  if (!v) { return false; }
+  cx_copy(cx_push(scope), v);
   return true;
 }
 
+bool cx_ogetvar2(struct cx_scope *scope) {
+  struct cx *cx = scope->cx;
+  
+  if (!scope->cuts.count) {
+      cx_error(cx, cx->row, cx->col, "Nothing to uncut");
+      return false;
+  }
+  
+  struct cx_cut *c = cx_vec_peek(&scope->cuts, 0);
+  
+  if (!c->offs) {
+    cx_error(cx, cx->row, cx->col, "Nothing to uncut");
+    return false;
+  }
+  
+  c->offs--;
+  
+  if (c->offs < scope->stack.count-1) {
+    struct cx_box v = *(struct cx_box *)cx_vec_get(&scope->stack, c->offs);
+    cx_vec_delete(&scope->stack, c->offs);
+    *(struct cx_box *)cx_vec_push(&scope->stack) = v;
+  }
+  
+  if (!c->offs) { cx_cut_deinit(cx_vec_pop(&scope->cuts)); }
+  return true;
+}
+
+static bool getvar_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
+  struct cx_scope *s = cx_scope(cx, 0);
+  struct cx_sym id = op->as_getvar.id;
+  return id.id[0] ? cx_ogetvar1(s, id) : cx_ogetvar2(s);
+}
+
+static bool getvar_emit(struct cx_op *op,
+			struct cx_bin *bin,
+			FILE *out,
+			struct cx *cx) {
+  struct cx_sym id = op->as_getvar.id;
+
+  if (id.id[0]) {
+    fprintf(out, "cx_ogetvar1(cx_scope(cx, 0), cx_sym(cx, \"%s\"));\n", id.id);
+  } else {
+    fputs("cx_ogetvar2(cx_scope(cx, 0));\n", out);
+  }
+
+  fputs("cx->pc++;\n", out);
+  fputs("break;\n", out);  
+  return true;
+}
+
+
 cx_op_type(CX_OGETVAR, {
     type.eval = getvar_eval;
+    type.emit = getvar_emit;
   });
 
 static bool jump_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
@@ -418,7 +441,7 @@ cx_op_type(CX_OPUSH, {
     type.emit = push_emit;
   });
 
-void cx_putargs(struct cx_fimp *imp, struct cx *cx) {
+void cx_oputargs(struct cx_fimp *imp, struct cx *cx) {
   struct cx_scope *ds = cx_scope(cx, 0), *ss = ds->stack.count ? ds : cx_scope(cx, 1);
 
   for (struct cx_func_arg *a = cx_vec_peek(&imp->args, 0);
@@ -435,7 +458,7 @@ void cx_putargs(struct cx_fimp *imp, struct cx *cx) {
 }
 
 static bool putargs_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
-  cx_putargs(op->as_putargs.imp, cx);
+  cx_oputargs(op->as_putargs.imp, cx);
   return true;
 }
 
@@ -466,9 +489,7 @@ static bool putvar_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
   if (!src) { return false; }
 
   if (op->as_putvar.type && !cx_is(src->type, op->as_putvar.type)) {
-    struct cx_tok *tok = cx_vec_get(&bin->toks, op->tok_idx);
-
-    cx_error(cx, tok->row, tok->col,
+    cx_error(cx, op->row, op->col,
 	     "Expected type %s, actual: %s",
 	     op->as_putvar.type->id, src->type->id);
 
