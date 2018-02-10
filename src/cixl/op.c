@@ -67,6 +67,8 @@ static bool emit(struct cx_op *op, struct cx_bin *bin, FILE *out, struct cx *cx)
 
 struct cx_op_type *cx_op_type_init(struct cx_op_type *type, const char *id) {
   type->id = id;
+  type->init = NULL;
+  type->deinit = NULL;
   type->eval = NULL;
   type->emit = emit;
   return type;
@@ -419,9 +421,16 @@ cx_op_type(CX_OLAMBDA, {
     type.eval = lambda_eval;
   });
 
+static void push_init(struct cx_op *op, struct cx_tok *tok) {
+  cx_copy(&op->as_push.value, &tok->as_box);
+}
+
+static void push_deinit(struct cx_op *op) {
+  cx_box_deinit(&op->as_push.value);
+}
+
 static bool push_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
-  struct cx_tok *tok = cx_vec_get(&bin->toks, op->tok_idx);
-  cx_copy(cx_push(cx_scope(cx, 0)),  &tok->as_box);
+  cx_copy(cx_push(cx_scope(cx, 0)),  &op->as_push.value);
   return true;
 }
 
@@ -429,14 +438,15 @@ static bool push_emit(struct cx_op *op,
 		      struct cx_bin *bin,
 		      FILE *out,
 		      struct cx *cx) {
-  struct cx_tok *tok = cx_vec_get(&bin->toks, op->tok_idx);
-  cx_box_emit(&tok->as_box, out);
+  cx_box_emit(&op->as_push.value, out);
   fputs("cx->pc++;\n", out);
   fputs("break;\n", out);  
   return true;
 }
 
 cx_op_type(CX_OPUSH, {
+    type.init = push_init;
+    type.deinit = push_deinit;
     type.eval = push_eval;
     type.emit = push_emit;
   });

@@ -18,6 +18,7 @@ struct cx_bin_func {
 struct cx_bin {
   struct cx_vec toks, ops;
   struct cx_set funcs;
+  size_t init_offs;
   unsigned int nrefs;
   bool (*eval)(struct cx *);
 };
@@ -35,6 +36,7 @@ struct cx_bin_func *cx_bin_add_func(struct cx_bin *bin,
 				    size_t op_idx);
 
 struct cx_bin_func *cx_bin_get_func(struct cx_bin *bin, struct cx_fimp *imp);
+void cx_init_ops(struct cx_bin *bin);
 
 bool cx_compile(struct cx *cx,
 		struct cx_tok *start,

@@ -27,6 +27,10 @@ struct cx_tok;
 
 struct cx_op_type {
   const char *id;
+
+  void (*init)(struct cx_op *, struct cx_tok *);
+  void (*deinit)(struct cx_op *);
+
   bool (*eval)(struct cx_op *, struct cx_bin *, struct cx *);
   bool (*emit)(struct cx_op *, struct cx_bin *, FILE *out, struct cx *);
 };
@@ -81,6 +85,10 @@ struct cx_lambda_op {
   size_t start_op, num_ops;
 };
 
+struct cx_push_op {
+  struct cx_box value;
+};
+
 struct cx_putargs_op {
   struct cx_fimp *imp;
 };
@@ -112,6 +120,7 @@ struct cx_op {
     struct cx_getvar_op as_getvar;
     struct cx_jump_op as_jump;
     struct cx_lambda_op as_lambda;
+    struct cx_push_op as_push;
     struct cx_putargs_op as_putargs;
     struct cx_putvar_op as_putvar;
     struct cx_return_op as_return;

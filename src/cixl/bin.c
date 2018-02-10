@@ -13,17 +13,12 @@ struct cx_bin *cx_bin_new() {
 
 static bool eval(struct cx *cx) {
   if (!cx->bin->ops.count) { return true; }
-      
+  
   while (cx->pc < cx->bin->ops.count && !cx->stop) {
+    cx_init_ops(cx->bin);
     struct cx_op *op = cx_vec_get(&cx->bin->ops, cx->pc++);
-    
-    if (op->row == -1) {
-      struct cx_tok *tok = cx_vec_get(&cx->bin->toks, op->tok_idx);
-      cx->row = op->row = tok->row; cx->col = op->col = tok->col;
-    } else {
-      cx->row = op->row; cx->col = op->col;
-    }
-    
+    cx->row = op->row; cx->col = op->col;
+
     if (!op->type->eval(op, cx->bin, cx) || cx->errors.count) { return false; }
 
     while (cx->scans.count) {
@@ -42,6 +37,7 @@ struct cx_bin *cx_bin_init(struct cx_bin *bin) {
   cx_vec_init(&bin->ops, sizeof(struct cx_op));
   cx_set_init(&bin->funcs, sizeof(struct cx_bin_func), cx_cmp_ptr);
   bin->funcs.key_offs = offsetof(struct cx_bin_func, imp);
+  bin->init_offs = 0;
   bin->nrefs = 1;
   bin->eval = eval;
   return bin;
@@ -49,7 +45,12 @@ struct cx_bin *cx_bin_init(struct cx_bin *bin) {
 
 struct cx_bin *cx_bin_deinit(struct cx_bin *bin) {
   cx_do_vec(&bin->toks, struct cx_tok, t) { cx_tok_deinit(t); }
-  cx_vec_deinit(&bin->toks);
+  cx_vec_deinit(&bin->toks);  
+
+  cx_do_vec(&bin->ops, struct cx_op, o) {
+    if (o->type->deinit) { o->type->deinit(o); }
+  }
+  
   cx_vec_deinit(&bin->ops);
   cx_set_deinit(&bin->funcs);
   return bin;
@@ -105,6 +106,19 @@ bool cx_compile(struct cx *cx,
   return true;
 }
 
+void cx_init_ops(struct cx_bin *bin) {
+  if (bin->init_offs < bin->ops.count) {
+    for (struct cx_op *op = cx_vec_get(&bin->ops, bin->init_offs);
+	 op != cx_vec_end(&bin->ops);
+	 op++) {
+      struct cx_tok *tok = cx_vec_get(&bin->toks, op->tok_idx);
+      op->row = tok->row; op->col = tok->col;
+      if (op->type->init) { op->type->init(op, tok); }
+      bin->init_offs++;
+    }
+  }
+}
+
 bool cx_eval(struct cx_bin *bin, size_t start_pc, struct cx *cx) {
   struct cx_bin *prev_bin = cx->bin;
   size_t prev_pc = cx->pc, prev_nscans = cx->scans.count;
@@ -129,16 +143,12 @@ bool cx_eval(struct cx_bin *bin, size_t start_pc, struct cx *cx) {
 }
 
 bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
+  cx_init_ops(bin);
+  
   for (struct cx_op *op = cx_vec_start(&bin->ops);
        op != cx_vec_end(&bin->ops);
        op++) {
-    if (op->row == -1) {
-      struct cx_tok *tok = cx_vec_get(&cx->bin->toks, op->tok_idx);
-      cx->row = op->row = tok->row; cx->col = op->col = tok->col;
-    } else {
-      cx->row = op->row; cx->col = op->col;
-    }
-
+    cx->row = op->row; cx->col = op->col;
     fprintf(out, "case %zd: {\n", op->pc);
     fprintf(out, "cx->row = %d; cx->col = %d;\n", cx->row, cx->col);
     if (!cx_test(op->type->emit)(op, bin, out, cx)) { return false; }

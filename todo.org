@@ -1,13 +1,3 @@
-* add cx_bin_init_ops
-** move row/col init
-** add op_type.init
-*** void (op *, tok *)
-** add bin.init_offs
-*** default 0
-** call from eval/emit
-** move tok->as_box to ops
-*** copy/deinit
-* --
 * implement Char emit
 * implement oreturn emit
 * implement fib emit
