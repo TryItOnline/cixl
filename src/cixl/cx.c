@@ -218,6 +218,8 @@ struct cx *cx_init(struct cx *cx) {
   cx_set_init(&cx->consts, sizeof(struct cx_var), cx_cmp_sym);
   cx->consts.key_offs = offsetof(struct cx_var, id);
 
+  cx_set_init(&cx->emits, sizeof(void *), cx_cmp_ptr);
+
   cx_malloc_init(&cx->lambda_alloc, CX_SLAB_SIZE, sizeof(struct cx_lambda));
   cx_malloc_init(&cx->pair_alloc, CX_SLAB_SIZE, sizeof(struct cx_pair));
   cx_malloc_init(&cx->rec_alloc, CX_SLAB_SIZE, sizeof(struct cx_rec));
@@ -328,6 +330,8 @@ struct cx *cx_deinit(struct cx *cx) {
 
   cx_do_set(&cx->consts, struct cx_var, v) { cx_var_deinit(v); }
   cx_set_deinit(&cx->consts);
+
+  cx_set_deinit(&cx->emits);
 
   cx_do_set(&cx->macros, struct cx_macro *, m) { free(cx_macro_deinit(*m)); }
   cx_set_deinit(&cx->macros);
@@ -623,4 +627,11 @@ bool cx_load(struct cx *cx, const char *path) {
     free(full_path);
     return ok;
   }
+}
+
+bool cx_emit_init(struct cx *cx, void *id) {
+  void **ok = cx_set_insert(&cx->emits, &id);
+  if (!ok) { return false; }
+  *ok = id;
+  return true;
 }

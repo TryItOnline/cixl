@@ -1,10 +1,4 @@
-* add emit init
-** add cx.emit_inits
-*** set of eval ptrs
-*** add bool cx_emit_init(eval) fn
-**** set true & return true if insert ok
-*** check in emit fn before init block
-* declare func vars in eval init
+* declare func vars in emit init
 ** replaces func/imp lookup
 ** func_X and fimpN_X (N = idx)
 * ---
