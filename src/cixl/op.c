@@ -19,26 +19,88 @@ bool cx_emit_tests(struct cx *cx) {
 
       case 0: {
 	cx->row = 1; cx->col = 0;
+	struct cx_func *func = cx_get_func(cx, "say", false);
+	struct cx_scan *scan = cx_scan(cx_scope(cx, 0), func, cx_fimp_scan);
+	scan->as_fimp.imp = cx_func_get_imp(func, "A", false);
+	scan->as_fimp.pc = 1;
+	cx->pc += 10;
+	break;
+      }
+      case 1: {
+	cx->row = 1; cx->col = 0;
+	struct cx_scope *parent = NULL;
+	struct cx_func *func = cx_get_func(cx, "say", false);
+	struct cx_fimp *imp = cx_func_get_imp(func, "A", false);
+	parent = imp->scope;
+	cx_begin(cx, parent);
+	cx->scan_level++;
+	cx->pc++;
+      }
+      case 2: {
+	cx->row = 1; cx->col = 0;
+	struct cx_func *func = cx_get_func(cx, "say", false);
+	struct cx_fimp *imp = cx_func_get_imp(func, "A", false);
+	cx_oputargs(imp, cx);
+	cx->pc++;
+      }
+      case 3: {
+	cx->row = 1; cx->col = 0;
 	struct cx_box *v = cx_get_const(cx, cx_sym(cx, "out"), false);
 	if (!v) { return false; }
 	cx_copy(cx_push(cx_scope(cx, 0)), v);
 	cx->pc++;
 	break;
       }
-      case 1: {
-	cx->row = 1; cx->col = 13;
+      case 4: {
+	cx->row = 1; cx->col = 5;
 	struct cx_func *func = cx_get_func(cx, "print", false);
 	struct cx_scan *scan = cx_scan(cx_scope(cx, 0), func, cx_funcall_scan);
-	scan->as_funcall.imp = cx_func_get_imp(func, "WFile A", false);
+	scan->as_funcall.imp = NULL;
 	cx->pc++;
 	break;
       }
-      case 2: {
+      case 5: {
 	cx->row = 1; cx->col = 11;
+	cx_ogetvar1(cx_sym(cx, "v"), cx_scope(cx, 0));
+	cx->pc++;
+	break;
+      }
+      case 6: {
+	cx->row = 1; cx->col = 14;
+	struct cx_box *v = cx_get_const(cx, cx_sym(cx, "out"), false);
+	if (!v) { return false; }
+	cx_copy(cx_push(cx_scope(cx, 0)), v);
+	cx->pc++;
+	break;
+      }
+      case 7: {
+	cx->row = 1; cx->col = 19;
+	struct cx_func *func = cx_get_func(cx, "print", false);
+	struct cx_scan *scan = cx_scan(cx_scope(cx, 0), func, cx_funcall_scan);
+	scan->as_funcall.imp = NULL;
+	cx->pc++;
+	break;
+      }
+      case 8: {
+	cx->row = 1; cx->col = 25;
+	cx_box_init(cx_push(cx_scope(cx, 0)), cx->char_type)->as_char = 10;
+	cx->pc++;
+	break;
+      }
+      case 9: {
+	cx->row = 1; cx->col = 25;
+	struct cx_func *func = cx_get_func(cx, "say", false);
+	struct cx_fimp *imp = cx_func_get_imp(func, "A", false);
+	cx_oreturn(imp, 1);
+	cx->pc++;
+	break;
+      }
+      case 10: {
+	cx->row = 1; cx->col = 6;
 	cx_box_init(cx_push(cx_scope(cx, 0)), cx->int_type)->as_int = 42;
 	cx->pc++;
 	break;
-      }
+      }	
 	
       default:
 	return true;
@@ -57,7 +119,9 @@ bool cx_emit_tests(struct cx *cx) {
 
   struct cx_bin *bin = cx_bin_new();
   bin->eval = eval;
-  return cx_eval(bin, 0, cx);
+  bool ok = cx_eval(bin, 0, cx);
+  cx_bin_deref(bin);
+  return ok;
 }
 
 static bool emit(struct cx_op *op, struct cx_bin *bin, FILE *out, struct cx *cx) {
@@ -110,7 +174,8 @@ static bool begin_emit(struct cx_op *op,
 	    "struct cx_func *func = cx_get_func(cx, \"%s\", false);\n",
 	    imp->func->id);
     
-    fprintf(out, "struct cx_fimp *imp = cx_get_fimp(func, \"%s\");\n", imp->id);
+    fprintf(out, "struct cx_fimp *imp = cx_func_get_imp(func, \"%s\", false);\n",
+	    imp->id);
     fputs("parent = imp->scope;\n", out);
   }
 
@@ -192,7 +257,7 @@ bool cx_fimp_scan(struct cx_scan *scan) {
   }
   
   cx_call_init(cx_vec_push(&cx->calls), cx->row, cx->col, imp, cx->pc);
-  cx->pc = scan->as_fimp.pc+1;
+  cx->pc = scan->as_fimp.pc;
   return true;
 }
 
@@ -202,7 +267,7 @@ static bool fimp_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
   if (op->as_fimp.inline1) {
     struct cx_scan *scan = cx_scan(cx_scope(cx, 0), imp->func, cx_fimp_scan);
     scan->as_fimp.imp = imp;
-    scan->as_fimp.pc = op->pc;
+    scan->as_fimp.pc = op->pc+1;
   }
   
   cx->pc += op->as_fimp.num_ops;
@@ -335,7 +400,7 @@ cx_op_type(CX_OGETCONST, {
   });
 
 
-bool cx_ogetvar1(struct cx_scope *scope, struct cx_sym id) {
+bool cx_ogetvar1(struct cx_sym id, struct cx_scope *scope) {
   struct cx_box *v = cx_get_var(scope, id, false);
   if (!v) { return false; }
   cx_copy(cx_push(scope), v);
@@ -346,8 +411,8 @@ bool cx_ogetvar2(struct cx_scope *scope) {
   struct cx *cx = scope->cx;
   
   if (!scope->cuts.count) {
-      cx_error(cx, cx->row, cx->col, "Nothing to uncut");
-      return false;
+    cx_error(cx, cx->row, cx->col, "Nothing to uncut");
+    return false;
   }
   
   struct cx_cut *c = cx_vec_peek(&scope->cuts, 0);
@@ -372,7 +437,7 @@ bool cx_ogetvar2(struct cx_scope *scope) {
 static bool getvar_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
   struct cx_scope *s = cx_scope(cx, 0);
   struct cx_sym id = op->as_getvar.id;
-  return id.id[0] ? cx_ogetvar1(s, id) : cx_ogetvar2(s);
+  return id.id[0] ? cx_ogetvar1(id, s) : cx_ogetvar2(s);
 }
 
 static bool getvar_emit(struct cx_op *op,
@@ -382,7 +447,7 @@ static bool getvar_emit(struct cx_op *op,
   struct cx_sym id = op->as_getvar.id;
 
   if (id.id[0]) {
-    fprintf(out, "cx_ogetvar1(cx_scope(cx, 0), cx_sym(cx, \"%s\"));\n", id.id);
+    fprintf(out, "cx_ogetvar1(cx_sym(cx, \"%s\"), cx_scope(cx, 0));\n", id.id);
   } else {
     fputs("cx_ogetvar2(cx_scope(cx, 0));\n", out);
   }
@@ -481,8 +546,9 @@ static bool putargs_emit(struct cx_op *op,
   fprintf(out,
 	  "struct cx_func *func = cx_get_func(cx, \"%s\", false);\n",
 	  imp->func->id);
-  fprintf(out, "struct cx_fimp *imp = cx_get_fimp(func, \"%s\");\n", imp->id);
-  fputs("cx_putargs(imp, cx);\n", out);
+  fprintf(out, "struct cx_fimp *imp = cx_func_get_imp(func, \"%s\", false);\n",
+	  imp->id);
+  fputs("cx_oputargs(imp, cx);\n", out);
   fputs("cx->pc++;\n", out);
   return true;
 }
@@ -531,15 +597,15 @@ bool cx_recall_scan(struct cx_scan *scan) {
   return true;
 }
 
-static bool return_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
+bool cx_oreturn(struct cx_fimp *imp, size_t pc) {
+  struct cx *cx = imp->func->cx;
   struct cx_call *call = cx_test(cx_vec_peek(&cx->calls, 0));
-  struct cx_fimp *imp = call->target;
 
   if (call->recalls) {
     call->recalls--;
     struct cx_scan *scan = cx_scan(cx_scope(cx, 0), imp->func, cx_recall_scan);
-    scan->as_recall.imp = op->as_return.imp;
-    scan->as_recall.pc = op->as_return.pc;
+    scan->as_recall.imp = imp;
+    scan->as_recall.pc = pc;
   } else {
     if (call->return_pc > -1) {
       cx->pc = call->return_pc;
@@ -598,8 +664,30 @@ static bool return_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
   return true;
 }
 
+static bool return_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
+  return cx_oreturn(op->as_return.imp, op->as_return.pc);
+}
+
+static bool return_emit(struct cx_op *op,
+			struct cx_bin *bin,
+			FILE *out,
+			struct cx *cx) {
+  struct cx_fimp *imp = op->as_return.imp;
+  struct cx_func *func = imp->func;
+  
+  fprintf(out, "struct cx_func *func = cx_get_func(cx, \"%s\", false);\n", func->id);
+  fprintf(out, "struct cx_fimp *imp = cx_func_get_imp(func, \"%s\", false);\n",
+	  imp->id);
+
+  fprintf(out, "cx_oreturn(imp, %zd);\n", op->as_return.pc);
+  fputs("cx->pc++;\n", out);
+  fputs("break;\n", out);
+  return true;
+}
+
 cx_op_type(CX_ORETURN, {
     type.eval = return_eval;
+    type.emit = return_emit;
   });
 
 static bool stash_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
