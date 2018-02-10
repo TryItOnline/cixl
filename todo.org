@@ -1,4 +1,4 @@
-* implement fib emit
+* finish fib emit
 ** implement olambda emit
 * add emit init
 ** add cx.emit_inits
@@ -19,6 +19,9 @@
 *** pass to gcc
 ** add -h option
 *** print usage
+* declare func vars in eval init
+** replaces func/imp lookup
+** func_X and func_XN (N = idx)
 * --
 * add TN to generated ids
 ** add/parse_fimp
