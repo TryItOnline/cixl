@@ -35,7 +35,6 @@ bool cx_emit_tests(struct cx *cx) {
 	cx_begin(cx, parent);
 	cx->scan_level++;
 	cx->pc++;
-	break;
       }
       case 2: { /* CX_OPUTARGS */
 	cx->row = 1; cx->col = 0;
@@ -43,7 +42,6 @@ bool cx_emit_tests(struct cx *cx) {
 	struct cx_fimp *imp = cx_func_get_imp(func, "A", false);
 	cx_oputargs(imp, cx);
 	cx->pc++;
-	break;
       }
       case 3: { /* CX_OGETCONST */
 	cx->row = 1; cx->col = 0;
@@ -103,7 +101,6 @@ bool cx_emit_tests(struct cx *cx) {
 	cx_begin(cx, parent);
 	cx->scan_level++;
 	cx->pc++;
-	break;
       }
       case 11: { /* CX_OFUNCALL */
 	cx->row = 1; cx->col = 4;
@@ -179,7 +176,6 @@ bool cx_emit_tests(struct cx *cx) {
 	cx_begin(cx, parent);
 	cx->scan_level++;
 	cx->pc++;
-	break;
       }
       case 21: { /* CX_OPUTARGS */
 	cx->row = 1; cx->col = 25;
@@ -187,7 +183,6 @@ bool cx_emit_tests(struct cx *cx) {
 	struct cx_fimp *imp = cx_func_get_imp(func, "Int", false);
 	cx_oputargs(imp, cx);
 	cx->pc++;
-	break;
       }
       case 22: { /* CX_OPUSH */
 	cx->row = 1; cx->col = 1;
@@ -225,7 +220,6 @@ bool cx_emit_tests(struct cx *cx) {
 	cx_begin(cx, parent);
 	cx->scan_level++;
 	cx->pc++;
-	break;
       }
       case 27: { /* CX_OPUTARGS */
 	cx->row = 1; cx->col = 7;
@@ -233,7 +227,6 @@ bool cx_emit_tests(struct cx *cx) {
 	struct cx_fimp *imp = cx_func_get_imp(func, "Int Int Int", false);
 	cx_oputargs(imp, cx);
 	cx->pc++;
-	break;
       }
       case 28: { /* CX_OGETVAR */
 	cx->row = 1; cx->col = 0;
@@ -324,7 +317,9 @@ bool cx_emit_tests(struct cx *cx) {
 	cx->scan_level += -1;
 	struct cx_scope *s = cx_scope(cx, 0);
 	struct cx_cut *c = s->cuts.count ? cx_vec_peek(&s->cuts, 0) : NULL;
-	if (c && c->scan_level == cx->scan_level) { cx_cut_deinit(cx_vec_pop(&s->cuts)); }
+	if (c && c->scan_level == cx->scan_level) {
+	  cx_cut_deinit(cx_vec_pop(&s->cuts));
+	}
 	cx->pc++;
 	break;
       }
@@ -367,7 +362,9 @@ bool cx_emit_tests(struct cx *cx) {
 	cx->scan_level += -1;
 	struct cx_scope *s = cx_scope(cx, 0);
 	struct cx_cut *c = s->cuts.count ? cx_vec_peek(&s->cuts, 0) : NULL;
-	if (c && c->scan_level == cx->scan_level) { cx_cut_deinit(cx_vec_pop(&s->cuts)); }
+	if (c && c->scan_level == cx->scan_level) {
+	  cx_cut_deinit(cx_vec_pop(&s->cuts));
+	}
 	cx->pc++;
 	break;
       }
@@ -382,7 +379,9 @@ bool cx_emit_tests(struct cx *cx) {
 	cx->scan_level += -1;
 	struct cx_scope *s = cx_scope(cx, 0);
 	struct cx_cut *c = s->cuts.count ? cx_vec_peek(&s->cuts, 0) : NULL;
-	if (c && c->scan_level == cx->scan_level) { cx_cut_deinit(cx_vec_pop(&s->cuts)); }
+	if (c && c->scan_level == cx->scan_level) {
+	  cx_cut_deinit(cx_vec_pop(&s->cuts));
+	}
 	cx->pc++;
 	break;
       }
@@ -420,7 +419,7 @@ bool cx_emit_tests(struct cx *cx) {
 	cx->pc++;
 	break;
       }
-
+	
       default:
 	return true;
       }
