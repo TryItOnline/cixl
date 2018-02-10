@@ -100,8 +100,8 @@ bool cx_emit_tests(struct cx *cx) {
 	cx_box_init(cx_push(cx_scope(cx, 0)), cx->int_type)->as_int = 42;
 	cx->pc++;
 	break;
-      }	
-	
+      }
+  
       default:
 	return true;
       }
@@ -270,7 +270,7 @@ static bool fimp_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
     scan->as_fimp.pc = op->pc+1;
   }
   
-  cx->pc += op->as_fimp.num_ops;
+  cx->pc += op->as_fimp.nops;
   return true;
 }
 
@@ -289,7 +289,7 @@ static bool fimp_emit(struct cx_op *op,
     fprintf(out, "scan->as_fimp.pc = %zd;\n", op->pc+1);
   }
 
-  fprintf(out, "cx->pc += %zd;\n", op->as_fimp.num_ops);
+  fprintf(out, "cx->pc += %zd;\n", op->as_fimp.nops+1);
   fputs("break;\n", out);
   return true;
 }
@@ -476,7 +476,7 @@ static bool lambda_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
   struct cx_scope *scope = cx_scope(cx, 0);
   struct cx_lambda *l = cx_lambda_new(scope,
 				      op->as_lambda.start_op,
-				      op->as_lambda.num_ops);
+				      op->as_lambda.nops);
   cx_box_init(cx_push(scope), cx->lambda_type)->as_ptr = l;
   cx->pc += l->nops;
   return true;

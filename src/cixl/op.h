@@ -56,7 +56,7 @@ struct cx_fence_op {
 
 struct cx_fimp_op {
   struct cx_fimp *imp;
-  size_t start_op, num_ops;
+  size_t start_op, nops;
   bool inline1;
 };
 
@@ -82,7 +82,7 @@ struct cx_jump_op {
 };
 
 struct cx_lambda_op {
-  size_t start_op, num_ops;
+  size_t start_op, nops;
 };
 
 struct cx_push_op {

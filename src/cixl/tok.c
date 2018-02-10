@@ -73,7 +73,7 @@ static bool inline_fimp1(struct cx_fimp *imp,
   op->as_fimp.start_op = i+1;
   if (!cx_fimp_compile(imp, tok_idx, true, bin)) { return false; }
   op = cx_vec_get(&bin->ops, i);
-  op->as_fimp.num_ops = bin->ops.count - op->as_fimp.start_op;
+  op->as_fimp.nops = bin->ops.count - op->as_fimp.start_op;
   op->as_fimp.inline1 = true;
   return true;
 }
@@ -89,7 +89,7 @@ static bool inline_fimp2(struct cx_fimp *imp,
   op->as_fimp.start_op = i+1;
   if (!cx_fimp_compile(imp, tok_idx, false, bin)) { return false; }
   op = cx_vec_get(&bin->ops, i);
-  op->as_fimp.num_ops = bin->ops.count - op->as_fimp.start_op;
+  op->as_fimp.nops = bin->ops.count - op->as_fimp.start_op;
   op->as_fimp.inline1 = false;
   return true;
 }
@@ -254,7 +254,7 @@ static ssize_t lambda_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx)
   
   cx_op_init(bin, CX_OSTOP(), tok_idx);
   struct cx_op *op = cx_vec_get(&bin->ops, i);
-  op->as_lambda.num_ops = bin->ops.count - op->as_lambda.start_op;
+  op->as_lambda.nops = bin->ops.count - op->as_lambda.start_op;
   return tok_idx+1;
 }
 
