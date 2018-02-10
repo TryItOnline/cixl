@@ -1,4 +1,5 @@
 * implement fib emit
+** implement olambda emit
 * add emit init
 ** add cx.emit_inits
 *** set of eval ptrs
