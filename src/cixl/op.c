@@ -242,8 +242,28 @@ static bool fence_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
   return true;
 }
 
+static bool fence_emit(struct cx_op *op,
+		       struct cx_bin *bin,
+		       FILE *out,
+		       struct cx *cx) {
+  fprintf(out, "cx->scan_level += %d;\n", op->as_fence.delta_level);
+
+  if (op->as_fence.delta_level < 0) {
+    fputs("struct cx_scope *s = cx_scope(cx, 0);\n"
+	  "struct cx_cut *c = s->cuts.count ? cx_vec_peek(&s->cuts, 0) : NULL;\n"
+	  "if (c && c->scan_level == cx->scan_level) { "
+	  "cx_cut_deinit(cx_vec_pop(&s->cuts)); "
+	  "}", out);
+  }
+
+  fputs("cx->pc++;\n", out);
+  fputs("break;\n", out);
+  return true;
+}
+
 cx_op_type(CX_OFENCE, {
     type.eval = fence_eval;
+    type.emit = fence_emit;
   });
 
 bool cx_fimp_scan(struct cx_scan *scan) {

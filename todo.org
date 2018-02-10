@@ -1,5 +1,5 @@
 * finish fib emit
-** implement ofence emit
+** implement ostop emit
 * add emit init
 ** add cx.emit_inits
 *** set of eval ptrs
