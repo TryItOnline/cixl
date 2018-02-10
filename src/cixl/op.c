@@ -482,8 +482,22 @@ static bool lambda_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
   return true;
 }
 
+static bool lambda_emit(struct cx_op *op,
+			struct cx_bin *bin,
+			FILE *out,
+			struct cx *cx) {
+  fputs("struct cx_scope *s = cx_scope(cx, 0);\n", out);
+  fprintf(out, "struct cx_lambda *l = cx_lambda_new(s, %zd, %zd);\n",
+	  op->as_lambda.start_op, op->as_lambda.nops);
+  fputs("cx_box_init(cx_push(s), cx->lambda_type)->as_ptr = l;\n", out);
+  fputs("cx->pc += l->nops+1;\n", out);
+  fputs("break;\n", out);  
+  return true;
+}
+
 cx_op_type(CX_OLAMBDA, {
     type.eval = lambda_eval;
+    type.emit = lambda_emit;
   });
 
 static void push_init(struct cx_op *op, struct cx_tok *tok) {
