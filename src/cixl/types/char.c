@@ -45,6 +45,13 @@ static void print_imp(struct cx_box *v, FILE *out) {
   fputc(v->as_char, out);
 }
 
+static bool emit_imp(struct cx_box *v, FILE *out) {
+  fprintf(out,
+	  "cx_box_init(cx_push(cx_scope(cx, 0)), cx->char_type)->as_char = %d;\n",
+	  v->as_char);
+  return true;
+}
+
 struct cx_type *cx_init_char_type(struct cx *cx) {
   struct cx_type *t = cx_add_type(cx, "Char", cx->any_type);
   t->equid = equid_imp;
@@ -52,5 +59,6 @@ struct cx_type *cx_init_char_type(struct cx *cx) {
   t->write = dump_imp;
   t->dump = dump_imp; 
   t->print = print_imp;
+  t->emit = emit_imp;
   return t;
 }

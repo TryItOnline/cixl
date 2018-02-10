@@ -1,4 +1,3 @@
-* implement Char emit
 * implement oreturn emit
 * implement fib emit
 * add emit init
