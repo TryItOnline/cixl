@@ -25,7 +25,7 @@ struct cx_fimp;
 struct cx_op;
 struct cx_scan;
 struct cx_tok;
-
+  
 struct cx_op_type {
   const char *id;
 

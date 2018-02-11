@@ -1,8 +1,5 @@
-* inline scan loop in op emits where needed
-** add emit_scan_check fn
-** break out of switch if any called
 * inline stop check where needed
-** add emit_stop_check fn
+** add CX_EMIT_STOP fn
 * add bin generation of outer emit func
 ** move static vars & init to outer func
 * profile fib emit

@@ -328,12 +328,6 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
 
   fputs("      default:\n"
 	"        return true;\n"
-	"    }\n\n"
-	"    while (cx->scans.count) {\n"
-	"      struct cx_scan *s = cx_vec_peek(&cx->scans, 0);\n"
-	"      if (!cx_scan_ok(s)) { break; }\n"
-	"      cx_vec_pop(&cx->scans);\n"
-        "      if (!cx_scan_call(s)) { return false; }\n"
 	"    }\n"
         "  }\n\n"
 	"  cx->stop = false;\n"
