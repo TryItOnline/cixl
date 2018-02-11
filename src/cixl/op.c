@@ -1218,12 +1218,12 @@ void cx_oreturn_end(struct cx_scope *scope) {
   cx->scan_level--;
 }
 
-bool cx_oreturn(struct cx_fimp *imp, size_t pc) {
-  struct cx *cx = imp->func->cx;
+static bool return_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
+  struct cx_fimp *imp = op->as_return.imp;
   struct cx_call *call = cx_test(cx_vec_peek(&cx->calls, 0));
 
   if (call->recalls) {
-    cx_oreturn_recall(call, pc, cx);
+    cx_oreturn_recall(call, op->as_return.pc, cx);
   } else {
     struct cx_scope *ss = cx_scope(cx, 0);
     if (!cx_oreturn_check(call, ss)) { return false; }
@@ -1263,10 +1263,6 @@ bool cx_oreturn(struct cx_fimp *imp, size_t pc) {
   }
   
   return true;
-}
-
-static bool return_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
-  return cx_oreturn(op->as_return.imp, op->as_return.pc);
 }
 
 static bool return_emit(struct cx_op *op,

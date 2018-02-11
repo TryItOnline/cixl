@@ -153,7 +153,6 @@ void cx_oend(struct cx *cx);
 bool cx_ogetvar1(struct cx_sym id, struct cx_scope *scope);
 bool cx_ogetvar2(struct cx_scope *scope);
 
-bool cx_oreturn(struct cx_fimp *imp, size_t pc);
 void cx_oreturn_recall(struct cx_call *call, size_t pc, struct cx *cx);
 bool cx_oreturn_check(struct cx_call *call, struct cx_scope *s);
 void cx_oreturn_end(struct cx_scope *scope);
