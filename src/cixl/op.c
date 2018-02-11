@@ -17,18 +17,23 @@ bool cx_emit_tests(struct cx *cx) {
     static bool init = true;
     static struct cx_func *func40 = NULL;
     static struct cx_fimp *fimp40_0 = NULL;
+    static struct cx_sym sym16;
     static struct cx_func *func32 = NULL;
+    static struct cx_sym sym2;
     static struct cx_func *func9 = NULL;
     static struct cx_fimp *fimp9_0 = NULL;
     static struct cx_func *func3 = NULL;
     static struct cx_fimp *fimp3_0 = NULL;
     static struct cx_func *func64 = NULL;
     static struct cx_fimp *fimp64_0 = NULL;
+    static struct cx_sym sym3;
     static struct cx_func *func63 = NULL;
     static struct cx_fimp *fimp63_0 = NULL;
     static struct cx_func *func22 = NULL;
     static struct cx_func *func28 = NULL;
     static struct cx_fimp *fimp28_0 = NULL;
+    static struct cx_sym sym26;
+    static struct cx_sym sym25;
     static struct cx_func *func57 = NULL;
     static struct cx_fimp *fimp57_0 = NULL;
     static struct cx_func *func2 = NULL;
@@ -40,23 +45,28 @@ bool cx_emit_tests(struct cx *cx) {
     static struct cx_func *func60 = NULL;
     static struct cx_fimp *fimp60_0 = NULL;
     static struct cx_func *func14 = NULL;
-  
+
     if (init) {
       init = false;
       func40 = cx_get_func(cx, "say", false);
       fimp40_0 = cx_func_get_imp(func40, "A", false);
+      sym16 = cx_sym(cx, "out");
       func32 = cx_get_func(cx, "print", false);
+      sym2 = cx_sym(cx, "v");
       func9 = cx_get_func(cx, "clock", false);
       fimp9_0 = cx_func_get_imp(func9, "A", false);
       func3 = cx_get_func(cx, "times", false);
       fimp3_0 = cx_func_get_imp(func3, "Int A", false);
       func64 = cx_get_func(cx, "fib", false);
       fimp64_0 = cx_func_get_imp(func64, "Int", false);
+      sym3 = cx_sym(cx, "n");
       func63 = cx_get_func(cx, "fib-rec", false);
       fimp63_0 = cx_func_get_imp(func63, "Int Int Int", false);
       func22 = cx_get_func(cx, "?", false);
       func28 = cx_get_func(cx, "if-else", false);
       fimp28_0 = cx_func_get_imp(func28, "Opt A A", false);
+      sym26 = cx_sym(cx, "b");
+      sym25 = cx_sym(cx, "a");
       func57 = cx_get_func(cx, "+", false);
       fimp57_0 = cx_func_get_imp(func57, "Int Int", false);
       func2 = cx_get_func(cx, "--", false);
@@ -97,7 +107,7 @@ bool cx_emit_tests(struct cx *cx) {
       }
       case 3: { /* CX_OGETCONST */
         cx->row = 1; cx->col = 0;
-	struct cx_box *v = cx_get_const(cx, cx_sym(cx, "out"), false);
+	struct cx_box *v = cx_get_const(cx, sym16, false);
 	if (!v) { return false; }
 	cx_copy(cx_push(cx_scope(cx, 0)), v);
 	cx->pc++;
@@ -114,13 +124,13 @@ bool cx_emit_tests(struct cx *cx) {
       }
       case 5: { /* CX_OGETVAR */
         cx->row = 1; cx->col = 11;
-	cx_ogetvar1(cx_sym(cx, "v"), cx_scope(cx, 0));
+	cx_ogetvar1(sym2, cx_scope(cx, 0));
 	cx->pc++;
 	break;
       }
       case 6: { /* CX_OGETCONST */
         cx->row = 1; cx->col = 14;
-	struct cx_box *v = cx_get_const(cx, cx_sym(cx, "out"), false);
+	struct cx_box *v = cx_get_const(cx, sym16, false);
 	if (!v) { return false; }
 	cx_copy(cx_push(cx_scope(cx, 0)), v);
 	cx->pc++;
@@ -249,7 +259,7 @@ bool cx_emit_tests(struct cx *cx) {
       }
       case 24: { /* CX_OGETVAR */
         cx->row = 1; cx->col = 4;
-	cx_ogetvar1(cx_sym(cx, "n"), cx_scope(cx, 0));
+	cx_ogetvar1(sym3, cx_scope(cx, 0));
 	cx->pc++;
 	break;
       }
@@ -278,7 +288,7 @@ bool cx_emit_tests(struct cx *cx) {
       }
       case 28: { /* CX_OGETVAR */
         cx->row = 1; cx->col = 0;
-	cx_ogetvar1(cx_sym(cx, "n"), cx_scope(cx, 0));
+	cx_ogetvar1(sym3, cx_scope(cx, 0));
 	cx->pc++;
 	break;
       }
@@ -316,19 +326,19 @@ bool cx_emit_tests(struct cx *cx) {
       }
       case 33: { /* CX_OGETVAR */
         cx->row = 1; cx->col = 12;
-	cx_ogetvar1(cx_sym(cx, "b"), cx_scope(cx, 0));
+	cx_ogetvar1(sym26, cx_scope(cx, 0));
 	cx->pc++;
 	break;
       }
       case 34: { /* CX_OGETVAR */
         cx->row = 1; cx->col = 15;
-	cx_ogetvar1(cx_sym(cx, "a"), cx_scope(cx, 0));
+	cx_ogetvar1(sym25, cx_scope(cx, 0));
 	cx->pc++;
 	break;
       }
       case 35: { /* CX_OGETVAR */
         cx->row = 1; cx->col = 18;
-	cx_ogetvar1(cx_sym(cx, "b"), cx_scope(cx, 0));
+	cx_ogetvar1(sym26, cx_scope(cx, 0));
 	cx->pc++;
 	break;
       }
@@ -343,7 +353,7 @@ bool cx_emit_tests(struct cx *cx) {
       }
       case 37: { /* CX_OGETVAR */
         cx->row = 1; cx->col = 23;
-	cx_ogetvar1(cx_sym(cx, "n"), cx_scope(cx, 0));
+	cx_ogetvar1(sym3, cx_scope(cx, 0));
 	cx->pc++;
 	break;
       }
@@ -384,7 +394,7 @@ bool cx_emit_tests(struct cx *cx) {
       }
       case 42: { /* CX_OGETVAR */
         cx->row = 1; cx->col = 36;
-	cx_ogetvar1(cx_sym(cx, "a"), cx_scope(cx, 0));
+	cx_ogetvar1(sym25, cx_scope(cx, 0));
 	cx->pc++;
 	break;
       }
@@ -507,6 +517,7 @@ struct cx_op_type *cx_op_type_init(struct cx_op_type *type, const char *id) {
   type->emit = emit;
   type->emit_func = NULL;
   type->emit_fimp = NULL;
+  type->emit_syms = NULL;
   return type;
 }
 
@@ -816,8 +827,8 @@ static bool getconst_emit(struct cx_op *op,
 			  struct cx_bin *bin,
 			  FILE *out,
 			  struct cx *cx) {
-  fprintf(out, "struct cx_box *v = cx_get_const(cx, cx_sym(cx, \"%s\"), false);\n",
-	  op->as_getconst.id.id);
+  fprintf(out, "struct cx_box *v = cx_get_const(cx, sym%zd, false);\n",
+	  op->as_getconst.id.tag);
 
   fputs("if (!v) { return false; }\n"
 	"cx_copy(cx_push(cx_scope(cx, 0)), v);\n"
@@ -828,9 +839,14 @@ static bool getconst_emit(struct cx_op *op,
   return true;
 }
 
+static void getconst_emit_syms(struct cx_op *op, struct cx_vec *out) {
+  *(struct cx_sym *)cx_vec_push(out) = op->as_getconst.id;
+}
+
 cx_op_type(CX_OGETCONST, {
     type.eval = getconst_eval;
     type.emit = getconst_emit;
+    type.emit_syms = getconst_emit_syms;
   });
 
 
@@ -881,7 +897,7 @@ static bool getvar_emit(struct cx_op *op,
   struct cx_sym id = op->as_getvar.id;
 
   if (id.id[0]) {
-    fprintf(out, "cx_ogetvar1(cx_sym(cx, \"%s\"), cx_scope(cx, 0));\n", id.id);
+    fprintf(out, "cx_ogetvar1(sym%zd, cx_scope(cx, 0));\n", id.tag);
   } else {
     fputs("cx_ogetvar2(cx_scope(cx, 0));\n", out);
   }
@@ -893,10 +909,15 @@ static bool getvar_emit(struct cx_op *op,
   return true;
 }
 
+static void getvar_emit_syms(struct cx_op *op, struct cx_vec *out) {
+  struct cx_sym id = op->as_getvar.id;
+  if (id.id[0]) { *(struct cx_sym *)cx_vec_push(out) = id; }
+}
 
 cx_op_type(CX_OGETVAR, {
     type.eval = getvar_eval;
     type.emit = getvar_emit;
+    type.emit_syms = getvar_emit_syms;
   });
 
 static bool jump_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {

@@ -36,6 +36,7 @@ struct cx_op_type {
 
   struct cx_func *(*emit_func)(struct cx_op *);
   struct cx_fimp *(*emit_fimp)(struct cx_op *);
+  void (*emit_syms)(struct cx_op *, struct cx_vec *);
 };
 
 struct cx_op_type *cx_op_type_init(struct cx_op_type *type, const char *id);

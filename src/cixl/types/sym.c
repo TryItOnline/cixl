@@ -11,7 +11,7 @@
 #include "cixl/types/str.h"
 #include "cixl/types/sym.h"
 
-struct cx_sym *cx_sym_init(struct cx_sym *sym, const char *id, uint64_t tag) {
+struct cx_sym *cx_sym_init(struct cx_sym *sym, const char *id, size_t tag) {
   sym->id = strdup(id);
   sym->tag = tag;
   return sym;
@@ -44,7 +44,7 @@ static bool str_imp(struct cx_scope *scope) {
 
 static void new_imp(struct cx_box *out) {
   struct cx *cx = out->type->cx;
-  char *id = cx_fmt("S%" PRIu64, cx->next_sym_tag);
+  char *id = cx_fmt("S%zd", cx->next_sym_tag);
   out->as_sym = cx_sym(cx, id);
   free(id);
 }

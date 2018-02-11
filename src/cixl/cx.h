@@ -30,7 +30,7 @@ struct cx {
     *ref_type, *rfile_type, *rwfile_type, *seq_type, *str_type, *sym_type,
     *table_type, *time_type, *vect_type, *wfile_type;
 
-  uint64_t next_func_tag, next_sym_tag;
+  size_t next_func_tag, next_sym_tag;
   struct cx_set syms, macros, funcs, consts;
   
   struct cx_malloc lambda_alloc, pair_alloc, rec_alloc, ref_alloc, scope_alloc,
