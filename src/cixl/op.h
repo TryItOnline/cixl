@@ -28,7 +28,8 @@ struct cx_tok;
   
 struct cx_op_type {
   const char *id;
-
+  bool scan;
+  
   void (*init)(struct cx_op *, struct cx_tok *);
   void (*deinit)(struct cx_op *);
 
@@ -39,6 +40,7 @@ struct cx_op_type {
   struct cx_fimp *(*emit_fimp)(struct cx_op *);
   void (*emit_syms)(struct cx_op *, struct cx_vec *);
   void (*emit_types)(struct cx_op *, struct cx_vec *);
+  bool emit_break;
 };
 
 struct cx_op_type *cx_op_type_init(struct cx_op_type *type, const char *id);

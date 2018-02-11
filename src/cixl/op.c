@@ -12,19 +12,7 @@
 #include "cixl/scope.h"
 #include "cixl/tok.h"
 
-#define CX_EMIT_SCAN						\
-  "    \n"							\
-  "    size_t noks = 0;\n"					\
-  "    while (cx->scans.count) {\n"				\
-  "      struct cx_scan *s = cx_vec_peek(&cx->scans, 0);\n"	\
-  "      if (!cx_scan_ok(s)) { break; }\n"			\
-  "      cx_vec_pop(&cx->scans);\n"				\
-  "      if (!cx_scan_call(s)) { return false; }\n"		\
-  "      noks++;\n"						\
-  "    }\n"							\
-  "    if (noks) { break; }\n"					\
-
-bool cx_emit_tests(struct cx *cx) {
+bool cx_emit_tests(struct cx *cx) {  
   bool eval(struct cx *cx) {
     static bool init = true;
     static struct cx_func *func40 = NULL;
@@ -58,7 +46,7 @@ bool cx_emit_tests(struct cx *cx) {
     static struct cx_func *func60 = NULL;
     static struct cx_fimp *fimp60_0 = NULL;
     static struct cx_func *func14 = NULL;
-
+    
     if (init) {
       init = false;
       func40 = cx_get_func(cx, "say", false);
@@ -243,7 +231,6 @@ bool cx_emit_tests(struct cx *cx) {
 
 	  cx_oreturn_end(ss);
 	}
-
     
 	size_t noks = 0;
 	while (cx->scans.count) {
@@ -742,7 +729,6 @@ bool cx_emit_tests(struct cx *cx) {
 
 	  cx_oreturn_end(ss);
 	}
-
     
 	size_t noks = 0;
 	while (cx->scans.count) {
@@ -786,7 +772,6 @@ bool cx_emit_tests(struct cx *cx) {
 
 	  cx_oreturn_end(ss);
 	}
-
     
 	size_t noks = 0;
 	while (cx->scans.count) {
@@ -923,7 +908,7 @@ bool cx_emit_tests(struct cx *cx) {
     cx->stop = false;
     return true;
   }
- 
+  
   struct cx_bin *bin = cx_bin_new();
   bin->eval = eval;
   bool ok = cx_eval(bin, 0, cx);
@@ -938,6 +923,7 @@ static bool emit(struct cx_op *op, struct cx_bin *bin, FILE *out, struct cx *cx)
 
 struct cx_op_type *cx_op_type_init(struct cx_op_type *type, const char *id) {
   type->id = id;
+  type->scan = false;
   type->init = NULL;
   type->deinit = NULL;
   type->eval = NULL;
@@ -946,6 +932,7 @@ struct cx_op_type *cx_op_type_init(struct cx_op_type *type, const char *id) {
   type->emit_fimp = NULL;
   type->emit_syms = NULL;
   type->emit_types = NULL;
+  type->emit_break = false;
   return type;
 }
 
@@ -1043,14 +1030,14 @@ static bool end_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
 
 static bool end_emit(struct cx_op *op, struct cx_bin *bin, FILE *out, struct cx *cx) {
   fputs("cx_oend(cx);\n"
-	"cx->pc++;\n"
-	CX_EMIT_SCAN,
+	"cx->pc++;\n",
 	out);
 
   return true;
 }
 
 cx_op_type(CX_OEND, {
+    type.scan = true;
     type.eval = end_eval;
     type.emit = end_emit;
   });
@@ -1085,6 +1072,7 @@ static bool fence_emit(struct cx_op *op,
 }
 
 cx_op_type(CX_OFENCE, {
+    type.scan = true;
     type.eval = fence_eval;
     type.emit = fence_emit;
   });
@@ -1133,9 +1121,6 @@ static bool fimp_emit(struct cx_op *op,
   }
 
   fprintf(out, "cx->pc += %zd;\n", op->as_fimp.nops+1);
-  fputs(CX_EMIT_SCAN
-	"break;\n",
-	out);
   return true;
 }
 
@@ -1148,10 +1133,12 @@ static struct cx_fimp *fimp_emit_fimp(struct cx_op *op) {
 }
 
 cx_op_type(CX_OFIMP, {
+    type.scan = true;
     type.eval = fimp_eval;
     type.emit = fimp_emit;
     type.emit_func = fimp_emit_func;
     type.emit_fimp = fimp_emit_fimp;
+    type.emit_break = true;
   });
 
 static bool fimpdef_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
@@ -1221,10 +1208,7 @@ static bool funcall_emit(struct cx_op *op,
     fputs("scan->as_funcall.imp = NULL;\n", out);
   }
   
-  fputs("cx->pc++;\n"
-	CX_EMIT_SCAN,
-	out);
-  
+  fputs("cx->pc++;\n", out);
   return true;
 }
 
@@ -1237,6 +1221,7 @@ static struct cx_fimp *funcall_emit_fimp(struct cx_op *op) {
 }
 
 cx_op_type(CX_OFUNCALL, {
+    type.scan = true;
     type.eval = funcall_eval;
     type.emit = funcall_emit;
     type.emit_func = funcall_emit_func;
@@ -1259,8 +1244,7 @@ static bool getconst_emit(struct cx_op *op,
 
   fputs("if (!v) { return false; }\n"
 	"cx_copy(cx_push(cx_scope(cx, 0)), v);\n"
-	"cx->pc++;\n"
-	CX_EMIT_SCAN,
+	"cx->pc++;\n",
 	out);
   
   return true;
@@ -1271,6 +1255,7 @@ static void getconst_emit_syms(struct cx_op *op, struct cx_vec *out) {
 }
 
 cx_op_type(CX_OGETCONST, {
+    type.scan = true;
     type.eval = getconst_eval;
     type.emit = getconst_emit;
     type.emit_syms = getconst_emit_syms;
@@ -1329,10 +1314,7 @@ static bool getvar_emit(struct cx_op *op,
     fputs("cx_ogetvar2(cx_scope(cx, 0));\n", out);
   }
 
-  fputs("cx->pc++;\n"
-	CX_EMIT_SCAN,
-	out);
-  
+  fputs("cx->pc++;\n", out);
   return true;
 }
 
@@ -1342,6 +1324,7 @@ static void getvar_emit_syms(struct cx_op *op, struct cx_vec *out) {
 }
 
 cx_op_type(CX_OGETVAR, {
+    type.scan = true;
     type.eval = getvar_eval;
     type.emit = getvar_emit;
     type.emit_syms = getvar_emit_syms;
@@ -1375,17 +1358,17 @@ static bool lambda_emit(struct cx_op *op,
 	  op->as_lambda.start_op, op->as_lambda.nops);
 
   fputs("cx_box_init(cx_push(s), cx->lambda_type)->as_ptr = l;\n"
-	"cx->pc += l->nops+1;\n"
-	CX_EMIT_SCAN
-	"break;\n",
+	"cx->pc += l->nops+1;\n",
 	out);  
 
   return true;
 }
 
 cx_op_type(CX_OLAMBDA, {
+    type.scan = true;
     type.eval = lambda_eval;
     type.emit = lambda_emit;
+    type.emit_break = true;
   });
 
 static void push_init(struct cx_op *op, struct cx_tok *tok) {
@@ -1406,15 +1389,12 @@ static bool push_emit(struct cx_op *op,
 		      FILE *out,
 		      struct cx *cx) {
   cx_box_emit(&op->as_push.value, out);
-
-  fputs("cx->pc++;\n"
-	CX_EMIT_SCAN,
-	out);
-  
+  fputs("cx->pc++;\n", out);
   return true;
 }
 
 cx_op_type(CX_OPUSH, {
+    type.scan = true;
     type.init = push_init;
     type.deinit = push_deinit;
     type.eval = push_eval;
@@ -1670,9 +1650,7 @@ static bool return_emit(struct cx_op *op,
   } 
   
   fputs("  cx_oreturn_end(ss);\n"
-	"}\n\n"
-	CX_EMIT_SCAN
-	"break;\n",
+	"}\n",
 	out);
   
   return true;  
@@ -1697,11 +1675,13 @@ static void return_emit_types(struct cx_op *op, struct cx_vec *out) {
 }
 
 cx_op_type(CX_ORETURN, {
+    type.scan = true;
     type.eval = return_eval;
     type.emit = return_emit;
     type.emit_func = return_emit_func;
     type.emit_fimp = return_emit_fimp;
     type.emit_types = return_emit_types;
+    type.emit_break = true;
   });
 
 static bool stash_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
@@ -1728,6 +1708,7 @@ static bool stash_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
 }
 
 cx_op_type(CX_OSTASH, {
+    type.scan = true;
     type.eval = stash_eval;
   });
 
@@ -1741,8 +1722,7 @@ static bool stop_emit(struct cx_op *op,
 		      FILE *out,
 		      struct cx *cx) {
   fputs("cx->stop = true;\n"
-	"cx->pc++;\n"
-	"break;\n",
+	"cx->pc++;\n",
 	out);
   
   return true;
@@ -1751,4 +1731,5 @@ static bool stop_emit(struct cx_op *op,
 cx_op_type(CX_OSTOP, {
     type.eval = stop_eval;
     type.emit = stop_emit;
+    type.emit_break = true;
   });

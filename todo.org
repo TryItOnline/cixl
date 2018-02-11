@@ -1,14 +1,10 @@
-* inline stop check where needed
-** add CX_EMIT_STOP fn
-* add bin generation of outer emit func
-** move static vars & init to outer func
 * profile fib emit
+* add compiled bmips
+** evalN/compileN bmips
 * inline oreturn_check emit
 ** prefill nargs
 * prettify emitted code
 ** add CX_TAB define
-* add compiled bmips
-** evalN/compileN bmips
 * implement func: emit
 ** register all funcs from bin in outer eval
 * implement trait: & rec: emit

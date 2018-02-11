@@ -20,7 +20,8 @@ static bool eval(struct cx *cx) {
     cx->row = op->row; cx->col = op->col;
 
     if (!op->type->eval(op, cx->bin, cx) || cx->errors.count) { return false; }
-
+    if (!op->type->scan) { continue; }
+    
     while (cx->scans.count) {
       struct cx_scan *s = cx_vec_peek(&cx->scans, 0);
       if (!cx_scan_ok(s)) { break; }
@@ -323,6 +324,22 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
     fprintf(out, "      case %zd: { /* %s */\n", op->pc, op->type->id);
     fprintf(out, "        cx->row = %d; cx->col = %d;\n", cx->row, cx->col);
     if (!cx_test(op->type->emit)(op, bin, out, cx)) { return false; }
+
+    if (op->type->scan) {
+      fputs("    \n"						
+	    "    size_t noks = 0;\n"					
+	    "    while (cx->scans.count) {\n"				
+	    "      struct cx_scan *s = cx_vec_peek(&cx->scans, 0);\n"	
+	    "      if (!cx_scan_ok(s)) { break; }\n"			
+	    "      cx_vec_pop(&cx->scans);\n"				
+	    "      if (!cx_scan_call(s)) { return false; }\n"		
+	    "      noks++;\n"						
+	    "    }\n"							
+	    "    if (noks) { break; }\n",
+	    out);
+    }
+
+    if (op->type->emit_break) { fputs("break;\n", out); }
     fputs("      }\n", out);
   }
 
