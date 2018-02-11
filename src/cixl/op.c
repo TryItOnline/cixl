@@ -572,13 +572,13 @@ static bool begin_emit(struct cx_op *op,
 		       struct cx_bin *bin,
 		       FILE *out,
 		       struct cx *cx) {
-  fputs("struct cx_scope *parent = NULL;\n", out);
+  fputs("struct cx_scope *parent = ", out);
   
   if (op->as_begin.child) {
-    fputs("parent = cx_scope(cx, 0);\n", out);
+    fputs("cx_scope(cx, 0);\n", out);
   } else {
     struct cx_fimp *imp = op->as_begin.fimp;
-    fprintf(out, "parent = fimp%zd_%zd->scope;\n", imp->func->tag, imp->idx);
+    fprintf(out, "fimp%zd_%zd->scope;\n", imp->func->tag, imp->idx);
   }
 
   fputs("cx_begin(cx, parent);\n"
@@ -1130,35 +1130,49 @@ bool cx_recall_scan(struct cx_scan *scan) {
   return true;
 }
 
+void cx_oreturn_recall(struct cx_call *call, size_t pc, struct cx *cx) {
+  struct cx_fimp *imp = call->target;
+  call->recalls--;
+  struct cx_scan *scan = cx_scan(cx_scope(cx, 0), imp->func, cx_recall_scan);
+  scan->as_recall.imp = imp;
+  scan->as_recall.pc = pc;
+}
+
+bool cx_oreturn_check(struct cx_call *call, struct cx_scope *s) {
+  struct cx *cx = s->cx;
+  struct cx_fimp *imp = call->target;
+
+  if (call->return_pc > -1) {
+    cx->pc = call->return_pc;
+  } else {
+    cx->stop = true;
+  }
+
+  if (s->stack.count > imp->rets.count) {
+      cx_error(cx, cx->row, cx->col, "Stack not empty on return");
+      return false;
+    }
+
+    if (s->stack.count < imp->rets.count) {
+      cx_error(cx, cx->row, cx->col, "Not enough return values on stack");
+      return false;
+    }
+
+    return true;
+}
+
 bool cx_oreturn(struct cx_fimp *imp, size_t pc) {
   struct cx *cx = imp->func->cx;
   struct cx_call *call = cx_test(cx_vec_peek(&cx->calls, 0));
 
   if (call->recalls) {
-    call->recalls--;
-    struct cx_scan *scan = cx_scan(cx_scope(cx, 0), imp->func, cx_recall_scan);
-    scan->as_recall.imp = imp;
-    scan->as_recall.pc = pc;
+    cx_oreturn_recall(call, pc, cx);
   } else {
-    if (call->return_pc > -1) {
-      cx->pc = call->return_pc;
-    } else {
-      cx->stop = true;
-    }
-
-    struct cx_scope *ss = cx_scope(cx, 0), *ds = cx_scope(cx, 1);
-
-    if (ss->stack.count > imp->rets.count) {
-      cx_error(cx, cx->row, cx->col, "Stack not empty on return");
-      return false;
-    }
-
+    struct cx_scope *ss = cx_scope(cx, 0);
+    if (!cx_oreturn_check(call, ss)) { return false; }
+    
     if (imp->rets.count) {
-      if (ss->stack.count < imp->rets.count) {
-	cx_error(cx, cx->row, cx->col, "Not enough return values on stack");
-	return false;
-      }
-      
+      struct cx_scope *ds = cx_scope(cx, 1);
       cx_vec_grow(&ds->stack, ds->stack.count+imp->rets.count);
       size_t i = 0;
       struct cx_func_ret *r = cx_vec_peek(&imp->rets, i);
