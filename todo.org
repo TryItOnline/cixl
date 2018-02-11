@@ -1,5 +1,3 @@
-* unroll oputargs loop in emit
-** add putargs_emit_syms
 * unroll oreturn loop in emit
 * profile fib emit
 * implement func: emit
