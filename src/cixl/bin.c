@@ -321,26 +321,32 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
        op != cx_vec_end(&bin->ops);
        op++) {
     cx->row = op->row; cx->col = op->col;
-    fprintf(out, "      case %zd: { /* %s */\n", op->pc, op->type->id);
+    struct cx_tok *tok = cx_vec_get(&bin->toks, op->tok_idx);
+    
+    fprintf(out, "      case %zd: { /* %s %s */\n",
+	    op->pc, tok->type->id, op->type->id);
     fprintf(out, "        cx->row = %d; cx->col = %d;\n", cx->row, cx->col);
+
     if (!cx_test(op->type->emit)(op, bin, out, cx)) { return false; }
 
     if (op->type->scan) {
-      fputs("    \n"						
-	    "    size_t noks = 0;\n"					
-	    "    while (cx->scans.count) {\n"				
-	    "      struct cx_scan *s = cx_vec_peek(&cx->scans, 0);\n"	
-	    "      if (!cx_scan_ok(s)) { break; }\n"			
-	    "      cx_vec_pop(&cx->scans);\n"				
-	    "      if (!cx_scan_call(s)) { return false; }\n"		
-	    "      noks++;\n"						
-	    "    }\n",							
-	    out);
+      fputs("        \n", out);
 
-      if (!op->type->emit_break) { fputs("    if (noks) { break; }\n", out); }
+      if (!op->type->emit_break) { fputs("        size_t noks = 0;\n", out); }
+
+      fputs("        while (cx->scans.count) {\n"				
+	    "          struct cx_scan *s = cx_vec_peek(&cx->scans, 0);\n"	
+	    "          if (!cx_scan_ok(s)) { break; }\n"			
+	    "          cx_vec_pop(&cx->scans);\n"				
+	    "          if (!cx_scan_call(s)) { return false; }\n",
+	    out);
+      	    
+      if (!op->type->emit_break) { fputs("          noks++;\n", out); }
+      fputs("        }\n", out);
+      if (!op->type->emit_break) { fputs("        if (noks) { break; }\n", out); }
     }
 
-    if (op->type->emit_break) { fputs("break;\n", out); }
+    if (op->type->emit_break) { fputs("        break;\n", out); }
     fputs("      }\n", out);
   }
 
