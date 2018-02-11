@@ -38,6 +38,7 @@ struct cx_op_type {
   struct cx_func *(*emit_func)(struct cx_op *);
   struct cx_fimp *(*emit_fimp)(struct cx_op *);
   void (*emit_syms)(struct cx_op *, struct cx_vec *);
+  void (*emit_types)(struct cx_op *, struct cx_vec *);
 };
 
 struct cx_op_type *cx_op_type_init(struct cx_op_type *type, const char *id);
@@ -151,9 +152,11 @@ struct cx_op_type *CX_OSTOP();
 void cx_oend(struct cx *cx);
 bool cx_ogetvar1(struct cx_sym id, struct cx_scope *scope);
 bool cx_ogetvar2(struct cx_scope *scope);
+
 bool cx_oreturn(struct cx_fimp *imp, size_t pc);
 void cx_oreturn_recall(struct cx_call *call, size_t pc, struct cx *cx);
 bool cx_oreturn_check(struct cx_call *call, struct cx_scope *s);
+void cx_oreturn_end(struct cx_scope *scope);
 
 bool cx_fimp_scan(struct cx_scan *scan);
 bool cx_funcall_scan(struct cx_scan *scan);

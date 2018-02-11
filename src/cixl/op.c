@@ -40,6 +40,7 @@ bool cx_emit_tests(struct cx *cx) {
     static struct cx_fimp *fimp2_0 = NULL;
     static struct cx_func *func30 = NULL;
     static struct cx_fimp *fimp30_0 = NULL;
+    static struct cx_type *type11;
     static struct cx_func *func48 = NULL;
     static struct cx_fimp *fimp48_0 = NULL;
     static struct cx_func *func60 = NULL;
@@ -73,6 +74,7 @@ bool cx_emit_tests(struct cx *cx) {
       fimp2_0 = cx_func_get_imp(func2, "Int", false);
       func30 = cx_get_func(cx, "recall", false);
       fimp30_0 = cx_func_get_imp(func30, "", false);
+      type11 = cx_get_type(cx, "Int", false);
       func48 = cx_get_func(cx, "_", false);
       fimp48_0 = cx_func_get_imp(func48, "", false);
       func60 = cx_get_func(cx, "/", false);
@@ -94,8 +96,7 @@ bool cx_emit_tests(struct cx *cx) {
       }
       case 1: { /* CX_OBEGIN */
         cx->row = 1; cx->col = 0;
-	struct cx_scope *parent = NULL;
-	parent = fimp40_0->scope;
+	struct cx_scope *parent = fimp40_0->scope;
 	cx_begin(cx, parent);
 	cx->scan_level++;
 	cx->pc++;
@@ -105,10 +106,7 @@ bool cx_emit_tests(struct cx *cx) {
 	struct cx_scope
 	  *ds = cx_scope(cx, 0),
 	  *ss = ds->stack.count ? ds : cx_scope(cx, 1);
-	{
-	  struct cx_box *src = cx_test(cx_pop(ss, false));
-	  *cx_put_var(ds, sym2, true) = *src;
-	}
+	*cx_put_var(ds, sym2, true) = *cx_test(cx_pop(ss, false));
 	cx->pc++;
       }
       case 3: { /* CX_OGETCONST */
@@ -159,13 +157,21 @@ bool cx_emit_tests(struct cx *cx) {
       }
       case 9: { /* CX_ORETURN */
         cx->row = 1; cx->col = 25;
-	cx_oreturn(fimp40_0, 1);
+	struct cx_call *call = cx_test(cx_vec_peek(&cx->calls, 0));
+
+	if (call->recalls) {
+	  cx_oreturn_recall(call, 1, cx);
+	} else {
+	  struct cx_scope *ss = cx_scope(cx, 0);
+	  if (!cx_oreturn_check(call, ss)) { return false; }
+	  cx_oreturn_end(ss);
+	}
+
 	break;
       }
       case 10: { /* CX_OBEGIN */
         cx->row = 1; cx->col = 4;
-	struct cx_scope *parent = NULL;
-	parent = cx_scope(cx, 0);
+	struct cx_scope *parent = cx_scope(cx, 0);
 	cx_begin(cx, parent);
 	cx->scan_level++;
 	cx->pc++;
@@ -240,8 +246,7 @@ bool cx_emit_tests(struct cx *cx) {
       }
       case 20: { /* CX_OBEGIN */
         cx->row = 1; cx->col = 25;
-	struct cx_scope *parent = NULL;
-	parent = fimp64_0->scope;
+	struct cx_scope *parent = fimp64_0->scope;
 	cx_begin(cx, parent);
 	cx->scan_level++;
 	cx->pc++;
@@ -251,10 +256,7 @@ bool cx_emit_tests(struct cx *cx) {
 	struct cx_scope
 	  *ds = cx_scope(cx, 0),
 	  *ss = ds->stack.count ? ds : cx_scope(cx, 1);
-	{
-	  struct cx_box *src = cx_test(cx_pop(ss, false));
-	  *cx_put_var(ds, sym3, true) = *src;
-	}
+	*cx_put_var(ds, sym3, true) = *cx_test(cx_pop(ss, false));
 	cx->pc++;
       }
       case 22: { /* CX_OPUSH */
@@ -287,8 +289,7 @@ bool cx_emit_tests(struct cx *cx) {
       }
       case 26: { /* CX_OBEGIN */
         cx->row = 1; cx->col = 7;
-	struct cx_scope *parent = NULL;
-	parent = fimp63_0->scope;
+	struct cx_scope *parent = fimp63_0->scope;
 	cx_begin(cx, parent);
 	cx->scan_level++;
 	cx->pc++;
@@ -298,18 +299,9 @@ bool cx_emit_tests(struct cx *cx) {
 	struct cx_scope
 	  *ds = cx_scope(cx, 0),
 	  *ss = ds->stack.count ? ds : cx_scope(cx, 1);
-	{
-	  struct cx_box *src = cx_test(cx_pop(ss, false));
-	  *cx_put_var(ds, sym3, true) = *src;
-	}
-	{
-	  struct cx_box *src = cx_test(cx_pop(ss, false));
-	  *cx_put_var(ds, sym26, true) = *src;
-	}
-	{
-	  struct cx_box *src = cx_test(cx_pop(ss, false));
-	  *cx_put_var(ds, sym25, true) = *src;
-	}
+	*cx_put_var(ds, sym3, true) = *cx_test(cx_pop(ss, false));
+	*cx_put_var(ds, sym26, true) = *cx_test(cx_pop(ss, false));
+	*cx_put_var(ds, sym25, true) = *cx_test(cx_pop(ss, false));
 	cx->pc++;
       }
       case 28: { /* CX_OGETVAR */
@@ -426,12 +418,68 @@ bool cx_emit_tests(struct cx *cx) {
       }
       case 43: { /* CX_ORETURN */
         cx->row = 1; cx->col = 35;
-	cx_oreturn(fimp63_0, 26);
+	struct cx_call *call = cx_test(cx_vec_peek(&cx->calls, 0));
+
+	if (call->recalls) {
+	  cx_oreturn_recall(call, 26, cx);
+	} else {
+	  struct cx_scope *ss = cx_scope(cx, 0);
+	  if (!cx_oreturn_check(call, ss)) { return false; }
+	  struct cx_scope *ds = cx_scope(cx, 1);
+	  cx_vec_grow(&ds->stack, ds->stack.count+1);
+	  struct cx_box *v = cx_vec_start(&ss->stack);
+
+	  if (ss->safe) {
+	    struct cx_type *t = NULL;
+	    t = type11;
+	    if (!cx_is(v->type, t)) {
+	      cx_error(cx, cx->row, cx->col,
+		       "Invalid return type.\n"
+		       "Expected %s, actual: %s",
+		       t->id, v->type->id);
+	      return false;
+	    }
+	  }
+
+	  *(struct cx_box *)cx_vec_push(&ds->stack) = *v;
+	  v++;
+
+	  cx_oreturn_end(ss);
+	}
+
 	break;
       }
       case 44: { /* CX_ORETURN */
         cx->row = 1; cx->col = 35;
-	cx_oreturn(fimp64_0, 20);
+	struct cx_call *call = cx_test(cx_vec_peek(&cx->calls, 0));
+
+	if (call->recalls) {
+	  cx_oreturn_recall(call, 20, cx);
+	} else {
+	  struct cx_scope *ss = cx_scope(cx, 0);
+	  if (!cx_oreturn_check(call, ss)) { return false; }
+	  struct cx_scope *ds = cx_scope(cx, 1);
+	  cx_vec_grow(&ds->stack, ds->stack.count+1);
+	  struct cx_box *v = cx_vec_start(&ss->stack);
+
+	  if (ss->safe) {
+	    struct cx_type *t = NULL;
+	    t = type11;
+	    if (!cx_is(v->type, t)) {
+	      cx_error(cx, cx->row, cx->col,
+		       "Invalid return type.\n"
+		       "Expected %s, actual: %s",
+		       t->id, v->type->id);
+	      return false;
+	    }
+	  }
+
+	  *(struct cx_box *)cx_vec_push(&ds->stack) = *v;
+	  v++;
+
+	  cx_oreturn_end(ss);
+	}
+
 	break;
       }
       case 45: { /* CX_OFUNCALL */
@@ -1149,16 +1197,24 @@ bool cx_oreturn_check(struct cx_call *call, struct cx_scope *s) {
   }
 
   if (s->stack.count > imp->rets.count) {
-      cx_error(cx, cx->row, cx->col, "Stack not empty on return");
-      return false;
-    }
+    cx_error(cx, cx->row, cx->col, "Stack not empty on return: %s", imp->func->id);
+    return false;
+  }
 
-    if (s->stack.count < imp->rets.count) {
-      cx_error(cx, cx->row, cx->col, "Not enough return values on stack");
-      return false;
-    }
+  if (s->stack.count < imp->rets.count) {
+    cx_error(cx, cx->row, cx->col, "Not enough return values on stack");
+    return false;
+  }
 
-    return true;
+  return true;
+}
+
+void cx_oreturn_end(struct cx_scope *scope) {
+  struct cx *cx = scope->cx;
+  cx_vec_clear(&scope->stack);
+  cx_call_deinit(cx_vec_pop(&cx->calls));
+  cx_end(cx);
+  cx->scan_level--;
 }
 
 bool cx_oreturn(struct cx_fimp *imp, size_t pc) {
@@ -1175,7 +1231,7 @@ bool cx_oreturn(struct cx_fimp *imp, size_t pc) {
       struct cx_scope *ds = cx_scope(cx, 1);
       cx_vec_grow(&ds->stack, ds->stack.count+imp->rets.count);
       size_t i = 0;
-      struct cx_func_ret *r = cx_vec_peek(&imp->rets, i);
+      struct cx_func_ret *r = cx_vec_start(&imp->rets);
       
       for (struct cx_box *v = cx_vec_start(&ss->stack);
 	   i < ss->stack.count;
@@ -1201,11 +1257,8 @@ bool cx_oreturn(struct cx_fimp *imp, size_t pc) {
 	*(struct cx_box *)cx_vec_push(&ds->stack) = *v;
       }    
     }
-    
-    cx_vec_clear(&ss->stack);
-    cx_call_deinit(cx_vec_pop(&cx->calls));
-    cx_end(cx);
-    cx->scan_level--;
+
+    cx_oreturn_end(ss);
   }
   
   return true;
@@ -1219,13 +1272,59 @@ static bool return_emit(struct cx_op *op,
 			struct cx_bin *bin,
 			FILE *out,
 			struct cx *cx) {
+  fprintf(out,
+	  "struct cx_call *call = cx_test(cx_vec_peek(&cx->calls, 0));\n\n"
+	  "if (call->recalls) {\n"
+	  "  cx_oreturn_recall(call, %zd, cx);\n"
+	  "} else {\n"
+	  "  struct cx_scope *ss = cx_scope(cx, 0);\n"
+	  "  if (!cx_oreturn_check(call, ss)) { return false; }\n\n",
+	  op->as_return.pc);
+
   struct cx_fimp *imp = op->as_return.imp;
   
-  fprintf(out, "cx_oreturn(fimp%zd_%zd, %zd);\n",
-	  imp->func->tag, imp->idx, op->as_return.pc);
-
-  fputs("break;\n", out);
-  return true;
+  if (imp->rets.count) {
+    fputs("struct cx_scope *ds = cx_scope(cx, 1);\n", out);
+    fprintf(out, "cx_vec_grow(&ds->stack, ds->stack.count+%zd);\n", imp->rets.count);
+    fputs("struct cx_box *v = cx_vec_start(&ss->stack);\n\n", out);
+    
+    for (struct cx_func_ret *r = cx_vec_start(&imp->rets);
+	 r != cx_vec_end(&imp->rets);
+	 r++) {
+      fputs("  if (ss->safe) {\n"
+	    "    struct cx_type *t = NULL;\n",
+	    out);
+      
+      if (r->type) {
+	fprintf(out, "    t = type%zd;\n", r->type->tag);
+      } else {
+	fprintf(out,
+		"    struct cx_func_arg *a = cx_vec_get(&fimp%zd_%zd->args, %d);\n"
+		"    struct cx_box *av = cx_test(cx_get_var(ss, a->sym_id, false));\n"
+		"    t = av->type;\n",
+		imp->func->tag, imp->idx, r->narg);
+      }
+      
+      fputs("    if (!cx_is(v->type, t)) {\n"
+	    "      cx_error(cx, cx->row, cx->col,\n"
+	    "               \"Invalid return type.\\n\"\n"
+            "               \"Expected %s, actual: %s\",\n"
+	    "               t->id, v->type->id);\n"
+	    "      return false;\n"
+	    "    }\n"
+	    "  }\n\n"
+	    "  *(struct cx_box *)cx_vec_push(&ds->stack) = *v;\n"
+	    "  v++;\n\n",
+	    out);
+    }
+  } 
+  
+  fputs("  cx_oreturn_end(ss);\n"
+	"}\n\n"
+	"break;\n",
+	out);
+  
+  return true;  
 }
 
 static struct cx_func *return_emit_func(struct cx_op *op) {
@@ -1236,11 +1335,22 @@ static struct cx_fimp *return_emit_fimp(struct cx_op *op) {
   return op->as_return.imp;
 }
 
+static void return_emit_types(struct cx_op *op, struct cx_vec *out) {
+  struct cx_fimp *imp = op->as_return.imp;
+  
+  for (struct cx_func_ret *r = cx_vec_start(&imp->rets);
+       r != cx_vec_end(&imp->rets);
+       r++) {
+    if (r->type) { *(struct cx_type **)cx_vec_push(out) = r->type; }
+  }
+}
+
 cx_op_type(CX_ORETURN, {
     type.eval = return_eval;
     type.emit = return_emit;
     type.emit_func = return_emit_func;
     type.emit_fimp = return_emit_fimp;
+    type.emit_types = return_emit_types;
   });
 
 static bool stash_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {

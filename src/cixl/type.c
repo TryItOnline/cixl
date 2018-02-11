@@ -17,6 +17,7 @@ static bool emit(struct cx_box *box, FILE *out) {
 
 struct cx_type *cx_type_init(struct cx_type *type, struct cx *cx, const char *id) {
   type->cx = cx;
+  type->tag = cx->next_type_tag++;
   type->id = strdup(id);
   type->trait = false;
   cx_set_init(&type->parents, sizeof(struct cx_type *), cx_cmp_ptr);

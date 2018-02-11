@@ -157,7 +157,13 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
 
   struct cx_vec syms;
   cx_vec_init(&syms, sizeof(struct cx_sym));
-  
+
+  struct cx_set type_dup;
+  cx_set_init(&type_dup, sizeof(size_t), cx_cmp_size);
+
+  struct cx_vec types;
+  cx_vec_init(&types, sizeof(struct cx_type *));
+
   for (struct cx_op *op = cx_vec_start(&bin->ops);
        op != cx_vec_end(&bin->ops);
        op++) {
@@ -203,6 +209,23 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
 
       cx_vec_clear(&syms);
     }
+
+    if (op->type->emit_types) {
+      op->type->emit_types(op, &types);
+      
+      cx_do_vec(&types, struct cx_type *, tp) {
+	size_t
+	  tag = (*tp)->tag,
+	  *ok = cx_set_insert(&sym_dup, &tag);
+
+	if (ok) {
+	  *ok = tag;
+	  fprintf(out, "  static struct cx_type *type%zd;\n", tag);
+	}
+      }
+
+      cx_vec_clear(&types);
+    }
   }  
   
   fputs("\n"
@@ -212,6 +235,7 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
   
   cx_set_clear(&func_dup);
   cx_set_clear(&sym_dup);
+  cx_set_clear(&type_dup);
   
   for (struct cx_op *op = cx_vec_start(&bin->ops);
        op != cx_vec_end(&bin->ops);
@@ -260,11 +284,31 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
 
       cx_vec_clear(&syms);
     }
+
+    if (op->type->emit_types) {
+      op->type->emit_types(op, &types);
+      
+      cx_do_vec(&types, struct cx_type *, tp) {
+	size_t
+	  tag = (*tp)->tag,
+	  *ok = cx_set_insert(&type_dup, &tag);
+
+	if (ok) {
+	  *ok = tag;
+	  fprintf(out, "    type%zd = cx_get_type(cx, \"%s\", false);\n",
+		  tag, (*tp)->id);
+	}
+      }
+
+      cx_vec_clear(&types);
+    }
   }
 
   cx_set_deinit(&func_dup);
   cx_set_deinit(&sym_dup);
   cx_vec_deinit(&syms);
+  cx_set_deinit(&type_dup);
+  cx_vec_deinit(&types);
 		
   fputs("  }\n\n"
 	"  while (!cx->stop) {\n"

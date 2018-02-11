@@ -1,9 +1,10 @@
-* unroll oreturn loop in emit
-* extract scan loop at end
-** call from both eval & emit
-** replace break calls with scan calls where possible
+* inline scan loop in op emits
+** add emit_scan fn
+** break out of switch if any called
 * add bin generation of outer emit func
 ** move static vars & init to outer func
+* inline oreturn_check emit
+** prefill nargs
 * profile fib emit
 * prettify emitted code
 ** add CX_TAB define
@@ -63,3 +64,4 @@
 | Bin new %, $ compile '#out print<WFile A> 42' emit
 | Bin new %, $ compile 'say 42' emit
 | Bin new %, $ compile 'say (clock {10000 times {50 fib _}} / 1000000 int)' emit
+| say (clock {10000 times {50 fib _}} / 1000000 int)
