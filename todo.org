@@ -1,5 +1,7 @@
 * unroll oreturn loop in emit
 * profile fib emit
+* add compiled bmips
+** evalN/compileN bmips
 * implement func: emit
 ** register all funcs from bin in outer eval
 * implement trait: & rec: emit
@@ -13,8 +15,6 @@
 *** pass to gcc
 ** add -h option
 *** print usage
-* add compiled bmips
-** evalN/compileN bmips
 * --
 * add TN to generated ids
 ** add/parse_fimp
