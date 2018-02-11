@@ -334,9 +334,10 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
 	    "      cx_vec_pop(&cx->scans);\n"				
 	    "      if (!cx_scan_call(s)) { return false; }\n"		
 	    "      noks++;\n"						
-	    "    }\n"							
-	    "    if (noks) { break; }\n",
+	    "    }\n",							
 	    out);
+
+      if (!op->type->emit_break) { fputs("    if (noks) { break; }\n", out); }
     }
 
     if (op->type->emit_break) { fputs("break;\n", out); }
