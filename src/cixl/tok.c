@@ -154,7 +154,9 @@ cx_tok_type(CX_TFUNC, {
   });
 
 static ssize_t group_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) {
-  cx_op_init(bin, CX_OBEGIN(), tok_idx)->as_begin.child = true;
+  struct cx_op *op = cx_op_init(bin, CX_OBEGIN(), tok_idx);
+  op->as_begin.child = true;
+  op->as_begin.fimp = NULL;
   struct cx_tok *tok = cx_vec_get(&bin->toks, tok_idx);
   struct cx_vec *toks = &tok->as_vec;
 

@@ -592,6 +592,7 @@ struct cx_op_type *cx_op_type_init(struct cx_op_type *type, const char *id) {
   type->emit_func = NULL;
   type->emit_fimp = NULL;
   type->emit_syms = NULL;
+  type->emit_types = NULL;
   return type;
 }
 
