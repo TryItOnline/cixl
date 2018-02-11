@@ -1,5 +1,12 @@
 * unroll oreturn loop in emit
+* extract scan loop at end
+** call from both eval & emit
+** replace break calls with scan calls where possible
+* add bin generation of outer emit func
+** move static vars & init to outer func
 * profile fib emit
+* prettify emitted code
+** add CX_TAB define
 * add compiled bmips
 ** evalN/compileN bmips
 * implement func: emit
