@@ -1,11 +1,13 @@
-* inline scan loop in op emits
-** add emit_scan fn
+* inline scan loop in op emits where needed
+** add emit_scan_check fn
 ** break out of switch if any called
+* inline stop check where needed
+** add emit_stop_check fn
 * add bin generation of outer emit func
 ** move static vars & init to outer func
+* profile fib emit
 * inline oreturn_check emit
 ** prefill nargs
-* profile fib emit
 * prettify emitted code
 ** add CX_TAB define
 * add compiled bmips
