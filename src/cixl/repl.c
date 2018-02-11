@@ -15,7 +15,7 @@
 void cx_repl(struct cx *cx, FILE *in, FILE *out) {
   fprintf(out, "Cixl v%s, ", CX_VERSION);
 
-  if (cx_eval_str(cx, "1000000000, clock {30 fib _} / int")) {
+  if (cx_eval_str(cx, "1000000000 {30 fib _} clock / int")) {
     struct cx_box bmips = *cx_pop(cx->main, false);
     fprintf(out, "%" PRId64 " bmips\n\n", bmips.as_int);
   } else {
