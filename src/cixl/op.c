@@ -224,7 +224,15 @@ bool cx_emit_tests(struct cx *cx) {
 	  cx_oreturn_recall(call, 1, cx);
 	} else {
 	  struct cx_scope *ss = cx_scope(cx, 0);
-	  if (!cx_oreturn_check(call, ss)) { return false; }
+
+	  if (ss->stack.count > 0) {
+	    return false;
+	  }
+
+	  if (ss->stack.count < 0) {
+	    cx_error(cx, cx->row, cx->col, "Not enough return values on stack");
+	    return false;
+	  }
 
 	  cx_oreturn_end(ss);
 	}
@@ -725,7 +733,15 @@ bool cx_emit_tests(struct cx *cx) {
 	  cx_oreturn_recall(call, 26, cx);
 	} else {
 	  struct cx_scope *ss = cx_scope(cx, 0);
-	  if (!cx_oreturn_check(call, ss)) { return false; }
+
+	  if (ss->stack.count > 1) {
+	    return false;
+	  }
+
+	  if (ss->stack.count < 1) {
+	    cx_error(cx, cx->row, cx->col, "Not enough return values on stack");
+	    return false;
+	  }
 
 	  struct cx_scope *ds = cx_scope(cx, 1);
 	  cx_vec_grow(&ds->stack, ds->stack.count+1);
@@ -765,7 +781,15 @@ bool cx_emit_tests(struct cx *cx) {
 	  cx_oreturn_recall(call, 20, cx);
 	} else {
 	  struct cx_scope *ss = cx_scope(cx, 0);
-	  if (!cx_oreturn_check(call, ss)) { return false; }
+
+	  if (ss->stack.count > 1) {
+	    return false;
+	  }
+
+	  if (ss->stack.count < 1) {
+	    cx_error(cx, cx->row, cx->col, "Not enough return values on stack");
+	    return false;
+	  }
 
 	  struct cx_scope *ds = cx_scope(cx, 1);
 	  cx_vec_grow(&ds->stack, ds->stack.count+1);
@@ -1553,33 +1577,19 @@ void cx_oreturn_recall(struct cx_call *call, size_t pc, struct cx *cx) {
   scan->as_recall.pc = pc;
 }
 
-bool cx_oreturn_check(struct cx_call *call, struct cx_scope *s) {
-  struct cx *cx = s->cx;
-  struct cx_fimp *imp = call->target;
+void cx_oreturn_end(struct cx_scope *scope) {
+  struct cx *cx = scope->cx;
+  cx_vec_clear(&scope->stack);
 
+  struct cx_call *call = cx_vec_pop(&cx->calls);
+  
   if (call->return_pc > -1) {
     cx->pc = call->return_pc;
   } else {
     cx->stop = true;
   }
 
-  if (s->stack.count > imp->rets.count) {
-    cx_error(cx, cx->row, cx->col, "Stack not empty on return: %s", imp->func->id);
-    return false;
-  }
-
-  if (s->stack.count < imp->rets.count) {
-    cx_error(cx, cx->row, cx->col, "Not enough return values on stack");
-    return false;
-  }
-
-  return true;
-}
-
-void cx_oreturn_end(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  cx_vec_clear(&scope->stack);
-  cx_call_deinit(cx_vec_pop(&cx->calls));
+  cx_call_deinit(call);
   cx_end(cx);
   cx->scan_level--;
 }
@@ -1592,8 +1602,17 @@ static bool return_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
     cx_oreturn_recall(call, op->as_return.pc, cx);
   } else {
     struct cx_scope *ss = cx_scope(cx, 0);
-    if (!cx_oreturn_check(call, ss)) { return false; }
+
+    if (ss->stack.count > imp->rets.count) {
+      cx_error(cx, cx->row, cx->col, "Stack not empty on return");
+      return false;
+    }
     
+    if (ss->stack.count < imp->rets.count) {
+      cx_error(cx, cx->row, cx->col, "Not enough return values on stack");
+      return false;
+    }
+
     if (imp->rets.count) {
       struct cx_scope *ds = cx_scope(cx, 1);
       cx_vec_grow(&ds->stack, ds->stack.count+imp->rets.count);
@@ -1635,16 +1654,23 @@ static bool return_emit(struct cx_op *op,
 			struct cx_bin *bin,
 			FILE *out,
 			struct cx *cx) {
+  struct cx_fimp *imp = op->as_return.imp;
+
   fprintf(out,
 	  "struct cx_call *call = cx_test(cx_vec_peek(&cx->calls, 0));\n\n"
 	  "if (call->recalls) {\n"
 	  "  cx_oreturn_recall(call, %zd, cx);\n"
 	  "} else {\n"
-	  "  struct cx_scope *ss = cx_scope(cx, 0);\n"
-	  "  if (!cx_oreturn_check(call, ss)) { return false; }\n\n",
-	  op->as_return.pc);
-
-  struct cx_fimp *imp = op->as_return.imp;
+	  "  struct cx_scope *ss = cx_scope(cx, 0);\n\n"
+	  "if (ss->stack.count > %zd) {\n"
+	  "  cx_error(cx, cx->row, cx->col, \"Stack not empty on return\");\n"
+	  "  return false;\n"
+	  "}\n\n"
+	  "if (ss->stack.count < %zd) {\n"
+	  "  cx_error(cx, cx->row, cx->col, \"Not enough return values on stack\");\n"
+	  "  return false;\n"
+	  "}\n\n",
+	  op->as_return.pc, imp->rets.count, imp->rets.count);
   
   if (imp->rets.count) {
     fputs("struct cx_scope *ds = cx_scope(cx, 1);\n", out);

@@ -1,8 +1,6 @@
-* profile fib emit
+* move outer fn gen to bin
 * add compiled bmips
 ** evalN/compileN bmips
-* inline oreturn_check emit
-** prefill nargs
 * prettify emitted code
 ** add CX_TAB define
 * implement func: emit
