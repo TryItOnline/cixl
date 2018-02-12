@@ -12,40 +12,40 @@
 #include "cixl/scope.h"
 #include "cixl/tok.h"
 
-bool cx_emit_tests(struct cx *cx) {  
-  bool eval(struct cx *cx) {
+bool cx_emit_tests(struct cx *cx) {
+  bool _eval(struct cx *cx) {
     static bool init = true;
-    static struct cx_func *func40 = NULL;
-    static struct cx_fimp *fimp40_0 = NULL;
+    static struct cx_func *func40;
+    static struct cx_fimp *fimp40_0;
     static struct cx_sym sym2;
     static struct cx_sym sym16;
-    static struct cx_func *func32 = NULL;
-    static struct cx_func *func9 = NULL;
-    static struct cx_fimp *fimp9_0 = NULL;
-    static struct cx_func *func3 = NULL;
-    static struct cx_fimp *fimp3_0 = NULL;
-    static struct cx_func *func64 = NULL;
-    static struct cx_fimp *fimp64_0 = NULL;
+    static struct cx_func *func32;
+    static struct cx_func *func9;
+    static struct cx_fimp *fimp9_0;
+    static struct cx_func *func3;
+    static struct cx_fimp *fimp3_0;
+    static struct cx_func *func64;
+    static struct cx_fimp *fimp64_0;
     static struct cx_sym sym3;
-    static struct cx_func *func63 = NULL;
-    static struct cx_fimp *fimp63_0 = NULL;
+    static struct cx_func *func63;
+    static struct cx_fimp *fimp63_0;
     static struct cx_sym sym26;
     static struct cx_sym sym25;
-    static struct cx_func *func22 = NULL;
-    static struct cx_func *func28 = NULL;
-    static struct cx_fimp *fimp28_0 = NULL;
-    static struct cx_func *func57 = NULL;
-    static struct cx_fimp *fimp57_0 = NULL;
-    static struct cx_func *func2 = NULL;
-    static struct cx_fimp *fimp2_0 = NULL;
-    static struct cx_func *func30 = NULL;
-    static struct cx_fimp *fimp30_0 = NULL;
+    static struct cx_func *func22;
+    static struct cx_func *func28;
+    static struct cx_fimp *fimp28_0;
+    static struct cx_func *func57;
+    static struct cx_fimp *fimp57_0;
+    static struct cx_func *func2;
+    static struct cx_fimp *fimp2_0;
+    static struct cx_func *func30;
+    static struct cx_fimp *fimp30_0;
     static struct cx_type *type11;
-    static struct cx_func *func48 = NULL;
-    static struct cx_fimp *fimp48_0 = NULL;
-    static struct cx_func *func60 = NULL;
-    static struct cx_fimp *fimp60_0 = NULL;
-    static struct cx_func *func14 = NULL;
+    static struct cx_func *func48;
+    static struct cx_fimp *fimp48_0;
+    static struct cx_func *func60;
+    static struct cx_fimp *fimp60_0;
+    static struct cx_func *func14;
 
     if (init) {
       init = false;
@@ -226,6 +226,7 @@ bool cx_emit_tests(struct cx *cx) {
 	  struct cx_scope *ss = cx_scope(cx, 0);
 
 	  if (ss->stack.count > 0) {
+	    cx_error(cx, cx->row, cx->col, "Stack not empty on return");
 	    return false;
 	  }
 
@@ -735,6 +736,7 @@ bool cx_emit_tests(struct cx *cx) {
 	  struct cx_scope *ss = cx_scope(cx, 0);
 
 	  if (ss->stack.count > 1) {
+	    cx_error(cx, cx->row, cx->col, "Stack not empty on return");
 	    return false;
 	  }
 
@@ -783,6 +785,7 @@ bool cx_emit_tests(struct cx *cx) {
 	  struct cx_scope *ss = cx_scope(cx, 0);
 
 	  if (ss->stack.count > 1) {
+	    cx_error(cx, cx->row, cx->col, "Stack not empty on return");
 	    return false;
 	  }
 
@@ -965,9 +968,9 @@ bool cx_emit_tests(struct cx *cx) {
     cx->stop = false;
     return true;
   }
-  
+
   struct cx_bin *bin = cx_bin_new();
-  bin->eval = eval;
+  bin->eval = _eval;
   bool ok = cx_eval(bin, 0, cx);
   cx_bin_deref(bin);
   return ok;

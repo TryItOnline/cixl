@@ -8,7 +8,7 @@
 #include "cixl/type.h"
 #include "cixl/types/fimp.h"
 
-#define CX_VERSION "0.8.9"
+#define CX_VERSION "0.9.0"
 #define CX_SLAB_SIZE 20
 
 #define cx_add_type(cx, id, ...)		\

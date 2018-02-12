@@ -147,6 +147,7 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
   cx_init_ops(bin);
 
   fputs("bool eval(struct cx *cx) {\n"
+	"bool _eval(struct cx *cx) {\n"
         "  static bool init = true;\n",
 	out);
 
@@ -176,7 +177,7 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
 	
 	if (ok) {
 	  *ok = f;
-	  fprintf(out, "  static struct cx_func *func%zd = NULL;\n", f->tag);
+	  fprintf(out, "  static struct cx_func *func%zd;\n", f->tag);
 	}
       }
     }
@@ -190,7 +191,7 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
 	if (ok) {
 	  *ok = f;
 
-	  fprintf(out, "  static struct cx_fimp *fimp%zd_%zd = NULL;\n",
+	  fprintf(out, "  static struct cx_fimp *fimp%zd_%zd;\n",
 		  f->func->tag, f->idx);
 	}
       }
@@ -356,6 +357,12 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
         "  }\n\n"
 	"  cx->stop = false;\n"
 	"  return true;\n"
+	"}\n\n"
+	"  struct cx_bin *bin = cx_bin_new();\n"
+	"  bin->eval = _eval;\n"
+	"  bool ok = cx_eval(bin, 0, cx);\n"
+	"  cx_bin_deref(bin);\n"
+	"  return ok;\n"
 	"}\n",
 	out);
   

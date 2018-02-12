@@ -1,6 +1,3 @@
-* move outer fn gen to bin
-* add compiled bmips
-** evalN/compileN bmips
 * prettify emitted code
 ** add CX_TAB define
 * implement func: emit
@@ -54,7 +51,8 @@
 ** grep all cx_scope *
 ** use cx_scope to get current
 
-| Bin new %, $ compile '1000000000 {30 fib _} clock / int' emit
+say [@/ ~ ' bmips']
+| Bin new %, $ compile '1000000000 {50 fib _} clock / int' emit
 
 | Bin new %, $ compile '#out print<WFile A> 42' emit
 | Bin new %, $ compile 'say 42' emit
