@@ -1,3 +1,11 @@
+* convert scope to fixed stack size
+** declare CX_STACK_SIZE
+** fixed size array of boxes
+** add stack_pos
+* convert scope env to unsorted vect
+** search newest first
+* remove getconst op
+** output push instead
 * prettify emitted code
 ** add CX_TAB define
 * implement func: emit
