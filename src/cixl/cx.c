@@ -8,6 +8,7 @@
 #include "cixl/box.h"
 #include "cixl/call.h"
 #include "cixl/cx.h"
+#include "cixl/env.h"
 #include "cixl/error.h"
 #include "cixl/eval.h"
 #include "cixl/op.h"
@@ -34,7 +35,6 @@
 #include "cixl/types/time.h"
 #include "cixl/types/vect.h"
 #include "cixl/util.h"
-#include "cixl/var.h"
 
 static const void *get_type_id(const void *value) {
   struct cx_type *const *type = value;

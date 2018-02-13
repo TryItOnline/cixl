@@ -4,17 +4,13 @@
 #include "cixl/scope.h"
 #include "cixl/tok.h"
 #include "cixl/types/vect.h"
-#include "cixl/var.h"
 
 struct cx_scope *cx_scope_new(struct cx *cx, struct cx_scope *parent) {
   struct cx_scope *scope = cx_malloc(&cx->scope_alloc);
   scope->cx = cx;
   scope->parent = parent ? cx_scope_ref(parent) : NULL;
   cx_vec_init(&scope->stack, sizeof(struct cx_box));
-
-  cx_set_init(&scope->env, sizeof(struct cx_var), cx_cmp_sym);
-  scope->env.key_offs = offsetof(struct cx_var, id);
-
+  cx_env_init(&scope->env);
   cx_vec_init(&scope->cuts, sizeof(struct cx_cut));
   scope->safe = cx->scopes.count ? cx_scope(cx, 0)->safe : true;
   scope->nrefs = 0;
@@ -38,8 +34,7 @@ void cx_scope_deref(struct cx_scope *scope) {
     cx_do_vec(&scope->stack, struct cx_box, b) { cx_box_deinit(b); }
     cx_vec_deinit(&scope->stack);
     
-    cx_do_set(&scope->env, struct cx_var, v) { cx_var_deinit(v); }
-    cx_set_deinit(&scope->env);
+    cx_env_deinit(&scope->env);
 
     cx_free(&scope->cx->scope_alloc, scope);
   }
@@ -76,9 +71,9 @@ void cx_stackdump(struct cx_scope *scope, FILE *out) {
 }
 
 struct cx_box *cx_get_var(struct cx_scope *scope, struct cx_sym id, bool silent) {
-  struct cx_var *var = cx_set_get(&scope->env, &id);
+  struct cx_box *val = cx_env_get(&scope->env, id);
 
-  if (!var) {
+  if (!val) {
     if (scope->parent) { return cx_get_var(scope->parent, id, silent); }
 
     if (!silent) {
@@ -89,47 +84,25 @@ struct cx_box *cx_get_var(struct cx_scope *scope, struct cx_sym id, bool silent)
     return NULL;
   }
 
-  return &var->value;
+  return val;
 }
 
 struct cx_box *cx_put_var(struct cx_scope *scope, struct cx_sym id, bool force) {
-  struct cx_var *var = NULL;
+  struct cx_box *val = cx_env_get(&scope->env, id);
 
-  void *found = NULL;
-  size_t i = cx_set_find(&scope->env, &id, 0, &found);
-  
-  if (found) {
-    var = found;
-
+  if (val) {
     if (!force) {
       struct cx *cx = scope->cx;
       cx_error(cx, cx->row, cx->col, "Attempt to rebind var: %s", id.id);
       return NULL;
     }
       
-    cx_box_deinit(&var->value);
+    cx_box_deinit(val);
   } else {
-    var = cx_var_init(cx_vec_insert(&scope->env.members, i), id);
+    val = cx_env_put(&scope->env, id);
   }
 
-  return &var->value;
-}
-
-bool cx_delete_var(struct cx_scope *scope, struct cx_sym id, bool silent) {
-  struct cx_var *v = cx_set_get(&scope->env, &id);
-
-  if (!v) {
-    if (!silent) {
-      struct cx *cx = scope->cx;
-      cx_error(cx, cx->row, cx->col, "Unknown var: %s", id.id);
-    }
-
-    return false;
-  }
-
-  cx_var_deinit(v);
-  cx_set_delete(&scope->env, &id);
-  return true;
+  return val;
 }
 
 struct cx_cut *cx_cut_init(struct cx_cut *cut, struct cx_scope *scope) {

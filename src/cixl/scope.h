@@ -2,7 +2,7 @@
 #define CX_SCOPE_H
 
 #include <stdio.h>
-#include "cixl/set.h"
+#include "cixl/env.h"
 #include "cixl/vec.h"
 
 struct cx;
@@ -12,7 +12,7 @@ struct cx_scope {
   struct cx *cx;
   struct cx_scope *parent;
   struct cx_vec stack;
-  struct cx_set env;
+  struct cx_env env;
   struct cx_vec cuts;
   bool safe;
   unsigned int nrefs;
@@ -29,7 +29,6 @@ void cx_stackdump(struct cx_scope *scope, FILE *out);
 
 struct cx_box *cx_get_var(struct cx_scope *scope, struct cx_sym id, bool silent);
 struct cx_box *cx_put_var(struct cx_scope *scope, struct cx_sym id, bool force);
-bool cx_delete_var(struct cx_scope *scope, struct cx_sym id, bool silent);
 
 struct cx_cut {
   struct cx_scope *scope;
