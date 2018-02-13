@@ -5,21 +5,17 @@
 * remove getconst op
 ** output push instead
 * switch recs to use cx_env instead of set
+** rerun benchmark
 * prettify emitted code
 ** add CX_TAB define
+* implement -e flag
+** generate main
+*** include all libs
+** link with libcixl.a to a.out
 * implement func: emit
 ** register all funcs from bin in outer eval
 * implement trait: & rec: emit
 ** register in bin & create in init
-* implement -e flag
-** generate nested fns with switch
-** generate main
-*** include all libs
-** link with libcixl.a to a.out
-** add -o X option
-*** pass to gcc
-** add -h option
-*** print usage
 * --
 * add TN to generated ids
 ** add/parse_fimp
