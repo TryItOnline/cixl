@@ -1231,7 +1231,7 @@ Next up is consing a vector.
 ```
    | clock {(let: v []; 10000000 for {$v ~ push})} / 1000000 int
 ...
-[1958]
+[3201]
 ```
 
 ```
@@ -1255,7 +1255,7 @@ Moving on to instantiating records.
    rec: Foo() x Int y Str;
 ...| clock {10000000 times {new Foo % `x 42 put `y 'bar' put}} / 1000000 int
 ...
-[5702]
+[8152]
 ```
 
 ```
