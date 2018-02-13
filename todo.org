@@ -4,8 +4,6 @@
 ** add stack_pos
 * remove getconst op
 ** output push instead
-* switch recs to use cx_env instead of set
-** rerun benchmark
 * prettify emitted code
 ** add CX_TAB define
 * implement -e flag

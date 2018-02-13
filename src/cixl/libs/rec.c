@@ -190,18 +190,19 @@ static bool put_imp(struct cx_scope *scope) {
     
   if (!f) {
     cx_error(cx, cx->row, cx->col, "Invalid %s field: %s", rt->imp.id, fid.id);
+    cx_box_deinit(&v);
     goto exit;
   }
 
   if (!cx_is(v.type, f->type)) {
     cx_error(cx, cx->row, cx->col, "Expected %s, was %s", f->type->id, v.type->id);
+    cx_box_deinit(&v);
     goto exit;
   }
 
-  cx_rec_put(r.as_ptr, fid, &v);
+  *cx_rec_put(r.as_ptr, fid) = v;
   ok = true;
  exit:
-  cx_box_deinit(&v);
   cx_box_deinit(&r);
   return ok;
 }
@@ -214,24 +215,18 @@ static bool eqval_imp(struct cx_scope *scope) {
     y = *cx_test(cx_pop(scope, false));
 
   struct cx_rec *xr = x.as_ptr, *yr = y.as_ptr;
-  bool eqval = true;
-  
-  if (xr->values.members.count != yr->values.members.count) {
-    eqval = false;
-  } else {
-    for (size_t i = 0; i < xr->values.members.count; i++) {
-      struct cx_field_value
-	*xv = cx_vec_get(&xr->values.members, i),
-	*yv = cx_vec_get(&yr->values.members, i);
-      
-      if (xv->id.tag != yv->id.tag || !cx_eqval(&xv->box, &yv->box)) {
-	eqval = false;
-	break;
-      }
-    }
+  bool ok = false;
+
+  if (xr->fields.vars.count != yr->fields.vars.count) { goto exit; }
+
+  cx_do_vec(&xr->fields.vars, struct cx_var, xv) {
+    struct cx_box *yv = cx_rec_get(yr, xv->id);
+    if (!yv || !cx_eqval(&xv->value, yv)) { goto exit; }
   }
 
-  cx_box_init(cx_push(scope), cx->bool_type)->as_bool = eqval;
+  ok = true;
+ exit:
+  cx_box_init(cx_push(scope), cx->bool_type)->as_bool = ok;
   cx_box_deinit(&x);
   cx_box_deinit(&y);
   return true;
@@ -240,10 +235,7 @@ static bool eqval_imp(struct cx_scope *scope) {
 static bool ok_imp(struct cx_scope *scope) {
   struct cx_box v = *cx_test(cx_pop(scope, false));
   struct cx_rec *r = v.as_ptr;
-  
-  cx_box_init(cx_push(scope),
-	      scope->cx->bool_type)->as_bool = r->values.members.count;
-  
+  cx_box_init(cx_push(scope), scope->cx->bool_type)->as_bool = r->fields.vars.count;
   cx_box_deinit(&v);
   return true;
 }

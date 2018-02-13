@@ -46,10 +46,9 @@ static void clone_imp(struct cx_box *dst, struct cx_box *src) {
   
   dst->as_ptr = dst_rec;
 
-  cx_do_set(&src_rec->values, struct cx_field_value, sv) {
-    struct cx_field_value *dv = cx_test(cx_set_insert(&dst_rec->values, &sv->id));
-    dv->id = sv->id;
-    cx_clone(&dv->box, &sv->box);
+  cx_do_vec(&src_rec->fields.vars, struct cx_var, sv) {
+    struct cx_box *dv = cx_env_put(&dst_rec->fields, sv->id);
+    cx_clone(dv, &sv->value);
   }
 }
 
@@ -57,9 +56,9 @@ static void write_imp(struct cx_box *v, FILE *out) {
   fprintf(out, "(%s new", v->type->id);
   struct cx_rec *r = v->as_ptr;
   
-  cx_do_set(&r->values, struct cx_field_value, fv) {
+  cx_do_vec(&r->fields.vars, struct cx_var, fv) {
     fprintf(out, " %% `%s ", fv->id.id);
-    cx_write(&fv->box, out);
+    cx_write(&fv->value, out);
     fputs(" put", out);
   }
 
@@ -71,10 +70,10 @@ static void dump_imp(struct cx_box *v, FILE *out) {
   fprintf(out, "%s(", v->type->id);
   char sep = 0;
   
-  cx_do_set(&r->values, struct cx_field_value, v) {
+  cx_do_vec(&r->fields.vars, struct cx_var, v) {
     if (sep) { fputc(sep, out); }
     fprintf(out, "(%s ", v->id.id);
-    cx_dump(&v->box, out);
+    cx_dump(&v->value, out);
     fputc(')', out);
     sep = ' ';
   }
@@ -180,8 +179,7 @@ bool cx_add_field(struct cx_rec_type *type,
 struct cx_rec *cx_rec_new(struct cx_rec_type *type) {
   struct cx_rec *rec = cx_malloc(&type->imp.cx->rec_alloc);
   rec->type = type;
-  cx_set_init(&rec->values, sizeof(struct cx_field_value), cx_cmp_sym);
-  rec->values.key_offs = offsetof(struct cx_field_value, id);
+  cx_env_init(&rec->fields);
   rec->nrefs = 1;
   return rec;
 }
@@ -196,26 +194,23 @@ void cx_rec_deref(struct cx_rec *rec) {
   rec->nrefs--;
   
   if (!rec->nrefs) {
-    cx_do_set(&rec->values, struct cx_field_value, v) { cx_box_deinit(&v->box); }
-    cx_set_deinit(&rec->values);
+    cx_env_deinit(&rec->fields);
     cx_free(&rec->type->imp.cx->rec_alloc, rec);
   }
 }
 
 struct cx_box *cx_rec_get(struct cx_rec *rec, struct cx_sym fid) {
-  struct cx_field_value *f = cx_set_get(&rec->values, &fid);
-  return f ? &f->box : NULL;
+  return cx_env_get(&rec->fields, fid);
 }
 
-void cx_rec_put(struct cx_rec *rec, struct cx_sym fid, struct cx_box *v) {
-  struct cx_field_value *f = cx_set_get(&rec->values, &fid);
+struct cx_box *cx_rec_put(struct cx_rec *rec, struct cx_sym fid) {
+  struct cx_box *v = cx_env_get(&rec->fields, fid);
 
-  if (f) {
-    cx_box_deinit(&f->box);
+  if (v) {
+    cx_box_deinit(v);
   } else {
-    f = cx_set_insert(&rec->values, &fid);
+    v = cx_env_put(&rec->fields, fid);
   }
   
-  f->id = fid;
-  cx_copy(&f->box, v);
+  return v;
 }
