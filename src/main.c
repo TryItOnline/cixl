@@ -59,7 +59,7 @@ int main(int argc, char *argv[]) {
   if (argc == 1 && !emit) {
     cx_repl(&cx, stdin, stdout);
   } else {
-    if (emit) {
+    if (emit) {     
       if (!cx_emit_tests(&cx)) {
 	cx_do_vec(&cx.errors, struct cx_error, e) {
 	  fprintf(stderr, "Error in row %d, col %d:\n%s\n", e->row, e->col, e->msg);

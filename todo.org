@@ -1,9 +1,13 @@
-* prettify emitted code
-** add CX_TAB define
 * implement -e flag
+** extract cx_dump_errors(cx, FILE *)
+*** use in repl & main
+** start compiler using popen
+*** link with libcixl.a
 ** generate main
 *** include all libs
-** link with libcixl.a to a.out
+** emit to pipe
+* prettify emitted code
+** add CX_TAB define
 * implement func: emit
 ** register all funcs from bin in outer eval
 * implement trait: & rec: emit
@@ -37,9 +41,6 @@
 * add seek(file, pos) fn
 * add tell(file) fn
 * add len(file) fn
-* reuse stack values in imps
-** go through all fns used in fib
-** go through libs
 * convert repl to use getline
 * change funcs to take cx instead of scope
 ** grep all cx_scope *
