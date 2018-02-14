@@ -200,6 +200,15 @@ struct cx *cx_init(struct cx *cx) {
   cx->stop = false;
   cx->row = cx->col = -1;
   
+  cx_malloc_init(&cx->lambda_alloc, CX_SLAB_SIZE, sizeof(struct cx_lambda));
+  cx_malloc_init(&cx->pair_alloc, CX_SLAB_SIZE, sizeof(struct cx_pair));
+  cx_malloc_init(&cx->rec_alloc, CX_SLAB_SIZE, sizeof(struct cx_rec));
+  cx_malloc_init(&cx->ref_alloc, CX_SLAB_SIZE, sizeof(struct cx_ref));
+  cx_malloc_init(&cx->scope_alloc, CX_SLAB_SIZE, sizeof(struct cx_scope));
+  cx_malloc_init(&cx->table_alloc, CX_SLAB_SIZE, sizeof(struct cx_table));
+  cx_malloc_init(&cx->var_alloc, CX_SLAB_SIZE, sizeof(struct cx_var));
+  cx_malloc_init(&cx->vect_alloc, CX_SLAB_SIZE, sizeof(struct cx_vect));
+
   cx_set_init(&cx->separators, sizeof(char), cx_cmp_char);
   cx_add_separators(cx, " \t\n;,.|_?!()[]{}");
 
@@ -215,17 +224,7 @@ struct cx *cx_init(struct cx *cx) {
   cx_set_init(&cx->funcs, sizeof(struct cx_func *), cx_cmp_cstr);
   cx->funcs.key = get_func_id;
 
-  cx_set_init(&cx->consts, sizeof(struct cx_var), cx_cmp_sym);
-  cx->consts.key_offs = offsetof(struct cx_var, id);
-
-  cx_malloc_init(&cx->lambda_alloc, CX_SLAB_SIZE, sizeof(struct cx_lambda));
-  cx_malloc_init(&cx->pair_alloc, CX_SLAB_SIZE, sizeof(struct cx_pair));
-  cx_malloc_init(&cx->rec_alloc, CX_SLAB_SIZE, sizeof(struct cx_rec));
-  cx_malloc_init(&cx->ref_alloc, CX_SLAB_SIZE, sizeof(struct cx_ref));
-  cx_malloc_init(&cx->scope_alloc, CX_SLAB_SIZE, sizeof(struct cx_scope));
-  cx_malloc_init(&cx->table_alloc, CX_SLAB_SIZE, sizeof(struct cx_table));
-  cx_malloc_init(&cx->var_alloc, CX_SLAB_SIZE, sizeof(struct cx_var));
-  cx_malloc_init(&cx->vect_alloc, CX_SLAB_SIZE, sizeof(struct cx_vect));
+  cx_env_init(&cx->consts, &cx->var_alloc);
   
   cx_vec_init(&cx->load_paths, sizeof(char *));
   cx_vec_init(&cx->scopes, sizeof(struct cx_scope *));
@@ -312,7 +311,7 @@ struct cx *cx_init(struct cx *cx) {
 
 struct cx *cx_deinit(struct cx *cx) {
   cx_set_deinit(&cx->separators);
-  
+
   cx_do_vec(&cx->errors, struct cx_error, e) { cx_error_deinit(e); }
   cx_vec_deinit(&cx->errors);
 
@@ -327,8 +326,7 @@ struct cx *cx_deinit(struct cx *cx) {
   cx_do_vec(&cx->load_paths, char *, p) { free(*p); }
   cx_vec_deinit(&cx->load_paths);
 
-  cx_do_set(&cx->consts, struct cx_var, v) { cx_box_deinit(&v->value); }
-  cx_set_deinit(&cx->consts);
+  cx_env_deinit(&cx->consts);
 
   cx_do_set(&cx->macros, struct cx_macro *, m) { free(cx_macro_deinit(*m)); }
   cx_set_deinit(&cx->macros);
@@ -350,6 +348,7 @@ struct cx *cx_deinit(struct cx *cx) {
   cx_malloc_deinit(&cx->table_alloc);
   cx_malloc_deinit(&cx->var_alloc);
   cx_malloc_deinit(&cx->vect_alloc);
+
   return cx;
 }
 
@@ -485,33 +484,31 @@ struct cx_macro *cx_get_macro(struct cx *cx, const char *id, bool silent) {
 }
 
 struct cx_box *cx_get_const(struct cx *cx, struct cx_sym id, bool silent) {
-  struct cx_var *var = cx_set_get(&cx->consts, &id);
+  struct cx_box *v = cx_env_get(&cx->consts, id);
 
-  if (!var) {
+  if (!v) {
     if (!silent) { cx_error(cx, cx->row, cx->col, "Unknown const: '%s'", id); }
     return NULL;
   }
 
-  return &var->value;
+  return v;
 }
 
 struct cx_box *cx_set_const(struct cx *cx, struct cx_sym id, bool force) {
-  struct cx_var *var = cx_set_get(&cx->consts, &id);
+  struct cx_box *v = cx_env_get(&cx->consts, id);
 
-  if (var) {
+  if (v) {
     if (!force) {
       cx_error(cx, cx->row, cx->col, "Attempt to rebind const: '%s'", id);
       return NULL;
     }
       
-    cx_box_deinit(&var->value);
+    cx_box_deinit(v);
   } else {
-    var = cx_set_insert(&cx->consts, &id);
-    var->id = id;
-    var->next = NULL;
+    v = cx_env_put(&cx->consts, id);
   }
 
-  return &var->value;
+  return v;
 }
 
 struct cx_sym cx_sym(struct cx *cx, const char *id) {

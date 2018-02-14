@@ -1,6 +1,7 @@
 #ifndef CX_H
 #define CX_H
 
+#include "cixl/env.h"
 #include "cixl/macro.h"
 #include "cixl/malloc.h"
 #include "cixl/parse.h"
@@ -23,6 +24,9 @@ struct cx {
   struct cx_set separators;
   ssize_t inline_limit1, inline_limit2;
 
+  struct cx_malloc lambda_alloc, pair_alloc, rec_alloc, ref_alloc, scope_alloc,
+    table_alloc, var_alloc, vect_alloc;
+
   struct cx_set types;
   struct cx_type *any_type, *bin_type, *bool_type, *char_type, *cmp_type, *file_type,
     *fimp_type, *func_type, *guid_type, *int_type, *iter_type, *lambda_type,
@@ -31,11 +35,9 @@ struct cx {
     *table_type, *time_type, *vect_type, *wfile_type;
 
   size_t next_func_tag, next_sym_tag, next_type_tag;
-  struct cx_set syms, macros, funcs, consts;
+  struct cx_set syms, macros, funcs;
+  struct cx_env consts;
   
-  struct cx_malloc lambda_alloc, pair_alloc, rec_alloc, ref_alloc, scope_alloc,
-    table_alloc, var_alloc, vect_alloc;
-
   struct cx_vec load_paths;
   struct cx_vec scopes;
   struct cx_scope *main, **scope;

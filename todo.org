@@ -1,4 +1,3 @@
-* convert cx.consts to env
 * remove getconst op
 ** output push instead
 * prettify emitted code
@@ -55,3 +54,4 @@ say [@/ ~ ' bmips']
 | Bin new %, $ compile 'say 42' emit
 | Bin new %, $ compile 'say (clock {10000 times {50 fib _}} / 1000000 int)' emit
 | say (clock {10000 times {50 fib _}} / 1000000 int)
+* add @@ char escape
