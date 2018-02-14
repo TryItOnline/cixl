@@ -1186,10 +1186,6 @@ Type checking may be partly disabled for the current scope by calling ```unsafe`
 ...clock {10000 times {50 fib _}} / 1000000 int
 ...
 [357]
-
-   | safe
-...clock {10000 times {50 fib _}} / 1000000 int
-[415]
 ```
 
 ### Performance
