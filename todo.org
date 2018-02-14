@@ -1,7 +1,3 @@
-* convert scope to fixed stack size
-** declare CX_STACK_SIZE
-** fixed size array of boxes
-** add stack_pos
 * remove getconst op
 ** output push instead
 * add cx.var_alloc
