@@ -4,6 +4,9 @@
 ** add stack_pos
 * remove getconst op
 ** output push instead
+* add cx.var_alloc
+** change cx_env to use fixed number of hash slots
+** add cx_link
 * prettify emitted code
 ** add CX_TAB define
 * implement -e flag
