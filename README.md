@@ -1251,7 +1251,7 @@ Moving on to instantiating records.
    rec: Foo() x Int y Str;
 ...| clock {10000000 times {new Foo % `x 42 put `y 'bar' put}} / 1000000 int
 ...
-[8152]
+[7899]
 ```
 
 ```

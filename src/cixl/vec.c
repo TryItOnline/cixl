@@ -24,9 +24,9 @@ struct cx_vec *cx_vec_deinit(struct cx_vec *vec) {
 void cx_vec_grow(struct cx_vec *vec, size_t capac) {
   if (capac > vec->capac) {
     if (vec->capac) {
-      while (vec->capac < capac) { vec->capac *= CX_VEC_GROW_FACTOR; }
+      while (vec->capac < capac) { vec->capac *= CX_VEC_GROW; }
     } else {
-      vec->capac = cx_max(capac, CX_VEC_MIN_SIZE);
+      vec->capac = cx_max(capac, CX_VEC_MIN);
     }
     
     vec->items = realloc(vec->items, vec->capac*vec->item_size);

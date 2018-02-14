@@ -10,7 +10,7 @@ struct cx_scope *cx_scope_new(struct cx *cx, struct cx_scope *parent) {
   scope->cx = cx;
   scope->parent = parent ? cx_scope_ref(parent) : NULL;
   cx_vec_init(&scope->stack, sizeof(struct cx_box));
-  cx_env_init(&scope->env);
+  cx_env_init(&scope->env, &cx->var_alloc);
   cx_vec_init(&scope->cuts, sizeof(struct cx_cut));
   scope->safe = cx->scopes.count ? cx_scope(cx, 0)->safe : true;
   scope->nrefs = 0;

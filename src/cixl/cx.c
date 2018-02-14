@@ -224,6 +224,7 @@ struct cx *cx_init(struct cx *cx) {
   cx_malloc_init(&cx->ref_alloc, CX_SLAB_SIZE, sizeof(struct cx_ref));
   cx_malloc_init(&cx->scope_alloc, CX_SLAB_SIZE, sizeof(struct cx_scope));
   cx_malloc_init(&cx->table_alloc, CX_SLAB_SIZE, sizeof(struct cx_table));
+  cx_malloc_init(&cx->var_alloc, CX_SLAB_SIZE, sizeof(struct cx_var));
   cx_malloc_init(&cx->vect_alloc, CX_SLAB_SIZE, sizeof(struct cx_vect));
   
   cx_vec_init(&cx->load_paths, sizeof(char *));
@@ -326,7 +327,7 @@ struct cx *cx_deinit(struct cx *cx) {
   cx_do_vec(&cx->load_paths, char *, p) { free(*p); }
   cx_vec_deinit(&cx->load_paths);
 
-  cx_do_set(&cx->consts, struct cx_var, v) { cx_var_deinit(v); }
+  cx_do_set(&cx->consts, struct cx_var, v) { cx_box_deinit(&v->value); }
   cx_set_deinit(&cx->consts);
 
   cx_do_set(&cx->macros, struct cx_macro *, m) { free(cx_macro_deinit(*m)); }
@@ -347,6 +348,7 @@ struct cx *cx_deinit(struct cx *cx) {
   cx_malloc_deinit(&cx->ref_alloc);
   cx_malloc_deinit(&cx->scope_alloc);
   cx_malloc_deinit(&cx->table_alloc);
+  cx_malloc_deinit(&cx->var_alloc);
   cx_malloc_deinit(&cx->vect_alloc);
   return cx;
 }
@@ -504,7 +506,9 @@ struct cx_box *cx_set_const(struct cx *cx, struct cx_sym id, bool force) {
       
     cx_box_deinit(&var->value);
   } else {
-    var = cx_var_init(cx_set_insert(&cx->consts, &id), id);
+    var = cx_set_insert(&cx->consts, &id);
+    var->id = id;
+    var->next = NULL;
   }
 
   return &var->value;

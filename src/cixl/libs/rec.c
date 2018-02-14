@@ -217,9 +217,9 @@ static bool eqval_imp(struct cx_scope *scope) {
   struct cx_rec *xr = x.as_ptr, *yr = y.as_ptr;
   bool ok = false;
 
-  if (xr->fields.vars.count != yr->fields.vars.count) { goto exit; }
+  if (xr->fields.count != yr->fields.count) { goto exit; }
 
-  cx_do_vec(&xr->fields.vars, struct cx_var, xv) {
+  cx_do_env(&xr->fields, xv) {
     struct cx_box *yv = cx_rec_get(yr, xv->id);
     if (!yv || !cx_eqval(&xv->value, yv)) { goto exit; }
   }
@@ -235,7 +235,7 @@ static bool eqval_imp(struct cx_scope *scope) {
 static bool ok_imp(struct cx_scope *scope) {
   struct cx_box v = *cx_test(cx_pop(scope, false));
   struct cx_rec *r = v.as_ptr;
-  cx_box_init(cx_push(scope), scope->cx->bool_type)->as_bool = r->fields.vars.count;
+  cx_box_init(cx_push(scope), scope->cx->bool_type)->as_bool = r->fields.count;
   cx_box_deinit(&v);
   return true;
 }

@@ -15,8 +15,8 @@
 #define cx_do_vec(vec, type, var)		\
   _cx_do_vec(cx_gencid(i), vec, type, var)	\
 
-#define CX_VEC_MIN_SIZE 10
-#define CX_VEC_GROW_FACTOR 3
+#define CX_VEC_MIN 10
+#define CX_VEC_GROW 3
 
 struct cx_vec {
   size_t count, capac, item_size;

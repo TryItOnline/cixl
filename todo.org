@@ -1,3 +1,4 @@
+* convert cx.consts to env
 * remove getconst op
 ** output push instead
 * prettify emitted code

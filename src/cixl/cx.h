@@ -34,7 +34,7 @@ struct cx {
   struct cx_set syms, macros, funcs, consts;
   
   struct cx_malloc lambda_alloc, pair_alloc, rec_alloc, ref_alloc, scope_alloc,
-    table_alloc, vect_alloc;
+    table_alloc, var_alloc, vect_alloc;
 
   struct cx_vec load_paths;
   struct cx_vec scopes;

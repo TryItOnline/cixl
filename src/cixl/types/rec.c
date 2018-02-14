@@ -46,7 +46,7 @@ static void clone_imp(struct cx_box *dst, struct cx_box *src) {
   
   dst->as_ptr = dst_rec;
 
-  cx_do_vec(&src_rec->fields.vars, struct cx_var, sv) {
+  cx_do_env(&src_rec->fields, sv) {
     struct cx_box *dv = cx_env_put(&dst_rec->fields, sv->id);
     cx_clone(dv, &sv->value);
   }
@@ -56,7 +56,7 @@ static void write_imp(struct cx_box *v, FILE *out) {
   fprintf(out, "(%s new", v->type->id);
   struct cx_rec *r = v->as_ptr;
   
-  cx_do_vec(&r->fields.vars, struct cx_var, fv) {
+  cx_do_env(&r->fields, fv) {
     fprintf(out, " %% `%s ", fv->id.id);
     cx_write(&fv->value, out);
     fputs(" put", out);
@@ -70,7 +70,7 @@ static void dump_imp(struct cx_box *v, FILE *out) {
   fprintf(out, "%s(", v->type->id);
   char sep = 0;
   
-  cx_do_vec(&r->fields.vars, struct cx_var, v) {
+  cx_do_env(&r->fields, v) {
     if (sep) { fputc(sep, out); }
     fprintf(out, "(%s ", v->id.id);
     cx_dump(&v->value, out);
@@ -179,7 +179,7 @@ bool cx_add_field(struct cx_rec_type *type,
 struct cx_rec *cx_rec_new(struct cx_rec_type *type) {
   struct cx_rec *rec = cx_malloc(&type->imp.cx->rec_alloc);
   rec->type = type;
-  cx_env_init(&rec->fields);
+  cx_env_init(&rec->fields, &type->imp.cx->var_alloc);
   rec->nrefs = 1;
   return rec;
 }
