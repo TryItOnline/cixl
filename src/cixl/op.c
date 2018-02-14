@@ -1288,40 +1288,6 @@ cx_op_type(CX_OFUNCALL, {
     type.emit_fimp = funcall_emit_fimp;
   });
 
-static bool getconst_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
-  struct cx_box *v = cx_get_const(cx, op->as_getconst.id, false);
-  if (!v) { return false; }
-  cx_copy(cx_push(cx_scope(cx, 0)), v);
-  return true;
-}
-
-static bool getconst_emit(struct cx_op *op,
-			  struct cx_bin *bin,
-			  FILE *out,
-			  struct cx *cx) {
-  fprintf(out, "struct cx_box *v = cx_get_const(cx, sym%zd, false);\n",
-	  op->as_getconst.id.tag);
-
-  fputs("if (!v) { return false; }\n"
-	"cx_copy(cx_push(cx_scope(cx, 0)), v);\n"
-	"cx->pc++;\n",
-	out);
-  
-  return true;
-}
-
-static void getconst_emit_syms(struct cx_op *op, struct cx_vec *out) {
-  *(struct cx_sym *)cx_vec_push(out) = op->as_getconst.id;
-}
-
-cx_op_type(CX_OGETCONST, {
-    type.scan = true;
-    type.eval = getconst_eval;
-    type.emit = getconst_emit;
-    type.emit_syms = getconst_emit_syms;
-  });
-
-
 bool cx_ogetvar1(struct cx_sym id, struct cx_scope *scope) {
   struct cx_box *v = cx_get_var(scope, id, false);
   if (!v) { return false; }
@@ -1431,10 +1397,6 @@ cx_op_type(CX_OLAMBDA, {
     type.emit_break = true;
   });
 
-static void push_init(struct cx_op *op, struct cx_tok *tok) {
-  cx_copy(&op->as_push.value, &tok->as_box);
-}
-
 static void push_deinit(struct cx_op *op) {
   cx_box_deinit(&op->as_push.value);
 }
@@ -1455,7 +1417,6 @@ static bool push_emit(struct cx_op *op,
 
 cx_op_type(CX_OPUSH, {
     type.scan = true;
-    type.init = push_init;
     type.deinit = push_deinit;
     type.eval = push_eval;
     type.emit = push_emit;

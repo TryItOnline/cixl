@@ -1,5 +1,3 @@
-* remove getconst op
-** output push instead
 * prettify emitted code
 ** add CX_TAB define
 * implement -e flag

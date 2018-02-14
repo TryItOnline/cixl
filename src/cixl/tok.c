@@ -205,13 +205,11 @@ static ssize_t id_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) {
   char *id = tok->as_ptr;
   
   if (id[0] == '#') {
-    cx_op_init(bin,
-	       CX_OGETCONST(),
-	       tok_idx)->as_getconst.id = cx_sym(cx, id+1);
+    struct cx_box *v = cx_get_const(cx, cx_sym(cx, id+1), false);
+    if (!v) { return -1; }
+    cx_copy(&cx_op_init(bin, CX_OPUSH(), tok_idx)->as_push.value, v);
   } else if (id[0] == '$') {
-    cx_op_init(bin,
-	       CX_OGETVAR(),
-	       tok_idx)->as_getvar.id = cx_sym(cx, id+1);
+    cx_op_init(bin, CX_OGETVAR(), tok_idx)->as_getvar.id = cx_sym(cx, id+1);
   } else {
     cx_error(cx, tok->row, tok->col, "Unknown id: '%s'", id);
     return -1;
@@ -273,7 +271,8 @@ cx_tok_type(CX_TLAMBDA, {
   });
 
 static ssize_t literal_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) {
-  cx_op_init(bin, CX_OPUSH(), tok_idx);
+  struct cx_tok *t = cx_vec_get(&bin->toks, tok_idx);
+  cx_copy(&cx_op_init(bin, CX_OPUSH(), tok_idx)->as_push.value, &t->as_box);
   return tok_idx+1;
 }
 
@@ -325,7 +324,7 @@ static ssize_t type_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) {
   struct cx_type *type = tok->as_ptr;
   tok->type = CX_TLITERAL();
   cx_box_init(&tok->as_box, cx->meta_type)->as_ptr = type;    
-  cx_op_init(bin, CX_OPUSH(), tok_idx);
+  cx_copy(&cx_op_init(bin, CX_OPUSH(), tok_idx)->as_push.value, &tok->as_box);
   return tok_idx+1;
 }
 
