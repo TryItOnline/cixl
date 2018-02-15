@@ -1,7 +1,6 @@
 * thread emit loop using computed goto
-** inline labels in emit
-*** fimp_emit/lambda_emit
-*** inline oreturn_recall with label
+** inline oreturn_recall with op label
+** inline op labels in fimp_emit/lambda_emit
 * fix emit formatting
 ** add CX_TAB to ops
 * handle argv in emit main
