@@ -79,6 +79,7 @@ struct cx_box *cx_get_var(struct cx_scope *scope, struct cx_sym id, bool silent)
     if (!silent) {
       struct cx *cx = scope->cx;
       cx_error(cx, cx->row, cx->col, "Unknown var: %s", id.id);
+      cx_test(false);
     }
     
     return NULL;

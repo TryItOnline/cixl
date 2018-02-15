@@ -148,9 +148,19 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
 
   fputs("bool eval(struct cx *cx) {\n"
 	"bool _eval(struct cx *cx) {\n"
-        "  static bool init = true;\n",
+        "  static bool init = true;\n\n",
 	out);
 
+  fprintf(out, "  static void *op_labels[%zd] = {\n", bin->ops.count);
+  
+  for (size_t i = 0; i < bin->ops.count; i++) {
+    fprintf(out, "    &&op%zd", i);
+    if (i < bin->ops.count-1) { fputs(", ", out); }
+    fputc('\n', out);
+  }
+  
+  fputs("};\n\n", out);
+  
   struct cx_set func_dup;
   cx_set_init(&func_dup, sizeof(void *), cx_cmp_ptr);
 
@@ -313,51 +323,44 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
   cx_vec_deinit(&types);
 		
   fputs("  }\n\n"
-	"  while (!cx->stop) {\n"
-	"    switch (cx->pc) {\n",
+	"  goto *op_labels[cx->pc];\n\n",
 	out);
-
-  
+ 
   for (struct cx_op *op = cx_vec_start(&bin->ops);
        op != cx_vec_end(&bin->ops);
        op++) {
     cx->row = op->row; cx->col = op->col;
     struct cx_tok *tok = cx_vec_get(&bin->toks, op->tok_idx);
     
-    fprintf(out, "      case %zd: { /* %s %s */\n",
+    fprintf(out, "  op%zd: { /* %s %s */\n",
 	    op->pc, tok->type->id, op->type->id);
-    fprintf(out, "        cx->row = %d; cx->col = %d;\n", cx->row, cx->col);
+    fprintf(out, "    cx->row = %d; cx->col = %d;\n", cx->row, cx->col);
+    fputs("    size_t ppc = cx->pc;\n", out);
 
     if (!cx_test(op->type->emit)(op, bin, out, cx)) { return false; }
 
     if (op->type->scan) {
-      fputs("        \n", out);
-
-      if (!op->type->emit_break) { fputs("        size_t ppc = cx->pc;\n", out); }
-
-      fputs("        while (cx->scans.count) {\n"				
-	    "          struct cx_scan *s = cx_vec_peek(&cx->scans, 0);\n"	
-	    "          if (!cx_scan_ok(s)) { break; }\n"			
-	    "          cx_vec_pop(&cx->scans);\n"				
-	    "          if (!cx_scan_call(s)) { return false; }\n",
+      fputs("    \n"
+            "    while (cx->scans.count) {\n"				
+	    "      struct cx_scan *s = cx_vec_peek(&cx->scans, 0);\n"	
+	    "      if (!cx_scan_ok(s)) { break; }\n"			
+	    "      cx_vec_pop(&cx->scans);\n"				
+	    "      if (!cx_scan_call(s)) { return false; }\n"
+            "    }\n\n",
 	    out);
-      	    
-      fputs("        }\n", out);
-      
-      if (!op->type->emit_break) {
-	fputs("        if (cx->pc != ppc) { break; }\n", out);
-      }
     }
 
-    if (op->type->emit_break) { fputs("        break;\n", out); }
-    fputs("      }\n", out);
+    fputs("    if (cx->pc == ppc) {\n"
+          "      cx->pc++;\n"
+	  "    } else {\n"
+	  "      goto *op_labels[cx->pc];\n"
+          "    }\n\n"
+	  "    if (cx->stop) { return true; }\n"
+	  "  }\n\n",
+	  out);
   }
 
-  fputs("      default:\n"
-	"        return true;\n"
-	"    }\n"
-        "  }\n\n"
-	"  cx->stop = false;\n"
+  fputs("  cx->stop = false;\n"
 	"  return true;\n"
 	"}\n\n"
 	"  struct cx_bin *bin = cx_bin_new();\n"

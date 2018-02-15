@@ -1,17 +1,11 @@
+* thread emit loop using computed goto
+** inline labels in emit
+*** fimp_emit/lambda_emit
+*** inline oreturn_recall with label
 * fix emit formatting
 ** add CX_TAB to ops
 * handle argv in emit main
 ** push strings like load main
-* thread emit loop using computed goto
-** store array of labels indexed by pc
-** remember pc on label enter
-*** goto on exit if changed
-** check stop inside every case
-** remove outer loop
-** remove op.emit_break
-** test stopped in each case
-** attempt inlining labels in emit
-*** using naming convention
 * emit guess.cx
 * emit histogram.cx
 * implement func: emit
@@ -55,9 +49,8 @@
 ** use cx_scope to get current
 * add @@ char escape
 
-say [@/ ~ ' bmips']
+| Bin new %, $ compile '1 + 2' emit
 | Bin new %, $ compile '1000000000 {50 fib _} clock / int' emit
-
 | Bin new %, $ compile '#out print<WFile A> 42' emit
 | Bin new %, $ compile 'say 42' emit
 | Bin new %, $ compile 'say (clock {10000 times {50 fib _}} / 1000000 int)' emit

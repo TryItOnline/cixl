@@ -18,9 +18,49 @@
 #include "cixl/types/lambda.h"
 #include "cixl/types/vect.h"
 
-static bool emit_bmips(struct cx *cx) {
+bool emit_bmips(struct cx *cx) {
   bool _eval(struct cx *cx) {
     static bool init = true;
+
+    static void *op_labels[36] = {
+      &&op0, 
+      &&op1, 
+      &&op2, 
+      &&op3, 
+      &&op4, 
+      &&op5, 
+      &&op6, 
+      &&op7, 
+      &&op8, 
+      &&op9, 
+      &&op10, 
+      &&op11, 
+      &&op12, 
+      &&op13, 
+      &&op14, 
+      &&op15, 
+      &&op16, 
+      &&op17, 
+      &&op18, 
+      &&op19, 
+      &&op20, 
+      &&op21, 
+      &&op22, 
+      &&op23, 
+      &&op24, 
+      &&op25, 
+      &&op26, 
+      &&op27, 
+      &&op28, 
+      &&op29, 
+      &&op30, 
+      &&op31, 
+      &&op32, 
+      &&op33, 
+      &&op34, 
+      &&op35
+    };
+
     static struct cx_func *func64;
     static struct cx_fimp *fimp64_0;
     static struct cx_sym sym3;
@@ -74,614 +114,853 @@ static bool emit_bmips(struct cx *cx) {
       func14 = cx_get_func(cx, "int", false);
     }
 
-    while (!cx->stop) {
-      switch (cx->pc) {
-      case 0: { /* CX_TLITERAL CX_OPUSH */
-        cx->row = 1; cx->col = 10;
-	cx_box_init(cx_push(cx_scope(cx, 0)), cx->int_type)->as_int = 1000000000;
+    goto *op_labels[cx->pc];
+
+  op0: { /* CX_TLITERAL CX_OPUSH */
+      cx->row = 1; cx->col = 10;
+      size_t ppc = cx->pc;
+      cx_box_init(cx_push(cx_scope(cx, 0)), cx->int_type)->as_int = 1000000000;
+    
+      while (cx->scans.count) {
+	struct cx_scan *s = cx_vec_peek(&cx->scans, 0);
+	if (!cx_scan_ok(s)) { break; }
+	cx_vec_pop(&cx->scans);
+	if (!cx_scan_call(s)) { return false; }
+      }
+
+      if (cx->pc == ppc) {
 	cx->pc++;
-        
-        size_t noks = 0;
-        while (cx->scans.count) {
-          struct cx_scan *s = cx_vec_peek(&cx->scans, 0);
-          if (!cx_scan_ok(s)) { break; }
-          cx_vec_pop(&cx->scans);
-          if (!cx_scan_call(s)) { return false; }
-          noks++;
-        }
-        if (noks) { break; }
+      } else {
+	goto *op_labels[cx->pc];
       }
-      case 1: { /* CX_TLAMBDA CX_OLAMBDA */
-        cx->row = 1; cx->col = 11;
-	struct cx_scope *s = cx_scope(cx, 0);
-	struct cx_lambda *l = cx_lambda_new(s, 2, 31);
-	cx_box_init(cx_push(s), cx->lambda_type)->as_ptr = l;
-	cx->pc += l->nops+1;
-        
-        while (cx->scans.count) {
-          struct cx_scan *s = cx_vec_peek(&cx->scans, 0);
-          if (!cx_scan_ok(s)) { break; }
-          cx_vec_pop(&cx->scans);
-          if (!cx_scan_call(s)) { return false; }
-        }
-        break;
+
+      if (cx->stop) { return true; }
+    }
+
+  op1: { /* CX_TLAMBDA CX_OLAMBDA */
+      cx->row = 1; cx->col = 11;
+      size_t ppc = cx->pc;
+      struct cx_scope *s = cx_scope(cx, 0);
+      struct cx_lambda *l = cx_lambda_new(s, 2, 31);
+      cx_box_init(cx_push(s), cx->lambda_type)->as_ptr = l;
+      cx->pc += l->nops+1;
+    
+      while (cx->scans.count) {
+	struct cx_scan *s = cx_vec_peek(&cx->scans, 0);
+	if (!cx_scan_ok(s)) { break; }
+	cx_vec_pop(&cx->scans);
+	if (!cx_scan_call(s)) { return false; }
       }
-      case 2: { /* CX_TFENCE CX_OFENCE */
-        cx->row = 1; cx->col = 11;
-	cx->scan_level += 1;
+
+      if (cx->pc == ppc) {
 	cx->pc++;
-        
-        size_t noks = 0;
-        while (cx->scans.count) {
-          struct cx_scan *s = cx_vec_peek(&cx->scans, 0);
-          if (!cx_scan_ok(s)) { break; }
-          cx_vec_pop(&cx->scans);
-          if (!cx_scan_call(s)) { return false; }
-          noks++;
-        }
-        if (noks) { break; }
+      } else {
+	goto *op_labels[cx->pc];
       }
-      case 3: { /* CX_TLITERAL CX_OPUSH */
-        cx->row = 1; cx->col = 13;
-	cx_box_init(cx_push(cx_scope(cx, 0)), cx->int_type)->as_int = 50;
+
+      if (cx->stop) { return true; }
+    }
+
+  op2: { /* CX_TFENCE CX_OFENCE */
+      cx->row = 1; cx->col = 11;
+      size_t ppc = cx->pc;
+      cx->scan_level += 1;
+    
+      while (cx->scans.count) {
+	struct cx_scan *s = cx_vec_peek(&cx->scans, 0);
+	if (!cx_scan_ok(s)) { break; }
+	cx_vec_pop(&cx->scans);
+	if (!cx_scan_call(s)) { return false; }
+      }
+
+      if (cx->pc == ppc) {
 	cx->pc++;
-        
-        size_t noks = 0;
-        while (cx->scans.count) {
-          struct cx_scan *s = cx_vec_peek(&cx->scans, 0);
-          if (!cx_scan_ok(s)) { break; }
-          cx_vec_pop(&cx->scans);
-          if (!cx_scan_call(s)) { return false; }
-          noks++;
-        }
-        if (noks) { break; }
+      } else {
+	goto *op_labels[cx->pc];
       }
-      case 4: { /* CX_TFUNC CX_OFIMP */
-        cx->row = 1; cx->col = 14;
-	struct cx_scan *scan = cx_scan(cx_scope(cx, 0),
-				       func64,
-				       cx_fimp_scan);
-	scan->as_fimp.imp = fimp64_0;
-	scan->as_fimp.pc = 5;
-	cx->pc += 26;
-        
-        while (cx->scans.count) {
-          struct cx_scan *s = cx_vec_peek(&cx->scans, 0);
-          if (!cx_scan_ok(s)) { break; }
-          cx_vec_pop(&cx->scans);
-          if (!cx_scan_call(s)) { return false; }
-        }
-        break;
+
+      if (cx->stop) { return true; }
+    }
+
+  op3: { /* CX_TLITERAL CX_OPUSH */
+      cx->row = 1; cx->col = 13;
+      size_t ppc = cx->pc;
+      cx_box_init(cx_push(cx_scope(cx, 0)), cx->int_type)->as_int = 50;
+    
+      while (cx->scans.count) {
+	struct cx_scan *s = cx_vec_peek(&cx->scans, 0);
+	if (!cx_scan_ok(s)) { break; }
+	cx_vec_pop(&cx->scans);
+	if (!cx_scan_call(s)) { return false; }
       }
-      case 5: { /* CX_TFUNC CX_OBEGIN */
-        cx->row = 1; cx->col = 14;
-	struct cx_scope *parent = fimp64_0->scope;
-	cx_begin(cx, parent);
-	cx->scan_level++;
+
+      if (cx->pc == ppc) {
 	cx->pc++;
+      } else {
+	goto *op_labels[cx->pc];
       }
-      case 6: { /* CX_TFUNC CX_OPUTARGS */
-        cx->row = 1; cx->col = 14;
-	struct cx_scope
-	  *ds = cx_scope(cx, 0),
-	  *ss = ds->stack.count ? ds : cx_scope(cx, 1);
-	*cx_put_var(ds, sym3, true) = *cx_test(cx_pop(ss, false));
+
+      if (cx->stop) { return true; }
+    }
+
+  op4: { /* CX_TFUNC CX_OFIMP */
+      cx->row = 1; cx->col = 14;
+      size_t ppc = cx->pc;
+      struct cx_scan *scan = cx_scan(cx_scope(cx, 0),
+				     func64,
+				     cx_fimp_scan);
+      scan->as_fimp.imp = fimp64_0;
+      scan->as_fimp.pc = 5;
+      cx->pc += 26;
+    
+      while (cx->scans.count) {
+	struct cx_scan *s = cx_vec_peek(&cx->scans, 0);
+	if (!cx_scan_ok(s)) { break; }
+	cx_vec_pop(&cx->scans);
+	if (!cx_scan_call(s)) { return false; }
+      }
+
+      if (cx->pc == ppc) {
 	cx->pc++;
+      } else {
+	goto *op_labels[cx->pc];
       }
-      case 7: { /* CX_TLITERAL CX_OPUSH */
-        cx->row = 1; cx->col = 1;
-	cx_box_init(cx_push(cx_scope(cx, 0)), cx->int_type)->as_int = 0;
+
+      if (cx->stop) { return true; }
+    }
+
+  op5: { /* CX_TFUNC CX_OBEGIN */
+      cx->row = 1; cx->col = 14;
+      size_t ppc = cx->pc;
+      struct cx_scope *parent = fimp64_0->scope;
+      cx_begin(cx, parent);
+      cx->scan_level++;
+      if (cx->pc == ppc) {
 	cx->pc++;
-        
-        size_t noks = 0;
-        while (cx->scans.count) {
-          struct cx_scan *s = cx_vec_peek(&cx->scans, 0);
-          if (!cx_scan_ok(s)) { break; }
-          cx_vec_pop(&cx->scans);
-          if (!cx_scan_call(s)) { return false; }
-          noks++;
-        }
-        if (noks) { break; }
+      } else {
+	goto *op_labels[cx->pc];
       }
-      case 8: { /* CX_TLITERAL CX_OPUSH */
-        cx->row = 1; cx->col = 3;
-	cx_box_init(cx_push(cx_scope(cx, 0)), cx->int_type)->as_int = 1;
+
+      if (cx->stop) { return true; }
+    }
+
+  op6: { /* CX_TFUNC CX_OPUTARGS */
+      cx->row = 1; cx->col = 14;
+      size_t ppc = cx->pc;
+      struct cx_scope
+	*ds = cx_scope(cx, 0),
+	*ss = ds->stack.count ? ds : cx_scope(cx, 1);
+      *cx_put_var(ds, sym3, true) = *cx_test(cx_pop(ss, false));
+      if (cx->pc == ppc) {
 	cx->pc++;
-        
-        size_t noks = 0;
-        while (cx->scans.count) {
-          struct cx_scan *s = cx_vec_peek(&cx->scans, 0);
-          if (!cx_scan_ok(s)) { break; }
-          cx_vec_pop(&cx->scans);
-          if (!cx_scan_call(s)) { return false; }
-          noks++;
-        }
-        if (noks) { break; }
+      } else {
+	goto *op_labels[cx->pc];
       }
-      case 9: { /* CX_TID CX_OGETVAR */
-        cx->row = 1; cx->col = 4;
-	cx_ogetvar1(sym3, cx_scope(cx, 0));
+
+      if (cx->stop) { return true; }
+    }
+
+  op7: { /* CX_TLITERAL CX_OPUSH */
+      cx->row = 1; cx->col = 1;
+      size_t ppc = cx->pc;
+      cx_box_init(cx_push(cx_scope(cx, 0)), cx->int_type)->as_int = 0;
+    
+      while (cx->scans.count) {
+	struct cx_scan *s = cx_vec_peek(&cx->scans, 0);
+	if (!cx_scan_ok(s)) { break; }
+	cx_vec_pop(&cx->scans);
+	if (!cx_scan_call(s)) { return false; }
+      }
+
+      if (cx->pc == ppc) {
 	cx->pc++;
-        
-        size_t noks = 0;
-        while (cx->scans.count) {
-          struct cx_scan *s = cx_vec_peek(&cx->scans, 0);
-          if (!cx_scan_ok(s)) { break; }
-          cx_vec_pop(&cx->scans);
-          if (!cx_scan_call(s)) { return false; }
-          noks++;
-        }
-        if (noks) { break; }
+      } else {
+	goto *op_labels[cx->pc];
       }
-      case 10: { /* CX_TFUNC CX_OFIMP */
-        cx->row = 1; cx->col = 7;
-	struct cx_scan *scan = cx_scan(cx_scope(cx, 0),
-				       func63,
-				       cx_fimp_scan);
-	scan->as_fimp.imp = fimp63_0;
-	scan->as_fimp.pc = 11;
-	cx->pc += 19;
-        
-        while (cx->scans.count) {
-          struct cx_scan *s = cx_vec_peek(&cx->scans, 0);
-          if (!cx_scan_ok(s)) { break; }
-          cx_vec_pop(&cx->scans);
-          if (!cx_scan_call(s)) { return false; }
-        }
-        break;
+
+      if (cx->stop) { return true; }
+    }
+
+  op8: { /* CX_TLITERAL CX_OPUSH */
+      cx->row = 1; cx->col = 3;
+      size_t ppc = cx->pc;
+      cx_box_init(cx_push(cx_scope(cx, 0)), cx->int_type)->as_int = 1;
+    
+      while (cx->scans.count) {
+	struct cx_scan *s = cx_vec_peek(&cx->scans, 0);
+	if (!cx_scan_ok(s)) { break; }
+	cx_vec_pop(&cx->scans);
+	if (!cx_scan_call(s)) { return false; }
       }
-      case 11: { /* CX_TFUNC CX_OBEGIN */
-        cx->row = 1; cx->col = 7;
-	struct cx_scope *parent = fimp63_0->scope;
-	cx_begin(cx, parent);
-	cx->scan_level++;
+
+      if (cx->pc == ppc) {
 	cx->pc++;
+      } else {
+	goto *op_labels[cx->pc];
       }
-      case 12: { /* CX_TFUNC CX_OPUTARGS */
-        cx->row = 1; cx->col = 7;
-	struct cx_scope
-	  *ds = cx_scope(cx, 0),
-	  *ss = ds->stack.count ? ds : cx_scope(cx, 1);
-	*cx_put_var(ds, sym3, true) = *cx_test(cx_pop(ss, false));
-	*cx_put_var(ds, sym26, true) = *cx_test(cx_pop(ss, false));
-	*cx_put_var(ds, sym25, true) = *cx_test(cx_pop(ss, false));
+
+      if (cx->stop) { return true; }
+    }
+
+  op9: { /* CX_TID CX_OGETVAR */
+      cx->row = 1; cx->col = 4;
+      size_t ppc = cx->pc;
+      cx_ogetvar1(sym3, cx_scope(cx, 0));
+    
+      while (cx->scans.count) {
+	struct cx_scan *s = cx_vec_peek(&cx->scans, 0);
+	if (!cx_scan_ok(s)) { break; }
+	cx_vec_pop(&cx->scans);
+	if (!cx_scan_call(s)) { return false; }
+      }
+
+      if (cx->pc == ppc) {
 	cx->pc++;
+      } else {
+	goto *op_labels[cx->pc];
       }
-      case 13: { /* CX_TID CX_OGETVAR */
-        cx->row = 1; cx->col = 0;
-	cx_ogetvar1(sym3, cx_scope(cx, 0));
+
+      if (cx->stop) { return true; }
+    }
+
+  op10: { /* CX_TFUNC CX_OFIMP */
+      cx->row = 1; cx->col = 7;
+      size_t ppc = cx->pc;
+      struct cx_scan *scan = cx_scan(cx_scope(cx, 0),
+				     func63,
+				     cx_fimp_scan);
+      scan->as_fimp.imp = fimp63_0;
+      scan->as_fimp.pc = 11;
+      cx->pc += 19;
+    
+      while (cx->scans.count) {
+	struct cx_scan *s = cx_vec_peek(&cx->scans, 0);
+	if (!cx_scan_ok(s)) { break; }
+	cx_vec_pop(&cx->scans);
+	if (!cx_scan_call(s)) { return false; }
+      }
+
+      if (cx->pc == ppc) {
 	cx->pc++;
-        
-        size_t noks = 0;
-        while (cx->scans.count) {
-          struct cx_scan *s = cx_vec_peek(&cx->scans, 0);
-          if (!cx_scan_ok(s)) { break; }
-          cx_vec_pop(&cx->scans);
-          if (!cx_scan_call(s)) { return false; }
-          noks++;
-        }
-        if (noks) { break; }
+      } else {
+	goto *op_labels[cx->pc];
       }
-      case 14: { /* CX_TFUNC CX_OFUNCALL */
-        cx->row = 1; cx->col = 2;
-	struct cx_scan *scan = cx_scan(cx_scope(cx, 0),
-				       func22,
-				       cx_funcall_scan);
-	scan->as_funcall.imp = NULL;
+
+      if (cx->stop) { return true; }
+    }
+
+  op11: { /* CX_TFUNC CX_OBEGIN */
+      cx->row = 1; cx->col = 7;
+      size_t ppc = cx->pc;
+      struct cx_scope *parent = fimp63_0->scope;
+      cx_begin(cx, parent);
+      cx->scan_level++;
+      if (cx->pc == ppc) {
 	cx->pc++;
-        
-        size_t noks = 0;
-        while (cx->scans.count) {
-          struct cx_scan *s = cx_vec_peek(&cx->scans, 0);
-          if (!cx_scan_ok(s)) { break; }
-          cx_vec_pop(&cx->scans);
-          if (!cx_scan_call(s)) { return false; }
-          noks++;
-        }
-        if (noks) { break; }
+      } else {
+	goto *op_labels[cx->pc];
       }
-      case 15: { /* CX_TFUNC CX_OFUNCALL */
-        cx->row = 1; cx->col = 4;
-	struct cx_scan *scan = cx_scan(cx_scope(cx, 0),
-				       func28,
-				       cx_funcall_scan);
-	scan->as_funcall.imp = fimp28_0;
+
+      if (cx->stop) { return true; }
+    }
+
+  op12: { /* CX_TFUNC CX_OPUTARGS */
+      cx->row = 1; cx->col = 7;
+      size_t ppc = cx->pc;
+      struct cx_scope
+	*ds = cx_scope(cx, 0),
+	*ss = ds->stack.count ? ds : cx_scope(cx, 1);
+      *cx_put_var(ds, sym3, true) = *cx_test(cx_pop(ss, false));
+      *cx_put_var(ds, sym26, true) = *cx_test(cx_pop(ss, false));
+      *cx_put_var(ds, sym25, true) = *cx_test(cx_pop(ss, false));
+      if (cx->pc == ppc) {
 	cx->pc++;
-        
-        size_t noks = 0;
-        while (cx->scans.count) {
-          struct cx_scan *s = cx_vec_peek(&cx->scans, 0);
-          if (!cx_scan_ok(s)) { break; }
-          cx_vec_pop(&cx->scans);
-          if (!cx_scan_call(s)) { return false; }
-          noks++;
-        }
-        if (noks) { break; }
+      } else {
+	goto *op_labels[cx->pc];
       }
-      case 16: { /* CX_TLAMBDA CX_OLAMBDA */
-        cx->row = 1; cx->col = 12;
-	struct cx_scope *s = cx_scope(cx, 0);
-	struct cx_lambda *l = cx_lambda_new(s, 17, 10);
-	cx_box_init(cx_push(s), cx->lambda_type)->as_ptr = l;
-	cx->pc += l->nops+1;
-        
-        while (cx->scans.count) {
-          struct cx_scan *s = cx_vec_peek(&cx->scans, 0);
-          if (!cx_scan_ok(s)) { break; }
-          cx_vec_pop(&cx->scans);
-          if (!cx_scan_call(s)) { return false; }
-        }
-        break;
+
+      if (cx->stop) { return true; }
+    }
+
+  op13: { /* CX_TID CX_OGETVAR */
+      cx->row = 1; cx->col = 0;
+      size_t ppc = cx->pc;
+      cx_ogetvar1(sym3, cx_scope(cx, 0));
+    
+      while (cx->scans.count) {
+	struct cx_scan *s = cx_vec_peek(&cx->scans, 0);
+	if (!cx_scan_ok(s)) { break; }
+	cx_vec_pop(&cx->scans);
+	if (!cx_scan_call(s)) { return false; }
       }
-      case 17: { /* CX_TFENCE CX_OFENCE */
-        cx->row = 1; cx->col = 12;
-	cx->scan_level += 1;
+
+      if (cx->pc == ppc) {
 	cx->pc++;
-        
-        size_t noks = 0;
-        while (cx->scans.count) {
-          struct cx_scan *s = cx_vec_peek(&cx->scans, 0);
-          if (!cx_scan_ok(s)) { break; }
-          cx_vec_pop(&cx->scans);
-          if (!cx_scan_call(s)) { return false; }
-          noks++;
-        }
-        if (noks) { break; }
+      } else {
+	goto *op_labels[cx->pc];
       }
-      case 18: { /* CX_TID CX_OGETVAR */
-        cx->row = 1; cx->col = 12;
-	cx_ogetvar1(sym26, cx_scope(cx, 0));
+
+      if (cx->stop) { return true; }
+    }
+
+  op14: { /* CX_TFUNC CX_OFUNCALL */
+      cx->row = 1; cx->col = 2;
+      size_t ppc = cx->pc;
+      struct cx_scan *scan = cx_scan(cx_scope(cx, 0),
+				     func22,
+				     cx_funcall_scan);
+      scan->as_funcall.imp = NULL;
+    
+      while (cx->scans.count) {
+	struct cx_scan *s = cx_vec_peek(&cx->scans, 0);
+	if (!cx_scan_ok(s)) { break; }
+	cx_vec_pop(&cx->scans);
+	if (!cx_scan_call(s)) { return false; }
+      }
+
+      if (cx->pc == ppc) {
 	cx->pc++;
-        
-        size_t noks = 0;
-        while (cx->scans.count) {
-          struct cx_scan *s = cx_vec_peek(&cx->scans, 0);
-          if (!cx_scan_ok(s)) { break; }
-          cx_vec_pop(&cx->scans);
-          if (!cx_scan_call(s)) { return false; }
-          noks++;
-        }
-        if (noks) { break; }
+      } else {
+	goto *op_labels[cx->pc];
       }
-      case 19: { /* CX_TID CX_OGETVAR */
-        cx->row = 1; cx->col = 15;
-	cx_ogetvar1(sym25, cx_scope(cx, 0));
+
+      if (cx->stop) { return true; }
+    }
+
+  op15: { /* CX_TFUNC CX_OFUNCALL */
+      cx->row = 1; cx->col = 4;
+      size_t ppc = cx->pc;
+      struct cx_scan *scan = cx_scan(cx_scope(cx, 0),
+				     func28,
+				     cx_funcall_scan);
+      scan->as_funcall.imp = fimp28_0;
+    
+      while (cx->scans.count) {
+	struct cx_scan *s = cx_vec_peek(&cx->scans, 0);
+	if (!cx_scan_ok(s)) { break; }
+	cx_vec_pop(&cx->scans);
+	if (!cx_scan_call(s)) { return false; }
+      }
+
+      if (cx->pc == ppc) {
 	cx->pc++;
-        
-        size_t noks = 0;
-        while (cx->scans.count) {
-          struct cx_scan *s = cx_vec_peek(&cx->scans, 0);
-          if (!cx_scan_ok(s)) { break; }
-          cx_vec_pop(&cx->scans);
-          if (!cx_scan_call(s)) { return false; }
-          noks++;
-        }
-        if (noks) { break; }
+      } else {
+	goto *op_labels[cx->pc];
       }
-      case 20: { /* CX_TID CX_OGETVAR */
-        cx->row = 1; cx->col = 18;
-	cx_ogetvar1(sym26, cx_scope(cx, 0));
+
+      if (cx->stop) { return true; }
+    }
+
+  op16: { /* CX_TLAMBDA CX_OLAMBDA */
+      cx->row = 1; cx->col = 12;
+      size_t ppc = cx->pc;
+      struct cx_scope *s = cx_scope(cx, 0);
+      struct cx_lambda *l = cx_lambda_new(s, 17, 10);
+      cx_box_init(cx_push(s), cx->lambda_type)->as_ptr = l;
+      cx->pc += l->nops+1;
+    
+      while (cx->scans.count) {
+	struct cx_scan *s = cx_vec_peek(&cx->scans, 0);
+	if (!cx_scan_ok(s)) { break; }
+	cx_vec_pop(&cx->scans);
+	if (!cx_scan_call(s)) { return false; }
+      }
+
+      if (cx->pc == ppc) {
 	cx->pc++;
-        
-        size_t noks = 0;
-        while (cx->scans.count) {
-          struct cx_scan *s = cx_vec_peek(&cx->scans, 0);
-          if (!cx_scan_ok(s)) { break; }
-          cx_vec_pop(&cx->scans);
-          if (!cx_scan_call(s)) { return false; }
-          noks++;
-        }
-        if (noks) { break; }
+      } else {
+	goto *op_labels[cx->pc];
       }
-      case 21: { /* CX_TFIMP CX_OFUNCALL */
-        cx->row = 1; cx->col = 21;
-	struct cx_scan *scan = cx_scan(cx_scope(cx, 0),
-				       func57,
-				       cx_funcall_scan);
-	scan->as_funcall.imp = fimp57_0;
+
+      if (cx->stop) { return true; }
+    }
+
+  op17: { /* CX_TFENCE CX_OFENCE */
+      cx->row = 1; cx->col = 12;
+      size_t ppc = cx->pc;
+      cx->scan_level += 1;
+    
+      while (cx->scans.count) {
+	struct cx_scan *s = cx_vec_peek(&cx->scans, 0);
+	if (!cx_scan_ok(s)) { break; }
+	cx_vec_pop(&cx->scans);
+	if (!cx_scan_call(s)) { return false; }
+      }
+
+      if (cx->pc == ppc) {
 	cx->pc++;
-        
-        size_t noks = 0;
-        while (cx->scans.count) {
-          struct cx_scan *s = cx_vec_peek(&cx->scans, 0);
-          if (!cx_scan_ok(s)) { break; }
-          cx_vec_pop(&cx->scans);
-          if (!cx_scan_call(s)) { return false; }
-          noks++;
-        }
-        if (noks) { break; }
+      } else {
+	goto *op_labels[cx->pc];
       }
-      case 22: { /* CX_TID CX_OGETVAR */
-        cx->row = 1; cx->col = 23;
-	cx_ogetvar1(sym3, cx_scope(cx, 0));
+
+      if (cx->stop) { return true; }
+    }
+
+  op18: { /* CX_TID CX_OGETVAR */
+      cx->row = 1; cx->col = 12;
+      size_t ppc = cx->pc;
+      cx_ogetvar1(sym26, cx_scope(cx, 0));
+    
+      while (cx->scans.count) {
+	struct cx_scan *s = cx_vec_peek(&cx->scans, 0);
+	if (!cx_scan_ok(s)) { break; }
+	cx_vec_pop(&cx->scans);
+	if (!cx_scan_call(s)) { return false; }
+      }
+
+      if (cx->pc == ppc) {
 	cx->pc++;
-        
-        size_t noks = 0;
-        while (cx->scans.count) {
-          struct cx_scan *s = cx_vec_peek(&cx->scans, 0);
-          if (!cx_scan_ok(s)) { break; }
-          cx_vec_pop(&cx->scans);
-          if (!cx_scan_call(s)) { return false; }
-          noks++;
-        }
-        if (noks) { break; }
+      } else {
+	goto *op_labels[cx->pc];
       }
-      case 23: { /* CX_TFUNC CX_OFUNCALL */
-        cx->row = 1; cx->col = 26;
-	struct cx_scan *scan = cx_scan(cx_scope(cx, 0),
-				       func2,
-				       cx_funcall_scan);
-	scan->as_funcall.imp = fimp2_0;
+
+      if (cx->stop) { return true; }
+    }
+
+  op19: { /* CX_TID CX_OGETVAR */
+      cx->row = 1; cx->col = 15;
+      size_t ppc = cx->pc;
+      cx_ogetvar1(sym25, cx_scope(cx, 0));
+    
+      while (cx->scans.count) {
+	struct cx_scan *s = cx_vec_peek(&cx->scans, 0);
+	if (!cx_scan_ok(s)) { break; }
+	cx_vec_pop(&cx->scans);
+	if (!cx_scan_call(s)) { return false; }
+      }
+
+      if (cx->pc == ppc) {
 	cx->pc++;
-        
-        size_t noks = 0;
-        while (cx->scans.count) {
-          struct cx_scan *s = cx_vec_peek(&cx->scans, 0);
-          if (!cx_scan_ok(s)) { break; }
-          cx_vec_pop(&cx->scans);
-          if (!cx_scan_call(s)) { return false; }
-          noks++;
-        }
-        if (noks) { break; }
+      } else {
+	goto *op_labels[cx->pc];
       }
-      case 24: { /* CX_TFUNC CX_OFUNCALL */
-        cx->row = 1; cx->col = 29;
-	struct cx_scan *scan = cx_scan(cx_scope(cx, 0),
-				       func30,
-				       cx_funcall_scan);
-	scan->as_funcall.imp = fimp30_0;
+
+      if (cx->stop) { return true; }
+    }
+
+  op20: { /* CX_TID CX_OGETVAR */
+      cx->row = 1; cx->col = 18;
+      size_t ppc = cx->pc;
+      cx_ogetvar1(sym26, cx_scope(cx, 0));
+    
+      while (cx->scans.count) {
+	struct cx_scan *s = cx_vec_peek(&cx->scans, 0);
+	if (!cx_scan_ok(s)) { break; }
+	cx_vec_pop(&cx->scans);
+	if (!cx_scan_call(s)) { return false; }
+      }
+
+      if (cx->pc == ppc) {
 	cx->pc++;
-        
-        size_t noks = 0;
-        while (cx->scans.count) {
-          struct cx_scan *s = cx_vec_peek(&cx->scans, 0);
-          if (!cx_scan_ok(s)) { break; }
-          cx_vec_pop(&cx->scans);
-          if (!cx_scan_call(s)) { return false; }
-          noks++;
-        }
-        if (noks) { break; }
+      } else {
+	goto *op_labels[cx->pc];
       }
-      case 25: { /* CX_TFENCE CX_OFENCE */
-        cx->row = 1; cx->col = 35;
-	cx->scan_level += -1;
-	struct cx_scope *s = cx_scope(cx, 0);
-	struct cx_cut *c = s->cuts.count ? cx_vec_peek(&s->cuts, 0) : NULL;
-	if (c && c->scan_level == cx->scan_level) {
-	  cx_cut_deinit(cx_vec_pop(&s->cuts));
+
+      if (cx->stop) { return true; }
+    }
+
+  op21: { /* CX_TFIMP CX_OFUNCALL */
+      cx->row = 1; cx->col = 21;
+      size_t ppc = cx->pc;
+      struct cx_scan *scan = cx_scan(cx_scope(cx, 0),
+				     func57,
+				     cx_funcall_scan);
+      scan->as_funcall.imp = fimp57_0;
+    
+      while (cx->scans.count) {
+	struct cx_scan *s = cx_vec_peek(&cx->scans, 0);
+	if (!cx_scan_ok(s)) { break; }
+	cx_vec_pop(&cx->scans);
+	if (!cx_scan_call(s)) { return false; }
+      }
+
+      if (cx->pc == ppc) {
+	cx->pc++;
+      } else {
+	goto *op_labels[cx->pc];
+      }
+
+      if (cx->stop) { return true; }
+    }
+
+  op22: { /* CX_TID CX_OGETVAR */
+      cx->row = 1; cx->col = 23;
+      size_t ppc = cx->pc;
+      cx_ogetvar1(sym3, cx_scope(cx, 0));
+    
+      while (cx->scans.count) {
+	struct cx_scan *s = cx_vec_peek(&cx->scans, 0);
+	if (!cx_scan_ok(s)) { break; }
+	cx_vec_pop(&cx->scans);
+	if (!cx_scan_call(s)) { return false; }
+      }
+
+      if (cx->pc == ppc) {
+	cx->pc++;
+      } else {
+	goto *op_labels[cx->pc];
+      }
+
+      if (cx->stop) { return true; }
+    }
+
+  op23: { /* CX_TFUNC CX_OFUNCALL */
+      cx->row = 1; cx->col = 26;
+      size_t ppc = cx->pc;
+      struct cx_scan *scan = cx_scan(cx_scope(cx, 0),
+				     func2,
+				     cx_funcall_scan);
+      scan->as_funcall.imp = fimp2_0;
+    
+      while (cx->scans.count) {
+	struct cx_scan *s = cx_vec_peek(&cx->scans, 0);
+	if (!cx_scan_ok(s)) { break; }
+	cx_vec_pop(&cx->scans);
+	if (!cx_scan_call(s)) { return false; }
+      }
+
+      if (cx->pc == ppc) {
+	cx->pc++;
+      } else {
+	goto *op_labels[cx->pc];
+      }
+
+      if (cx->stop) { return true; }
+    }
+
+  op24: { /* CX_TFUNC CX_OFUNCALL */
+      cx->row = 1; cx->col = 29;
+      size_t ppc = cx->pc;
+      struct cx_scan *scan = cx_scan(cx_scope(cx, 0),
+				     func30,
+				     cx_funcall_scan);
+      scan->as_funcall.imp = fimp30_0;
+    
+      while (cx->scans.count) {
+	struct cx_scan *s = cx_vec_peek(&cx->scans, 0);
+	if (!cx_scan_ok(s)) { break; }
+	cx_vec_pop(&cx->scans);
+	if (!cx_scan_call(s)) { return false; }
+      }
+
+      if (cx->pc == ppc) {
+	cx->pc++;
+      } else {
+	goto *op_labels[cx->pc];
+      }
+
+      if (cx->stop) { return true; }
+    }
+
+  op25: { /* CX_TFENCE CX_OFENCE */
+      cx->row = 1; cx->col = 35;
+      size_t ppc = cx->pc;
+      cx->scan_level += -1;
+      struct cx_scope *s = cx_scope(cx, 0);
+      struct cx_cut *c = s->cuts.count ? cx_vec_peek(&s->cuts, 0) : NULL;
+      if (c && c->scan_level == cx->scan_level) {
+	cx_cut_deinit(cx_vec_pop(&s->cuts));
+      }
+    
+      while (cx->scans.count) {
+	struct cx_scan *s = cx_vec_peek(&cx->scans, 0);
+	if (!cx_scan_ok(s)) { break; }
+	cx_vec_pop(&cx->scans);
+	if (!cx_scan_call(s)) { return false; }
+      }
+
+      if (cx->pc == ppc) {
+	cx->pc++;
+      } else {
+	goto *op_labels[cx->pc];
+      }
+
+      if (cx->stop) { return true; }
+    }
+
+  op26: { /* CX_TLAMBDA CX_OSTOP */
+      cx->row = 1; cx->col = 12;
+      size_t ppc = cx->pc;
+      cx->stop = true;
+      if (cx->pc == ppc) {
+	cx->pc++;
+      } else {
+	goto *op_labels[cx->pc];
+      }
+
+      if (cx->stop) { return true; }
+    }
+
+  op27: { /* CX_TID CX_OGETVAR */
+      cx->row = 1; cx->col = 36;
+      size_t ppc = cx->pc;
+      cx_ogetvar1(sym25, cx_scope(cx, 0));
+    
+      while (cx->scans.count) {
+	struct cx_scan *s = cx_vec_peek(&cx->scans, 0);
+	if (!cx_scan_ok(s)) { break; }
+	cx_vec_pop(&cx->scans);
+	if (!cx_scan_call(s)) { return false; }
+      }
+
+      if (cx->pc == ppc) {
+	cx->pc++;
+      } else {
+	goto *op_labels[cx->pc];
+      }
+
+      if (cx->stop) { return true; }
+    }
+
+  op28: { /* CX_TFENCE CX_ORETURN */
+      cx->row = 1; cx->col = 35;
+      size_t ppc = cx->pc;
+      struct cx_call *call = cx_test(cx_vec_peek(&cx->calls, 0));
+
+      if (call->recalls) {
+	cx_oreturn_recall(call, 11, cx);
+      } else {
+	struct cx_scope *ss = cx_scope(cx, 0);
+
+	if (ss->stack.count > 1) {
+	  cx_error(cx, cx->row, cx->col, "Stack not empty on return");
+	  return false;
 	}
-	cx->pc++;
-        
-        size_t noks = 0;
-        while (cx->scans.count) {
-          struct cx_scan *s = cx_vec_peek(&cx->scans, 0);
-          if (!cx_scan_ok(s)) { break; }
-          cx_vec_pop(&cx->scans);
-          if (!cx_scan_call(s)) { return false; }
-          noks++;
-        }
-        if (noks) { break; }
-      }
-      case 26: { /* CX_TLAMBDA CX_OSTOP */
-        cx->row = 1; cx->col = 12;
-	cx->stop = true;
-	cx->pc++;
-        break;
-      }
-      case 27: { /* CX_TID CX_OGETVAR */
-        cx->row = 1; cx->col = 36;
-	cx_ogetvar1(sym25, cx_scope(cx, 0));
-	cx->pc++;
-        
-        size_t noks = 0;
-        while (cx->scans.count) {
-          struct cx_scan *s = cx_vec_peek(&cx->scans, 0);
-          if (!cx_scan_ok(s)) { break; }
-          cx_vec_pop(&cx->scans);
-          if (!cx_scan_call(s)) { return false; }
-          noks++;
-        }
-        if (noks) { break; }
-      }
-      case 28: { /* CX_TFENCE CX_ORETURN */
-        cx->row = 1; cx->col = 35;
-	struct cx_call *call = cx_test(cx_vec_peek(&cx->calls, 0));
 
-	if (call->recalls) {
-	  cx_oreturn_recall(call, 11, cx);
-	} else {
-	  struct cx_scope *ss = cx_scope(cx, 0);
+	if (ss->stack.count < 1) {
+	  cx_error(cx, cx->row, cx->col, "Not enough return values on stack");
+	  return false;
+	}
 
-	  if (ss->stack.count > 1) {
-	    cx_error(cx, cx->row, cx->col, "Stack not empty on return");
+	struct cx_scope *ds = cx_scope(cx, 1);
+	cx_vec_grow(&ds->stack, ds->stack.count+1);
+	struct cx_box *v = cx_vec_start(&ss->stack);
+
+	if (ss->safe) {
+	  struct cx_type *t = NULL;
+	  t = type11;
+	  if (!cx_is(v->type, t)) {
+	    cx_error(cx, cx->row, cx->col,
+		     "Invalid return type.\n"
+		     "Expected %s, actual: %s",
+		     t->id, v->type->id);
 	    return false;
 	  }
+	}
 
-	  if (ss->stack.count < 1) {
-	    cx_error(cx, cx->row, cx->col, "Not enough return values on stack");
+	*(struct cx_box *)cx_vec_push(&ds->stack) = *v;
+	v++;
+
+	cx_oreturn_end(ss);
+      }
+    
+      while (cx->scans.count) {
+	struct cx_scan *s = cx_vec_peek(&cx->scans, 0);
+	if (!cx_scan_ok(s)) { break; }
+	cx_vec_pop(&cx->scans);
+	if (!cx_scan_call(s)) { return false; }
+      }
+
+      if (cx->pc == ppc) {
+	cx->pc++;
+      } else {
+	goto *op_labels[cx->pc];
+      }
+
+      if (cx->stop) { return true; }
+    }
+
+  op29: { /* CX_TFENCE CX_ORETURN */
+      cx->row = 1; cx->col = 35;
+      size_t ppc = cx->pc;
+      struct cx_call *call = cx_test(cx_vec_peek(&cx->calls, 0));
+
+      if (call->recalls) {
+	cx_oreturn_recall(call, 5, cx);
+      } else {
+	struct cx_scope *ss = cx_scope(cx, 0);
+
+	if (ss->stack.count > 1) {
+	  cx_error(cx, cx->row, cx->col, "Stack not empty on return");
+	  return false;
+	}
+
+	if (ss->stack.count < 1) {
+	  cx_error(cx, cx->row, cx->col, "Not enough return values on stack");
+	  return false;
+	}
+
+	struct cx_scope *ds = cx_scope(cx, 1);
+	cx_vec_grow(&ds->stack, ds->stack.count+1);
+	struct cx_box *v = cx_vec_start(&ss->stack);
+
+	if (ss->safe) {
+	  struct cx_type *t = NULL;
+	  t = type11;
+	  if (!cx_is(v->type, t)) {
+	    cx_error(cx, cx->row, cx->col,
+		     "Invalid return type.\n"
+		     "Expected %s, actual: %s",
+		     t->id, v->type->id);
 	    return false;
 	  }
-
-	  struct cx_scope *ds = cx_scope(cx, 1);
-	  cx_vec_grow(&ds->stack, ds->stack.count+1);
-	  struct cx_box *v = cx_vec_start(&ss->stack);
-
-	  if (ss->safe) {
-	    struct cx_type *t = NULL;
-	    t = type11;
-	    if (!cx_is(v->type, t)) {
-	      cx_error(cx, cx->row, cx->col,
-		       "Invalid return type.\n"
-		       "Expected %s, actual: %s",
-		       t->id, v->type->id);
-	      return false;
-	    }
-	  }
-
-	  *(struct cx_box *)cx_vec_push(&ds->stack) = *v;
-	  v++;
-
-	  cx_oreturn_end(ss);
 	}
-        
-        while (cx->scans.count) {
-          struct cx_scan *s = cx_vec_peek(&cx->scans, 0);
-          if (!cx_scan_ok(s)) { break; }
-          cx_vec_pop(&cx->scans);
-          if (!cx_scan_call(s)) { return false; }
-        }
-        break;
+
+	*(struct cx_box *)cx_vec_push(&ds->stack) = *v;
+	v++;
+
+	cx_oreturn_end(ss);
       }
-      case 29: { /* CX_TFENCE CX_ORETURN */
-        cx->row = 1; cx->col = 35;
-	struct cx_call *call = cx_test(cx_vec_peek(&cx->calls, 0));
-
-	if (call->recalls) {
-	  cx_oreturn_recall(call, 5, cx);
-	} else {
-	  struct cx_scope *ss = cx_scope(cx, 0);
-
-	  if (ss->stack.count > 1) {
-	    cx_error(cx, cx->row, cx->col, "Stack not empty on return");
-	    return false;
-	  }
-
-	  if (ss->stack.count < 1) {
-	    cx_error(cx, cx->row, cx->col, "Not enough return values on stack");
-	    return false;
-	  }
-
-	  struct cx_scope *ds = cx_scope(cx, 1);
-	  cx_vec_grow(&ds->stack, ds->stack.count+1);
-	  struct cx_box *v = cx_vec_start(&ss->stack);
-
-	  if (ss->safe) {
-	    struct cx_type *t = NULL;
-	    t = type11;
-	    if (!cx_is(v->type, t)) {
-	      cx_error(cx, cx->row, cx->col,
-		       "Invalid return type.\n"
-		       "Expected %s, actual: %s",
-		       t->id, v->type->id);
-	      return false;
-	    }
-	  }
-
-	  *(struct cx_box *)cx_vec_push(&ds->stack) = *v;
-	  v++;
-
-	  cx_oreturn_end(ss);
-	}
-        
-        while (cx->scans.count) {
-          struct cx_scan *s = cx_vec_peek(&cx->scans, 0);
-          if (!cx_scan_ok(s)) { break; }
-          cx_vec_pop(&cx->scans);
-          if (!cx_scan_call(s)) { return false; }
-        }
-        break;
+    
+      while (cx->scans.count) {
+	struct cx_scan *s = cx_vec_peek(&cx->scans, 0);
+	if (!cx_scan_ok(s)) { break; }
+	cx_vec_pop(&cx->scans);
+	if (!cx_scan_call(s)) { return false; }
       }
-      case 30: { /* CX_TFUNC CX_OFUNCALL */
-        cx->row = 1; cx->col = 18;
-	struct cx_scan *scan = cx_scan(cx_scope(cx, 0),
-				       func48,
-				       cx_funcall_scan);
-	scan->as_funcall.imp = fimp48_0;
+
+      if (cx->pc == ppc) {
 	cx->pc++;
-        
-        size_t noks = 0;
-        while (cx->scans.count) {
-          struct cx_scan *s = cx_vec_peek(&cx->scans, 0);
-          if (!cx_scan_ok(s)) { break; }
-          cx_vec_pop(&cx->scans);
-          if (!cx_scan_call(s)) { return false; }
-          noks++;
-        }
-        if (noks) { break; }
+      } else {
+	goto *op_labels[cx->pc];
       }
-      case 31: { /* CX_TFENCE CX_OFENCE */
-        cx->row = 1; cx->col = 19;
-	cx->scan_level += -1;
-	struct cx_scope *s = cx_scope(cx, 0);
-	struct cx_cut *c = s->cuts.count ? cx_vec_peek(&s->cuts, 0) : NULL;
-	if (c && c->scan_level == cx->scan_level) {
-	  cx_cut_deinit(cx_vec_pop(&s->cuts));
-	}
+
+      if (cx->stop) { return true; }
+    }
+
+  op30: { /* CX_TFUNC CX_OFUNCALL */
+      cx->row = 1; cx->col = 18;
+      size_t ppc = cx->pc;
+      struct cx_scan *scan = cx_scan(cx_scope(cx, 0),
+				     func48,
+				     cx_funcall_scan);
+      scan->as_funcall.imp = fimp48_0;
+    
+      while (cx->scans.count) {
+	struct cx_scan *s = cx_vec_peek(&cx->scans, 0);
+	if (!cx_scan_ok(s)) { break; }
+	cx_vec_pop(&cx->scans);
+	if (!cx_scan_call(s)) { return false; }
+      }
+
+      if (cx->pc == ppc) {
 	cx->pc++;
-        
-        size_t noks = 0;
-        while (cx->scans.count) {
-          struct cx_scan *s = cx_vec_peek(&cx->scans, 0);
-          if (!cx_scan_ok(s)) { break; }
-          cx_vec_pop(&cx->scans);
-          if (!cx_scan_call(s)) { return false; }
-          noks++;
-        }
-        if (noks) { break; }
+      } else {
+	goto *op_labels[cx->pc];
       }
-      case 32: { /* CX_TLAMBDA CX_OSTOP */
-        cx->row = 1; cx->col = 11;
-	cx->stop = true;
+
+      if (cx->stop) { return true; }
+    }
+
+  op31: { /* CX_TFENCE CX_OFENCE */
+      cx->row = 1; cx->col = 19;
+      size_t ppc = cx->pc;
+      cx->scan_level += -1;
+      struct cx_scope *s = cx_scope(cx, 0);
+      struct cx_cut *c = s->cuts.count ? cx_vec_peek(&s->cuts, 0) : NULL;
+      if (c && c->scan_level == cx->scan_level) {
+	cx_cut_deinit(cx_vec_pop(&s->cuts));
+      }
+    
+      while (cx->scans.count) {
+	struct cx_scan *s = cx_vec_peek(&cx->scans, 0);
+	if (!cx_scan_ok(s)) { break; }
+	cx_vec_pop(&cx->scans);
+	if (!cx_scan_call(s)) { return false; }
+      }
+
+      if (cx->pc == ppc) {
 	cx->pc++;
-        break;
+      } else {
+	goto *op_labels[cx->pc];
       }
-      case 33: { /* CX_TFUNC CX_OFUNCALL */
-        cx->row = 1; cx->col = 20;
-	struct cx_scan *scan = cx_scan(cx_scope(cx, 0),
-				       func9,
-				       cx_funcall_scan);
-	scan->as_funcall.imp = fimp9_0;
+
+      if (cx->stop) { return true; }
+    }
+
+  op32: { /* CX_TLAMBDA CX_OSTOP */
+      cx->row = 1; cx->col = 11;
+      size_t ppc = cx->pc;
+      cx->stop = true;
+      if (cx->pc == ppc) {
 	cx->pc++;
-        
-        size_t noks = 0;
-        while (cx->scans.count) {
-          struct cx_scan *s = cx_vec_peek(&cx->scans, 0);
-          if (!cx_scan_ok(s)) { break; }
-          cx_vec_pop(&cx->scans);
-          if (!cx_scan_call(s)) { return false; }
-          noks++;
-        }
-        if (noks) { break; }
+      } else {
+	goto *op_labels[cx->pc];
       }
-      case 34: { /* CX_TFUNC CX_OFUNCALL */
-        cx->row = 1; cx->col = 26;
-	struct cx_scan *scan = cx_scan(cx_scope(cx, 0),
-				       func60,
-				       cx_funcall_scan);
-	scan->as_funcall.imp = fimp60_0;
+
+      if (cx->stop) { return true; }
+    }
+
+  op33: { /* CX_TFUNC CX_OFUNCALL */
+      cx->row = 1; cx->col = 20;
+      size_t ppc = cx->pc;
+      struct cx_scan *scan = cx_scan(cx_scope(cx, 0),
+				     func9,
+				     cx_funcall_scan);
+      scan->as_funcall.imp = fimp9_0;
+    
+      while (cx->scans.count) {
+	struct cx_scan *s = cx_vec_peek(&cx->scans, 0);
+	if (!cx_scan_ok(s)) { break; }
+	cx_vec_pop(&cx->scans);
+	if (!cx_scan_call(s)) { return false; }
+      }
+
+      if (cx->pc == ppc) {
 	cx->pc++;
-        
-        size_t noks = 0;
-        while (cx->scans.count) {
-          struct cx_scan *s = cx_vec_peek(&cx->scans, 0);
-          if (!cx_scan_ok(s)) { break; }
-          cx_vec_pop(&cx->scans);
-          if (!cx_scan_call(s)) { return false; }
-          noks++;
-        }
-        if (noks) { break; }
+      } else {
+	goto *op_labels[cx->pc];
       }
-      case 35: { /* CX_TFUNC CX_OFUNCALL */
-        cx->row = 1; cx->col = 28;
-	struct cx_scan *scan = cx_scan(cx_scope(cx, 0),
-				       func14,
-				       cx_funcall_scan);
-	scan->as_funcall.imp = NULL;
+
+      if (cx->stop) { return true; }
+    }
+
+  op34: { /* CX_TFUNC CX_OFUNCALL */
+      cx->row = 1; cx->col = 26;
+      size_t ppc = cx->pc;
+      struct cx_scan *scan = cx_scan(cx_scope(cx, 0),
+				     func60,
+				     cx_funcall_scan);
+      scan->as_funcall.imp = fimp60_0;
+    
+      while (cx->scans.count) {
+	struct cx_scan *s = cx_vec_peek(&cx->scans, 0);
+	if (!cx_scan_ok(s)) { break; }
+	cx_vec_pop(&cx->scans);
+	if (!cx_scan_call(s)) { return false; }
+      }
+
+      if (cx->pc == ppc) {
 	cx->pc++;
-        
-        size_t noks = 0;
-        while (cx->scans.count) {
-          struct cx_scan *s = cx_vec_peek(&cx->scans, 0);
-          if (!cx_scan_ok(s)) { break; }
-          cx_vec_pop(&cx->scans);
-          if (!cx_scan_call(s)) { return false; }
-          noks++;
-        }
-        if (noks) { break; }
+      } else {
+	goto *op_labels[cx->pc];
       }
-      default:
-        return true;
+
+      if (cx->stop) { return true; }
+    }
+
+  op35: { /* CX_TFUNC CX_OFUNCALL */
+      cx->row = 1; cx->col = 28;
+      size_t ppc = cx->pc;
+      struct cx_scan *scan = cx_scan(cx_scope(cx, 0),
+				     func14,
+				     cx_funcall_scan);
+      scan->as_funcall.imp = NULL;
+    
+      while (cx->scans.count) {
+	struct cx_scan *s = cx_vec_peek(&cx->scans, 0);
+	if (!cx_scan_ok(s)) { break; }
+	cx_vec_pop(&cx->scans);
+	if (!cx_scan_call(s)) { return false; }
       }
+
+      if (cx->pc == ppc) {
+	cx->pc++;
+      } else {
+	goto *op_labels[cx->pc];
+      }
+
+      if (cx->stop) { return true; }
     }
 
     cx->stop = false;
