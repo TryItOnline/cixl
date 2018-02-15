@@ -1,5 +1,7 @@
 * fix emit formatting
 ** add CX_TAB to ops
+* handle argv in emit main
+** push strings like load main
 * emit guess.cx
 * emit histogram.cx
 * implement func: emit
