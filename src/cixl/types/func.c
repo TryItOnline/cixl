@@ -76,9 +76,9 @@ static void print_arg_id(struct cx_func_arg *a,
   }
 }
 
-struct cx_fimp *cx_func_add_imp(struct cx_func *func,
-				int nargs, struct cx_func_arg *args,
-				int nrets, struct cx_func_ret *rets) {
+struct cx_fimp *cx_add_fimp(struct cx_func *func,
+			    int nargs, struct cx_func_arg *args,
+			    int nrets, struct cx_func_ret *rets) {
   struct cx_vec imp_args;
   cx_vec_init(&imp_args, sizeof(struct cx_func_arg));
 
@@ -129,9 +129,9 @@ struct cx_fimp *cx_func_add_imp(struct cx_func *func,
   return imp;
 }
 
-struct cx_fimp *cx_func_get_imp(struct cx_func *func,
-				const char *id,
-				bool silent) {
+struct cx_fimp *cx_get_fimp(struct cx_func *func,
+			    const char *id,
+			    bool silent) {
   struct cx_fimp **imp = cx_set_get(&func->imp_lookup, &id);
   
   if (!imp && silent) {

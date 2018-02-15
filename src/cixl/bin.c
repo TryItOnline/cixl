@@ -266,7 +266,7 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
 	if (ok) {
 	  *ok = f;
 	
-	  fprintf(out, "    fimp%zd_%zd = cx_func_get_imp(func%zd, \"%s\", false);\n",
+	  fprintf(out, "    fimp%zd_%zd = cx_get_fimp(func%zd, \"%s\", false);\n",
 		  f->func->tag, f->idx, f->func->tag, f->id);
 	}
       }

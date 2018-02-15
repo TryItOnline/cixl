@@ -1,5 +1,6 @@
 #include <string.h>
 
+#include "cixl/bin.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
 #include "cixl/libs/cond.h"
@@ -46,45 +47,117 @@ int main(int argc, char *argv[]) {
   cx_init_meta(&cx);
 
   bool emit = false;
+  int argi = 1;
   
-  for (int i=1; i < argc && *argv[i] == '-'; i++, argc--) {
-    if (strcmp(argv[i], "-e") == 0) {
+  for (; argi < argc && *argv[argi] == '-'; argi++) {
+    if (strcmp(argv[argi], "-e") == 0) {
       emit = true;
     } else {
-      printf("Invalid option %s\n", argv[i]);
+      printf("Invalid option %s\n", argv[argi]);
       return -1;
     }
   }
   
-  if (argc == 1 && !emit) {
+  if (argi == argc && !emit) {
     cx_repl(&cx, stdin, stdout);
   } else {
-    if (emit) {     
-      if (!cx_emit_tests(&cx)) {
-	cx_do_vec(&cx.errors, struct cx_error, e) {
-	  fprintf(stderr, "Error in row %d, col %d:\n%s\n", e->row, e->col, e->msg);
-	  cx_vect_dump(&e->stack, stderr);
-	  fputs("\n\n", stderr);
-	  cx_error_deinit(e);
+    if (emit) {
+      struct cx_bin *bin = cx_bin_new();
+      
+      for (; argi < argc; argi++) {
+	if (!cx_load(&cx, argv[argi], bin)) {
+	  cx_dump_errors(&cx, stderr);
+	  return -1;
 	}
-	
-	cx_vec_clear(&cx.errors);
       }
+      
+      FILE *out = popen("gcc -x c -std=gnu1x -Wall -Werror -O2 -g - -lcixl", "w");
+      
+      fputs("#include \"cixl/bin.h\"\n"
+	    "#include \"cixl/call.h\"\n"
+	    "#include \"cixl/cx.h\"\n"
+            "#include \"cixl/error.h\"\n"
+            "#include \"cixl/libs/cond.h\"\n"
+            "#include \"cixl/libs/func.h\"\n"
+            "#include \"cixl/libs/io.h\"\n"
+            "#include \"cixl/libs/iter.h\"\n"
+            "#include \"cixl/libs/math.h\"\n"
+            "#include \"cixl/libs/meta.h\"\n"
+            "#include \"cixl/libs/pair.h\"\n"
+            "#include \"cixl/libs/rec.h\"\n"
+            "#include \"cixl/libs/ref.h\"\n"
+            "#include \"cixl/libs/stack.h\"\n"
+            "#include \"cixl/libs/str.h\"\n"
+            "#include \"cixl/libs/table.h\"\n"
+            "#include \"cixl/libs/time.h\"\n"
+            "#include \"cixl/libs/type.h\"\n"
+            "#include \"cixl/libs/var.h\"\n"
+            "#include \"cixl/libs/vect.h\"\n"
+            "#include \"cixl/op.h\"\n"
+            "#include \"cixl/scan.h\"\n"
+            "#include \"cixl/scope.h\"\n"
+            "#include \"cixl/types/func.h\"\n"
+            "#include \"cixl/types/lambda.h\"\n\n",
+	    out);
+
+      if (!cx_emit(bin, out, &cx)) {
+	cx_dump_errors(&cx, stderr);
+	cx_bin_deref(bin);
+	pclose(out);
+	return -1;
+      }
+      
+      cx_bin_deref(bin);
+      
+      fputs("int main() {\n"
+	    "  struct cx cx;\n"
+	    "  cx_init(&cx);\n"
+	    "  cx_init_cond(&cx);\n"
+	    "  cx_init_func(&cx);\n"
+	    "  cx_init_io(&cx);\n"
+	    "  cx_init_iter(&cx);\n"
+	    "  cx_init_stack(&cx);\n"
+	    "  cx_init_pair(&cx);\n"
+	    "  cx_init_math(&cx);\n"
+	    "  cx_init_type(&cx);\n"
+	    "  cx_init_vect(&cx);\n"
+	    "  cx_init_rec(&cx);\n"
+	    "  cx_init_ref(&cx);\n"
+	    "  cx_init_str(&cx);\n"
+	    "  cx_init_table(&cx);\n"
+	    "  cx_init_time(&cx);\n"
+	    "  cx_init_var(&cx);\n"
+	    "  cx_init_meta(&cx);\n\n"
+	    "  if (!eval(&cx)) {\n"
+	    "    cx_dump_errors(&cx, stderr);\n"
+	    "    return -1;\n"
+	    "  }\n\n"
+	    "  return 0;\n"
+	    "}",
+	    out);
+      
+      pclose(out);
     } else {
-      for (int i = 2; i < argc; i++) {
-	cx_box_init(cx_push(cx.main), cx.str_type)->as_str = cx_str_new(argv[i]);
+      if (argi == argc) {
+	fputs("Error: Missing file\n", stderr);
+	return -1;
       }
       
-      cx_load(&cx, argv[1]);
+      char *fn = argv[argi++];
       
-      cx_do_vec(&cx.errors, struct cx_error, e) {
-	fprintf(stderr, "Error in row %d, col %d:\n%s\n", e->row, e->col, e->msg);
-	cx_vect_dump(&e->stack, stderr);
-	fputs("\n\n", stderr);
-	cx_error_deinit(e);
+      for (; argi < argc; argi++) {
+	cx_box_init(cx_push(cx.main), cx.str_type)->as_str = cx_str_new(argv[argi]);
       }
-	
-      cx_vec_clear(&cx.errors);
+
+      struct cx_bin *bin = cx_bin_new();
+      
+      if (!cx_load(&cx, fn, bin) || !cx_eval(bin, 0, &cx)) {
+	cx_dump_errors(&cx, stderr);
+	cx_bin_deref(bin);
+	return -1;
+      }
+
+      cx_bin_deref(bin);
     }
   }
 

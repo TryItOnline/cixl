@@ -152,20 +152,20 @@ void cx_init_math(struct cx *cx) {
 	       cx_rets(cx_ret(cx->int_type)),
 	       rat_int_imp);
   
-  cx_add_func(cx, "fib-rec",
-	      cx_args(cx_arg("a", cx->int_type),
-		      cx_arg("b", cx->int_type),
-		      cx_arg("n", cx->int_type)),
-	      cx_rets(cx_ret(cx->int_type)),
-	      "$n? if-else {$b $a $b +<Int Int> $n -- recall} $a");
+  cx_add_cxfunc(cx, "fib-rec",
+		cx_args(cx_arg("a", cx->int_type),
+			cx_arg("b", cx->int_type),
+			cx_arg("n", cx->int_type)),
+		cx_rets(cx_ret(cx->int_type)),
+		"$n? if-else {$b $a $b +<Int Int> $n -- recall} $a");
 
-  cx_add_func(cx, "fib",
-	      cx_args(cx_arg("n", cx->int_type)),
-	      cx_rets(cx_ret(cx->int_type)),
-	      "0 1 $n fib-rec");
+  cx_add_cxfunc(cx, "fib",
+		cx_args(cx_arg("n", cx->int_type)),
+		cx_rets(cx_ret(cx->int_type)),
+		"0 1 $n fib-rec");
 
-  cx_add_func(cx, "sum",
-	      cx_args(cx_arg("in", cx->seq_type)),
-	      cx_rets(cx_ret(cx->any_type)),
-	      "0, $in for &+");
+  cx_add_cxfunc(cx, "sum",
+		cx_args(cx_arg("in", cx->seq_type)),
+		cx_rets(cx_ret(cx->any_type)),
+		"0, $in for &+");
 }

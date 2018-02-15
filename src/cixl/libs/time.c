@@ -526,7 +526,7 @@ void cx_init_time(struct cx *cx) {
 	       cx_rets(cx_ret(cx->time_type)),
 	       mul_imp);
 
-  cx_add_func(cx, "today",
-	      cx_args(), cx_rets(cx_ret(cx->time_type)),
-	      "now date");
+  cx_add_cxfunc(cx, "today",
+		cx_args(), cx_rets(cx_ret(cx->time_type)),
+		"now date");
 }

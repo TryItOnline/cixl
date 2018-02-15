@@ -83,8 +83,8 @@ void cx_init_pair(struct cx *cx) {
 	       cx_rets(),
 	       rezip_imp);  
 
-  cx_add_func(cx, "rezip", 
-	      cx_args(cx_arg("in", cx->seq_type)),
-	      cx_rets(),
-	      "$in for &rezip");
+  cx_add_cxfunc(cx, "rezip", 
+		cx_args(cx_arg("in", cx->seq_type)),
+		cx_rets(),
+		"$in for &rezip");
 }

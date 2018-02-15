@@ -59,13 +59,13 @@ struct cx_func_ret {
 struct cx_func_ret cx_ret(struct cx_type *type);
 struct cx_func_ret cx_nret(int n);
 
-struct cx_fimp *cx_func_add_imp(struct cx_func *func,
-				int nargs, struct cx_func_arg *args,
-				int nrets, struct cx_func_ret *rets);
+struct cx_fimp *cx_add_fimp(struct cx_func *func,
+			    int nargs, struct cx_func_arg *args,
+			    int nrets, struct cx_func_ret *rets);
 
-struct cx_fimp *cx_func_get_imp(struct cx_func *func,
-				const char *id,
-				bool silent);
+struct cx_fimp *cx_get_fimp(struct cx_func *func,
+			    const char *id,
+			    bool silent);
 
 struct cx_fimp *cx_func_match_imp(struct cx_func *func,
 				  struct cx_scope *scope,

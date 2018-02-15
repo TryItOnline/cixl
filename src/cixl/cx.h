@@ -66,23 +66,23 @@ struct cx_type *cx_get_type(struct cx *cx, const char *id, bool silent);
 struct cx_macro *cx_add_macro(struct cx *cx, const char *id, cx_macro_parse_t imp);
 struct cx_macro *cx_get_macro(struct cx *cx, const char *id, bool silent);
 
-struct cx_fimp *cx_add_fimp(struct cx *cx,
-			    const char *id,
-			    int nargs, struct cx_func_arg *args,
-			    int nrets, struct cx_func_ret *rets);
-
 struct cx_fimp *cx_add_func(struct cx *cx,
 			    const char *id,
 			    int nargs, struct cx_func_arg *args,
-			    int nrets, struct cx_func_ret *rets,
-			    const char *body);
+			    int nrets, struct cx_func_ret *rets);
 
 struct cx_fimp *cx_add_cfunc(struct cx *cx,
 			     const char *id,
 			     int nargs, struct cx_func_arg *args,
 			     int nrets, struct cx_func_ret *rets,
 			     cx_fimp_ptr_t ptr);
- 
+
+struct cx_fimp *cx_add_cxfunc(struct cx *cx,
+			      const char *id,
+			      int nargs, struct cx_func_arg *args,
+			      int nrets, struct cx_func_ret *rets,
+			      const char *body);
+
 struct cx_func *cx_get_func(struct cx *cx, const char *id, bool silent);
 
 struct cx_box *cx_get_const(struct cx *cx, struct cx_sym id, bool silent);
@@ -99,6 +99,8 @@ void cx_end(struct cx *cx);
 bool cx_funcall(struct cx *cx, const char *id);
 
 bool cx_load_toks(struct cx *cx, const char *path, struct cx_vec *out);
-bool cx_load(struct cx *cx, const char *path);
+bool cx_load(struct cx *cx, const char *path, struct cx_bin *bin);
+
+void cx_dump_errors(struct cx *cx, FILE *out);
 
 #endif

@@ -3,6 +3,7 @@
 #include "cixl/box.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
+#include "cixl/op.h"
 #include "cixl/scope.h"
 #include "cixl/types/char.h"
 #include "cixl/types/fimp.h"
@@ -47,8 +48,10 @@ static void print_imp(struct cx_box *v, FILE *out) {
 
 static bool emit_imp(struct cx_box *v, FILE *out) {
   fprintf(out,
-	  "cx_box_init(cx_push(cx_scope(cx, 0)), cx->char_type)->as_char = %d;\n",
+	  CX_TAB "cx_box_init(cx_push(cx_scope(cx, 0)),\n"
+	  CX_TAB "            cx->char_type)->as_char = %d;\n",
 	  v->as_char);
+  
   return true;
 }
 

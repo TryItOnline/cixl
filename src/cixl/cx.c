@@ -410,7 +410,7 @@ struct cx_type *cx_get_type(struct cx *cx, const char *id, bool silent) {
   return t ? *t : NULL;
 }
 
-struct cx_fimp *cx_add_fimp(struct cx *cx,
+struct cx_fimp *cx_add_func(struct cx *cx,
 			    const char *id,
 			    int nargs, struct cx_func_arg *args,
 			    int nrets, struct cx_func_ret *rets) {
@@ -428,17 +428,7 @@ struct cx_fimp *cx_add_fimp(struct cx *cx,
     *f = cx_func_init(malloc(sizeof(struct cx_func)), cx, id, nargs);
   }
   
-  return cx_func_add_imp(*f, nargs, args, nrets, rets);
-}
-
-struct cx_fimp *cx_add_func(struct cx *cx,
-			    const char *id,
-			    int nargs, struct cx_func_arg *args,
-			    int nrets, struct cx_func_ret *rets,
-			    const char *body) {
-  struct cx_fimp *imp = cx_add_fimp(cx, id, nargs, args, nrets, rets);
-  cx_test(cx_parse_str(cx, body, &imp->toks));
-  return imp;
+  return cx_add_fimp(*f, nargs, args, nrets, rets);
 }
 
 struct cx_fimp *cx_add_cfunc(struct cx *cx,
@@ -446,8 +436,18 @@ struct cx_fimp *cx_add_cfunc(struct cx *cx,
 			     int nargs, struct cx_func_arg *args,
 			     int nrets, struct cx_func_ret *rets,
 			     cx_fimp_ptr_t ptr) {
-  struct cx_fimp *imp = cx_add_fimp(cx, id, nargs, args, nrets, rets);
+  struct cx_fimp *imp = cx_add_func(cx, id, nargs, args, nrets, rets);
   imp->ptr = ptr;
+  return imp;
+}
+
+struct cx_fimp *cx_add_cxfunc(struct cx *cx,
+			    const char *id,
+			    int nargs, struct cx_func_arg *args,
+			    int nrets, struct cx_func_ret *rets,
+			    const char *body) {
+  struct cx_fimp *imp = cx_add_func(cx, id, nargs, args, nrets, rets);
+  cx_test(cx_parse_str(cx, body, &imp->toks));
   return imp;
 }
 
@@ -597,7 +597,7 @@ bool cx_load_toks(struct cx *cx, const char *path, struct cx_vec *out) {
   return ok;
 }
 
-bool cx_load(struct cx *cx, const char *path) {
+bool cx_load(struct cx *cx, const char *path, struct cx_bin *bin) {
   bool ok = false;
 
   char *full_path = get_full_path(cx, path);
@@ -611,12 +611,8 @@ bool cx_load(struct cx *cx, const char *path) {
     goto exit1;
   }
 
-  struct cx_bin *bin = cx_bin_new();
-  if (!cx_compile(cx, cx_vec_start(&toks), cx_vec_end(&toks), bin)) { goto exit2; }
-  if (!cx_eval(bin, 0, cx)) { goto exit2; }
+  if (!cx_compile(cx, cx_vec_start(&toks), cx_vec_end(&toks), bin)) { goto exit1; }
   ok = true;
- exit2:
-  cx_bin_deref(bin);
  exit1: {
     free(*(char **)cx_vec_pop(&cx->load_paths));
     cx_do_vec(&toks, struct cx_tok, t) { cx_tok_deinit(t); }
@@ -624,4 +620,15 @@ bool cx_load(struct cx *cx, const char *path) {
     free(full_path);
     return ok;
   }
+}
+
+void cx_dump_errors(struct cx *cx, FILE *out) {
+  cx_do_vec(&cx->errors, struct cx_error, e) {
+    fprintf(out, "Error in row %d, col %d:\n%s\n", e->row, e->col, e->msg);
+    cx_vect_dump(&e->stack, out);
+    fputs("\n\n", out);
+    cx_error_deinit(e);
+  }
+
+  cx_vec_clear(&cx->errors);
 }

@@ -124,7 +124,7 @@ static bool func_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
     return false;
   }
 
-  struct cx_fimp *imp = cx_add_fimp(cx,
+  struct cx_fimp *imp = cx_add_func(cx,
 				    id.as_ptr,
 				    func_args.count,
 				    (void *)func_args.items,

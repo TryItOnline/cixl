@@ -83,7 +83,9 @@ static bool ask_imp(struct cx_scope *scope) {
 
 static bool load_imp(struct cx_scope *scope) {
   struct cx_box p = *cx_test(cx_pop(scope, false));
-  bool ok = cx_load(scope->cx, p.as_str->data);
+  struct cx_bin *bin = cx_bin_new();
+  bool ok = cx_load(scope->cx, p.as_str->data, bin) && cx_eval(bin, 0, scope->cx);
+  cx_bin_deref(bin);
   cx_box_deinit(&p);
   return ok;
 }
@@ -232,8 +234,8 @@ void cx_init_io(struct cx *cx) {
 	       cx_rets(cx_ret(cx->iter_type)),
 	       lines_imp);
 
-  cx_add_func(cx, "say",
-	      cx_args(cx_arg("v", cx->any_type)), cx_rets(),
-	      "#out print $v "
-	      "#out print @@n");
+  cx_add_cxfunc(cx, "say",
+		cx_args(cx_arg("v", cx->any_type)), cx_rets(),
+		"#out print $v "
+		"#out print @@n");
 }

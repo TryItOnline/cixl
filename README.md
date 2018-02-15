@@ -1160,9 +1160,9 @@ int main() {
                cx_args(cx_arg("s", t)), cx_rets(cx_ret(cx.int_type)),
 	       len_imp);
 
-  cx_add_func(cx, "upper",
-	      cx_args(cx_arg("s", t)), cx_rets(cx_ret(t)),
-	      "$s map &upper str");
+  cx_add_cxfunc(cx, "upper",
+	   	cx_args(cx_arg("s", t)), cx_rets(cx_ret(t)),
+	        "$s map &upper str");
 
   ...
 

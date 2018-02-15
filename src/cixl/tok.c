@@ -205,9 +205,9 @@ static ssize_t id_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) {
   char *id = tok->as_ptr;
   
   if (id[0] == '#') {
-    struct cx_box *v = cx_get_const(cx, cx_sym(cx, id+1), false);
-    if (!v) { return -1; }
-    cx_copy(&cx_op_init(bin, CX_OPUSH(), tok_idx)->as_push.value, v);
+    cx_op_init(bin,
+	       CX_OGETCONST(),
+	       tok_idx)->as_getconst.id = cx_sym(cx, id+1);    
   } else if (id[0] == '$') {
     cx_op_init(bin, CX_OGETVAR(), tok_idx)->as_getvar.id = cx_sym(cx, id+1);
   } else {

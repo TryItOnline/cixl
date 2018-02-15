@@ -1,6 +1,7 @@
 #include "cixl/box.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
+#include "cixl/op.h"
 #include "cixl/scope.h"
 #include "cixl/types/file.h"
 #include "cixl/types/iter.h"

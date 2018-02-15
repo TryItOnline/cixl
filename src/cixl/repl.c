@@ -49,28 +49,28 @@ static bool emit_bmips(struct cx *cx) {
     if (init) {
       init = false;
       func64 = cx_get_func(cx, "fib", false);
-      fimp64_0 = cx_func_get_imp(func64, "Int", false);
+      fimp64_0 = cx_get_fimp(func64, "Int", false);
       sym3 = cx_sym(cx, "n");
       func63 = cx_get_func(cx, "fib-rec", false);
-      fimp63_0 = cx_func_get_imp(func63, "Int Int Int", false);
+      fimp63_0 = cx_get_fimp(func63, "Int Int Int", false);
       sym26 = cx_sym(cx, "b");
       sym25 = cx_sym(cx, "a");
       func22 = cx_get_func(cx, "?", false);
       func28 = cx_get_func(cx, "if-else", false);
-      fimp28_0 = cx_func_get_imp(func28, "Opt A A", false);
+      fimp28_0 = cx_get_fimp(func28, "Opt A A", false);
       func57 = cx_get_func(cx, "+", false);
-      fimp57_0 = cx_func_get_imp(func57, "Int Int", false);
+      fimp57_0 = cx_get_fimp(func57, "Int Int", false);
       func2 = cx_get_func(cx, "--", false);
-      fimp2_0 = cx_func_get_imp(func2, "Int", false);
+      fimp2_0 = cx_get_fimp(func2, "Int", false);
       func30 = cx_get_func(cx, "recall", false);
-      fimp30_0 = cx_func_get_imp(func30, "", false);
+      fimp30_0 = cx_get_fimp(func30, "", false);
       type11 = cx_get_type(cx, "Int", false);
       func48 = cx_get_func(cx, "_", false);
-      fimp48_0 = cx_func_get_imp(func48, "", false);
+      fimp48_0 = cx_get_fimp(func48, "", false);
       func9 = cx_get_func(cx, "clock", false);
-      fimp9_0 = cx_func_get_imp(func9, "A", false);
+      fimp9_0 = cx_get_fimp(func9, "A", false);
       func60 = cx_get_func(cx, "/", false);
-      fimp60_0 = cx_func_get_imp(func60, "Int Int", false);
+      fimp60_0 = cx_get_fimp(func60, "Int Int", false);
       func14 = cx_get_func(cx, "int", false);
     }
 
@@ -720,14 +720,7 @@ void cx_repl(struct cx *cx, FILE *in, FILE *out) {
       if (cx_eval_str(cx, body.data)) {
 	cx_stackdump(cx_scope(cx, 0), out);
       } else {
-	cx_do_vec(&cx->errors, struct cx_error, e) {
-	  fprintf(out, "Error in row %d, col %d:\n%s\n", e->row, e->col, e->msg);
-	  cx_vect_dump(&e->stack, out);
-	  fputs("\n\n", out);
-	  cx_error_deinit(e);
-	}
-	
-	cx_vec_clear(&cx->errors);
+	cx_dump_errors(cx, out);
       }
 
       free(body.data);

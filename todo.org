@@ -1,15 +1,11 @@
-* implement -e flag
-** extract cx_dump_errors(cx, FILE *)
-*** use in repl & main
-** start compiler using popen
-*** link with libcixl.a
-** generate main
-*** include all libs
-** emit to pipe
-* prettify emitted code
-** add CX_TAB define
+* fix emit formatting
+** add CX_TAB to ops
+* emit guess.cx
+* emit histogram.cx
 * implement func: emit
-** register all funcs from bin in outer eval
+** add emit_init flag to cx_bin_func
+*** set for parsed funcs
+*** generate init if set
 * implement trait: & rec: emit
 ** register in bin & create in init
 * add TN to generated ids
@@ -45,6 +41,7 @@
 * change funcs to take cx instead of scope
 ** grep all cx_scope *
 ** use cx_scope to get current
+* add @@ char escape
 
 say [@/ ~ ' bmips']
 | Bin new %, $ compile '1000000000 {50 fib _} clock / int' emit
@@ -53,4 +50,4 @@ say [@/ ~ ' bmips']
 | Bin new %, $ compile 'say 42' emit
 | Bin new %, $ compile 'say (clock {10000 times {50 fib _}} / 1000000 int)' emit
 | say (clock {10000 times {50 fib _}} / 1000000 int)
-* add @@ char escape
+  
