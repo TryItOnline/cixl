@@ -333,7 +333,7 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
     if (op->type->scan) {
       fputs("        \n", out);
 
-      if (!op->type->emit_break) { fputs("        size_t noks = 0;\n", out); }
+      if (!op->type->emit_break) { fputs("        size_t ppc = cx->pc;\n", out); }
 
       fputs("        while (cx->scans.count) {\n"				
 	    "          struct cx_scan *s = cx_vec_peek(&cx->scans, 0);\n"	
@@ -342,9 +342,11 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
 	    "          if (!cx_scan_call(s)) { return false; }\n",
 	    out);
       	    
-      if (!op->type->emit_break) { fputs("          noks++;\n", out); }
       fputs("        }\n", out);
-      if (!op->type->emit_break) { fputs("        if (noks) { break; }\n", out); }
+      
+      if (!op->type->emit_break) {
+	fputs("        if (cx->pc != ppc) { break; }\n", out);
+      }
     }
 
     if (op->type->emit_break) { fputs("        break;\n", out); }

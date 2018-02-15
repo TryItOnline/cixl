@@ -9,6 +9,9 @@
 ** check stop inside every case
 ** remove outer loop
 ** remove op.emit_break
+** test stopped in each case
+** attempt inlining labels in emit
+*** using naming convention
 * emit guess.cx
 * emit histogram.cx
 * implement func: emit
