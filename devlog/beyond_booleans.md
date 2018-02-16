@@ -68,14 +68,14 @@ The ```?```-operator may be overloaded for user defined types, which allows hook
 ```
    |
 ...rec: Foo() bar Int;
-...func: ?(x Foo) $x `bar get = 42;
-...let: foo Foo new %, $ `bar put 21;
+...func: ?(x Foo) $x `bar get 42 =;
+...let: foo Foo new %, $ `bar 21 put;
 ...$foo?
 ...
 [#f]
 
    |
-...$foo `bar put 42
+...$foo `bar 42 put
 ...$foo?
 ...
 [#t]
@@ -89,12 +89,12 @@ The rest of the language will call ```?``` whenever a boolean projection is requ
 ...
 [#f]
 
-   | 'foo' if {say 'Yes'}
+   | 'foo' {say 'Yes'} if
 ...
 Yes
 []
 
-   | #nil or $foo
+   | #nil $foo or
 ...
 ...
 [Foo(0x53dd068)@2]

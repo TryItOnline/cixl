@@ -236,6 +236,6 @@ void cx_init_io(struct cx *cx) {
 
   cx_add_cxfunc(cx, "say",
 		cx_args(cx_arg("v", cx->any_type)), cx_rets(),
-		"#out print $v "
-		"#out print @@n");
+		"#out $v print\n"
+		"#out @@n print");
 }

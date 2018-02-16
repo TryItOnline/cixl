@@ -21,31 +21,31 @@ Times may be queried for absolute and relative field values;
 ...
 [Time(2018/0/3) Time(20:14:48.105655092)]
 
-   | year $t, month $t, day $t
+   | $t year $t month $t day
 ...
 [2018 0 3]
 
-   | months $t
+   | $t months
 ...
 [24216]
 
-   / 12 int
+   12 / int
 ...
 [2018]
 
-   | hour $t, minute $t, second $t, nsecond $t
+   | $t hour $t minute $t second $t nsecond
 ...
 [20 14 48 105655092]
 
-   | h $t, m $t, s $t, ms $t, us $t, ns $t
+   | $t h $t m $t s $t ms $t us $t ns
 ...
 [93 5591 335485 335485094 335485094756 335485094756404]
 
-   | h $t / 24 int
+   | $t h 24 / int
 ...
 [3]
 
-   | m $t / 60 int
+   | $t m 60 / int
 ...
 [93]
 ```
@@ -77,7 +77,7 @@ compared, added and subtracted;
 ...
 [Time(1/2/2) 12:0:0.0]
 
-   <= now
+   now <=
 ...
 [#t]
 

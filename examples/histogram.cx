@@ -13,19 +13,19 @@
   Split stdin into lowercase words and count them using a table.
 */
 
-| let: ws new Table;
+| let: ws Table new;
 
-#in words for { % lower $ws ~ put-else &++ 1 }
+#in words { % lower $ws ~ &++ 1 put-else } for
 
 /*
   Convert table to vector of pairs and sort by descending value, pairs are already
   sorted alphabetically since the table is sorted by key.
 */
 
-$ws vect %, $ sort {y ~ y <=>}
+$ws vect % {y ~ y <=>} sort
 
 /*
   Print results to stdout.
 */
 
-for { [unzip @ ~] say }
+{ [unzip @ ~] say } for

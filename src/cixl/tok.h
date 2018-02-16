@@ -50,9 +50,7 @@ struct cx_tok *cx_tok_deinit(struct cx_tok *tok);
 
 void cx_tok_copy(struct cx_tok *dst, struct cx_tok *src);
 
-struct cx_tok_type *CX_TCUT();
 struct cx_tok_type *CX_TEND();
-struct cx_tok_type *CX_TFENCE();
 struct cx_tok_type *CX_TFIMP();
 struct cx_tok_type *CX_TFUNC();
 struct cx_tok_type *CX_TGROUP();

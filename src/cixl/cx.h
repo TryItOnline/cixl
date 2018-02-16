@@ -9,7 +9,7 @@
 #include "cixl/type.h"
 #include "cixl/types/fimp.h"
 
-#define CX_VERSION "0.9.0"
+#define CX_VERSION "0.9.1"
 #define CX_SLAB_SIZE 20
 
 #define cx_add_type(cx, id, ...)		\
@@ -41,11 +41,10 @@ struct cx {
   struct cx_vec load_paths;
   struct cx_vec scopes;
   struct cx_scope *main, **scope;
-  struct cx_vec scans, calls;
+  struct cx_vec calls;
   
   struct cx_bin *bin;
   size_t pc;
-  int scan_level;
   bool stop;
   
   int row, col;

@@ -19,10 +19,6 @@ static ssize_t let_eval(struct cx_macro_eval *eval,
 			struct cx_bin *bin,
 			size_t tok_idx,
 			struct cx *cx) {
-  cx_op_init(bin,
-	     CX_OFENCE(),
-	     tok_idx)->as_fence.delta_level = 1;
-
   if (!cx_compile(cx, cx_vec_get(&eval->toks, 1), cx_vec_end(&eval->toks), bin)) {
     cx_error(cx, cx->row, cx->col, "Failed compiling let");
     return -1;
@@ -82,10 +78,6 @@ static ssize_t let_eval(struct cx_macro_eval *eval,
     cx_vec_deinit(&types);
     if (!ok) { return -1; }
   }
-
-  cx_op_init(bin,
-	     CX_OFENCE(),
-	     tok_idx)->as_fence.delta_level = -1;
 
   return tok_idx+1;
 }

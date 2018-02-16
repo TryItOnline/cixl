@@ -25,12 +25,10 @@ struct cx_call;
 struct cx_func;
 struct cx_fimp;
 struct cx_op;
-struct cx_scan;
 struct cx_tok;
   
 struct cx_op_type {
   const char *id;
-  bool scan;
   
   void (*init)(struct cx_op *, struct cx_tok *);
   void (*deinit)(struct cx_op *);
@@ -53,10 +51,6 @@ struct cx_begin_op {
 
 struct cx_else_op {
   size_t nops;
-};
-
-struct cx_fence_op {
-  int delta_level;
 };
 
 struct cx_fimp_op {
@@ -116,7 +110,6 @@ struct cx_op {
   union {
     struct cx_begin_op as_begin;
     struct cx_else_op as_else;
-    struct cx_fence_op as_fence;
     struct cx_fimp_op as_fimp;
     struct cx_fimpdef_op as_fimpdef;
     struct cx_funcall_op as_funcall;
@@ -134,10 +127,8 @@ struct cx_op {
 struct cx_op *cx_op_init(struct cx_bin *bin, struct cx_op_type *type, size_t tok_idx);
 
 struct cx_op_type *CX_OBEGIN();
-struct cx_op_type *CX_OCUT();
 struct cx_op_type *CX_OEND();
 struct cx_op_type *CX_OELSE();
-struct cx_op_type *CX_OFENCE();
 struct cx_op_type *CX_OFIMP();
 struct cx_op_type *CX_OFIMPDEF();
 struct cx_op_type *CX_OFUNCALL();
@@ -152,15 +143,9 @@ struct cx_op_type *CX_ORETURN();
 struct cx_op_type *CX_OSTASH();
 struct cx_op_type *CX_OSTOP();
 
-void cx_oend(struct cx *cx);
-bool cx_ogetvar1(struct cx_sym id, struct cx_scope *scope);
-bool cx_ogetvar2(struct cx_scope *scope);
+bool cx_ogetvar(struct cx_sym id, struct cx_scope *scope);
 
-void cx_oreturn_recall(struct cx_call *call, size_t pc, struct cx *cx);
+bool cx_oreturn_recall(struct cx_call *call, size_t pc, struct cx *cx);
 void cx_oreturn_end(struct cx_scope *scope);
-
-bool cx_fimp_scan(struct cx_scan *scan);
-bool cx_funcall_scan(struct cx_scan *scan);
-bool cx_recall_scan(struct cx_scan *scan);
 
 #endif

@@ -11,7 +11,6 @@ struct cx_scope *cx_scope_new(struct cx *cx, struct cx_scope *parent) {
   scope->parent = parent ? cx_scope_ref(parent) : NULL;
   cx_vec_init(&scope->stack, sizeof(struct cx_box));
   cx_env_init(&scope->env, &cx->var_alloc);
-  cx_vec_init(&scope->cuts, sizeof(struct cx_cut));
   scope->safe = cx->scopes.count ? cx_scope(cx, 0)->safe : true;
   scope->nrefs = 0;
   return scope;
@@ -28,8 +27,6 @@ void cx_scope_deref(struct cx_scope *scope) {
   
   if (!scope->nrefs) {
     if (scope->parent) { cx_scope_deref(scope->parent); }
-
-    cx_vec_deinit(&scope->cuts);
 
     cx_do_vec(&scope->stack, struct cx_box, b) { cx_box_deinit(b); }
     cx_vec_deinit(&scope->stack);
@@ -79,7 +76,6 @@ struct cx_box *cx_get_var(struct cx_scope *scope, struct cx_sym id, bool silent)
     if (!silent) {
       struct cx *cx = scope->cx;
       cx_error(cx, cx->row, cx->col, "Unknown var: %s", id.id);
-      cx_test(false);
     }
     
     return NULL;
@@ -104,17 +100,4 @@ struct cx_box *cx_put_var(struct cx_scope *scope, struct cx_sym id, bool force) 
   }
 
   return val;
-}
-
-struct cx_cut *cx_cut_init(struct cx_cut *cut, struct cx_scope *scope) {
-  cut->scope = scope;
-  cut->offs = scope->stack.count;
-  scope->cx->scan_level++;
-  cut->scan_level = scope->cx->scan_level;
-  return cut;
-}
-
-struct cx_cut *cx_cut_deinit(struct cx_cut *cut) {
-  cut->scope->cx->scan_level--;
-  return cut;
 }

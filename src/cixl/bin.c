@@ -18,16 +18,7 @@ static bool eval(struct cx *cx) {
     cx_init_ops(cx->bin);
     struct cx_op *op = cx_vec_get(&cx->bin->ops, cx->pc++);
     cx->row = op->row; cx->col = op->col;
-
     if (!op->type->eval(op, cx->bin, cx) || cx->errors.count) { return false; }
-    if (!op->type->scan) { continue; }
-    
-    while (cx->scans.count) {
-      struct cx_scan *s = cx_vec_peek(&cx->scans, 0);
-      if (!cx_scan_ok(s)) { break; }
-      cx_vec_pop(&cx->scans);
-      if (!cx_scan_call(s)) { return false; }
-    }
   }
   
   return true;
@@ -122,21 +113,10 @@ void cx_init_ops(struct cx_bin *bin) {
 
 bool cx_eval(struct cx_bin *bin, size_t start_pc, struct cx *cx) {
   struct cx_bin *prev_bin = cx->bin;
-  size_t prev_pc = cx->pc, prev_nscans = cx->scans.count;
+  size_t prev_pc = cx->pc;
   cx->bin = bin;
   cx->pc = start_pc;
   bool ok = cx_test(bin->eval)(cx);
-
-  if (ok && cx->scans.count > prev_nscans) {
-    struct cx_scan *s = cx_vec_peek(&cx->scans, 0);
-    
-    cx_error(cx, cx->row, cx->col,
-	     "Not enough args for func: '%s'", s->func->id);
-
-    cx->scans.count = prev_nscans;
-    ok = false;
-  }
-
   cx->bin = prev_bin;
   cx->pc = prev_pc;
   cx->stop = false;
@@ -154,9 +134,9 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
   fprintf(out, "  static void *op_labels[%zd] = {\n", bin->ops.count);
   
   for (size_t i = 0; i < bin->ops.count; i++) {
-    fprintf(out, "    &&op%zd", i);
+    fprintf(out, "&&op%zd", i);
     if (i < bin->ops.count-1) { fputs(", ", out); }
-    fputc('\n', out);
+    if (i >= 10 && i % 10 == 0) { fputc('\n', out); }
   }
   
   fputs("};\n\n", out);
@@ -338,17 +318,6 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
     fputs("    size_t ppc = cx->pc;\n", out);
 
     if (!cx_test(op->type->emit)(op, bin, out, cx)) { return false; }
-
-    if (op->type->scan) {
-      fputs("    \n"
-            "    while (cx->scans.count) {\n"				
-	    "      struct cx_scan *s = cx_vec_peek(&cx->scans, 0);\n"	
-	    "      if (!cx_scan_ok(s)) { break; }\n"			
-	    "      cx_vec_pop(&cx->scans);\n"				
-	    "      if (!cx_scan_call(s)) { return false; }\n"
-            "    }\n\n",
-	    out);
-    }
 
     fputs("    if (cx->pc == ppc) {\n"
           "      cx->pc++;\n"

@@ -7,17 +7,17 @@
   https://github.com/basic-gongfu/cixl#getting-started
 */
 
-((let: n rand 100++; {
-  ask 'Your guess: '
+((let: n 100 rand ++; {
+  'Your guess: ' ask
   
-  %, $ if-else {
-    let: c int <=> $n;
+  % {
+    let: c int $n <=>;
 
     switch:
-      (($c = `<) say 'Too low!'  #t)
-      (($c = `>) say 'Too high!' #t)
-      (#t        say 'Correct!'  #nil);
+      (($c `< =) 'Too low!'  say #t)
+      (($c `> =) 'Too high!' say #t)
+      (#t        'Correct!'  say #nil);
   } {
     _ #nil
-  }
-}) for &_)
+  } if-else
+}) &_ for)

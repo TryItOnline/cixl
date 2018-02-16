@@ -145,7 +145,7 @@ static bool func_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
 static bool imps_imp(struct cx_scope *scope) {
   struct cx *cx = scope->cx;
   struct cx_func *f = cx_test(cx_pop(scope, false))->as_ptr;
-  struct cx_vect *is = cx_vect_new();
+  struct cx_vect *is = cx_vect_new(cx);
 
   for (struct cx_fimp **i = cx_vec_peek(&f->imps, 0);
        i >= (struct cx_fimp **)f->imps.items;
@@ -180,22 +180,6 @@ static bool recall_imp(struct cx_scope *scope) {
   return true;
 }
 
-static bool upcall_scan(struct cx_scan *scan) {
-  struct cx_fimp *imp = scan->as_upcall.imp;
-  struct cx_func *func = imp->func;
-  struct cx_scope *s = scan->scope;
-  struct cx *cx = s->cx;
-  
-  imp = cx_func_match_imp(func, s, func->imps.count - imp->idx);
-  
-  if (!imp) {
-    cx_error(cx, cx->row, cx->col, "Upcall not applicable");
-    return false;
-  }
-  
-  return cx_fimp_call(imp, s);  
-}
-
 static bool upcall_imp(struct cx_scope *scope) {
   struct cx *cx = scope->cx;
   struct cx_call *call = get_fimp_call(cx);
@@ -206,15 +190,21 @@ static bool upcall_imp(struct cx_scope *scope) {
   }
 
   struct cx_fimp *imp = call->target;
-
+  struct cx_func *func = imp->func;
+  
   if (!imp->idx) {
     cx_error(cx, cx->row, cx->col, "No more fimps");
     return false;
   }
   
-  struct cx_scan *scan = cx_scan(scope, imp->func, upcall_scan);
-  scan->as_upcall.imp = imp;
-  return true;
+  imp = cx_func_match_imp(func, scope, func->imps.count - imp->idx);
+  
+  if (!imp) {
+    cx_error(cx, cx->row, cx->col, "Upcall not applicable");
+    return false;
+  }
+  
+  return cx_fimp_call(imp, scope);  
 }
 
 void cx_init_func(struct cx *cx) {

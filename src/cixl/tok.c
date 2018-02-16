@@ -38,30 +38,7 @@ void cx_tok_copy(struct cx_tok *dst, struct cx_tok *src) {
   if (src->type->copy) { src->type->copy(dst, src); }
 }
 
-static ssize_t cut_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) {
-  cx_op_init(bin, CX_OCUT(), tok_idx);
-  return tok_idx+1;
-}
-
-cx_tok_type(CX_TCUT, {
-    type.compile = cut_compile;
-  });
-
 cx_tok_type(CX_TEND);
-
-static ssize_t fence_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) {
-  struct cx_tok *tok = cx_vec_get(&bin->toks, tok_idx);
-
-  cx_op_init(bin,
-	     CX_OFENCE(),
-	     tok_idx)->as_fence.delta_level = tok->as_int;
-  
-  return tok_idx+1;
-}
-
-cx_tok_type(CX_TFENCE, {
-    type.compile = fence_compile;
-  });
 
 static bool inline_fimp1(struct cx_fimp *imp,
 			 struct cx_bin *bin,
@@ -83,7 +60,6 @@ static bool inline_fimp2(struct cx_fimp *imp,
 			 size_t tok_idx,
 			 struct cx *cx) {
   size_t i = bin->ops.count;
-
   struct cx_op *op = cx_op_init(bin, CX_OFIMP(), tok_idx);
   op->as_fimp.imp = imp;
   op->as_fimp.start_op = i+1;
@@ -113,7 +89,6 @@ static ssize_t fimp_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) {
 					 tok_idx)->as_funcall;
   op->func = imp->func;
   op->imp = imp;
-
  exit:
   return tok_idx+1;
 }
@@ -144,7 +119,6 @@ static ssize_t func_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) {
 					 tok_idx)->as_funcall;
   op->func = func;
   op->imp = imp;
-
  exit:
   return tok_idx+1;
 }

@@ -196,7 +196,6 @@ struct cx *cx_init(struct cx *cx) {
   cx->next_func_tag = cx->next_sym_tag = cx->next_type_tag = 1;
   cx->bin = NULL;
   cx->pc = 0;
-  cx->scan_level = 0;
   cx->stop = false;
   cx->row = cx->col = -1;
   
@@ -228,7 +227,6 @@ struct cx *cx_init(struct cx *cx) {
   
   cx_vec_init(&cx->load_paths, sizeof(char *));
   cx_vec_init(&cx->scopes, sizeof(struct cx_scope *));
-  cx_vec_init(&cx->scans, sizeof(struct cx_scan));
   cx_vec_init(&cx->calls, sizeof(struct cx_call));
   cx_vec_init(&cx->errors, sizeof(struct cx_error));
   
@@ -317,8 +315,6 @@ struct cx *cx_deinit(struct cx *cx) {
 
   cx_do_vec(&cx->calls, struct cx_call, c) { cx_call_deinit(c); }
   cx_vec_deinit(&cx->calls);
-
-  cx_vec_deinit(&cx->scans);
 
   cx_do_vec(&cx->scopes, struct cx_scope *, s) { cx_scope_deref(*s); }
   cx_vec_deinit(&cx->scopes);

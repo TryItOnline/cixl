@@ -22,14 +22,14 @@ rec: DBTable()
 
 func: new-db-table(n Str k Vect) (DBTable)
   let: t DBTable new;
-  $t put `file,     fopen $n `a+
-  $t put `key       $k
-  $t put `rec-keys, new Table
-  $t put `key-recs, new Table
+  $t `file     $n `a+ fopen put
+  $t `key      $k           put
+  $t `rec-keys Table new    put
+  $t `key-recs Table new    put
   $t;
 
 func: get-rec-key(t DBTable r Rec) (Vect)
-  $t get `key map {$r ~ get} vect;
+  $t `key get {$r ~ get} map vect;
 
 /*
   The transaction contains the current set of changes.
@@ -50,11 +50,11 @@ rec: DBChange()
 
 func: push-change(t DBTable k Vect r Rec o Sym) ()
   let: c DBChange new;
-  $c put `table $t
-  $c put `key   $k
-  $c put `rec   $r
-  $c put `op    $o
-  $db-trans push $c;
+  $c `table $t put
+  $c `key   $k put
+  $c `rec   $r put
+  $c `op    $o put
+  $db-trans $c push;
 
 /*
   Records are looked up via the record pointer, which must remain the same;
@@ -62,60 +62,59 @@ func: push-change(t DBTable k Vect r Rec o Sym) ()
 */
 
 func: upsert(t DBTable r Rec) ()
-  let: krs $t get `key-recs;
-  let: rks $t get `rec-keys;  
-  let: tk $rks get $r;
-  let: k get-rec-key $t $r;
+  let: krs $t `key-recs get;
+  let: rks $t `rec-keys get;  
+  let: tk $rks $r get;
+  let: k $t $r get-rec-key;
   let: tr $r %% ~ _;
   
-  $tk if-else {
-    let: tr $krs get $tk;
-    push-change $t $k $tr `update
-    delete $krs $tk
-    delete $rks $r
+  $tk {
+    let: tr $krs $tk get;
+    $t $k $tr `update push-change
+    $krs $tk delete
+    $rks $r delete
   } {
-    push-change $t $k $r `insert
-  }
+    $t $k $r `insert push-change
+  } if-else
   
-  $krs put $k $tr
-  $rks put $r $k;
+  $krs $k $tr put
+  $rks $r $k put;
 
 /*
   The current set of changes is flushed to disk on commit.
 */
 
 func: commit() ()
-  let: dirty new Table;
+  let: dirty Table new;
 
-  $db-trans for {
+  $db-trans {
     let: c;
-    let: f $c get `table get `file;
-    $f write [$c get `op, $c get `key, $c get `rec]
-    $dirty put $f #t
-  }
+    let: f $c `table get `file get;
+    $f ([$c `op get $c `key get $c `rec get]) write
+    $dirty $f #t put
+  } for
 
-  $dirty map &x for &flush
-  clear $db-trans;
+  $dirty &x map &flush for
+  $db-trans clear;
 
 /*
   Or reverted on rollback.
 */
 
 func: rollback() ()
-  $db-trans for {
+  $db-trans {
     let: c;
-    let: t $c get `table;
-    let: krs $t get `key-recs;
-    let: rks $t get `rec-keys;
+    let: t $c `table get;
+    let: krs $t `key-recs get;
+    let: rks $t `rec-keys get;
 
-    $c get `op = `insert if-else {
-      $krs delete ($c get `key)
-      $rks delete ($c get `rec)
+    $c `op get `insert = {
+      $krs ($c `key get) delete
+      $rks ($c `rec get) delete
     } {
-      $krs put ($c get `key) ($c get `rec)
-    }
-  }
+      $krs $c `key get $c `rec get put
+    } if-else
+  } for
 
-  clear $db-trans;
-
+  $db-trans clear;
 )

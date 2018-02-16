@@ -1,6 +1,6 @@
-* thread emit loop using computed goto
-** inline oreturn_recall with op label
-** inline op labels in fimp_emit/lambda_emit
+* inline ogetvar()
+* inline oreturn_recall()
+* inline emit labels/goto where possible
 * fix emit formatting
 ** add CX_TAB to ops
 * handle argv in emit main
@@ -19,10 +19,6 @@
 ** convert read to iter
 *** keep bin ref
 ** update example and add to post
-* more qdb
-** add find-key(Vect) fn
-** add is-dirty fn
-** add delete fn
 * add MFile based on cx_buf
 ** derive RWFile
 * add seq zip/unzip fns
@@ -47,11 +43,17 @@
 ** grep all cx_scope *
 ** use cx_scope to get current
 * add @@ char escape
+* more qdb
+** add find-key(Vect) fn
+** add is-dirty fn
+** add delete fn
 
-| Bin new %, $ compile '1 + 2' emit
-| Bin new %, $ compile '1000000000 {50 fib _} clock / int' emit
-| Bin new %, $ compile '#out print<WFile A> 42' emit
-| Bin new %, $ compile 'say 42' emit
-| Bin new %, $ compile 'say (clock {10000 times {50 fib _}} / 1000000 int)' emit
-| say (clock {10000 times {50 fib _}} / 1000000 int)
-  
+| func: foo(x y Int) (Int) $x $y +; 35 7 foo
+
+| Bin new % '1 2 +' compile emit
+| Bin new % '1000000000 {50 fib _} clock / int' compile emit
+| Bin new % '#out 42 print<WFile A>' compile emit
+| Bin new % '42 say' compile emit
+| Bin new % '{10000 {50 fib _} times} clock 1000000 / int say' compile emit
+| {10000 {50 fib _} times} clock 1000000 / int say
+

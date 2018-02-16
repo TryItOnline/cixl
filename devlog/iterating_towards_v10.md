@@ -14,7 +14,7 @@ The instant Forth clicked for me, my mind started skunkworking strategies for sn
 Since their inception, iterators have come to play an increasingly important role in Cixl. Contrary to most languages; they are seemlessly integrated into the language, rather than bolted onto the side as an additional feature. I keep finding more uses for them so this story has at least a couple of chapters remaining to be written. All iterable types derive ```Seq```; functions, lambdas, integers, strings, vectors, tables and readable files are all iterable. Mapping an action over a sequence results in an iterator; which is, drumroll, iterable.
 
 ```
-   | 'foo' map {int ++ char}
+   | 'foo' {int ++ char} map
 ...
 [Iter(0x545db40)@1]
 
@@ -25,11 +25,11 @@ Since their inception, iterators have come to play an increasingly important rol
 Sequences may be filtered, which also results in a new iterator.
 
 ```
-   | 10 filter {, $ > 5}
+   | 10 {, $ > 5} filter
 ...
 [Iter(0x54dfd80)@1]
 
-   for {}
+   {} for
 ...
 [6 7 8 9]
 ```
@@ -37,7 +37,7 @@ Sequences may be filtered, which also results in a new iterator.
 ```for``` plays the combined role of for, for-each and and reduce by pushing each value in a sequence on the stack and calling the specified action.
 
 ```
-   | 0 [1 2 3] for &+
+   | 0 ([1 2 3]) &+ for
 ...
 [6]
 
@@ -50,7 +50,7 @@ Iterators may be created manually by calling ```iter``` on any sequence and cons
 ...
 [Iter(0x53ec8c0)@1]
 
-   % %, $ drop 2 next ~ next
+   % % 2 drop next ~ next
 ...
 [3 #nil]
 ```
@@ -69,24 +69,24 @@ One final example before we leave iterators behind and move on into the future, 
 
 [examples/guess.cx](https://github.com/basic-gongfu/cixl/blob/master/examples/guess.cx)
 ```
-((let: n rand 100++; {
-  ask 'Your guess: '
+((let: n 100 rand ++; {
+  'Your guess: ' ask
   
-  %, $ if-else {
-    let: c int <=> $n;
+  % {
+    let: c int $n <=>;
 
     switch:
-      (($c = `<) say 'Too low!'  #t)
-      (($c = `>) say 'Too high!' #t)
-      (#t        say 'Correct!'  #nil);
+      (($c `< =) 'Too low!'  say #t)
+      (($c `> =) 'Too high!' say #t)
+      (#t        'Correct!'  say #nil);
   } {
     _ #nil
-  }
-}) for &_)
+  } if-else
+}) &_ for)
 ```
 
 ```
-   |load 'examples/guess.cx'
+   |'examples/guess.cx' load
 ...
 Your guess: 50
 Too high!
@@ -113,7 +113,7 @@ When it comes to error handling, it seems like we've gotten collectively stuck i
        Int `int ~ .
        Opt `opt ~ .
        Nil `nil;
-     (fail 42 `foo)
+     (42 fail `foo)
      `bar
    )
 ...

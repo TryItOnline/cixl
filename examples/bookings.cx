@@ -11,8 +11,8 @@ include: 'qdb.cx';
 
 (
 
-let: resources  new-db-table 'resource.db', [`id];
-let: bookings   new-db-table 'booking.db', [`id];     
+let: resources  'resource.db' ([`id]) new-db-table;
+let: bookings   'booking.db'  ([`id]) new-db-table;     
 
 let: next-booking-id 1 ref;
 
@@ -35,11 +35,11 @@ rec: Capacity()
   total used Int;
 
 func: new-capacity(start end Time total used Int) (Capacity)
-  let: c new Capacity;
-  $c put `start $start
-  $c put `end   $end
-  $c put `total $total
-  $c put `used  $used
+  let: c Capacity new;
+  $c `start $start put
+  $c `end   $end   put
+  $c `total $total put
+  $c `used  $used  put
   $c;
 
 /*
@@ -47,11 +47,12 @@ func: new-capacity(start end Time total used Int) (Capacity)
 */
 
 func: new-resource(id Sym q Int) (Resource)
-  let: r new Resource;
-  $r put `id       $id
-  $r put `quantity $q
-  $r put `calendar, [new-capacity #min-time #max-time $q 0]
-  upsert $resources $r
+  let: r Resource new;
+  let: c [#min-time #max-time $q 0 new-capacity];
+  $r `id       $id put
+  $r `quantity $q  put
+  $r `calendar $c  put
+  $resources $r upsert
   $r;
 
 /*
@@ -59,30 +60,30 @@ func: new-resource(id Sym q Int) (Resource)
 */
 
 func: update-capacity(in Capacity start end Time total used Int out Vect) ()
-  $in get `start < $start if {(
+  $in `start get $start < {(
     let: head $in %% ~ _;
-    $head put `end $start
-    $in put `start $start
-    $out push $head
-  )}
+    $head `end   $start put
+    $in   `start $start put
+    $out $head push
+  )} if
 
-  $out push $in
+  $out $in push
 
-  $in get `end > $end if {(
+  $in `end get $end > {(
     let: tail $in %% ~ _;
-    $tail put `start $end
-    $in put `end $end
-    $out push $tail
-  )}
+    $tail `start $end put
+    $in   `end   $end put
+    $out $tail push
+  )} if
 
-  let: t get $in `total + $total;
-  let: u get $in `used + $used;
-  $u > $t if {fail 'Overbook'}
-  $in put `total $t
-  $in put `used  $u;
+  let: t $in `total get $total +;
+  let: u $in `used get $used +;
+  $u $t > {'Overbook' fail} if
+  $in `total $t put
+  $in `used  $u put;
 
 func: intersects(in Capacity start end Time) (Bool)
-  {$in get `start < $end} and {($in get `end > $start)};
+  {$in `start get $end <} {$in `end get $start >} and;
 
 /*
   The entire calendar is scanned for each update, records are cloned to avoid
@@ -92,17 +93,17 @@ func: intersects(in Capacity start end Time) (Bool)
 func: update-calendar(in Vect start end Time total used Int) (Vect)
   let: out [];
 
-  $in for {
-    %, intersects $ $start $end, $ if {
-      %%, update-capacity $ $start $end $total $used $out
-    } _
-  }
+  $in {
+    % $start $end intersects {
+      %% $start $end $total $used $out update-capacity
+    } if _
+  } for
   
   $out;
 
 func: update-resource(r Resource start end Time total used Int) ()
-  let: c $r get `calendar;
-  $r put `calendar (update-calendar $c $start $end $total $used);
+  let: c $r `calendar get;
+  $r `calendar ($c $start $end $total $used update-calendar) put;
 
 /*
   Bookings represent used quantity for a specific resource and interval.
@@ -115,20 +116,20 @@ rec: Booking()
   quantity  Int;
 
 func: next-booking-id() (Int)
-  let: id get-ref $next-booking-id;
-  $next-booking-id put-ref ($id ++)
+  let: id $next-booking-id get-ref;
+  $next-booking-id $id ++ put-ref 
   $id;
 
 func: new-booking(r Resource start end Time q Int) (Booking)
-  $start < $end else {fail 'Invalid booking length'}
-  let: b new Booking;
-  $b put `id       next-booking-id
-  $b put `resource $r
-  $b put `start    $start
-  $b put `end      $end
-  $b put `quantity $q
-  update-resource $r $start $end 0 $q
-  upsert $bookings $b
+  $start $end < {'Invalid booking length' fail} else
+  let: b Booking new;
+  $b `id       next-booking-id put
+  $b `resource $r              put
+  $b `start    $start          put
+  $b `end      $end            put
+  $b `quantity $q              put
+  $r $start $end 0 $q update-resource
+  $bookings $b upsert
   $b;
 
 /*
@@ -137,8 +138,8 @@ func: new-booking(r Resource start end Time q Int) (Booking)
 */
 
 func: run-tests() ()
-  let: r new-resource new Sym 10;
-  new-booking $r today (today 1 days +) 5 _
-  new-booking $r now   (now 1h +)       6 _;
+  let: r Sym new 10 new-resource;
+  $r today (today 1 days +) 5 new-booking _
+  $r now   (now 1h +)       6 new-booking _;
 
 )
