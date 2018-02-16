@@ -148,7 +148,12 @@ static bool fimp_emit(struct cx_op *op,
             "cx_call_init(cx_vec_push(&cx->calls), cx->row, cx->col, imp, %zd);\n",
 	    imp->func->tag, imp->idx, op->pc+op->as_fimp.nops+1);
   } else {
-    fprintf(out, "cx->pc += %zd;\n", op->as_fimp.nops+1);
+    size_t pc = op->pc+op->as_fimp.nops+1;
+    
+    fprintf(out,
+	    "cx->pc = %zd;\n"
+	    "goto op%zd;\n",
+	    pc, pc);
   }
   
   return true;
@@ -353,9 +358,14 @@ static bool lambda_emit(struct cx_op *op,
   fprintf(out, "struct cx_lambda *l = cx_lambda_new(s, %zd, %zd);\n",
 	  op->as_lambda.start_op, op->as_lambda.nops);
 
-  fputs("cx_box_init(cx_push(s), cx->lambda_type)->as_ptr = l;\n"
-	"cx->pc += l->nops+1;\n",
-	out);  
+  fputs("cx_box_init(cx_push(s), cx->lambda_type)->as_ptr = l;\n", out);  
+
+  size_t pc = op->pc+op->as_lambda.nops+1;
+  
+  fprintf(out,
+	  "cx->pc = %zd;\n"
+	  "goto op%zd;\n",
+	  pc, pc);
 
   return true;
 }

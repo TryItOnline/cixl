@@ -314,6 +314,7 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
     
     fprintf(out, "  op%zd: { /* %s %s */\n",
 	    op->pc, tok->type->id, op->type->id);
+    fputs("    if (cx->stop) { return true; }\n", out);
     fprintf(out, "    cx->row = %d; cx->col = %d;\n", cx->row, cx->col);
     fputs("    size_t ppc = cx->pc;\n", out);
 
@@ -324,7 +325,6 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
 	  "    } else {\n"
 	  "      goto *op_labels[cx->pc];\n"
           "    }\n\n"
-	  "    if (cx->stop) { return true; }\n"
 	  "  }\n\n",
 	  out);
   }
