@@ -5,6 +5,11 @@
 ** add CX_TAB to ops
 * handle argv in emit main
 ** push strings like load main
+* change emit main to take one file
+** forward remaining arguments after file to compiler
+* convert scope to fixed size stack
+** stack.h/c
+** CX_STACK_SIZE
 * emit guess.cx
 * emit histogram.cx
 * implement func: emit
