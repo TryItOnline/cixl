@@ -1,15 +1,15 @@
-* fix emit formatting
-** add CX_TAB to ops
+* emit guess.cx
 * handle argv in emit main
 ** push strings like load main
-* change emit main to take one file
-** forward remaining arguments after file to compiler
-* emit guess.cx
 * emit histogram.cx
 * implement func: emit
 ** add emit_init flag to cx_bin_func
 *** set for parsed funcs
 *** generate init if set
+* change emit main to take one file
+** forward remaining arguments after file to compiler
+* fix emit formatting
+** add CX_TAB to ops
 * ---
 * implement trait: & rec: emit
 ** register in bin & create in init
