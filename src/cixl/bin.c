@@ -315,13 +315,13 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
     fprintf(out, "  op%zd: { /* %s %s */\n",
 	    op->pc, tok->type->id, op->type->id);
     fputs("    if (cx->stop) { return true; }\n", out);
-    fprintf(out, "    cx->row = %d; cx->col = %d;\n", cx->row, cx->col);
+    
+    fprintf(out,
+	    "    cx->pc = %zd; cx->row = %d; cx->col = %d;\n",
+	    op->pc, cx->row, cx->col);
 
     if (!cx_test(op->type->emit)(op, bin, out, cx)) { return false; }
-
-    fputs("    cx->pc++;\n"
-	  "  }\n\n",
-	  out);
+    fputs("  }\n\n", out);
   }
 
   fputs("  cx->stop = false;\n"
