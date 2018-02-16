@@ -10,6 +10,10 @@
 ** forward remaining arguments after file to compiler
 * fix emit formatting
 ** add CX_TAB to ops
+* add bool is_tags[CX_TYPE_TAG_MAX] to Type
+** set in cx_derive
+** check is_tags[type.tag] in cx_is
+** change tags to start from 0
 * ---
 * implement trait: & rec: emit
 ** register in bin & create in init
