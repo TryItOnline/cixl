@@ -1,3 +1,5 @@
+* inline ogetvar
+* inline oreturn_end
 * fix emit formatting
 ** add CX_TAB to ops
 * handle argv in emit main
