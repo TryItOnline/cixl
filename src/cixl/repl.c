@@ -86,50 +86,31 @@ static bool emit_bmips(struct cx *cx) {
   op0: { /* CX_TLITERAL CX_OPUSH */
       if (cx->stop) { return true; }
       cx->row = 1; cx->col = 10;
-      size_t ppc = cx->pc;
       cx_box_init(cx_push(cx_scope(cx, 0)), cx->int_type)->as_int = 1000000000;
-      if (cx->pc == ppc) {
-	cx->pc++;
-      } else {
-	goto *op_labels[cx->pc];
-      }
-
+      cx->pc++;
     }
 
   op1: { /* CX_TLAMBDA CX_OLAMBDA */
       if (cx->stop) { return true; }
       cx->row = 1; cx->col = 11;
-      size_t ppc = cx->pc;
       struct cx_scope *s = cx_scope(cx, 0);
       struct cx_lambda *l = cx_lambda_new(s, 2, 27);
       cx_box_init(cx_push(s), cx->lambda_type)->as_ptr = l;
       cx->pc = 29;
       goto op29;
-      if (cx->pc == ppc) {
-	cx->pc++;
-      } else {
-	goto *op_labels[cx->pc];
-      }
-
+      cx->pc++;
     }
 
   op2: { /* CX_TLITERAL CX_OPUSH */
       if (cx->stop) { return true; }
       cx->row = 1; cx->col = 13;
-      size_t ppc = cx->pc;
       cx_box_init(cx_push(cx_scope(cx, 0)), cx->int_type)->as_int = 50;
-      if (cx->pc == ppc) {
-	cx->pc++;
-      } else {
-	goto *op_labels[cx->pc];
-      }
-
+      cx->pc++;
     }
 
   op3: { /* CX_TFUNC CX_OFIMP */
       if (cx->stop) { return true; }
       cx->row = 1; cx->col = 14;
-      size_t ppc = cx->pc;
       struct cx_scope *s = cx_scope(cx, 0);
       struct cx_fimp *imp = fimp64_0;
       if (s->safe && !cx_fimp_match(imp, s)) {
@@ -138,87 +119,51 @@ static bool emit_bmips(struct cx *cx) {
 	return false;
       }
       cx_call_init(cx_vec_push(&cx->calls), cx->row, cx->col, imp, 27);
-      if (cx->pc == ppc) {
-	cx->pc++;
-      } else {
-	goto *op_labels[cx->pc];
-      }
-
+      cx->pc++;
     }
 
   op4: { /* CX_TFUNC CX_OBEGIN */
       if (cx->stop) { return true; }
       cx->row = 1; cx->col = 14;
-      size_t ppc = cx->pc;
       struct cx_scope *parent = fimp64_0->scope;
       cx_begin(cx, parent);
-      if (cx->pc == ppc) {
-	cx->pc++;
-      } else {
-	goto *op_labels[cx->pc];
-      }
-
+      cx->pc++;
     }
 
   op5: { /* CX_TFUNC CX_OPUTARGS */
       if (cx->stop) { return true; }
       cx->row = 1; cx->col = 14;
-      size_t ppc = cx->pc;
       struct cx_scope
 	*ds = cx_scope(cx, 0),
 	*ss = ds->stack.count ? ds : cx_scope(cx, 1);
       *cx_put_var(ds, sym3, true) = *cx_test(cx_pop(ss, false));
-      if (cx->pc == ppc) {
-	cx->pc++;
-      } else {
-	goto *op_labels[cx->pc];
-      }
-
+      cx->pc++;
     }
 
   op6: { /* CX_TLITERAL CX_OPUSH */
       if (cx->stop) { return true; }
       cx->row = 1; cx->col = 1;
-      size_t ppc = cx->pc;
       cx_box_init(cx_push(cx_scope(cx, 0)), cx->int_type)->as_int = 0;
-      if (cx->pc == ppc) {
-	cx->pc++;
-      } else {
-	goto *op_labels[cx->pc];
-      }
-
+      cx->pc++;
     }
 
   op7: { /* CX_TLITERAL CX_OPUSH */
       if (cx->stop) { return true; }
       cx->row = 1; cx->col = 3;
-      size_t ppc = cx->pc;
       cx_box_init(cx_push(cx_scope(cx, 0)), cx->int_type)->as_int = 1;
-      if (cx->pc == ppc) {
-	cx->pc++;
-      } else {
-	goto *op_labels[cx->pc];
-      }
-
+      cx->pc++;
     }
 
   op8: { /* CX_TID CX_OGETVAR */
       if (cx->stop) { return true; }
       cx->row = 1; cx->col = 4;
-      size_t ppc = cx->pc;
       cx_ogetvar(sym3, cx_scope(cx, 0));
-      if (cx->pc == ppc) {
-	cx->pc++;
-      } else {
-	goto *op_labels[cx->pc];
-      }
-
+      cx->pc++;
     }
 
   op9: { /* CX_TFUNC CX_OFIMP */
       if (cx->stop) { return true; }
       cx->row = 1; cx->col = 7;
-      size_t ppc = cx->pc;
       struct cx_scope *s = cx_scope(cx, 0);
       struct cx_fimp *imp = fimp63_0;
       if (s->safe && !cx_fimp_match(imp, s)) {
@@ -227,63 +172,39 @@ static bool emit_bmips(struct cx *cx) {
 	return false;
       }
       cx_call_init(cx_vec_push(&cx->calls), cx->row, cx->col, imp, 26);
-      if (cx->pc == ppc) {
-	cx->pc++;
-      } else {
-	goto *op_labels[cx->pc];
-      }
-
+      cx->pc++;
     }
 
   op10: { /* CX_TFUNC CX_OBEGIN */
       if (cx->stop) { return true; }
       cx->row = 1; cx->col = 7;
-      size_t ppc = cx->pc;
       struct cx_scope *parent = fimp63_0->scope;
       cx_begin(cx, parent);
-      if (cx->pc == ppc) {
-	cx->pc++;
-      } else {
-	goto *op_labels[cx->pc];
-      }
-
+      cx->pc++;
     }
 
   op11: { /* CX_TFUNC CX_OPUTARGS */
       if (cx->stop) { return true; }
       cx->row = 1; cx->col = 7;
-      size_t ppc = cx->pc;
       struct cx_scope
 	*ds = cx_scope(cx, 0),
 	*ss = ds->stack.count ? ds : cx_scope(cx, 1);
       *cx_put_var(ds, sym3, true) = *cx_test(cx_pop(ss, false));
       *cx_put_var(ds, sym26, true) = *cx_test(cx_pop(ss, false));
       *cx_put_var(ds, sym25, true) = *cx_test(cx_pop(ss, false));
-      if (cx->pc == ppc) {
-	cx->pc++;
-      } else {
-	goto *op_labels[cx->pc];
-      }
-
+      cx->pc++;
     }
 
   op12: { /* CX_TID CX_OGETVAR */
       if (cx->stop) { return true; }
       cx->row = 1; cx->col = 0;
-      size_t ppc = cx->pc;
       cx_ogetvar(sym3, cx_scope(cx, 0));
-      if (cx->pc == ppc) {
-	cx->pc++;
-      } else {
-	goto *op_labels[cx->pc];
-      }
-
+      cx->pc++;
     }
 
   op13: { /* CX_TFUNC CX_OFUNCALL */
       if (cx->stop) { return true; }
       cx->row = 1; cx->col = 2;
-      size_t ppc = cx->pc;
       struct cx_scope *s = cx_scope(cx, 0);
       struct cx_func *func = func22;
       struct cx_fimp *imp = cx_func_match_imp(func, s, 0);
@@ -292,74 +213,44 @@ static bool emit_bmips(struct cx *cx) {
 	return false;
       }
       if (!cx_fimp_call(imp, s)) { return false; }
-      if (cx->pc == ppc) {
-	cx->pc++;
-      } else {
-	goto *op_labels[cx->pc];
-      }
-
+      cx->pc++;
     }
 
   op14: { /* CX_TLAMBDA CX_OLAMBDA */
       if (cx->stop) { return true; }
       cx->row = 1; cx->col = 4;
-      size_t ppc = cx->pc;
       struct cx_scope *s = cx_scope(cx, 0);
       struct cx_lambda *l = cx_lambda_new(s, 15, 8);
       cx_box_init(cx_push(s), cx->lambda_type)->as_ptr = l;
       cx->pc = 23;
       goto op23;
-      if (cx->pc == ppc) {
-	cx->pc++;
-      } else {
-	goto *op_labels[cx->pc];
-      }
-
+      cx->pc++;
     }
 
   op15: { /* CX_TID CX_OGETVAR */
       if (cx->stop) { return true; }
       cx->row = 1; cx->col = 4;
-      size_t ppc = cx->pc;
       cx_ogetvar(sym26, cx_scope(cx, 0));
-      if (cx->pc == ppc) {
-	cx->pc++;
-      } else {
-	goto *op_labels[cx->pc];
-      }
-
+      cx->pc++;
     }
 
   op16: { /* CX_TID CX_OGETVAR */
       if (cx->stop) { return true; }
       cx->row = 1; cx->col = 7;
-      size_t ppc = cx->pc;
       cx_ogetvar(sym25, cx_scope(cx, 0));
-      if (cx->pc == ppc) {
-	cx->pc++;
-      } else {
-	goto *op_labels[cx->pc];
-      }
-
+      cx->pc++;
     }
 
   op17: { /* CX_TID CX_OGETVAR */
       if (cx->stop) { return true; }
       cx->row = 1; cx->col = 10;
-      size_t ppc = cx->pc;
       cx_ogetvar(sym26, cx_scope(cx, 0));
-      if (cx->pc == ppc) {
-	cx->pc++;
-      } else {
-	goto *op_labels[cx->pc];
-      }
-
+      cx->pc++;
     }
 
   op18: { /* CX_TFIMP CX_OFUNCALL */
       if (cx->stop) { return true; }
       cx->row = 1; cx->col = 13;
-      size_t ppc = cx->pc;
       struct cx_scope *s = cx_scope(cx, 0);
       struct cx_func *func = func57;
       struct cx_fimp *imp = fimp57_0;
@@ -369,31 +260,19 @@ static bool emit_bmips(struct cx *cx) {
 	return false;
       }
       if (!cx_fimp_call(imp, s)) { return false; }
-      if (cx->pc == ppc) {
-	cx->pc++;
-      } else {
-	goto *op_labels[cx->pc];
-      }
-
+      cx->pc++;
     }
 
   op19: { /* CX_TID CX_OGETVAR */
       if (cx->stop) { return true; }
       cx->row = 1; cx->col = 15;
-      size_t ppc = cx->pc;
       cx_ogetvar(sym3, cx_scope(cx, 0));
-      if (cx->pc == ppc) {
-	cx->pc++;
-      } else {
-	goto *op_labels[cx->pc];
-      }
-
+      cx->pc++;
     }
 
   op20: { /* CX_TFUNC CX_OFUNCALL */
       if (cx->stop) { return true; }
       cx->row = 1; cx->col = 18;
-      size_t ppc = cx->pc;
       struct cx_scope *s = cx_scope(cx, 0);
       struct cx_func *func = func2;
       struct cx_fimp *imp = fimp2_0;
@@ -403,18 +282,12 @@ static bool emit_bmips(struct cx *cx) {
 	return false;
       }
       if (!cx_fimp_call(imp, s)) { return false; }
-      if (cx->pc == ppc) {
-	cx->pc++;
-      } else {
-	goto *op_labels[cx->pc];
-      }
-
+      cx->pc++;
     }
 
   op21: { /* CX_TFUNC CX_OFUNCALL */
       if (cx->stop) { return true; }
       cx->row = 1; cx->col = 21;
-      size_t ppc = cx->pc;
       struct cx_scope *s = cx_scope(cx, 0);
       struct cx_func *func = func30;
       struct cx_fimp *imp = fimp30_0;
@@ -424,44 +297,26 @@ static bool emit_bmips(struct cx *cx) {
 	return false;
       }
       if (!cx_fimp_call(imp, s)) { return false; }
-      if (cx->pc == ppc) {
-	cx->pc++;
-      } else {
-	goto *op_labels[cx->pc];
-      }
-
+      cx->pc++;
     }
 
   op22: { /* CX_TLAMBDA CX_OSTOP */
       if (cx->stop) { return true; }
       cx->row = 1; cx->col = 4;
-      size_t ppc = cx->pc;
       cx->stop = true;
-      if (cx->pc == ppc) {
-	cx->pc++;
-      } else {
-	goto *op_labels[cx->pc];
-      }
-
+      cx->pc++;
     }
 
   op23: { /* CX_TID CX_OGETVAR */
       if (cx->stop) { return true; }
       cx->row = 1; cx->col = 28;
-      size_t ppc = cx->pc;
       cx_ogetvar(sym25, cx_scope(cx, 0));
-      if (cx->pc == ppc) {
-	cx->pc++;
-      } else {
-	goto *op_labels[cx->pc];
-      }
-
+      cx->pc++;
     }
 
   op24: { /* CX_TFUNC CX_OFUNCALL */
       if (cx->stop) { return true; }
       cx->row = 1; cx->col = 31;
-      size_t ppc = cx->pc;
       struct cx_scope *s = cx_scope(cx, 0);
       struct cx_func *func = func28;
       struct cx_fimp *imp = fimp28_0;
@@ -471,18 +326,12 @@ static bool emit_bmips(struct cx *cx) {
 	return false;
       }
       if (!cx_fimp_call(imp, s)) { return false; }
-      if (cx->pc == ppc) {
-	cx->pc++;
-      } else {
-	goto *op_labels[cx->pc];
-      }
-
+      cx->pc++;
     }
 
   op25: { /* CX_TFUNC CX_ORETURN */
       if (cx->stop) { return true; }
       cx->row = 1; cx->col = 21;
-      size_t ppc = cx->pc;
       struct cx_call *call = cx_test(cx_vec_peek(&cx->calls, 0));
       struct cx_scope *s = cx_scope(cx, 0);
 
@@ -528,18 +377,12 @@ static bool emit_bmips(struct cx *cx) {
 
 	cx_oreturn_end(s);
       }
-      if (cx->pc == ppc) {
-	cx->pc++;
-      } else {
-	goto *op_labels[cx->pc];
-      }
-
+      cx->pc++;
     }
 
   op26: { /* CX_TFUNC CX_ORETURN */
       if (cx->stop) { return true; }
       cx->row = 1; cx->col = 21;
-      size_t ppc = cx->pc;
       struct cx_call *call = cx_test(cx_vec_peek(&cx->calls, 0));
       struct cx_scope *s = cx_scope(cx, 0);
 
@@ -585,18 +428,12 @@ static bool emit_bmips(struct cx *cx) {
 
 	cx_oreturn_end(s);
       }
-      if (cx->pc == ppc) {
-	cx->pc++;
-      } else {
-	goto *op_labels[cx->pc];
-      }
-
+      cx->pc++;
     }
 
   op27: { /* CX_TFUNC CX_OFUNCALL */
       if (cx->stop) { return true; }
       cx->row = 1; cx->col = 18;
-      size_t ppc = cx->pc;
       struct cx_scope *s = cx_scope(cx, 0);
       struct cx_func *func = func48;
       struct cx_fimp *imp = fimp48_0;
@@ -606,31 +443,19 @@ static bool emit_bmips(struct cx *cx) {
 	return false;
       }
       if (!cx_fimp_call(imp, s)) { return false; }
-      if (cx->pc == ppc) {
-	cx->pc++;
-      } else {
-	goto *op_labels[cx->pc];
-      }
-
+      cx->pc++;
     }
 
   op28: { /* CX_TLAMBDA CX_OSTOP */
       if (cx->stop) { return true; }
       cx->row = 1; cx->col = 11;
-      size_t ppc = cx->pc;
       cx->stop = true;
-      if (cx->pc == ppc) {
-	cx->pc++;
-      } else {
-	goto *op_labels[cx->pc];
-      }
-
+      cx->pc++;
     }
 
   op29: { /* CX_TFUNC CX_OFUNCALL */
       if (cx->stop) { return true; }
       cx->row = 1; cx->col = 20;
-      size_t ppc = cx->pc;
       struct cx_scope *s = cx_scope(cx, 0);
       struct cx_func *func = func9;
       struct cx_fimp *imp = fimp9_0;
@@ -640,18 +465,12 @@ static bool emit_bmips(struct cx *cx) {
 	return false;
       }
       if (!cx_fimp_call(imp, s)) { return false; }
-      if (cx->pc == ppc) {
-	cx->pc++;
-      } else {
-	goto *op_labels[cx->pc];
-      }
-
+      cx->pc++;
     }
 
   op30: { /* CX_TFUNC CX_OFUNCALL */
       if (cx->stop) { return true; }
       cx->row = 1; cx->col = 26;
-      size_t ppc = cx->pc;
       struct cx_scope *s = cx_scope(cx, 0);
       struct cx_func *func = func60;
       struct cx_fimp *imp = fimp60_0;
@@ -661,18 +480,12 @@ static bool emit_bmips(struct cx *cx) {
 	return false;
       }
       if (!cx_fimp_call(imp, s)) { return false; }
-      if (cx->pc == ppc) {
-	cx->pc++;
-      } else {
-	goto *op_labels[cx->pc];
-      }
-
+      cx->pc++;
     }
 
   op31: { /* CX_TFUNC CX_OFUNCALL */
       if (cx->stop) { return true; }
       cx->row = 1; cx->col = 28;
-      size_t ppc = cx->pc;
       struct cx_scope *s = cx_scope(cx, 0);
       struct cx_func *func = func14;
       struct cx_fimp *imp = cx_func_match_imp(func, s, 0);
@@ -681,12 +494,7 @@ static bool emit_bmips(struct cx *cx) {
 	return false;
       }
       if (!cx_fimp_call(imp, s)) { return false; }
-      if (cx->pc == ppc) {
-	cx->pc++;
-      } else {
-	goto *op_labels[cx->pc];
-      }
-
+      cx->pc++;
     }
 
     cx->stop = false;

@@ -240,11 +240,13 @@ static bool funcall_emit(struct cx_op *op,
 	out);
     
   if (imp && !imp->ptr) {
-    fputs("struct cx_bin_func *f = cx_bin_get_func(cx->bin, imp);\n"
-	  "cx_call_init(cx_vec_push(&cx->calls), cx->row, cx->col, imp, cx->pc);\n"
-          "cx->pc = f->start_pc;\n"
-	  "goto op_labels[cx->pc];\n",
-	  out);
+    struct cx_bin_func *f = cx_test(cx_bin_get_func(cx->bin, imp));
+
+    fprintf(out,
+	    "cx_call_init(cx_vec_push(&cx->calls), cx->row, cx->col, imp, cx->pc);\n"
+	    "cx->pc = %zd;\n"
+	    "goto op%zd;\n",
+	    f->start_pc, f->start_pc);
   } else {
     fputs("if (!cx_fimp_call(imp, s)) { return false; }\n", out);
   }

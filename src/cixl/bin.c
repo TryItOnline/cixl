@@ -316,15 +316,10 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
 	    op->pc, tok->type->id, op->type->id);
     fputs("    if (cx->stop) { return true; }\n", out);
     fprintf(out, "    cx->row = %d; cx->col = %d;\n", cx->row, cx->col);
-    fputs("    size_t ppc = cx->pc;\n", out);
 
     if (!cx_test(op->type->emit)(op, bin, out, cx)) { return false; }
 
-    fputs("    if (cx->pc == ppc) {\n"
-          "      cx->pc++;\n"
-	  "    } else {\n"
-	  "      goto *op_labels[cx->pc];\n"
-          "    }\n\n"
+    fputs("    cx->pc++;\n"
 	  "  }\n\n",
 	  out);
   }
