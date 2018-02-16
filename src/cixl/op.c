@@ -300,25 +300,26 @@ cx_op_type(CX_OGETCONST, {
     type.emit_syms = getconst_emit_syms;
   });
 
-bool cx_ogetvar(struct cx_sym id, struct cx_scope *scope) {
-  struct cx_box *v = cx_get_var(scope, id, false);
-  if (!v) { return false; }
-  cx_copy(cx_push(scope), v);
-  return true;
-}
-
 static bool getvar_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
   struct cx_scope *s = cx_scope(cx, 0);
   struct cx_sym id = op->as_getvar.id;
-  return cx_ogetvar(id, s);
+  struct cx_box *v = cx_get_var(s, id, false);
+  if (!v) { return false; }
+  cx_copy(cx_push(s), v);
+  return true;
 }
 
 static bool getvar_emit(struct cx_op *op,
 			struct cx_bin *bin,
 			FILE *out,
 			struct cx *cx) {
-  struct cx_sym id = op->as_getvar.id;
-  fprintf(out, "cx_ogetvar(sym%zd, cx_scope(cx, 0));\n", id.tag);
+  fprintf(out,
+	  "struct cx_scope *s = cx_scope(cx, 0);\n"
+	  "struct cx_box *v = cx_get_var(s, sym%zd, false);\n"
+	  "if (!v) { return false; }\n"
+	  "cx_copy(cx_push(s), v);\n",
+	  op->as_getvar.id.tag);
+
   return true;
 }
 
@@ -496,22 +497,6 @@ cx_op_type(CX_OPUTVAR, {
     type.eval = putvar_eval;
   });
 
-void cx_oreturn_end(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  cx_vec_clear(&scope->stack);
-
-  struct cx_call *call = cx_vec_pop(&cx->calls);
-  
-  if (call->return_pc > -1) {
-    cx->pc = call->return_pc;
-  } else {
-    cx->stop = true;
-  }
-
-  cx_call_deinit(call);
-  cx_end(cx);
-}
-
 static bool return_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
   struct cx_fimp *imp = op->as_return.imp;
   struct cx_call *call = cx_test(cx_vec_peek(&cx->calls, 0));
@@ -570,7 +555,17 @@ static bool return_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
       }    
     }
 
-    cx_oreturn_end(ss);
+    cx_vec_clear(&ss->stack);
+    struct cx_call *call = cx_vec_pop(&cx->calls);
+    
+    if (call->return_pc > -1) {
+      cx->pc = call->return_pc;
+    } else {
+      cx->stop = true;
+    }
+    
+    cx_call_deinit(call);
+    cx_end(cx);
   }
   
   return true;
@@ -647,8 +642,17 @@ static bool return_emit(struct cx_op *op,
 	    out);
     }
   } 
-  
-  fputs("  cx_oreturn_end(s);\n"
+
+  fputs("  cx_vec_clear(&s->stack);\n"
+	"  cx_end(cx);\n"
+	"  struct cx_call *call = cx_vec_pop(&cx->calls);\n\n"
+	"  if (call->return_pc > -1) {\n"
+	"    cx->pc = call->return_pc;\n"
+	"    cx_call_deinit(call);\n"
+	"    goto *op_labels[cx->pc];\n"
+	"  }\n\n"
+	"  cx_call_deinit(call);\n"
+	"  cx->stop = true;\n"
 	"}\n",
 	out);
   

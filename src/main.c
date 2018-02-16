@@ -132,6 +132,7 @@ int main(int argc, char *argv[]) {
 	    "    cx_dump_errors(&cx, stderr);\n"
 	    "    return -1;\n"
 	    "  }\n\n"
+	    "  cx_deinit(&cx);\n"
 	    "  return 0;\n"
 	    "}",
 	    out);

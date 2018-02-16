@@ -143,7 +143,4 @@ struct cx_op_type *CX_ORETURN();
 struct cx_op_type *CX_OSTASH();
 struct cx_op_type *CX_OSTOP();
 
-bool cx_ogetvar(struct cx_sym id, struct cx_scope *scope);
-void cx_oreturn_end(struct cx_scope *scope);
-
 #endif
