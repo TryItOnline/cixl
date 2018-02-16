@@ -1,4 +1,3 @@
-* simplify emit init
 * fix emit formatting
 ** add CX_TAB to ops
 * handle argv in emit main
