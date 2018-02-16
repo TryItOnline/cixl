@@ -36,6 +36,7 @@ static bool emit_bmips(struct cx *cx) {
     static struct cx_sym sym26;
     static struct cx_sym sym25;
     static struct cx_func *func22;
+    static struct cx_fimp *fimp22_0;
     static struct cx_func *func57;
     static struct cx_fimp *fimp57_0;
     static struct cx_func *func2;
@@ -52,6 +53,7 @@ static bool emit_bmips(struct cx *cx) {
     static struct cx_func *func60;
     static struct cx_fimp *fimp60_0;
     static struct cx_func *func14;
+    static struct cx_fimp *fimp14_1;
 
     if (init) {
       init = false;
@@ -63,6 +65,7 @@ static bool emit_bmips(struct cx *cx) {
       sym26 = cx_sym(cx, "b");
       sym25 = cx_sym(cx, "a");
       func22 = cx_get_func(cx, "?", false);
+      fimp22_0 = cx_get_fimp(func22, "Opt", false);
       func57 = cx_get_func(cx, "+", false);
       fimp57_0 = cx_get_fimp(func57, "Int Int", false);
       func2 = cx_get_func(cx, "--", false);
@@ -79,6 +82,7 @@ static bool emit_bmips(struct cx *cx) {
       func60 = cx_get_func(cx, "/", false);
       fimp60_0 = cx_get_fimp(func60, "Int Int", false);
       func14 = cx_get_func(cx, "int", false);
+      fimp14_1 = cx_get_fimp(func14, "Rat", false);
     }
 
     goto *op_labels[cx->pc];
@@ -195,12 +199,13 @@ static bool emit_bmips(struct cx *cx) {
       cx_copy(cx_push(s), v);
     }
 
-  op13: { /* CX_TFUNC CX_OFUNCALL */
+  op13: { /* CX_TFIMP CX_OFUNCALL */
       if (cx->stop) { return true; }
       cx->pc = 13; cx->row = 1; cx->col = 2;
       struct cx_scope *s = cx_scope(cx, 0);
       struct cx_func *func = func22;
-      struct cx_fimp *imp = cx_func_match_imp(func, s, 0);
+      struct cx_fimp *imp = fimp22_0;
+      if (s->safe && !cx_fimp_match(imp, s)) { imp = NULL; }
       if (!imp) {
 	cx_error(cx, cx->row, cx->col, "Func not applicable: %%s", func->id);
 	return false;
@@ -495,12 +500,13 @@ static bool emit_bmips(struct cx *cx) {
       if (!cx_fimp_call(imp, s)) { return false; }
     }
 
-  op31: { /* CX_TFUNC CX_OFUNCALL */
+  op31: { /* CX_TFIMP CX_OFUNCALL */
       if (cx->stop) { return true; }
       cx->pc = 31; cx->row = 1; cx->col = 28;
       struct cx_scope *s = cx_scope(cx, 0);
       struct cx_func *func = func14;
-      struct cx_fimp *imp = cx_func_match_imp(func, s, 0);
+      struct cx_fimp *imp = fimp14_1;
+      if (s->safe && !cx_fimp_match(imp, s)) { imp = NULL; }
       if (!imp) {
 	cx_error(cx, cx->row, cx->col, "Func not applicable: %%s", func->id);
 	return false;
