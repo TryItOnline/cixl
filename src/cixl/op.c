@@ -494,20 +494,6 @@ cx_op_type(CX_OPUTVAR, {
     type.eval = putvar_eval;
   });
 
-bool cx_oreturn_recall(struct cx_call *call, size_t pc, struct cx *cx) {
-  struct cx_fimp *imp = call->target;
-  call->recalls--;
-  struct cx_scope *s = cx_scope(cx, 0);
-  
-  if (s->safe && !cx_fimp_match(imp, s)) {
-    cx_error(cx, cx->row, cx->col, "Recall not applicable");
-    return false;
-  }
-  
-  cx->pc = pc+1;
-  return true;
-}
-
 void cx_oreturn_end(struct cx_scope *scope) {
   struct cx *cx = scope->cx;
   cx_vec_clear(&scope->stack);
@@ -528,52 +514,62 @@ static bool return_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
   struct cx_fimp *imp = op->as_return.imp;
   struct cx_call *call = cx_test(cx_vec_peek(&cx->calls, 0));
 
-  if (call->recalls) { return cx_oreturn_recall(call, op->as_return.pc, cx); }
-
-  struct cx_scope *ss = cx_scope(cx, 0);
-
-  if (ss->stack.count > imp->rets.count) {
-    cx_error(cx, cx->row, cx->col, "Stack not empty on return");
-    return false;
-  }
+  if (call->recalls) {
+    call->recalls--;
+    struct cx_scope *s = cx_scope(cx, 0);
     
-  if (ss->stack.count < imp->rets.count) {
-    cx_error(cx, cx->row, cx->col, "Not enough return values on stack");
-    return false;
-  }
+    if (s->safe && !cx_fimp_match(imp, s)) {
+      cx_error(cx, cx->row, cx->col, "Recall not applicable");
+      return false;
+    }
+    
+    cx->pc = op->as_return.pc+1;
+  } else {
+    struct cx_scope *ss = cx_scope(cx, 0);
 
-  if (imp->rets.count) {
-    struct cx_scope *ds = cx_scope(cx, 1);
-    cx_vec_grow(&ds->stack, ds->stack.count+imp->rets.count);
-    size_t i = 0;
-    struct cx_func_ret *r = cx_vec_start(&imp->rets);
+    if (ss->stack.count > imp->rets.count) {
+      cx_error(cx, cx->row, cx->col, "Stack not empty on return");
+      return false;
+    }
+    
+    if (ss->stack.count < imp->rets.count) {
+      cx_error(cx, cx->row, cx->col, "Not enough return values on stack");
+      return false;
+    }
+
+    if (imp->rets.count) {
+      struct cx_scope *ds = cx_scope(cx, 1);
+      cx_vec_grow(&ds->stack, ds->stack.count+imp->rets.count);
+      size_t i = 0;
+      struct cx_func_ret *r = cx_vec_start(&imp->rets);
       
-    for (struct cx_box *v = cx_vec_start(&ss->stack);
-	 i < ss->stack.count;
-	 i++, v++, r++) {
-      if (ss->safe) {
-	struct cx_type *t = r->type;
+      for (struct cx_box *v = cx_vec_start(&ss->stack);
+	   i < ss->stack.count;
+	   i++, v++, r++) {
+	if (ss->safe) {
+	  struct cx_type *t = r->type;
 	  
-	if (!r->type) {
-	  struct cx_func_arg *a = cx_vec_get(&imp->args, r->narg);
-	  struct cx_box *av = cx_test(cx_get_var(ss, a->sym_id, false));
-	  t = av->type;
-	}
+	  if (!r->type) {
+	    struct cx_func_arg *a = cx_vec_get(&imp->args, r->narg);
+	    struct cx_box *av = cx_test(cx_get_var(ss, a->sym_id, false));
+	    t = av->type;
+	  }
 	  
-	if (!cx_is(v->type, t)) {
-	  cx_error(cx, cx->row, cx->col,
-		   "Invalid return type.\nExpected %s, actual: %s",
-		   t->id, v->type->id);
+	  if (!cx_is(v->type, t)) {
+	    cx_error(cx, cx->row, cx->col,
+		     "Invalid return type.\nExpected %s, actual: %s",
+		     t->id, v->type->id);
 	    
-	  return false;
+	    return false;
+	  }
 	}
-      }
 	
-      *(struct cx_box *)cx_vec_push(&ds->stack) = *v;
-    }    
-  }
+	*(struct cx_box *)cx_vec_push(&ds->stack) = *v;
+      }    
+    }
 
-  cx_oreturn_end(ss);
+    cx_oreturn_end(ss);
+  }
   
   return true;
 }
@@ -584,31 +580,45 @@ static bool return_emit(struct cx_op *op,
 			struct cx *cx) {
   struct cx_fimp *imp = op->as_return.imp;
 
+  fputs("struct cx_call *call = cx_test(cx_vec_peek(&cx->calls, 0));\n"
+	"struct cx_scope *s = cx_scope(cx, 0);\n\n"
+	"if (call->recalls) {\n",
+	out);
+
+  size_t pc = op->as_return.pc+1;
+  
   fprintf(out,
-	  "struct cx_call *call = cx_test(cx_vec_peek(&cx->calls, 0));\n\n"
-	  "if (call->recalls) {\n"
-	  "  if (!cx_oreturn_recall(call, %zd, cx)) { return false; }\n"
+	  "  if (s->safe && !cx_fimp_match(fimp%zd_%zd, s)) {\n"
+	  "    cx_error(cx, cx->row, cx->col, \"Recall not applicable\");\n"
+	  "    return false;\n"
+	  "  }\n\n"
+	  "  call->recalls--;\n"
+	  "  cx->pc = %zd;\n"
+	  "  goto op%zd;\n",
+          imp->func->tag, imp->idx, pc, pc);
+
+  fprintf(out,
 	  "} else {\n"
-	  "  struct cx_scope *ss = cx_scope(cx, 0);\n\n"
-	  "if (ss->stack.count > %zd) {\n"
-	  "  cx_error(cx, cx->row, cx->col, \"Stack not empty on return\");\n"
-	  "  return false;\n"
-	  "}\n\n"
-	  "if (ss->stack.count < %zd) {\n"
-	  "  cx_error(cx, cx->row, cx->col, \"Not enough return values on stack\");\n"
-	  "  return false;\n"
-	  "}\n\n",
-	  op->as_return.pc, imp->rets.count, imp->rets.count);
+	  "  if (s->stack.count > %zd) {\n"
+	  "    cx_error(cx, cx->row, cx->col, \"Stack not empty on return\");\n"
+	  "    return false;\n"
+	  "  }\n\n"
+	  "  if (s->stack.count < %zd) {\n"
+	  "    cx_error(cx, cx->row, cx->col,\n"
+	  "             \"Not enough return values on stack\");\n"
+	  "    return false;\n"
+	  "  }\n\n",
+	  imp->rets.count, imp->rets.count);
   
   if (imp->rets.count) {
     fputs("struct cx_scope *ds = cx_scope(cx, 1);\n", out);
     fprintf(out, "cx_vec_grow(&ds->stack, ds->stack.count+%zd);\n", imp->rets.count);
-    fputs("struct cx_box *v = cx_vec_start(&ss->stack);\n\n", out);
+    fputs("struct cx_box *v = cx_vec_start(&s->stack);\n\n", out);
     
     for (struct cx_func_ret *r = cx_vec_start(&imp->rets);
 	 r != cx_vec_end(&imp->rets);
 	 r++) {
-      fputs("  if (ss->safe) {\n"
+      fputs("  if (s->safe) {\n"
 	    "    struct cx_type *t = NULL;\n",
 	    out);
       
@@ -617,7 +627,7 @@ static bool return_emit(struct cx_op *op,
       } else {
 	fprintf(out,
 		"    struct cx_func_arg *a = cx_vec_get(&fimp%zd_%zd->args, %d);\n"
-		"    struct cx_box *av = cx_test(cx_get_var(ss, a->sym_id, false));\n"
+		"    struct cx_box *av = cx_test(cx_get_var(s, a->sym_id, false));\n"
 		"    t = av->type;\n",
 		imp->func->tag, imp->idx, r->narg);
       }
@@ -636,7 +646,7 @@ static bool return_emit(struct cx_op *op,
     }
   } 
   
-  fputs("  cx_oreturn_end(ss);\n"
+  fputs("  cx_oreturn_end(s);\n"
 	"}\n",
 	out);
   

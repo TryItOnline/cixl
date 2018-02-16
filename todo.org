@@ -1,6 +1,5 @@
-* inline ogetvar()
-* inline oreturn_recall()
-* inline emit labels/goto where possible
+* inline ofuncall pc
+** lookup bin_func in funcall_emit
 * fix emit formatting
 ** add CX_TAB to ops
 * handle argv in emit main
@@ -16,6 +15,7 @@
 ** add emit_init flag to cx_bin_func
 *** set for parsed funcs
 *** generate init if set
+* ---
 * implement trait: & rec: emit
 ** register in bin & create in init
 * add TN to generated ids
@@ -52,8 +52,6 @@
 ** add find-key(Vect) fn
 ** add is-dirty fn
 ** add delete fn
-
-| func: foo(x y Int) (Int) $x $y +; 35 7 foo
 
 | Bin new % '1 2 +' compile emit
 | Bin new % '1000000000 {50 fib _} clock / int' compile emit
