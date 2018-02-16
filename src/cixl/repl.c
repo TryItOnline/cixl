@@ -522,7 +522,7 @@ static bool emit_bmips(struct cx *cx) {
 void cx_repl(struct cx *cx, FILE *in, FILE *out) {
   fprintf(out, "Cixl v%s, ", CX_VERSION);
 
-  cx_eval_str(cx, "1000000000 {50 fib _} clock / int");
+  cx_eval_str(cx, "1000000000 {50 fib _} clock / int<Rat>");
   emit_bmips(cx);
   cx_eval_str(cx, "[@/ ~ ' bmips' @@n] say");
 

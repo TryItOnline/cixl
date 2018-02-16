@@ -157,7 +157,7 @@ void cx_init_math(struct cx *cx) {
 			cx_arg("b", cx->int_type),
 			cx_arg("n", cx->int_type)),
 		cx_rets(cx_ret(cx->int_type)),
-		"$n? {$b $a $b +<Int Int> $n -- recall} $a if-else");
+		"$n?<Opt> {$b $a $b +<Int Int> $n -- recall} $a if-else");
 
   cx_add_cxfunc(cx, "fib",
 		cx_args(cx_arg("n", cx->int_type)),
