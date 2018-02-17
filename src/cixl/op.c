@@ -331,7 +331,7 @@ static bool funcall_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
   if (imp) {
     if (s->safe && !cx_fimp_match(imp, s)) { imp = NULL; }
   } else {
-    imp = cx_func_match_imp(func, s, 0);
+    imp = cx_match_fimp(func, s, 0);
   }
   
   if (!imp) {
@@ -369,7 +369,7 @@ static bool funcall_emit(struct cx_op *op,
 	    CX_TAB "if (s->safe && !cx_fimp_match(imp, s)) { imp = NULL; }\n",
 	    imp->emit_id);
   } else {
-    fputs(CX_TAB "cx_func_match_imp(func, s, 0);\n\n", out);
+    fputs(CX_TAB "cx_match_fimp(func, s, 0);\n\n", out);
   }
   
   fputs(CX_TAB "if (!imp) {\n"
@@ -868,8 +868,8 @@ static bool return_emit(struct cx_op *op,
 	  CX_TAB "    return false;\n"
 	  CX_TAB "  }\n\n"
 	  CX_TAB "  if (s->stack.count < %zd) {\n"
-	  CX_TAB "    cx_error(cx, cx->row, cx->col,\n"
-	  CX_TAB "             \"Not enough return values on stack\");\n"
+	  CX_TAB "    cx_error(cx, cx->row, cx->col, "
+	  "\"Not enough return values on stack\");\n"
 	  CX_TAB "    return false;\n"
 	  CX_TAB "  }\n\n",
 	  imp->rets.count, imp->rets.count);

@@ -197,7 +197,7 @@ static bool upcall_imp(struct cx_scope *scope) {
     return false;
   }
   
-  imp = cx_func_match_imp(func, scope, func->imps.count - imp->idx);
+  imp = cx_match_fimp(func, scope, func->imps.count - imp->idx);
   
   if (!imp) {
     cx_error(cx, cx->row, cx->col, "Upcall not applicable");

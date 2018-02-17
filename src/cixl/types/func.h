@@ -66,9 +66,9 @@ struct cx_fimp *cx_get_fimp(struct cx_func *func,
 			    const char *id,
 			    bool silent);
 
-struct cx_fimp *cx_func_match_imp(struct cx_func *func,
-				  struct cx_scope *scope,
-				  size_t offs);
+struct cx_fimp *cx_match_fimp(struct cx_func *func,
+			      struct cx_scope *scope,
+			      size_t offs);
 
 struct cx_type *cx_init_func_type(struct cx *cx);
 
