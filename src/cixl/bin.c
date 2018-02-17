@@ -157,20 +157,19 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
   }  
 
   cx_do_set(&funcs, struct cx_func *, f) {
-    fprintf(out, "  static struct cx_func *func%zd;\n", (*f)->tag);
+    fprintf(out, "  static struct cx_func *%s;\n", (*f)->emit_id);
   }
 
   cx_do_set(&fimps, struct cx_fimp *, f) {
-    fprintf(out, "  static struct cx_fimp *fimp%zd_%zd;\n",
-	    (*f)->func->tag, (*f)->idx);
+    fprintf(out, "  static struct cx_fimp *%s;\n", (*f)->emit_id);
   }
 
   cx_do_set(&syms, struct cx_sym, s) {
-    fprintf(out, "  static struct cx_sym sym%zd;\n", s->tag);
+    fprintf(out, "  static struct cx_sym %s;\n", s->emit_id);
   }
 
   cx_do_set(&types, struct cx_type *, t) {
-    fprintf(out, "  static struct cx_type *type%zd;\n", (*t)->tag);
+    fprintf(out, "  static struct cx_type *%s;\n", (*t)->emit_id);
   }
 
   fputs("\n"
@@ -179,22 +178,22 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
 	out);
   
   cx_do_set(&funcs, struct cx_func *, f) {
-    fprintf(out, "    func%zd = cx_get_func(cx, \"%s\", false);\n",
-	    (*f)->tag, (*f)->id);
+    fprintf(out, "    %s = cx_get_func(cx, \"%s\", false);\n",
+	    (*f)->emit_id, (*f)->id);
   }
 
   cx_do_set(&fimps, struct cx_fimp *, f) {
-    fprintf(out, "    fimp%zd_%zd = cx_get_fimp(func%zd, \"%s\", false);\n",
-	    (*f)->func->tag, (*f)->idx, (*f)->func->tag, (*f)->id);
+    fprintf(out, "    %s = cx_get_fimp(%s, \"%s\", false);\n",
+	    (*f)->emit_id, (*f)->func->emit_id, (*f)->id);
   }
   
   cx_do_set(&syms, struct cx_sym, s) {
-    fprintf(out, "    sym%zd = cx_sym(cx, \"%s\");\n", s->tag, s->id);
+    fprintf(out, "    %s = cx_sym(cx, \"%s\");\n", s->emit_id, s->id);
   }
 
   cx_do_set(&types, struct cx_type *, t) {
-    fprintf(out, "    type%zd = cx_get_type(cx, \"%s\", false);\n",
-	    (*t)->tag, (*t)->id);
+    fprintf(out, "    %s = cx_get_type(cx, \"%s\", false);\n",
+	    (*t)->emit_id, (*t)->id);
   }
   
   cx_set_deinit(&funcs);

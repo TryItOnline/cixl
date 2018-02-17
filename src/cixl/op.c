@@ -59,7 +59,7 @@ static bool begin_emit(struct cx_op *op,
     fputs("cx_scope(cx, 0);\n", out);
   } else {
     struct cx_fimp *imp = op->as_begin.fimp;
-    fprintf(out, "fimp%zd_%zd->scope;\n", imp->func->tag, imp->idx);
+    fprintf(out, "%s->scope;\n", imp->emit_id);
   }
 
   fputs("cx_begin(cx, parent);\n", out);
@@ -173,14 +173,14 @@ static bool fimp_emit(struct cx_op *op,
   if (op->as_fimp.inline1) {
     fprintf(out,
 	    "struct cx_scope *s = cx_scope(cx, 0);\n"
-	    "struct cx_fimp *imp = fimp%zd_%zd;\n"
+	    "struct cx_fimp *imp = %s;\n"
 	    "if (s->safe && !cx_fimp_match(imp, s)) {\n"
 	    "  cx_error(cx, cx->row, cx->col, \"Func not applicable: %%s\",\n"
 	    " 	        imp->func->id);\n"
 	    "  return false;\n"
 	    "}\n"
             "cx_call_init(cx_vec_push(&cx->calls), cx->row, cx->col, imp, %zd);\n",
-	    imp->func->tag, imp->idx, op->pc+op->as_fimp.nops+1);
+	    imp->emit_id, op->pc+op->as_fimp.nops+1);
   } else {
     size_t pc = op->pc+op->as_fimp.nops+1;
     
@@ -263,14 +263,14 @@ static bool funcall_emit(struct cx_op *op,
   struct cx_fimp *imp = op->as_funcall.imp;
 
   fputs("struct cx_scope *s = cx_scope(cx, 0);\n", out);
-  fprintf(out, "struct cx_func *func = func%zd;\n", func->tag);
+  fprintf(out, "struct cx_func *func = %s;\n", func->emit_id);
   fputs("struct cx_fimp *imp = ", out);
   
   if (imp) {
     fprintf(out,
-	    "fimp%zd_%zd;\n"
+	    "%s;\n"
 	    "if (s->safe && !cx_fimp_match(imp, s)) { imp = NULL; }\n",
-	    func->tag, imp->idx);
+	    imp->emit_id);
   } else {
     fputs("cx_func_match_imp(func, s, 0);\n", out);
   }
@@ -331,8 +331,8 @@ static bool getconst_emit(struct cx_op *op,
 			  struct cx_bin *bin,
 			  FILE *out,
 			  struct cx *cx) {
-  fprintf(out, "struct cx_box *v = cx_get_const(cx, sym%zd, false);\n",
-	  op->as_getconst.id.tag);
+  fprintf(out, "struct cx_box *v = cx_get_const(cx, %s, false);\n",
+	  op->as_getconst.id.emit_id);
 
   fputs("if (!v) { return false; }\n"
 	"cx_copy(cx_push(cx_scope(cx, 0)), v);\n",
@@ -370,10 +370,10 @@ static bool getvar_emit(struct cx_op *op,
 			struct cx *cx) {
   fprintf(out,
 	  "struct cx_scope *s = cx_scope(cx, 0);\n"
-	  "struct cx_box *v = cx_get_var(s, sym%zd, false);\n"
+	  "struct cx_box *v = cx_get_var(s, %s, false);\n"
 	  "if (!v) { return false; }\n"
 	  "cx_copy(cx_push(s), v);\n",
-	  op->as_getvar.id.tag);
+	  op->as_getvar.id.emit_id);
 
   return true;
 }
@@ -520,8 +520,8 @@ static bool putargs_emit(struct cx_op *op,
        a--) {
     if (a->id) {
       fprintf(out,
-	      "  *cx_put_var(ds, sym%zd, true) = *cx_test(cx_pop(ss, false));\n",
-	      a->sym_id.tag);
+	      "  *cx_put_var(ds, %s, true) = *cx_test(cx_pop(ss, false));\n",
+	      a->sym_id.emit_id);
     } else {
       fputs("  cx_box_deinit(cx_test(cx_pop(ss, false)));\n", out);
     }
@@ -597,18 +597,18 @@ static bool putvar_emit(struct cx_op *op,
 
   if (op->as_putvar.type) {
     fprintf(out,
-	    "if (!cx_is(src->type, type%zd)) {\n"
+	    "if (!cx_is(src->type, %s)) {\n"
 	    "  cx_error(cx, op->row, op->col,\n"
 	    "           \"Expected type %s, actual: %%s\",\n"
 	    "           src->type->id);\n\n"
 	    "  return false;\n"
             "}\n\n",
-	    op->as_putvar.type->tag, op->as_putvar.type->id);
+	    op->as_putvar.type->emit_id, op->as_putvar.type->id);
   }
   
   fprintf(out,
-	  "struct cx_box *dst = cx_put_var(s, sym%zd, true);\n",
-	  op->as_putvar.id.tag);
+	  "struct cx_box *dst = cx_put_var(s, %s, true);\n",
+	  op->as_putvar.id.emit_id);
 
   fputs("if (!dst) { return false; }\n"
 	"*dst = *src;\n",
@@ -729,14 +729,14 @@ static bool return_emit(struct cx_op *op,
   size_t pc = op->as_return.pc+1;
   
   fprintf(out,
-	  "  if (s->safe && !cx_fimp_match(fimp%zd_%zd, s)) {\n"
+	  "  if (s->safe && !cx_fimp_match(%s, s)) {\n"
 	  "    cx_error(cx, cx->row, cx->col, \"Recall not applicable\");\n"
 	  "    return false;\n"
 	  "  }\n\n"
 	  "  call->recalls--;\n"
 	  "  cx->pc = %zd;\n"
 	  "  goto op%zd;\n",
-          imp->func->tag, imp->idx, pc, pc);
+          imp->emit_id, pc, pc);
 
   fprintf(out,
 	  "} else {\n"
@@ -764,13 +764,13 @@ static bool return_emit(struct cx_op *op,
 	    out);
       
       if (r->type) {
-	fprintf(out, "    t = type%zd;\n", r->type->tag);
+	fprintf(out, "    t = %s;\n", r->type->emit_id);
       } else {
 	fprintf(out,
-		"    struct cx_func_arg *a = cx_vec_get(&fimp%zd_%zd->args, %d);\n"
+		"    struct cx_func_arg *a = cx_vec_get(&%s->args, %d);\n"
 		"    struct cx_box *av = cx_test(cx_get_var(s, a->sym_id, false));\n"
 		"    t = av->type;\n",
-		imp->func->tag, imp->idx, r->narg);
+		imp->emit_id, r->narg);
       }
       
       fputs("    if (!cx_is(v->type, t)) {\n"

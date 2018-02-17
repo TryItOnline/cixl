@@ -12,7 +12,7 @@ typedef bool (*cx_fimp_ptr_t)(struct cx_scope *);
 
 struct cx_fimp {
   struct cx_func *func;
-  char *id;
+  char *id, *emit_id;
   size_t idx;
   struct cx_vec args, rets;
   cx_fimp_ptr_t ptr;

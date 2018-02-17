@@ -4,8 +4,8 @@
 #include <string.h>
 
 #include "cixl/cx.h"
+#include "cixl/emit.h"
 #include "cixl/error.h"
-#include "cixl/op.h"
 #include "cixl/scope.h"
 #include "cixl/types/fimp.h"
 #include "cixl/types/func.h"
@@ -14,12 +14,14 @@
 
 struct cx_sym *cx_sym_init(struct cx_sym *sym, const char *id, size_t tag) {
   sym->id = strdup(id);
+  sym->emit_id = cx_emit_id("sym", id);
   sym->tag = tag;
   return sym;
 }
 
 struct cx_sym *cx_sym_deinit(struct cx_sym *sym) {
   free(sym->id);
+  free(sym->emit_id);
   return sym;
 }
 
@@ -65,8 +67,8 @@ static void print_imp(struct cx_box *v, FILE *out) {
 static bool emit_imp(struct cx_box *v, FILE *out) {
   fprintf(out,
 	  CX_TAB "cx_box_init(cx_push(cx_scope(cx, 0)), cx->sym_type)->as_sym "
-	  "= sym%zd;\n",
-	  v->as_sym.tag);
+	  "= %s;\n",
+	  v->as_sym.emit_id);
   return true;
 }
 

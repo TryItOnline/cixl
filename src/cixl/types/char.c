@@ -2,8 +2,8 @@
 
 #include "cixl/box.h"
 #include "cixl/cx.h"
+#include "cixl/emit.h"
 #include "cixl/error.h"
-#include "cixl/op.h"
 #include "cixl/scope.h"
 #include "cixl/types/char.h"
 #include "cixl/types/fimp.h"

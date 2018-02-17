@@ -13,7 +13,7 @@ struct cx_scope;
 struct cx_type {
   struct cx *cx;
   size_t tag;
-  char *id;
+  char *id, *emit_id;
   struct cx_set parents, children;
   bool trait;
 

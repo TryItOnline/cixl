@@ -9,7 +9,7 @@ struct cx;
 struct cx_type;
 
 struct cx_sym {
-  char *id;
+  char *id, *emit_id;
   size_t tag;
 };
 

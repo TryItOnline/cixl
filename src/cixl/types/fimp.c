@@ -5,6 +5,7 @@
 #include "cixl/call.h"
 #include "cixl/call_iter.h"
 #include "cixl/cx.h"
+#include "cixl/emit.h"
 #include "cixl/error.h"
 #include "cixl/eval.h"
 #include "cixl/op.h"
@@ -19,6 +20,7 @@ struct cx_fimp *cx_fimp_init(struct cx_fimp *imp,
 			     size_t idx) {
   imp->func = func;
   imp->id = id;
+  imp->emit_id = cx_emit_id(func->emit_id, id);
   imp->idx = idx;
   imp->ptr = NULL;
   imp->scope = NULL;
@@ -31,7 +33,8 @@ struct cx_fimp *cx_fimp_init(struct cx_fimp *imp,
 
 struct cx_fimp *cx_fimp_deinit(struct cx_fimp *imp) {
   free(imp->id);
-       
+  free(imp->emit_id);
+  
   cx_do_vec(&imp->args, struct cx_func_arg, a) { cx_func_arg_deinit(a); }
   cx_vec_deinit(&imp->args);
 

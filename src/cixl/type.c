@@ -3,6 +3,7 @@
 
 #include "cixl/cx.h"
 #include "cixl/box.h"
+#include "cixl/emit.h"
 #include "cixl/error.h"
 #include "cixl/scope.h"
 #include "cixl/type.h"
@@ -19,6 +20,7 @@ struct cx_type *cx_type_init(struct cx_type *type, struct cx *cx, const char *id
   type->cx = cx;
   type->tag = cx->next_type_tag++;
   type->id = strdup(id);
+  type->emit_id = cx_emit_id("type", id);
   type->trait = false;
   cx_set_init(&type->parents, sizeof(struct cx_type *), cx_cmp_ptr);
   cx_set_init(&type->children, sizeof(struct cx_type *), cx_cmp_ptr);
@@ -62,6 +64,7 @@ struct cx_type *cx_type_deinit(struct cx_type *type) {
   cx_set_deinit(&type->parents);
   cx_set_deinit(&type->children);
   free(type->id);
+  free(type->emit_id);
   return type;  
 }
 

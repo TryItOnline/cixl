@@ -5,8 +5,6 @@
 
 #include "cixl/box.h"
 
-#define CX_TAB "    "
-
 #define cx_op_type(id, ...)			\
   struct cx_op_type *id() {			\
     static struct cx_op_type type;		\
