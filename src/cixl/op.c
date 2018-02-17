@@ -468,6 +468,15 @@ static bool push_emit(struct cx_op *op,
   return cx_box_emit(&op->as_push.value, out);
 }
 
+static void push_emit_funcs(struct cx_op *op, struct cx_set *out, struct cx *cx) {
+  struct cx_box *v = &op->as_push.value;
+
+  if (v->type == cx->func_type) {
+    struct cx_func **ok = cx_set_insert(out, &v->as_ptr);
+    if (ok) { *ok = v->as_ptr; }
+  }
+}
+
 static void push_emit_syms(struct cx_op *op, struct cx_set *out, struct cx *cx) {
   struct cx_box *v = &op->as_push.value;
 
@@ -481,6 +490,7 @@ cx_op_type(CX_OPUSH, {
     type.deinit = push_deinit;
     type.eval = push_eval;
     type.emit = push_emit;
+    type.emit_funcs = push_emit_funcs;
     type.emit_syms = push_emit_syms;
   });
 

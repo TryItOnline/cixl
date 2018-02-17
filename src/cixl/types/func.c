@@ -193,6 +193,17 @@ static void dump_imp(struct cx_box *value, FILE *out) {
   fprintf(out, "Func(%s)", func->id);
 }
 
+static bool emit_imp(struct cx_box *v, FILE *out) {
+  struct cx_func *func = v->as_ptr;
+  
+  fprintf(out,
+	  CX_TAB "cx_box_init(cx_push(cx_scope(cx, 0)), cx->func_type)->as_ptr "
+	  "= %s;\n",
+	  func->emit_id);
+
+  return true;
+}
+
 struct cx_type *cx_init_func_type(struct cx *cx) {
   struct cx_type *t = cx_add_type(cx, "Func", cx->any_type, cx->seq_type);
   t->equid = equid_imp;
@@ -200,6 +211,6 @@ struct cx_type *cx_init_func_type(struct cx *cx) {
   t->iter = iter_imp;
   t->write = write_imp;
   t->dump = dump_imp;
-
+  t->emit = emit_imp;
   return t;
 }

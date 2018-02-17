@@ -1,5 +1,3 @@
-* emit guess.cx
-** implement Func emit
 * handle argv in emit main
 ** push strings like load main
 * emit histogram.cx
