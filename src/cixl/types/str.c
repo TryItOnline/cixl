@@ -116,8 +116,7 @@ static void print_imp(struct cx_box *v, FILE *out) {
 
 static bool emit_imp(struct cx_box *v, const char *exp, FILE *out) {
   fprintf(out,
-	  CX_TAB "cx_box_init(%s, cx->str_type)->as_str "
-	  "= cx_str_new(\"%s\");\n",
+	  "cx_box_init(%s, cx->str_type)->as_str = cx_str_new(\"%s\");\n",
 	  exp, v->as_str->data);
   return true;
 }

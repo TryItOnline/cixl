@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include "cixl/set.h"
 
-#define CX_TYPE_TAG_MAX 128
+#define CX_TYPE_TAG_MAX 100
 
 struct cx;
 struct cx_box;

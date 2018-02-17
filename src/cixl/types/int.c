@@ -98,8 +98,7 @@ static void dump_imp(struct cx_box *v, FILE *out) {
 
 static bool emit_imp(struct cx_box *v, const char *exp, FILE *out) {
   fprintf(out,
-	  CX_TAB "cx_box_init(%s, cx->int_type)->as_int "
-	  "= %" PRId64 ";\n",
+	  "cx_box_init(%s, cx->int_type)->as_int = %" PRId64 ";\n",
 	  exp, v->as_int);
   return true;
 }

@@ -46,6 +46,8 @@
 ** add is-dirty fn
 ** add delete fn
 
+| Bin new % 'func: foo(x y Int) (Int) 35 $y +; 35 7 foo' compile emit
+
 | Bin new % '1 2 +' compile emit
 | Bin new % '1000000000 {50 fib _} clock / int<Rat>' compile emit
 | Bin new % '#out 42 print<WFile A>' compile emit

@@ -164,16 +164,16 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
 
   fputs("\n"
 	"  if (init) {\n"
-	"    init = false;\n",
+	"    init = false;\n\n",
 	out);
 
   for (struct cx_op *op = cx_vec_start(&bin->ops);
        op != cx_vec_end(&bin->ops);
        op++) {
     if (op->type->emit_init) {
-      fputs("  {\n", out);
+      fputs("    {\n", out);
       op->type->emit_init(op, out, cx);
-      fputs("  }\n\n", out);
+      fputs("    }\n\n", out);
     }
   }
   
@@ -203,12 +203,12 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
 		
   fputs("  }\n\n", out);
 
-  fprintf(out, "  static void *op_labels[%zd] = {\n", bin->ops.count);
+  fprintf(out, "  static void *op_labels[%zd] = {\n    ", bin->ops.count);
   
   for (size_t i = 0; i < bin->ops.count; i++) {
     fprintf(out, "&&op%zd", i);
     if (i < bin->ops.count-1) { fputs(", ", out); }
-    if (i >= 10 && i % 10 == 0) { fputc('\n', out); }
+    if (i >= 10 && i % 10 == 0) { fputs("\n    ", out); }
   }
   
   fputs("};\n\n"

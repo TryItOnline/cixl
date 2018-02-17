@@ -66,8 +66,7 @@ static void print_imp(struct cx_box *v, FILE *out) {
 
 static bool emit_imp(struct cx_box *v, const char *exp, FILE *out) {
   fprintf(out,
-	  CX_TAB "cx_box_init(%s, cx->sym_type)->as_sym "
-	  "= %s;\n",
+	  "cx_box_init(%s, cx->sym_type)->as_sym = %s;\n",
 	  exp, v->as_sym.emit_id);
   return true;
 }

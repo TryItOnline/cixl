@@ -106,8 +106,7 @@ static bool emit_imp(struct cx_box *v, const char *exp, FILE *out) {
   struct cx_type *t = v->as_ptr;
   
   fprintf(out,
-	  CX_TAB "cx_box_init(%s, cx->meta_type)->as_ptr "
-	  "= %s;\n",
+	  "cx_box_init(%s, cx->meta_type)->as_ptr = %s;\n",
 	  exp, t->emit_id);
   
   return true;

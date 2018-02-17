@@ -1,6 +1,7 @@
 #include "cixl/bin.h"
 #include "cixl/call.h"
 #include "cixl/cx.h"
+#include "cixl/emit.h"
 #include "cixl/error.h"
 #include "cixl/eval.h"
 #include "cixl/types/fimp.h"
@@ -54,7 +55,7 @@ static bool begin_emit(struct cx_op *op,
 		       struct cx_bin *bin,
 		       FILE *out,
 		       struct cx *cx) {
-  fputs("struct cx_scope *parent = ", out);
+  fputs(CX_TAB "struct cx_scope *parent = ", out);
   
   if (op->as_begin.child) {
     fputs("cx_scope(cx, 0);\n", out);
@@ -63,7 +64,7 @@ static bool begin_emit(struct cx_op *op,
     fprintf(out, "%s->scope;\n", imp->emit_id);
   }
 
-  fputs("cx_begin(cx, parent);\n", out);
+  fputs(CX_TAB "cx_begin(cx, parent);\n", out);
   return true;
 }
 
@@ -105,21 +106,21 @@ static bool else_emit(struct cx_op *op,
 		      FILE *out,
 		      struct cx *cx) {
   
-  fputs("struct cx_box *v = cx_pop(cx_scope(cx, 0), false);\n"
-	"if (!v) { return false; }\n",
+  fputs(CX_TAB "struct cx_box *v = cx_pop(cx_scope(cx, 0), false);\n"
+	CX_TAB "if (!v) { return false; }\n",
 	out);
 
   size_t pc = op->pc+op->as_else.nops+1;
   
   fprintf(out,
-	  "if (!cx_ok(v)) {\n"
-	  "  cx_box_deinit(v);\n"
-	  "  cx->pc = %zd;\n"
-	  "  goto op%zd;\n"
-	  "}\n\n",
+	  CX_TAB "if (!cx_ok(v)) {\n"
+	  CX_TAB "  cx_box_deinit(v);\n"
+	  CX_TAB "  cx->pc = %zd;\n"
+	  CX_TAB "  goto op%zd;\n"
+	  CX_TAB "}\n\n",
 	  pc, pc);
   
-  fputs("cx_box_deinit(v);\n", out);
+  fputs(CX_TAB "cx_box_deinit(v);\n", out);
   return true;
 }
 
@@ -134,7 +135,7 @@ static bool end_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
 }
 
 static bool end_emit(struct cx_op *op, struct cx_bin *bin, FILE *out, struct cx *cx) {
-  fputs("cx_end(cx);\n", out);
+  fputs(CX_TAB "cx_end(cx);\n", out);
   return true;
 }
 
@@ -173,21 +174,22 @@ static bool fimp_emit(struct cx_op *op,
 
   if (op->as_fimp.inline1) {
     fprintf(out,
-	    "struct cx_scope *s = cx_scope(cx, 0);\n"
-	    "struct cx_fimp *imp = %s;\n"
-	    "if (s->safe && !cx_fimp_match(imp, s)) {\n"
-	    "  cx_error(cx, cx->row, cx->col, \"Func not applicable: %%s\",\n"
-	    " 	        imp->func->id);\n"
-	    "  return false;\n"
-	    "}\n"
-            "cx_call_init(cx_vec_push(&cx->calls), cx->row, cx->col, imp, %zd);\n",
+	    CX_TAB "struct cx_scope *s = cx_scope(cx, 0);\n"
+	    CX_TAB "struct cx_fimp *imp = %s;\n\n"
+	    CX_TAB "if (s->safe && !cx_fimp_match(imp, s)) {\n"
+	    CX_TAB "  cx_error(cx, cx->row, cx->col, \"Func not applicable: %%s\",\n"
+	    CX_TAB " 	        imp->func->id);\n"
+	    CX_TAB "  return false;\n"
+	    CX_TAB "}\n\n"
+            CX_TAB "cx_call_init(cx_vec_push(&cx->calls), "
+	    "cx->row, cx->col, imp, %zd);\n",
 	    imp->emit_id, op->pc+op->as_fimp.nops+1);
   } else {
     size_t pc = op->pc+op->as_fimp.nops+1;
     
     fprintf(out,
-	    "cx->pc = %zd;\n"
-	    "goto op%zd;\n",
+	    CX_TAB "cx->pc = %zd;\n"
+	    CX_TAB "goto op%zd;\n",
 	    pc, pc);
   }
   
@@ -228,7 +230,7 @@ static bool fimpdef_emit(struct cx_op *op,
 			 FILE *out,
 			 struct cx *cx) {
   fprintf(out,
-	  "%s->scope = cx_scope_ref(cx_scope(cx, 0));\n",
+	  CX_TAB "%s->scope = cx_scope_ref(cx_scope(cx, 0));\n",
 	  op->as_fimpdef.imp->emit_id);
   return true;  
 }
@@ -239,59 +241,60 @@ static void fimpdef_emit_init(struct cx_op *op,
   struct cx_fimp *imp = op->as_fimpdef.imp;
   
   fprintf(out,
-	  "struct cx_func_arg args[%zd] = {\n",
+	  CX_ITAB "struct cx_func_arg args[%zd] = {\n",
 	  imp->args.count);
 
   char *sep = NULL;
   
   cx_do_vec(&imp->args, struct cx_func_arg, a) {
     if (sep) { fputs(sep, out); }
-    sep = ", ";
+    sep = ",\n";
     
     if (a->type) {
       fprintf(out,
-	      "cx_arg(\"%s\", cx_get_type(cx, \"%s\", false))",
+	      CX_ITAB "cx_arg(\"%s\", cx_get_type(cx, \"%s\", false))",
 	      a->id, a->type->id);
     } else if (a->narg > -1) {
-      fprintf(out, "cx_narg(\"%s\", %d)", a->id, a->narg);
+      fprintf(out, CX_ITAB "cx_narg(\"%s\", %d)", a->id, a->narg);
     } else {
-      fputs("({\n"
-	    "  struct cx_box v;\n",
+      fputs(CX_ITAB "({\n"
+	    CX_ITAB "  struct cx_box v;\n",
 	    out);
-      
+
+      fputs(CX_ITAB "  ", out);
       cx_box_emit(&a->value, "&v", out);
       
-      fputs("  cx_varg(&v);\n"
-	    "})",
+      fputs(CX_ITAB "  cx_varg(&v);\n"
+	    CX_ITAB "})",
 	    out);
     }
   }
 					     
-  fputs("};\n", out);
+  fputs(CX_ITAB "};\n\n", out);
 
   fprintf(out,
-	  "struct cx_func_ret rets[%zd] = {\n",
+	  CX_ITAB "struct cx_func_ret rets[%zd] = {\n",
 	  imp->rets.count);
 
   sep = NULL;
   
   cx_do_vec(&imp->rets, struct cx_func_ret, r) {
     if (sep) { fputs(sep, out); }
-    sep = ", ";
+    sep = ",\n";
     
     if (r->type) {
-      fprintf(out, "cx_ret(cx_get_type(cx, \"%s\", false))", r->type->id);
+      fprintf(out, CX_ITAB "cx_ret(cx_get_type(cx, \"%s\", false))", r->type->id);
     } else {
-      fprintf(out, "cx_nret(%d)", r->narg);
+      fprintf(out, CX_ITAB "cx_nret(%d)", r->narg);
     }
   }
   
-  fputs("};\n", out);
+  fputs(CX_ITAB "};\n\n", out);
 
   fprintf(out,
-	  "struct cx_fimp *imp = "
+	  CX_ITAB "struct cx_fimp *imp = "
 	  "cx_add_func(cx, \"%s\", %zd, args, %zd, rets);\n"
-	  "imp->bin = cx_bin_ref(cx->bin);\n",
+	  CX_ITAB "imp->bin = cx_bin_ref(cx->bin);\n",
 	  imp->func->id, imp->args.count, imp->rets.count);
 }
 
@@ -356,35 +359,37 @@ static bool funcall_emit(struct cx_op *op,
   struct cx_func *func = op->as_funcall.func;
   struct cx_fimp *imp = op->as_funcall.imp;
 
-  fputs("struct cx_scope *s = cx_scope(cx, 0);\n", out);
-  fprintf(out, "struct cx_func *func = %s;\n", func->emit_id);
-  fputs("struct cx_fimp *imp = ", out);
+  fputs(CX_TAB "struct cx_scope *s = cx_scope(cx, 0);\n", out);
+  fprintf(out, CX_TAB "struct cx_func *func = %s;\n", func->emit_id);
+  fputs(CX_TAB "struct cx_fimp *imp = ", out);
   
   if (imp) {
     fprintf(out,
-	    "%s;\n\n"
-	    "if (s->safe && !cx_fimp_match(imp, s)) { imp = NULL; }\n",
+	    CX_TAB "%s;\n\n"
+	    CX_TAB "if (s->safe && !cx_fimp_match(imp, s)) { imp = NULL; }\n",
 	    imp->emit_id);
   } else {
-    fputs("cx_func_match_imp(func, s, 0);\n\n", out);
+    fputs(CX_TAB "cx_func_match_imp(func, s, 0);\n\n", out);
   }
   
-  fputs("if (!imp) {\n"
-	"  cx_error(cx, cx->row, cx->col, \"Func not applicable: %%s\", func->id);\n"
-	"  return false;\n"
-	"}\n\n",
+  fputs(CX_TAB "if (!imp) {\n"
+	CX_TAB "  cx_error(cx, cx->row, cx->col, \"Func not applicable: %%s\", "
+	"func->id);\n"
+	CX_TAB "  return false;\n"
+	CX_TAB "}\n\n",
 	out);
     
   if (imp && !imp->ptr) {
     struct cx_bin_func *f = cx_test(cx_bin_get_func(cx->bin, imp));
 
     fprintf(out,
-	    "cx_call_init(cx_vec_push(&cx->calls), cx->row, cx->col, imp, cx->pc);\n"
-	    "cx->pc = %zd;\n"
-	    "goto op%zd;\n",
+	    CX_TAB "cx_call_init(cx_vec_push(&cx->calls), cx->row, cx->col, "
+	    "imp, cx->pc);\n"
+	    CX_TAB "cx->pc = %zd;\n"
+	    CX_TAB "goto op%zd;\n",
 	    f->start_pc, f->start_pc);
   } else {
-    fputs("if (!cx_fimp_call(imp, s)) { return false; }\n", out);
+    fputs(CX_TAB "if (!cx_fimp_call(imp, s)) { return false; }\n", out);
   }
   
   return true;
@@ -425,11 +430,11 @@ static bool getconst_emit(struct cx_op *op,
 			  struct cx_bin *bin,
 			  FILE *out,
 			  struct cx *cx) {
-  fprintf(out, "struct cx_box *v = cx_get_const(cx, %s, false);\n",
+  fprintf(out, CX_TAB "struct cx_box *v = cx_get_const(cx, %s, false);\n",
 	  op->as_getconst.id.emit_id);
 
-  fputs("if (!v) { return false; }\n"
-	"cx_copy(cx_push(cx_scope(cx, 0)), v);\n",
+  fputs(CX_TAB "if (!v) { return false; }\n"
+	CX_TAB "cx_copy(cx_push(cx_scope(cx, 0)), v);\n",
 	out);
   
   return true;
@@ -463,10 +468,10 @@ static bool getvar_emit(struct cx_op *op,
 			FILE *out,
 			struct cx *cx) {
   fprintf(out,
-	  "struct cx_scope *s = cx_scope(cx, 0);\n"
-	  "struct cx_box *v = cx_get_var(s, %s, false);\n"
-	  "if (!v) { return false; }\n"
-	  "cx_copy(cx_push(s), v);\n",
+	  CX_TAB "struct cx_scope *s = cx_scope(cx, 0);\n"
+	  CX_TAB "struct cx_box *v = cx_get_var(s, %s, false);\n"
+	  CX_TAB "if (!v) { return false; }\n"
+	  CX_TAB "cx_copy(cx_push(s), v);\n",
 	  op->as_getvar.id.emit_id);
 
   return true;
@@ -499,8 +504,8 @@ static bool jump_emit(struct cx_op *op,
   size_t pc = op->pc+op->as_jump.nops+1;
   
   fprintf(out,
-	  "cx->pc = %zd;\n"
-	  "goto op%zd;\n",
+	  CX_TAB "cx->pc = %zd;\n"
+	  CX_TAB "goto op%zd;\n",
 	  pc, pc);
 
   return true;
@@ -525,17 +530,17 @@ static bool lambda_emit(struct cx_op *op,
 			struct cx_bin *bin,
 			FILE *out,
 			struct cx *cx) {
-  fputs("struct cx_scope *s = cx_scope(cx, 0);\n", out);
-  fprintf(out, "struct cx_lambda *l = cx_lambda_new(s, %zd, %zd);\n",
+  fputs(CX_TAB "struct cx_scope *s = cx_scope(cx, 0);\n", out);
+  fprintf(out, CX_TAB "struct cx_lambda *l = cx_lambda_new(s, %zd, %zd);\n",
 	  op->as_lambda.start_op, op->as_lambda.nops);
 
-  fputs("cx_box_init(cx_push(s), cx->lambda_type)->as_ptr = l;\n", out);  
+  fputs(CX_TAB "cx_box_init(cx_push(s), cx->lambda_type)->as_ptr = l;\n", out);  
 
   size_t pc = op->pc+op->as_lambda.nops+1;
   
   fprintf(out,
-	  "cx->pc = %zd;\n"
-	  "goto op%zd;\n",
+	  CX_TAB "cx->pc = %zd;\n"
+	  CX_TAB "goto op%zd;\n",
 	  pc, pc);
 
   return true;
@@ -559,6 +564,7 @@ static bool push_emit(struct cx_op *op,
 		      struct cx_bin *bin,
 		      FILE *out,
 		      struct cx *cx) {
+  fputs(CX_TAB, out);
   return cx_box_emit(&op->as_push.value, "cx_push(cx_scope(cx, 0))", out);
 }
 
@@ -624,9 +630,9 @@ static bool putargs_emit(struct cx_op *op,
 			 struct cx *cx) {
   struct cx_fimp *imp = op->as_putargs.imp;
 
-  fputs("struct cx_scope\n"
-	"*ds = cx_scope(cx, 0),\n"
-	"*ss = ds->stack.count ? ds : cx_scope(cx, 1);\n",
+  fputs(CX_TAB "struct cx_scope\n"
+	CX_TAB "*ds = cx_scope(cx, 0),\n"
+	CX_TAB "*ss = ds->stack.count ? ds : cx_scope(cx, 1);\n",
 	out);
 
   for (struct cx_func_arg *a = cx_vec_peek(&imp->args, 0);
@@ -634,10 +640,10 @@ static bool putargs_emit(struct cx_op *op,
        a--) {
     if (a->id) {
       fprintf(out,
-	      "  *cx_put_var(ds, %s, true) = *cx_test(cx_pop(ss, false));\n",
+	      CX_TAB "*cx_put_var(ds, %s, true) = *cx_test(cx_pop(ss, false));\n",
 	      a->sym_id.emit_id);
     } else {
-      fputs("  cx_box_deinit(cx_test(cx_pop(ss, false)));\n", out);
+      fputs(CX_TAB "cx_box_deinit(cx_test(cx_pop(ss, false)));\n", out);
     }
   }
   
@@ -706,28 +712,28 @@ static bool putvar_emit(struct cx_op *op,
 			struct cx_bin *bin,
 			FILE *out,
 			struct cx *cx) {
-  fputs("struct cx_scope *s = cx_scope(cx, 0);\n"
-	"struct cx_box *src = cx_pop(s, false);\n"
-	"if (!src) { return false; }\n\n",
+  fputs(CX_TAB "struct cx_scope *s = cx_scope(cx, 0);\n"
+	CX_TAB "struct cx_box *src = cx_pop(s, false);\n"
+	CX_TAB "if (!src) { return false; }\n\n",
 	out);
 
   if (op->as_putvar.type) {
     fprintf(out,
-	    "if (!cx_is(src->type, %s)) {\n"
-	    "  cx_error(cx, op->row, op->col,\n"
-	    "           \"Expected type %s, actual: %%s\",\n"
-	    "           src->type->id);\n\n"
-	    "  return false;\n"
-            "}\n\n",
+	    CX_TAB "if (!cx_is(src->type, %s)) {\n"
+	    CX_TAB "  cx_error(cx, op->row, op->col,\n"
+	    CX_TAB "           \"Expected type %s, actual: %%s\",\n"
+	    CX_TAB "           src->type->id);\n\n"
+	    CX_TAB "  return false;\n"
+            CX_TAB "}\n\n",
 	    op->as_putvar.type->emit_id, op->as_putvar.type->id);
   }
   
   fprintf(out,
-	  "struct cx_box *dst = cx_put_var(s, %s, true);\n",
+	  CX_TAB "struct cx_box *dst = cx_put_var(s, %s, true);\n",
 	  op->as_putvar.id.emit_id);
 
-  fputs("if (!dst) { return false; }\n"
-	"*dst = *src;\n",
+  fputs(CX_TAB "if (!dst) { return false; }\n"
+	CX_TAB "*dst = *src;\n",
 	out);
 
   return true;
@@ -837,83 +843,87 @@ static bool return_emit(struct cx_op *op,
 			struct cx *cx) {
   struct cx_fimp *imp = op->as_return.imp;
 
-  fputs("struct cx_call *call = cx_test(cx_vec_peek(&cx->calls, 0));\n"
-	"struct cx_scope *s = cx_scope(cx, 0);\n\n"
-	"if (call->recalls) {\n",
+  fputs(CX_TAB "struct cx_call *call = cx_test(cx_vec_peek(&cx->calls, 0));\n"
+	CX_TAB "struct cx_scope *s = cx_scope(cx, 0);\n\n"
+	CX_TAB "if (call->recalls) {\n",
 	out);
 
   size_t pc = op->as_return.pc+1;
   
   fprintf(out,
-	  "  if (s->safe && !cx_fimp_match(%s, s)) {\n"
-	  "    cx_error(cx, cx->row, cx->col, \"Recall not applicable\");\n"
-	  "    return false;\n"
-	  "  }\n\n"
-	  "  call->recalls--;\n"
-	  "  cx->pc = %zd;\n"
-	  "  goto op%zd;\n",
+	  CX_TAB "  if (s->safe && !cx_fimp_match(%s, s)) {\n"
+	  CX_TAB "    cx_error(cx, cx->row, cx->col, \"Recall not applicable\");\n"
+	  CX_TAB "    return false;\n"
+	  CX_TAB "  }\n\n"
+	  CX_TAB "  call->recalls--;\n"
+	  CX_TAB "  cx->pc = %zd;\n"
+	  CX_TAB "  goto op%zd;\n",
           imp->emit_id, pc, pc);
 
   fprintf(out,
-	  "} else {\n"
-	  "  if (s->stack.count > %zd) {\n"
-	  "    cx_error(cx, cx->row, cx->col, \"Stack not empty on return\");\n"
-	  "    return false;\n"
-	  "  }\n\n"
-	  "  if (s->stack.count < %zd) {\n"
-	  "    cx_error(cx, cx->row, cx->col,\n"
-	  "             \"Not enough return values on stack\");\n"
-	  "    return false;\n"
-	  "  }\n\n",
+	  CX_TAB "} else {\n"
+	  CX_TAB "  if (s->stack.count > %zd) {\n"
+	  CX_TAB "    cx_error(cx, cx->row, cx->col, "
+	  "\"Stack not empty on return\");\n"
+	  CX_TAB "    return false;\n"
+	  CX_TAB "  }\n\n"
+	  CX_TAB "  if (s->stack.count < %zd) {\n"
+	  CX_TAB "    cx_error(cx, cx->row, cx->col,\n"
+	  CX_TAB "             \"Not enough return values on stack\");\n"
+	  CX_TAB "    return false;\n"
+	  CX_TAB "  }\n\n",
 	  imp->rets.count, imp->rets.count);
   
   if (imp->rets.count) {
-    fputs("struct cx_scope *ds = cx_scope(cx, 1);\n", out);
-    fprintf(out, "cx_vec_grow(&ds->stack, ds->stack.count+%zd);\n", imp->rets.count);
-    fputs("struct cx_box *v = cx_vec_start(&s->stack);\n\n", out);
+    fputs(CX_TAB "  struct cx_scope *ds = cx_scope(cx, 1);\n", out);
+    fprintf(out,
+	    CX_TAB "  cx_vec_grow(&ds->stack, ds->stack.count+%zd);\n",
+	    imp->rets.count);
+    fputs(CX_TAB "  struct cx_box *v = cx_vec_start(&s->stack);\n\n", out);
     
     for (struct cx_func_ret *r = cx_vec_start(&imp->rets);
 	 r != cx_vec_end(&imp->rets);
 	 r++) {
-      fputs("  if (s->safe) {\n"
-	    "    struct cx_type *t = NULL;\n",
+      fputs(CX_TAB "  if (s->safe) {\n"
+	    CX_TAB "    struct cx_type *t = NULL;\n",
 	    out);
       
       if (r->type) {
-	fprintf(out, "    t = %s;\n", r->type->emit_id);
+	fprintf(out, CX_TAB "    t = %s;\n", r->type->emit_id);
       } else {
 	fprintf(out,
-		"    struct cx_func_arg *a = cx_vec_get(&%s->args, %d);\n"
-		"    struct cx_box *av = cx_test(cx_get_var(s, a->sym_id, false));\n"
-		"    t = av->type;\n",
+		CX_TAB "    struct cx_func_arg *a = cx_vec_get(&%s->args, %d);\n"
+		CX_TAB "    struct cx_box *av = "
+		"cx_test(cx_get_var(s, a->sym_id, false));\n"
+		CX_TAB "    t = av->type;\n",
 		imp->emit_id, r->narg);
       }
       
-      fputs("    if (!cx_is(v->type, t)) {\n"
-	    "      cx_error(cx, cx->row, cx->col,\n"
-	    "               \"Invalid return type.\\n\"\n"
-            "               \"Expected %s, actual: %s\",\n"
-	    "               t->id, v->type->id);\n"
-	    "      return false;\n"
-	    "    }\n"
-	    "  }\n\n"
-	    "  *(struct cx_box *)cx_vec_push(&ds->stack) = *v;\n"
-	    "  v++;\n\n",
+      fputs(CX_TAB "    if (!cx_is(v->type, t)) {\n"
+	    CX_TAB "      cx_error(cx, cx->row, cx->col,\n"
+	    CX_TAB "               \"Invalid return type.\\n\"\n"
+            CX_TAB "               \"Expected %s, actual: %s\",\n"
+	    CX_TAB "               t->id, v->type->id);\n"
+	    CX_TAB "      return false;\n"
+	    CX_TAB "    }\n"
+	    CX_TAB "  }\n\n"
+	    CX_TAB "  *(struct cx_box *)cx_vec_push(&ds->stack) = *v;\n"
+	    CX_TAB "  v++;\n\n",
 	    out);
     }
   } 
 
-  fputs("  cx_vec_clear(&s->stack);\n"
-	"  cx_end(cx);\n"
-	"  struct cx_call *call = cx_vec_pop(&cx->calls);\n\n"
-	"  if (call->return_pc > -1) {\n"
-	"    cx->pc = call->return_pc;\n"
-	"    cx_call_deinit(call);\n"
-	"    goto *op_labels[cx->pc];\n"
-	"  }\n\n"
-	"  cx_call_deinit(call);\n"
-	"  cx->stop = true;\n"
-	"}\n",
+  fputs(CX_TAB "  cx_vec_clear(&s->stack);\n"
+	CX_TAB "  cx_end(cx);\n"
+	CX_TAB "  struct cx_call *call = cx_vec_pop(&cx->calls);\n\n"
+	CX_TAB "  if (call->return_pc > -1) {\n"
+	CX_TAB "    cx->pc = call->return_pc;\n"
+	CX_TAB "    cx_call_deinit(call);\n"
+	CX_TAB "    goto *op_labels[cx->pc];\n"
+	CX_TAB "  }\n\n"
+	CX_TAB "  cx_call_deinit(call);\n"
+	CX_TAB "  cx->stop = true;\n"
+	CX_TAB "}\n",
 	out);
   
   return true;  
@@ -969,11 +979,11 @@ static bool stash_emit(struct cx_op *op,
 		       struct cx_bin *bin,
 		       FILE *out,
 		       struct cx *cx) {
-  fputs("struct cx_scope *s = cx_scope(cx, 0);\n"
-	"struct cx_vect *out = cx_vect_new();\n"
-	"out->imp = s->stack;\n"
-	"cx_vec_init(&s->stack, sizeof(struct cx_box));\n"
-	"cx_box_init(cx_push(s), s->cx->vect_type)->as_ptr = out;\n",
+  fputs(CX_TAB "struct cx_scope *s = cx_scope(cx, 0);\n"
+	CX_TAB "struct cx_vect *out = cx_vect_new();\n"
+	CX_TAB "out->imp = s->stack;\n"
+	CX_TAB "cx_vec_init(&s->stack, sizeof(struct cx_box));\n"
+	CX_TAB "cx_box_init(cx_push(s), s->cx->vect_type)->as_ptr = out;\n",
 	out);
 
   return true;
@@ -993,7 +1003,7 @@ static bool stop_emit(struct cx_op *op,
 		      struct cx_bin *bin,
 		      FILE *out,
 		      struct cx *cx) {
-  fputs("cx->stop = true;\n", out);
+  fputs(CX_TAB "cx->stop = true;\n", out);
   return true;
 }
 
