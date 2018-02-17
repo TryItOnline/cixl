@@ -34,7 +34,7 @@ struct cx {
     *ref_type, *rfile_type, *rwfile_type, *seq_type, *str_type, *sym_type,
     *table_type, *time_type, *vect_type, *wfile_type;
 
-  size_t next_func_tag, next_sym_tag, next_type_tag;
+  size_t next_sym_tag, next_type_tag;
   struct cx_set syms, macros, funcs;
   struct cx_env consts;
   

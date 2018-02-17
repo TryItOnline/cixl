@@ -193,7 +193,7 @@ static bool unsafe_imp(struct cx_scope *scope) {
 struct cx *cx_init(struct cx *cx) {
   cx->inline_limit1 = 10;
   cx->inline_limit2 = -1;
-  cx->next_func_tag = cx->next_sym_tag = cx->next_type_tag = 1;
+  cx->next_sym_tag = cx->next_type_tag = 0;
   cx->bin = NULL;
   cx->pc = 0;
   cx->stop = false;

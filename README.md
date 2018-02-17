@@ -1131,12 +1131,12 @@ Type checking may be partly disabled for the current scope by calling ```unsafe`
 ```
    | {10000 {50 fib _} times} clock 1000000 / int
 ...
-[383]
+[317]
 
    | unsafe
 ...{10000 {50 fib _} times} clock 1000000 / int
 ...
-[290]
+[282]
 ```
 
 ### Performance
@@ -1151,7 +1151,7 @@ Let's start with a tail-recursive fibonacci to exercise the interpreter loop, it
 ...  0 1 $n fib-rec;
 ...| {10000 {50 fib _} times} clock 1000000 / int
 ...
-[383]
+[317]
 ```
 
 ```
@@ -1178,7 +1178,7 @@ Next up is consing a vector.
 ```
    | {let: v []; 10000000 {$v ~ push} for} clock 1000000 / int
 ...
-[2208]
+[2117]
 ```
 
 ```
@@ -1202,7 +1202,7 @@ Moving on to instantiating records.
    rec: Foo() x Int y Str;
 ...| {10000000 {Foo new % `x 42 put `y 'bar' put} times} clock 1000000 / int
 ...
-[6435]
+[4210]
 ```
 
 ```

@@ -12,53 +12,57 @@ char *cx_emit_id(const char *prefix, const char *in) {
     switch (*c) {
     case ' ':
       break;      
-    case '?':
-      *p++ = 'q';
-      *p++ = 'U';
+    case '+':
+      *p++ = 'A';
+      *p++ = 'D';
       break;
-    case '!':
-      *p++ = 'e';
-      *p++ = 'X';
+    case '&':
+      *p++ = 'A';
+      *p++ = 'M';
+      break;
+    case '|':
+      *p++ = 'B';
+      *p++ = 'A';
+      break;
+    case '/':
+      *p++ = 'D';
+      *p++ = 'I';
       break;
     case '=':
-      *p++ = 'e';
+      *p++ = 'E';
       *p++ = 'Q';
       break;
+    case '!':
+      *p++ = 'E';
+      *p++ = 'X';
+      break;
     case '<':
-      *p++ = 'l';
+      *p++ = 'L';
       *p++ = 'T';
       break;
     case '>':
-      *p++ = 'g';
+      *p++ = 'G';
       *p++ = 'T';
       break;
-    case '+':
-      *p++ = 'a';
-      *p++ = 'D';
-      break;
-    case '-':
-      *p++ = 's';
-      *p++ = 'U';
-      break;
     case '*':
-      *p++ = 'm';
+      *p++ = 'M';
       *p++ = 'U';
-      break;
-    case '/':
-      *p++ = 'd';
-      *p++ = 'I';
       break;
     case '%':
-      *p++ = 'p';
+      *p++ = 'P';
       *p++ = 'E';
       break;
-    case '~':
-      *p++ = 't';
-      *p++ = 'I';
+    case '?':
+      *p++ = 'Q';
+      *p++ = 'U';
       break;
-    case '|':
-      *p++ = 'b';
-      *p++ = 'A';
+    case '-':
+      *p++ = 'S';
+      *p++ = 'U';
+      break;
+    case '~':
+      *p++ = 'T';
+      *p++ = 'I';
       break;
     default:
       *(p++) = *c;
