@@ -49,8 +49,6 @@
 ** add is-dirty fn
 ** add delete fn
 
-| {10000000 {Foo new % `x 42 put<Rec Sym A> `y 'bar' put<Rec Sym A>} times} clock 1000000 / int
-
 | Bin new % '1 2 +' compile emit
 | Bin new % '1000000000 {50 fib _} clock / int<Rat>' compile emit
 | Bin new % '#out 42 print<WFile A>' compile emit

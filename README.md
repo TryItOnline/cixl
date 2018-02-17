@@ -1146,7 +1146,7 @@ Let's start with a tail-recursive fibonacci to exercise the interpreter loop, it
 
 ```
    func: fib-rec(a b n Int) (Int)
-...  $n? {$b $a $b + $n -- recall} $a if-else;
+...  $n?<Opt> {$b $a $b +<Int Int> $n -- recall} $a if-else;
 ...func: fib(n Int) (Int)
 ...  0 1 $n fib-rec;
 ...| {10000 {50 fib _} times} clock 1000000 / int
@@ -1200,7 +1200,8 @@ Moving on to instantiating records.
 
 ```
    rec: Foo() x Int y Str;
-...| {10000000 {Foo new % `x 42 put `y 'bar' put} times} clock 1000000 / int
+...| {10000000 {Foo new % `x 42 put<Rec A> `y 'bar' put<Rec A>} times} clock
+...1000000 / int
 ...
 [4210]
 ```
