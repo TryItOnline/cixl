@@ -1,16 +1,15 @@
-* handle argv in emit main
-** push strings like load main
 * emit histogram.cx
 ** add Type emit
 * implement func: emit
-** add emit_init flag to cx_bin_func
-*** set for parsed funcs
-*** generate init if set
+** add bin.emit_fimps
+*** generate init code to register
 * change emit main to take one file
 ** forward remaining arguments after file to compiler
 * fix emit formatting
 ** add CX_TAB to ops
 * ---
+* handle argv in emit main
+** push strings like load main
 * add op_type.emit_consts
 ** rewrite getconst emit
 * implement trait: & rec: emit
