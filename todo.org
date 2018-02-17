@@ -1,4 +1,5 @@
-* add bool is_tags[CX_TYPE_TAG_MAX] to Type
+* add bool is[CX_TYPE_TAG_MAX] to Type
+** memset to 0 and add self
 ** set in cx_derive
 ** check is_tags[type.tag] in cx_is
 ** change tags to start from 0
