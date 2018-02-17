@@ -268,17 +268,17 @@ static bool funcall_emit(struct cx_op *op,
   
   if (imp) {
     fprintf(out,
-	    "%s;\n"
+	    "%s;\n\n"
 	    "if (s->safe && !cx_fimp_match(imp, s)) { imp = NULL; }\n",
 	    imp->emit_id);
   } else {
-    fputs("cx_func_match_imp(func, s, 0);\n", out);
+    fputs("cx_func_match_imp(func, s, 0);\n\n", out);
   }
   
   fputs("if (!imp) {\n"
 	"  cx_error(cx, cx->row, cx->col, \"Func not applicable: %%s\", func->id);\n"
 	"  return false;\n"
-	"}\n",
+	"}\n\n",
 	out);
     
   if (imp && !imp->ptr) {

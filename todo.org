@@ -1,3 +1,7 @@
+* add bool is_tags[CX_TYPE_TAG_MAX] to Type
+** set in cx_derive
+** check is_tags[type.tag] in cx_is
+** change tags to start from 0
 * handle argv in emit main
 ** push strings like load main
 * emit histogram.cx
@@ -9,10 +13,6 @@
 ** forward remaining arguments after file to compiler
 * fix emit formatting
 ** add CX_TAB to ops
-* add bool is_tags[CX_TYPE_TAG_MAX] to Type
-** set in cx_derive
-** check is_tags[type.tag] in cx_is
-** change tags to start from 0
 * ---
 * add op_type.emit_consts
 ** rewrite getconst emit

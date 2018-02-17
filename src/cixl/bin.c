@@ -130,16 +130,6 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
 	"bool _eval(struct cx *cx) {\n"
         "  static bool init = true;\n\n",
 	out);
-
-  fprintf(out, "  static void *op_labels[%zd] = {\n", bin->ops.count);
-  
-  for (size_t i = 0; i < bin->ops.count; i++) {
-    fprintf(out, "&&op%zd", i);
-    if (i < bin->ops.count-1) { fputs(", ", out); }
-    if (i >= 10 && i % 10 == 0) { fputc('\n', out); }
-  }
-  
-  fputs("};\n\n", out);
   
   struct cx_set funcs, fimps, syms, types;
   cx_set_init(&funcs, sizeof(struct cx_func *), cx_cmp_ptr);
@@ -201,10 +191,20 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
   cx_set_deinit(&syms);
   cx_set_deinit(&types);
 		
-  fputs("  }\n\n"
+  fputs("  }\n\n", out);
+
+  fprintf(out, "  static void *op_labels[%zd] = {\n", bin->ops.count);
+  
+  for (size_t i = 0; i < bin->ops.count; i++) {
+    fprintf(out, "&&op%zd", i);
+    if (i < bin->ops.count-1) { fputs(", ", out); }
+    if (i >= 10 && i % 10 == 0) { fputc('\n', out); }
+  }
+  
+  fputs("};\n\n"
 	"  goto *op_labels[cx->pc];\n\n",
 	out);
- 
+  
   for (struct cx_op *op = cx_vec_start(&bin->ops);
        op != cx_vec_end(&bin->ops);
        op++) {
