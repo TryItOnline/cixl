@@ -555,7 +555,7 @@ bool cx_funcall(struct cx *cx, const char *id) {
   struct cx_func *func = cx_get_func(cx, id, false);
   if (!func) { return false; }
   struct cx_scope *s = cx_scope(cx, 0);
-  struct cx_fimp *imp = cx_match_fimp(func, s, 0);
+  struct cx_fimp *imp = cx_func_match(func, s, 0);
   
   if (!imp) {
     cx_error(cx, cx->row, cx->col, "Func not applicable: %s", func->id);

@@ -331,7 +331,7 @@ static bool funcall_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
   if (imp) {
     if (s->safe && !cx_fimp_match(imp, s)) { imp = NULL; }
   } else {
-    imp = cx_match_fimp(func, s, 0);
+    imp = cx_func_match(func, s, 0);
   }
   
   if (!imp) {
@@ -369,7 +369,7 @@ static bool funcall_emit(struct cx_op *op,
 	    CX_TAB "if (s->safe && !cx_fimp_match(imp, s)) { imp = NULL; }\n",
 	    imp->emit_id);
   } else {
-    fputs(CX_TAB "cx_match_fimp(func, s, 0);\n\n", out);
+    fputs(CX_TAB "cx_func_match(func, s, 0);\n\n", out);
   }
   
   fputs(CX_TAB "if (!imp) {\n"

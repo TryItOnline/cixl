@@ -145,7 +145,7 @@ struct cx_fimp *cx_get_fimp(struct cx_func *func,
   return *imp;
 }
 
-struct cx_fimp *cx_match_fimp(struct cx_func *func,
+struct cx_fimp *cx_func_match(struct cx_func *func,
 			      struct cx_scope *scope,
 			      size_t offs) {
   if (offs >= func->imps.count) { return NULL; }
@@ -169,7 +169,7 @@ static bool equid_imp(struct cx_box *x, struct cx_box *y) {
 static bool call_imp(struct cx_box *value, struct cx_scope *scope) {
   struct cx *cx = scope->cx;
   struct cx_func *func = value->as_ptr;
-  struct cx_fimp *imp = cx_match_fimp(func, scope, 0);
+  struct cx_fimp *imp = cx_func_match(func, scope, 0);
 
   if (!imp) {
     cx_error(cx, cx->row, cx->col, "Func not applicable: '%s'", func->id);
