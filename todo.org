@@ -1,6 +1,7 @@
 * handle argv in emit main
 ** push strings like load main
 * emit histogram.cx
+** add Type emit
 * implement func: emit
 ** add emit_init flag to cx_bin_func
 *** set for parsed funcs
