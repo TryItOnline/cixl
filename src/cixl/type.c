@@ -102,10 +102,22 @@ static void dump_imp(struct cx_box *value, FILE *out) {
   fputs(type->id, out);
 }
 
+static bool emit_imp(struct cx_box *v, FILE *out) {
+  struct cx_type *t = v->as_ptr;
+  
+  fprintf(out,
+	  CX_TAB "cx_box_init(cx_push(cx_scope(cx, 0)), cx->meta_type)->as_ptr "
+	  "= %s;\n",
+	  t->emit_id);
+  
+  return true;
+}
+
 struct cx_type *cx_init_meta_type(struct cx *cx) {
   struct cx_type *t = cx_add_type(cx, "Type", cx->any_type);
   t->equid = equid_imp;
   t->write = dump_imp;
   t->dump = dump_imp;
+  t->emit = emit_imp;
   return t;
 }
