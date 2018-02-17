@@ -22,8 +22,8 @@ struct cx_op_type *cx_op_type_init(struct cx_op_type *type, const char *id) {
   type->deinit = NULL;
   type->eval = NULL;
   type->emit = emit;
-  type->emit_func = NULL;
-  type->emit_fimp = NULL;
+  type->emit_funcs = NULL;
+  type->emit_fimps = NULL;
   type->emit_syms = NULL;
   type->emit_types = NULL;
   return type;
@@ -66,19 +66,29 @@ static bool begin_emit(struct cx_op *op,
   return true;
 }
 
-static struct cx_func *begin_emit_func(struct cx_op *op) {
-  return op->as_begin.fimp ? op->as_begin.fimp->func : NULL;
+static void begin_emit_funcs(struct cx_op *op, struct cx_set *out) {
+  struct cx_fimp *imp = op->as_begin.fimp;
+
+  if (imp) {
+    struct cx_func **ok = cx_set_insert(out, &imp->func);
+    if (ok) { *ok = imp->func; }
+  }
 }
 
-static struct cx_fimp *begin_emit_fimp(struct cx_op *op) {
-  return op->as_begin.fimp;
+static void begin_emit_fimps(struct cx_op *op, struct cx_set *out) {
+  struct cx_fimp *imp = op->as_begin.fimp;
+
+  if (imp) {
+    struct cx_fimp **ok = cx_set_insert(out, &imp);
+    if (ok) { *ok = imp; }
+  }  
 }
 
 cx_op_type(CX_OBEGIN, {
     type.eval = begin_eval;
     type.emit = begin_emit;
-    type.emit_func = begin_emit_func;
-    type.emit_fimp = begin_emit_fimp;
+    type.emit_funcs = begin_emit_funcs;
+    type.emit_fimps = begin_emit_fimps;
   });
 
 static bool else_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
@@ -159,19 +169,27 @@ static bool fimp_emit(struct cx_op *op,
   return true;
 }
 
-static struct cx_func *fimp_emit_func(struct cx_op *op) {
-  return op->as_fimp.imp->func;
+static void fimp_emit_funcs(struct cx_op *op, struct cx_set *out) {
+  struct cx_func
+    *func = op->as_fimp.imp->func,
+    **ok = cx_set_insert(out, &func);
+
+  if (ok) { *ok = func; }
 }
 
-static struct cx_fimp *fimp_emit_fimp(struct cx_op *op) {
-  return op->as_fimp.imp;
+static void fimp_emit_fimps(struct cx_op *op, struct cx_set *out) {
+  struct cx_fimp
+    *imp = op->as_fimp.imp,
+    **ok = cx_set_insert(out, &imp);
+
+  if (ok) { *ok = imp; }
 }
 
 cx_op_type(CX_OFIMP, {
     type.eval = fimp_eval;
     type.emit = fimp_emit;
-    type.emit_func = fimp_emit_func;
-    type.emit_fimp = fimp_emit_fimp;
+    type.emit_funcs = fimp_emit_funcs;
+    type.emit_fimps = fimp_emit_fimps;
   });
 
 static bool fimpdef_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
@@ -254,19 +272,28 @@ static bool funcall_emit(struct cx_op *op,
   return true;
 }
 
-static struct cx_func *funcall_emit_func(struct cx_op *op) {
-  return op->as_funcall.func;
+static void funcall_emit_funcs(struct cx_op *op, struct cx_set *out) {
+  struct cx_func
+    *func = op->as_funcall.func,
+    **ok = cx_set_insert(out, &func);
+
+  if (ok) { *ok = func; }
 }
 
-static struct cx_fimp *funcall_emit_fimp(struct cx_op *op) {
-  return op->as_funcall.imp;
+static void funcall_emit_fimps(struct cx_op *op, struct cx_set *out) {
+  struct cx_fimp *imp = op->as_funcall.imp;
+
+  if (imp) {
+    struct cx_fimp **ok = cx_set_insert(out, &imp);
+    if (ok) { *ok = imp; }
+  }
 }
 
 cx_op_type(CX_OFUNCALL, {
     type.eval = funcall_eval;
     type.emit = funcall_emit;
-    type.emit_func = funcall_emit_func;
-    type.emit_fimp = funcall_emit_fimp;
+    type.emit_funcs = funcall_emit_funcs;
+    type.emit_fimps = funcall_emit_fimps;
   });
 
 static bool getconst_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
@@ -290,8 +317,12 @@ static bool getconst_emit(struct cx_op *op,
   return true;
 }
 
-static void getconst_emit_syms(struct cx_op *op, struct cx_vec *out) {
-  *(struct cx_sym *)cx_vec_push(out) = op->as_getconst.id;
+static void getconst_emit_syms(struct cx_op *op, struct cx_set *out) {
+  struct cx_sym
+    id = op->as_getconst.id,
+    *ok = cx_set_insert(out, &id);
+  
+  if (ok) { *ok = id; }
 }
 
 cx_op_type(CX_OGETCONST, {
@@ -323,9 +354,13 @@ static bool getvar_emit(struct cx_op *op,
   return true;
 }
 
-static void getvar_emit_syms(struct cx_op *op, struct cx_vec *out) {
+static void getvar_emit_syms(struct cx_op *op, struct cx_set *out) {
   struct cx_sym id = op->as_getvar.id;
-  if (id.id[0]) { *(struct cx_sym *)cx_vec_push(out) = id; }
+
+  if (id.id[0]) {
+    struct cx_sym *ok = cx_set_insert(out, &id);
+    if (ok) { *ok = id; }
+  }
 }
 
 cx_op_type(CX_OGETVAR, {
@@ -446,29 +481,38 @@ static bool putargs_emit(struct cx_op *op,
   return true;
 }
 
-static struct cx_func *putargs_emit_func(struct cx_op *op) {
-  return op->as_putargs.imp->func;
+static void putargs_emit_funcs(struct cx_op *op, struct cx_set *out) {
+  struct cx_func
+    *func = op->as_putargs.imp->func,
+    **ok = cx_set_insert(out, &func);
+
+  if (ok) { *ok = func; }
 }
 
-static struct cx_fimp *putargs_emit_fimp(struct cx_op *op) {
-  return op->as_putargs.imp;
+static void putargs_emit_fimps(struct cx_op *op, struct cx_set *out) {
+  struct cx_fimp
+    *imp = op->as_putargs.imp,
+    **ok = cx_set_insert(out, &imp);
+
+  if (ok) { *ok = imp; }
 }
 
-static void putargs_emit_syms(struct cx_op *op, struct cx_vec *out) {
+static void putargs_emit_syms(struct cx_op *op, struct cx_set *out) {
   struct cx_fimp *imp = op->as_putargs.imp;
 
   for (struct cx_func_arg *a = cx_vec_peek(&imp->args, 0);
        a >= (struct cx_func_arg *)imp->args.items;
        a--) {
-    *(struct cx_sym *)cx_vec_push(out) = a->sym_id;
+    struct cx_sym *ok = cx_set_insert(out, &a->sym_id);
+    if (ok) { *ok = a->sym_id; }
   }
 }
 
 cx_op_type(CX_OPUTARGS, {
     type.eval = putargs_eval;
     type.emit = putargs_emit;
-    type.emit_func = putargs_emit_func;
-    type.emit_fimp = putargs_emit_fimp;
+    type.emit_funcs = putargs_emit_funcs;
+    type.emit_fimps = putargs_emit_fimps;
     type.emit_syms = putargs_emit_syms;
   });
 
@@ -493,8 +537,59 @@ static bool putvar_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
   return true;
 }
 
+static bool putvar_emit(struct cx_op *op,
+			struct cx_bin *bin,
+			FILE *out,
+			struct cx *cx) {
+  fputs("struct cx_scope *s = cx_scope(cx, 0);\n"
+	"struct cx_box *src = cx_pop(s, false);\n"
+	"if (!src) { return false; }\n\n",
+	out);
+
+  if (op->as_putvar.type) {
+    fprintf(out,
+	    "if (!cx_is(src->type, type%zd)) {\n"
+	    "  cx_error(cx, op->row, op->col,\n"
+	    "           \"Expected type %s, actual: %%s\",\n"
+	    "           src->type->id);\n\n"
+	    "  return false;\n"
+            "}\n\n",
+	    op->as_putvar.type->tag, op->as_putvar.type->id);
+  }
+  
+  fprintf(out,
+	  "struct cx_box *dst = cx_put_var(s, sym%zd, true);\n",
+	  op->as_putvar.id.tag);
+
+  fputs("if (!dst) { return false; }\n"
+	"*dst = *src;\n",
+	out);
+
+  return true;
+}
+
+static void putvar_emit_syms(struct cx_op *op, struct cx_set *out) {
+  struct cx_sym
+    id = op->as_putvar.id,
+    *ok = cx_set_insert(out, &id);
+
+  if (ok) { *ok = id; }
+}
+
+static void putvar_emit_types(struct cx_op *op, struct cx_set *out) {
+  struct cx_type *t = op->as_putvar.type;
+
+  if (t) {
+    struct cx_type **ok = cx_set_insert(out, &t);
+    if (ok) { *ok = t; }
+  }
+}
+
 cx_op_type(CX_OPUTVAR, {
     type.eval = putvar_eval;
+    type.emit = putvar_emit;
+    type.emit_syms = putvar_emit_syms;
+    type.emit_types = putvar_emit_types;
   });
 
 static bool return_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
@@ -659,29 +754,40 @@ static bool return_emit(struct cx_op *op,
   return true;  
 }
 
-static struct cx_func *return_emit_func(struct cx_op *op) {
-  return op->as_return.imp->func;
+static void return_emit_funcs(struct cx_op *op, struct cx_set *out) {
+  struct cx_func
+    *f = op->as_return.imp->func,
+    **ok = cx_set_insert(out, &f);
+
+  if (ok) { *ok = f; }
 }
 
-static struct cx_fimp *return_emit_fimp(struct cx_op *op) {
-  return op->as_return.imp;
+static void return_emit_fimps(struct cx_op *op, struct cx_set *out) {
+  struct cx_fimp
+    *f = op->as_return.imp,
+    **ok = cx_set_insert(out, &f);
+
+  if (ok) { *ok = f; }
 }
 
-static void return_emit_types(struct cx_op *op, struct cx_vec *out) {
+static void return_emit_types(struct cx_op *op, struct cx_set *out) {
   struct cx_fimp *imp = op->as_return.imp;
   
   for (struct cx_func_ret *r = cx_vec_start(&imp->rets);
        r != cx_vec_end(&imp->rets);
        r++) {
-    if (r->type) { *(struct cx_type **)cx_vec_push(out) = r->type; }
+    if (r->type) {
+      struct cx_type **ok = cx_set_insert(out, &r->type);
+      if (ok) { *ok = r->type; }
+    }
   }
 }
 
 cx_op_type(CX_ORETURN, {
     type.eval = return_eval;
     type.emit = return_emit;
-    type.emit_func = return_emit_func;
-    type.emit_fimp = return_emit_fimp;
+    type.emit_funcs = return_emit_funcs;
+    type.emit_fimps = return_emit_fimps;
     type.emit_types = return_emit_types;
   });
 

@@ -141,166 +141,66 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
   
   fputs("};\n\n", out);
   
-  struct cx_set func_dup;
-  cx_set_init(&func_dup, sizeof(void *), cx_cmp_ptr);
-
-  struct cx_set sym_dup;
-  cx_set_init(&sym_dup, sizeof(size_t), cx_cmp_size);
-
-  struct cx_vec syms;
-  cx_vec_init(&syms, sizeof(struct cx_sym));
-
-  struct cx_set type_dup;
-  cx_set_init(&type_dup, sizeof(size_t), cx_cmp_size);
-
-  struct cx_vec types;
-  cx_vec_init(&types, sizeof(struct cx_type *));
+  struct cx_set funcs, fimps, syms, types;
+  cx_set_init(&funcs, sizeof(struct cx_func *), cx_cmp_ptr);
+  cx_set_init(&fimps, sizeof(struct cx_fimp *), cx_cmp_ptr);
+  cx_set_init(&syms, sizeof(struct cx_sym), cx_cmp_sym);
+  cx_set_init(&types, sizeof(struct cx_type *), cx_cmp_ptr);
 
   for (struct cx_op *op = cx_vec_start(&bin->ops);
        op != cx_vec_end(&bin->ops);
        op++) {
-    if (op->type->emit_func) {
-      struct cx_func *f = op->type->emit_func(op);
-
-      if (f) {
-	void **ok = cx_set_insert(&func_dup, &f);
-	
-	if (ok) {
-	  *ok = f;
-	  fprintf(out, "  static struct cx_func *func%zd;\n", f->tag);
-	}
-      }
-    }
-
-    if (op->type->emit_fimp) {
-      struct cx_fimp *f = op->type->emit_fimp(op);
-
-      if (f) {
-	void **ok = cx_set_insert(&func_dup, &f);
-      
-	if (ok) {
-	  *ok = f;
-
-	  fprintf(out, "  static struct cx_fimp *fimp%zd_%zd;\n",
-		  f->func->tag, f->idx);
-	}
-      }
-    }
-
-    if (op->type->emit_syms) {
-      op->type->emit_syms(op, &syms);
-      
-      cx_do_vec(&syms, struct cx_sym, s) {
-	size_t *ok = cx_set_insert(&sym_dup, &s->tag);
-
-	if (ok) {
-	  *ok = s->tag;
-	  fprintf(out, "  static struct cx_sym sym%zd;\n", s->tag);
-	}
-      }
-
-      cx_vec_clear(&syms);
-    }
-
-    if (op->type->emit_types) {
-      op->type->emit_types(op, &types);
-      
-      cx_do_vec(&types, struct cx_type *, tp) {
-	size_t
-	  tag = (*tp)->tag,
-	  *ok = cx_set_insert(&sym_dup, &tag);
-
-	if (ok) {
-	  *ok = tag;
-	  fprintf(out, "  static struct cx_type *type%zd;\n", tag);
-	}
-      }
-
-      cx_vec_clear(&types);
-    }
+    if (op->type->emit_funcs) { op->type->emit_funcs(op, &funcs); }
+    if (op->type->emit_fimps) { op->type->emit_fimps(op, &fimps); }
+    if (op->type->emit_syms) { op->type->emit_syms(op, &syms); }
+    if (op->type->emit_types) {op->type->emit_types(op, &types); }
   }  
-  
+
+  cx_do_set(&funcs, struct cx_func *, f) {
+    fprintf(out, "  static struct cx_func *func%zd;\n", (*f)->tag);
+  }
+
+  cx_do_set(&fimps, struct cx_fimp *, f) {
+    fprintf(out, "  static struct cx_fimp *fimp%zd_%zd;\n",
+	    (*f)->func->tag, (*f)->idx);
+  }
+
+  cx_do_set(&syms, struct cx_sym, s) {
+    fprintf(out, "  static struct cx_sym sym%zd;\n", s->tag);
+  }
+
+  cx_do_set(&types, struct cx_type *, t) {
+    fprintf(out, "  static struct cx_type *type%zd;\n", (*t)->tag);
+  }
+
   fputs("\n"
 	"  if (init) {\n"
 	"    init = false;\n",
 	out);
   
-  cx_set_clear(&func_dup);
-  cx_set_clear(&sym_dup);
-  cx_set_clear(&type_dup);
-  
-  for (struct cx_op *op = cx_vec_start(&bin->ops);
-       op != cx_vec_end(&bin->ops);
-       op++) {
-    if (op->type->emit_func) {
-      struct cx_func *f = op->type->emit_func(op);
-
-      if (f) {
-	void **ok = cx_set_insert(&func_dup, &f);
-	
-	if (ok) {
-	  *ok = f;
-	  
-	  fprintf(out, "    func%zd = cx_get_func(cx, \"%s\", false);\n",
-		  f->tag, f->id);
-	}
-      }
-    }
-    
-    if (op->type->emit_fimp) {
-      struct cx_fimp *f = op->type->emit_fimp(op);
-
-      if (f) {
-	void **ok = cx_set_insert(&func_dup, &f);
-	
-	if (ok) {
-	  *ok = f;
-	
-	  fprintf(out, "    fimp%zd_%zd = cx_get_fimp(func%zd, \"%s\", false);\n",
-		  f->func->tag, f->idx, f->func->tag, f->id);
-	}
-      }
-    }
-
-    if (op->type->emit_syms) {
-      op->type->emit_syms(op, &syms);
-      
-      cx_do_vec(&syms, struct cx_sym, s) {
-	size_t *ok = cx_set_insert(&sym_dup, &s->tag);
-
-	if (ok) {
-	  *ok = s->tag;
-	  fprintf(out, "    sym%zd = cx_sym(cx, \"%s\");\n", s->tag, s->id);
-	}
-      }
-
-      cx_vec_clear(&syms);
-    }
-
-    if (op->type->emit_types) {
-      op->type->emit_types(op, &types);
-      
-      cx_do_vec(&types, struct cx_type *, tp) {
-	size_t
-	  tag = (*tp)->tag,
-	  *ok = cx_set_insert(&type_dup, &tag);
-
-	if (ok) {
-	  *ok = tag;
-	  fprintf(out, "    type%zd = cx_get_type(cx, \"%s\", false);\n",
-		  tag, (*tp)->id);
-	}
-      }
-
-      cx_vec_clear(&types);
-    }
+  cx_do_set(&funcs, struct cx_func *, f) {
+    fprintf(out, "    func%zd = cx_get_func(cx, \"%s\", false);\n",
+	    (*f)->tag, (*f)->id);
   }
 
-  cx_set_deinit(&func_dup);
-  cx_set_deinit(&sym_dup);
-  cx_vec_deinit(&syms);
-  cx_set_deinit(&type_dup);
-  cx_vec_deinit(&types);
+  cx_do_set(&fimps, struct cx_fimp *, f) {
+    fprintf(out, "    fimp%zd_%zd = cx_get_fimp(func%zd, \"%s\", false);\n",
+	    (*f)->func->tag, (*f)->idx, (*f)->func->tag, (*f)->id);
+  }
+  
+  cx_do_set(&syms, struct cx_sym, s) {
+    fprintf(out, "    sym%zd = cx_sym(cx, \"%s\");\n", s->tag, s->id);
+  }
+
+  cx_do_set(&types, struct cx_type *, t) {
+    fprintf(out, "    type%zd = cx_get_type(cx, \"%s\", false);\n",
+	    (*t)->tag, (*t)->id);
+  }
+  
+  cx_set_deinit(&funcs);
+  cx_set_deinit(&fimps);
+  cx_set_deinit(&syms);
+  cx_set_deinit(&types);
 		
   fputs("  }\n\n"
 	"  goto *op_labels[cx->pc];\n\n",

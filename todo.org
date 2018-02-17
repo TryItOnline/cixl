@@ -1,4 +1,5 @@
 * emit guess.cx
+** implement Str emit
 * handle argv in emit main
 ** push strings like load main
 * emit histogram.cx
