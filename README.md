@@ -1200,8 +1200,7 @@ Moving on to instantiating records.
 
 ```
    rec: Foo() x Int y Str;
-...| {10000000 {Foo new % `x 42 put<Rec A> `y 'bar' put<Rec A>} times} clock
-...1000000 / int
+...| {10000000 {Foo new % `x 42 put<Rec A> `y 'bar' put<Rec A>} times} clock 1000000 / int
 ...
 [4210]
 ```
