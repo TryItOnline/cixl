@@ -18,6 +18,7 @@ struct cx_bin_func {
 struct cx_bin {
   struct cx_vec toks, ops;
   struct cx_set funcs;
+  
   size_t init_offs;
   unsigned int nrefs;
   bool (*eval)(struct cx *);

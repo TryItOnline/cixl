@@ -32,7 +32,7 @@ struct cx_type {
   void (*write)(struct cx_box *, FILE *);
   void (*dump)(struct cx_box *, FILE *);
   void (*print)(struct cx_box *, FILE *);
-  bool (*emit)(struct cx_box *, FILE *);
+  bool (*emit)(struct cx_box *, const char *, FILE *);
   void (*deinit)(struct cx_box *);
 
   void (*type_deinit)(struct cx_type *);

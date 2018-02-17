@@ -64,11 +64,11 @@ static void print_imp(struct cx_box *v, FILE *out) {
   fputs(v->as_sym.id, out);
 }
 
-static bool emit_imp(struct cx_box *v, FILE *out) {
+static bool emit_imp(struct cx_box *v, const char *exp, FILE *out) {
   fprintf(out,
-	  CX_TAB "cx_box_init(cx_push(cx_scope(cx, 0)), cx->sym_type)->as_sym "
+	  CX_TAB "cx_box_init(%s, cx->sym_type)->as_sym "
 	  "= %s;\n",
-	  v->as_sym.emit_id);
+	  exp, v->as_sym.emit_id);
   return true;
 }
 

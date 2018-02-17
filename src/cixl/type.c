@@ -10,7 +10,7 @@
 #include "cixl/types/fimp.h"
 #include "cixl/types/func.h"
 
-static bool emit(struct cx_box *box, FILE *out) {
+static bool emit(struct cx_box *box, const char *exp, FILE *out) {
   struct cx *cx = box->type->cx;
   cx_error(cx, cx->row, cx->col, "Emit not implemented: %s", box->type->id);
   return false;
@@ -102,13 +102,13 @@ static void dump_imp(struct cx_box *value, FILE *out) {
   fputs(type->id, out);
 }
 
-static bool emit_imp(struct cx_box *v, FILE *out) {
+static bool emit_imp(struct cx_box *v, const char *exp, FILE *out) {
   struct cx_type *t = v->as_ptr;
   
   fprintf(out,
-	  CX_TAB "cx_box_init(cx_push(cx_scope(cx, 0)), cx->meta_type)->as_ptr "
+	  CX_TAB "cx_box_init(%s, cx->meta_type)->as_ptr "
 	  "= %s;\n",
-	  t->emit_id);
+	  exp, t->emit_id);
   
   return true;
 }

@@ -1,6 +1,3 @@
-* implement func: emit
-** add bin.emit_fimps
-*** generate init code to register
 * change emit main to take one file
 ** forward remaining arguments after file to compiler
 * fix emit formatting
@@ -10,8 +7,10 @@
 ** push strings like load main
 * add op_type.emit_consts
 ** rewrite getconst emit
-* implement trait: & rec: emit
-** register in bin & create in init
+* add trait: emit
+** add OTYPEDEF
+*** rename OFIMPDEF to OFUNCDEF
+* add rec: emit
 * add TN to generated ids
 ** add/parse_fimp
 * add read-iter to io lib

@@ -46,11 +46,11 @@ static void print_imp(struct cx_box *v, FILE *out) {
   fputc(v->as_char, out);
 }
 
-static bool emit_imp(struct cx_box *v, FILE *out) {
+static bool emit_imp(struct cx_box *v, const char *exp, FILE *out) {
   fprintf(out,
-	  CX_TAB "cx_box_init(cx_push(cx_scope(cx, 0)),\n"
+	  CX_TAB "cx_box_init(%s,\n"
 	  CX_TAB "            cx->char_type)->as_char = %d;\n",
-	  v->as_char);
+	  exp, v->as_char);
   
   return true;
 }
