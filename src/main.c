@@ -98,7 +98,8 @@ int main(int argc, char *argv[]) {
             "#include \"cixl/scope.h\"\n"
             "#include \"cixl/types/func.h\"\n"
             "#include \"cixl/types/lambda.h\"\n"
-            "#include \"cixl/types/str.h\"\n\n",
+            "#include \"cixl/types/str.h\"\n"
+            "#include \"cixl/types/vect.h\"\n\n",
 	    out);
 
       if (!cx_emit(bin, out, &cx)) {

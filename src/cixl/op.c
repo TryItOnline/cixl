@@ -486,12 +486,22 @@ static void push_emit_syms(struct cx_op *op, struct cx_set *out, struct cx *cx) 
   }
 }
 
+static void push_emit_types(struct cx_op *op, struct cx_set *out, struct cx *cx) {
+  struct cx_box *v = &op->as_push.value;
+
+  if (v->type == cx->meta_type) {
+    struct cx_type **ok = cx_set_insert(out, &v->as_ptr);
+    if (ok) { *ok = v->as_ptr; }
+  }
+}
+
 cx_op_type(CX_OPUSH, {
     type.deinit = push_deinit;
     type.eval = push_eval;
     type.emit = push_emit;
     type.emit_funcs = push_emit_funcs;
     type.emit_syms = push_emit_syms;
+    type.emit_types = push_emit_types;
   });
 
 static bool putargs_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
@@ -859,8 +869,23 @@ static bool stash_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
   return true;
 }
 
+static bool stash_emit(struct cx_op *op,
+		       struct cx_bin *bin,
+		       FILE *out,
+		       struct cx *cx) {
+  fputs("struct cx_scope *s = cx_scope(cx, 0);\n"
+	"struct cx_vect *out = cx_vect_new();\n"
+	"out->imp = s->stack;\n"
+	"cx_vec_init(&s->stack, sizeof(struct cx_box));\n"
+	"cx_box_init(cx_push(s), s->cx->vect_type)->as_ptr = out;\n",
+	out);
+
+  return true;
+}
+
 cx_op_type(CX_OSTASH, {
     type.eval = stash_eval;
+    type.emit = stash_emit;
   });
 
 static bool stop_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {

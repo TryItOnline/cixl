@@ -1,5 +1,3 @@
-* emit histogram.cx
-** add ostash emit
 * implement func: emit
 ** add bin.emit_fimps
 *** generate init code to register
