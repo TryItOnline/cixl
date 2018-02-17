@@ -99,8 +99,32 @@ static bool else_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
   return true;
 }
 
+static bool else_emit(struct cx_op *op,
+		      struct cx_bin *bin,
+		      FILE *out,
+		      struct cx *cx) {
+  
+  fputs("struct cx_box *v = cx_pop(cx_scope(cx, 0), false);\n"
+	"if (!v) { return false; }\n",
+	out);
+
+  size_t pc = op->pc+op->as_else.nops+1;
+  
+  fprintf(out,
+	  "if (!cx_ok(v)) {\n"
+	  "  cx_box_deinit(v);\n"
+	  "  cx->pc = %zd;\n"
+	  "  goto op%zd;\n"
+	  "}\n\n",
+	  pc, pc);
+  
+  fputs("cx_box_deinit(v);\n", out);
+  return true;
+}
+
 cx_op_type(CX_OELSE, {
     type.eval = else_eval;
+    type.emit = else_emit;
   });
 
 static bool end_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
@@ -374,8 +398,23 @@ static bool jump_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
   return true;
 }
 
+static bool jump_emit(struct cx_op *op,
+		      struct cx_bin *bin,
+		      FILE *out,
+		      struct cx *cx) {
+  size_t pc = op->pc+op->as_jump.nops+1;
+  
+  fprintf(out,
+	  "cx->pc = %zd;\n"
+	  "goto op%zd;\n",
+	  pc, pc);
+
+  return true;
+}
+
 cx_op_type(CX_OJUMP, {
     type.eval = jump_eval;
+    type.emit = jump_emit;
   });
 
 static bool lambda_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {

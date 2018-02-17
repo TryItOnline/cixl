@@ -1,5 +1,17 @@
 * emit guess.cx
-** implement oelse emit
+** implement ojump emit
+* add emit_id
+** replaces func%zd fimp%zd_%zd sym%zd & type%zd
+** add char *cx_emit_id(const char *prefix, const char *in)
+*** alloc length of both
+*** replace '?' with '_qm_' and '!' with '_em_'
+*** replace '-' and ' ' with '_'.
+** add func.emit_id, replaces tag
+** add fimp.emit_id
+** add sym.emit_id
+** add type.emit_id
+** update op.c
+** update types/sym.c
 * handle argv in emit main
 ** push strings like load main
 * emit histogram.cx
