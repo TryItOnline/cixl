@@ -36,10 +36,10 @@ struct cx_op_type {
   bool (*eval)(struct cx_op *, struct cx_bin *, struct cx *);
   bool (*emit)(struct cx_op *, struct cx_bin *, FILE *out, struct cx *);
 
-  void (*emit_funcs)(struct cx_op *, struct cx_set *);
-  void (*emit_fimps)(struct cx_op *, struct cx_set *);
-  void (*emit_syms)(struct cx_op *, struct cx_set *);
-  void (*emit_types)(struct cx_op *, struct cx_set *);
+  void (*emit_funcs)(struct cx_op *, struct cx_set *, struct cx *);
+  void (*emit_fimps)(struct cx_op *, struct cx_set *, struct cx *);
+  void (*emit_syms)(struct cx_op *, struct cx_set *, struct cx *);
+  void (*emit_types)(struct cx_op *, struct cx_set *, struct cx *);
 };
 
 struct cx_op_type *cx_op_type_init(struct cx_op_type *type, const char *id);

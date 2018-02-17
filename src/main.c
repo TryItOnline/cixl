@@ -97,7 +97,8 @@ int main(int argc, char *argv[]) {
             "#include \"cixl/scan.h\"\n"
             "#include \"cixl/scope.h\"\n"
             "#include \"cixl/types/func.h\"\n"
-            "#include \"cixl/types/lambda.h\"\n\n",
+            "#include \"cixl/types/lambda.h\"\n"
+            "#include \"cixl/types/str.h\"\n\n",
 	    out);
 
       if (!cx_emit(bin, out, &cx)) {

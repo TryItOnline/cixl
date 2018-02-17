@@ -1,5 +1,5 @@
 * emit guess.cx
-** implement Sym emit
+** implement oelse emit
 * handle argv in emit main
 ** push strings like load main
 * emit histogram.cx
@@ -16,6 +16,8 @@
 ** check is_tags[type.tag] in cx_is
 ** change tags to start from 0
 * ---
+* add op_type.emit_consts
+** rewrite getconst emit
 * implement trait: & rec: emit
 ** register in bin & create in init
 * add TN to generated ids

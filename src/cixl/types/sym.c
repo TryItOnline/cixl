@@ -5,6 +5,7 @@
 
 #include "cixl/cx.h"
 #include "cixl/error.h"
+#include "cixl/op.h"
 #include "cixl/scope.h"
 #include "cixl/types/fimp.h"
 #include "cixl/types/func.h"
@@ -61,6 +62,14 @@ static void print_imp(struct cx_box *v, FILE *out) {
   fputs(v->as_sym.id, out);
 }
 
+static bool emit_imp(struct cx_box *v, FILE *out) {
+  fprintf(out,
+	  CX_TAB "cx_box_init(cx_push(cx_scope(cx, 0)), cx->sym_type)->as_sym "
+	  "= sym%zd;\n",
+	  v->as_sym.tag);
+  return true;
+}
+
 struct cx_type *cx_init_sym_type(struct cx *cx) {
   struct cx_type *t = cx_add_type(cx, "Sym", cx->any_type);
   t->new = new_imp;
@@ -68,6 +77,7 @@ struct cx_type *cx_init_sym_type(struct cx *cx) {
   t->write = dump_imp;
   t->dump = dump_imp;
   t->print = print_imp;
+  t->emit = emit_imp;
   
   cx_add_cfunc(cx, "sym",
 	       cx_args(cx_arg("id", cx->str_type)),

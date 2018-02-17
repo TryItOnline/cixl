@@ -150,10 +150,10 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
   for (struct cx_op *op = cx_vec_start(&bin->ops);
        op != cx_vec_end(&bin->ops);
        op++) {
-    if (op->type->emit_funcs) { op->type->emit_funcs(op, &funcs); }
-    if (op->type->emit_fimps) { op->type->emit_fimps(op, &fimps); }
-    if (op->type->emit_syms) { op->type->emit_syms(op, &syms); }
-    if (op->type->emit_types) {op->type->emit_types(op, &types); }
+    if (op->type->emit_funcs) { op->type->emit_funcs(op, &funcs, cx); }
+    if (op->type->emit_fimps) { op->type->emit_fimps(op, &fimps, cx); }
+    if (op->type->emit_syms) { op->type->emit_syms(op, &syms, cx); }
+    if (op->type->emit_types) {op->type->emit_types(op, &types, cx); }
   }  
 
   cx_do_set(&funcs, struct cx_func *, f) {
