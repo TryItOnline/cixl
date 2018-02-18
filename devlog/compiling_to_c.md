@@ -94,7 +94,7 @@ Press Return twice to evaluate.
 ```
 
 ### Implementation
-It was clear from the start that the compiler had to support embedded use, I also wanted to share as much of the implementation as possible with the interpreter to reduce the maintenance burden. The resulting code implements a threaded state machine based on computed gotos that calls into the supplied interpreter. Types, functions, constants and symbols are cached inside the C function on first call and reused.
+It was clear from the start that the compiler had to support embedded use, I also wanted to share as much of the implementation as possible with the interpreter to reduce the maintenance burden. The resulting code implements a threaded state machine based on computed gotos with unrolled loops that calls into the supplied interpreter. Types, functions, constants and symbols are cached inside the C function on first call and reused.
 
 Included below is a slightly more elaborate example with a function definition. Functions shorter than 10 operations are inlined, which is why the definition comes last.
 
