@@ -373,7 +373,7 @@ static bool funcall_emit(struct cx_op *op,
   }
   
   fputs(CX_TAB "if (!imp) {\n"
-	CX_TAB "  cx_error(cx, cx->row, cx->col, \"Func not applicable: %%s\", "
+	CX_TAB "  cx_error(cx, cx->row, cx->col, \"Func not applicable: %s\", "
 	"func->id);\n"
 	CX_TAB "  return false;\n"
 	CX_TAB "}\n\n",
