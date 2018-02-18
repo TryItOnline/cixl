@@ -2,7 +2,7 @@
 #### 2018-02-17
 
 ### Intro
-While [Cixl](https://github.com/basic-gongfu/cixl)'s primary use case is scripting, in some situations it's just not very practical to drag a script around and require that clients have Cixl installed. Since the language is implemented in, and designed to be embedded into C; and since ease of maintenance is more important than raw speed in this case; compiling to C seemed like a good compromise. The short story is that [Cixl](https://github.com/basic-gongfu/cixl) now supports compiling blocks of code into GNU-C functions, which when linked with libcixl.a and called will execute the corresponding operations.
+While [Cixl](https://github.com/basic-gongfu/cixl)'s primary use case is scripting, in some situations it's just not very practical to drag a script around and require that clients have Cixl installed. Since the language is implemented in, and designed to be embedded into C; and since ease of maintenance is more important than raw speed in this case; compiling to C seemed like a good compromise. The short story is that Cixl now supports compiling blocks of code into GNU-C functions which execute the corresponding operations when called.
 
 Calling Cixl with ```-e``` compiles the specified file to a native, statically linked executable. Flags following the filename are passed straight to GCC.
 
@@ -94,7 +94,7 @@ Press Return twice to evaluate.
 ```
 
 ### Implementation
-I knew from the start that the compiler had to support embedded use, which is why it c compiles to self-contained functions. I also wanted to share as much of the implementation as possible with the interpreter to reduce the maintenance burden. The resulting code implements a threaded state machine based on computed gotos that calls into the supplied interpreter. Types, functions, constants and symbols are cached inside the C function on first call and reused.
+It was clear from the start that the compiler had to support embedded use, I also wanted to share as much of the implementation as possible with the interpreter to reduce the maintenance burden. The resulting code implements a threaded state machine based on computed gotos that calls into the supplied interpreter. Types, functions, constants and symbols are cached inside the C function on first call and reused.
 
 Included below is a slightly more elaborate example with a function definition. Functions shorter than 10 operations are inlined, which is why the definition comes last.
 

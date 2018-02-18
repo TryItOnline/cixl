@@ -11,13 +11,13 @@ Examples should work in the most recent version and run clean in ```valgrind```,
 You may try Cixl online [here](https://tio.run/#cixl). To build it yourself, you'll need a reasonably modern GCC and CMake installed. Building on macOS unfortunately doesn't work yet, as it's missing support for POSIX timers. Most Linuxes and BSDs should be fine. I don't know enough about Windows to say for sure, but back in the days it was certainly possible to get GCC running. A basic REPL is included, it's highly recommended to run it through ```rlwrap``` for a less nerve wrecking experience.
 
 ```
-git clone https://github.com/basic-gongfu/cixl.git
-cd cixl
-mkdir build
-cd build
-cmake ..
-make
-rlwrap ./cixl
+$ git clone https://github.com/basic-gongfu/cixl.git
+$ cd cixl
+$ mkdir build
+$ cd build
+$ cmake ..
+$ make
+$ rlwrap ./cixl
 
 Cixl v0.9.1, 18571/29582 bmips
 
