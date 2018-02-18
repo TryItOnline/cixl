@@ -1,14 +1,12 @@
-* change emit main to take one file
-** forward remaining arguments after file to compiler
-* ---
+* add Fimp emit
 * handle argv in emit main
 ** push strings like load main
-* add op_type.emit_consts
-** rewrite getconst emit
 * add trait: emit
 ** add OTYPEDEF
 *** rename OFIMPDEF to OFUNCDEF
 * add rec: emit
+* add op_type.emit_consts
+** rewrite getconst emit
 * add TN to generated ids
 ** add/parse_fimp
 * add read-iter to io lib

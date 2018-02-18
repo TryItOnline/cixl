@@ -1,6 +1,8 @@
+#include <errno.h>
 #include <string.h>
 
 #include "cixl/bin.h"
+#include "cixl/buf.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
 #include "cixl/libs/cond.h"
@@ -53,7 +55,7 @@ int main(int argc, char *argv[]) {
     if (strcmp(argv[argi], "-e") == 0) {
       emit = true;
     } else {
-      printf("Invalid option %s\n", argv[argi]);
+      fprintf(stderr, "Invalid option %s\n", argv[argi]);
       return -1;
     }
   }
@@ -63,16 +65,36 @@ int main(int argc, char *argv[]) {
   } else {
     if (emit) {
       struct cx_bin *bin = cx_bin_new();
-      
-      for (; argi < argc; argi++) {
-	if (!cx_load(&cx, argv[argi], bin)) {
-	  cx_dump_errors(&cx, stderr);
-	  return -1;
-	}
+
+      if (argi == argc) {
+	fputs("Missing filename\n", stderr);
+	return -1;
       }
-      
-      FILE *out = popen("gcc -x c -std=gnu1x -Wall -Werror -O2 -g - -lcixl", "w");
-      
+
+      if (!cx_load(&cx, argv[argi++], bin)) {
+	cx_dump_errors(&cx, stderr);
+	return -1;
+      }
+
+      struct cx_buf cmd;
+      cx_buf_open(&cmd);
+      fputs("gcc -x c -std=gnu1x -Wall -Werror -O2 -g - -lcixl", cmd.stream);
+
+      for (; argi < argc; argi++) {
+	fprintf(cmd.stream, " %s", argv[argi]);
+      }
+
+      cx_buf_close(&cmd);
+      FILE *out = popen(cmd.data, "w");
+
+      if (!out) {
+	fprintf(stderr, "Failed executing compiler: %d\n%s\n", errno, cmd.data);
+	free(cmd.data);
+	return -1;
+      }
+
+      free(cmd.data);
+
       fputs("#include \"cixl/bin.h\"\n"
 	    "#include \"cixl/call.h\"\n"
 	    "#include \"cixl/cx.h\"\n"
