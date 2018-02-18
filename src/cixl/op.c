@@ -270,7 +270,7 @@ static void fimpdef_emit_init(struct cx_op *op,
     }
   }
 					     
-  fputs(CX_ITAB "};\n\n", out);
+  fputs("};\n\n", out);
 
   fprintf(out,
 	  CX_ITAB "struct cx_func_ret rets[%zd] = {\n",
@@ -289,7 +289,7 @@ static void fimpdef_emit_init(struct cx_op *op,
     }
   }
   
-  fputs(CX_ITAB "};\n\n", out);
+  fputs("};\n\n", out);
 
   fprintf(out,
 	  CX_ITAB "struct cx_fimp *imp = "
@@ -364,11 +364,11 @@ static bool funcall_emit(struct cx_op *op,
   
   if (imp) {
     fprintf(out,
-	    CX_TAB "%s;\n\n"
+	    "%s;\n\n"
 	    CX_TAB "if (s->safe && !cx_fimp_match(imp, s)) { imp = NULL; }\n",
 	    imp->emit_id);
   } else {
-    fputs(CX_TAB "cx_func_match(func, s, 0);\n\n", out);
+    fputs("cx_func_match(func, s, 0);\n\n", out);
   }
   
   fputs(CX_TAB "if (!imp) {\n"
@@ -576,6 +576,15 @@ static void push_emit_funcs(struct cx_op *op, struct cx_set *out, struct cx *cx)
   }
 }
 
+static void push_emit_fimps(struct cx_op *op, struct cx_set *out, struct cx *cx) {
+  struct cx_box *v = &op->as_push.value;
+
+  if (v->type == cx->fimp_type) {
+    struct cx_fimp **ok = cx_set_insert(out, &v->as_ptr);
+    if (ok) { *ok = v->as_ptr; }
+  }
+}
+
 static void push_emit_syms(struct cx_op *op, struct cx_set *out, struct cx *cx) {
   struct cx_box *v = &op->as_push.value;
 
@@ -599,6 +608,7 @@ cx_op_type(CX_OPUSH, {
     type.eval = push_eval;
     type.emit = push_emit;
     type.emit_funcs = push_emit_funcs;
+    type.emit_fimps = push_emit_fimps;
     type.emit_syms = push_emit_syms;
     type.emit_types = push_emit_types;
   });

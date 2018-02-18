@@ -1,4 +1,5 @@
-* add Fimp emit
+* fix calling declared func by ref in emit
+** test2.cx
 * handle argv in emit main
 ** push strings like load main
 * add trait: emit
@@ -43,6 +44,8 @@
 ** add delete fn
 * add support for untyped func: arg list tails
 ** default to A
+
+| Bin new % 'func: foo(35 y Int) (Int) 35 $y +; 35 7 &foo call say' compile emit
 
 | Bin new % 'func: foo(x y Int) (Int) 35 $y +; 35 7 foo' compile emit
 
