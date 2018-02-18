@@ -41,6 +41,8 @@
 ** add find-key(Vect) fn
 ** add is-dirty fn
 ** add delete fn
+* add support for untyped func: arg list tails
+** default to A
 
 | Bin new % 'func: foo(x y Int) (Int) 35 $y +; 35 7 foo' compile emit
 

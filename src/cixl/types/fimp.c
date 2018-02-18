@@ -53,8 +53,8 @@ bool cx_fimp_match(struct cx_fimp *imp, struct cx_scope *scope) {
   if (stack->count < imp->args.count) { return false; }
   if (!imp->args.count) { return true; }
   
-  struct cx_func_arg *i = (struct cx_func_arg *)cx_vec_end(&imp->args)-1;
-  struct cx_box *j = (struct cx_box *)cx_vec_end(stack)-1;
+  struct cx_func_arg *i = (struct cx_func_arg *)cx_vec_peek(&imp->args, 0);
+  struct cx_box *j = (struct cx_box *)cx_vec_peek(stack, 0);
   
   for (; i >= (struct cx_func_arg *)imp->args.items &&
 	 j >= (struct cx_box *)stack->items;
