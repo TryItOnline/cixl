@@ -5,8 +5,6 @@
 #include <stdio.h>
 #include "cixl/set.h"
 
-#define CX_TYPE_TAG_MAX 100
-
 struct cx;
 struct cx_box;
 struct cx_iter;
@@ -17,7 +15,7 @@ struct cx_type {
   size_t tag;
   char *id, *emit_id;
   struct cx_set parents, children;
-  bool is[CX_TYPE_TAG_MAX];
+  struct cx_vec is;
   bool trait;
 
   void (*new)(struct cx_box *);

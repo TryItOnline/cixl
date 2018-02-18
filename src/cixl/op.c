@@ -314,7 +314,6 @@ static void fimpdef_emit_fimps(struct cx_op *op, struct cx_set *out, struct cx *
   if (ok) { *ok = imp; }
 }
 
-
 cx_op_type(CX_OFIMPDEF, {
     type.eval = fimpdef_eval;
     type.emit = fimpdef_emit;

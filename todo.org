@@ -1,7 +1,3 @@
-* convert cx_type.is to cx_vec
-** remove MAX
-** grow cx_vec to tag if needed
-** loop through grown items and set to false
 * add Fimp emit
 * handle argv in emit main
 ** push strings like load main

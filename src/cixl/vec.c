@@ -61,6 +61,17 @@ void *cx_vec_pop(struct cx_vec *vec) {
   return cx_vec_get(vec, vec->count);
 }
 
+void *cx_vec_put(struct cx_vec *vec, size_t i) {
+  if (vec->capac <= i) { cx_vec_grow(vec, i+1); }
+
+  if (i > vec->count) {
+    memset(cx_vec_get(vec, vec->count), 0, (i-vec->count)*vec->item_size);
+  }
+  
+  vec->count = cx_max(i+1, vec->count);
+  return cx_vec_get(vec, i);
+}
+
 void *cx_vec_insert(struct cx_vec *vec, size_t i) {
   cx_test(i <= vec->count);
   if (vec->capac == vec->count) { cx_vec_grow(vec, vec->capac+1); }

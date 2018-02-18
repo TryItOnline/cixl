@@ -34,6 +34,7 @@ void *cx_vec_get(const struct cx_vec *vec, size_t i);
 void *cx_vec_push(struct cx_vec *vec);
 void *cx_vec_peek(struct cx_vec *vec, size_t i);
 void *cx_vec_pop(struct cx_vec *vec);
+void *cx_vec_put(struct cx_vec *vec, size_t i);
 void *cx_vec_insert(struct cx_vec *vec, size_t i);
 void cx_vec_delete(struct cx_vec *vec, size_t i);
 void cx_vec_clear(struct cx_vec *vec);

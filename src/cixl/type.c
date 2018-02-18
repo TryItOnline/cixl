@@ -21,9 +21,8 @@ struct cx_type *cx_type_init(struct cx_type *type, struct cx *cx, const char *id
   type->tag = cx->next_type_tag++;
   type->id = strdup(id);
   type->emit_id = cx_emit_id("type", id);
-  
-  memset(type->is, 0, sizeof(type->is));
-  type->is[type->tag] = true;
+  cx_vec_init(&type->is, sizeof(bool));
+  *(bool *)cx_vec_put(&type->is, type->tag) = true;
 
   type->trait = false;
   cx_set_init(&type->parents, sizeof(struct cx_type *), cx_cmp_ptr);
@@ -49,8 +48,9 @@ struct cx_type *cx_type_init(struct cx_type *type, struct cx *cx, const char *id
 }
 
 struct cx_type *cx_type_reinit(struct cx_type *type) {
-  memset(type->is, 0, sizeof(type->is));
-  type->is[type->tag] = true;
+  for (size_t i=0; i < type->is.count; i++) {
+    if (i != type->tag) { *(bool *)cx_vec_get(&type->is, i) = false; }
+  }
 
   cx_do_set(&type->parents, struct cx_type *, t) {
     cx_set_delete(&(*t)->children, t);
@@ -59,8 +59,8 @@ struct cx_type *cx_type_reinit(struct cx_type *type) {
   cx_set_clear(&type->parents);
 
   cx_do_set(&type->children, struct cx_type *, t) {
-    cx_set_delete(&(*t)->parents, t);
-    (*t)->is[type->tag] = false;
+    cx_set_delete(&(*t)->parents, &type);
+    *(bool *)cx_vec_put(&(*t)->is, type->tag) = false;
   }
   
   cx_set_clear(&type->children);
@@ -71,13 +71,14 @@ struct cx_type *cx_type_deinit(struct cx_type *type) {
   if (type->type_deinit) { type->type_deinit(type); }  
   cx_set_deinit(&type->parents);
   cx_set_deinit(&type->children);
+  cx_vec_deinit(&type->is);
   free(type->id);
   free(type->emit_id);
   return type;  
 }
 
 void cx_derive(struct cx_type *child, struct cx_type *parent) {
-  child->is[parent->tag] = true;
+  *(bool *)cx_vec_put(&child->is, parent->tag) = true;
   
   struct cx_type **tp = cx_set_insert(&child->parents, &parent);
   if (tp) { *tp = parent; }
@@ -90,7 +91,9 @@ void cx_derive(struct cx_type *child, struct cx_type *parent) {
 }
 
 bool cx_is(const struct cx_type *child, const struct cx_type *parent) {
-  return child->is[parent->tag];
+  return (parent->tag < child->is.count)
+    ? *(bool *)cx_vec_get(&child->is, parent->tag)
+    : false;
 }
 
 static bool equid_imp(struct cx_box *x, struct cx_box *y) {
