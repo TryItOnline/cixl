@@ -945,7 +945,7 @@ and scaled.
 ```
 
 ### Types
-Capitalized names are treated as types, the following types are defined out of the box:
+Cixl is statically and strongly typed; but since it's approach to typing is gradual, it allows you to be exactly as precise as you feel like. All types have capitalized names, the following are defined out of the box:
 
 | Type   | Parents     |
 | ------ | ----------- |
