@@ -55,4 +55,3 @@
 | Bin new % '42 say' compile emit
 | Bin new % '{10000 {50 fib _} times} clock 1000000 / int say' compile emit
 | {10000 {50 fib _} times} clock 1000000 / int say
-
