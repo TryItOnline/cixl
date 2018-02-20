@@ -230,6 +230,8 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
 
     fputs("    if (cx->stop) { return true; }\n", out);
 
+    fprintf(out, "printf(\"%zd %s\\n\");\n", op->pc, op->type->id);
+    
     if (!cx_test(op->type->emit)(op, bin, out, cx)) { return false; }
     fputs("  }\n\n", out);
   }

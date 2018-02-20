@@ -1,4 +1,7 @@
 * fix calling declared func by ref in emit
+** inline func on first eval
+*** move from funcall
+*** remove cx inline limits
 ** test2.cx
 * handle argv in emit main
 ** push strings like load main
@@ -45,7 +48,7 @@
 * add support for untyped func: arg list tails
 ** default to A
 
-| Bin new % 'func: foo(35 y Int) (Int) 35 $y +; 35 7 &foo call say' compile emit
+| Bin new % 'func: foo() (Int) 42; &foo call' compile emit
 
 | Bin new % 'func: foo(x y Int) (Int) 35 $y +; 35 7 foo' compile emit
 
