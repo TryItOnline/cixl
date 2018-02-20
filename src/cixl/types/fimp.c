@@ -123,7 +123,6 @@ bool cx_fimp_inline(struct cx_fimp *imp,
 bool cx_fimp_eval(struct cx_fimp *imp, struct cx_scope *scope) {
   struct cx *cx = scope->cx;
   struct cx_bin_func *bin = cx_bin_get_func(cx->bin, imp);
-  if (!bin) { bin = cx_fimp_compile(imp, 0, cx->bin); }
   return bin && cx_eval(cx->bin, bin->start_pc, cx);
 }
 
