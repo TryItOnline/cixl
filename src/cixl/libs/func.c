@@ -22,6 +22,7 @@ static ssize_t func_eval(struct cx_macro_eval *eval,
 	     CX_OFIMPDEF(),
 	     tok_idx)->as_fimpdef.imp = f->as_ptr;
   
+  if (!cx_fimp_inline(f->as_ptr, tok_idx, bin, cx)) { return -1; }
   return tok_idx+1;
 }
 

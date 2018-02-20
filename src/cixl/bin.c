@@ -62,7 +62,10 @@ void cx_bin_deref(struct cx_bin *bin) {
 struct cx_bin_func *cx_bin_add_func(struct cx_bin *bin,
 				    struct cx_fimp *imp,
 				    size_t start_pc) {
-  struct cx_bin_func *f = cx_test(cx_set_insert(&bin->funcs, &imp));
+  struct cx_bin_func *f = cx_set_get(&bin->funcs, &imp);
+  if (f) { return f; }
+
+  f = cx_set_insert(&bin->funcs, &imp);
   f->imp = imp;
   f->start_pc = start_pc;
   return f;
@@ -203,11 +206,11 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
 		
   fputs("  }\n\n", out);
 
-  fprintf(out, "  static void *op_labels[%zd] = {\n    ", bin->ops.count);
+  fprintf(out, "  static void *op_labels[%zd] = {\n    ", bin->ops.count+1);
   
-  for (size_t i = 0; i < bin->ops.count; i++) {
+  for (size_t i = 0; i < bin->ops.count+1; i++) {
     fprintf(out, "&&op%zd", i);
-    if (i < bin->ops.count-1) { fputs(", ", out); }
+    if (i < bin->ops.count) { fputs(", ", out); }
     if (i >= 10 && i % 10 == 0) { fputs("\n    ", out); }
   }
   
@@ -221,7 +224,7 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
     cx->row = op->row; cx->col = op->col;
     struct cx_tok *tok = cx_vec_get(&bin->toks, op->tok_idx);
     
-    fprintf(out, "  op%zd: { /* %s %s */\n",
+    fprintf(out, " op%zd: { /* %s %s */\n",
 	    op->pc, tok->type->id, op->type->id);
     
     fprintf(out,
@@ -230,12 +233,11 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
 
     fputs("    if (cx->stop) { return true; }\n", out);
 
-    fprintf(out, "printf(\"%zd %s\\n\");\n", op->pc, op->type->id);
-    
     if (!cx_test(op->type->emit)(op, bin, out, cx)) { return false; }
-    fputs("  }\n\n", out);
+    fputs(" }\n\n", out);
   }
 
+  fprintf(out, " op%zd:\n",  bin->ops.count);
   fputs("  cx->stop = false;\n"
 	"  return true;\n"
 	"}\n\n"

@@ -22,7 +22,6 @@ struct cx_sym;
 
 struct cx {
   struct cx_set separators;
-  ssize_t inline_limit1, inline_limit2;
 
   struct cx_malloc lambda_alloc, pair_alloc, rec_alloc, ref_alloc, scope_alloc,
     table_alloc, var_alloc, vect_alloc;
