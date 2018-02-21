@@ -110,15 +110,12 @@ static bool else_emit(struct cx_op *op,
 	CX_TAB "if (!v) { return false; }\n",
 	out);
 
-  size_t pc = op->pc+op->as_else.nops+1;
-  
   fprintf(out,
 	  CX_TAB "if (!cx_ok(v)) {\n"
 	  CX_TAB "  cx_box_deinit(v);\n"
-	  CX_TAB "  cx->pc = %zd;\n"
 	  CX_TAB "  goto op%zd;\n"
 	  CX_TAB "}\n\n",
-	  pc, pc);
+	  op->pc+op->as_else.nops+1);
   
   fputs(CX_TAB "cx_box_deinit(v);\n", out);
   return true;
@@ -153,13 +150,7 @@ static bool fimp_emit(struct cx_op *op,
 		      struct cx_bin *bin,
 		      FILE *out,
 		      struct cx *cx) {
-  size_t pc = op->pc+op->as_fimp.nops+1;
-    
-  fprintf(out,
-	  CX_TAB "cx->pc = %zd;\n"
-	  CX_TAB "goto op%zd;\n",
-	  pc, pc);
-  
+  fprintf(out, CX_TAB "goto op%zd;\n", op->pc+op->as_fimp.nops+1);
   return true;
 }
 
@@ -343,7 +334,7 @@ static bool funcall_emit(struct cx_op *op,
   if (imp) {
     fprintf(out,
 	    "%s;\n\n"
-	    CX_TAB "if (s->safe && !cx_fimp_match(imp, s)) { imp = NULL; }\n",
+	    CX_TAB "if (s->safe && !cx_fimp_match(imp, s)) { imp = NULL; }\n\n",
 	    imp->emit_id);
   } else {
     fputs("cx_func_match(func, s, 0);\n\n", out);
@@ -362,9 +353,8 @@ static bool funcall_emit(struct cx_op *op,
     fprintf(out,
 	    CX_TAB "cx_call_init(cx_vec_push(&cx->calls), cx->row, cx->col, "
 	           "imp, %zd);\n"
-	    CX_TAB "cx->pc = %zd;\n"
 	    CX_TAB "goto op%zd;\n",
-	    op->pc+1, f->start_pc, f->start_pc);
+	    op->pc+1, f->start_pc);
   } else {
     fputs(CX_TAB "if (!cx_fimp_call(imp, s)) { return false; }\n", out);
   }
@@ -478,13 +468,7 @@ static bool jump_emit(struct cx_op *op,
 		      struct cx_bin *bin,
 		      FILE *out,
 		      struct cx *cx) {
-  size_t pc = op->pc+op->as_jump.nops+1;
-  
-  fprintf(out,
-	  CX_TAB "cx->pc = %zd;\n"
-	  CX_TAB "goto op%zd;\n",
-	  pc, pc);
-
+  fprintf(out, CX_TAB "goto op%zd;\n", op->pc+op->as_jump.nops+1);
   return true;
 }
 
@@ -512,14 +496,7 @@ static bool lambda_emit(struct cx_op *op,
 	  op->as_lambda.start_op, op->as_lambda.nops);
 
   fputs(CX_TAB "cx_box_init(cx_push(s), cx->lambda_type)->as_ptr = l;\n", out);  
-
-  size_t pc = op->pc+op->as_lambda.nops+1;
-  
-  fprintf(out,
-	  CX_TAB "cx->pc = %zd;\n"
-	  CX_TAB "goto op%zd;\n",
-	  pc, pc);
-
+  fprintf(out, CX_TAB "goto op%zd;\n", op->pc+op->as_lambda.nops+1);
   return true;
 }
 
@@ -835,17 +812,14 @@ static bool return_emit(struct cx_op *op,
 	CX_TAB "if (call->recalls) {\n",
 	out);
 
-  size_t pc = op->as_return.pc+1;
-  
   fprintf(out,
 	  CX_TAB "  if (s->safe && !cx_fimp_match(%s, s)) {\n"
 	  CX_TAB "    cx_error(cx, cx->row, cx->col, \"Recall not applicable\");\n"
 	  CX_TAB "    return false;\n"
 	  CX_TAB "  }\n\n"
 	  CX_TAB "  call->recalls--;\n"
-	  CX_TAB "  cx->pc = %zd;\n"
 	  CX_TAB "  goto op%zd;\n",
-          imp->emit_id, pc, pc);
+          imp->emit_id, op->as_return.pc+1);
 
   fprintf(out,
 	  CX_TAB "} else {\n"
