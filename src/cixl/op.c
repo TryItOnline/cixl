@@ -596,7 +596,7 @@ static bool putargs_emit(struct cx_op *op,
 
   fputs(CX_TAB "struct cx_scope\n"
 	CX_TAB "*ds = cx_scope(cx, 0),\n"
-	CX_TAB "*ss = ds->stack.count ? ds : cx_scope(cx, 1);\n",
+	CX_TAB "*ss = ds->stack.count ? ds : cx_scope(cx, 1);\n\n",
 	out);
 
   for (struct cx_func_arg *a = cx_vec_peek(&imp->args, 0);

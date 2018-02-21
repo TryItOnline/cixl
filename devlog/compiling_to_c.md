@@ -171,9 +171,11 @@ Included below is a slightly more elaborate example with a function definition.
   op3: { /* CX_TMACRO CX_OPUTARGS */
       cx->pc = 3; cx->row = 1; cx->col = 5;
       if (cx->stop) { return true; }
+      
       struct cx_scope
 	*ds = cx_scope(cx, 0),
 	*ss = ds->stack.count ? ds : cx_scope(cx, 1);
+	
       *cx_put_var(ds, sym_y, true) = *cx_test(cx_pop(ss, false));
       *cx_put_var(ds, sym_x, true) = *cx_test(cx_pop(ss, false));
     }
