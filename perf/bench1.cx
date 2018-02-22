@@ -1,0 +1,2 @@
+unsafe
+{10000 {50 fib _} times} clock 1000000 / int say

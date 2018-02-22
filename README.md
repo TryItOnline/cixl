@@ -1140,18 +1140,22 @@ Type checking may be partly disabled for the current scope by calling ```unsafe`
 ```
 
 ### Performance
-There is still plenty of work remaining in the profiling and benchmarking departments, but preliminary indications puts Cixl at around 1-2 times slower than Python. Measured time is displayed in milliseconds.
+There is still plenty of work remaining in the profiling and benchmarking departments, but preliminary indications puts compiled Cixl at around equal to 2 times slower than Python. Measured time is displayed in milliseconds.
 
 Let's start with a tail-recursive fibonacci to exercise the interpreter loop, it's worth mentioning that Cixl uses 64-bit integers while Python settles for 32-bit.
 
 ```
-   func: fib-rec(a b n Int) (Int)
-...  $n?<Opt> {$b $a $b +<Int Int> $n -- recall} $a if-else;
-...func: fib(n Int) (Int)
-...  0 1 $n fib-rec;
-...| {10000 {50 fib _} times} clock 1000000 / int
-...
-[317]
+func: fib-rec(a b n Int) (Int)
+  $n?<Opt> {$b $a $b +<Int Int> $n -- recall} $a if-else;
+
+func: fib(n Int) (Int)
+  0 1 $n fib-rec;
+
+{10000 {50 fib _} times} clock 1000000 / int say
+
+$ cixl -e perf/bench1.cx -o bench1
+$ ./bench1
+192
 ```
 
 ```
@@ -1169,16 +1173,18 @@ def test():
 
 print(int(timeit(test, number=1) * 1000))
 
-$ python3 fib.py 
+$ python3 perf/bench1.py 
 118
 ```
 
 Next up is consing a vector.
 
 ```
-   | {let: v []; 10000000 {$v ~ push} for} clock 1000000 / int
-...
-[2117]
+{let: v []; 10000000 {$v ~ push} for} clock 1000000 / int say
+
+$ cixl -e perf/bench2.cx -o bench2
+$ ./bench2
+1305
 ```
 
 ```
@@ -1192,17 +1198,19 @@ def test():
 
 print(int(timeit(test, number=1) * 1000))
 
-$ python3 vect.py 
+$ python3 perf/bench2.py 
 1348
 ```
 
-Moving on to instantiating records.
+Moving on to instantiating records; interpreted for now since the code generator is still missing support for records.
 
 ```
-   rec: Foo() x Int y Str;
-...| {10000000 {Foo new % `x 42 put<Rec A> `y 'bar' put<Rec A>} times} clock 1000000 / int
-...
-[4210]
+rec: Foo() x Int y Str;
+{10000000 {Foo new % `x 42 put<Rec Sym A> `y 'bar' put<Rec Sym A>} times}
+clock 1000000 / int say
+
+$ cixl perf/bench3.cx
+3950
 ```
 
 ```
@@ -1219,7 +1227,7 @@ def test():
 
 print(int(timeit(test, number=1) * 1000))
 
-$ python3 rec.py
+$ python3 perf/bench3.py
 3213
 ```
 
@@ -1231,7 +1239,7 @@ $ python3 rec.py
 - Obvious is overrated
 - Symmetry beats consistency
 - Rules are for machines
-- Only fools predict "the future"
+- Only fools predict the future
 - Intuition goes with the flow
 - Duality of syntax is one honking great idea
 

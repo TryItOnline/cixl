@@ -1,3 +1,4 @@
+* switch times arg order
 * handle argv in emit main
 ** push strings like load main
 * add trait: emit
@@ -54,3 +55,5 @@
 | Bin new % '42 say' compile emit
 | Bin new % '{10000 {50 fib _} times} clock 1000000 / int say' compile emit
 | {10000 {50 fib _} times} clock 1000000 / int say
+
+{10000000 {Foo new % `x 42 put<Rec A> `y 'bar' put<Rec A>} times} clock 1000000 / int
