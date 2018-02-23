@@ -1,5 +1,6 @@
 #include <inttypes.h>
 
+#include "cixl/args.h"
 #include "cixl/cx.h"
 #include "cixl/box.h"
 #include "cixl/emit.h"
@@ -114,16 +115,15 @@ struct cx_type *cx_init_int_type(struct cx *cx) {
   t->emit = emit_imp;
   
   cx_add_cfunc(cx, "++",
-	       cx_args(cx_arg("v", t)), cx_rets(cx_ret(t)),
+	       cx_args(cx_arg("v", t)), cx_args(cx_arg(NULL, t)),
 	       inc_imp);
   
   cx_add_cfunc(cx, "--",
-	       cx_args(cx_arg("v", t)), cx_rets(cx_ret(t)),
+	       cx_args(cx_arg("v", t)), cx_args(cx_arg(NULL, t)),
 	       dec_imp);
     
   cx_add_cfunc(cx, "times",
-	       cx_args(cx_arg("n", t), cx_arg("act", cx->any_type)),
-	       cx_rets(),
+	       cx_args(cx_arg("n", t), cx_arg("act", cx->any_type)), cx_args(),
 	       times_imp);
   
   return t;

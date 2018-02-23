@@ -1,6 +1,7 @@
 #include <string.h>
 #include <inttypes.h>
 
+#include "cixl/args.h"
 #include "cixl/box.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
@@ -42,16 +43,16 @@ void cx_init_ref(struct cx *cx) {
   
   cx_add_cfunc(cx, "ref",
 	       cx_args(cx_arg("val", cx->opt_type)),
-	       cx_rets(cx_ret(cx->ref_type)),
+	       cx_args(cx_arg(NULL, cx->ref_type)),
 	       ref_imp);
   
   cx_add_cfunc(cx, "get-ref",
 	       cx_args(cx_arg("ref", cx->ref_type)),
-	       cx_rets(cx_ret(cx->opt_type)),
+	       cx_args(cx_arg(NULL, cx->opt_type)),
 	       get_imp);
 
   cx_add_cfunc(cx, "put-ref",
 	       cx_args(cx_arg("ref", cx->ref_type), cx_arg("val", cx->opt_type)),
-	       cx_rets(),
+	       cx_args(),
 	       put_imp);
 }

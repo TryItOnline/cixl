@@ -15,8 +15,8 @@
 #define cx_add_type(cx, id, ...)		\
   _cx_add_type(cx, id, ##__VA_ARGS__, NULL)	\
 
-struct cx_func_arg;
-struct cx_func_ret;
+struct cx_arg;
+struct cx_arg;
 struct cx_scope;
 struct cx_sym;
 
@@ -66,19 +66,19 @@ struct cx_macro *cx_get_macro(struct cx *cx, const char *id, bool silent);
 
 struct cx_fimp *cx_add_func(struct cx *cx,
 			    const char *id,
-			    int nargs, struct cx_func_arg *args,
-			    int nrets, struct cx_func_ret *rets);
+			    int nargs, struct cx_arg *args,
+			    int nrets, struct cx_arg *rets);
 
 struct cx_fimp *cx_add_cfunc(struct cx *cx,
 			     const char *id,
-			     int nargs, struct cx_func_arg *args,
-			     int nrets, struct cx_func_ret *rets,
+			     int nargs, struct cx_arg *args,
+			     int nrets, struct cx_arg *rets,
 			     cx_fimp_ptr_t ptr);
 
 struct cx_fimp *cx_add_cxfunc(struct cx *cx,
 			      const char *id,
-			      int nargs, struct cx_func_arg *args,
-			      int nrets, struct cx_func_ret *rets,
+			      int nargs, struct cx_arg *args,
+			      int nrets, struct cx_arg *rets,
 			      const char *body);
 
 struct cx_func *cx_get_func(struct cx *cx, const char *id, bool silent);

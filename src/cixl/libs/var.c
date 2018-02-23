@@ -1,6 +1,7 @@
 #include <ctype.h>
 #include <string.h>
 
+#include "cixl/args.h"
 #include "cixl/bin.h"
 #include "cixl/box.h"
 #include "cixl/cx.h"
@@ -139,10 +140,11 @@ void cx_init_var(struct cx *cx) {
 
   cx_add_cfunc(cx, "put-var",
 	       cx_args(cx_arg("id", cx->sym_type), cx_arg("val", cx->any_type)),
-	       cx_rets(),
+	       cx_args(),
 	       put_imp);
   
   cx_add_cfunc(cx, "get-var",
-	       cx_args(cx_arg("id", cx->sym_type)), cx_rets(cx_ret(cx->opt_type)),
+	       cx_args(cx_arg("id", cx->sym_type)),
+	       cx_args(cx_arg(NULL, cx->opt_type)),
 	       get_imp);
 }

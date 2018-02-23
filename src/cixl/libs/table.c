@@ -1,6 +1,7 @@
 #include <ctype.h>
 #include <string.h>
 
+#include "cixl/args.h"
 #include "cixl/box.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
@@ -147,14 +148,14 @@ static bool seq_imp(struct cx_scope *scope) {
 void cx_init_table(struct cx *cx) {
   cx_add_cfunc(cx, "get",
 	       cx_args(cx_arg("tbl", cx->table_type), cx_arg("key", cx->cmp_type)),
-	       cx_rets(cx_ret(cx->opt_type)),
+	       cx_args(cx_arg(NULL, cx->opt_type)),
 	       get_imp);
 
   cx_add_cfunc(cx, "put",
 	       cx_args(cx_arg("tbl", cx->table_type),
 		       cx_arg("key", cx->cmp_type),
 		       cx_arg("val", cx->any_type)),
-	       cx_rets(),
+	       cx_args(),
 	       put_imp);
 
   cx_add_cfunc(cx, "put-else",
@@ -162,21 +163,21 @@ void cx_init_table(struct cx *cx) {
 		       cx_arg("key", cx->cmp_type),
 		       cx_arg("upd", cx->any_type),
 		       cx_arg("ins", cx->any_type)),
-	       cx_rets(),
+	       cx_args(),
 	       put_else_imp);
 
   cx_add_cfunc(cx, "delete",
 	       cx_args(cx_arg("tbl", cx->table_type), cx_arg("key", cx->cmp_type)),
-	       cx_rets(),
+	       cx_args(),
 	       delete_imp);
 
   cx_add_cfunc(cx, "len",
 	       cx_args(cx_arg("tbl", cx->table_type)),
-	       cx_rets(cx_ret(cx->int_type)),
+	       cx_args(cx_arg(NULL, cx->int_type)),
 	       len_imp);
 
   cx_add_cfunc(cx, "table",
 	       cx_args(cx_arg("in", cx->seq_type)),
-	       cx_rets(cx_ret(cx->table_type)),
+	       cx_args(cx_arg(NULL, cx->table_type)),
 	       seq_imp);
 }

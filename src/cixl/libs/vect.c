@@ -1,6 +1,7 @@
 #include <string.h>
 #include <inttypes.h>
 
+#include "cixl/args.h"
 #include "cixl/box.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
@@ -133,29 +134,30 @@ static bool sort_imp(struct cx_scope *scope) {
 void cx_init_vect(struct cx *cx) {
   cx_add_cfunc(cx, "len",
 	       cx_args(cx_arg("vec", cx->vect_type)),
-	       cx_rets(cx_ret(cx->int_type)),
+	       cx_args(cx_arg(NULL, cx->int_type)),
 	       len_imp);
   
   cx_add_cfunc(cx, "push",
 	       cx_args(cx_arg("vec", cx->vect_type), cx_arg("val", cx->any_type)),
-	       cx_rets(),
+	       cx_args(),
 	       push_imp);
 
   cx_add_cfunc(cx, "pop",
-	       cx_args(cx_arg("vec", cx->vect_type)), cx_rets(cx_ret(cx->opt_type)),
+	       cx_args(cx_arg("vec", cx->vect_type)),
+	       cx_args(cx_arg(NULL, cx->opt_type)),
 	       pop_imp);
 
   cx_add_cfunc(cx, "vect",
 	       cx_args(cx_arg("in", cx->seq_type)),
-	       cx_rets(cx_ret(cx->vect_type)),
+	       cx_args(cx_arg(NULL, cx->vect_type)),
 	       seq_imp);
 
   cx_add_cfunc(cx, "clear",
-	       cx_args(cx_arg("vec", cx->vect_type)), cx_rets(),
+	       cx_args(cx_arg("vec", cx->vect_type)), cx_args(),
 	       clear_imp);
 
   cx_add_cfunc(cx, "sort",
 	       cx_args(cx_arg("vec", cx->vect_type), cx_arg("cmp", cx->opt_type)),
-	       cx_rets(),
+	       cx_args(),
 	       sort_imp);
 }

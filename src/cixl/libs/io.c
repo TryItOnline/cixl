@@ -1,6 +1,7 @@
 #include <errno.h>
 #include <string.h>
 
+#include "cixl/args.h"
 #include "cixl/cx.h"
 #include "cixl/bin.h"
 #include "cixl/box.h"
@@ -200,42 +201,43 @@ void cx_init_io(struct cx *cx) {
 
   cx_add_cfunc(cx, "print",
 	       cx_args(cx_arg("out", cx->wfile_type), cx_arg("v", cx->any_type)),
-	       cx_rets(),
+	       cx_args(),
 	       print_imp);
     
   cx_add_cfunc(cx, "ask",
-	       cx_args(cx_arg("prompt", cx->str_type)), cx_rets(),
+	       cx_args(cx_arg("prompt", cx->str_type)), cx_args(),
 	       ask_imp);
   
   cx_add_cfunc(cx, "load",
-	       cx_args(cx_arg("path", cx->str_type)), cx_rets(),
+	       cx_args(cx_arg("path", cx->str_type)), cx_args(),
 	       load_imp);  
 
   cx_add_cfunc(cx, "fopen",
 	       cx_args(cx_arg("path", cx->str_type), cx_arg("mode", cx->sym_type)),
-	       cx_rets(cx_ret(cx->file_type)),
+	       cx_args(cx_arg(NULL, cx->file_type)),
 	       fopen_imp);  
 
   cx_add_cfunc(cx, "flush",
-	       cx_args(cx_arg("file", cx->wfile_type)), cx_rets(),
+	       cx_args(cx_arg("file", cx->wfile_type)), cx_args(),
 	       flush_imp);
 
   cx_add_cfunc(cx, "read",
-	       cx_args(cx_arg("f", cx->rfile_type)), cx_rets(cx_ret(cx->opt_type)),
+	       cx_args(cx_arg("f", cx->rfile_type)),
+	       cx_args(cx_arg(NULL, cx->opt_type)),
 	       read_imp);
 
   cx_add_cfunc(cx, "write",
 	       cx_args(cx_arg("f", cx->wfile_type), cx_arg("v", cx->opt_type)),
-	       cx_rets(),
+	       cx_args(),
 	       write_imp);
 
   cx_add_cfunc(cx, "lines",
 	       cx_args(cx_arg("f", cx->rfile_type)),
-	       cx_rets(cx_ret(cx->iter_type)),
+	       cx_args(cx_arg(NULL, cx->iter_type)),
 	       lines_imp);
 
   cx_add_cxfunc(cx, "say",
-		cx_args(cx_arg("v", cx->any_type)), cx_rets(),
+		cx_args(cx_arg("v", cx->any_type)), cx_args(),
 		"#out $v print\n"
 		"#out @@n print");
 }

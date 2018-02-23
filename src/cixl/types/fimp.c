@@ -1,5 +1,6 @@
 #include <inttypes.h>
 
+#include "cixl/args.h"
 #include "cixl/bin.h"
 #include "cixl/box.h"
 #include "cixl/call.h"
@@ -26,8 +27,8 @@ struct cx_fimp *cx_fimp_init(struct cx_fimp *imp,
   imp->bin = NULL;
   imp->start_pc = imp->nops = 0;
   imp->scope = NULL;
-  cx_vec_init(&imp->args, sizeof(struct cx_func_arg));
-  cx_vec_init(&imp->rets, sizeof(struct cx_func_ret));
+  cx_vec_init(&imp->args, sizeof(struct cx_arg));
+  cx_vec_init(&imp->rets, sizeof(struct cx_arg));
   cx_vec_init(&imp->toks, sizeof(struct cx_tok));
   return imp;
 }
@@ -36,7 +37,7 @@ struct cx_fimp *cx_fimp_deinit(struct cx_fimp *imp) {
   free(imp->id);
   free(imp->emit_id);
   
-  cx_do_vec(&imp->args, struct cx_func_arg, a) { cx_func_arg_deinit(a); }
+  cx_do_vec(&imp->args, struct cx_arg, a) { cx_arg_deinit(a); }
   cx_vec_deinit(&imp->args);
 
   cx_vec_deinit(&imp->rets);
@@ -54,10 +55,10 @@ bool cx_fimp_match(struct cx_fimp *imp, struct cx_scope *scope) {
   if (stack->count < imp->args.count) { return false; }
   if (!imp->args.count) { return true; }
   
-  struct cx_func_arg *i = (struct cx_func_arg *)cx_vec_peek(&imp->args, 0);
+  struct cx_arg *i = (struct cx_arg *)cx_vec_peek(&imp->args, 0);
   struct cx_box *j = (struct cx_box *)cx_vec_peek(stack, 0);
   
-  for (; i >= (struct cx_func_arg *)imp->args.items &&
+  for (; i >= (struct cx_arg *)imp->args.items &&
 	 j >= (struct cx_box *)stack->items;
        i--, j--) {    
     struct cx_type *t = i->type;

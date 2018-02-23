@@ -1,6 +1,7 @@
 #include <string.h>
 #include <inttypes.h>
 
+#include "cixl/args.h"
 #include "cixl/bin.h"
 #include "cixl/box.h"
 #include "cixl/buf.h"
@@ -58,11 +59,11 @@ static bool emit_imp(struct cx_scope *scope) {
 void cx_init_meta(struct cx *cx) {
   cx_add_cfunc(cx, "compile",
 	       cx_args(cx_arg("out", cx->bin_type), cx_arg("in", cx->str_type)),
-	       cx_rets(),
+	       cx_args(),
 	       compile_imp);
 
   cx_add_cfunc(cx, "emit",
 	       cx_args(cx_arg("in", cx->bin_type)),
-	       cx_rets(cx_ret(cx->str_type)),
+	       cx_args(cx_arg(NULL, cx->str_type)),
 	       emit_imp);
 }

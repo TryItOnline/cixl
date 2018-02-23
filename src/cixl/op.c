@@ -1,3 +1,4 @@
+#include "cixl/args.h"
 #include "cixl/bin.h"
 #include "cixl/call.h"
 #include "cixl/cx.h"
@@ -214,12 +215,12 @@ static void fimpdef_emit_init(struct cx_op *op,
   struct cx_fimp *imp = op->as_fimpdef.imp;
   
   fprintf(out,
-	  CX_ITAB "struct cx_func_arg args[%zd] = {\n",
+	  CX_ITAB "struct cx_arg args[%zd] = {\n",
 	  imp->args.count);
 
   char *sep = NULL;
   
-  cx_do_vec(&imp->args, struct cx_func_arg, a) {
+  cx_do_vec(&imp->args, struct cx_arg, a) {
     if (sep) { fputs(sep, out); }
     sep = ",\n";
     
@@ -246,12 +247,12 @@ static void fimpdef_emit_init(struct cx_op *op,
   fputs("};\n\n", out);
 
   fprintf(out,
-	  CX_ITAB "struct cx_func_ret rets[%zd] = {\n",
+	  CX_ITAB "struct cx_arg rets[%zd] = {\n",
 	  imp->rets.count);
 
   sep = NULL;
   
-  cx_do_vec(&imp->rets, struct cx_func_ret, r) {
+  cx_do_vec(&imp->rets, struct cx_arg, r) {
     if (sep) { fputs(sep, out); }
     sep = ",\n";
     
@@ -575,8 +576,8 @@ static bool putargs_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
   struct cx_fimp *imp = op->as_putargs.imp;
   struct cx_scope *ds = cx_scope(cx, 0), *ss = ds->stack.count ? ds : cx_scope(cx, 1);
 
-  for (struct cx_func_arg *a = cx_vec_peek(&imp->args, 0);
-       a >= (struct cx_func_arg *)imp->args.items;
+  for (struct cx_arg *a = cx_vec_peek(&imp->args, 0);
+       a >= (struct cx_arg *)imp->args.items;
        a--) {
     struct cx_box *src = cx_pop(ss, false);
     if (!src) { return false; }
@@ -602,8 +603,8 @@ static bool putargs_emit(struct cx_op *op,
 	CX_TAB "*ss = ds->stack.count ? ds : cx_scope(cx, 1);\n\n",
 	out);
 
-  for (struct cx_func_arg *a = cx_vec_peek(&imp->args, 0);
-       a >= (struct cx_func_arg *)imp->args.items;
+  for (struct cx_arg *a = cx_vec_peek(&imp->args, 0);
+       a >= (struct cx_arg *)imp->args.items;
        a--) {
     if (a->id) {
       fprintf(out,
@@ -636,8 +637,8 @@ static void putargs_emit_fimps(struct cx_op *op, struct cx_set *out, struct cx *
 static void putargs_emit_syms(struct cx_op *op, struct cx_set *out, struct cx *cx) {
   struct cx_fimp *imp = op->as_putargs.imp;
 
-  for (struct cx_func_arg *a = cx_vec_peek(&imp->args, 0);
-       a >= (struct cx_func_arg *)imp->args.items;
+  for (struct cx_arg *a = cx_vec_peek(&imp->args, 0);
+       a >= (struct cx_arg *)imp->args.items;
        a--) {
     if (a->id) {
       struct cx_sym *ok = cx_set_insert(out, &a->sym_id);
@@ -761,7 +762,7 @@ static bool return_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
       struct cx_scope *ds = cx_scope(cx, 1);
       cx_vec_grow(&ds->stack, ds->stack.count+imp->rets.count);
       size_t i = 0;
-      struct cx_func_ret *r = cx_vec_start(&imp->rets);
+      struct cx_arg *r = cx_vec_start(&imp->rets);
       
       for (struct cx_box *v = cx_vec_start(&ss->stack);
 	   i < ss->stack.count;
@@ -770,7 +771,7 @@ static bool return_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
 	  struct cx_type *t = r->type;
 	  
 	  if (!r->type) {
-	    struct cx_func_arg *a = cx_vec_get(&imp->args, r->narg);
+	    struct cx_arg *a = cx_vec_get(&imp->args, r->narg);
 	    struct cx_box *av = cx_test(cx_get_var(ss, a->sym_id, false));
 	    t = av->type;
 	  }
@@ -845,7 +846,7 @@ static bool return_emit(struct cx_op *op,
 	    imp->rets.count);
     fputs(CX_TAB "  struct cx_box *v = cx_vec_start(&s->stack);\n\n", out);
     
-    for (struct cx_func_ret *r = cx_vec_start(&imp->rets);
+    for (struct cx_arg *r = cx_vec_start(&imp->rets);
 	 r != cx_vec_end(&imp->rets);
 	 r++) {
       fputs(CX_TAB "  if (s->safe) {\n"
@@ -856,7 +857,7 @@ static bool return_emit(struct cx_op *op,
 	fprintf(out, CX_TAB "    t = %s;\n", r->type->emit_id);
       } else {
 	fprintf(out,
-		CX_TAB "    struct cx_func_arg *a = cx_vec_get(&%s->args, %d);\n"
+		CX_TAB "    struct cx_arg *a = cx_vec_get(&%s->args, %d);\n"
 		CX_TAB "    struct cx_box *av = "
 		"cx_test(cx_get_var(s, a->sym_id, false));\n"
 		CX_TAB "    t = av->type;\n",
@@ -912,7 +913,7 @@ static void return_emit_fimps(struct cx_op *op, struct cx_set *out, struct cx *c
 static void return_emit_types(struct cx_op *op, struct cx_set *out, struct cx *cx) {
   struct cx_fimp *imp = op->as_return.imp;
   
-  for (struct cx_func_ret *r = cx_vec_start(&imp->rets);
+  for (struct cx_arg *r = cx_vec_start(&imp->rets);
        r != cx_vec_end(&imp->rets);
        r++) {
     if (r->type) {

@@ -1,3 +1,4 @@
+#include "cixl/args.h"
 #include "cixl/cx.h"
 #include "cixl/box.h"
 #include "cixl/buf.h"
@@ -207,30 +208,32 @@ static bool drop_imp(struct cx_scope *scope) {
 
 void cx_init_iter(struct cx *cx) {
   cx_add_cfunc(cx, "iter",
-	       cx_args(cx_arg("seq", cx->seq_type)), cx_rets(cx_ret(cx->iter_type)),
+	       cx_args(cx_arg("seq", cx->seq_type)),
+	       cx_args(cx_arg(NULL, cx->iter_type)),
 	       iter_imp);
 
   cx_add_cfunc(cx, "for",
 	       cx_args(cx_arg("seq", cx->seq_type), cx_arg("act", cx->any_type)),
-	       cx_rets(),
+	       cx_args(),
 	       for_imp);
   
   cx_add_cfunc(cx, "map",
 	       cx_args(cx_arg("seq", cx->seq_type), cx_arg("act", cx->any_type)),
-	       cx_rets(cx_ret(cx->iter_type)),
+	       cx_args(cx_arg(NULL, cx->iter_type)),
 	       map_imp);
   
   cx_add_cfunc(cx, "filter",
 	       cx_args(cx_arg("seq", cx->seq_type), cx_arg("act", cx->any_type)),
-	       cx_rets(cx_ret(cx->iter_type)),
+	       cx_args(cx_arg(NULL, cx->iter_type)),
 	       filter_imp);
   
   cx_add_cfunc(cx, "next",
-	       cx_args(cx_arg("it", cx->iter_type)), cx_rets(cx_ret(cx->opt_type)),
+	       cx_args(cx_arg("it", cx->iter_type)),
+	       cx_args(cx_arg(NULL, cx->opt_type)),
 	       next_imp);
 
   cx_add_cfunc(cx, "drop", 
 	       cx_args(cx_arg("it", cx->iter_type), cx_arg("n", cx->int_type)),
-	       cx_rets(),
+	       cx_args(),
 	       drop_imp);
 }

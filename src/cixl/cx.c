@@ -4,6 +4,7 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "cixl/args.h"
 #include "cixl/bin.h"
 #include "cixl/box.h"
 #include "cixl/call.h"
@@ -277,26 +278,28 @@ struct cx *cx_init(struct cx *cx) {
   
   cx_add_macro(cx, "include:", include_parse);
 
-  cx_add_cfunc(cx, "call", cx_args(cx_arg("act", cx->any_type)), cx_rets(), call_imp);
+  cx_add_cfunc(cx, "call", cx_args(cx_arg("act", cx->any_type)), cx_args(), call_imp);
 
   cx_add_cfunc(cx, "new",
-	       cx_args(cx_arg("t", cx->meta_type)), cx_rets(cx_ret(cx->any_type)),
+	       cx_args(cx_arg("t", cx->meta_type)),
+	       cx_args(cx_arg(NULL, cx->any_type)),
 	       new_imp);
 
   cx_add_cfunc(cx, "clock",
-	       cx_args(cx_arg("act", cx->any_type)), cx_rets(cx_ret(cx->int_type)),
+	       cx_args(cx_arg("act", cx->any_type)),
+	       cx_args(cx_arg(NULL, cx->int_type)),
 	       clock_imp);
   
   cx_add_cfunc(cx, "check",
-	       cx_args(cx_arg("v", cx->opt_type)), cx_rets(),
+	       cx_args(cx_arg("v", cx->opt_type)), cx_args(),
 	       check_imp);
   
   cx_add_cfunc(cx, "fail",
-	       cx_args(cx_arg("msg", cx->str_type)), cx_rets(),
+	       cx_args(cx_arg("msg", cx->str_type)), cx_args(),
 	       fail_imp);
 
-  cx_add_cfunc(cx, "safe", cx_args(), cx_rets(), safe_imp);
-  cx_add_cfunc(cx, "unsafe", cx_args(), cx_rets(), unsafe_imp);
+  cx_add_cfunc(cx, "safe", cx_args(), cx_args(), safe_imp);
+  cx_add_cfunc(cx, "unsafe", cx_args(), cx_args(), unsafe_imp);
 
   cx->scope = NULL;
   cx->main = cx_begin(cx, NULL);
@@ -406,8 +409,8 @@ struct cx_type *cx_get_type(struct cx *cx, const char *id, bool silent) {
 
 struct cx_fimp *cx_add_func(struct cx *cx,
 			    const char *id,
-			    int nargs, struct cx_func_arg *args,
-			    int nrets, struct cx_func_ret *rets) {
+			    int nargs, struct cx_arg *args,
+			    int nrets, struct cx_arg *rets) {
   struct cx_func **f = cx_set_get(&cx->funcs, &id);
 
   if (f) {
@@ -427,8 +430,8 @@ struct cx_fimp *cx_add_func(struct cx *cx,
 
 struct cx_fimp *cx_add_cfunc(struct cx *cx,
 			     const char *id,
-			     int nargs, struct cx_func_arg *args,
-			     int nrets, struct cx_func_ret *rets,
+			     int nargs, struct cx_arg *args,
+			     int nrets, struct cx_arg *rets,
 			     cx_fimp_ptr_t ptr) {
   struct cx_fimp *imp = cx_add_func(cx, id, nargs, args, nrets, rets);
   imp->ptr = ptr;
@@ -437,8 +440,8 @@ struct cx_fimp *cx_add_cfunc(struct cx *cx,
 
 struct cx_fimp *cx_add_cxfunc(struct cx *cx,
 			    const char *id,
-			    int nargs, struct cx_func_arg *args,
-			    int nrets, struct cx_func_ret *rets,
+			    int nargs, struct cx_arg *args,
+			    int nrets, struct cx_arg *rets,
 			    const char *body) {
   struct cx_fimp *imp = cx_add_func(cx, id, nargs, args, nrets, rets);
   cx_test(cx_parse_str(cx, body, &imp->toks));

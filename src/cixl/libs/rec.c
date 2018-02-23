@@ -1,6 +1,7 @@
 #include <ctype.h>
 #include <string.h>
 
+#include "cixl/args.h"
 #include "cixl/box.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
@@ -255,27 +256,27 @@ void cx_init_rec(struct cx *cx) {
 
   cx_add_cfunc(cx, "=",
 	       cx_args(cx_arg("x", cx->rec_type), cx_arg("y", cx->rec_type)),
-	       cx_rets(cx_ret(cx->bool_type)),
+	       cx_args(cx_arg(NULL, cx->bool_type)),
 	       eqval_imp);
 
   cx_add_cfunc(cx, "?",
-	       cx_args(cx_arg("rec", cx->rec_type)), cx_rets(cx_ret(cx->bool_type)),
+	       cx_args(cx_arg("rec", cx->rec_type)), cx_args(cx_arg(NULL, cx->bool_type)),
 	       ok_imp);
 
   cx_add_cfunc(cx, "print",
 	       cx_args(cx_arg("out", cx->wfile_type), cx_arg("rec", cx->rec_type)),
-	       cx_rets(),
+	       cx_args(),
 	       print_imp);
 
   cx_add_cfunc(cx, "get",
 	       cx_args(cx_arg("rec", cx->rec_type), cx_arg("fld", cx->sym_type)),
-	       cx_rets(cx_ret(cx->opt_type)),
+	       cx_args(cx_arg(NULL, cx->opt_type)),
 	       get_imp);
 
   cx_add_cfunc(cx, "put",
 	       cx_args(cx_arg("rec", cx->rec_type),
 		       cx_arg("fld", cx->sym_type),
 		       cx_arg("val", cx->any_type)),
-	       cx_rets(),
+	       cx_args(),
 	       put_imp);
 }

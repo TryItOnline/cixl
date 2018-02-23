@@ -1,6 +1,7 @@
 #include <string.h>
 #include <inttypes.h>
 
+#include "cixl/args.h"
 #include "cixl/box.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
@@ -60,31 +61,31 @@ static bool rezip_imp(struct cx_scope *scope) {
 void cx_init_pair(struct cx *cx) {
   cx_add_cfunc(cx, ".", 
 	       cx_args(cx_arg("x", cx->opt_type), cx_arg("y", cx->opt_type)),
-	       cx_rets(cx_ret(cx->pair_type)),
+	       cx_args(cx_arg(NULL, cx->pair_type)),
 	       zip_imp);
 
   cx_add_cfunc(cx, "unzip", 
 	       cx_args(cx_arg("p", cx->pair_type)),
-	       cx_rets(cx_ret(cx->opt_type), cx_ret(cx->opt_type)),
+	       cx_args(cx_arg(NULL, cx->opt_type), cx_arg(NULL, cx->opt_type)),
 	       unzip_imp);
 
   cx_add_cfunc(cx, "x",
 	       cx_args(cx_arg("p", cx->pair_type)),
-	       cx_rets(cx_ret(cx->any_type)),
+	       cx_args(cx_arg(NULL, cx->any_type)),
 	       x_imp);
 
   cx_add_cfunc(cx, "y",
 	       cx_args(cx_arg("p", cx->pair_type)),
-	       cx_rets(cx_ret(cx->any_type)),
+	       cx_args(cx_arg(NULL, cx->any_type)),
 	       y_imp);
 
   cx_add_cfunc(cx, "rezip", 
 	       cx_args(cx_arg("p", cx->pair_type)),
-	       cx_rets(),
+	       cx_args(),
 	       rezip_imp);  
 
   cx_add_cxfunc(cx, "rezip", 
 		cx_args(cx_arg("in", cx->seq_type)),
-		cx_rets(),
+		cx_args(),
 		"$in &rezip for");
 }

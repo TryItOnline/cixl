@@ -1110,11 +1110,11 @@ int main() {
   t->deinit = deinit_imp;
   
   cx_add_cfunc(&cx, "len",
-               cx_args(cx_arg("s", t)), cx_rets(cx_ret(cx.int_type)),
+               cx_args(cx_arg("s", t)), cx_args(cx_arg(NULL, cx.int_type)),
 	       len_imp);
 
   cx_add_cxfunc(cx, "upper",
-	   	cx_args(cx_arg("s", t)), cx_rets(cx_ret(t)),
+	   	cx_args(cx_arg("s", t)), cx_args(cx_arg(NULL, t)),
 	        "$s &upper map str");
 
   ...

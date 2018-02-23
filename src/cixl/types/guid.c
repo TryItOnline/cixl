@@ -1,6 +1,7 @@
 #include <stdbool.h>
 #include <string.h>
 
+#include "cixl/args.h"
 #include "cixl/box.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
@@ -153,12 +154,11 @@ struct cx_type *cx_init_guid_type(struct cx *cx) {
   t->dump = dump_imp;
 
   cx_add_cfunc(cx, "guid",
-	       cx_args(cx_arg("s", cx->str_type)), cx_rets(cx_ret(t)),
+	       cx_args(cx_arg("s", cx->str_type)), cx_args(cx_arg(NULL, t)),
 	       guid_imp);
   
   cx_add_cfunc(cx, "str",
-	       cx_args(cx_arg("id", t)),
-	       cx_rets(cx_ret(cx->str_type)),
+	       cx_args(cx_arg("id", t)), cx_args(cx_arg(NULL, cx->str_type)),
 	       str_imp);
 
   return t;

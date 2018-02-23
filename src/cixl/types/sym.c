@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "cixl/args.h"
 #include "cixl/cx.h"
 #include "cixl/emit.h"
 #include "cixl/error.h"
@@ -82,12 +83,12 @@ struct cx_type *cx_init_sym_type(struct cx *cx) {
   
   cx_add_cfunc(cx, "sym",
 	       cx_args(cx_arg("id", cx->str_type)),
-	       cx_rets(cx_ret(t)),
+	       cx_args(cx_arg(NULL, t)),
 	       sym_imp);
   
   cx_add_cfunc(cx, "str",
 	       cx_args(cx_arg("s", t)),
-	       cx_rets(cx_ret(cx->str_type)),
+	       cx_args(cx_arg(NULL, cx->str_type)),
 	       str_imp);
   
   return t;

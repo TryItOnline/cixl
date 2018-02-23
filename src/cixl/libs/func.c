@@ -1,3 +1,4 @@
+#include "cixl/args.h"
 #include "cixl/bin.h"
 #include "cixl/box.h"
 #include "cixl/call.h"
@@ -69,9 +70,9 @@ static bool func_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   }
   
   struct cx_vec func_args;
-  cx_vec_init(&func_args, sizeof(struct cx_func_arg));
+  cx_vec_init(&func_args, sizeof(struct cx_arg));
 
-  if (!cx_eval_args(cx, &args.as_vec, &func_args)) {
+  if (!cx_parse_args(cx, &args.as_vec, &func_args, false)) {
     cx_tok_deinit(&id);
     cx_tok_deinit(&args);
     cx_do_vec(&toks, struct cx_tok, t) { cx_tok_deinit(t); }
@@ -102,9 +103,9 @@ static bool func_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   }
   
   struct cx_vec func_rets;
-  cx_vec_init(&func_rets, sizeof(struct cx_func_ret));
+  cx_vec_init(&func_rets, sizeof(struct cx_arg));
 
-  if (!cx_eval_rets(cx, &rets.as_vec, &func_args, &func_rets)) {
+  if (!cx_parse_args(cx, &rets.as_vec, &func_rets, true)) {
     cx_tok_deinit(&id);
     cx_tok_deinit(&rets);
     cx_do_vec(&toks, struct cx_tok, t) { cx_tok_deinit(t); }
@@ -212,9 +213,10 @@ void cx_init_func(struct cx *cx) {
   cx_add_macro(cx, "func:", func_parse);
 
   cx_add_cfunc(cx, "imps",
-	       cx_args(cx_arg("f", cx->func_type)), cx_rets(cx_ret(cx->vect_type)),
+	       cx_args(cx_arg("f", cx->func_type)),
+	       cx_args(cx_arg(NULL, cx->vect_type)),
 	       imps_imp);
   
-  cx_add_cfunc(cx, "recall", cx_args(), cx_rets(), recall_imp);
-  cx_add_cfunc(cx, "upcall", cx_args(), cx_rets(), upcall_imp);
+  cx_add_cfunc(cx, "recall", cx_args(), cx_args(), recall_imp);
+  cx_add_cfunc(cx, "upcall", cx_args(), cx_args(), upcall_imp);
 }

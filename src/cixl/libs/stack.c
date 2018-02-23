@@ -1,3 +1,4 @@
+#include "cixl/args.h"
 #include "cixl/box.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
@@ -41,19 +42,19 @@ static bool flip_imp(struct cx_scope *scope) {
 }
 
 void cx_init_stack(struct cx *cx) {
-  cx_add_cfunc(cx, "|", cx_args(), cx_rets(), reset_imp);
-  cx_add_cfunc(cx, "_", cx_args(), cx_rets(), zap_imp);
+  cx_add_cfunc(cx, "|", cx_args(), cx_args(), reset_imp);
+  cx_add_cfunc(cx, "_", cx_args(), cx_args(), zap_imp);
 
   cx_add_cfunc(cx, "%",
-	       cx_args(cx_arg("v", cx->opt_type)), cx_rets(cx_nret(0)),
+	       cx_args(cx_arg("v", cx->opt_type)), cx_args(cx_narg(NULL, 0)),
 	       copy_imp);
 
   cx_add_cfunc(cx, "%%",
-	       cx_args(cx_arg("v", cx->opt_type)), cx_rets(cx_nret(0)),
+	       cx_args(cx_arg("v", cx->opt_type)), cx_args(cx_narg(NULL, 0)),
 	       clone_imp);
   
   cx_add_cfunc(cx, "~",
 	       cx_args(cx_arg("x", cx->opt_type), cx_arg("y", cx->opt_type)),
-	       cx_rets(cx_nret(1), cx_nret(0)),
+	       cx_args(cx_narg(NULL, 1), cx_narg(NULL, 0)),
 	       flip_imp);
 }

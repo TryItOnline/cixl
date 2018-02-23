@@ -1,13 +1,10 @@
-* add support for anonymous args & literal/named returns
-** join ret & arg structs
-** join parse code
-** update code to use arg fns
-*** replace ret( with arg(NULL, 
-** add support for anonymous args
-*** push instead of binding var if id is NULL
-** handle in parse/return op
+* add support for anonymous args
+** push instead of binding var if id is NULL
+* add support for named returns
 ** lookup variables in return op
-** update README
+* add support for literal returns
+** push literal in return op
+* update README
 ---
 * add rec: emit
 * add trait: emit

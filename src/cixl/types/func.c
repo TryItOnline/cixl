@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "cixl/args.h"
 #include "cixl/buf.h"
 #include "cixl/call_iter.h"
 #include "cixl/cx.h"
@@ -38,51 +39,11 @@ struct cx_func *cx_func_deinit(struct cx_func *func) {
   return func; 
 }
 
-struct cx_func_arg *cx_func_arg_deinit(struct cx_func_arg *arg) {
-  if (arg->id) { free(arg->id); }
-  if (!arg->type && arg->narg == -1) { cx_box_deinit(&arg->value); }
-  return arg;
-}
-
-struct cx_func_arg cx_arg(const char *id, struct cx_type *type) {
-  return (struct cx_func_arg) { .id = strdup(id), .type = type };
-}
-
-struct cx_func_arg cx_varg(struct cx_box *value) {
-  struct cx_func_arg arg = { .id = NULL, .type = NULL, .narg = -1};
-  cx_copy(&arg.value, value);
-  return arg;
-}
-
-struct cx_func_arg cx_narg(const char *id, int n) {
-  return (struct cx_func_arg) { .id = strdup(id), .type = NULL, .narg = n };
-}
-
-struct cx_func_ret cx_ret(struct cx_type *type) {
-  return (struct cx_func_ret) { .type = type, .narg = -1 };
-}
-
-struct cx_func_ret cx_nret(int n) {
-  return (struct cx_func_ret) { .type = NULL, .narg = n };
-}
-
-static void print_arg_id(struct cx_func_arg *a,
-			  struct cx_vec *args,
-			  FILE *out) {
-  if (a->type) {
-    fputs(a->type->id, out);
-  } else if (a->narg != -1) {
-    fprintf(out, "%d", a->narg);
-  } else {
-    cx_dump(&a->value, out);
-  }
-}
-
 struct cx_fimp *cx_add_fimp(struct cx_func *func,
-			    int nargs, struct cx_func_arg *args,
-			    int nrets, struct cx_func_ret *rets) {
+			    int nargs, struct cx_arg *args,
+			    int nrets, struct cx_arg *rets) {
   struct cx_vec imp_args;
-  cx_vec_init(&imp_args, sizeof(struct cx_func_arg));
+  cx_vec_init(&imp_args, sizeof(struct cx_arg));
 
   struct cx_buf id;
   cx_buf_open(&id);
@@ -91,11 +52,11 @@ struct cx_fimp *cx_add_fimp(struct cx_func *func,
     cx_vec_grow(&imp_args, nargs);
 
     for (int i=0; i < nargs; i++) {
-      struct cx_func_arg a = args[i];
+      struct cx_arg a = args[i];
       if (a.id) { a.sym_id = cx_sym(func->cx, a.id); }
-      *(struct cx_func_arg *)cx_vec_push(&imp_args) = a;
+      *(struct cx_arg *)cx_vec_push(&imp_args) = a;
       if (i) { fputc(' ', id.stream); }
-      print_arg_id(&a, &imp_args, id.stream);
+      cx_arg_print(&a, id.stream);
     }
   }
 
@@ -123,8 +84,8 @@ struct cx_fimp *cx_add_fimp(struct cx_func *func,
     cx_vec_grow(&imp->rets, nrets);
 
     for (int i=0; i < nrets; i++) {
-      struct cx_func_ret r = rets[i];
-      *(struct cx_func_ret *)cx_vec_push(&imp->rets) = r;
+      struct cx_arg r = rets[i];
+      *(struct cx_arg *)cx_vec_push(&imp->rets) = r;
     }
   }
 
