@@ -103,9 +103,8 @@ bool cx_eval_args(struct cx *cx,
     }
   }
 
-  if (tmp_ids.count) {
-    struct cx_tok *t = cx_vec_get(&tmp_ids, 0);
-    cx_error(cx, t->row, t->col, "Missing type for id: %s", t->as_ptr);
+  cx_do_vec(&tmp_ids, struct cx_tok, id) {
+    *(struct cx_func_arg *)cx_vec_push(args) = cx_arg(id->as_ptr, cx->any_type);      
   }
   
   ok = true;

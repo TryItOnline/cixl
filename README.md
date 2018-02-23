@@ -523,55 +523,36 @@ Correct!
 ```
 
 ### Functions
-The ```func:``` macro may be used to define named functions. Several implementations may be defined for the same name as long as they have the same arity and different argument types. Each function captures its defining environment and opens an implicit child scope that is closed on exit. Functions are allowed anywhere in the code, but are defined in order of appearance during compilation.
+The ```func:``` macro may be used to define functions. Several implementations may be defined for the same name as long as they have the same arity and different argument types. Functions capture their defining environment and open an implicit child scope on evaluation. Function definitions are allowed anywhere, but are processed in order of appearance during compilation.
+
+Functions are required to specify arguments and return values.
 
 ```
-   func: foo() (Int) 42;
-...| foo
+   func: say-hi(n)() ['Hi ' $n @!] say;
+...| 'stranger' say-hi
+...
+Hi stranger!
+[]
+```
+
+Arguments and return values may specify types, ```A``` may be used to match any type.
+
+```
+   func: int-add(x y Int)(Int) $x $y +;
+...| 7 35 int-add
 ...
 [42]
 ```
-
-Prefixing a function name with ```&``` pushes a reference on the stack.
-
-```
-   | &foo
-...
-[Func(foo)]
-
-   call
-...
-[42]
-```
-
-Each argument needs a type, ```A``` may be used to accept any type.
-
-```
-   func: bar(x A) (A) $x + 35;
-...| 7 bar
-...
-[42]
-```
-
-Several parameters may share the same type.
-
-```
-   func: baz(x y Int) (Int) $x + $y;
-...| 7 35 baz
-...
-[42]
-```
-
 
 An index may may be specified instead of type to refer to previous arguments, it is substituted for the actual type on evaluation.
 
 ```
-   func: baz(x A y Arg0) (Arg0) $x + $y;
-...| 1 2 baz
+   func: same-add(x Num y Arg0)(Arg0) $x $y +;
+...| 7 34 same-add
 ...
-[3]
+[42]
 
-   | 1 'foo' baz
+   | 7 'foo' same-add
 ...
 Error in row 1, col 7:
 Func not applicable: baz
@@ -580,17 +561,21 @@ Func not applicable: baz
 It's possible to specify literal values for arguments instead of names and types.
 
 ```
-   func: bar(x Int) (Bool) #f;
-...func: bar(42) (Bool) #t;
-...| 41 bar 42 bar
+   func: is-fortytwo(x Int)(Bool) #f;
+...func: is-fortytwo(42)(Bool) #t;
+...| 41 is-fortytwo
 ...
-[#f #t]
+[#f]
+
+   | 42 is-fortytwo
+...
+[#t]
 ```
 
 Multiple return types may be specified.
 
 ```
-   func: flip(x y Opt) (Arg1 Arg0)
+   func: flip(x y Opt)(Arg1 Arg0)
 ...  $y $x;
 ...1 2 flip
 ...
@@ -601,18 +586,18 @@ Overriding existing implementations is as easy as defining a function with ident
 
 ```
 
-   func: +(x y Int) (Int) 42;
+   func: +(x y Int)(Int) 42;
 ...| 1 2 +
 ...
 [42]
 ```
 
-```recall``` may be used to call the current function recursively in the same scope. The call may be placed anywhere in the function body, but the actual calling doesn't take place until it finishes; it's even possible to schedule several recalls at a time by repeating ```recall```.
+```recall``` may be used to call the current function recursively in the same scope. The call may be placed anywhere, but the actual calling doesn't take place until the current call exits.
 
 ```  
-   func: fib-rec(a b n Int) (Int)
+   func: fib-rec(a b n Int)(Int)
 ...  $n? {, recall $b, $a + $b, -- $n} $a if;
-...func: fib(n Int) (Int)
+...func: fib(n Int)(Int)
 ...  0 1 $n fib-rec;
 ...| 50 fib
 ...
@@ -648,15 +633,28 @@ A vector containing all implementations for a specific function in the order the
 
 ```
    
-   func: maybe-add(x Num y Arg0) (Arg0)
+   func: maybe-add(x Num y Arg0)(Arg0)
 ...  $x $y +;
-...func: maybe-add(x y Int) (Int)
+...func: maybe-add(x y Int)(Int)
 ...  $x 42 = if-else 42 {upcall $x $y};
 ...| 1 2 maybe-add
 ...
 [3]
 
    | 42 2 maybe-add
+...
+[42]
+```
+
+Prefixing a function name with ```&``` pushes a reference on the stack.
+
+```
+   func: fortytwo()(Int) 42;
+...| &fortytwo
+...
+[Func(fortytwo)]
+
+   call
 ...
 [42]
 ```
@@ -997,7 +995,7 @@ Cixl is statically and strongly typed; but since it's approach to typing is grad
 ```
 
 ### Records
-Records map finite sets of typed fields to values. Record types are required to specify an (optionally empty) list of parent types and traits; and will inherit any fields that don't clash with its own. Records are allowed anywhere in the code, but are defined in order of appearance during compilation. ```new``` may be used to create new record instances. Getting and putting field values is accomplished using symbols, uninitialized fields return ```#nil```.
+Records map finite sets of typed fields to values. Record types are required to specify an (optionally empty) list of parent types and traits; and will inherit any fields that don't clash with its own. Record definitions are allowed anywhere, but are processed in order of appearance during compilation. ```new``` may be used to create new record instances. Getting and putting field values is accomplished using symbols, uninitialized fields return ```#nil```.
 
 
 ```
@@ -1039,7 +1037,7 @@ Records support full deep equality by default, but ```=``` may be implemented to
 ```
 
 ### Traits
-Traits are abstract types that may be used to simplify type checking and/or function dispatch. Besides the standard offering; ```A```, ```Cmp```, ```Num```, ```Opt```, ```Rec``` and ```Seq```; new traits may be defined using the ```trait:``` macro. Traits are allowed anywhere in the code, but are defined in order of appearance during compilation.
+Traits are abstract types that may be used to simplify type checking and/or function dispatch. Besides the standard offering; ```A```, ```Cmp```, ```Num```, ```Opt```, ```Rec``` and ```Seq```; new traits may be defined using the ```trait:``` macro. Trait definitions are allowed anywhere, but are processed in order of appearance during compilation.
 
 ```
    trait: StrInt Str Int;

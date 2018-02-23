@@ -202,10 +202,11 @@ static void func_tests() {
   cx_init_math(&cx);
   cx_init_var(&cx);
   
-  run(&cx, "func: foo() (Int) 42; foo 42 = check");
-  run(&cx, "(let: x 42; func: foo() (Int) $x;) &foo call 42 = check");
-  run(&cx, "func: bar(x A) (Int) $x 35 +; 7 bar 42 = check");
-  run(&cx, "func: baz(x y Int z Arg0) (Int) $x $y $z + +; 1 3 5 baz 9 = check");
+  run(&cx, "func: foo0() (Int) 42; foo0 42 = check");
+  run(&cx, "func: foo2(x y) (Int) $x $y +; 1 2 foo2 3 = check");
+  run(&cx, "(let: x 42; func: foo0() (Int) $x;) &foo0 call 42 = check");
+  run(&cx, "func: foo1(x A) (Int) $x 35 +; 7 foo1 42 = check");
+  run(&cx, "func: foo3(x y Int z Arg0) (Int) $x $y $z + +; 1 3 5 foo3 9 = check");
 
   run(&cx,
       "func: maybe-add(x Num y Arg0) (Arg0) $x $y +; "

@@ -1,7 +1,5 @@
 * move bin_func fields into fimp
 ** remove struct & replace lookups
-* add support for untyped func: arg list tails
-** default to A
 * add rec: emit
 * add trait: emit
 ** add OTYPEDEF
@@ -45,6 +43,12 @@
 ** add find-key(Vect) fn
 ** add is-dirty fn
 ** add delete fn
+* add support for literal returns
+** handle in parse_rets/return op
+* add support for named returns
+** join ret & arg structs
+** update code to call cx_arg/narg/etc
+*** NULL id if not used
 
 | Bin new % 'func: foo() (Int) 42; &foo call say' compile emit
 | Bin new % 'func: foo() (Int) 42; &foo call' compile emit
