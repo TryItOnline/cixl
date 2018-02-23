@@ -1,9 +1,8 @@
 * add support for anonymous args & literal/named returns
 ** join ret & arg structs
 ** join parse code
-** rename args/rets to in_args/out_args
-** change ret fns to create arg with NULL id
-** remove cx_rets, use args
+** update code to use arg fns
+*** replace ret( with arg(NULL, 
 ** add support for anonymous args
 *** push instead of binding var if id is NULL
 ** handle in parse/return op
