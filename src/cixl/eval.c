@@ -53,10 +53,10 @@ bool cx_eval_args(struct cx *cx,
     if (t->type == CX_TID()) {
       char *id = t->as_ptr;
 
-      if (id[0] == 'T' && isdigit(id[1])) {
-	int i = strtoimax(id+1, NULL, 10);
+      if (strncmp(id, "Arg", 3) == 0 && isdigit(id[3])) {
+	int i = strtoimax(id+3, NULL, 10);
 
-	if (i >= args->count || (!i && id[1] != '0')) {
+	if (i >= args->count || (!i && id[3] != '0')) {
 	  cx_error(cx, t->row, t->col, "Invalid arg type: %s", t->as_ptr);
 	  goto exit;
 	}
@@ -122,10 +122,10 @@ bool cx_eval_rets(struct cx *cx,
     if (t->type == CX_TID()) {
       char *id = t->as_ptr;
 
-      if (id[0] == 'T' && isdigit(id[1])) {
-	int i = strtoimax(id+1, NULL, 10);
+      if (strncmp(id, "Arg", 3) == 0 && isdigit(id[3])) {
+	int i = strtoimax(id+3, NULL, 10);
 
-	if (i >= args->count || (!i && id[1] != '0')) {
+	if (i >= args->count || (!i && id[3] != '0')) {
 	  cx_error(cx, t->row, t->col, "Invalid ret: %s", t->as_ptr);
 	  return false;
 	}

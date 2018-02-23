@@ -205,10 +205,10 @@ static void func_tests() {
   run(&cx, "func: foo() (Int) 42; foo 42 = check");
   run(&cx, "(let: x 42; func: foo() (Int) $x;) &foo call 42 = check");
   run(&cx, "func: bar(x A) (Int) $x 35 +; 7 bar 42 = check");
-  run(&cx, "func: baz(x y Int z T0) (Int) $x $y $z + +; 1 3 5 baz 9 = check");
+  run(&cx, "func: baz(x y Int z Arg0) (Int) $x $y $z + +; 1 3 5 baz 9 = check");
 
   run(&cx,
-      "func: maybe-add(x y Num) (T0) $x $y +; "
+      "func: maybe-add(x Num y Arg0) (Arg0) $x $y +; "
       "func: maybe-add(x y Int) (Int) $x 42 = 42 {$x $y upcall} if-else; "
       "1 2 maybe-add 3 = check "
       "42 2 maybe-add 42 = check");

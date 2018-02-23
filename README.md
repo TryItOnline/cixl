@@ -566,7 +566,7 @@ Several parameters may share the same type.
 An index may may be specified instead of type to refer to previous arguments, it is substituted for the actual type on evaluation.
 
 ```
-   func: baz(x A y T0) (T0) $x + $y;
+   func: baz(x A y Arg0) (Arg0) $x + $y;
 ...| 1 2 baz
 ...
 [3]
@@ -590,7 +590,7 @@ It's possible to specify literal values for arguments instead of names and types
 Multiple return types may be specified.
 
 ```
-   func: flip(x y Opt) (T1 T0)
+   func: flip(x y Opt) (Arg1 Arg0)
 ...  $y $x;
 ...1 2 flip
 ...
@@ -648,13 +648,17 @@ A vector containing all implementations for a specific function in the order the
 
 ```
    
-   func: maybe-add(x y Num) (T0)
-...  $x + $y;
+   func: maybe-add(x Num y Arg0) (Arg0)
+...  $x $y +;
 ...func: maybe-add(x y Int) (Int)
-...  $x = 42 if 42 {upcall $x $y};
-...| 1 2 maybe-add 42 2 maybe-add
+...  $x 42 = if-else 42 {upcall $x $y};
+...| 1 2 maybe-add
 ...
-[3 42]
+[3]
+
+   | 42 2 maybe-add
+...
+[42]
 ```
 
 ### Conversions
