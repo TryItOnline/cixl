@@ -1,6 +1,14 @@
 * move bin_func start_pc into fimp
 ** remove struct & replace lookups
 ** check imp->bin == bin in funcall emit like eval
+* add support for literal/named returns
+** join ret & arg structs
+** join parse code
+** handle in parse/return op
+** lookup variables in return op
+** update code to call cx_arg/narg/etc
+*** NULL id if not used
+---
 * add rec: emit
 * add trait: emit
 ** add OTYPEDEF
@@ -15,7 +23,6 @@
 ** convert read to iter
 *** keep bin ref
 ** update example and add to post
-* ---
 * add MFile based on cx_buf
 ** derive RWFile
 * add seq zip/unzip fns
@@ -44,14 +51,6 @@
 ** add find-key(Vect) fn
 ** add is-dirty fn
 ** add delete fn
-* add support for literal returns
-** handle in parse_rets/return op
-* add support for named returns
-** join ret & arg structs
-** join parse code
-** lookup variables in return op
-** update code to call cx_arg/narg/etc
-*** NULL id if not used
 
 | Bin new % 'func: foo() (Int) 42; &foo call say' compile emit
 | Bin new % 'func: foo() (Int) 42; &foo call' compile emit
