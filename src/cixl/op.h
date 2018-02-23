@@ -54,7 +54,6 @@ struct cx_else_op {
 
 struct cx_fimp_op {
   struct cx_fimp *imp;
-  size_t start_op, nops;
 };
 
 struct cx_fimpdef_op {

@@ -142,7 +142,7 @@ cx_op_type(CX_OEND, {
   });
 
 static bool fimp_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
-  cx->pc += op->as_fimp.nops;
+  cx->pc += op->as_fimp.imp->nops;
   return true;
 }
 
@@ -150,7 +150,7 @@ static bool fimp_emit(struct cx_op *op,
 		      struct cx_bin *bin,
 		      FILE *out,
 		      struct cx *cx) {
-  fprintf(out, CX_TAB "goto op%zd;\n", op->pc+op->as_fimp.nops+1);
+  fprintf(out, CX_TAB "goto op%zd;\n", op->pc+op->as_fimp.imp->nops+1);
   return true;
 }
 
@@ -162,9 +162,10 @@ static void fimp_emit_init(struct cx_op *op,
   fprintf(out,
 	  CX_ITAB "struct cx_func *func = cx_get_func(cx, \"%s\", false);\n"
 	  CX_ITAB "struct cx_fimp *imp = cx_get_fimp(func, \"%s\", false);\n"
-	  CX_ITAB "cx_bin_add_func(cx->bin, imp, %zd);\n"
-	  CX_ITAB "imp->bin = cx_bin_ref(cx->bin);\n",
-	  imp->func->id, imp->id, op->pc+1);
+	  CX_ITAB "imp->bin = cx_bin_ref(cx->bin);\n"
+	  CX_ITAB "imp->start_pc = %zd;\n"
+	  CX_ITAB "imp->nops = %zd;\n",
+	  imp->func->id, imp->id, imp->start_pc, imp->nops);
 }
 
 static void fimp_emit_funcs(struct cx_op *op, struct cx_set *out, struct cx *cx) {
@@ -309,9 +310,8 @@ static bool funcall_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
   }
     
   if (!imp->ptr && imp->bin == bin) {
-    struct cx_bin_func *f = cx_test(cx_bin_get_func(imp->bin, imp));
     cx_call_init(cx_vec_push(&cx->calls), cx->row, cx->col, imp, cx->pc);
-    cx->pc = f->start_pc;
+    cx->pc = imp->start_pc;
     return true;
   }
   
@@ -344,19 +344,24 @@ static bool funcall_emit(struct cx_op *op,
 	CX_TAB "  return false;\n"
 	CX_TAB "}\n\n",
 	out);
-    
-  if (imp && !imp->ptr) {
-    struct cx_bin_func *f = cx_test(cx_bin_get_func(imp->bin, imp));
-    
+
+  if (imp) {
     fprintf(out,
-	    CX_TAB "cx_call_init(cx_vec_push(&cx->calls), cx->row, cx->col, "
+	    CX_TAB "if (!imp->ptr && imp->bin == cx->bin) {\n"
+	    CX_TAB "  cx_call_init(cx_vec_push(&cx->calls), cx->row, cx->col, "
 	           "imp, %zd);\n"
-	    CX_TAB "goto op%zd;\n",
-	    op->pc+1, f->start_pc);
+	    CX_TAB "  goto op%zd;\n"
+	    CX_TAB "} else ",
+	    op->pc+1, imp->start_pc);
   } else {
-    fputs(CX_TAB "if (!cx_fimp_call(imp, s)) { return false; }\n", out);
+    fputs(CX_TAB, out);
   }
   
+  fputs("if (!cx_fimp_call(imp, s)) {\n"
+	CX_TAB "  return false;\n"
+	CX_TAB "}\n",
+	out);
+
   return true;
 }
 

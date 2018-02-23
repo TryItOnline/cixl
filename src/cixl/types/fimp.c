@@ -24,6 +24,7 @@ struct cx_fimp *cx_fimp_init(struct cx_fimp *imp,
   imp->idx = idx;
   imp->ptr = NULL;
   imp->bin = NULL;
+  imp->start_pc = imp->nops = 0;
   imp->scope = NULL;
   cx_vec_init(&imp->args, sizeof(struct cx_func_arg));
   cx_vec_init(&imp->rets, sizeof(struct cx_func_ret));
@@ -76,9 +77,7 @@ bool cx_fimp_match(struct cx_fimp *imp, struct cx_scope *scope) {
   return true;
 }
 
-struct cx_bin_func *cx_fimp_compile(struct cx_fimp *imp,
-				    size_t tok_idx,
-				    struct cx_bin *out) {
+bool cx_fimp_compile(struct cx_fimp *imp, size_t tok_idx, struct cx_bin *out) {
   struct cx *cx = imp->func->cx;
   size_t start_pc = out->ops.count;
   
@@ -93,7 +92,7 @@ struct cx_bin_func *cx_fimp_compile(struct cx_fimp *imp,
     
     if (!cx_compile(cx, cx_vec_start(&imp->toks), cx_vec_end(&imp->toks), out)) {
       cx_error(cx, cx->row, cx->col, "Failed compiling fimp");
-      return NULL;
+      return false;
     }
   }
   
@@ -102,7 +101,7 @@ struct cx_bin_func *cx_fimp_compile(struct cx_fimp *imp,
 		  out->toks.count-1);
   op->as_return.imp = imp;
   op->as_return.pc = start_pc;  
-  return cx_bin_add_func(out, imp, start_pc);
+  return true;
 }
 
 bool cx_fimp_inline(struct cx_fimp *imp,
@@ -110,21 +109,16 @@ bool cx_fimp_inline(struct cx_fimp *imp,
 		    struct cx_bin *out,
 		    struct cx *cx) {
   if (imp->bin) { return true; }
-  size_t i = out->ops.count;
-  struct cx_op *op = cx_op_init(out, CX_OFIMP(), tok_idx);
-  op->as_fimp.imp = imp;
-  op->as_fimp.start_op = i+1;
-  if (!cx_fimp_compile(imp, tok_idx, out)) { return false; }
-  op = cx_vec_get(&out->ops, i);
-  op->as_fimp.nops = out->ops.count - op->as_fimp.start_op;
   imp->bin = cx_bin_ref(out);
+  imp->start_pc = out->ops.count+1;
+  cx_op_init(out, CX_OFIMP(), tok_idx)->as_fimp.imp = imp;
+  if (!cx_fimp_compile(imp, tok_idx, out)) { return false; }
+  imp->nops = out->ops.count - imp->start_pc;
   return true;
 }
 
 bool cx_fimp_eval(struct cx_fimp *imp, struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  struct cx_bin_func *bin = cx_test(cx_bin_get_func(cx_test(imp->bin), imp));
-  return cx_eval(imp->bin, bin->start_pc, cx);
+  return cx_eval(imp->bin, imp->start_pc, scope->cx);
 }
 
 bool cx_fimp_call(struct cx_fimp *imp, struct cx_scope *scope) {

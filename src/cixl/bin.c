@@ -27,8 +27,6 @@ static bool eval(struct cx *cx) {
 struct cx_bin *cx_bin_init(struct cx_bin *bin) {
   cx_vec_init(&bin->toks, sizeof(struct cx_tok));
   cx_vec_init(&bin->ops, sizeof(struct cx_op));
-  cx_set_init(&bin->funcs, sizeof(struct cx_bin_func), cx_cmp_ptr);
-  bin->funcs.key_offs = offsetof(struct cx_bin_func, imp);
   bin->init_offs = 0;
   bin->nrefs = 1;
   bin->eval = eval;
@@ -44,7 +42,6 @@ struct cx_bin *cx_bin_deinit(struct cx_bin *bin) {
   }
   
   cx_vec_deinit(&bin->ops);
-  cx_set_deinit(&bin->funcs);
   return bin;
 }
 
@@ -57,22 +54,6 @@ void cx_bin_deref(struct cx_bin *bin) {
   cx_test(bin->nrefs);
   bin->nrefs--;
   if (!bin->nrefs) { free(cx_bin_deinit(bin)); }
-}
-
-struct cx_bin_func *cx_bin_add_func(struct cx_bin *bin,
-				    struct cx_fimp *imp,
-				    size_t start_pc) {
-  struct cx_bin_func *f = cx_set_get(&bin->funcs, &imp);
-  if (f) { return f; }
-
-  f = cx_set_insert(&bin->funcs, &imp);
-  f->imp = imp;
-  f->start_pc = start_pc;
-  return f;
-}
-
-struct cx_bin_func *cx_bin_get_func(struct cx_bin *bin, struct cx_fimp *imp) {
-  return cx_set_get(&bin->funcs, &imp);
 }
 
 bool cx_compile(struct cx *cx,
