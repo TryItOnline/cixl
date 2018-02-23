@@ -47,6 +47,8 @@
 ** handle in parse_rets/return op
 * add support for named returns
 ** join ret & arg structs
+** join parse code
+** lookup variables in return op
 ** update code to call cx_arg/narg/etc
 *** NULL id if not used
 

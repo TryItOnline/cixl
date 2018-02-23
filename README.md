@@ -25,7 +25,7 @@ Press Return twice to evaluate.
 
    1 2 +
 ...
-3
+[3]
 
    quit
 ```
