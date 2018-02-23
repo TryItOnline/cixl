@@ -596,7 +596,7 @@ Overriding existing implementations is as easy as defining a function with ident
 
 ```  
    func: fib-rec(a b n Int)(Int)
-...  $n? {, recall $b, $a + $b, -- $n} $a if;
+...  $n? {$b $a $b + $n -- recall} $a if-else;
 ...func: fib(n Int)(Int)
 ...  0 1 $n fib-rec;
 ...| 50 fib
