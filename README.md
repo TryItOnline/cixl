@@ -701,8 +701,8 @@ Basic rational arithmetics is supported out of the box.
 The ```#nil``` value may be used to represent missing values. Since ```Nil``` isn't derived from ```A```, stray ```#nil``` values never get far before being trapped in a function call; ```Opt``` may be used instead where ```#nil``` is allowed.
 
 ```
-...func: foo(x A) ();
-...func: bar(x Opt) (Int) 42;
+...func: foo(x A)();
+...func: bar(x Opt)(Int) 42;
 ...| #nil foo
 ...
 Error in row 1, col 1:
@@ -848,7 +848,7 @@ Iterators may be created manually by calling ```iter``` on any sequence and cons
 Functions and lambdas are sequences, calling ```iter``` creates an iterator that keeps returning values until the target returns ```#nil```.
 
 ```
-   func: forever(n Int) (Lambda) {$n};
+   func: forever(n Int)(Lambda) {$n};
 ...| 42 forever iter
 ...% next ~ next
 ...
@@ -1030,7 +1030,7 @@ Records support full deep equality by default, but ```=``` may be implemented to
 ...
 [#f]
 
-   func: =(a b Foo) (Bool) $a `x get $b `x get =;
+   func: =(a b Foo)(Bool) $a `x get $b `x get =;
 ...| $bar $baz =
 ...
 [#t]
@@ -1147,10 +1147,10 @@ There is still plenty of work remaining in the profiling and benchmarking depart
 Let's start with a tail-recursive fibonacci to exercise the interpreter loop, it's worth mentioning that Cixl uses 64-bit integers while Python settles for 32-bit.
 
 ```
-func: fib-rec(a b n Int) (Int)
+func: fib-rec(a b n Int)(Int)
   $n?<Opt> {$b $a $b +<Int Int> $n -- recall} $a if-else;
 
-func: fib(n Int) (Int)
+func: fib(n Int)(Int)
   0 1 $n fib-rec;
 
 {10000 {50 fib _} times} clock 1000000 / int say

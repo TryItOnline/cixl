@@ -20,7 +20,7 @@ rec: DBTable()
   key-recs Table
   rec-keys Table;
 
-func: new-db-table(n Str k Vect) (DBTable)
+func: new-db-table(n Str k Vect)(DBTable)
   let: t DBTable new;
   $t `file     $n `a+ fopen put
   $t `key      $k           put
@@ -28,7 +28,7 @@ func: new-db-table(n Str k Vect) (DBTable)
   $t `key-recs Table new    put
   $t;
 
-func: get-rec-key(t DBTable r Rec) (Vect)
+func: get-rec-key(t DBTable r Rec)(Vect)
   $t `key get {$r ~ get} map vect;
 
 /*
@@ -48,7 +48,7 @@ rec: DBChange()
   rec   Rec
   op    Sym;
 
-func: push-change(t DBTable k Vect r Rec o Sym) ()
+func: push-change(t DBTable k Vect r Rec o Sym)()
   let: c DBChange new;
   $c `table $t put
   $c `key   $k put
@@ -61,7 +61,7 @@ func: push-change(t DBTable k Vect r Rec o Sym) ()
   and cloned to enable change management.
 */
 
-func: upsert(t DBTable r Rec) ()
+func: upsert(t DBTable r Rec)()
   let: krs $t `key-recs get;
   let: rks $t `rec-keys get;  
   let: tk $rks $r get;
@@ -84,7 +84,7 @@ func: upsert(t DBTable r Rec) ()
   The current set of changes is flushed to disk on commit.
 */
 
-func: commit() ()
+func: commit()()
   let: dirty Table new;
 
   $db-trans {
@@ -101,7 +101,7 @@ func: commit() ()
   Or reverted on rollback.
 */
 
-func: rollback() ()
+func: rollback()()
   $db-trans {
     let: c;
     let: t $c `table get;
