@@ -750,7 +750,7 @@ Vectors may be sorted in place by calling ```sort```.
 Values may be paired by calling ```.```, the result provides reference semantics and access to parts using ```x``` and ```y```.
 
 ```
-   | 1.2
+   | 1 2 .
 ...
 [(1 2)r1]
 
