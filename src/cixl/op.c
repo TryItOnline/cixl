@@ -162,7 +162,8 @@ static void fimp_emit_init(struct cx_op *op,
   fprintf(out,
 	  CX_ITAB "struct cx_func *func = cx_get_func(cx, \"%s\", false);\n"
 	  CX_ITAB "struct cx_fimp *imp = cx_get_fimp(func, \"%s\", false);\n"
-	  CX_ITAB "cx_bin_add_func(cx->bin, imp, %zd);\n",
+	  CX_ITAB "cx_bin_add_func(cx->bin, imp, %zd);\n"
+	  CX_ITAB "imp->bin = cx_bin_ref(cx->bin);\n",
 	  imp->func->id, imp->id, op->pc+1);
 }
 

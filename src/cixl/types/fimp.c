@@ -101,9 +101,7 @@ struct cx_bin_func *cx_fimp_compile(struct cx_fimp *imp,
 		  CX_ORETURN(),
 		  out->toks.count-1);
   op->as_return.imp = imp;
-  op->as_return.pc = start_pc;
-  
-  imp->bin = cx_bin_ref(out);
+  op->as_return.pc = start_pc;  
   return cx_bin_add_func(out, imp, start_pc);
 }
 
@@ -119,6 +117,7 @@ bool cx_fimp_inline(struct cx_fimp *imp,
   if (!cx_fimp_compile(imp, tok_idx, out)) { return false; }
   op = cx_vec_get(&out->ops, i);
   op->as_fimp.nops = out->ops.count - op->as_fimp.start_op;
+  imp->bin = cx_bin_ref(out);
   return true;
 }
 

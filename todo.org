@@ -1,5 +1,6 @@
-* move bin_func fields into fimp
+* move bin_func start_pc into fimp
 ** remove struct & replace lookups
+** check imp->bin == bin in funcall emit like eval
 * add rec: emit
 * add trait: emit
 ** add OTYPEDEF
