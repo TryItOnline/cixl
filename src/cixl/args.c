@@ -39,10 +39,7 @@ void cx_arg_print(struct cx_arg *a, FILE *out) {
   }
 }
 
-bool cx_parse_args(struct cx *cx,
-		   struct cx_vec *toks,
-		   struct cx_vec *args,
-		   bool ret) {
+bool cx_parse_args(struct cx *cx, struct cx_vec *toks, struct cx_vec *args) {
   struct cx_vec tmp_ids;
   cx_vec_init(&tmp_ids, sizeof(struct cx_tok));
   bool ok = false;
@@ -77,12 +74,8 @@ bool cx_parse_args(struct cx *cx,
 	}
       
 	cx_vec_clear(&tmp_ids);
-      } else if (ret) {
-	*(struct cx_arg *)cx_vec_push(args) = cx_arg(NULL, type);
       } else {
-	struct cx_box box;
-	cx_box_init(&box, cx->meta_type)->as_ptr = type;
-	*(struct cx_arg *)cx_vec_push(args) = cx_varg(&box);
+	*(struct cx_arg *)cx_vec_push(args) = cx_arg(NULL, type);
       }
     } else {
       cx_error(cx, t->row, t->col, "Unexpected tok: %d", t->type);

@@ -72,7 +72,7 @@ static bool func_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   struct cx_vec func_args;
   cx_vec_init(&func_args, sizeof(struct cx_arg));
 
-  if (!cx_parse_args(cx, &args.as_vec, &func_args, false)) {
+  if (!cx_parse_args(cx, &args.as_vec, &func_args)) {
     cx_tok_deinit(&id);
     cx_tok_deinit(&args);
     cx_do_vec(&toks, struct cx_tok, t) { cx_tok_deinit(t); }
@@ -105,7 +105,7 @@ static bool func_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   struct cx_vec func_rets;
   cx_vec_init(&func_rets, sizeof(struct cx_arg));
 
-  if (!cx_parse_args(cx, &rets.as_vec, &func_rets, true)) {
+  if (!cx_parse_args(cx, &rets.as_vec, &func_rets)) {
     cx_tok_deinit(&id);
     cx_tok_deinit(&rets);
     cx_do_vec(&toks, struct cx_tok, t) { cx_tok_deinit(t); }
