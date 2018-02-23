@@ -1,13 +1,14 @@
-* move bin_func start_pc into fimp
-** remove struct & replace lookups
-** check imp->bin == bin in funcall emit like eval
-* add support for literal/named returns
+* add support for anonymous args & literal/named returns
 ** join ret & arg structs
 ** join parse code
+** rename args/rets to in_args/out_args
+** change ret fns to create arg with NULL id
+** remove cx_rets, use args
+** add support for anonymous args
+*** push instead of binding var if id is NULL
 ** handle in parse/return op
 ** lookup variables in return op
-** update code to call cx_arg/narg/etc
-*** NULL id if not used
+** update README
 ---
 * add rec: emit
 * add trait: emit
