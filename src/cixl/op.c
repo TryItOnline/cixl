@@ -307,14 +307,11 @@ static bool funcall_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
     return false;
   }
     
-  if (!imp->ptr) {
-    struct cx_bin_func *f = cx_bin_get_func(cx->bin, imp);
-
-    if (f) {
-      cx_call_init(cx_vec_push(&cx->calls), cx->row, cx->col, imp, cx->pc);
-      cx->pc = f->start_pc;
-      return true;
-    }
+  if (!imp->ptr && imp->bin == bin) {
+    struct cx_bin_func *f = cx_test(cx_bin_get_func(imp->bin, imp));
+    cx_call_init(cx_vec_push(&cx->calls), cx->row, cx->col, imp, cx->pc);
+    cx->pc = f->start_pc;
+    return true;
   }
   
   return cx_fimp_call(imp, s);
@@ -348,7 +345,7 @@ static bool funcall_emit(struct cx_op *op,
 	out);
     
   if (imp && !imp->ptr) {
-    struct cx_bin_func *f = cx_test(cx_bin_get_func(bin, imp));
+    struct cx_bin_func *f = cx_test(cx_bin_get_func(imp->bin, imp));
     
     fprintf(out,
 	    CX_TAB "cx_call_init(cx_vec_push(&cx->calls), cx->row, cx->col, "

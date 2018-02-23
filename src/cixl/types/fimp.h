@@ -17,6 +17,7 @@ struct cx_fimp {
   struct cx_vec args, rets;
   cx_fimp_ptr_t ptr;
   struct cx_vec toks;
+  struct cx_bin *bin;
   struct cx_scope *scope;
 };
 

@@ -23,6 +23,7 @@ struct cx_fimp *cx_fimp_init(struct cx_fimp *imp,
   imp->emit_id = cx_emit_id(func->emit_id, id);
   imp->idx = idx;
   imp->ptr = NULL;
+  imp->bin = NULL;
   imp->scope = NULL;
   cx_vec_init(&imp->args, sizeof(struct cx_func_arg));
   cx_vec_init(&imp->rets, sizeof(struct cx_func_ret));
@@ -42,6 +43,7 @@ struct cx_fimp *cx_fimp_deinit(struct cx_fimp *imp) {
   cx_do_vec(&imp->toks, struct cx_tok, t) { cx_tok_deinit(t); }
   cx_vec_deinit(&imp->toks);
 
+  if (imp->bin) { cx_bin_deref(imp->bin); }
   if (imp->scope) { cx_scope_deref(imp->scope); }
   return imp;
 }
@@ -101,6 +103,7 @@ struct cx_bin_func *cx_fimp_compile(struct cx_fimp *imp,
   op->as_return.imp = imp;
   op->as_return.pc = start_pc;
   
+  imp->bin = cx_bin_ref(out);
   return cx_bin_add_func(out, imp, start_pc);
 }
 
@@ -108,8 +111,7 @@ bool cx_fimp_inline(struct cx_fimp *imp,
 		    size_t tok_idx,
 		    struct cx_bin *out,
 		    struct cx *cx) {
-  struct cx_bin_func *bin = cx_bin_get_func(out, imp);
-  if (bin) { return true; }
+  if (imp->bin) { return true; }
   size_t i = out->ops.count;
   struct cx_op *op = cx_op_init(out, CX_OFIMP(), tok_idx);
   op->as_fimp.imp = imp;
@@ -122,8 +124,8 @@ bool cx_fimp_inline(struct cx_fimp *imp,
 
 bool cx_fimp_eval(struct cx_fimp *imp, struct cx_scope *scope) {
   struct cx *cx = scope->cx;
-  struct cx_bin_func *bin = cx_bin_get_func(cx->bin, imp);
-  return bin && cx_eval(cx->bin, bin->start_pc, cx);
+  struct cx_bin_func *bin = cx_test(cx_bin_get_func(cx_test(imp->bin), imp));
+  return cx_eval(imp->bin, bin->start_pc, cx);
 }
 
 bool cx_fimp_call(struct cx_fimp *imp, struct cx_scope *scope) {
