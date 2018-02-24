@@ -1,10 +1,9 @@
-* add support for anonymous args
-** push instead of binding var if id is NULL
 * add support for named returns
 ** lookup variables in return op
 * add support for literal returns
 ** push literal in return op
-* update README
+* update putargs emit
+* update func README
 ---
 * add rec: emit
 * add trait: emit

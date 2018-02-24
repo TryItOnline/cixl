@@ -575,20 +575,46 @@ cx_op_type(CX_OPUSH, {
 static bool putargs_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
   struct cx_fimp *imp = op->as_putargs.imp;
   struct cx_scope *ds = cx_scope(cx, 0), *ss = ds->stack.count ? ds : cx_scope(cx, 1);
-
+  int nargs = imp->args.count;
+  
   for (struct cx_arg *a = cx_vec_peek(&imp->args, 0);
        a >= (struct cx_arg *)imp->args.items;
-       a--) {
-    struct cx_box *src = cx_pop(ss, false);
-    if (!src) { return false; }
-    
+       a--) { 
     if (a->id) {
-      *cx_put_var(ds, a->sym_id, true) = *src;
-    } else {
-      cx_box_deinit(src);
+      struct cx_box *v = cx_pop(ss, false);
+      if (!v) { return false; }
+      *cx_put_var(ds, a->sym_id, true) = *v;
+      nargs--;
+    }
+  }
+  
+  if (nargs) {
+    size_t i = ss->stack.count-1;
+    
+    for (struct cx_arg *a = cx_vec_peek(&imp->args, 0);
+       a >= (struct cx_arg *)imp->args.items;
+       a--) { 
+      if (!a->id && !a->type && a->narg == -1) {
+	cx_vec_delete(&ss->stack, i);
+	nargs--;
+      }
+      
+      i--;
     }
   }
 
+  if (nargs && ds != ss) {
+    struct cx_box *v = cx_vec_peek(&ss->stack, nargs-1);
+  
+    for (struct cx_arg *a = cx_vec_start(&imp->args);
+	 a != cx_vec_end(&imp->args);
+	 a++) {    
+      if (!a->id) { *cx_push(ds) = *v++; }
+    }
+
+    ss->stack.count -= nargs;
+  }
+  
   return true;
 }
 
