@@ -2,7 +2,7 @@
 #### 2018-02-24
 
 ### Intro
-Functions/methods are an essential part of most programming languages, and one of the aspects most likely to offer different capabilities depending on language. This post describes the steps taken by [Cixl](https://github.com/basic-gongfu/cixl) towards unifying syntax and semantics for specifying function arguments and results.
+Functions/methods are an essential part of most programming languages, and one of the aspects likely to offer different capabilities depending on language. This post describes the steps taken by [Cixl](https://github.com/basic-gongfu/cixl) towards unifying syntax and semantics for specifying function arguments and results.
 
 ### Baby Steps
 [Cixl](https://github.com/basic-gongfu/cixl) started out with support for multiple dispatch and single results, returning the top of the stack on exit.
@@ -72,13 +72,13 @@ Named results is one of those features that people either love or hate; I guess 
 While I wouldn't have thought of adding support for literal results unless pushed in that direction; the more I thought about it, the more arbitrary it seemed to only support literal arguments. The specified value is pushed on the calling stack. 
 
 ```
-   func: fortytwo(Int)(#f) _;
-...func: fortytwo(42)(#t);
-...| 21 fortytwo
+   func: is-fortytwo(Int)(#f) _;
+...func: is-fortytwo(42)(#t);
+...| 21 is-fortytwo
 ...
 [#f]
 
-...| 42 fortytwo
+...| 42 is-fortytwo
 ...
 [#t]
 ```
