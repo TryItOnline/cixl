@@ -1,9 +1,9 @@
 * unify function io
-** add support for literal returns
-*** push literal in return op
+** fix test.cx emit
+*** add wfile emit
 ** update putargs emit
 ** update return emit
-** emit test3/4.cx
+** emit test3/4/5.cx
 ** signal error for references to value arguments
 ** signal error for return references to anonymous arguments
 * update func README

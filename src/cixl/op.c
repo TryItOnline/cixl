@@ -390,41 +390,6 @@ cx_op_type(CX_OFUNCALL, {
     type.emit_fimps = funcall_emit_fimps;
   });
 
-static bool getconst_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
-  struct cx_box *v = cx_get_const(cx, op->as_getconst.id, false);
-  if (!v) { return false; }
-  cx_copy(cx_push(cx_scope(cx, 0)), v);
-  return true;
-}
-
-static bool getconst_emit(struct cx_op *op,
-			  struct cx_bin *bin,
-			  FILE *out,
-			  struct cx *cx) {
-  fprintf(out, CX_TAB "struct cx_box *v = cx_get_const(cx, %s, false);\n",
-	  op->as_getconst.id.emit_id);
-
-  fputs(CX_TAB "if (!v) { return false; }\n"
-	CX_TAB "cx_copy(cx_push(cx_scope(cx, 0)), v);\n",
-	out);
-  
-  return true;
-}
-
-static void getconst_emit_syms(struct cx_op *op, struct cx_set *out, struct cx *cx) {
-  struct cx_sym
-    id = op->as_getconst.id,
-    *ok = cx_set_insert(out, &id);
-  
-  if (ok) { *ok = id; }
-}
-
-cx_op_type(CX_OGETCONST, {
-    type.eval = getconst_eval;
-    type.emit = getconst_emit;
-    type.emit_syms = getconst_emit_syms;
-  });
-
 static bool getvar_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
   struct cx_scope *s = cx_scope(cx, 0);
   struct cx_sym id = op->as_getvar.id;

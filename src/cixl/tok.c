@@ -130,11 +130,7 @@ static ssize_t id_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) {
   struct cx_tok *tok = cx_vec_get(&bin->toks, tok_idx);
   char *id = tok->as_ptr;
   
-  if (id[0] == '#') {
-    cx_op_init(bin,
-	       CX_OGETCONST(),
-	       tok_idx)->as_getconst.id = cx_sym(cx, id+1);    
-  } else if (id[0] == '$') {
+  if (id[0] == '$') {
     cx_op_init(bin, CX_OGETVAR(), tok_idx)->as_getvar.id = cx_sym(cx, id+1);
   } else {
     cx_error(cx, tok->row, tok->col, "Unknown id: '%s'", id);
