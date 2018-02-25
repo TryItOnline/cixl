@@ -1,6 +1,4 @@
 * unify function io
-** fix test.cx emit
-*** add wfile emit
 ** update putargs emit
 ** update return emit
 ** emit test3/4/5.cx

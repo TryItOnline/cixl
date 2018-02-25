@@ -19,7 +19,13 @@ struct cx_box *cx_box_deinit(struct cx_box *box) {
 }
 
 bool cx_box_emit(struct cx_box *box, const char *exp, FILE *out) {
-  return cx_test(box->type->emit)(box, exp, out);
+  if (!box->type->emit) {
+    struct cx *cx = box->type->cx;
+    cx_error(cx, cx->row, cx->col, "Emit not implemented: %s", box->type->id);
+    return false;
+  }
+  
+  return box->type->emit(box, exp, out);
 }
 
 bool cx_eqval(struct cx_box *x, struct cx_box *y) {

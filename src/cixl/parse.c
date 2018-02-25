@@ -44,10 +44,16 @@ static bool parse_const(struct cx *cx,
   struct cx_box *v = cx_get_const(cx, cx_sym(cx, id+1), false);
   if (!v) { return false; }
 
-  cx_copy(&cx_tok_init(cx_vec_push(out),
-		       CX_TLITERAL(),
-		       cx->row, cx->col)->as_box,
-	  v);
+  if (v->type->emit) {
+    cx_copy(&cx_tok_init(cx_vec_push(out),
+			 CX_TLITERAL(),
+			 cx->row, cx->col)->as_box,
+	    v);
+  } else {
+    cx_tok_init(cx_vec_push(out),
+		CX_TID(),
+		cx->row, cx->col)->as_ptr = strdup(id);
+  }
   
   return true;
 }
