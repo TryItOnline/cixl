@@ -4,7 +4,7 @@
 ** signal error for references to value arguments
 ** signal error for return references to anonymous arguments
 * update func README
----
+* ---
 * add rec: emit
 * add trait: emit
 ** add OTYPEDEF
@@ -17,6 +17,7 @@
 ** add cx_getconst_op.value
 *** set in parse_const
 *** change eval to push value
+* ---
 * add read-iter to io lib
 ** convert read to iter
 *** keep bin ref
