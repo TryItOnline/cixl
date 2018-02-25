@@ -577,29 +577,16 @@ static bool putargs_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
   struct cx_scope *ds = cx_scope(cx, 0), *ss = ds->stack.count ? ds : cx_scope(cx, 1);
   int nargs = imp->args.count;
   
+  struct cx_box *v = cx_vec_peek(&ss->stack, 0);
+  size_t i = ss->stack.count-1;
+  
   for (struct cx_arg *a = cx_vec_peek(&imp->args, 0);
        a >= (struct cx_arg *)imp->args.items;
-       a--) { 
-    if (a->id) {
-      struct cx_box *v = cx_pop(ss, false);
-      if (!v) { return false; }
-      *cx_put_var(ds, a->sym_id, true) = *v;
+       a--, v--, i--) {
+    if (a->id || a->arg_type == CX_VARG) {
+      if (a->id) { *cx_put_var(ds, a->sym_id, true) = *v; }
+      cx_vec_delete(&ss->stack, i);
       nargs--;
-    }
-  }
-  
-  if (nargs) {
-    size_t i = ss->stack.count-1;
-    
-    for (struct cx_arg *a = cx_vec_peek(&imp->args, 0);
-       a >= (struct cx_arg *)imp->args.items;
-       a--) { 
-      if (!a->id && !a->type && a->narg == -1) {
-	cx_vec_delete(&ss->stack, i);
-	nargs--;
-      }
-      
-      i--;
     }
   }
 
@@ -792,17 +779,30 @@ static bool return_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
       
       for (struct cx_box *v = cx_vec_start(&ss->stack);
 	   i < ss->stack.count;
-	   i++, v++, r++) {
+	   i++, r++) {
+	if (r->arg_type == CX_VARG) {
+	  cx_copy(cx_push(ds), &r->value);
+	  continue;
+	}
+	
 	if (ss->safe) {
-	  struct cx_type *t = r->type;
-	  
-	  if (!r->type) {
+	  struct cx_type *t = NULL;
+
+	  switch (r->arg_type) {
+	  case CX_ARG:
+	    t = r->type;
+	    break;
+	  case CX_NARG: {
 	    struct cx_arg *a = cx_vec_get(&imp->args, r->narg);
 	    struct cx_box *av = cx_test(cx_get_var(ss, a->sym_id, false));
 	    t = av->type;
+	    break;
+	  }
+	  default:
+	    break;
 	  }
 	  
-	  if (!cx_is(v->type, t)) {
+	  if (!cx_is(v->type, cx_test(t))) {
 	    cx_error(cx, cx->row, cx->col,
 		     "Invalid return type.\nExpected %s, actual: %s",
 		     t->id, v->type->id);
@@ -811,8 +811,8 @@ static bool return_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
 	  }
 	}
 	
-	*(struct cx_box *)cx_vec_push(&ds->stack) = *v;
-      }    
+	*(struct cx_box *)cx_vec_push(&ds->stack) = *v++;
+      }
     }
 
     cx_vec_clear(&ss->stack);

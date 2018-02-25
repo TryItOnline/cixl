@@ -2,6 +2,7 @@
 #include <string.h>
 
 #include "cixl/args.h"
+#include "cixl/error.h"
 #include "cixl/type.h"
 
 struct cx_arg *cx_arg_deinit(struct cx_arg *arg) {
@@ -11,25 +12,38 @@ struct cx_arg *cx_arg_deinit(struct cx_arg *arg) {
 }
 
 struct cx_arg cx_arg(const char *id, struct cx_type *type) {
-  return (struct cx_arg) { .id = id ? strdup(id) : NULL, .type = type };
+  return (struct cx_arg) {
+    .arg_type = CX_ARG,
+      .id = id ? strdup(id) : NULL,
+      .type = type };
 }
 
 struct cx_arg cx_varg(struct cx_box *value) {
-  struct cx_arg arg = { .id = NULL, .type = NULL, .narg = -1};
+  struct cx_arg arg = { .arg_type = CX_VARG, .id = NULL };
   cx_copy(&arg.value, value);
   return arg;
 }
 
 struct cx_arg cx_narg(const char *id, int n) {
-  return (struct cx_arg) { .id = id ? strdup(id) : NULL, .type = NULL, .narg = n };
+  return (struct cx_arg) {
+    .arg_type = CX_NARG,
+      .id = id ? strdup(id) : NULL,
+      .narg = n };
 }
 
 void cx_arg_print(struct cx_arg *a, FILE *out) {
-  if (a->type) {
+  switch(a->arg_type) {
+  case CX_ARG:
     fputs(a->type->id, out);
-  } else if (a->narg != -1) {
-    fprintf(out, "%d", a->narg);
-  } else {
+    break;
+  case CX_NARG:
+    fprintf(out, "T%d", a->narg);
+    break;
+  case CX_VARG:
     cx_dump(&a->value, out);
+    break;
+  default:
+    cx_test(false);
+    break;
   }
 }

@@ -60,19 +60,27 @@ bool cx_fimp_match(struct cx_fimp *imp, struct cx_scope *scope) {
   
   for (; i >= (struct cx_arg *)imp->args.items &&
 	 j >= (struct cx_box *)stack->items;
-       i--, j--) {    
-    struct cx_type *t = i->type;
+       i--, j--) {
+    if (i->arg_type == CX_VARG) {
+      if (!cx_eqval(&i->value, j)) { return false; }
+      continue;
+    }
+    
+    struct cx_type *t = NULL;
 
-    if (!t && i->narg != -1) {
+    switch (i->arg_type) {
+    case CX_ARG:
+      t = i->type;
+      break;
+    case CX_NARG:
       t = ((struct cx_box *)cx_vec_get(stack,
 				       stack->count-imp->args.count+i->narg))->type;
+      break;
+    default:
+      break;
     }
-
-    if (t) {
-      if (!cx_is(j->type, t)) { return false; }
-    } else if (!cx_eqval(&i->value, j)) {
-      return false;
-    }
+    
+    if (!cx_is(j->type, cx_test(t))) { return false; }
   }
 
   return true;

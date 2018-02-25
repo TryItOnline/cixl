@@ -204,7 +204,7 @@ static void func_tests() {
   
   run(&cx, "func: foo0() (Int) 42; foo0 42 = check");
   run(&cx, "func: foo2(x y) (Int) $x $y +; 1 2 foo2 3 = check");
-  run(&cx, "func: foo3(Int Int op Func) (Int) $op call; 49 7 &- foo3 42 = check");
+  run(&cx, "func: foo3(op Func Int Int) (Int) $op call; &- 49 7 foo3 42 = check");
   run(&cx, "(let: x 42; func: foo0() (Int) $x;) &foo0 call 42 = check");
   run(&cx, "func: foo1(x A) (Int) $x 35 +; 7 foo1 42 = check");
   run(&cx, "func: foo3(x y Int z Arg0) (Int) $x $y $z + +; 1 3 5 foo3 9 = check");

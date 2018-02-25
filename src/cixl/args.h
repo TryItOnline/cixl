@@ -14,12 +14,18 @@
 struct cx_type;
 struct cx_vec;
 
+enum cx_arg_type { CX_ARG, CX_NARG, CX_VARG };
+
 struct cx_arg {
   char *id;
   struct cx_sym sym_id;
-  struct cx_type *type;
-  struct cx_box value;
-  int narg;
+  enum cx_arg_type arg_type;
+
+  union {
+    int narg;
+    struct cx_type *type;
+    struct cx_box value;
+  };
 };
 
 struct cx_arg *cx_arg_deinit(struct cx_arg *arg);
