@@ -1,5 +1,4 @@
 * unify function io
-** update putargs emit
 ** update return emit
 ** emit test3/4/5.cx
 ** signal error for references to value arguments

@@ -578,10 +578,10 @@ static bool putargs_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
   int nargs = imp->args.count;
   
   struct cx_box *v = cx_vec_peek(&ss->stack, 0);
-  size_t i = ss->stack.count-1;
+  ssize_t i = imp->args.count-1;
   
   for (struct cx_arg *a = cx_vec_peek(&imp->args, 0);
-       a >= (struct cx_arg *)imp->args.items;
+       i >= 0;
        a--, v--, i--) {
     if (a->id || a->arg_type == CX_VARG) {
       if (a->id) { *cx_put_var(ds, a->sym_id, true) = *v; }
@@ -616,16 +616,44 @@ static bool putargs_emit(struct cx_op *op,
 	CX_TAB "*ss = ds->stack.count ? ds : cx_scope(cx, 1);\n\n",
 	out);
 
+  int nargs = imp->args.count;
+  ssize_t i = imp->args.count-1;
+
   for (struct cx_arg *a = cx_vec_peek(&imp->args, 0);
-       a >= (struct cx_arg *)imp->args.items;
-       a--) {
-    if (a->id) {
-      fprintf(out,
-	      CX_TAB "*cx_put_var(ds, %s, true) = *cx_test(cx_pop(ss, false));\n",
-	      a->sym_id.emit_id);
-    } else {
-      fputs(CX_TAB "cx_box_deinit(cx_test(cx_pop(ss, false)));\n", out);
+       i >= 0;
+       a--, i--) {
+    if (a->id || a->arg_type == CX_VARG) {
+      if (a->id) {
+	fprintf(out,
+		CX_TAB "*cx_put_var(ds, %s, true) = "
+		       "*(struct cx_box *)cx_vec_get(&ss->stack, %zd);\n",
+		a->sym_id.emit_id, i);
+      }
+
+      fprintf(out, CX_TAB "cx_vec_delete(&ss->stack, %zd);\n", i);
+      nargs--;
     }
+  }
+
+  if (nargs) {
+    fputs("\n"
+	  CX_TAB "if (ds != ss) {\n",
+	  out);
+    
+    i = 0;
+
+    for (struct cx_arg *a = cx_vec_start(&imp->args);
+	 a != cx_vec_end(&imp->args);
+	 a++) {
+      if (!a->id) {
+	fprintf(out,
+		CX_TAB "  *cx_push(ds) = "
+		       "*(struct cx_box *)cx_vec_get(ss->stack, %zd);\n",
+		i);
+      }
+    }
+
+    fputs(CX_TAB "}\n\n", out);
   }
   
   return true;
