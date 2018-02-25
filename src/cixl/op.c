@@ -760,29 +760,33 @@ static bool return_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
     cx->pc = op->as_return.pc+1;
   } else {
     struct cx_scope *ss = cx_scope(cx, 0);
-
-    if (ss->stack.count > imp->rets.count) {
-      cx_error(cx, cx->row, cx->col, "Stack not empty on return");
-      return false;
-    }
+    size_t si = 0;
     
-    if (ss->stack.count < imp->rets.count) {
-      cx_error(cx, cx->row, cx->col, "Not enough return values on stack");
-      return false;
-    }
-
     if (imp->rets.count) {
       struct cx_scope *ds = cx_scope(cx, 1);
       cx_vec_grow(&ds->stack, ds->stack.count+imp->rets.count);
-      size_t i = 0;
       struct cx_arg *r = cx_vec_start(&imp->rets);
+      struct cx_box *sv = cx_vec_start(&ss->stack);
       
-      for (struct cx_box *v = cx_vec_start(&ss->stack);
-	   i < ss->stack.count;
-	   i++, r++) {
+      for (size_t ri = 0; ri < imp->rets.count; ri++, r++) {
 	if (r->arg_type == CX_VARG) {
 	  cx_copy(cx_push(ds), &r->value);
 	  continue;
+	}
+
+	struct cx_box *v = NULL;
+	
+	if (r->id) {
+	  v = cx_get_var(ss, r->sym_id, false);
+	  if (!v) { return false; }
+	} else {
+	  if (si == ss->stack.count) {
+	    cx_error(cx, cx->row, cx->col, "Not enough return values on stack");
+	    return false;
+	  }
+
+	  v = sv++;
+	  si++;
 	}
 	
 	if (ss->safe) {
@@ -813,6 +817,11 @@ static bool return_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
 	
 	*(struct cx_box *)cx_vec_push(&ds->stack) = *v++;
       }
+    }
+
+    if (si < ss->stack.count) {
+      cx_error(cx, cx->row, cx->col, "Stack not empty on return");
+      return false;
     }
 
     cx_vec_clear(&ss->stack);

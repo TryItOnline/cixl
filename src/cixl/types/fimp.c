@@ -40,6 +40,7 @@ struct cx_fimp *cx_fimp_deinit(struct cx_fimp *imp) {
   cx_do_vec(&imp->args, struct cx_arg, a) { cx_arg_deinit(a); }
   cx_vec_deinit(&imp->args);
 
+  cx_do_vec(&imp->rets, struct cx_arg, r) { cx_arg_deinit(r); }
   cx_vec_deinit(&imp->rets);
   
   cx_do_vec(&imp->toks, struct cx_tok, t) { cx_tok_deinit(t); }

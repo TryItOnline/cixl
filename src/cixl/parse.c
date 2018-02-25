@@ -95,8 +95,8 @@ char *parse_fimp(struct cx *cx,
 	goto exit;
       }
       
-      if (s[0] == 'T' && isdigit(s[1])) {
-	fputs(s+1, id.stream);
+      if (strncmp(s, "Arg", 3) == 0 && isdigit(s[3])) {
+	fputs(s, id.stream);
       } else {
 	cx_error(cx, row, col, "Invalid func type: %s", s);
 	cx_buf_close(&id);

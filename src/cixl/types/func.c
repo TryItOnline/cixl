@@ -85,6 +85,7 @@ struct cx_fimp *cx_add_fimp(struct cx_func *func,
 
     for (int i=0; i < nrets; i++) {
       struct cx_arg r = rets[i];
+      if (r.id) { r.sym_id = cx_sym(func->cx, r.id); }
       *(struct cx_arg *)cx_vec_push(&imp->rets) = r;
     }
   }

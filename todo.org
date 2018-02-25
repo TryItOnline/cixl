@@ -1,9 +1,9 @@
 * unify function io
-** add support for named returns
-*** lookup variables in return op
 ** add support for literal returns
 *** push literal in return op
 ** update putargs emit
+** update return emit
+** emit test3/4.cx
 ** signal error for references to value arguments
 ** signal error for return references to anonymous arguments
 * update func README
@@ -16,8 +16,6 @@
 ** push strings like load main
 * add op_type.emit_consts
 ** rewrite getconst emit
-* add TN to generated ids
-** add/parse_fimp
 * add read-iter to io lib
 ** convert read to iter
 *** keep bin ref
