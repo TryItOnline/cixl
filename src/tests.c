@@ -200,13 +200,20 @@ static void func_tests() {
   cx_init_func(&cx);
   cx_init_iter(&cx);
   cx_init_math(&cx);
+  cx_init_stack(&cx);
   cx_init_var(&cx);
   
   run(&cx, "func: foo0() (Int) 42; foo0 42 = check");
   run(&cx, "func: foo2(x y) (Int) $x $y +; 1 2 foo2 3 = check");
   run(&cx, "func: foo3(op Func Int Int) (Int) $op call; &- 49 7 foo3 42 = check");
   run(&cx, "func: foo1(x Int) (result Int) let: result $x 2 *;; 21 foo1 42 = check");
-  
+
+  run(&cx,
+      "func: fortytwo(Int)(#f) _;"
+      "func: fortytwo(42)(#t);"
+      "21 fortytwo !check "
+      "42 fortytwo check");
+						       
   run(&cx, "(let: x 42; func: foo0() (Int) $x;) &foo0 call 42 = check");
   run(&cx, "func: foo1(x A) (Int) $x 35 +; 7 foo1 42 = check");
   run(&cx, "func: foo3(x y Int z Arg0) (Int) $x $y $z + +; 1 3 5 foo3 9 = check");

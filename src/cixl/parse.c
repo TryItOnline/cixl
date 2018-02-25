@@ -38,6 +38,20 @@ static bool parse_type(struct cx *cx,
   return true;
 }
 
+static bool parse_const(struct cx *cx,
+		       const char *id,
+		       struct cx_vec *out) {
+  struct cx_box *v = cx_get_const(cx, cx_sym(cx, id+1), false);
+  if (!v) { return false; }
+
+  cx_copy(&cx_tok_init(cx_vec_push(out),
+		       CX_TLITERAL(),
+		       cx->row, cx->col)->as_box,
+	  v);
+  
+  return true;
+}
+
 char *parse_fimp(struct cx *cx,
 		 struct cx_func *func,
 		 FILE *in,
@@ -249,7 +263,9 @@ static bool parse_id(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
       } else {
 	if (isupper(s[0])) {
 	  ok = parse_type(cx, s, out, lookup);
-	} else if (!lookup || s[0] == '#' || s[0] == '$') {
+	} else if (s[0] == '#') {
+	  ok = parse_const(cx, s, out);
+	} else if (!lookup || s[0] == '$') {
 	  cx_tok_init(cx_vec_push(out),
 		      CX_TID(),
 		      cx->row, cx->col)->as_ptr = strdup(s);
