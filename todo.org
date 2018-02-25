@@ -1,9 +1,8 @@
 * unify function io
-** update return emit
-** emit test3/4/5.cx
 ** signal error for references to value arguments
 ** signal error for return references to anonymous arguments
 * update func README
+* rename args.h to arg.h
 * ---
 * add rec: emit
 * add trait: emit
@@ -55,4 +54,6 @@
 | Bin new % '1000000000 {50 fib _} clock / int<Rat>' compile emit
 | Bin new % '#out 42 print<WFile A>' compile emit
 | Bin new % '42 say' compile emit
+| Bin new % '50 fib' compile emit
 | Bin new % '{10000 {50 fib _} times} clock 1000000 / int say' compile emit
+| Bin new % 'func: fortytwo(Int)(#f) _; func: fortytwo(42)(#t); 21 fortytwo say' compile emit

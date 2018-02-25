@@ -2,13 +2,14 @@
 #include <string.h>
 
 #include "cixl/args.h"
+#include "cixl/emit.h"
 #include "cixl/error.h"
 #include "cixl/type.h"
 
-struct cx_arg *cx_arg_deinit(struct cx_arg *arg) {
-  if (arg->id) { free(arg->id); }
-  if (!arg->type && arg->narg == -1) { cx_box_deinit(&arg->value); }
-  return arg;
+struct cx_arg *cx_arg_deinit(struct cx_arg *a) {
+  if (a->id) { free(a->id); }
+  if (!a->type && a->narg == -1) { cx_box_deinit(&a->value); }
+  return a;
 }
 
 struct cx_arg cx_arg(const char *id, struct cx_type *type) {
@@ -37,13 +38,49 @@ void cx_arg_print(struct cx_arg *a, FILE *out) {
     fputs(a->type->id, out);
     break;
   case CX_NARG:
-    fprintf(out, "T%d", a->narg);
+    fprintf(out, "Arg%d", a->narg);
     break;
   case CX_VARG:
     cx_dump(&a->value, out);
     break;
-  default:
-    cx_test(false);
-    break;
   }
+}
+
+void cx_arg_emit(struct cx_arg *a, FILE *out) {
+    switch (a->arg_type) {
+    case CX_ARG:
+      fputs(CX_ITAB "cx_arg(", out);
+
+      if (a->id) {
+	fprintf(out, "\"%s\"", a->id);
+      } else {
+	fputs("NULL", out);
+      }
+
+      fprintf(out, ", cx_get_type(cx, \"%s\", false))", a->type->id);
+      break;
+    case CX_NARG:
+      fputs(CX_ITAB "cx_narg(", out);
+
+      if (a->id) {
+	fprintf(out, "\"%s\"", a->id);
+      } else {
+	fputs("NULL", out);
+      }
+
+      fprintf(out, ", %d)", a->narg);
+      break;
+    case CX_VARG:
+      fputs(CX_ITAB "({\n"
+	    CX_ITAB "  struct cx_box v;\n",
+	    out);
+      
+      fputs(CX_ITAB "  ", out);
+      cx_box_emit(&a->value, "&v", out);
+      
+      fputs(CX_ITAB "  cx_varg(&v);\n"
+	    CX_ITAB "})",
+	    out);
+      break;
+    }
 }

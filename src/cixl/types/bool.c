@@ -20,7 +20,7 @@ static void dump_imp(struct cx_box *v, FILE *out) {
 
 static bool emit_imp(struct cx_box *v, const char *exp, FILE *out) {
   fprintf(out,
-	  "cx_box_init(%s, cx->str_type)->as_bool = %s;",
+	  "cx_box_init(%s, cx->bool_type)->as_bool = %s;",
 	  exp, v->as_bool ? "true" : "false");
   return true;
 }

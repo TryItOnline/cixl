@@ -33,6 +33,7 @@ struct cx_arg cx_arg(const char *id, struct cx_type *type);
 struct cx_arg cx_varg(struct cx_box *value);
 struct cx_arg cx_narg(const char *id, int n);
 void cx_arg_print(struct cx_arg *a, FILE *out);
+void cx_arg_emit(struct cx_arg *a, FILE *out);
 
 bool cx_parse_args(struct cx *cx, struct cx_vec *toks, struct cx_vec *args);
 

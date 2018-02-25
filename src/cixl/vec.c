@@ -86,7 +86,7 @@ void *cx_vec_insert(struct cx_vec *vec, size_t i) {
 }
 
 void cx_vec_delete(struct cx_vec *vec, size_t i) {
-  if (i < vec->count-1) {
+  if (i < cx_test(vec->count)-1) {
     memmove(cx_vec_get(vec, i), cx_vec_get(vec, i+1),
 	    (vec->count-i-1) * vec->item_size);
   }

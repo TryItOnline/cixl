@@ -95,7 +95,8 @@ int main(int argc, char *argv[]) {
 
       free(cmd.data);
 
-      fputs("#include \"cixl/bin.h\"\n"
+      fputs("#include \"cixl/args.h\"\n"
+	    "#include \"cixl/bin.h\"\n"
 	    "#include \"cixl/call.h\"\n"
 	    "#include \"cixl/cx.h\"\n"
             "#include \"cixl/error.h\"\n"

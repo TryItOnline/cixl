@@ -118,7 +118,8 @@ bool cx_fimp_inline(struct cx_fimp *imp,
 		    size_t tok_idx,
 		    struct cx_bin *out,
 		    struct cx *cx) {
-  if (imp->bin) { return true; }
+  if (imp->bin == out) { return true; }
+  if (imp->bin) { cx_bin_deref(imp->bin); }
   imp->bin = cx_bin_ref(out);
   imp->start_pc = out->ops.count+1;
   cx_op_init(out, CX_OFIMP(), tok_idx)->as_fimp.imp = imp;

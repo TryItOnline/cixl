@@ -223,25 +223,7 @@ static void fimpdef_emit_init(struct cx_op *op,
   cx_do_vec(&imp->args, struct cx_arg, a) {
     if (sep) { fputs(sep, out); }
     sep = ",\n";
-    
-    if (a->type) {
-      fprintf(out,
-	      CX_ITAB "cx_arg(\"%s\", cx_get_type(cx, \"%s\", false))",
-	      a->id, a->type->id);
-    } else if (a->narg > -1) {
-      fprintf(out, CX_ITAB "cx_narg(\"%s\", %d)", a->id, a->narg);
-    } else {
-      fputs(CX_ITAB "({\n"
-	    CX_ITAB "  struct cx_box v;\n",
-	    out);
-
-      fputs(CX_ITAB "  ", out);
-      cx_box_emit(&a->value, "&v", out);
-      
-      fputs(CX_ITAB "  cx_varg(&v);\n"
-	    CX_ITAB "})",
-	    out);
-    }
+    cx_arg_emit(a, out);
   }
 					     
   fputs("};\n\n", out);
@@ -255,12 +237,7 @@ static void fimpdef_emit_init(struct cx_op *op,
   cx_do_vec(&imp->rets, struct cx_arg, r) {
     if (sep) { fputs(sep, out); }
     sep = ",\n";
-    
-    if (r->type) {
-      fprintf(out, CX_ITAB "cx_ret(cx_get_type(cx, \"%s\", false))", r->type->id);
-    } else {
-      fprintf(out, CX_ITAB "cx_nret(%d)", r->narg);
-    }
+    cx_arg_emit(r, out);
   }
   
   fputs("};\n\n", out);
@@ -578,10 +555,10 @@ static bool putargs_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
   int nargs = imp->args.count;
   
   struct cx_box *v = cx_vec_peek(&ss->stack, 0);
-  ssize_t i = imp->args.count-1;
+  ssize_t i = ss->stack.count-1;
   
   for (struct cx_arg *a = cx_vec_peek(&imp->args, 0);
-       i >= 0;
+       a >= (struct cx_arg *)cx_vec_start(&imp->args);
        a--, v--, i--) {
     if (a->id || a->arg_type == CX_VARG) {
       if (a->id) { *cx_put_var(ds, a->sym_id, true) = *v; }
@@ -592,13 +569,13 @@ static bool putargs_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
 
   if (nargs && ds != ss) {
     struct cx_box *v = cx_vec_peek(&ss->stack, nargs-1);
-  
+    
     for (struct cx_arg *a = cx_vec_start(&imp->args);
 	 a != cx_vec_end(&imp->args);
 	 a++) {    
       if (!a->id) { *cx_push(ds) = *v++; }
     }
-
+    
     ss->stack.count -= nargs;
   }
   
@@ -617,21 +594,26 @@ static bool putargs_emit(struct cx_op *op,
 	out);
 
   int nargs = imp->args.count;
-  ssize_t i = imp->args.count-1;
-
+  size_t i = 0;
+  
   for (struct cx_arg *a = cx_vec_peek(&imp->args, 0);
-       i >= 0;
-       a--, i--) {
+       a >= (struct cx_arg *)cx_vec_start(&imp->args);
+       a--) {
     if (a->id || a->arg_type == CX_VARG) {
       if (a->id) {
 	fprintf(out,
 		CX_TAB "*cx_put_var(ds, %s, true) = "
-		       "*(struct cx_box *)cx_vec_get(&ss->stack, %zd);\n",
+		       "*(struct cx_box *)cx_vec_peek(&ss->stack, %zd);\n",
 		a->sym_id.emit_id, i);
       }
 
-      fprintf(out, CX_TAB "cx_vec_delete(&ss->stack, %zd);\n", i);
+      fprintf(out,
+	      CX_TAB "cx_vec_delete(&ss->stack, ss->stack.count-%zd);\n",
+	      i+1);
+      
       nargs--;
+    } else {
+      i++;
     }
   }
 
@@ -640,7 +622,7 @@ static bool putargs_emit(struct cx_op *op,
 	  CX_TAB "if (ds != ss) {\n",
 	  out);
     
-    i = 0;
+    i = nargs-1;
 
     for (struct cx_arg *a = cx_vec_start(&imp->args);
 	 a != cx_vec_end(&imp->args);
@@ -648,8 +630,8 @@ static bool putargs_emit(struct cx_op *op,
       if (!a->id) {
 	fprintf(out,
 		CX_TAB "  *cx_push(ds) = "
-		       "*(struct cx_box *)cx_vec_get(ss->stack, %zd);\n",
-		i);
+		       "*(struct cx_box *)cx_vec_peek(&ss->stack, %zd);\n",
+		i--);
       }
     }
 
@@ -843,7 +825,7 @@ static bool return_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
 	  }
 	}
 	
-	*(struct cx_box *)cx_vec_push(&ds->stack) = *v++;
+	*(struct cx_box *)cx_vec_push(&ds->stack) = *v;
       }
     }
 
@@ -885,63 +867,85 @@ static bool return_emit(struct cx_op *op,
 	  CX_TAB "    return false;\n"
 	  CX_TAB "  }\n\n"
 	  CX_TAB "  call->recalls--;\n"
-	  CX_TAB "  goto op%zd;\n",
+	  CX_TAB "  goto op%zd;\n"
+	  CX_TAB "} else {\n"
+	  CX_TAB "  size_t si = 0;\n",
           imp->emit_id, op->as_return.pc+1);
 
-  fprintf(out,
-	  CX_TAB "} else {\n"
-	  CX_TAB "  if (s->stack.count > %zd) {\n"
-	  CX_TAB "    cx_error(cx, cx->row, cx->col, "
-	  "\"Stack not empty on return\");\n"
-	  CX_TAB "    return false;\n"
-	  CX_TAB "  }\n\n"
-	  CX_TAB "  if (s->stack.count < %zd) {\n"
-	  CX_TAB "    cx_error(cx, cx->row, cx->col, "
-	  "\"Not enough return values on stack\");\n"
-	  CX_TAB "    return false;\n"
-	  CX_TAB "  }\n\n",
-	  imp->rets.count, imp->rets.count);
-  
   if (imp->rets.count) {
-    fputs(CX_TAB "  struct cx_scope *ds = cx_scope(cx, 1);\n", out);
     fprintf(out,
-	    CX_TAB "  cx_vec_grow(&ds->stack, ds->stack.count+%zd);\n",
-	    imp->rets.count);
-    fputs(CX_TAB "  struct cx_box *v = cx_vec_start(&s->stack);\n\n", out);
+	    CX_TAB "  struct cx_scope *ds = cx_scope(cx, 1);\n"
+	    CX_TAB "  cx_vec_grow(&ds->stack, ds->stack.count+%zd);\n\n",
+	    imp->rets.count);    
     
     for (struct cx_arg *r = cx_vec_start(&imp->rets);
 	 r != cx_vec_end(&imp->rets);
 	 r++) {
-      fputs(CX_TAB "  if (s->safe) {\n"
-	    CX_TAB "    struct cx_type *t = NULL;\n",
-	    out);
+      if (r->arg_type == CX_VARG) {
+	cx_box_emit(&r->value, "cx_push(ds)", out);
+	continue;
+      }
+
+      fputs("  {\n", out);
       
-      if (r->type) {
-	fprintf(out, CX_TAB "    t = %s;\n", r->type->emit_id);
-      } else {
+      if (r->id) {
 	fprintf(out,
-		CX_TAB "    struct cx_arg *a = cx_vec_get(&%s->args, %d);\n"
-		CX_TAB "    struct cx_box *av = "
-		"cx_test(cx_get_var(s, a->sym_id, false));\n"
-		CX_TAB "    t = av->type;\n",
-		imp->emit_id, r->narg);
+		CX_TAB "    struct cx_box *v = cx_get_var(s, %s, false);\n"
+		CX_TAB "    if (!v) { return false; }\n",
+		r->sym_id.emit_id);
+      } else {
+	fputs(CX_TAB "    if (si == s->stack.count) {\n"
+	      CX_TAB "      cx_error(cx, cx->row, cx->col, "
+	             "\"Not enough return values on stack\");\n"
+	      CX_TAB "      return false;\n"
+	      CX_TAB "    }\n\n"
+	      CX_TAB "    struct cx_box *v = sv++;\n"
+	      CX_TAB "    si++;\n",
+	      out);
       }
       
-      fputs(CX_TAB "    if (!cx_is(v->type, t)) {\n"
-	    CX_TAB "      cx_error(cx, cx->row, cx->col,\n"
-	    CX_TAB "               \"Invalid return type.\\n\"\n"
-            CX_TAB "               \"Expected %s, actual: %s\",\n"
-	    CX_TAB "               t->id, v->type->id);\n"
-	    CX_TAB "      return false;\n"
-	    CX_TAB "    }\n"
-	    CX_TAB "  }\n\n"
-	    CX_TAB "  *(struct cx_box *)cx_vec_push(&ds->stack) = *v;\n"
-	    CX_TAB "  v++;\n\n",
+      fputs("\n"
+	    CX_TAB "    if (s->safe) {\n",
+	    out);
+
+      switch (r->arg_type) {
+      case CX_ARG:
+	fprintf(out, CX_TAB "     struct cx_type *t = %s;\n", r->type->emit_id);
+	break;
+      case CX_NARG: {
+	struct cx_arg *a = cx_vec_get(&imp->args, r->narg);
+	
+	fprintf(out,
+		CX_TAB "      struct cx_type *t = "
+		       "cx_test(cx_get_var(s, %s, false))->type;\n",
+		a->sym_id.emit_id);
+
+	break;
+      }	
+      default:
+	break;
+      }
+
+      fputs(CX_TAB "      if (!cx_is(v->type, t)) {\n"
+	    CX_TAB "        cx_error(cx, cx->row, cx->col,\n"
+	    CX_TAB "                 \"Invalid return type.\\n\"\n"
+            CX_TAB "                 \"Expected %s, actual: %s\",\n"
+	    CX_TAB "                 t->id, v->type->id);\n"
+	    CX_TAB "        return false;\n"
+	    CX_TAB "      }\n"
+	    CX_TAB "    }\n\n"
+	    CX_TAB "    *(struct cx_box *)cx_vec_push(&ds->stack) = *v;\n"
+	    CX_TAB "  }\n\n",
 	    out);
     }
   } 
 
-  fputs(CX_TAB "  cx_vec_clear(&s->stack);\n"
+  fputs(
+	CX_TAB "  if (si < s->stack.count) {\n"
+	CX_TAB "    cx_error(cx, cx->row, cx->col, \"Stack not empty on return\");\n"
+	CX_TAB "    return false;\n"
+	CX_TAB "  }\n\n"
+	CX_TAB "  cx_vec_clear(&s->stack);\n"
 	CX_TAB "  cx_end(cx);\n"
 	CX_TAB "  struct cx_call *call = cx_vec_pop(&cx->calls);\n\n"
 	CX_TAB "  if (call->return_pc > -1) {\n"
@@ -979,7 +983,7 @@ static void return_emit_types(struct cx_op *op, struct cx_set *out, struct cx *c
   for (struct cx_arg *r = cx_vec_start(&imp->rets);
        r != cx_vec_end(&imp->rets);
        r++) {
-    if (r->type) {
+    if (r->arg_type == CX_ARG) {
       struct cx_type **ok = cx_set_insert(out, &r->type);
       if (ok) { *ok = r->type; }
     }
