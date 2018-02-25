@@ -1,8 +1,8 @@
 * unify function io
 ** signal error for references to value arguments
 ** signal error for return references to anonymous arguments
-* update func README
-* rename args.h to arg.h
+** update func README
+** rename args.h to arg.h
 * ---
 * add rec: emit
 * add trait: emit

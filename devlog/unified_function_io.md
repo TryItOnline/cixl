@@ -52,8 +52,8 @@ At this point the code for dealing with arguments and results was turning comple
 Forth encourages using the stack and not naming values; since Cixl supports some of the same techniques, extending that support to functions seemed like step in the right direction. Anonymous arguments may appear anywhere in the argument list and are pushed on the function stack in the same order.
 
 ```
-   func: operate(op Func Int Int) (Int) $op call;
-...| &- 42 7 operate
+   func: add3(Int Int) (Int) +;
+...| 42 7 add3
 ...
 [35]
 ```
