@@ -11,8 +11,12 @@
 *** rename OFIMPDEF to OFUNCDEF
 * handle argv in emit main
 ** push strings like load main
-* add op_type.emit_consts
-** rewrite getconst emit
+* optimize consts
+** add op_type.emit_consts
+*** rewrite getconst emit
+** add cx_getconst_op.value
+*** set in parse_const
+*** change eval to push value
 * add read-iter to io lib
 ** convert read to iter
 *** keep bin ref
