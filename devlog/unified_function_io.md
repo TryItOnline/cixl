@@ -52,7 +52,7 @@ At this point the code for dealing with arguments and results was turning comple
 Forth encourages using the stack and not naming values; since Cixl supports some of the same techniques, extending that support to functions seemed like step in the right direction. Anonymous arguments may appear anywhere in the argument list and are pushed on the function stack in the same order.
 
 ```
-   func: add3(Int Int) (Int) +;
+   func: add3(Int Int)(Int) +;
 ...| 42 7 add3
 ...
 [35]
@@ -62,7 +62,7 @@ Forth encourages using the stack and not naming values; since Cixl supports some
 Named results is one of those features that people either love or hate; I guess it depends on which particular implementation of the idea you've been confronted with. Cixl reads the specified variable and pushes the value on the calling stack.
 
 ```
-   func: double(x Int) (result Int) let: result $x 2 *;;
+   func: double(x Int)(result Int) let: result $x 2 *;;
 ...| 21 double
 ...
 [42]
