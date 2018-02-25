@@ -78,7 +78,9 @@ Press Return twice to evaluate.
 	return false;
       }
 
-      if (!cx_fimp_call(imp, s)) { return false; }
+      if (!cx_fimp_call(imp, s)) {
+	return false;
+      }
     }
 
   op3:
@@ -119,12 +121,12 @@ Included below is a slightly more elaborate example with a function definition.
       init = false;
 
       {
-	struct cx_func_arg args[2] = {
+	struct cx_arg args[2] = {
 	  cx_arg("x", cx_get_type(cx, "Int", false)),
 	  cx_arg("y", cx_get_type(cx, "Int", false))};
 
-	struct cx_func_ret rets[1] = {
-	  cx_ret(cx_get_type(cx, "Int", false))};
+	struct cx_arg rets[1] = {
+	  cx_arg(NULL, cx_get_type(cx, "Int", false))};
 
 	cx_add_func(cx, "foo", 2, args, 1, rets);
       }
@@ -132,7 +134,9 @@ Included below is a slightly more elaborate example with a function definition.
       {
 	struct cx_func *func = cx_get_func(cx, "foo", false);
 	struct cx_fimp *imp = cx_get_fimp(func, "Int Int", false);
-	cx_bin_add_func(cx->bin, imp, 2);
+	imp->bin = cx_bin_ref(cx->bin);
+	imp->start_pc = 2;
+	imp->nops = 6;
       }
 
       func_AD = cx_get_func(cx, "+", false);
@@ -171,13 +175,14 @@ Included below is a slightly more elaborate example with a function definition.
   op3: { /* CX_TMACRO CX_OPUTARGS */
       cx->pc = 3; cx->row = 1; cx->col = 5;
       if (cx->stop) { return true; }
-      
       struct cx_scope
 	*ds = cx_scope(cx, 0),
 	*ss = ds->stack.count ? ds : cx_scope(cx, 1);
-	
-      *cx_put_var(ds, sym_y, true) = *cx_test(cx_pop(ss, false));
-      *cx_put_var(ds, sym_x, true) = *cx_test(cx_pop(ss, false));
+
+      *cx_put_var(ds, sym_y, true) = *(struct cx_box *)cx_vec_peek(&ss->stack, 0);
+      cx_vec_delete(&ss->stack, ss->stack.count-1);
+      *cx_put_var(ds, sym_x, true) = *(struct cx_box *)cx_vec_peek(&ss->stack, 0);
+      cx_vec_delete(&ss->stack, ss->stack.count-1);
     }
 
   op4: { /* CX_TID CX_OGETVAR */
@@ -210,7 +215,9 @@ Included below is a slightly more elaborate example with a function definition.
 	return false;
       }
 
-      if (!cx_fimp_call(imp, s)) { return false; }
+      if (!cx_fimp_call(imp, s)) {
+	return false;
+      }
     }
 
   op7: { /* CX_TFUNC CX_ORETURN */
@@ -228,34 +235,37 @@ Included below is a slightly more elaborate example with a function definition.
 	call->recalls--;
 	goto op3;
       } else {
-	if (s->stack.count > 1) {
+	size_t si = 0;
+	struct cx_scope *ds = cx_scope(cx, 1);
+	cx_vec_grow(&ds->stack, ds->stack.count+1);
+
+	{
+	  if (si == s->stack.count) {
+	    cx_error(cx, cx->row, cx->col, "Not enough return values on stack");
+	    return false;
+	  }
+
+	  struct cx_box *v = sv++;
+	  si++;
+
+	  if (s->safe) {
+	    struct cx_type *t = type_Int;
+	    if (!cx_is(v->type, t)) {
+	      cx_error(cx, cx->row, cx->col,
+		       "Invalid return type.\n"
+		       "Expected %s, actual: %s",
+		       t->id, v->type->id);
+	      return false;
+	    }
+	  }
+
+	  *(struct cx_box *)cx_vec_push(&ds->stack) = *v;
+	}
+
+	if (si < s->stack.count) {
 	  cx_error(cx, cx->row, cx->col, "Stack not empty on return");
 	  return false;
 	}
-
-	if (s->stack.count < 1) {
-	  cx_error(cx, cx->row, cx->col, "Not enough return values on stack");
-	  return false;
-	}
-
-	struct cx_scope *ds = cx_scope(cx, 1);
-	cx_vec_grow(&ds->stack, ds->stack.count+1);
-	struct cx_box *v = cx_vec_start(&s->stack);
-
-	if (s->safe) {
-	  struct cx_type *t = NULL;
-	  t = type_Int;
-	  if (!cx_is(v->type, t)) {
-	    cx_error(cx, cx->row, cx->col,
-		     "Invalid return type.\n"
-		     "Expected %s, actual: %s",
-		     t->id, v->type->id);
-	    return false;
-	  }
-	}
-
-	*(struct cx_box *)cx_vec_push(&ds->stack) = *v;
-	v++;
 
 	cx_vec_clear(&s->stack);
 	cx_end(cx);
@@ -298,8 +308,12 @@ Included below is a slightly more elaborate example with a function definition.
 	return false;
       }
 
-      cx_call_init(cx_vec_push(&cx->calls), cx->row, cx->col, imp, 11);
-      goto op2;
+      if (!imp->ptr && imp->bin == cx->bin) {
+	cx_call_init(cx_vec_push(&cx->calls), cx->row, cx->col, imp, 11);
+	goto op2;
+      } else if (!cx_fimp_call(imp, s)) {
+	return false;
+      }
     }
 
   op11:

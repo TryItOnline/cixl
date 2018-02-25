@@ -899,8 +899,7 @@ static bool return_emit(struct cx_op *op,
 	             "\"Not enough return values on stack\");\n"
 	      CX_TAB "      return false;\n"
 	      CX_TAB "    }\n\n"
-	      CX_TAB "    struct cx_box *v = sv++;\n"
-	      CX_TAB "    si++;\n",
+	      CX_TAB "    struct cx_box *v = cx_vec_get(&s->stack, si++);\n",
 	      out);
       }
       
