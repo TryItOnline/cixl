@@ -714,7 +714,7 @@ Func not applicable: 'foo'
 ```
 
 ### Vectors
-A vector is a one dimensional dynamic array that supports efficient pushing / popping and random access.
+Vectors are one dimensional dynamic arrays that supports efficient pushing, popping and random access.
 
 ```
    | [1 2 3 4 +]
