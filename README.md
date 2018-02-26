@@ -523,9 +523,9 @@ Correct!
 ```
 
 ### Functions
-The ```func:``` macro may be used to define functions. Several implementations may be defined for the same name as long as they have the same arity and different argument types. Functions capture their defining environment and open an implicit child scope on evaluation. Function definitions are allowed anywhere, but are processed in order of appearance during compilation.
+The ```func:``` macro may be used to define named functions. Several implementations may be defined with the same name as long as they also have the same arity and different argument types. Functions capture their defining environment and open an implicit child scope on evaluation. Function definitions are allowed anywhere, but are processed in order of appearance during compilation.
 
-Functions are required to specify arguments and return values.
+Functions are required to specify their arguments and results.
 
 ```
    func: say-hi(n)() ['Hi ' $n @!] say;
@@ -535,7 +535,7 @@ Hi stranger!
 []
 ```
 
-Arguments and return values may specify types, ```A``` may be used to match any type.
+All arguments and results have types, ```A``` may be used to match any type and is used as a default when no type is specified.
 
 ```
    func: int-add(x y Int)(Int) $x $y +;
@@ -544,7 +544,7 @@ Arguments and return values may specify types, ```A``` may be used to match any 
 [42]
 ```
 
-An index may may be specified instead of type to refer to previous arguments, it is substituted for the actual type on evaluation.
+Previous argument types may be referenced by index, it is substituted for the actual type on evaluation.
 
 ```
    func: same-add(x Num y Arg0)(Arg0) $x $y +;
@@ -558,11 +558,11 @@ Error in row 1, col 7:
 Func not applicable: baz
 ```
 
-It's possible to specify literal values for arguments instead of names and types.
+Literal values may used instead of types. Anonymous arguments are pushed on the function stack before evaluation.
 
 ```
-   func: is-fortytwo(x Int)(Bool) #f;
-...func: is-fortytwo(42)(Bool) #t;
+   func: is-fortytwo(Int)(#t) _;
+...func: is-fortytwo(42)(#f);
 ...| 41 is-fortytwo
 ...
 [#f]
@@ -572,7 +572,7 @@ It's possible to specify literal values for arguments instead of names and types
 [#t]
 ```
 
-Multiple return types may be specified.
+Functions may return multiple results.
 
 ```
    func: flip(x y Opt)(Arg1 Arg0)
@@ -582,7 +582,7 @@ Multiple return types may be specified.
 [2 1]
 ```
 
-Overriding existing implementations is as easy as defining a function with identical argument list.
+Overriding existing implementations is as easy as defining a function with the same arguments.
 
 ```
 
@@ -649,10 +649,9 @@ A vector containing all implementations for a specific function in the order the
 Prefixing a function name with ```&``` pushes a reference on the stack.
 
 ```
-   func: fortytwo()(Int) 42;
-...| &fortytwo
+   | 35 7 &+
 ...
-[Func(fortytwo)]
+[35 7 Func(+)]
 
    call
 ...

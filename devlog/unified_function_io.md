@@ -8,8 +8,8 @@ Functions/methods are an essential part of most programming languages, and one o
 [Cixl](https://github.com/basic-gongfu/cixl) started out with support for multiple dispatch and single results, returning the top of the stack on exit.
 
 ```
-   func: add1(x y Int) $x $y +;
-   | 1 2 add1
+   func: int-add(x y Int) $x $y +;
+   | 1 2 int-add
 ...
 [3]
 ```
@@ -17,8 +17,8 @@ Functions/methods are an essential part of most programming languages, and one o
 The first improvement was support for referring to previous arguments types. The function below only matches when the second argument is type compatible with the first.
 
 ```
-   func: add2(x Num y Arg0) $x $y +;
-   | 1 2 add2
+   func: same-add(x Num y Arg0) $x $y +;
+   | 1 2 same-add
 ...
 [3]
 ```
@@ -26,13 +26,13 @@ The first improvement was support for referring to previous arguments types. The
 Since I've long been a fan of declarative approaches such as Haskell's pattern matching, the next thing added was support for literal arguments.
 
 ```
-   func: is-answer(x Int) #f;
-   func: is-answer(42) #t;
-   | 21 is-answer
+   func: is-fortytwo1(x Int) #f;
+   func: is-fortytwo1(42) #t;
+   | 21 is-fortytwo1
 ...
 [#f]
 
-   | 42 is-answer
+   | 42 is-fortytwo1
 ...
 [#t]
 ```
@@ -75,13 +75,13 @@ Named results is one of those features that people either love or hate; I guess 
 While I wouldn't have thought of adding support for literal results unless pushed in that direction; the more I thought about it, the more arbitrary it seemed to only support literal arguments. The specified value is pushed on the calling stack. 
 
 ```
-   func: is-fortytwo(Int)(#f) _;
-...func: is-fortytwo(42)(#t);
-...| 21 is-fortytwo
+   func: is-fortytwo2(Int)(#f) _;
+...func: is-fortytwo2(42)(#t);
+...| 21 is-fortytwo2
 ...
 [#f]
 
-...| 42 is-fortytwo
+...| 42 is-fortytwo2
 ...
 [#t]
 ```
