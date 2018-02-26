@@ -190,12 +190,18 @@ static bool func_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
 				    (void *)func_args.items,
 				    func_rets.count,
 				    (void *)func_rets.items);
-  imp->toks = toks;
 
   cx_tok_deinit(&id);
   cx_vec_deinit(&func_args);
   cx_vec_deinit(&func_rets);
 
+  if (!imp) {
+    cx_do_vec(&toks, struct cx_tok, t) { cx_tok_deinit(t); }    
+    cx_vec_deinit(&toks);
+    return false;
+  }
+  
+  imp->toks = toks;
   struct cx_macro_eval *eval = cx_macro_eval_new(func_eval);
   cx_tok_init(cx_vec_push(&eval->toks), CX_TFIMP(), row, col)->as_ptr = imp;
   cx_tok_init(cx_vec_push(out), CX_TMACRO(), row, col)->as_ptr = eval;

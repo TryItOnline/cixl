@@ -1,12 +1,10 @@
-* unify function io
-** signal error for references to value arguments
-** signal error for return references to anonymous arguments
-** update func README
+* update func README
 * add rec: and trait: emit
 ** add OTYPEDEF
 *** rename OFIMPDEF to OFUNCDEF
 * handle argv in emit main
 ** push strings like load main
+* inc version
 * ---
 * add libs
 ** tag based

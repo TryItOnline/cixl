@@ -44,7 +44,8 @@ struct cx_fimp *cx_add_fimp(struct cx_func *func,
 			    int nrets, struct cx_arg *rets) {
   struct cx_vec imp_args;
   cx_vec_init(&imp_args, sizeof(struct cx_arg));
-
+  struct cx *cx = func->cx;
+  
   struct cx_buf id;
   cx_buf_open(&id);
   
@@ -52,11 +53,28 @@ struct cx_fimp *cx_add_fimp(struct cx_func *func,
     cx_vec_grow(&imp_args, nargs);
 
     for (int i=0; i < nargs; i++) {
-      struct cx_arg a = args[i];
-      if (a.id) { a.sym_id = cx_sym(func->cx, a.id); }
-      *(struct cx_arg *)cx_vec_push(&imp_args) = a;
+      struct cx_arg *a = args+i;
+
+      if (a->arg_type == CX_NARG) {
+	if (a->narg >= nargs) {
+	  cx_error(cx, cx->row, cx->col, "Arg index out of bounds: %d", a->narg);
+	  return NULL;
+	}
+	
+	struct cx_arg *aa = args+a->narg;
+
+	if (aa->arg_type == CX_VARG) {
+	  cx_error(cx, cx->row, cx->col, "Value arg ref by index: %d",
+		   a->narg);
+	  return NULL;
+	}
+      }
+
+
+      if (a->id) { a->sym_id = cx_sym(func->cx, a->id); }
+      *(struct cx_arg *)cx_vec_push(&imp_args) = *a;
       if (i) { fputc(' ', id.stream); }
-      cx_arg_print(&a, id.stream);
+      cx_arg_print(a, id.stream);
     }
   }
 
@@ -84,9 +102,25 @@ struct cx_fimp *cx_add_fimp(struct cx_func *func,
     cx_vec_grow(&imp->rets, nrets);
 
     for (int i=0; i < nrets; i++) {
-      struct cx_arg r = rets[i];
-      if (r.id) { r.sym_id = cx_sym(func->cx, r.id); }
-      *(struct cx_arg *)cx_vec_push(&imp->rets) = r;
+      struct cx_arg *r = rets+i;
+      
+      if (r->arg_type == CX_NARG) {
+	if (r->narg >= nargs) {
+	  cx_error(cx, cx->row, cx->col, "Arg index out of bounds: %d", r->narg);
+	  return NULL;
+	}
+	
+	struct cx_arg *a = args+r->narg;
+
+	if (!a->id) {
+	  cx_error(cx, cx->row, cx->col, "Anonymous arg ref by index: %d",
+		   r->narg);
+	  return NULL;
+	}
+      }
+      
+      if (r->id) { r->sym_id = cx_sym(func->cx, r->id); }
+      *(struct cx_arg *)cx_vec_push(&imp->rets) = *r;
     }
   }
 

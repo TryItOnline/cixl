@@ -419,6 +419,7 @@ struct cx_fimp *cx_add_func(struct cx *cx,
 	       cx->row, cx->col,
 	       "Wrong number of args for func '%s': %d/%d",
 	       id, nargs, (*f)->nargs);
+      return NULL;
     }
   } else {
     f = cx_set_insert(&cx->funcs, &id);
@@ -434,7 +435,7 @@ struct cx_fimp *cx_add_cfunc(struct cx *cx,
 			     int nrets, struct cx_arg *rets,
 			     cx_fimp_ptr_t ptr) {
   struct cx_fimp *imp = cx_add_func(cx, id, nargs, args, nrets, rets);
-  imp->ptr = ptr;
+  if (imp) { imp->ptr = ptr; }
   return imp;
 }
 
@@ -444,7 +445,7 @@ struct cx_fimp *cx_add_cxfunc(struct cx *cx,
 			    int nrets, struct cx_arg *rets,
 			    const char *body) {
   struct cx_fimp *imp = cx_add_func(cx, id, nargs, args, nrets, rets);
-  cx_test(cx_parse_str(cx, body, &imp->toks));
+  if (imp) { cx_test(cx_parse_str(cx, body, &imp->toks)); }
   return imp;
 }
 
