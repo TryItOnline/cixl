@@ -2,7 +2,7 @@
 #### 2018-02-24
 
 ### Intro
-Functions/methods are an essential part of most programming languages, and one of the aspects likely to offer different capabilities depending on language. This post describes the steps taken by [Cixl](https://github.com/basic-gongfu/cixl) towards unifying syntax and semantics for specifying function arguments and results.
+Functions/methods are an essential part of most programming languages, and one of the aspects likely to offer different capabilities depending on language. This post describes the steps taken by [Cixl](https://github.com/basic-gongfu/cixl) towards unifying its syntax and semantics for function arguments and results.
 
 ### Baby Steps
 [Cixl](https://github.com/basic-gongfu/cixl) started out with support for multiple dispatch and single results, returning the top of the stack on exit.
@@ -36,7 +36,7 @@ Since I've long been a fan of declarative approaches such as Haskell's pattern m
 ...
 [#t]
 ```
-Next up was multiple results, which added the requirement of specifying result lists for all functions. Types are checked, but don't take part in dispatch.
+Next up was multiple results, which added the requirement of specifying result lists for all functions. Result types are checked, but don't take part in dispatch.
 
 ```
    func: flip(x y Opt)(Arg1 Arg0) $y $x;
