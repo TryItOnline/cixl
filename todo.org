@@ -2,7 +2,11 @@
 ** signal error for references to value arguments
 ** signal error for return references to anonymous arguments
 ** update func README
-** rename args.h to arg.h
+* ---
+* rename scope.env to vars
+* rename args.h to arg.h
+* add implicit vect literal scope
+** remove parens in examples/readme/tests
 * ---
 * add rec: emit
 * add trait: emit
@@ -10,7 +14,14 @@
 *** rename OFIMPDEF to OFUNCDEF
 * handle argv in emit main
 ** push strings like load main
-* optimize consts
+* ---
+* add procs
+** proc: macro
+** copy cx and run all specified ops
+** separate thread
+** add cx_chan (snabel)
+* ---
+* optimize const emit
 ** add op_type.emit_consts
 *** rewrite getconst emit
 ** add cx_getconst_op.value
