@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "cixl/args.h"
+#include "cixl/arg.h"
 #include "cixl/cx.h"
 #include "cixl/emit.h"
 #include "cixl/error.h"

@@ -3,7 +3,6 @@
 ** signal error for return references to anonymous arguments
 ** update func README
 * ---
-* rename args.h to arg.h
 * add implicit vect literal scope
 ** remove parens in examples/readme/tests
 * ---

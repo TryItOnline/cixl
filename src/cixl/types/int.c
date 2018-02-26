@@ -1,6 +1,6 @@
 #include <inttypes.h>
 
-#include "cixl/args.h"
+#include "cixl/arg.h"
 #include "cixl/cx.h"
 #include "cixl/box.h"
 #include "cixl/emit.h"

@@ -2,7 +2,7 @@
 #include <inttypes.h>
 #include <string.h>
 
-#include "cixl/args.h"
+#include "cixl/arg.h"
 #include "cixl/box.h"
 #include "cixl/buf.h"
 #include "cixl/cx.h"

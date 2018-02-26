@@ -1,7 +1,7 @@
 #include <errno.h>
 #include <string.h>
 
-#include "cixl/args.h"
+#include "cixl/arg.h"
 #include "cixl/cx.h"
 #include "cixl/bin.h"
 #include "cixl/box.h"

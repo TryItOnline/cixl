@@ -1,5 +1,5 @@
-#ifndef CX_ARGS_H
-#define CX_ARGS_H
+#ifndef CX_ARG_H
+#define CX_ARG_H
 
 #include <stdio.h>
 

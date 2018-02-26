@@ -1,7 +1,7 @@
 #include <string.h>
 #include <inttypes.h>
 
-#include "cixl/args.h"
+#include "cixl/arg.h"
 #include "cixl/bin.h"
 #include "cixl/box.h"
 #include "cixl/buf.h"

@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "cixl/args.h"
+#include "cixl/arg.h"
 #include "cixl/emit.h"
 #include "cixl/error.h"
 #include "cixl/type.h"

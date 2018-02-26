@@ -1,7 +1,7 @@
 #include <errno.h>
 #include <time.h>
 
-#include "cixl/args.h"
+#include "cixl/arg.h"
 #include "cixl/cx.h"
 #include "cixl/box.h"
 #include "cixl/buf.h"

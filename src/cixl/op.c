@@ -1,4 +1,4 @@
-#include "cixl/args.h"
+#include "cixl/arg.h"
 #include "cixl/bin.h"
 #include "cixl/call.h"
 #include "cixl/cx.h"

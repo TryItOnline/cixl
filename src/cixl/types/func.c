@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "cixl/args.h"
+#include "cixl/arg.h"
 #include "cixl/buf.h"
 #include "cixl/call_iter.h"
 #include "cixl/cx.h"
