@@ -8,7 +8,7 @@ Functions/methods are an essential part of most programming languages, and one o
 [Cixl](https://github.com/basic-gongfu/cixl) started out with support for multiple dispatch and single results, returning the top of the stack on exit.
 
 ```
-   func: add1(x y Int) x y +;
+   func: add1(x y Int) $x $y +;
    | 1 2 add1
 ...
 [3]
@@ -17,7 +17,7 @@ Functions/methods are an essential part of most programming languages, and one o
 The first improvement was support for referring to previous arguments types. The function below only matches when the second argument is type compatible with the first.
 
 ```
-   func: add2(x Num y Arg0) x y +;
+   func: add2(x Num y Arg0) $x $y +;
    | 1 2 add2
 ...
 [3]
