@@ -58,7 +58,6 @@ struct cx_tok_type *CX_TID();
 struct cx_tok_type *CX_TLAMBDA();
 struct cx_tok_type *CX_TLITERAL();
 struct cx_tok_type *CX_TMACRO();
-struct cx_tok_type *CX_TSTASH();
 struct cx_tok_type *CX_TTYPE();
 struct cx_tok_type *CX_TUNGROUP();
 struct cx_tok_type *CX_TUNLAMBDA();

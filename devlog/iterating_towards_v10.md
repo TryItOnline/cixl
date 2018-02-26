@@ -37,7 +37,7 @@ Sequences may be filtered, which also results in a new iterator.
 ```for``` plays the combined role of for, for-each and and reduce by pushing each value in a sequence on the stack and calling the specified action.
 
 ```
-   | 0 ([1 2 3]) &+ for
+   | 0 [1 2 3] &+ for
 ...
 [6]
 

@@ -92,7 +92,7 @@ static bool ok_imp(struct cx_box *v) {
 
 static void write_imp(struct cx_box *v, FILE *out) {
   struct cx_rat *r = &v->as_rat;
-  fprintf(out, "(%s%" PRIu64 " %" PRIu64 " /)", r->neg ? "-" : "", r->num, r->den);
+  fprintf(out, "%s%" PRIu64 " %" PRIu64 " /", r->neg ? "-" : "", r->num, r->den);
 }
 
 static void dump_imp(struct cx_box *v, FILE *out) {

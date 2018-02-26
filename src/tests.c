@@ -396,12 +396,12 @@ static void vect_tests() {
   cx_init_stack(&cx);
   cx_init_vect(&cx);
 
-  run(&cx, "1 2 3 [4 5] len 5 = check");
+  run(&cx, "1 2 [3 4 5] len 3 = check");
   run(&cx, "[1 2 3] pop 3 = check");
   run(&cx, "[1 2 3] % 4 push<Vect A> len 4 = check");
   run(&cx, "[1 2] {2 *} for + 6 = check");
-  run(&cx, "[1 2] ([3 4]) < check");
-  run(&cx, "[1 2 3] ([1 2]) > check");
+  run(&cx, "[1 2] [3 4] < check");
+  run(&cx, "[1 2 3] [1 2] > check");
   run(&cx, "[3 2 1] % #nil sort {} for + - -4 = check");
   run(&cx, "[1 2 3] % {~ <=>} sort {} for + - 0 = check");
   
@@ -427,7 +427,7 @@ static void table_tests() {
            " $t 2 delete"
            " $t len 1 = check)");
 
-  run(&cx, "([1 'foo'. 2 'bar'.] table vect len 2 = check");
+  run(&cx, "[1 'foo'. 2 'bar'.] table vect len 2 = check");
   
   cx_deinit(&cx);
 }

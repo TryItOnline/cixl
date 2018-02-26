@@ -44,9 +44,8 @@ static void copy_imp(struct cx_box *dst, const struct cx_box *src) {
 }
 
 static void write_imp(struct cx_box *v, FILE *out) {
-  fputc('(', out);
   cx_dump(&v->as_ref->value, out);
-  fputs(" ref)", out);
+  fputs(" ref", out);
 }
 
 static void dump_imp(struct cx_box *v, FILE *out) {

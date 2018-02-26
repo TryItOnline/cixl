@@ -11,8 +11,8 @@ include: 'qdb.cx';
 
 (
 
-let: resources  'resource.db' ([`id]) new-db-table;
-let: bookings   'booking.db'  ([`id]) new-db-table;     
+let: resources  'resource.db' [`id] new-db-table;
+let: bookings   'booking.db'  [`id] new-db-table;     
 
 let: next-booking-id 1 ref;
 
@@ -60,21 +60,21 @@ func: new-resource(id Sym q Int)(Resource)
 */
 
 func: update-capacity(in Capacity start end Time total used Int out Vect)()
-  $in `start get $start < {(
+  $in `start get $start < {
     let: head $in %% ~ _;
     $head `end   $start put
     $in   `start $start put
     $out $head push
-  )} if
+  } if
 
   $out $in push
 
-  $in `end get $end > {(
+  $in `end get $end > {
     let: tail $in %% ~ _;
     $tail `start $end put
     $in   `end   $end put
     $out $tail push
-  )} if
+  } if
 
   let: t $in `total get $total +;
   let: u $in `used get $used +;

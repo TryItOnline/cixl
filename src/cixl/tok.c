@@ -80,21 +80,23 @@ cx_tok_type(CX_TFUNC, {
   });
 
 static ssize_t group_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) {
-  struct cx_op *op = cx_op_init(bin, CX_OBEGIN(), tok_idx);
-  op->as_begin.child = true;
-  op->as_begin.fimp = NULL;
   struct cx_tok *tok = cx_vec_get(&bin->toks, tok_idx);
   struct cx_vec *toks = &tok->as_vec;
 
   if (toks->count) {
+    struct cx_op *op = cx_op_init(bin, CX_OBEGIN(), tok_idx);
+    op->as_begin.child = true;
+    op->as_begin.fimp = NULL;
+    
     if (!cx_compile(cx, cx_vec_start(toks), cx_vec_end(toks), bin)) {
       tok = cx_vec_get(&bin->toks, tok_idx);  
       cx_error(cx, tok->row, tok->col, "Failed compiling group");
       return -1;
     }
+    
+    cx_op_init(bin, CX_OEND(), tok_idx);
   }
   
-  cx_op_init(bin, CX_OEND(), tok_idx);
   return tok_idx+1;
 }
 
@@ -236,15 +238,6 @@ cx_tok_type(CX_TMACRO, {
     type.deinit = macro_deinit;
   });
 
-static ssize_t stash_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) {
-  cx_op_init(bin, CX_OSTASH(), tok_idx);
-  return tok_idx+1;
-}
-
-cx_tok_type(CX_TSTASH, {
-    type.compile = stash_compile;
-  });
-
 static ssize_t type_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) {
   struct cx_tok *tok = cx_vec_get(&bin->toks, tok_idx);
   struct cx_type *type = tok->as_ptr;
@@ -261,3 +254,29 @@ cx_tok_type(CX_TTYPE, {
 cx_tok_type(CX_TUNGROUP);
 cx_tok_type(CX_TUNLAMBDA);
 cx_tok_type(CX_TUNVECT);
+
+static ssize_t vect_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) {
+  struct cx_tok *tok = cx_vec_get(&bin->toks, tok_idx);    
+  struct cx_vec *toks = &tok->as_vec;
+
+  if (toks->count) {
+    cx_op_init(bin, CX_OBEGIN(), tok_idx)->as_begin.child = true;
+
+    if (!cx_compile(cx, cx_vec_start(toks), cx_vec_end(toks), bin)) {
+      tok = cx_vec_get(&bin->toks, tok_idx);  
+      cx_error(cx, tok->row, tok->col, "Failed compiling group");
+      return -1;
+    }
+
+    cx_op_init(bin, CX_OSTASH(), tok_idx);
+    cx_op_init(bin, CX_OEND(), tok_idx);
+  }
+  
+  return tok_idx+1;
+}
+
+cx_tok_type(CX_TVECT, {
+    type.compile = vect_compile;
+    type.copy = group_copy;
+    type.deinit = group_deinit;
+  });

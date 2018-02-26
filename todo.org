@@ -2,10 +2,6 @@
 ** signal error for references to value arguments
 ** signal error for return references to anonymous arguments
 ** update func README
-* ---
-* add implicit vect literal scope
-** remove parens in examples/readme/tests
-* ---
 * add rec: and trait: emit
 ** add OTYPEDEF
 *** rename OFIMPDEF to OFUNCDEF

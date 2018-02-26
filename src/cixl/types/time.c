@@ -51,7 +51,7 @@ static void fprint_ns(int64_t ns, FILE *out) {
 }
 
 static void write_imp(struct cx_box *v, FILE *out) {
-  fputs("([", out);
+  fputs("[", out);
   
   struct cx_time *t = &v->as_time;
   
@@ -72,7 +72,7 @@ static void write_imp(struct cx_box *v, FILE *out) {
     fprintf(out, "%" PRId32 " %" PRId32 " %" PRId32 " %" PRId64, h, m, s, ns);
   }
 
-  fputs("] time)", out);
+  fputs("] time", out);
 }
 
 static void dump_imp(struct cx_box *v, FILE *out) {

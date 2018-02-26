@@ -28,4 +28,7 @@ $ws vect % {y ~ y <=>} sort
   Print results to stdout.
 */
 
-{ [unzip @ ~] say } for
+{
+  % x ~ y let: (x y);
+  [$x @@s $y] say
+} for

@@ -314,7 +314,7 @@ Most values support being written to files and read back in. Calling ```write```
 
    #out ~ write
 ...
-([2018 0 12 1 25 12 123436182] time)
+[2018 0 12 1 25 12 123436182] time
 []
 ```
 
@@ -323,7 +323,7 @@ While calling ```read``` will parse and evaluate one value at a time from the sp
 ```
    | #in read
 ...
-([2018 0 12 1 25 12 123436182] time)
+[2018 0 12 1 25 12 123436182] time
 [Time(2018/0/12 1:25:12.123436182)]
 ```
 

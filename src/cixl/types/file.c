@@ -11,7 +11,9 @@ struct char_iter {
   struct cx_file *in;
 };
 
-static bool char_next(struct cx_iter *iter, struct cx_box *out, struct cx_scope *scope) {
+static bool char_next(struct cx_iter *iter,
+		      struct cx_box *out,
+		      struct cx_scope *scope) {
   struct char_iter *it = cx_baseof(iter, struct char_iter, iter);
   int c = fgetc(it->in->ptr);
   
