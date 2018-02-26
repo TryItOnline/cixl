@@ -36,10 +36,10 @@ Since I've long been a fan of declarative approaches such as Haskell's pattern m
 ...
 [#t]
 ```
-Next up was multiple results, which added the requirement of specifying result lists for all functions. Result types are checked, but don't take part in dispatch.
+Next up was multiple results, which added the requirement of specifying result lists for all functions. Result types are checked, but don't take part in dispatch. The function below matches any two values, returns them in reverse order and checks that the resulting types are reversed.
 
 ```
-   func: flip(x y Opt)(Arg1 Arg0) $y $x;
+   func: flip(x y)(Arg1 Arg0) $y $x;
    | 1 2 flip
 ...
 [2 1]
@@ -52,19 +52,22 @@ At this point the code for dealing with arguments and results was turning comple
 Forth encourages using the stack and not naming values; since Cixl supports some of the same techniques, extending that support to functions seemed like step in the right direction. Anonymous arguments may appear anywhere in the argument list and are pushed on the function stack in the same order.
 
 ```
-   func: add3(Int Int)(Int) +;
-...| 42 7 add3
+   func: repeat(Int c Char)(Str) {_ $c} map str;
+...| 3 @a repeat
 ...
-[35]
+['aaa'r1]
 ```
 
 #### Named Results
 Named results is one of those features that people either love or hate; I guess it depends on which particular implementation of the idea you've been confronted with. Cixl reads the specified variable and pushes the value on the calling stack.
 
 ```
-   func: double(x Int)(result Int) let: result $x 2 *;;
+   func: double(x Int)(result Int)
+...  let: result $x 2 *;
+...  [$x '*2 = ' $result] say;
 ...| 21 double
 ...
+21*2 = 42
 [42]
 ```
 
