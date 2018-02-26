@@ -56,7 +56,7 @@ struct cx_fimp_op {
   struct cx_fimp *imp;
 };
 
-struct cx_fimpdef_op {
+struct cx_funcdef_op {
   struct cx_fimp *imp;
 };
 
@@ -108,7 +108,7 @@ struct cx_op {
     struct cx_begin_op as_begin;
     struct cx_else_op as_else;
     struct cx_fimp_op as_fimp;
-    struct cx_fimpdef_op as_fimpdef;
+    struct cx_funcdef_op as_funcdef;
     struct cx_funcall_op as_funcall;
     struct cx_getconst_op as_getconst;
     struct cx_getvar_op as_getvar;
@@ -127,7 +127,7 @@ struct cx_op_type *CX_OBEGIN();
 struct cx_op_type *CX_OEND();
 struct cx_op_type *CX_OELSE();
 struct cx_op_type *CX_OFIMP();
-struct cx_op_type *CX_OFIMPDEF();
+struct cx_op_type *CX_OFUNCDEF();
 struct cx_op_type *CX_OFUNCALL();
 struct cx_op_type *CX_OGETCONST();
 struct cx_op_type *CX_OGETVAR();

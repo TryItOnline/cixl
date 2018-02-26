@@ -87,7 +87,7 @@ bool cx_fimp_match(struct cx_fimp *imp, struct cx_scope *scope) {
   return true;
 }
 
-bool cx_fimp_compile(struct cx_fimp *imp, size_t tok_idx, struct cx_bin *out) {
+static bool compile(struct cx_fimp *imp, size_t tok_idx, struct cx_bin *out) {
   struct cx *cx = imp->func->cx;
   size_t start_pc = out->ops.count;
   
@@ -123,7 +123,7 @@ bool cx_fimp_inline(struct cx_fimp *imp,
   imp->bin = cx_bin_ref(out);
   imp->start_pc = out->ops.count+1;
   cx_op_init(out, CX_OFIMP(), tok_idx)->as_fimp.imp = imp;
-  if (!cx_fimp_compile(imp, tok_idx, out)) { return false; }
+  if (!compile(imp, tok_idx, out)) { return false; }
   imp->nops = out->ops.count - imp->start_pc;
   return true;
 }

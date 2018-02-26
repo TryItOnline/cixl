@@ -1,4 +1,3 @@
-* update func README
 * add rec: and trait: emit
 ** add OTYPEDEF
 *** rename OFIMPDEF to OFUNCDEF

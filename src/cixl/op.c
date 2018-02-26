@@ -193,26 +193,26 @@ cx_op_type(CX_OFIMP, {
     type.emit_fimps = fimp_emit_fimps;
   });
 
-static bool fimpdef_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
-  struct cx_fimp *imp = op->as_fimpdef.imp;
+static bool funcdef_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
+  struct cx_fimp *imp = op->as_funcdef.imp;
   imp->scope = cx_scope_ref(cx_scope(cx, 0));
   return true;
 }
 
-static bool fimpdef_emit(struct cx_op *op,
+static bool funcdef_emit(struct cx_op *op,
 			 struct cx_bin *bin,
 			 FILE *out,
 			 struct cx *cx) {
   fprintf(out,
 	  CX_TAB "%s->scope = cx_scope_ref(cx_scope(cx, 0));\n",
-	  op->as_fimpdef.imp->emit_id);
+	  op->as_funcdef.imp->emit_id);
   return true;  
 }
 
-static void fimpdef_emit_init(struct cx_op *op,
+static void funcdef_emit_init(struct cx_op *op,
 			      FILE *out,
 			      struct cx *cx) {
-  struct cx_fimp *imp = op->as_fimpdef.imp;
+  struct cx_fimp *imp = op->as_funcdef.imp;
   
   fprintf(out,
 	  CX_ITAB "struct cx_arg args[%zd] = {\n",
@@ -247,15 +247,15 @@ static void fimpdef_emit_init(struct cx_op *op,
 	  imp->func->id, imp->args.count, imp->rets.count);
 }
 
-static void fimpdef_emit_funcs(struct cx_op *op, struct cx_set *out, struct cx *cx) {
+static void funcdef_emit_funcs(struct cx_op *op, struct cx_set *out, struct cx *cx) {
   struct cx_func
-    *func = op->as_fimpdef.imp->func,
+    *func = op->as_funcdef.imp->func,
     **ok = cx_set_insert(out, &func);
 
   if (ok) { *ok = func; }
 }
 
-static void fimpdef_emit_fimps(struct cx_op *op, struct cx_set *out, struct cx *cx) {
+static void funcdef_emit_fimps(struct cx_op *op, struct cx_set *out, struct cx *cx) {
   struct cx_fimp
     *imp = op->as_fimp.imp,
     **ok = cx_set_insert(out, &imp);
@@ -263,12 +263,12 @@ static void fimpdef_emit_fimps(struct cx_op *op, struct cx_set *out, struct cx *
   if (ok) { *ok = imp; }
 }
 
-cx_op_type(CX_OFIMPDEF, {
-    type.eval = fimpdef_eval;
-    type.emit = fimpdef_emit;
-    type.emit_init = fimpdef_emit_init;
-    type.emit_funcs = fimpdef_emit_funcs;
-    type.emit_fimps = fimpdef_emit_fimps;
+cx_op_type(CX_OFUNCDEF, {
+    type.eval = funcdef_eval;
+    type.emit = funcdef_emit;
+    type.emit_init = funcdef_emit_init;
+    type.emit_funcs = funcdef_emit_funcs;
+    type.emit_fimps = funcdef_emit_fimps;
   });
 
 static bool funcall_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
