@@ -334,6 +334,6 @@ Included below is a slightly more elaborate example with a function definition.
 The current implementation compiles code that is roughly 50% faster than interpreted. While that may not sound very impressive; the interpreter was already closing in on Python3, which is pretty fast as far as interpreters go. The profile is mostly dominated by the shared implementation at this point, which means that any major improvements will benefit both modes of operation.
 
 ### Mind the Gap
-There are still bits and pieces missing, ```rec:``` and ```trait:``` among others. The worst thing that could happen is that you get an error about emit not being implemented, followed by a failed attempt to compile the code; if that happens, I would appreciate if you took the time to register an issue in the [repo](https://github.com/basic-gongfu/cixl).
+The worst thing that could happen is that you get an error about emit not being implemented, followed by a failed attempt to compile the code; if that happens, I would appreciate if you took the time to register an issue in the [repo](https://github.com/basic-gongfu/cixl).
 
 Give me a yell if something is unclear, wrong or missing. And please consider helping out with a donation via [paypal](https://paypal.me/basicgongfu) or [liberapay](https://liberapay.com/basic-gongfu/donate) if you find this worthwhile, every contribution counts.

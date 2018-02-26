@@ -1,6 +1,3 @@
-* add rec: and trait: emit
-** add OTYPEDEF
-*** rename OFIMPDEF to OFUNCDEF
 * handle argv in emit main
 ** push strings like load main
 * inc version
@@ -56,6 +53,8 @@
 ** add find-key(Vect) fn
 ** add is-dirty fn
 ** add delete fn
+
+| Bin new % 'trait: IntStr Int Str; let: (x IntStr) 42; $x say' compile emit
 
 | Bin new % '1 2 +' compile emit
 | Bin new % '1000000000 {50 fib _} clock / int<Rat>' compile emit

@@ -258,20 +258,17 @@ cx_tok_type(CX_TUNVECT);
 static ssize_t vect_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) {
   struct cx_tok *tok = cx_vec_get(&bin->toks, tok_idx);    
   struct cx_vec *toks = &tok->as_vec;
-
-  if (toks->count) {
-    cx_op_init(bin, CX_OBEGIN(), tok_idx)->as_begin.child = true;
-
-    if (!cx_compile(cx, cx_vec_start(toks), cx_vec_end(toks), bin)) {
-      tok = cx_vec_get(&bin->toks, tok_idx);  
-      cx_error(cx, tok->row, tok->col, "Failed compiling group");
-      return -1;
-    }
-
-    cx_op_init(bin, CX_OSTASH(), tok_idx);
-    cx_op_init(bin, CX_OEND(), tok_idx);
-  }
   
+  cx_op_init(bin, CX_OBEGIN(), tok_idx)->as_begin.child = true;
+
+  if (!cx_compile(cx, cx_vec_start(toks), cx_vec_end(toks), bin)) {
+    tok = cx_vec_get(&bin->toks, tok_idx);  
+    cx_error(cx, tok->row, tok->col, "Failed compiling group");
+    return -1;
+  }
+
+  cx_op_init(bin, CX_OSTASH(), tok_idx);
+  cx_op_init(bin, CX_OEND(), tok_idx);
   return tok_idx+1;
 }
 

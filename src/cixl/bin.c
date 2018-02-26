@@ -18,7 +18,9 @@ static bool eval(struct cx *cx) {
     cx_init_ops(cx->bin);
     struct cx_op *op = cx_vec_get(&cx->bin->ops, cx->pc++);
     cx->row = op->row; cx->col = op->col;
-    if (!op->type->eval(op, cx->bin, cx) || cx->errors.count) { return false; }
+    
+    if (op->type->eval &&
+	(!op->type->eval(op, cx->bin, cx) || cx->errors.count)) { return false; }
   }
   
   return true;
@@ -187,12 +189,12 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
   }
   
   cx_do_set(&funcs, struct cx_func *, f) {
-    fprintf(out, "    %s = cx_get_func(cx, \"%s\", false);\n",
+    fprintf(out, "    %s = cx_test(cx_get_func(cx, \"%s\", false));\n",
 	    (*f)->emit_id, (*f)->id);
   }
 
   cx_do_set(&fimps, struct cx_fimp *, f) {
-    fprintf(out, "    %s = cx_get_fimp(%s, \"%s\", false);\n",
+    fprintf(out, "    %s = cx_test(cx_get_fimp(%s, \"%s\", false));\n",
 	    (*f)->emit_id, (*f)->func->emit_id, (*f)->id);
   }
   
@@ -201,7 +203,7 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
   }
 
   cx_do_set(&types, struct cx_type *, t) {
-    fprintf(out, "    %s = cx_get_type(cx, \"%s\", false);\n",
+    fprintf(out, "    %s = cx_test(cx_get_type(cx, \"%s\", false));\n",
 	    (*t)->emit_id, (*t)->id);
   }
   
@@ -238,8 +240,12 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
 	    op->pc, cx->row, cx->col);
 
     fputs("    if (cx->stop) { return true; }\n", out);
+    fputs("    if (cx->errors.count) { return false; }\n", out);
 
-    if (!cx_test(op->type->emit)(op, bin, out, cx)) { return false; }
+    if (op->type->emit && !cx_test(op->type->emit)(op, bin, out, cx)) {
+      return false;
+    }
+    
     fputs(" }\n\n", out);
   }
 

@@ -88,7 +88,6 @@ static ssize_t func_eval(struct cx_macro_eval *eval,
 static bool func_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   struct cx_vec toks;
   cx_vec_init(&toks, sizeof(struct cx_tok));
-
   int row = cx->row, col = cx->col;
   
   if (!cx_parse_tok(cx, in, &toks, false)) {

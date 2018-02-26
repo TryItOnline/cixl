@@ -8,6 +8,7 @@
 #include "cixl/types/fimp.h"
 #include "cixl/types/func.h"
 #include "cixl/types/lambda.h"
+#include "cixl/types/rec.h"
 #include "cixl/types/vect.h"
 #include "cixl/op.h"
 #include "cixl/scope.h"
@@ -711,7 +712,7 @@ static bool putvar_emit(struct cx_op *op,
   if (op->as_putvar.type) {
     fprintf(out,
 	    CX_TAB "if (!cx_is(src->type, %s)) {\n"
-	    CX_TAB "  cx_error(cx, op->row, op->col,\n"
+	    CX_TAB "  cx_error(cx, cx->row, cx->col,\n"
 	    CX_TAB "           \"Expected type %s, actual: %%s\",\n"
 	    CX_TAB "           src->type->id);\n\n"
 	    CX_TAB "  return false;\n"
@@ -1041,4 +1042,58 @@ static bool stop_emit(struct cx_op *op,
 cx_op_type(CX_OSTOP, {
     type.eval = stop_eval;
     type.emit = stop_emit;
+  });
+
+static bool typedef_emit(struct cx_op *op,
+			 struct cx_bin *bin,
+			 FILE *out,
+			 struct cx *cx) {
+  return true;
+}
+
+static void typedef_emit_init(struct cx_op *op,
+			      FILE *out,
+			      struct cx *cx) {
+  struct cx_type *t = op->as_typedef.type;
+
+  if (cx_is(t, cx->rec_type)) {
+    fprintf(out,
+	    CX_ITAB "struct cx_rec_type *t = cx_test(cx_add_rec_type(cx, \"%s\"));\n",
+	    t->id);
+
+    cx_do_set(&t->parents, struct cx_type *, pt) {
+      if (*pt == cx->rec_type) { continue; }
+      
+      fprintf(out,
+	      CX_ITAB "cx_derive_rec(t, cx_test(cx_get_type(cx, \"%s\", false)));\n",
+	      (*pt)->id);
+    }
+    
+    struct cx_rec_type *rt = cx_baseof(t, struct cx_rec_type, imp);
+
+    cx_do_set(&rt->fields, struct cx_field, f) {
+      fprintf(out,
+	      CX_ITAB "cx_test(cx_add_field(t,\n"
+	      CX_ITAB "        cx_sym(cx, \"%s\"),\n"
+	      CX_ITAB "        cx_get_type(cx, \"%s\", false),\n"
+	      CX_ITAB "        false));\n",
+	      f->id.id, f->type->id);
+    }
+  } else if (t->trait) {
+    fprintf(out,
+	    CX_ITAB "struct cx_type *t = cx_test(cx_add_type(cx, \"%s\"));\n"
+	    CX_ITAB "t->trait = true;\n\n",
+	    t->id);
+
+    cx_do_set(&t->children, struct cx_type *, ct) {
+      fprintf(out,
+	      CX_ITAB "cx_derive(cx_get_type(cx, \"%s\", false), t);\n",
+	      (*ct)->id);
+    }
+  }
+}
+
+cx_op_type(CX_OTYPEDEF, {
+    type.emit = typedef_emit;
+    type.emit_init = typedef_emit_init;
   });

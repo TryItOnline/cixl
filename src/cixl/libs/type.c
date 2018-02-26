@@ -2,15 +2,29 @@
 #include "cixl/box.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
+#include "cixl/op.h"
 #include "cixl/scope.h"
 #include "cixl/libs/type.h"
 #include "cixl/types/fimp.h"
 #include "cixl/types/func.h"
 
+static ssize_t trait_eval(struct cx_macro_eval *eval,
+			  struct cx_bin *bin,
+			  size_t tok_idx,
+			  struct cx *cx) {
+  struct cx_tok *t = cx_vec_get(&eval->toks, 0);
+  
+  cx_op_init(bin,
+	     CX_OTYPEDEF(),
+	     tok_idx)->as_typedef.type = t->as_ptr;
+
+  return tok_idx+1;
+}
+
 static bool trait_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
-  int row = cx->row, col = cx->col;
   struct cx_vec toks;
   cx_vec_init(&toks, sizeof(struct cx_tok));
+  int row = cx->row, col = cx->col;
   bool ok = false;
   
   if (!cx_parse_tok(cx, in, &toks, false)) {
@@ -60,6 +74,9 @@ static bool trait_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
     cx_derive(child, type);
   }
 
+  struct cx_macro_eval *eval = cx_macro_eval_new(trait_eval);
+  cx_tok_init(cx_vec_push(&eval->toks), CX_TTYPE(), row, col)->as_ptr = type;
+  cx_tok_init(cx_vec_push(out), CX_TMACRO(), row, col)->as_ptr = eval;
   ok = true;
  exit1:
   cx_tok_deinit(&id_tok);

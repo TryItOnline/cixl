@@ -99,6 +99,10 @@ struct cx_return_op {
   size_t pc;
 };
 
+struct cx_typedef_op {
+  struct cx_type *type;
+};
+
 struct cx_op {
   struct cx_op_type *type;
   size_t tok_idx, pc;
@@ -118,6 +122,7 @@ struct cx_op {
     struct cx_putargs_op as_putargs;
     struct cx_putvar_op as_putvar;
     struct cx_return_op as_return;
+    struct cx_typedef_op as_typedef;
   };
 };
 
@@ -139,5 +144,6 @@ struct cx_op_type *CX_OPUTVAR();
 struct cx_op_type *CX_ORETURN();
 struct cx_op_type *CX_OSTASH();
 struct cx_op_type *CX_OSTOP();
+struct cx_op_type *CX_OTYPEDEF();
 
 #endif

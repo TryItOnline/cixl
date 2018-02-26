@@ -7,6 +7,7 @@
 #include "cixl/error.h"
 #include "cixl/eval.h"
 #include "cixl/libs/rec.h"
+#include "cixl/op.h"
 #include "cixl/parse.h"
 #include "cixl/scope.h"
 #include "cixl/tok.h"
@@ -15,9 +16,23 @@
 #include "cixl/types/func.h"
 #include "cixl/types/rec.h"
 
+static ssize_t rec_eval(struct cx_macro_eval *eval,
+			struct cx_bin *bin,
+			size_t tok_idx,
+			struct cx *cx) {
+  struct cx_tok *t = cx_vec_get(&eval->toks, 0);
+  
+  cx_op_init(bin,
+	     CX_OTYPEDEF(),
+	     tok_idx)->as_typedef.type = t->as_ptr;
+
+  return tok_idx+1;
+}
+
 static bool rec_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   struct cx_vec toks;
   cx_vec_init(&toks, sizeof(struct cx_tok));
+  int row = cx->row, col = cx->col;
   bool ok = false;
   
   if (!cx_parse_tok(cx, in, &toks, false)) {
@@ -138,7 +153,10 @@ static bool rec_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   cx_do_vec(&parents.as_vec, struct cx_tok, t) {
     cx_derive_rec(rec_type, t->as_ptr);
   }
-  
+
+  struct cx_macro_eval *eval = cx_macro_eval_new(rec_eval);
+  cx_tok_init(cx_vec_push(&eval->toks), CX_TTYPE(), row, col)->as_ptr = rec_type;
+  cx_tok_init(cx_vec_push(out), CX_TMACRO(), row, col)->as_ptr = eval;
   ok = true;
  exit4:
   cx_vec_deinit(&fids);	      
