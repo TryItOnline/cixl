@@ -12,7 +12,7 @@ struct cx_scope {
   struct cx *cx;
   struct cx_scope *parent;
   struct cx_vec stack;
-  struct cx_env env;
+  struct cx_env vars;
   bool safe;
   unsigned int nrefs;
 };

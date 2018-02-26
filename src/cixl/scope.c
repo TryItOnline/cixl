@@ -10,7 +10,7 @@ struct cx_scope *cx_scope_new(struct cx *cx, struct cx_scope *parent) {
   scope->cx = cx;
   scope->parent = parent ? cx_scope_ref(parent) : NULL;
   cx_vec_init(&scope->stack, sizeof(struct cx_box));
-  cx_env_init(&scope->env, &cx->var_alloc);
+  cx_env_init(&scope->vars, &cx->var_alloc);
   scope->safe = cx->scopes.count ? cx_scope(cx, 0)->safe : true;
   scope->nrefs = 0;
   return scope;
@@ -31,7 +31,7 @@ void cx_scope_deref(struct cx_scope *scope) {
     cx_do_vec(&scope->stack, struct cx_box, b) { cx_box_deinit(b); }
     cx_vec_deinit(&scope->stack);
     
-    cx_env_deinit(&scope->env);
+    cx_env_deinit(&scope->vars);
 
     cx_free(&scope->cx->scope_alloc, scope);
   }
@@ -68,7 +68,7 @@ void cx_stackdump(struct cx_scope *scope, FILE *out) {
 }
 
 struct cx_box *cx_get_var(struct cx_scope *scope, struct cx_sym id, bool silent) {
-  struct cx_box *val = cx_env_get(&scope->env, id);
+  struct cx_box *val = cx_env_get(&scope->vars, id);
 
   if (!val) {
     if (scope->parent) { return cx_get_var(scope->parent, id, silent); }
@@ -85,7 +85,7 @@ struct cx_box *cx_get_var(struct cx_scope *scope, struct cx_sym id, bool silent)
 }
 
 struct cx_box *cx_put_var(struct cx_scope *scope, struct cx_sym id, bool force) {
-  struct cx_box *val = cx_env_get(&scope->env, id);
+  struct cx_box *val = cx_env_get(&scope->vars, id);
 
   if (val) {
     if (!force) {
@@ -96,7 +96,7 @@ struct cx_box *cx_put_var(struct cx_scope *scope, struct cx_sym id, bool force) 
       
     cx_box_deinit(val);
   } else {
-    val = cx_env_put(&scope->env, id);
+    val = cx_env_put(&scope->vars, id);
   }
 
   return val;

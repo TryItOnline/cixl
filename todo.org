@@ -3,17 +3,21 @@
 ** signal error for return references to anonymous arguments
 ** update func README
 * ---
-* rename scope.env to vars
 * rename args.h to arg.h
 * add implicit vect literal scope
 ** remove parens in examples/readme/tests
 * ---
-* add rec: emit
-* add trait: emit
+* add rec: and trait: emit
 ** add OTYPEDEF
 *** rename OFIMPDEF to OFUNCDEF
 * handle argv in emit main
 ** push strings like load main
+* ---
+* add libs
+** tag based
+** add definitions once all tags are imported
+* optimize startup
+** parse fns on first use
 * ---
 * add procs
 ** proc: macro
