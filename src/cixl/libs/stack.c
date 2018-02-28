@@ -2,12 +2,12 @@
 #include "cixl/box.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
+#include "cixl/fimp.h"
+#include "cixl/func.h"
+#include "cixl/iter.h"
 #include "cixl/lib.h"
 #include "cixl/libs/stack.h"
 #include "cixl/scope.h"
-#include "cixl/types/fimp.h"
-#include "cixl/types/func.h"
-#include "cixl/types/iter.h"
 
 struct cx_stack_iter {
   struct cx_iter iter;
@@ -117,7 +117,7 @@ static bool pop_imp(struct cx_scope *scope) {
   return true;
 }
 
-static bool seq_imp(struct cx_scope *scope) {
+static bool from_iter_imp(struct cx_scope *scope) {
   struct cx_box in = *cx_test(cx_pop(scope, false));
   struct cx_iter *it = cx_iter(&in);
   struct cx_stack *out = cx_stack_new(scope->cx);
@@ -224,7 +224,7 @@ cx_lib(cx_init_stack, "cx/stack", {
     cx_add_cfunc(cx, "stack",
 		 cx_args(cx_arg("in", cx->seq_type)),
 		 cx_args(cx_arg(NULL, cx->stack_type)),
-		 seq_imp);
+		 from_iter_imp);
 
     cx_add_cfunc(cx, "clear",
 		 cx_args(cx_arg("vec", cx->stack_type)), cx_args(),

@@ -5,32 +5,15 @@
 #include "cixl/buf.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
-#include "cixl/libs/cond.h"
-#include "cixl/libs/func.h"
-#include "cixl/libs/iter.h"
-#include "cixl/libs/math.h"
-#include "cixl/libs/meta.h"
 #include "cixl/libs/stack.h"
-#include "cixl/libs/str.h"
-#include "cixl/libs/type.h"
-#include "cixl/libs/var.h"
 #include "cixl/op.h"
 #include "cixl/repl.h"
+#include "cixl/str.h"
 #include "cixl/scope.h"
-#include "cixl/scope.h"
-#include "cixl/types/str.h"
 
 int main(int argc, char *argv[]) {
   struct cx cx;
   cx_init(&cx);
-  cx_init_cond(&cx);
-  cx_init_func(&cx);
-  cx_init_iter(&cx);
-  cx_init_math(&cx);
-  cx_init_type(&cx);
-  cx_init_str(&cx);
-  cx_init_var(&cx);
-  cx_init_meta(&cx);
   
   bool emit = false;
   int argi = 1;
@@ -84,21 +67,11 @@ int main(int argc, char *argv[]) {
 	    "#include \"cixl/call.h\"\n"
 	    "#include \"cixl/cx.h\"\n"
             "#include \"cixl/error.h\"\n"
-            "#include \"cixl/libs/cond.h\"\n"
-            "#include \"cixl/libs/func.h\"\n"
-            "#include \"cixl/libs/iter.h\"\n"
-            "#include \"cixl/libs/math.h\"\n"
-            "#include \"cixl/libs/meta.h\"\n"
-            "#include \"cixl/libs/stack.h\"\n"
-            "#include \"cixl/libs/str.h\"\n"
-            "#include \"cixl/libs/type.h\"\n"
-            "#include \"cixl/libs/var.h\"\n"
+            "#include \"cixl/lambda.h\"\n"
+            "#include \"cixl/rec.h\"\n"
             "#include \"cixl/op.h\"\n"
             "#include \"cixl/scope.h\"\n"
-            "#include \"cixl/types/func.h\"\n"
-            "#include \"cixl/types/lambda.h\"\n"
-            "#include \"cixl/types/rec.h\"\n"
-            "#include \"cixl/types/str.h\"\n\n",
+            "#include \"cixl/str.h\"\n\n",
 	    out);
 
       if (!cx_emit(bin, out, &cx)) {
@@ -112,16 +85,7 @@ int main(int argc, char *argv[]) {
       
       fputs("int main() {\n"
 	    "  struct cx cx;\n"
-	    "  cx_init(&cx);\n"
-	    "  cx_init_cond(&cx);\n"
-	    "  cx_init_func(&cx);\n"
-	    "  cx_init_iter(&cx);\n"
-	    "  cx_init_stack(&cx);\n"
-	    "  cx_init_math(&cx);\n"
-	    "  cx_init_type(&cx);\n"
-	    "  cx_init_str(&cx);\n"
-	    "  cx_init_var(&cx);\n"
-	    "  cx_init_meta(&cx);\n\n"
+	    "  cx_init(&cx);\n\n"
 	    "  if (!eval(&cx)) {\n"
 	    "    cx_dump_errors(&cx, stderr);\n"
 	    "    return -1;\n"

@@ -7,11 +7,12 @@
 #include "cixl/buf.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
-#include "cixl/scope.h"
+#include "cixl/fimp.h"
+#include "cixl/func.h"
+#include "cixl/lib.h"
 #include "cixl/libs/meta.h"
-#include "cixl/types/func.h"
-#include "cixl/types/fimp.h"
-#include "cixl/types/str.h"
+#include "cixl/scope.h"
+#include "cixl/str.h"
 
 static bool compile_imp(struct cx_scope *scope) {
   struct cx *cx = scope->cx;
@@ -56,14 +57,24 @@ static bool emit_imp(struct cx_scope *scope) {
   return ok;
 }
 
-void cx_init_meta(struct cx *cx) {
-  cx_add_cfunc(cx, "compile",
-	       cx_args(cx_arg("out", cx->bin_type), cx_arg("in", cx->str_type)),
-	       cx_args(),
-	       compile_imp);
+cx_lib(cx_init_meta, "cx/meta", {
+    if (!cx_use(cx, "cx/meta/types", false) ||
+	!cx_use(cx, "cx/str/types", false)) { return false; }
 
-  cx_add_cfunc(cx, "emit",
-	       cx_args(cx_arg("in", cx->bin_type)),
-	       cx_args(cx_arg(NULL, cx->str_type)),
-	       emit_imp);
-}
+    cx_add_cfunc(cx, "compile",
+		 cx_args(cx_arg("out", cx->bin_type), cx_arg("in", cx->str_type)),
+		 cx_args(),
+		 compile_imp);
+    
+    cx_add_cfunc(cx, "emit",
+		 cx_args(cx_arg("in", cx->bin_type)),
+		 cx_args(cx_arg(NULL, cx->str_type)),
+		 emit_imp);
+
+    return true;
+  })
+
+cx_lib(cx_init_meta_types, "cx/meta/types", {
+    cx->bin_type = cx_init_bin_type(cx);
+    return true;
+  });

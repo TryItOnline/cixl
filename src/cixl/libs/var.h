@@ -2,7 +2,8 @@
 #define CX_LIB_VAR_H
 
 struct cx;
+struct cx_lib;
 
-void cx_init_var(struct cx *cx);
+struct cx_lib *cx_init_var(struct cx *cx);
 
 #endif

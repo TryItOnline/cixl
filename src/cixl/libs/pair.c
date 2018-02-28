@@ -5,11 +5,11 @@
 #include "cixl/box.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
+#include "cixl/fimp.h"
+#include "cixl/func.h"
 #include "cixl/scope.h"
 #include "cixl/lib.h"
 #include "cixl/libs/pair.h"
-#include "cixl/types/func.h"
-#include "cixl/types/fimp.h"
 
 struct cx_pair *cx_pair_new(struct cx *cx, struct cx_box *x, struct cx_box *y) {
   struct cx_pair *pair = cx_malloc(&cx->pair_alloc);

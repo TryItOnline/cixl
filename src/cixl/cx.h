@@ -2,12 +2,12 @@
 #define CX_H
 
 #include "cixl/env.h"
+#include "cixl/fimp.h"
 #include "cixl/macro.h"
 #include "cixl/malloc.h"
 #include "cixl/parse.h"
 #include "cixl/set.h"
 #include "cixl/type.h"
-#include "cixl/types/fimp.h"
 
 #define CX_VERSION "0.9.1"
 #define CX_SLAB_SIZE 20

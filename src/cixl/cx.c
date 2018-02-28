@@ -11,32 +11,36 @@
 #include "cixl/cx.h"
 #include "cixl/env.h"
 #include "cixl/error.h"
+#include "cixl/func.h"
+#include "cixl/lambda.h"
 #include "cixl/lib.h"
+#include "cixl/libs/cond.h"
+#include "cixl/libs/guid.h"
+#include "cixl/libs/error.h"
+#include "cixl/libs/func.h"
 #include "cixl/libs/io.h"
+#include "cixl/libs/iter.h"
+#include "cixl/libs/math.h"
+#include "cixl/libs/meta.h"
 #include "cixl/libs/net.h"
 #include "cixl/libs/pair.h"
 #include "cixl/libs/rec.h"
 #include "cixl/libs/ref.h"
 #include "cixl/libs/stack.h"
+#include "cixl/libs/str.h"
+#include "cixl/libs/sym.h"
 #include "cixl/libs/table.h"
 #include "cixl/libs/time.h"
+#include "cixl/libs/type.h"
+#include "cixl/libs/var.h"
 #include "cixl/op.h"
+#include "cixl/rec.h"
 #include "cixl/scope.h"
+#include "cixl/str.h"
 #include "cixl/timer.h"
-#include "cixl/types/bin.h"
 #include "cixl/types/bool.h"
-#include "cixl/types/char.h"
-#include "cixl/types/file.h"
-#include "cixl/types/func.h"
-#include "cixl/types/guid.h"
 #include "cixl/types/int.h"
-#include "cixl/types/iter.h"
-#include "cixl/types/lambda.h"
 #include "cixl/types/nil.h"
-#include "cixl/types/rat.h"
-#include "cixl/types/rec.h"
-#include "cixl/types/str.h"
-#include "cixl/types/sym.h"
 #include "cixl/util.h"
 
 static const void *get_type_id(const void *value) {
@@ -171,21 +175,6 @@ static bool call_imp(struct cx_scope *scope) {
   return ok;
 }
 
-static bool new_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  struct cx_type *t = cx_test(cx_pop(scope, false))->as_ptr;
-
-  if (!t->new) {
-    cx_error(cx, cx->row, cx->col, "%s does not implement new", t->id);
-    return false;
-  }
-  
-  struct cx_box *v = cx_push(scope);
-  v->type = t;
-  t->new(v);
-  return true;
-}
-
 static bool clock_imp(struct cx_scope *scope) {
   struct cx_box v = *cx_test(cx_pop(scope, false));
   cx_timer_t timer;
@@ -194,28 +183,6 @@ static bool clock_imp(struct cx_scope *scope) {
   cx_box_deinit(&v);
   cx_box_init(cx_push(scope), scope->cx->int_type)->as_int = cx_timer_ns(&timer);
   return ok;
-}
-
-static bool check_imp(struct cx_scope *scope) {
-  struct cx_box v = *cx_test(cx_pop(scope, false));
-  struct cx *cx = scope->cx;
-  bool ok = true;
-  
-  if (!cx_ok(&v)) {
-    cx_error(cx, cx->row, cx->col, "Check failed");
-    ok = false;
-  }
-
-  cx_box_deinit(&v);
-  return ok;
-}
-
-static bool fail_imp(struct cx_scope *scope) {
-  struct cx_box m = *cx_test(cx_pop(scope, false));
-  struct cx *cx = scope->cx;
-  cx_error(cx, cx->row, cx->col, m.as_str->data);
-  cx_box_deinit(&m);
-  return false;
 }
 
 static bool safe_imp(struct cx_scope *scope) {
@@ -230,7 +197,13 @@ static bool unsafe_imp(struct cx_scope *scope) {
 
 static cx_lib(init_world, "cx", {
     return
+      cx_use(cx, "cx/cond", false) &&
+      cx_use(cx, "cx/error", false) &&
+      cx_use(cx, "cx/func", false) &&
+      cx_use(cx, "cx/guid", false) &&
       cx_use(cx, "cx/io", false) &&
+      cx_use(cx, "cx/iter", false) &&
+      cx_use(cx, "cx/math", false) &&
       cx_use(cx, "cx/net", false) &&
       cx_use(cx, "cx/pair", false) &&
       cx_use(cx, "cx/rec", false) &&
@@ -238,8 +211,12 @@ static cx_lib(init_world, "cx", {
       cx_use(cx, "cx/ref", false) &&
       cx_use(cx, "cx/stack", false) &&
       cx_use(cx, "cx/stack/ops", false) &&
+      cx_use(cx, "cx/str", false) &&
+      cx_use(cx, "cx/sym", false) &&
       cx_use(cx, "cx/table", false) &&
-      cx_use(cx, "cx/time", false);
+      cx_use(cx, "cx/time", false) &&
+      cx_use(cx, "cx/type", false) &&
+      cx_use(cx, "cx/var", false);
   })
 
 struct cx *cx_init(struct cx *cx) {
@@ -283,8 +260,25 @@ struct cx *cx_init(struct cx *cx) {
   cx_vec_init(&cx->calls, sizeof(struct cx_call));
   cx_vec_init(&cx->errors, sizeof(struct cx_error));
 
-  cx->file_type = cx->pair_type = cx->ref_type = cx->rfile_type = cx->rwfile_type =
-    cx->socket_type = cx->stack_type = cx->table_type = cx->time_type =
+  cx->bin_type =
+    cx->char_type =
+    cx->file_type =
+    cx->fimp_type =
+    cx->func_type =
+    cx->guid_type =
+    cx->iter_type =
+    cx->lambda_type =
+    cx->pair_type =
+    cx->rat_type =
+    cx->ref_type =
+    cx->rfile_type =
+    cx->rwfile_type =
+    cx->socket_type =
+    cx->stack_type =
+    cx->str_type =
+    cx->sym_type =
+    cx->table_type =
+    cx->time_type =
     cx->wfile_type = NULL;
   
   cx->opt_type = cx_add_type(cx, "Opt");
@@ -308,42 +302,19 @@ struct cx *cx_init(struct cx *cx) {
   cx->nil_type = cx_init_nil_type(cx);
   cx->meta_type = cx_init_meta_type(cx);
   
-  cx->iter_type = cx_init_iter_type(cx);
   cx->int_type = cx_init_int_type(cx);
   cx->bool_type = cx_init_bool_type(cx);
-  cx->rat_type = cx_init_rat_type(cx);
-  cx->char_type = cx_init_char_type(cx);
-  cx->str_type = cx_init_str_type(cx);
-  cx->sym_type = cx_init_sym_type(cx);
-  cx->guid_type = cx_init_guid_type(cx);
-  cx->bin_type = cx_init_bin_type(cx);
-  cx->func_type = cx_init_func_type(cx);
-  cx->fimp_type = cx_init_fimp_type(cx);
-  cx->lambda_type = cx_init_lambda_type(cx);
-    
+  
   cx_add_macro(cx, "include:", include_parse);
   cx_add_macro(cx, "use:", use_parse);
 
   cx_add_cfunc(cx, "call", cx_args(cx_arg("act", cx->any_type)), cx_args(), call_imp);
-
-  cx_add_cfunc(cx, "new",
-	       cx_args(cx_arg("t", cx->meta_type)),
-	       cx_args(cx_arg(NULL, cx->any_type)),
-	       new_imp);
 
   cx_add_cfunc(cx, "clock",
 	       cx_args(cx_arg("act", cx->any_type)),
 	       cx_args(cx_arg(NULL, cx->int_type)),
 	       clock_imp);
   
-  cx_add_cfunc(cx, "check",
-	       cx_args(cx_arg("v", cx->opt_type)), cx_args(),
-	       check_imp);
-  
-  cx_add_cfunc(cx, "fail",
-	       cx_args(cx_arg("msg", cx->str_type)), cx_args(),
-	       fail_imp);
-
   cx_add_cfunc(cx, "safe", cx_args(), cx_args(), safe_imp);
   cx_add_cfunc(cx, "unsafe", cx_args(), cx_args(), unsafe_imp);
 
@@ -351,8 +322,20 @@ struct cx *cx_init(struct cx *cx) {
   cx->main = cx_begin(cx, NULL);
   srand((ptrdiff_t)cx + clock());
 
+  cx_init_cond(cx);
+  cx_init_error(cx);
+  cx_init_func(cx);
+  cx_init_func_types(cx);
+  cx_init_guid(cx);
+  cx_init_guid_types(cx);
   cx_init_io(cx);
   cx_init_io_types(cx);
+  cx_init_iter(cx);
+  cx_init_iter_types(cx);
+  cx_init_math(cx);
+  cx_init_math_types(cx);
+  cx_init_meta(cx);
+  cx_init_meta_types(cx);
   cx_init_net(cx);
   cx_init_net_types(cx);
   cx_init_pair(cx);
@@ -364,10 +347,16 @@ struct cx *cx_init(struct cx *cx) {
   cx_init_stack(cx);
   cx_init_stack_ops(cx);
   cx_init_stack_types(cx);
+  cx_init_str(cx);
+  cx_init_str_types(cx);
+  cx_init_sym(cx);
+  cx_init_sym_types(cx);
   cx_init_table(cx);
   cx_init_table_types(cx);
   cx_init_time(cx);
   cx_init_time_types(cx);
+  cx_init_type(cx);
+  cx_init_var(cx);
   init_world(cx);
   return cx;
 }

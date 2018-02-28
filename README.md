@@ -16,8 +16,8 @@ $ cd cixl
 $ mkdir build
 $ cd build
 $ cmake ..
-$ make
-$ rlwrap ./cixl
+$ sudo make install
+$ rlwrap cixl
 
 Cixl v0.9.1, 18571/29582 bmips
 
@@ -28,6 +28,7 @@ Press Return twice to evaluate.
 [3]
 
    quit
+$
 ```
 
 ### Stack

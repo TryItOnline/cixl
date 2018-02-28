@@ -5,16 +5,16 @@
 #include "cixl/box.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
+#include "cixl/file.h"
+#include "cixl/fimp.h"
+#include "cixl/func.h"
 #include "cixl/lib.h"
 #include "cixl/libs/rec.h"
 #include "cixl/op.h"
 #include "cixl/parse.h"
+#include "cixl/rec.h"
 #include "cixl/scope.h"
 #include "cixl/tok.h"
-#include "cixl/types/file.h"
-#include "cixl/types/fimp.h"
-#include "cixl/types/func.h"
-#include "cixl/types/rec.h"
 
 static ssize_t rec_eval(struct cx_macro_eval *eval,
 			struct cx_bin *bin,

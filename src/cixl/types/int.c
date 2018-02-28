@@ -5,12 +5,12 @@
 #include "cixl/box.h"
 #include "cixl/emit.h"
 #include "cixl/error.h"
+#include "cixl/fimp.h"
+#include "cixl/func.h"
+#include "cixl/iter.h"
 #include "cixl/scope.h"
-#include "cixl/types/fimp.h"
-#include "cixl/types/func.h"
+#include "cixl/str.h"
 #include "cixl/types/int.h"
-#include "cixl/types/iter.h"
-#include "cixl/types/str.h"
 #include "cixl/util.h"
 
 struct cx_int_iter {

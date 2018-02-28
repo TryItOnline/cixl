@@ -7,11 +7,11 @@
 #include "cixl/box.h"
 #include "cixl/buf.h"
 #include "cixl/error.h"
+#include "cixl/fimp.h"
+#include "cixl/func.h"
 #include "cixl/lib.h"
 #include "cixl/libs/stack.h"
 #include "cixl/scope.h"
-#include "cixl/types/fimp.h"
-#include "cixl/types/func.h"
 #include "cixl/util.h"
 
 struct cx_time *cx_time_init(struct cx_time *time, int32_t months, int64_t ns) {

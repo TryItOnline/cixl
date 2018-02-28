@@ -3,11 +3,12 @@
 #include "cixl/box.h"
 #include "cixl/buf.h"
 #include "cixl/error.h"
+#include "cixl/fimp.h"
+#include "cixl/func.h"
+#include "cixl/iter.h"
+#include "cixl/lib.h"
 #include "cixl/libs/iter.h"
 #include "cixl/scope.h"
-#include "cixl/types/fimp.h"
-#include "cixl/types/func.h"
-#include "cixl/types/iter.h"
 
 struct cx_map_iter {
   struct cx_iter iter;
@@ -121,7 +122,7 @@ struct cx_filter_iter *cx_filter_iter_new(struct cx_iter *in, struct cx_box *act
   return it;
 }
 
-static bool iter_imp(struct cx_scope *scope) {
+static bool new_iter_imp(struct cx_scope *scope) {
   struct cx_box v = *cx_test(cx_pop(scope, false));
   cx_box_init(cx_push(scope), scope->cx->iter_type)->as_iter = cx_iter(&v);
   cx_box_deinit(&v);
@@ -206,34 +207,74 @@ static bool drop_imp(struct cx_scope *scope) {
   return true;
 }
 
-void cx_init_iter(struct cx *cx) {
-  cx_add_cfunc(cx, "iter",
-	       cx_args(cx_arg("seq", cx->seq_type)),
-	       cx_args(cx_arg(NULL, cx->iter_type)),
-	       iter_imp);
+cx_lib(cx_init_iter, "cx/iter", {
+    if (!cx_use(cx, "cx/iter/types", false)) { return false; }
 
-  cx_add_cfunc(cx, "for",
-	       cx_args(cx_arg("seq", cx->seq_type), cx_arg("act", cx->any_type)),
-	       cx_args(),
-	       for_imp);
-  
-  cx_add_cfunc(cx, "map",
-	       cx_args(cx_arg("seq", cx->seq_type), cx_arg("act", cx->any_type)),
-	       cx_args(cx_arg(NULL, cx->iter_type)),
-	       map_imp);
-  
-  cx_add_cfunc(cx, "filter",
-	       cx_args(cx_arg("seq", cx->seq_type), cx_arg("act", cx->any_type)),
-	       cx_args(cx_arg(NULL, cx->iter_type)),
-	       filter_imp);
-  
-  cx_add_cfunc(cx, "next",
-	       cx_args(cx_arg("it", cx->iter_type)),
-	       cx_args(cx_arg(NULL, cx->opt_type)),
-	       next_imp);
+    cx_add_cfunc(cx, "iter",
+		 cx_args(cx_arg("seq", cx->seq_type)),
+		 cx_args(cx_arg(NULL, cx->iter_type)),
+		 new_iter_imp);
 
-  cx_add_cfunc(cx, "drop", 
-	       cx_args(cx_arg("it", cx->iter_type), cx_arg("n", cx->int_type)),
-	       cx_args(),
-	       drop_imp);
+    cx_add_cfunc(cx, "for",
+		 cx_args(cx_arg("seq", cx->seq_type), cx_arg("act", cx->any_type)),
+		 cx_args(),
+		 for_imp);
+  
+    cx_add_cfunc(cx, "map",
+		 cx_args(cx_arg("seq", cx->seq_type), cx_arg("act", cx->any_type)),
+		 cx_args(cx_arg(NULL, cx->iter_type)),
+		 map_imp);
+  
+    cx_add_cfunc(cx, "filter",
+		 cx_args(cx_arg("seq", cx->seq_type), cx_arg("act", cx->any_type)),
+		 cx_args(cx_arg(NULL, cx->iter_type)),
+		 filter_imp);
+  
+    cx_add_cfunc(cx, "next",
+		 cx_args(cx_arg("it", cx->iter_type)),
+		 cx_args(cx_arg(NULL, cx->opt_type)),
+		 next_imp);
+
+    cx_add_cfunc(cx, "drop", 
+		 cx_args(cx_arg("it", cx->iter_type), cx_arg("n", cx->int_type)),
+		 cx_args(),
+		 drop_imp);
+
+    return true;
+  })
+
+static bool equid_imp(struct cx_box *x, struct cx_box *y) {
+  return x->as_iter == y->as_iter;
 }
+
+static bool ok_imp(struct cx_box *v) {
+  return !v->as_iter->done;
+}
+
+static void copy_imp(struct cx_box *dst, const struct cx_box *src) {
+  dst->as_iter = cx_iter_ref(src->as_iter);
+}
+
+static struct cx_iter *iter_imp(struct cx_box *v) {
+  return cx_iter_ref(v->as_iter);
+}
+
+static void dump_imp(struct cx_box *v, FILE *out) {
+  fprintf(out, "Iter(%p)r%d", v->as_iter, v->as_iter->nrefs);
+}
+
+static void deinit_imp(struct cx_box *v) {
+  cx_iter_deref(v->as_iter);
+}
+
+cx_lib(cx_init_iter_types, "cx/iter/types", {
+    struct cx_type *t = cx_add_type(cx, "Iter", cx->seq_type);
+    t->equid = equid_imp;
+    t->ok = ok_imp;
+    t->copy = copy_imp;
+    t->iter = iter_imp;
+    t->dump = dump_imp;
+    t->deinit = deinit_imp;
+    cx->iter_type = t;
+    return true;
+  })

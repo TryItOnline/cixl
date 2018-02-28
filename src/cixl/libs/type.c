@@ -2,11 +2,12 @@
 #include "cixl/box.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
+#include "cixl/fimp.h"
+#include "cixl/func.h"
+#include "cixl/lib.h"
+#include "cixl/libs/type.h"
 #include "cixl/op.h"
 #include "cixl/scope.h"
-#include "cixl/libs/type.h"
-#include "cixl/types/fimp.h"
-#include "cixl/types/func.h"
 
 static ssize_t trait_eval(struct cx_macro_eval *eval,
 			  struct cx_bin *bin,
@@ -102,21 +103,43 @@ static bool is_imp(struct cx_scope *scope) {
   return true;
 }
 
-void cx_init_type(struct cx *cx) {
-  cx_add_macro(cx, "trait:", trait_parse);
+static bool new_imp(struct cx_scope *scope) {
+  struct cx *cx = scope->cx;
+  struct cx_type *t = cx_test(cx_pop(scope, false))->as_ptr;
 
-  cx_add_cfunc(cx, "type",
-	       cx_args(cx_arg("v", cx->opt_type)),
-	       cx_args(cx_arg(NULL, cx->meta_type)),
-	       type_imp);
+  if (!t->new) {
+    cx_error(cx, cx->row, cx->col, "%s does not implement new", t->id);
+    return false;
+  }
   
-  cx_add_cxfunc(cx, "is",
-		cx_args(cx_arg("x", cx->opt_type), cx_arg("y", cx->meta_type)),
-		cx_args(cx_arg(NULL, cx->bool_type)),
-		"$x type $y is");
-
-  cx_add_cfunc(cx, "is",
-	       cx_args(cx_arg("x", cx->meta_type), cx_arg("y", cx->meta_type)),
-	       cx_args(cx_arg(NULL, cx->bool_type)),
-	       is_imp);
+  struct cx_box *v = cx_push(scope);
+  v->type = t;
+  t->new(v);
+  return true;
 }
+
+cx_lib(cx_init_type, "cx/type", {
+    cx_add_macro(cx, "trait:", trait_parse);
+
+    cx_add_cfunc(cx, "type",
+		 cx_args(cx_arg("v", cx->opt_type)),
+		 cx_args(cx_arg(NULL, cx->meta_type)),
+		 type_imp);
+  
+    cx_add_cxfunc(cx, "is",
+		  cx_args(cx_arg("x", cx->opt_type), cx_arg("y", cx->meta_type)),
+		  cx_args(cx_arg(NULL, cx->bool_type)),
+		  "$x type $y is");
+
+    cx_add_cfunc(cx, "is",
+		 cx_args(cx_arg("x", cx->meta_type), cx_arg("y", cx->meta_type)),
+		 cx_args(cx_arg(NULL, cx->bool_type)),
+		 is_imp);
+
+    cx_add_cfunc(cx, "new",
+		 cx_args(cx_arg("t", cx->meta_type)),
+		 cx_args(cx_arg(NULL, cx->any_type)),
+		 new_imp);
+    
+    return true;
+  })

@@ -8,12 +8,14 @@
 #include "cixl/call.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
-#include "cixl/op.h"
-#include "cixl/scope.h"
+#include "cixl/fimp.h"
+#include "cixl/func.h"
+#include "cixl/lambda.h"
+#include "cixl/lib.h"
 #include "cixl/libs/func.h"
 #include "cixl/libs/stack.h"
-#include "cixl/types/fimp.h"
-#include "cixl/types/func.h"
+#include "cixl/op.h"
+#include "cixl/scope.h"
 
 static bool parse_args(struct cx *cx, struct cx_vec *toks, struct cx_vec *args) {
   struct cx_vec tmp_ids;
@@ -270,7 +272,12 @@ static bool upcall_imp(struct cx_scope *scope) {
   return cx_fimp_call(imp, scope);  
 }
 
-void cx_init_func(struct cx *cx) {
+cx_lib(cx_init_func, "cx/func", {
+    if (!cx_use(cx, "cx/func/types", false) ||
+	!cx_use(cx, "cx/stack/types", false)) {
+      return false;
+    }
+
   cx_add_macro(cx, "func:", func_parse);
 
   cx_add_cfunc(cx, "imps",
@@ -280,4 +287,13 @@ void cx_init_func(struct cx *cx) {
   
   cx_add_cfunc(cx, "recall", cx_args(), cx_args(), recall_imp);
   cx_add_cfunc(cx, "upcall", cx_args(), cx_args(), upcall_imp);
-}
+
+  return true;
+  })
+
+cx_lib(cx_init_func_types, "cx/func/types", {
+    cx->func_type = cx_init_func_type(cx);
+    cx->fimp_type = cx_init_fimp_type(cx);
+    cx->lambda_type = cx_init_lambda_type(cx);
+    return true;
+  })

@@ -11,7 +11,7 @@
   _cx_do_env(cx_gencid(i), env, var)		\
 
 #include "cixl/box.h"
-#include "cixl/types/sym.h"
+#include "cixl/sym.h"
 #include "cixl/vec.h"
 
 struct cx_malloc;

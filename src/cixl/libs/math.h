@@ -3,6 +3,7 @@
 
 struct cx;
 
-void cx_init_math(struct cx *cx);
+struct cx_lib *cx_init_math(struct cx *cx);
+struct cx_lib *cx_init_math_types(struct cx *cx);
 
 #endif

@@ -5,15 +5,15 @@
 #include "cixl/box.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
+#include "cixl/func.h"
+#include "cixl/fimp.h"
+#include "cixl/iter.h"
 #include "cixl/lib.h"
 #include "cixl/libs/pair.h"
 #include "cixl/libs/rec.h"
 #include "cixl/libs/table.h"
 #include "cixl/scope.h"
 #include "cixl/tok.h"
-#include "cixl/types/func.h"
-#include "cixl/types/fimp.h"
-#include "cixl/types/iter.h"
 
 struct cx_table_iter {
   struct cx_iter iter;
@@ -244,7 +244,10 @@ static bool seq_imp(struct cx_scope *scope) {
 }
 
 cx_lib(cx_init_table, "cx/table", {
-    if (!cx_use(cx, "cx/table/types", false)) { return false; }
+    if (!cx_use(cx, "cx/iter/types", false) ||
+	!cx_use(cx, "cx/table/types", false)) {
+      return false;
+    }
     
     cx_add_cfunc(cx, "get",
 		 cx_args(cx_arg("tbl", cx->table_type), cx_arg("key", cx->cmp_type)),

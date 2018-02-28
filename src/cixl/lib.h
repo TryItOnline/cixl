@@ -3,7 +3,7 @@
 
 #include <stdbool.h>
 
-#include "cixl/types/sym.h"
+#include "cixl/sym.h"
 #include "cixl/vec.h"
 
 #define cx_lib(cid, id, ...)					\

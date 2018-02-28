@@ -4,8 +4,8 @@
 #include "cixl/cx.h"
 #include "cixl/call_iter.h"
 #include "cixl/error.h"
+#include "cixl/iter.h"
 #include "cixl/scope.h"
-#include "cixl/types/iter.h"
 
 struct cx_call_iter {
   struct cx_iter iter;

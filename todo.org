@@ -1,15 +1,13 @@
-* convert remaining libs
-* convert tests
-** use required libs in each test
-* update examples with use:
-* update benchmarks with use:
-* inc version & commit
-* ---
-* add guid lib
+* extract cx_stack to /cixl
+* rename meta lib to bin
+* move remaining types
 * move types/int/++/-- to math lib
 ** move times to iter lib
-* add sym lib
-
+* move bool/t/f to cond lib
+* update tests
+* update benchmarks with use:
+* update examples with use:
+* inc version & commit
 * ---
 * add connect(Socket, ip, port) fn
 ** non-blocking
@@ -82,8 +80,9 @@
 ** add is-dirty fn
 ** add delete fn
 
-| Bin new % 'trait: IntStr Int Str; let: (x IntStr) 42; $x say' compile emit
+sudo rm -rf /usr/local/include/cixl
 
+| Bin new % 'trait: IntStr Int Str; let: (x IntStr) 42; $x say' compile emit
 | Bin new % '1 2 +' compile emit
 | Bin new % '1000000000 {50 fib _} clock / int<Rat>' compile emit
 | Bin new % '#out 42 print<WFile A>' compile emit

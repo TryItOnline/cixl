@@ -7,14 +7,14 @@
 #include "cixl/box.h"
 #include "cixl/buf.h"
 #include "cixl/error.h"
+#include "cixl/fimp.h"
+#include "cixl/func.h"
+#include "cixl/file.h"
+#include "cixl/iter.h"
 #include "cixl/lib.h"
 #include "cixl/libs/io.h"
 #include "cixl/scope.h"
-#include "cixl/types/file.h"
-#include "cixl/types/fimp.h"
-#include "cixl/types/func.h"
-#include "cixl/types/iter.h"
-#include "cixl/types/str.h"
+#include "cixl/str.h"
 
 struct line_iter {
   struct cx_iter iter;
@@ -193,7 +193,12 @@ static bool lines_imp(struct cx_scope *scope) {
 }
 
 cx_lib(cx_init_io, "cx/io", {
-    if (!cx_use(cx, "cx/io/types", false)) { return false; }
+    if (!cx_use(cx, "cx/io/types", false) ||
+	!cx_use(cx, "cx/iter/types", false) ||
+	!cx_use(cx, "cx/str/types", false) ||
+	!cx_use(cx, "cx/sym/types", false)) {
+      return false;
+    }
     
     cx_box_init(cx_set_const(cx, cx_sym(cx, "in"), false),
 		cx->rfile_type)->as_file = cx_file_new(stdin);

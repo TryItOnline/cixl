@@ -37,4 +37,6 @@ bool cx_eval(struct cx_bin *bin, size_t start_pc, struct cx *cx);
 bool cx_eval_str(struct cx *cx, const char *in);
 bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx);
 
+struct cx_type *cx_init_bin_type(struct cx *cx);
+
 #endif

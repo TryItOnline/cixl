@@ -9,11 +9,11 @@
 #include "cixl/buf.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
+#include "cixl/func.h"
+#include "cixl/lambda.h"
 #include "cixl/parse.h"
-#include "cixl/types/func.h"
+#include "cixl/str.h"
 #include "cixl/types/int.h"
-#include "cixl/types/lambda.h"
-#include "cixl/types/str.h"
 #include "cixl/vec.h"
 
 static bool parse_type(struct cx *cx,

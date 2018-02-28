@@ -5,11 +5,11 @@
 #include "cixl/box.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
+#include "cixl/fimp.h"
+#include "cixl/func.h"
 #include "cixl/scope.h"
 #include "cixl/lib.h"
 #include "cixl/libs/ref.h"
-#include "cixl/types/func.h"
-#include "cixl/types/fimp.h"
 
 struct cx_ref *cx_ref_new(struct cx *cx, struct cx_box *value) {
   struct cx_ref *ref = cx_malloc(&cx->ref_alloc);

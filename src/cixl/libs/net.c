@@ -1,7 +1,7 @@
 #include "cixl/cx.h"
+#include "cixl/file.h"
 #include "cixl/lib.h"
 #include "cixl/libs/net.h"
-#include "cixl/types/file.h"
 
 cx_lib(cx_init_net, "cx/net", { 
     if (!cx_use(cx, "cx/net/types", false)) { return false; }

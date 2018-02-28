@@ -25,6 +25,5 @@ install(FILES ${type_headers} DESTINATION include/cixl/types)
 
 file(GLOB lib_headers src/cixl/libs/*.h)
 install(FILES ${lib_headers} DESTINATION include/cixl/libs)
-
 install(FILES build/cixl DESTINATION bin)
 install(FILES build/libcixl.a DESTINATION lib)

@@ -9,12 +9,12 @@
 #include "cixl/call.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
+#include "cixl/func.h"
+#include "cixl/lambda.h"
 #include "cixl/libs/stack.h"
 #include "cixl/repl.h"
 #include "cixl/op.h"
 #include "cixl/scope.h"
-#include "cixl/types/func.h"
-#include "cixl/types/lambda.h"
 
 static bool emit_bmips(struct cx *cx) {
   bool _eval(struct cx *cx) {
@@ -683,8 +683,10 @@ static bool emit_bmips(struct cx *cx) {
 
 void cx_repl(struct cx *cx, FILE *in, FILE *out) {
   cx_use(cx, "cx/io", false);
+  cx_use(cx, "cx/math", false);
   cx_use(cx, "cx/stack/ops", false);
   cx_use(cx, "cx/stack/types", false);
+  cx_use(cx, "cx/var", false);
 
   fprintf(out, "Cixl v%s, ", CX_VERSION);
 

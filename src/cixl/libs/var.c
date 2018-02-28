@@ -6,14 +6,14 @@
 #include "cixl/box.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
+#include "cixl/func.h"
+#include "cixl/fimp.h"
+#include "cixl/lib.h"
 #include "cixl/libs/var.h"
 #include "cixl/op.h"
 #include "cixl/parse.h"
 #include "cixl/scope.h"
 #include "cixl/tok.h"
-#include "cixl/types/func.h"
-#include "cixl/types/fimp.h"
-#include "cixl/types/rec.h"
 
 static ssize_t let_eval(struct cx_macro_eval *eval,
 			struct cx_bin *bin,
@@ -73,7 +73,7 @@ static ssize_t let_eval(struct cx_macro_eval *eval,
     
     ok = true;
     
-    exit:
+  exit:
     cx_vec_deinit(&ids);
     cx_vec_deinit(&types);
     if (!ok) { return -1; }
@@ -134,16 +134,21 @@ static bool get_imp(struct cx_scope *scope) {
   return true;
 }
 
-void cx_init_var(struct cx *cx) {
-  cx_add_macro(cx, "let:", let_parse);
+cx_lib(cx_init_var, "cx/var", {
+    if (!cx_use(cx, "cx/sym/types", false)) { return false; }
+    
+    cx_add_macro(cx, "let:", let_parse);
 
-  cx_add_cfunc(cx, "put-var",
-	       cx_args(cx_arg("id", cx->sym_type), cx_arg("val", cx->any_type)),
-	       cx_args(),
-	       put_imp);
+    cx_add_cfunc(cx, "put-var",
+		 cx_args(cx_arg("id", cx->sym_type), cx_arg("val", cx->any_type)),
+		 cx_args(),
+		 put_imp);
   
-  cx_add_cfunc(cx, "get-var",
-	       cx_args(cx_arg("id", cx->sym_type)),
-	       cx_args(cx_arg(NULL, cx->opt_type)),
-	       get_imp);
-}
+    cx_add_cfunc(cx, "get-var",
+		 cx_args(cx_arg("id", cx->sym_type)),
+		 cx_args(cx_arg(NULL, cx->opt_type)),
+		 get_imp);
+
+    return true;
+  
+  })

@@ -5,9 +5,9 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#include "cixl/types/guid.h"
-#include "cixl/types/rat.h"
-#include "cixl/types/sym.h"
+#include "cixl/guid.h"
+#include "cixl/rat.h"
+#include "cixl/sym.h"
 #include "cixl/libs/time.h"
 
 struct cx_file;

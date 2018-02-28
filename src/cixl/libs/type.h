@@ -2,7 +2,8 @@
 #define CX_LIB_TYPE_H
 
 struct cx;
+struct cx_lib;
 
-void cx_init_type(struct cx *cx);
+struct cx_lib *cx_init_type(struct cx *cx);
 
 #endif
