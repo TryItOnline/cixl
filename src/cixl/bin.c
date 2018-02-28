@@ -181,7 +181,7 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
        op++) {
     if (op->type->emit_init) {
       fputs("    {\n", out);
-      op->type->emit_init(op, out, cx);
+      op->type->emit_init(op, bin, out, cx);
       fputs("    }\n\n", out);
     }
   }

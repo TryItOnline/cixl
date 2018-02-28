@@ -34,7 +34,7 @@ struct cx_op_type {
   bool (*eval)(struct cx_op *, struct cx_bin *, struct cx *);
   bool (*emit)(struct cx_op *, struct cx_bin *, FILE *, struct cx *);
 
-  void (*emit_init)(struct cx_op *, FILE *, struct cx *);
+  void (*emit_init)(struct cx_op *, struct cx_bin *, FILE *, struct cx *);
   void (*emit_funcs)(struct cx_op *, struct cx_set *, struct cx *);
   void (*emit_fimps)(struct cx_op *, struct cx_set *, struct cx *);
   void (*emit_syms)(struct cx_op *, struct cx_set *, struct cx *);
@@ -145,5 +145,5 @@ struct cx_op_type *CX_ORETURN();
 struct cx_op_type *CX_OSTASH();
 struct cx_op_type *CX_OSTOP();
 struct cx_op_type *CX_OTYPEDEF();
-
+struct cx_op_type *CX_OUSE();
 #endif

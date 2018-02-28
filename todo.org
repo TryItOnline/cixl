@@ -1,7 +1,4 @@
 * convert remaining libs
-* fix use: emit
-** add CX_OUSE op
-*** emit from use_eval
 * convert tests
 ** use required libs in each test
 * update examples with use:

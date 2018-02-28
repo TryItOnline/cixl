@@ -156,6 +156,7 @@ static bool fimp_emit(struct cx_op *op,
 }
 
 static void fimp_emit_init(struct cx_op *op,
+			   struct cx_bin *bin,
 			   FILE *out,
 			   struct cx *cx) {
   struct cx_fimp *imp = op->as_fimp.imp;
@@ -210,6 +211,7 @@ static bool funcdef_emit(struct cx_op *op,
 }
 
 static void funcdef_emit_init(struct cx_op *op,
+			      struct cx_bin *bin,
 			      FILE *out,
 			      struct cx *cx) {
   struct cx_fimp *imp = op->as_funcdef.imp;
@@ -1051,6 +1053,7 @@ static bool typedef_emit(struct cx_op *op,
 }
 
 static void typedef_emit_init(struct cx_op *op,
+			      struct cx_bin *bin,
 			      FILE *out,
 			      struct cx *cx) {
   struct cx_type *t = op->as_typedef.type;
@@ -1095,4 +1098,30 @@ static void typedef_emit_init(struct cx_op *op,
 cx_op_type(CX_OTYPEDEF, {
     type.emit = typedef_emit;
     type.emit_init = typedef_emit_init;
+  });
+
+static bool use_emit(struct cx_op *op,
+			 struct cx_bin *bin,
+			 FILE *out,
+			 struct cx *cx) {
+  return true;
+}
+
+static void use_emit_init(struct cx_op *op,
+			  struct cx_bin *bin,
+			  FILE *out,
+			  struct cx *cx) {
+  struct cx_tok *t = cx_vec_get(&bin->toks, op->tok_idx);
+  struct cx_macro_eval *e = t->as_ptr;
+
+  cx_do_vec(&e->toks, struct cx_tok, t) {
+    fprintf(out,
+	    CX_ITAB "if (!cx_use(cx, \"%s\", false)) { return false; }\n",
+	    (char *)t->as_ptr);
+  }
+}
+
+cx_op_type(CX_OUSE, {
+    type.emit = use_emit;
+    type.emit_init = use_emit_init;
   });

@@ -129,33 +129,39 @@ static bool include_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   }
 }
 
+static ssize_t use_eval(struct cx_macro_eval *eval,
+			struct cx_bin *bin,
+			size_t tok_idx,
+			struct cx *cx) {
+  cx_op_init(bin, CX_OUSE(), tok_idx);
+  return tok_idx+1;
+}
+
 static bool use_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   int row = cx->row, col = cx->col;
-  bool ok = false;
+  struct cx_macro_eval *eval = cx_macro_eval_new(use_eval);
   
-  struct cx_vec libs;
-  cx_vec_init(&libs, sizeof(struct cx_tok));
-  
-  if (!cx_parse_end(cx, in, &libs, false)) {
+  if (!cx_parse_end(cx, in, &eval->toks, false)) {
     if (!cx->errors.count) { cx_error(cx, row, col, "Missing use: end"); }
-    goto exit;
+    cx_macro_eval_deref(eval);
+    return false;
   }
 
-  cx_do_vec(&libs, struct cx_tok, t) {
+  cx_do_vec(&eval->toks, struct cx_tok, t) {
     if (t->type != CX_TID()) {
       cx_error(cx, t->row, t->col, "Invalid lib: %s", t->type->id);
-      goto exit;
+      cx_macro_eval_deref(eval);
+      return false;
     }
     
-    if (!cx_use(cx, t->as_ptr, false)) { goto exit; }
+    if (!cx_use(cx, t->as_ptr, false)) {
+      cx_macro_eval_deref(eval);
+      return false;
+    }
   }
   
-  ok = true;
- exit: {
-    cx_do_vec(&libs, struct cx_tok, t) { cx_tok_deinit(t); }
-    cx_vec_deinit(&libs);
-    return ok;
-  }
+  cx_tok_init(cx_vec_push(out), CX_TMACRO(), row, col)->as_ptr = eval;
+  return true;
 }
 
 static bool call_imp(struct cx_scope *scope) {
