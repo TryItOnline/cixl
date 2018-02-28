@@ -4,12 +4,11 @@
 #include "cixl/cx.h"
 #include "cixl/emit.h"
 #include "cixl/error.h"
-#include "cixl/eval.h"
+#include "cixl/libs/stack.h"
 #include "cixl/types/fimp.h"
 #include "cixl/types/func.h"
 #include "cixl/types/lambda.h"
 #include "cixl/types/rec.h"
-#include "cixl/types/vect.h"
 #include "cixl/op.h"
 #include "cixl/scope.h"
 #include "cixl/tok.h"
@@ -1000,10 +999,10 @@ cx_op_type(CX_ORETURN, {
 
 static bool stash_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
   struct cx_scope *s = cx_scope(cx, 0);
-  struct cx_vect *out = cx_vect_new();
+  struct cx_stack *out = cx_stack_new();
   out->imp = s->stack;
   cx_vec_init(&s->stack, sizeof(struct cx_box));
-  cx_box_init(cx_push(s), s->cx->vect_type)->as_ptr = out;
+  cx_box_init(cx_push(s), s->cx->stack_type)->as_ptr = out;
   return true;
 }
 
@@ -1012,10 +1011,10 @@ static bool stash_emit(struct cx_op *op,
 		       FILE *out,
 		       struct cx *cx) {
   fputs(CX_TAB "struct cx_scope *s = cx_scope(cx, 0);\n"
-	CX_TAB "struct cx_vect *out = cx_vect_new();\n"
+	CX_TAB "struct cx_stack *out = cx_stack_new();\n"
 	CX_TAB "out->imp = s->stack;\n"
 	CX_TAB "cx_vec_init(&s->stack, sizeof(struct cx_box));\n"
-	CX_TAB "cx_box_init(cx_push(s), s->cx->vect_type)->as_ptr = out;\n",
+	CX_TAB "cx_box_init(cx_push(s), s->cx->stack_type)->as_ptr = out;\n",
 	out);
 
   return true;

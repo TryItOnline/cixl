@@ -8,14 +8,12 @@
 #include "cixl/call.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
-#include "cixl/eval.h"
 #include "cixl/op.h"
-#include "cixl/scan.h"
 #include "cixl/scope.h"
 #include "cixl/libs/func.h"
+#include "cixl/libs/stack.h"
 #include "cixl/types/fimp.h"
 #include "cixl/types/func.h"
-#include "cixl/types/vect.h"
 
 static bool parse_args(struct cx *cx, struct cx_vec *toks, struct cx_vec *args) {
   struct cx_vec tmp_ids;
@@ -210,7 +208,7 @@ static bool func_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
 static bool imps_imp(struct cx_scope *scope) {
   struct cx *cx = scope->cx;
   struct cx_func *f = cx_test(cx_pop(scope, false))->as_ptr;
-  struct cx_vect *is = cx_vect_new(cx);
+  struct cx_stack *is = cx_stack_new(cx);
 
   for (struct cx_fimp **i = cx_vec_peek(&f->imps, 0);
        i >= (struct cx_fimp **)f->imps.items;
@@ -218,7 +216,7 @@ static bool imps_imp(struct cx_scope *scope) {
     cx_box_init(cx_vec_push(&is->imp), cx->fimp_type)->as_ptr = *i;
   }
   
-  cx_box_init(cx_push(scope), scope->cx->vect_type)->as_ptr = is;
+  cx_box_init(cx_push(scope), scope->cx->stack_type)->as_ptr = is;
   return true;
 }
 
@@ -277,7 +275,7 @@ void cx_init_func(struct cx *cx) {
 
   cx_add_cfunc(cx, "imps",
 	       cx_args(cx_arg("f", cx->func_type)),
-	       cx_args(cx_arg(NULL, cx->vect_type)),
+	       cx_args(cx_arg(NULL, cx->stack_type)),
 	       imps_imp);
   
   cx_add_cfunc(cx, "recall", cx_args(), cx_args(), recall_imp);

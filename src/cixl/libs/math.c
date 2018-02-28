@@ -2,7 +2,6 @@
 #include "cixl/box.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
-#include "cixl/eval.h"
 #include "cixl/scope.h"
 #include "cixl/libs/math.h"
 #include "cixl/types/fimp.h"

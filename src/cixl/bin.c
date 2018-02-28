@@ -1,10 +1,8 @@
 #include "cixl/cx.h"
 #include "cixl/bin.h"
 #include "cixl/error.h"
-#include "cixl/eval.h"
 #include "cixl/types/func.h"
 #include "cixl/op.h"
-#include "cixl/scan.h"
 #include "cixl/tok.h"
 
 struct cx_bin *cx_bin_new() {

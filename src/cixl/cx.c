@@ -11,9 +11,16 @@
 #include "cixl/cx.h"
 #include "cixl/env.h"
 #include "cixl/error.h"
-#include "cixl/eval.h"
+#include "cixl/lib.h"
+#include "cixl/libs/io.h"
+#include "cixl/libs/net.h"
+#include "cixl/libs/pair.h"
+#include "cixl/libs/rec.h"
+#include "cixl/libs/ref.h"
+#include "cixl/libs/stack.h"
+#include "cixl/libs/table.h"
+#include "cixl/libs/time.h"
 #include "cixl/op.h"
-#include "cixl/scan.h"
 #include "cixl/scope.h"
 #include "cixl/timer.h"
 #include "cixl/types/bin.h"
@@ -26,15 +33,10 @@
 #include "cixl/types/iter.h"
 #include "cixl/types/lambda.h"
 #include "cixl/types/nil.h"
-#include "cixl/types/pair.h"
 #include "cixl/types/rat.h"
 #include "cixl/types/rec.h"
-#include "cixl/types/ref.h"
 #include "cixl/types/str.h"
 #include "cixl/types/sym.h"
-#include "cixl/types/table.h"
-#include "cixl/types/time.h"
-#include "cixl/types/vect.h"
 #include "cixl/util.h"
 
 static const void *get_type_id(const void *value) {
@@ -89,8 +91,8 @@ static bool include_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   struct cx_vec fns;
   cx_vec_init(&fns, sizeof(struct cx_tok));
   
-  if (!cx_parse_end(cx, in, &fns, true)) {
-    if (!cx->errors.count) { cx_error(cx, row, col, "Missing include end"); }
+  if (!cx_parse_end(cx, in, &fns, false)) {
+    if (!cx->errors.count) { cx_error(cx, row, col, "Missing include: end"); }
     goto exit1;
   }
 
@@ -126,7 +128,36 @@ static bool include_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
     return ok;
   }
 }
+
+static bool use_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
+  int row = cx->row, col = cx->col;
+  bool ok = false;
   
+  struct cx_vec libs;
+  cx_vec_init(&libs, sizeof(struct cx_tok));
+  
+  if (!cx_parse_end(cx, in, &libs, false)) {
+    if (!cx->errors.count) { cx_error(cx, row, col, "Missing use: end"); }
+    goto exit;
+  }
+
+  cx_do_vec(&libs, struct cx_tok, t) {
+    if (t->type != CX_TID()) {
+      cx_error(cx, t->row, t->col, "Invalid lib: %s", t->type->id);
+      goto exit;
+    }
+    
+    if (!cx_use(cx, t->as_ptr, false)) { goto exit; }
+  }
+  
+  ok = true;
+ exit: {
+    cx_do_vec(&libs, struct cx_tok, t) { cx_tok_deinit(t); }
+    cx_vec_deinit(&libs);
+    return ok;
+  }
+}
+
 static bool call_imp(struct cx_scope *scope) {
   struct cx_box v = *cx_test(cx_pop(scope, false));
   bool ok = cx_call(&v, scope);
@@ -191,6 +222,20 @@ static bool unsafe_imp(struct cx_scope *scope) {
   return true;
 }
 
+static cx_lib(init_world, "cx", {
+    return
+      cx_use(cx, "cx/io", false) &&
+      cx_use(cx, "cx/net", false) &&
+      cx_use(cx, "cx/pair", false) &&
+      cx_use(cx, "cx/rec", false) &&
+      cx_use(cx, "cx/rec/io", false) &&
+      cx_use(cx, "cx/ref", false) &&
+      cx_use(cx, "cx/stack", false) &&
+      cx_use(cx, "cx/stack/ops", false) &&
+      cx_use(cx, "cx/table", false) &&
+      cx_use(cx, "cx/time", false);
+  })
+
 struct cx *cx_init(struct cx *cx) {
   cx->next_sym_tag = cx->next_type_tag = 0;
   cx->bin = NULL;
@@ -205,7 +250,7 @@ struct cx *cx_init(struct cx *cx) {
   cx_malloc_init(&cx->scope_alloc, CX_SLAB_SIZE, sizeof(struct cx_scope));
   cx_malloc_init(&cx->table_alloc, CX_SLAB_SIZE, sizeof(struct cx_table));
   cx_malloc_init(&cx->var_alloc, CX_SLAB_SIZE, sizeof(struct cx_var));
-  cx_malloc_init(&cx->vect_alloc, CX_SLAB_SIZE, sizeof(struct cx_vect));
+  cx_malloc_init(&cx->stack_alloc, CX_SLAB_SIZE, sizeof(struct cx_stack));
 
   cx_set_init(&cx->separators, sizeof(char), cx_cmp_char);
   cx_add_separators(cx, " \t\n;,.|_?!()[]{}");
@@ -213,9 +258,12 @@ struct cx *cx_init(struct cx *cx) {
   cx_set_init(&cx->syms, sizeof(struct cx_sym), cx_cmp_cstr);
   cx->syms.key_offs = offsetof(struct cx_sym, id);
 
+  cx_set_init(&cx->libs, sizeof(struct cx_lib), cx_cmp_sym);
+  cx->types.key_offs = offsetof(struct cx_lib, id);
+
   cx_set_init(&cx->types, sizeof(struct cx_type *), cx_cmp_cstr);
   cx->types.key = get_type_id;
-  
+
   cx_set_init(&cx->macros, sizeof(struct cx_macro *), cx_cmp_cstr);
   cx->macros.key = get_macro_id;
 
@@ -228,6 +276,10 @@ struct cx *cx_init(struct cx *cx) {
   cx_vec_init(&cx->scopes, sizeof(struct cx_scope *));
   cx_vec_init(&cx->calls, sizeof(struct cx_call));
   cx_vec_init(&cx->errors, sizeof(struct cx_error));
+
+  cx->file_type = cx->pair_type = cx->ref_type = cx->rfile_type = cx->rwfile_type =
+    cx->socket_type = cx->stack_type = cx->table_type = cx->time_type =
+    cx->wfile_type = NULL;
   
   cx->opt_type = cx_add_type(cx, "Opt");
   cx->opt_type->trait = true;
@@ -250,7 +302,6 @@ struct cx *cx_init(struct cx *cx) {
   cx->nil_type = cx_init_nil_type(cx);
   cx->meta_type = cx_init_meta_type(cx);
   
-  cx->pair_type = cx_init_pair_type(cx);
   cx->iter_type = cx_init_iter_type(cx);
   cx->int_type = cx_init_int_type(cx);
   cx->bool_type = cx_init_bool_type(cx);
@@ -258,25 +309,14 @@ struct cx *cx_init(struct cx *cx) {
   cx->char_type = cx_init_char_type(cx);
   cx->str_type = cx_init_str_type(cx);
   cx->sym_type = cx_init_sym_type(cx);
-  cx->time_type = cx_init_time_type(cx);
   cx->guid_type = cx_init_guid_type(cx);
-  cx->vect_type = cx_init_vect_type(cx);
-  cx->table_type = cx_init_table_type(cx);
   cx->bin_type = cx_init_bin_type(cx);
   cx->func_type = cx_init_func_type(cx);
   cx->fimp_type = cx_init_fimp_type(cx);
   cx->lambda_type = cx_init_lambda_type(cx);
-  cx->ref_type = NULL;
-  
-  cx->file_type = cx_init_file_type(cx, "File");
-  cx->rfile_type = cx_init_file_type(cx, "RFile", cx->file_type, cx->seq_type);
-  cx->rfile_type->iter = cx_file_iter;
-
-  cx->wfile_type = cx_init_file_type(cx, "WFile", cx->file_type);
-  cx->rwfile_type = cx_init_file_type(cx, "RWFile", cx->rfile_type, cx->wfile_type);
-  cx->rwfile_type->iter = cx_file_iter;
-  
+    
   cx_add_macro(cx, "include:", include_parse);
+  cx_add_macro(cx, "use:", use_parse);
 
   cx_add_cfunc(cx, "call", cx_args(cx_arg("act", cx->any_type)), cx_args(), call_imp);
 
@@ -305,6 +345,24 @@ struct cx *cx_init(struct cx *cx) {
   cx->main = cx_begin(cx, NULL);
   srand((ptrdiff_t)cx + clock());
 
+  cx_init_io(cx);
+  cx_init_io_types(cx);
+  cx_init_net(cx);
+  cx_init_net_types(cx);
+  cx_init_pair(cx);
+  cx_init_pair_types(cx);
+  cx_init_rec(cx);
+  cx_init_rec_io(cx);
+  cx_init_ref(cx);
+  cx_init_ref_types(cx);
+  cx_init_stack(cx);
+  cx_init_stack_ops(cx);
+  cx_init_stack_types(cx);
+  cx_init_table(cx);
+  cx_init_table_types(cx);
+  cx_init_time(cx);
+  cx_init_time_types(cx);
+  init_world(cx);
   return cx;
 }
 
@@ -334,6 +392,8 @@ struct cx *cx_deinit(struct cx *cx) {
   cx_do_set(&cx->types, struct cx_type *, t) { free(cx_type_deinit(*t)); }
   cx_set_deinit(&cx->types);
 
+  cx_set_deinit(&cx->libs);
+
   cx_do_set(&cx->syms, struct cx_sym, s) { cx_sym_deinit(s); }
   cx_set_deinit(&cx->syms);
 
@@ -344,7 +404,7 @@ struct cx *cx_deinit(struct cx *cx) {
   cx_malloc_deinit(&cx->scope_alloc);
   cx_malloc_deinit(&cx->table_alloc);
   cx_malloc_deinit(&cx->var_alloc);
-  cx_malloc_deinit(&cx->vect_alloc);
+  cx_malloc_deinit(&cx->stack_alloc);
 
   return cx;
 }
@@ -620,10 +680,27 @@ bool cx_load(struct cx *cx, const char *path, struct cx_bin *bin) {
   }
 }
 
+bool cx_use(struct cx *cx, const char *id, bool silent) {
+  struct cx_sym sid = cx_sym(cx, id);
+  struct cx_lib *lib = cx_set_get(&cx->libs, &sid);
+
+  if (!lib) {
+    if (!silent) { cx_error(cx, cx->row, cx->col, "Lib not found: %s", id); }
+    return false;
+  }
+
+  if (!lib->used) {
+    lib->used = true;
+    if (!lib->init(cx)) { return false; }
+  }
+
+  return true;
+}
+
 void cx_dump_errors(struct cx *cx, FILE *out) {
   cx_do_vec(&cx->errors, struct cx_error, e) {
     fprintf(out, "Error in row %d, col %d:\n%s\n", e->row, e->col, e->msg);
-    cx_vect_dump(&e->stack, out);
+    cx_stack_dump(&e->stack, out);
     fputs("\n\n", out);
     cx_error_deinit(e);
   }

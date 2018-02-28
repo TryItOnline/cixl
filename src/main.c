@@ -7,47 +7,31 @@
 #include "cixl/error.h"
 #include "cixl/libs/cond.h"
 #include "cixl/libs/func.h"
-#include "cixl/libs/io.h"
 #include "cixl/libs/iter.h"
 #include "cixl/libs/math.h"
 #include "cixl/libs/meta.h"
-#include "cixl/libs/pair.h"
-#include "cixl/libs/rec.h"
-#include "cixl/libs/ref.h"
 #include "cixl/libs/stack.h"
 #include "cixl/libs/str.h"
-#include "cixl/libs/table.h"
-#include "cixl/libs/time.h"
 #include "cixl/libs/type.h"
 #include "cixl/libs/var.h"
-#include "cixl/libs/vect.h"
 #include "cixl/op.h"
 #include "cixl/repl.h"
 #include "cixl/scope.h"
 #include "cixl/scope.h"
 #include "cixl/types/str.h"
-#include "cixl/types/vect.h"
 
 int main(int argc, char *argv[]) {
   struct cx cx;
   cx_init(&cx);
   cx_init_cond(&cx);
   cx_init_func(&cx);
-  cx_init_io(&cx);
   cx_init_iter(&cx);
-  cx_init_stack(&cx);
-  cx_init_pair(&cx);
   cx_init_math(&cx);
   cx_init_type(&cx);
-  cx_init_vect(&cx);
-  cx_init_rec(&cx);
-  cx_init_ref(&cx);
   cx_init_str(&cx);
-  cx_init_table(&cx);
-  cx_init_time(&cx);
   cx_init_var(&cx);
   cx_init_meta(&cx);
-
+  
   bool emit = false;
   int argi = 1;
   
@@ -60,7 +44,7 @@ int main(int argc, char *argv[]) {
     }
   }
   
-  if (argi == argc && !emit) {
+  if (argi == argc && !emit) {    
     cx_repl(&cx, stdin, stdout);
   } else {
     if (emit) {
@@ -102,28 +86,19 @@ int main(int argc, char *argv[]) {
             "#include \"cixl/error.h\"\n"
             "#include \"cixl/libs/cond.h\"\n"
             "#include \"cixl/libs/func.h\"\n"
-            "#include \"cixl/libs/io.h\"\n"
             "#include \"cixl/libs/iter.h\"\n"
             "#include \"cixl/libs/math.h\"\n"
             "#include \"cixl/libs/meta.h\"\n"
-            "#include \"cixl/libs/pair.h\"\n"
-            "#include \"cixl/libs/rec.h\"\n"
-            "#include \"cixl/libs/ref.h\"\n"
             "#include \"cixl/libs/stack.h\"\n"
             "#include \"cixl/libs/str.h\"\n"
-            "#include \"cixl/libs/table.h\"\n"
-            "#include \"cixl/libs/time.h\"\n"
             "#include \"cixl/libs/type.h\"\n"
             "#include \"cixl/libs/var.h\"\n"
-            "#include \"cixl/libs/vect.h\"\n"
             "#include \"cixl/op.h\"\n"
-            "#include \"cixl/scan.h\"\n"
             "#include \"cixl/scope.h\"\n"
             "#include \"cixl/types/func.h\"\n"
             "#include \"cixl/types/lambda.h\"\n"
             "#include \"cixl/types/rec.h\"\n"
-            "#include \"cixl/types/str.h\"\n"
-            "#include \"cixl/types/vect.h\"\n\n",
+            "#include \"cixl/types/str.h\"\n\n",
 	    out);
 
       if (!cx_emit(bin, out, &cx)) {
@@ -140,18 +115,11 @@ int main(int argc, char *argv[]) {
 	    "  cx_init(&cx);\n"
 	    "  cx_init_cond(&cx);\n"
 	    "  cx_init_func(&cx);\n"
-	    "  cx_init_io(&cx);\n"
 	    "  cx_init_iter(&cx);\n"
 	    "  cx_init_stack(&cx);\n"
-	    "  cx_init_pair(&cx);\n"
 	    "  cx_init_math(&cx);\n"
 	    "  cx_init_type(&cx);\n"
-	    "  cx_init_vect(&cx);\n"
-	    "  cx_init_rec(&cx);\n"
-	    "  cx_init_ref(&cx);\n"
 	    "  cx_init_str(&cx);\n"
-	    "  cx_init_table(&cx);\n"
-	    "  cx_init_time(&cx);\n"
 	    "  cx_init_var(&cx);\n"
 	    "  cx_init_meta(&cx);\n\n"
 	    "  if (!eval(&cx)) {\n"

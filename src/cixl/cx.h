@@ -24,14 +24,16 @@ struct cx {
   struct cx_set separators;
 
   struct cx_malloc lambda_alloc, pair_alloc, rec_alloc, ref_alloc, scope_alloc,
-    table_alloc, var_alloc, vect_alloc;
+    table_alloc, var_alloc, stack_alloc;
 
+  struct cx_set libs;
+  
   struct cx_set types;
   struct cx_type *any_type, *bin_type, *bool_type, *char_type, *cmp_type, *file_type,
     *fimp_type, *func_type, *guid_type, *int_type, *iter_type, *lambda_type,
     *meta_type, *nil_type, *num_type, *opt_type, *pair_type, *rat_type, *rec_type,
-    *ref_type, *rfile_type, *rwfile_type, *seq_type, *str_type, *sym_type,
-    *table_type, *time_type, *vect_type, *wfile_type;
+    *ref_type, *rfile_type, *rwfile_type, *seq_type, *socket_type, *str_type,
+    *sym_type, *table_type, *time_type, *stack_type, *wfile_type;
 
   size_t next_sym_tag, next_type_tag;
   struct cx_set syms, macros, funcs;
@@ -98,7 +100,10 @@ bool cx_funcall(struct cx *cx, const char *id);
 
 bool cx_load_toks(struct cx *cx, const char *path, struct cx_vec *out);
 bool cx_load(struct cx *cx, const char *path, struct cx_bin *bin);
+bool cx_use(struct cx *cx, const char *id, bool silent);
 
 void cx_dump_errors(struct cx *cx, FILE *out);
+
+void cx_init_world(struct cx *cx);
 
 #endif

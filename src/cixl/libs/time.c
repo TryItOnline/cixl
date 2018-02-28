@@ -1,4 +1,5 @@
 #include <errno.h>
+#include <inttypes.h>
 #include <time.h>
 
 #include "cixl/arg.h"
@@ -6,14 +7,18 @@
 #include "cixl/box.h"
 #include "cixl/buf.h"
 #include "cixl/error.h"
-#include "cixl/eval.h"
-#include "cixl/libs/io.h"
+#include "cixl/lib.h"
+#include "cixl/libs/stack.h"
 #include "cixl/scope.h"
 #include "cixl/types/fimp.h"
 #include "cixl/types/func.h"
-#include "cixl/types/time.h"
-#include "cixl/types/vect.h"
 #include "cixl/util.h"
+
+struct cx_time *cx_time_init(struct cx_time *time, int32_t months, int64_t ns) {
+  time->months = months;
+  time->ns = ns;
+  return time;
+}
 
 static bool is_leap_year(int year) {
   return !(year%4) && ((year%100) || !(year%400));
@@ -122,10 +127,10 @@ static bool ns_imp(struct cx_scope *scope) {
   return true;
 }
 
-static bool vect_time_imp(struct cx_scope *scope) {
+static bool stack_time_imp(struct cx_scope *scope) {
   struct cx *cx = scope->cx;
   struct cx_box in = *cx_test(cx_pop(scope, false));
-  struct cx_vect *vs = in.as_ptr;
+  struct cx_stack *vs = in.as_ptr;
 
   struct cx_time t;
   cx_time_init(&t, 0, 0);
@@ -361,173 +366,291 @@ static bool mul_imp(struct cx_scope *scope) {
   return true;
 }
 
-void cx_init_time(struct cx *cx) {
-  cx_time_init(&cx_box_init(cx_set_const(cx, cx_sym(cx, "min-time"), false),
-			    cx->time_type)->as_time,
-	       INT32_MIN, INT64_MIN);
+cx_lib(cx_init_time, "cx/time", {
+    if (!cx_use(cx, "cx/stack/types", false)) { return false; }
+    if (!cx_use(cx, "cx/time/types", false)) { return false; }
+    
+    cx_time_init(&cx_box_init(cx_set_const(cx, cx_sym(cx, "min-time"), false),
+			      cx->time_type)->as_time,
+		 INT32_MIN, INT64_MIN);
   
-  cx_time_init(&cx_box_init(cx_set_const(cx, cx_sym(cx, "max-time"), false),
-			    cx->time_type)->as_time,
-	       INT32_MAX, INT64_MAX);
+    cx_time_init(&cx_box_init(cx_set_const(cx, cx_sym(cx, "max-time"), false),
+			      cx->time_type)->as_time,
+		 INT32_MAX, INT64_MAX);
   
-  cx_add_cfunc(cx, "years",
-	       cx_args(cx_arg("n", cx->int_type)),
-	       cx_args(cx_arg(NULL, cx->time_type)),
-	       years_imp);
+    cx_add_cfunc(cx, "years",
+		 cx_args(cx_arg("n", cx->int_type)),
+		 cx_args(cx_arg(NULL, cx->time_type)),
+		 years_imp);
 
-  cx_add_cfunc(cx, "months",
-	       cx_args(cx_arg("n", cx->int_type)),
-	       cx_args(cx_arg(NULL, cx->time_type)),
-	       months_imp);
+    cx_add_cfunc(cx, "months",
+		 cx_args(cx_arg("n", cx->int_type)),
+		 cx_args(cx_arg(NULL, cx->time_type)),
+		 months_imp);
   
-  cx_add_cfunc(cx, "days",
-	       cx_args(cx_arg("n", cx->int_type)),
-	       cx_args(cx_arg(NULL, cx->time_type)),
-	       days_imp);
+    cx_add_cfunc(cx, "days",
+		 cx_args(cx_arg("n", cx->int_type)),
+		 cx_args(cx_arg(NULL, cx->time_type)),
+		 days_imp);
   
-  cx_add_cfunc(cx, "h",
-	       cx_args(cx_arg("n", cx->int_type)),
-	       cx_args(cx_arg(NULL, cx->time_type)),
-	       h_imp);
+    cx_add_cfunc(cx, "h",
+		 cx_args(cx_arg("n", cx->int_type)),
+		 cx_args(cx_arg(NULL, cx->time_type)),
+		 h_imp);
   
-  cx_add_cfunc(cx, "m",
-	       cx_args(cx_arg("n", cx->int_type)),
-	       cx_args(cx_arg(NULL, cx->time_type)),
-	       m_imp);
+    cx_add_cfunc(cx, "m",
+		 cx_args(cx_arg("n", cx->int_type)),
+		 cx_args(cx_arg(NULL, cx->time_type)),
+		 m_imp);
 
-  cx_add_cfunc(cx, "s",
-	       cx_args(cx_arg("n", cx->int_type)),
-	       cx_args(cx_arg(NULL, cx->time_type)),
-	       s_imp);
+    cx_add_cfunc(cx, "s",
+		 cx_args(cx_arg("n", cx->int_type)),
+		 cx_args(cx_arg(NULL, cx->time_type)),
+		 s_imp);
   
-  cx_add_cfunc(cx, "ms",
-	       cx_args(cx_arg("n", cx->int_type)),
-	       cx_args(cx_arg(NULL, cx->time_type)),
-	       ms_imp);
+    cx_add_cfunc(cx, "ms",
+		 cx_args(cx_arg("n", cx->int_type)),
+		 cx_args(cx_arg(NULL, cx->time_type)),
+		 ms_imp);
   
-  cx_add_cfunc(cx, "us",
-	       cx_args(cx_arg("n", cx->int_type)),
-	       cx_args(cx_arg(NULL, cx->time_type)),
-	       us_imp);
+    cx_add_cfunc(cx, "us",
+		 cx_args(cx_arg("n", cx->int_type)),
+		 cx_args(cx_arg(NULL, cx->time_type)),
+		 us_imp);
   
-  cx_add_cfunc(cx, "ns",
-	       cx_args(cx_arg("n", cx->int_type)),
-	       cx_args(cx_arg(NULL, cx->time_type)),
-	       ns_imp);  
+    cx_add_cfunc(cx, "ns",
+		 cx_args(cx_arg("n", cx->int_type)),
+		 cx_args(cx_arg(NULL, cx->time_type)),
+		 ns_imp);  
 
-  cx_add_cfunc(cx, "time",
-	       cx_args(cx_arg("in", cx->vect_type)),
-	       cx_args(cx_arg(NULL, cx->opt_type)),
-	       vect_time_imp);
+    cx_add_cfunc(cx, "time",
+		 cx_args(cx_arg("in", cx->stack_type)),
+		 cx_args(cx_arg(NULL, cx->opt_type)),
+		 stack_time_imp);
   
-  cx_add_cfunc(cx, "now", cx_args(), cx_args(cx_arg(NULL, cx->time_type)), now_imp);
+    cx_add_cfunc(cx, "now", cx_args(), cx_args(cx_arg(NULL, cx->time_type)), now_imp);
 
-  cx_add_cfunc(cx, "date",
-	       cx_args(cx_arg("in", cx->time_type)),
-	       cx_args(cx_arg(NULL, cx->time_type)),
-	       time_date_imp);
+    cx_add_cfunc(cx, "date",
+		 cx_args(cx_arg("in", cx->time_type)),
+		 cx_args(cx_arg(NULL, cx->time_type)),
+		 time_date_imp);
   
-  cx_add_cfunc(cx, "time",
-	       cx_args(cx_arg("in", cx->time_type)),
-	       cx_args(cx_arg(NULL, cx->time_type)),
-	       time_time_imp);
+    cx_add_cfunc(cx, "time",
+		 cx_args(cx_arg("in", cx->time_type)),
+		 cx_args(cx_arg(NULL, cx->time_type)),
+		 time_time_imp);
 
-  cx_add_cfunc(cx, "year",
-	       cx_args(cx_arg("t", cx->time_type)),
-	       cx_args(cx_arg(NULL, cx->int_type)),
-	       time_years_imp);
+    cx_add_cfunc(cx, "year",
+		 cx_args(cx_arg("t", cx->time_type)),
+		 cx_args(cx_arg(NULL, cx->int_type)),
+		 time_years_imp);
   
-  cx_add_cfunc(cx, "years",
-	       cx_args(cx_arg("t", cx->time_type)),
-	       cx_args(cx_arg(NULL, cx->int_type)),
-	       time_years_imp);
+    cx_add_cfunc(cx, "years",
+		 cx_args(cx_arg("t", cx->time_type)),
+		 cx_args(cx_arg(NULL, cx->int_type)),
+		 time_years_imp);
   
-  cx_add_cfunc(cx, "month",
-	       cx_args(cx_arg("t", cx->time_type)),
-	       cx_args(cx_arg(NULL, cx->int_type)),
-	       month_imp);
+    cx_add_cfunc(cx, "month",
+		 cx_args(cx_arg("t", cx->time_type)),
+		 cx_args(cx_arg(NULL, cx->int_type)),
+		 month_imp);
   
-  cx_add_cfunc(cx, "months",
-	       cx_args(cx_arg("t", cx->time_type)),
-	       cx_args(cx_arg(NULL, cx->int_type)),
-	       time_months_imp);
+    cx_add_cfunc(cx, "months",
+		 cx_args(cx_arg("t", cx->time_type)),
+		 cx_args(cx_arg(NULL, cx->int_type)),
+		 time_months_imp);
   
-  cx_add_cfunc(cx, "day",
-	       cx_args(cx_arg("t", cx->time_type)),
-	       cx_args(cx_arg(NULL, cx->int_type)),
-	       time_day_imp);
+    cx_add_cfunc(cx, "day",
+		 cx_args(cx_arg("t", cx->time_type)),
+		 cx_args(cx_arg(NULL, cx->int_type)),
+		 time_day_imp);
   
-  cx_add_cfunc(cx, "days",
-	       cx_args(cx_arg("t", cx->time_type)),
-	       cx_args(cx_arg(NULL, cx->int_type)),
-	       time_days_imp);
+    cx_add_cfunc(cx, "days",
+		 cx_args(cx_arg("t", cx->time_type)),
+		 cx_args(cx_arg(NULL, cx->int_type)),
+		 time_days_imp);
 
-  cx_add_cfunc(cx, "hour",
-	       cx_args(cx_arg("t", cx->time_type)),
-	       cx_args(cx_arg(NULL, cx->int_type)),	       
-	       hour_imp);
+    cx_add_cfunc(cx, "hour",
+		 cx_args(cx_arg("t", cx->time_type)),
+		 cx_args(cx_arg(NULL, cx->int_type)),	       
+		 hour_imp);
   
-  cx_add_cfunc(cx, "minute",
-	       cx_args(cx_arg("t", cx->time_type)),
-	       cx_args(cx_arg(NULL, cx->int_type)),
-	       minute_imp);
+    cx_add_cfunc(cx, "minute",
+		 cx_args(cx_arg("t", cx->time_type)),
+		 cx_args(cx_arg(NULL, cx->int_type)),
+		 minute_imp);
   
-  cx_add_cfunc(cx, "second",
-	       cx_args(cx_arg("t", cx->time_type)),
-	       cx_args(cx_arg(NULL, cx->int_type)),
-	       second_imp);
+    cx_add_cfunc(cx, "second",
+		 cx_args(cx_arg("t", cx->time_type)),
+		 cx_args(cx_arg(NULL, cx->int_type)),
+		 second_imp);
   
-  cx_add_cfunc(cx, "nsecond",
-	       cx_args(cx_arg("t", cx->time_type)),
-	       cx_args(cx_arg(NULL, cx->int_type)),
-	       nsecond_imp);
+    cx_add_cfunc(cx, "nsecond",
+		 cx_args(cx_arg("t", cx->time_type)),
+		 cx_args(cx_arg(NULL, cx->int_type)),
+		 nsecond_imp);
   
-  cx_add_cfunc(cx, "h",
-	       cx_args(cx_arg("t", cx->time_type)),
-	       cx_args(cx_arg(NULL, cx->int_type)),	       
-	       time_h_imp);
+    cx_add_cfunc(cx, "h",
+		 cx_args(cx_arg("t", cx->time_type)),
+		 cx_args(cx_arg(NULL, cx->int_type)),	       
+		 time_h_imp);
   
-  cx_add_cfunc(cx, "m",
-	       cx_args(cx_arg("t", cx->time_type)),
-	       cx_args(cx_arg(NULL, cx->int_type)),
-	       time_m_imp);
+    cx_add_cfunc(cx, "m",
+		 cx_args(cx_arg("t", cx->time_type)),
+		 cx_args(cx_arg(NULL, cx->int_type)),
+		 time_m_imp);
   
-  cx_add_cfunc(cx, "s",
-	       cx_args(cx_arg("t", cx->time_type)),
-	       cx_args(cx_arg(NULL, cx->int_type)),
-	       time_s_imp);
+    cx_add_cfunc(cx, "s",
+		 cx_args(cx_arg("t", cx->time_type)),
+		 cx_args(cx_arg(NULL, cx->int_type)),
+		 time_s_imp);
 
-  cx_add_cfunc(cx, "ms",
-	       cx_args(cx_arg("t", cx->time_type)),
-	       cx_args(cx_arg(NULL, cx->int_type)),	       
-	       time_ms_imp);
+    cx_add_cfunc(cx, "ms",
+		 cx_args(cx_arg("t", cx->time_type)),
+		 cx_args(cx_arg(NULL, cx->int_type)),	       
+		 time_ms_imp);
   
-  cx_add_cfunc(cx, "us",
-	       cx_args(cx_arg("t", cx->time_type)),
-	       cx_args(cx_arg(NULL, cx->int_type)),
-	       time_us_imp);
+    cx_add_cfunc(cx, "us",
+		 cx_args(cx_arg("t", cx->time_type)),
+		 cx_args(cx_arg(NULL, cx->int_type)),
+		 time_us_imp);
   
-  cx_add_cfunc(cx, "ns",
-	       cx_args(cx_arg("t", cx->time_type)),
-	       cx_args(cx_arg(NULL, cx->int_type)),
-	       time_ns_imp);
+    cx_add_cfunc(cx, "ns",
+		 cx_args(cx_arg("t", cx->time_type)),
+		 cx_args(cx_arg(NULL, cx->int_type)),
+		 time_ns_imp);
   
-  cx_add_cfunc(cx, "+", 
-	       cx_args(cx_arg("x", cx->time_type), cx_arg("y", cx->time_type)),
-	       cx_args(cx_arg(NULL, cx->time_type)),
-	       add_imp);
+    cx_add_cfunc(cx, "+", 
+		 cx_args(cx_arg("x", cx->time_type), cx_arg("y", cx->time_type)),
+		 cx_args(cx_arg(NULL, cx->time_type)),
+		 add_imp);
   
-  cx_add_cfunc(cx, "-", 
-	       cx_args(cx_arg("x", cx->time_type), cx_arg("y", cx->time_type)),
-	       cx_args(cx_arg(NULL, cx->time_type)),
-	       sub_imp);
+    cx_add_cfunc(cx, "-", 
+		 cx_args(cx_arg("x", cx->time_type), cx_arg("y", cx->time_type)),
+		 cx_args(cx_arg(NULL, cx->time_type)),
+		 sub_imp);
   
-  cx_add_cfunc(cx, "*", 
-	       cx_args(cx_arg("x", cx->time_type), cx_arg("y", cx->int_type)),
-	       cx_args(cx_arg(NULL, cx->time_type)),
-	       mul_imp);
+    cx_add_cfunc(cx, "*", 
+		 cx_args(cx_arg("x", cx->time_type), cx_arg("y", cx->int_type)),
+		 cx_args(cx_arg(NULL, cx->time_type)),
+		 mul_imp);
 
-  cx_add_cxfunc(cx, "today",
-		cx_args(), cx_args(cx_arg(NULL, cx->time_type)),
-		"now date");
+    cx_add_cxfunc(cx, "today",
+		  cx_args(), cx_args(cx_arg(NULL, cx->time_type)),
+		  "now date");
+
+    return true;
+  })
+
+static bool equid_imp(struct cx_box *x, struct cx_box *y) {
+  struct cx_time *xt = &x->as_time, *yt = &y->as_time;
+  return xt->months == yt->months && xt->ns == yt->ns;
 }
+
+
+static enum cx_cmp cmp_imp(const struct cx_box *x, const struct cx_box *y) {
+  const struct cx_time *xt = &x->as_time, *yt = &y->as_time;
+  
+  if (xt->months < yt->months ||
+      (xt->months == yt->months && xt->ns < yt->ns)) {
+    return CX_CMP_LT;
+  }
+
+  if (xt->months > yt->months ||
+      (xt->months == yt->months && xt->ns > yt->ns)) {
+    return CX_CMP_GT;
+  }
+
+  return CX_CMP_EQ;
+}
+
+static bool ok_imp(struct cx_box *v) {
+  struct cx_time *t = &v->as_time;
+  return t->months || t->ns;
+}
+
+static void fprint_ns(int64_t ns, FILE *out) {
+  int32_t h = ns / CX_HOUR;
+  ns %= CX_HOUR;
+  int32_t m = ns / CX_MIN;
+  ns %= CX_MIN;
+  int32_t s = ns / CX_SEC;
+  ns %= CX_SEC;
+  
+  fprintf(out, "%02" PRId32 ":%02" PRId32 ":%02" PRId32 ".%" PRId64, h, m, s, ns);
+}
+
+static void write_imp(struct cx_box *v, FILE *out) {
+  fputs("[", out);
+  
+  struct cx_time *t = &v->as_time;
+  
+  int32_t y = t->months / 12, m = t->months % 12, d = t->ns / CX_DAY; 
+  fprintf(out, "%" PRId32 " %" PRId32 " %" PRId32, y, m, d);
+  int64_t ns = t->ns % CX_DAY;
+  
+  if (ns) {
+    fputc(' ', out);
+    
+    int32_t h = ns / CX_HOUR;
+    ns %= CX_HOUR;
+    int32_t m = ns / CX_MIN;
+    ns %= CX_MIN;
+    int32_t s = ns / CX_SEC;
+    ns %= CX_SEC;
+  
+    fprintf(out, "%" PRId32 " %" PRId32 " %" PRId32 " %" PRId64, h, m, s, ns);
+  }
+
+  fputs("] time", out);
+}
+
+static void dump_imp(struct cx_box *v, FILE *out) {
+  fputs("Time(", out);
+  struct cx_time *t = &v->as_time;
+  
+  if (t->months) {
+    int32_t y = t->months / 12, m = t->months % 12, d = t->ns / CX_DAY; 
+    fprintf(out, "%04" PRId32 "-%02" PRId32 "-%02" PRId32, y, m, d);
+    int64_t ns = t->ns % CX_DAY;
+
+    if (ns) {
+      fputc(' ', out);
+      fprint_ns(ns, out);
+    }
+  } else {
+    fprint_ns(t->ns, out);
+  }
+
+  fputc(')', out);
+}
+
+static void print_imp(struct cx_box *v, FILE *out) {
+  struct cx_time *t = &v->as_time;
+  
+  if (t->months) {
+    int32_t y = t->months / 12, m = t->months % 12, d = t->ns / CX_DAY; 
+    fprintf(out, "%04" PRId32 "-%02" PRId32 "-%02" PRId32, y, m+1, d+1);
+    int64_t ns = t->ns % CX_DAY;
+
+    if (ns) {
+      fputc(' ', out);
+      fprint_ns(ns, out);
+    }
+  } else {
+    fprint_ns(t->ns, out);
+  }
+}
+
+cx_lib(cx_init_time_types, "cx/time/types", {
+    struct cx_type *t = cx_add_type(cx, "Time", cx->cmp_type);
+    t->equid = equid_imp;
+    t->cmp = cmp_imp;
+    t->ok = ok_imp;
+    t->write = write_imp;
+    t->dump = dump_imp;
+    t->print = print_imp;
+    cx->time_type = t;
+
+    return true;
+  })

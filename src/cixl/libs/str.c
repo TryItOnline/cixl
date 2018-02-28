@@ -7,7 +7,6 @@
 #include "cixl/buf.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
-#include "cixl/eval.h"
 #include "cixl/scope.h"
 #include "cixl/libs/str.h"
 #include "cixl/types/func.h"

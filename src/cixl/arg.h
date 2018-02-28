@@ -4,7 +4,7 @@
 #include <stdio.h>
 
 #include "cixl/box.h"
-#include "cixl/sym.h"
+#include "cixl/types/sym.h"
 
 #define cx_args(...)				\
   sizeof((struct cx_arg[]){__VA_ARGS__}) /	\

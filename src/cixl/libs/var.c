@@ -6,7 +6,6 @@
 #include "cixl/box.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
-#include "cixl/eval.h"
 #include "cixl/libs/var.h"
 #include "cixl/op.h"
 #include "cixl/parse.h"

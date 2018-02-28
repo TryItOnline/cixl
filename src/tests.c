@@ -1,24 +1,18 @@
+#include "cixl/bin.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
-#include "cixl/eval.h"
 #include "cixl/libs/cond.h"
 #include "cixl/libs/func.h"
 #include "cixl/libs/iter.h"
 #include "cixl/libs/math.h"
 #include "cixl/libs/meta.h"
-#include "cixl/libs/pair.h"
-#include "cixl/libs/rec.h"
-#include "cixl/libs/ref.h"
-#include "cixl/libs/stack.h"
 #include "cixl/libs/str.h"
 #include "cixl/libs/table.h"
-#include "cixl/libs/time.h"
+#include "cixl/libs/stack.h"
 #include "cixl/libs/type.h"
 #include "cixl/libs/var.h"
-#include "cixl/libs/vect.h"
 #include "cixl/set.h"
 #include "cixl/scope.h"
-#include "cixl/types/vect.h"
 #include "cixl/vec.h"
 
 static void vec_tests() {
@@ -97,7 +91,7 @@ static void run(struct cx *cx, const char *in) {
     
     cx_do_vec(&cx->errors, struct cx_error, e) {
       printf("Error in row %d, col %d:\n%s\n", e->row, e->col, e->msg);
-      cx_vect_dump(&e->stack, stdout);
+      cx_stack_dump(&e->stack, stdout);
       fputs("\n\n", stdout);
       cx_error_deinit(e);
     }
@@ -129,21 +123,6 @@ static void type_tests() {
   run(&cx, "42 type Int = check");
   run(&cx, "Int A is check");
   run(&cx, "A Int is !check");
-
-  cx_deinit(&cx);
-}
-
-static void stack_tests() {
-  struct cx cx;
-  cx_init(&cx);
-  cx_init_cond(&cx);
-  cx_init_func(&cx);
-  cx_init_iter(&cx);
-  cx_init_math(&cx);
-  cx_init_stack(&cx);
-
-  run(&cx, "7 14 % + 28 = check");
-  run(&cx, "7 14 % _ + 21 = check");
 
   cx_deinit(&cx);
 }
@@ -200,9 +179,9 @@ static void func_tests() {
   cx_init_func(&cx);
   cx_init_iter(&cx);
   cx_init_math(&cx);
-  cx_init_stack(&cx);
   cx_init_var(&cx);
   
+  run(&cx, "use: cx/stack/ops;");
   run(&cx, "func: foo0()(Int) 42; foo0 42 = check");
   run(&cx, "func: foo2(x y)(Int) $x $y +; 1 2 foo2 3 = check");
   run(&cx, "func: foo3(op Func Int Int)(Int) $op call; &- 49 7 foo3 42 = check");
@@ -286,9 +265,9 @@ static void str_tests() {
   cx_init(&cx);
   cx_init_cond(&cx);
   cx_init_iter(&cx);
-  cx_init_stack(&cx);
   cx_init_str(&cx);
   
+  run(&cx, "use: cx/stack/ops;");
   run(&cx, "'foo' check");
   run(&cx, "''! check");
   run(&cx, "'foo' 'foo' = check");
@@ -306,8 +285,8 @@ static void sym_tests() {
   struct cx cx;
   cx_init(&cx);
   cx_init_cond(&cx);
-  cx_init_stack(&cx);
 
+  run(&cx, "use: cx/stack/ops;");
   run(&cx, "`foo `foo == check");
   run(&cx, "`foo `bar == !check");
   run(&cx, "'foo' sym `foo = check");
@@ -335,8 +314,8 @@ static void time_tests() {
   struct cx cx;
   cx_init(&cx);
   cx_init_cond(&cx);
-  cx_init_time(&cx);
 
+  run(&cx, "use: cx/time;");
   run(&cx, "now now <= check");
   run(&cx, "[1 0 0 24] time days 367 = check");
   run(&cx, "2m 120s = check");
@@ -349,8 +328,8 @@ static void guid_tests() {
   struct cx cx;
   cx_init(&cx);
   cx_init_cond(&cx);
-  cx_init_stack(&cx);
 
+  run(&cx, "use: cx/stack/ops;");
   run(&cx, "Guid % new ~ new = !check");
   run(&cx, "Guid new % str guid = check");
   
@@ -361,9 +340,8 @@ static void ref_tests() {
   struct cx cx;
   cx_init(&cx);
   cx_init_cond(&cx);
-  cx_init_ref(&cx);
-  cx_init_stack(&cx);
 
+  run(&cx, "use: cx/ref cx/stack/ops;");
   run(&cx, "#nil ref % 42 put-ref get-ref 42 = check");
   
   cx_deinit(&cx);
@@ -376,9 +354,8 @@ static void pair_tests() {
   cx_init_iter(&cx);
   cx_init_func(&cx);
   cx_init_math(&cx);
-  cx_init_pair(&cx);
-  cx_init_stack(&cx);
 
+  run(&cx, "use: cx/pair cx/stack/ops;");
   run(&cx, "1 2. % rezip unzip - 1 = check");
   run(&cx, "1 2. %% rezip unzip - -1 = check");
   
@@ -386,25 +363,26 @@ static void pair_tests() {
 }
 
 
-static void vect_tests() {
+static void stack_tests() {
   struct cx cx;
   cx_init(&cx);
   cx_init_cond(&cx);
   cx_init_func(&cx);
   cx_init_iter(&cx);
   cx_init_math(&cx);
-  cx_init_stack(&cx);
-  cx_init_vect(&cx);
 
+  run(&cx, "use: cx/stack cx/stack/ops;");
   run(&cx, "1 2 [3 4 5] len 3 = check");
   run(&cx, "[1 2 3] pop 3 = check");
-  run(&cx, "[1 2 3] % 4 push<Vect A> len 4 = check");
+  run(&cx, "[1 2 3] % 4 push<Stack A> len 4 = check");
   run(&cx, "[1 2] {2 *} for + 6 = check");
   run(&cx, "[1 2] [3 4] < check");
   run(&cx, "[1 2 3] [1 2] > check");
   run(&cx, "[3 2 1] % #nil sort {} for + - -4 = check");
   run(&cx, "[1 2 3] % {~ <=>} sort {} for + - 0 = check");
-  
+  run(&cx, "7 14 % + 28 = check");
+  run(&cx, "7 14 % _ + 21 = check");
+
   cx_deinit(&cx);
 }
 
@@ -413,10 +391,9 @@ static void table_tests() {
   cx_init(&cx);
   cx_init_cond(&cx);
   cx_init_iter(&cx);
-  cx_init_pair(&cx);
-  cx_init_table(&cx);
   cx_init_var(&cx);
-  cx_init_vect(&cx);
+
+  run(&cx, "use: cx/pair cx/stack cx/stack/ops cx/table;");
 
   run(&cx, "(let: t Table new;"
            " $t 1 'foo' put"
@@ -427,7 +404,7 @@ static void table_tests() {
            " $t 2 delete"
            " $t len 1 = check)");
 
-  run(&cx, "[1 'foo'. 2 'bar'.] table vect len 2 = check");
+  run(&cx, "[1 'foo'. 2 'bar'.] table stack len 2 = check");
   
   cx_deinit(&cx);
 }
@@ -451,9 +428,9 @@ static void rec_tests() {
   cx_init(&cx);
   cx_init_cond(&cx);
   cx_init_func(&cx);
-  cx_init_rec(&cx);
-  cx_init_stack(&cx);
   cx_init_var(&cx);
+
+  run(&cx, "use: cx/rec cx/stack/ops;");
 
   run(&cx,
       "rec: Foo() x Int y Str; "
@@ -489,8 +466,8 @@ static void compile_tests() {
   cx_init_iter(&cx);
   cx_init_math(&cx);
   cx_init_meta(&cx);
-  cx_init_stack(&cx);
 
+  run(&cx, "use: cx/stack/ops;");
   run(&cx, "Bin new % '1 2 +' compile call 3 = check");
   cx_deinit(&cx);
 }
@@ -501,7 +478,6 @@ int main() {
   
   comment_tests();
   type_tests();
-  stack_tests();
   group_tests();
   if_tests();
   let_tests();
@@ -516,7 +492,7 @@ int main() {
   guid_tests();
   ref_tests();
   pair_tests();
-  vect_tests();
+  stack_tests();
   table_tests();
   math_tests();
   rec_tests();

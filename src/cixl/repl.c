@@ -9,14 +9,12 @@
 #include "cixl/call.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
-#include "cixl/eval.h"
+#include "cixl/libs/stack.h"
 #include "cixl/repl.h"
 #include "cixl/op.h"
-#include "cixl/scan.h"
 #include "cixl/scope.h"
 #include "cixl/types/func.h"
 #include "cixl/types/lambda.h"
-#include "cixl/types/vect.h"
 
 static bool emit_bmips(struct cx *cx) {
   bool _eval(struct cx *cx) {
@@ -28,22 +26,22 @@ static bool emit_bmips(struct cx *cx) {
     static struct cx_func *func_QU;
     static struct cx_func *func_ifSUelse;
     static struct cx_func *func_recall;
-    static struct cx_func *func__;
     static struct cx_func *func_AD;
+    static struct cx_func *func_fib;
     static struct cx_func *func_DI;
     static struct cx_func *func_fibSUrec;
-    static struct cx_func *func_fib;
+    static struct cx_func *func__;
     static struct cx_fimp *func_SUSU_Int;
     static struct cx_fimp *func_clock_A;
     static struct cx_fimp *func_QU_Opt;
     static struct cx_fimp *func_ifSUelse_OptAA;
     static struct cx_fimp *func_recall_;
-    static struct cx_fimp *func___;
     static struct cx_fimp *func_AD_IntInt;
     static struct cx_fimp *func_DI_IntInt;
     static struct cx_fimp *func_int_Rat;
     static struct cx_fimp *func_fibSUrec_IntIntInt;
     static struct cx_fimp *func_fib_Int;
+    static struct cx_fimp *func___;
     static struct cx_sym sym_a;
     static struct cx_sym sym_b;
     static struct cx_sym sym_n;
@@ -68,32 +66,32 @@ static bool emit_bmips(struct cx *cx) {
 	imp->nops = 16;
       }
 
-      func_SUSU = cx_get_func(cx, "--", false);
-      func_clock = cx_get_func(cx, "clock", false);
-      func_int = cx_get_func(cx, "int", false);
-      func_QU = cx_get_func(cx, "?", false);
-      func_ifSUelse = cx_get_func(cx, "if-else", false);
-      func_recall = cx_get_func(cx, "recall", false);
-      func__ = cx_get_func(cx, "_", false);
-      func_AD = cx_get_func(cx, "+", false);
-      func_DI = cx_get_func(cx, "/", false);
-      func_fibSUrec = cx_get_func(cx, "fib-rec", false);
-      func_fib = cx_get_func(cx, "fib", false);
-      func_SUSU_Int = cx_get_fimp(func_SUSU, "Int", false);
-      func_clock_A = cx_get_fimp(func_clock, "A", false);
-      func_QU_Opt = cx_get_fimp(func_QU, "Opt", false);
-      func_ifSUelse_OptAA = cx_get_fimp(func_ifSUelse, "Opt A A", false);
-      func_recall_ = cx_get_fimp(func_recall, "", false);
-      func___ = cx_get_fimp(func__, "", false);
-      func_AD_IntInt = cx_get_fimp(func_AD, "Int Int", false);
-      func_DI_IntInt = cx_get_fimp(func_DI, "Int Int", false);
-      func_int_Rat = cx_get_fimp(func_int, "Rat", false);
-      func_fibSUrec_IntIntInt = cx_get_fimp(func_fibSUrec, "Int Int Int", false);
-      func_fib_Int = cx_get_fimp(func_fib, "Int", false);
+      func_SUSU = cx_test(cx_get_func(cx, "--", false));
+      func_clock = cx_test(cx_get_func(cx, "clock", false));
+      func_int = cx_test(cx_get_func(cx, "int", false));
+      func_QU = cx_test(cx_get_func(cx, "?", false));
+      func_ifSUelse = cx_test(cx_get_func(cx, "if-else", false));
+      func_recall = cx_test(cx_get_func(cx, "recall", false));
+      func_AD = cx_test(cx_get_func(cx, "+", false));
+      func_fib = cx_test(cx_get_func(cx, "fib", false));
+      func_DI = cx_test(cx_get_func(cx, "/", false));
+      func_fibSUrec = cx_test(cx_get_func(cx, "fib-rec", false));
+      func__ = cx_test(cx_get_func(cx, "_", false));
+      func_SUSU_Int = cx_test(cx_get_fimp(func_SUSU, "Int", false));
+      func_clock_A = cx_test(cx_get_fimp(func_clock, "A", false));
+      func_QU_Opt = cx_test(cx_get_fimp(func_QU, "Opt", false));
+      func_ifSUelse_OptAA = cx_test(cx_get_fimp(func_ifSUelse, "Opt A A", false));
+      func_recall_ = cx_test(cx_get_fimp(func_recall, "", false));
+      func_AD_IntInt = cx_test(cx_get_fimp(func_AD, "Int Int", false));
+      func_DI_IntInt = cx_test(cx_get_fimp(func_DI, "Int Int", false));
+      func_int_Rat = cx_test(cx_get_fimp(func_int, "Rat", false));
+      func_fibSUrec_IntIntInt = cx_test(cx_get_fimp(func_fibSUrec, "Int Int Int", false));
+      func_fib_Int = cx_test(cx_get_fimp(func_fib, "Int", false));
+      func___ = cx_test(cx_get_fimp(func__, "", false));
       sym_a = cx_sym(cx, "a");
       sym_b = cx_sym(cx, "b");
       sym_n = cx_sym(cx, "n");
-      type_Int = cx_get_type(cx, "Int", false);
+      type_Int = cx_test(cx_get_type(cx, "Int", false));
     }
 
     static void *op_labels[35] = {
@@ -107,12 +105,14 @@ static bool emit_bmips(struct cx *cx) {
   op0: { /* CX_TLITERAL CX_OPUSH */
       cx->pc = 0; cx->row = 1; cx->col = 10;
       if (cx->stop) { return true; }
+      if (cx->errors.count) { return false; }
       cx_box_init(cx_push(cx_scope(cx, 0)), cx->int_type)->as_int = 1000000000;
     }
 
   op1: { /* CX_TLAMBDA CX_OLAMBDA */
       cx->pc = 1; cx->row = 1; cx->col = 11;
       if (cx->stop) { return true; }
+      if (cx->errors.count) { return false; }
       struct cx_scope *s = cx_scope(cx, 0);
       struct cx_lambda *l = cx_lambda_new(s, 2, 29);
       cx_box_init(cx_push(s), cx->lambda_type)->as_ptr = l;
@@ -122,18 +122,21 @@ static bool emit_bmips(struct cx *cx) {
   op2: { /* CX_TLITERAL CX_OPUSH */
       cx->pc = 2; cx->row = 1; cx->col = 13;
       if (cx->stop) { return true; }
+      if (cx->errors.count) { return false; }
       cx_box_init(cx_push(cx_scope(cx, 0)), cx->int_type)->as_int = 50;
     }
 
   op3: { /* CX_TFUNC CX_OFIMP */
       cx->pc = 3; cx->row = 1; cx->col = 14;
       if (cx->stop) { return true; }
+      if (cx->errors.count) { return false; }
       goto op28;
     }
 
   op4: { /* CX_TFUNC CX_OBEGIN */
       cx->pc = 4; cx->row = 1; cx->col = 14;
       if (cx->stop) { return true; }
+      if (cx->errors.count) { return false; }
       struct cx_scope *parent = func_fib_Int->scope;
       cx_begin(cx, parent);
     }
@@ -141,6 +144,7 @@ static bool emit_bmips(struct cx *cx) {
   op5: { /* CX_TFUNC CX_OPUTARGS */
       cx->pc = 5; cx->row = 1; cx->col = 14;
       if (cx->stop) { return true; }
+      if (cx->errors.count) { return false; }
       struct cx_scope
 	*ds = cx_scope(cx, 0),
 	*ss = ds->stack.count ? ds : cx_scope(cx, 1);
@@ -152,18 +156,21 @@ static bool emit_bmips(struct cx *cx) {
   op6: { /* CX_TLITERAL CX_OPUSH */
       cx->pc = 6; cx->row = 1; cx->col = 1;
       if (cx->stop) { return true; }
+      if (cx->errors.count) { return false; }
       cx_box_init(cx_push(cx_scope(cx, 0)), cx->int_type)->as_int = 0;
     }
 
   op7: { /* CX_TLITERAL CX_OPUSH */
       cx->pc = 7; cx->row = 1; cx->col = 3;
       if (cx->stop) { return true; }
+      if (cx->errors.count) { return false; }
       cx_box_init(cx_push(cx_scope(cx, 0)), cx->int_type)->as_int = 1;
     }
 
   op8: { /* CX_TID CX_OGETVAR */
       cx->pc = 8; cx->row = 1; cx->col = 4;
       if (cx->stop) { return true; }
+      if (cx->errors.count) { return false; }
       struct cx_scope *s = cx_scope(cx, 0);
       struct cx_box *v = cx_get_var(s, sym_n, false);
       if (!v) { return false; }
@@ -173,12 +180,14 @@ static bool emit_bmips(struct cx *cx) {
   op9: { /* CX_TFUNC CX_OFIMP */
       cx->pc = 9; cx->row = 1; cx->col = 7;
       if (cx->stop) { return true; }
+      if (cx->errors.count) { return false; }
       goto op26;
     }
 
   op10: { /* CX_TFUNC CX_OBEGIN */
       cx->pc = 10; cx->row = 1; cx->col = 7;
       if (cx->stop) { return true; }
+      if (cx->errors.count) { return false; }
       struct cx_scope *parent = func_fibSUrec_IntIntInt->scope;
       cx_begin(cx, parent);
     }
@@ -186,6 +195,7 @@ static bool emit_bmips(struct cx *cx) {
   op11: { /* CX_TFUNC CX_OPUTARGS */
       cx->pc = 11; cx->row = 1; cx->col = 7;
       if (cx->stop) { return true; }
+      if (cx->errors.count) { return false; }
       struct cx_scope
 	*ds = cx_scope(cx, 0),
 	*ss = ds->stack.count ? ds : cx_scope(cx, 1);
@@ -201,6 +211,7 @@ static bool emit_bmips(struct cx *cx) {
   op12: { /* CX_TID CX_OGETVAR */
       cx->pc = 12; cx->row = 1; cx->col = 0;
       if (cx->stop) { return true; }
+      if (cx->errors.count) { return false; }
       struct cx_scope *s = cx_scope(cx, 0);
       struct cx_box *v = cx_get_var(s, sym_n, false);
       if (!v) { return false; }
@@ -210,6 +221,7 @@ static bool emit_bmips(struct cx *cx) {
   op13: { /* CX_TFIMP CX_OFUNCALL */
       cx->pc = 13; cx->row = 1; cx->col = 2;
       if (cx->stop) { return true; }
+      if (cx->errors.count) { return false; }
       struct cx_scope *s = cx_scope(cx, 0);
       struct cx_func *func = func_QU;
       struct cx_fimp *imp = func_QU_Opt;
@@ -232,6 +244,7 @@ static bool emit_bmips(struct cx *cx) {
   op14: { /* CX_TLAMBDA CX_OLAMBDA */
       cx->pc = 14; cx->row = 1; cx->col = 4;
       if (cx->stop) { return true; }
+      if (cx->errors.count) { return false; }
       struct cx_scope *s = cx_scope(cx, 0);
       struct cx_lambda *l = cx_lambda_new(s, 15, 8);
       cx_box_init(cx_push(s), cx->lambda_type)->as_ptr = l;
@@ -241,6 +254,7 @@ static bool emit_bmips(struct cx *cx) {
   op15: { /* CX_TID CX_OGETVAR */
       cx->pc = 15; cx->row = 1; cx->col = 4;
       if (cx->stop) { return true; }
+      if (cx->errors.count) { return false; }
       struct cx_scope *s = cx_scope(cx, 0);
       struct cx_box *v = cx_get_var(s, sym_b, false);
       if (!v) { return false; }
@@ -250,6 +264,7 @@ static bool emit_bmips(struct cx *cx) {
   op16: { /* CX_TID CX_OGETVAR */
       cx->pc = 16; cx->row = 1; cx->col = 7;
       if (cx->stop) { return true; }
+      if (cx->errors.count) { return false; }
       struct cx_scope *s = cx_scope(cx, 0);
       struct cx_box *v = cx_get_var(s, sym_a, false);
       if (!v) { return false; }
@@ -259,6 +274,7 @@ static bool emit_bmips(struct cx *cx) {
   op17: { /* CX_TID CX_OGETVAR */
       cx->pc = 17; cx->row = 1; cx->col = 10;
       if (cx->stop) { return true; }
+      if (cx->errors.count) { return false; }
       struct cx_scope *s = cx_scope(cx, 0);
       struct cx_box *v = cx_get_var(s, sym_b, false);
       if (!v) { return false; }
@@ -268,6 +284,7 @@ static bool emit_bmips(struct cx *cx) {
   op18: { /* CX_TFIMP CX_OFUNCALL */
       cx->pc = 18; cx->row = 1; cx->col = 13;
       if (cx->stop) { return true; }
+      if (cx->errors.count) { return false; }
       struct cx_scope *s = cx_scope(cx, 0);
       struct cx_func *func = func_AD;
       struct cx_fimp *imp = func_AD_IntInt;
@@ -290,6 +307,7 @@ static bool emit_bmips(struct cx *cx) {
   op19: { /* CX_TID CX_OGETVAR */
       cx->pc = 19; cx->row = 1; cx->col = 15;
       if (cx->stop) { return true; }
+      if (cx->errors.count) { return false; }
       struct cx_scope *s = cx_scope(cx, 0);
       struct cx_box *v = cx_get_var(s, sym_n, false);
       if (!v) { return false; }
@@ -299,6 +317,7 @@ static bool emit_bmips(struct cx *cx) {
   op20: { /* CX_TFUNC CX_OFUNCALL */
       cx->pc = 20; cx->row = 1; cx->col = 18;
       if (cx->stop) { return true; }
+      if (cx->errors.count) { return false; }
       struct cx_scope *s = cx_scope(cx, 0);
       struct cx_func *func = func_SUSU;
       struct cx_fimp *imp = func_SUSU_Int;
@@ -321,6 +340,7 @@ static bool emit_bmips(struct cx *cx) {
   op21: { /* CX_TFUNC CX_OFUNCALL */
       cx->pc = 21; cx->row = 1; cx->col = 21;
       if (cx->stop) { return true; }
+      if (cx->errors.count) { return false; }
       struct cx_scope *s = cx_scope(cx, 0);
       struct cx_func *func = func_recall;
       struct cx_fimp *imp = func_recall_;
@@ -343,12 +363,14 @@ static bool emit_bmips(struct cx *cx) {
   op22: { /* CX_TLAMBDA CX_OSTOP */
       cx->pc = 22; cx->row = 1; cx->col = 4;
       if (cx->stop) { return true; }
+      if (cx->errors.count) { return false; }
       cx->stop = true;
     }
 
   op23: { /* CX_TID CX_OGETVAR */
       cx->pc = 23; cx->row = 1; cx->col = 28;
       if (cx->stop) { return true; }
+      if (cx->errors.count) { return false; }
       struct cx_scope *s = cx_scope(cx, 0);
       struct cx_box *v = cx_get_var(s, sym_a, false);
       if (!v) { return false; }
@@ -358,6 +380,7 @@ static bool emit_bmips(struct cx *cx) {
   op24: { /* CX_TFUNC CX_OFUNCALL */
       cx->pc = 24; cx->row = 1; cx->col = 31;
       if (cx->stop) { return true; }
+      if (cx->errors.count) { return false; }
       struct cx_scope *s = cx_scope(cx, 0);
       struct cx_func *func = func_ifSUelse;
       struct cx_fimp *imp = func_ifSUelse_OptAA;
@@ -380,6 +403,7 @@ static bool emit_bmips(struct cx *cx) {
   op25: { /* CX_TFUNC CX_ORETURN */
       cx->pc = 25; cx->row = 1; cx->col = 21;
       if (cx->stop) { return true; }
+      if (cx->errors.count) { return false; }
       struct cx_call *call = cx_test(cx_vec_peek(&cx->calls, 0));
       struct cx_scope *s = cx_scope(cx, 0);
 
@@ -441,6 +465,7 @@ static bool emit_bmips(struct cx *cx) {
   op26: { /* CX_TFUNC CX_OFUNCALL */
       cx->pc = 26; cx->row = 1; cx->col = 7;
       if (cx->stop) { return true; }
+      if (cx->errors.count) { return false; }
       struct cx_scope *s = cx_scope(cx, 0);
       struct cx_func *func = func_fibSUrec;
       struct cx_fimp *imp = func_fibSUrec_IntIntInt;
@@ -463,6 +488,7 @@ static bool emit_bmips(struct cx *cx) {
   op27: { /* CX_TFUNC CX_ORETURN */
       cx->pc = 27; cx->row = 1; cx->col = 21;
       if (cx->stop) { return true; }
+      if (cx->errors.count) { return false; }
       struct cx_call *call = cx_test(cx_vec_peek(&cx->calls, 0));
       struct cx_scope *s = cx_scope(cx, 0);
 
@@ -524,6 +550,7 @@ static bool emit_bmips(struct cx *cx) {
   op28: { /* CX_TFUNC CX_OFUNCALL */
       cx->pc = 28; cx->row = 1; cx->col = 14;
       if (cx->stop) { return true; }
+      if (cx->errors.count) { return false; }
       struct cx_scope *s = cx_scope(cx, 0);
       struct cx_func *func = func_fib;
       struct cx_fimp *imp = func_fib_Int;
@@ -546,6 +573,7 @@ static bool emit_bmips(struct cx *cx) {
   op29: { /* CX_TFUNC CX_OFUNCALL */
       cx->pc = 29; cx->row = 1; cx->col = 18;
       if (cx->stop) { return true; }
+      if (cx->errors.count) { return false; }
       struct cx_scope *s = cx_scope(cx, 0);
       struct cx_func *func = func__;
       struct cx_fimp *imp = func___;
@@ -568,12 +596,14 @@ static bool emit_bmips(struct cx *cx) {
   op30: { /* CX_TLAMBDA CX_OSTOP */
       cx->pc = 30; cx->row = 1; cx->col = 11;
       if (cx->stop) { return true; }
+      if (cx->errors.count) { return false; }
       cx->stop = true;
     }
 
   op31: { /* CX_TFUNC CX_OFUNCALL */
       cx->pc = 31; cx->row = 1; cx->col = 20;
       if (cx->stop) { return true; }
+      if (cx->errors.count) { return false; }
       struct cx_scope *s = cx_scope(cx, 0);
       struct cx_func *func = func_clock;
       struct cx_fimp *imp = func_clock_A;
@@ -596,6 +626,7 @@ static bool emit_bmips(struct cx *cx) {
   op32: { /* CX_TFUNC CX_OFUNCALL */
       cx->pc = 32; cx->row = 1; cx->col = 26;
       if (cx->stop) { return true; }
+      if (cx->errors.count) { return false; }
       struct cx_scope *s = cx_scope(cx, 0);
       struct cx_func *func = func_DI;
       struct cx_fimp *imp = func_DI_IntInt;
@@ -618,6 +649,7 @@ static bool emit_bmips(struct cx *cx) {
   op33: { /* CX_TFIMP CX_OFUNCALL */
       cx->pc = 33; cx->row = 1; cx->col = 28;
       if (cx->stop) { return true; }
+      if (cx->errors.count) { return false; }
       struct cx_scope *s = cx_scope(cx, 0);
       struct cx_func *func = func_int;
       struct cx_fimp *imp = func_int_Rat;
@@ -650,6 +682,10 @@ static bool emit_bmips(struct cx *cx) {
 }
 
 void cx_repl(struct cx *cx, FILE *in, FILE *out) {
+  cx_use(cx, "cx/io", false);
+  cx_use(cx, "cx/stack/ops", false);
+  cx_use(cx, "cx/stack/types", false);
+
   fprintf(out, "Cixl v%s, ", CX_VERSION);
 
   cx_eval_str(cx, "1000000000 {50 fib _} clock / int<Rat>");
@@ -659,7 +695,8 @@ void cx_repl(struct cx *cx, FILE *in, FILE *out) {
 	      "[$bmips @/ $emit-bmips ' bmips' @@n] say");
 
   fputs("Press Return twice to evaluate.\n\n", out);
-    
+  if (cx->errors.count) { cx_dump_errors(cx, out); }
+
   struct cx_buf body;
   cx_buf_open(&body);
   char line[CX_REPL_LINE_MAX];
@@ -674,7 +711,8 @@ void cx_repl(struct cx *cx, FILE *in, FILE *out) {
       cx_buf_close(&body);
 
       if (cx_eval_str(cx, body.data)) {
-	cx_stackdump(cx_scope(cx, 0), out);
+	cx_stack_dump(&cx_scope(cx, 0)->stack, out);
+	fputc('\n', out);
       } else {
 	cx_dump_errors(cx, out);
       }

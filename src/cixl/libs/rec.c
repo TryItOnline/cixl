@@ -5,7 +5,7 @@
 #include "cixl/box.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
-#include "cixl/eval.h"
+#include "cixl/lib.h"
 #include "cixl/libs/rec.h"
 #include "cixl/op.h"
 #include "cixl/parse.h"
@@ -269,32 +269,41 @@ static bool print_imp(struct cx_scope *scope) {
   return true;
 }
 
-void cx_init_rec(struct cx *cx) {
-  cx_add_macro(cx, "rec:", rec_parse); 
+cx_lib(cx_init_rec, "cx/rec", { 
+    cx_add_macro(cx, "rec:", rec_parse); 
 
-  cx_add_cfunc(cx, "=",
-	       cx_args(cx_arg("x", cx->rec_type), cx_arg("y", cx->rec_type)),
-	       cx_args(cx_arg(NULL, cx->bool_type)),
-	       eqval_imp);
+    cx_add_cfunc(cx, "=",
+		 cx_args(cx_arg("x", cx->rec_type), cx_arg("y", cx->rec_type)),
+		 cx_args(cx_arg(NULL, cx->bool_type)),
+		 eqval_imp);
 
-  cx_add_cfunc(cx, "?",
-	       cx_args(cx_arg("rec", cx->rec_type)), cx_args(cx_arg(NULL, cx->bool_type)),
-	       ok_imp);
+    cx_add_cfunc(cx, "?",
+		 cx_args(cx_arg("rec", cx->rec_type)),
+		 cx_args(cx_arg(NULL, cx->bool_type)),
+		 ok_imp);
 
-  cx_add_cfunc(cx, "print",
-	       cx_args(cx_arg("out", cx->wfile_type), cx_arg("rec", cx->rec_type)),
-	       cx_args(),
-	       print_imp);
+    cx_add_cfunc(cx, "get",
+		 cx_args(cx_arg("rec", cx->rec_type), cx_arg("fld", cx->sym_type)),
+		 cx_args(cx_arg(NULL, cx->opt_type)),
+		 get_imp);
 
-  cx_add_cfunc(cx, "get",
-	       cx_args(cx_arg("rec", cx->rec_type), cx_arg("fld", cx->sym_type)),
-	       cx_args(cx_arg(NULL, cx->opt_type)),
-	       get_imp);
+    cx_add_cfunc(cx, "put",
+		 cx_args(cx_arg("rec", cx->rec_type),
+			 cx_arg("fld", cx->sym_type),
+			 cx_arg("val", cx->any_type)),
+		 cx_args(),
+		 put_imp);
 
-  cx_add_cfunc(cx, "put",
-	       cx_args(cx_arg("rec", cx->rec_type),
-		       cx_arg("fld", cx->sym_type),
-		       cx_arg("val", cx->any_type)),
-	       cx_args(),
-	       put_imp);
-}
+    return true;
+  })
+
+cx_lib(cx_init_rec_io, "cx/rec/io", {
+    if (!cx_use(cx, "cx/io/types", false)) { return false; }
+
+    cx_add_cfunc(cx, "print",
+		 cx_args(cx_arg("out", cx->wfile_type), cx_arg("rec", cx->rec_type)),
+		 cx_args(),
+		 print_imp);
+
+    return true;
+  })

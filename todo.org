@@ -1,26 +1,53 @@
+* convert remaining libs
+* fix use: emit
+** add CX_OUSE op
+*** emit from use_eval
+* convert tests
+** use required libs in each test
+* inc version & commit
+* ---
+* add guid lib
+* move types/int/++/-- to math lib
+** move times to iter lib
+* add sym lib
+
+* ---
+* add connect(Socket, ip, port) fn
+* add is-connected(Socket) fn
+* add cx_file.fd
+** init stream when needed using fdopen
+** take mode parameter in file constructor
+*** add cx_file_ptr(struct cx_file *)
+*** rename var to _ptr
+** call close on fd instead of fclose
+* ---
 * handle argv in emit main
 ** push strings like load main
-* inc version
-* ---
-* add libs
-** tag based
-** add definitions once all tags are imported
-* optimize startup
-** parse fns on first use
-* ---
+* add port scanner example
 * add procs
 ** proc: macro
 ** copy cx and run all specified ops
 ** separate thread
 ** add cx_chan (snabel)
 * ---
+* extract stack literals as macro in stack lib
+* extract sym literals as macro in sym lib
+* extract str literals as macro in str lib
+* extract char literals as macro in str lib
+* add lib: macro
+** register in cx
+** add data param to init fn
+*** store in cx_lib
+** copy macro toks
+*** compile into cx_bin in init
+* optimize startup
+** parse fns on first use
 * optimize const emit
 ** add op_type.emit_consts
 *** rewrite getconst emit
 ** add cx_getconst_op.value
 *** set in parse_const
 *** change eval to push value
-* ---
 * add read-iter to io lib
 ** convert read to iter
 *** keep bin ref
@@ -31,15 +58,15 @@
 * add and/or tests
 * add filter tests
 * add ^ (pow)
-** add as separator
+** also add ²/³
+** add as separators
 ** implement for int/rat in math
 * add vect put/get fns
 * add rat sub/div
 ** move fns to math lib
 * implement Cmp for Sym/Guid
-* use cx_str for CX_TID
-** remove cx_tok.as_ptr
-** replace with cx_tok.as_str, as_func, as_fimp etc.
+* replace cx_tok.as_ptr with as_id, as_literal etc.
+** use cx_sym for CX_TID?
 * replace box.as_ptr with as_func/fimp/etc
 * add seek(file, pos) fn
 * add tell(file) fn

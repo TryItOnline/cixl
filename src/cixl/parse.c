@@ -9,7 +9,6 @@
 #include "cixl/buf.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
-#include "cixl/eval.h"
 #include "cixl/parse.h"
 #include "cixl/types/func.h"
 #include "cixl/types/int.h"
@@ -491,9 +490,9 @@ static bool parse_group(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup
   return true;
 }
 
-static bool parse_vect(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
+static bool parse_stack(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
   struct cx_vec *body = &cx_tok_init(cx_vec_push(out),
-				     CX_TVECT(),
+				     CX_TSTACK(),
 				     cx->row, cx->col)->as_vec;
   cx_vec_init(body, sizeof(struct cx_tok));
 
@@ -503,7 +502,7 @@ static bool parse_vect(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup)
     if (body->count) {
       struct cx_tok *tok = cx_vec_peek(body, 0);
     
-      if (tok->type == CX_TUNVECT()) {
+      if (tok->type == CX_TUNSTACK()) {
 	cx_tok_deinit(cx_vec_pop(body));
 	break;
       }
@@ -561,9 +560,9 @@ bool cx_parse_tok(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
       cx_tok_init(cx_vec_push(out), CX_TUNGROUP(), row, col);
       return true;	
     case '[':
-      return parse_vect(cx, in, out, lookup);
+      return parse_stack(cx, in, out, lookup);
     case ']':
-      cx_tok_init(cx_vec_push(out), CX_TUNVECT(), row, col);
+      cx_tok_init(cx_vec_push(out), CX_TUNSTACK(), row, col);
       return true;	
     case '{':
       return parse_lambda(cx, in, out, lookup);

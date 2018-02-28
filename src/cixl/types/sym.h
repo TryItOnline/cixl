@@ -1,6 +1,7 @@
 #ifndef CX_TYPE_SYM_H
 #define CX_TYPE_SYM_H
 
+#include <stddef.h>
 #include <stdint.h>
 
 #include <cixl/cmp.h>
