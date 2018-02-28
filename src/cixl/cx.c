@@ -36,6 +36,7 @@
 #include "cixl/op.h"
 #include "cixl/rec.h"
 #include "cixl/scope.h"
+#include "cixl/stack.h"
 #include "cixl/str.h"
 #include "cixl/timer.h"
 #include "cixl/types/bool.h"

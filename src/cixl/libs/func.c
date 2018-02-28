@@ -13,9 +13,9 @@
 #include "cixl/lambda.h"
 #include "cixl/lib.h"
 #include "cixl/libs/func.h"
-#include "cixl/libs/stack.h"
 #include "cixl/op.h"
 #include "cixl/scope.h"
+#include "cixl/stack.h"
 
 static bool parse_args(struct cx *cx, struct cx_vec *toks, struct cx_vec *args) {
   struct cx_vec tmp_ids;

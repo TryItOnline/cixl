@@ -11,10 +11,10 @@
 #include "cixl/error.h"
 #include "cixl/func.h"
 #include "cixl/lambda.h"
-#include "cixl/libs/stack.h"
 #include "cixl/repl.h"
 #include "cixl/op.h"
 #include "cixl/scope.h"
+#include "cixl/stack.h"
 
 static bool emit_bmips(struct cx *cx) {
   bool _eval(struct cx *cx) {

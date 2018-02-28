@@ -1,6 +1,8 @@
-* extract cx_stack to /cixl
 * rename meta lib to bin
-* move remaining types
+* --
+* add meta lib with include:/use:
+** use in repl
+* move remaining types & rm dir
 * move types/int/++/-- to math lib
 ** move times to iter lib
 * move bool/t/f to cond lib

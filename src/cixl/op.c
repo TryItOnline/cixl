@@ -7,10 +7,10 @@
 #include "cixl/fimp.h"
 #include "cixl/func.h"
 #include "cixl/lambda.h"
-#include "cixl/libs/stack.h"
 #include "cixl/op.h"
 #include "cixl/rec.h"
 #include "cixl/scope.h"
+#include "cixl/stack.h"
 #include "cixl/tok.h"
 
 static bool emit(struct cx_op *op, struct cx_bin *bin, FILE *out, struct cx *cx) {
