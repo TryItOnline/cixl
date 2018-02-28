@@ -4,6 +4,8 @@
 *** emit from use_eval
 * convert tests
 ** use required libs in each test
+* update examples with use:
+* update benchmarks with use:
 * inc version & commit
 * ---
 * add guid lib
@@ -13,7 +15,9 @@
 
 * ---
 * add connect(Socket, ip, port) fn
+** non-blocking
 * add is-connected(Socket) fn
+** use getsockopt to check
 * add cx_file.fd
 ** init stream when needed using fdopen
 ** take mode parameter in file constructor
@@ -24,11 +28,10 @@
 * handle argv in emit main
 ** push strings like load main
 * add port scanner example
-* add procs
-** proc: macro
-** copy cx and run all specified ops
-** separate thread
-** add cx_chan (snabel)
+** take host and port range params
+** try connecting n sockets
+*** reuse sockets
+*** disconnect when connected and process next port
 * ---
 * extract stack literals as macro in stack lib
 * extract sym literals as macro in sym lib
@@ -40,6 +43,7 @@
 *** store in cx_lib
 ** copy macro toks
 *** compile into cx_bin in init
+* ---
 * optimize startup
 ** parse fns on first use
 * optimize const emit
