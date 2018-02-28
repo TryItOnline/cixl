@@ -4,6 +4,7 @@
 * move types/int/++/-- to math lib
 ** move times to iter lib
 * move bool/t/f to cond lib
+* rename libs to lib
 * update tests
 * update benchmarks with use:
 * update examples with use:

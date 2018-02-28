@@ -20,10 +20,11 @@ target_include_directories(tests PUBLIC src/)
 file(GLOB headers src/cixl/*.h)
 install(FILES ${headers} DESTINATION include/cixl)
 
-file(GLOB type_headers src/cixl/types/*.h)
-install(FILES ${type_headers} DESTINATION include/cixl/types)
+file(GLOB lib_headers src/cixl/lib/*.h)
+install(FILES ${lib_headers} DESTINATION include/cixl/lib)
 
-file(GLOB lib_headers src/cixl/libs/*.h)
-install(FILES ${lib_headers} DESTINATION include/cixl/libs)
+file(GLOB lib_headers src/cixl/posix/*.h)
+install(FILES ${lib_headers} DESTINATION include/cixl/posix)
+
 install(FILES build/cixl DESTINATION bin)
 install(FILES build/libcixl.a DESTINATION lib)
