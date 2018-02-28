@@ -98,6 +98,7 @@ void cx_end(struct cx *cx);
 
 bool cx_funcall(struct cx *cx, const char *id);
 
+char *cx_get_path(struct cx *cx, const char *path);
 bool cx_load_toks(struct cx *cx, const char *path, struct cx_vec *out);
 bool cx_load(struct cx *cx, const char *path, struct cx_bin *bin);
 bool cx_use(struct cx *cx, const char *id, bool silent);

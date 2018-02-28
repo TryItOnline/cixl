@@ -684,6 +684,7 @@ static bool emit_bmips(struct cx *cx) {
 void cx_repl(struct cx *cx, FILE *in, FILE *out) {
   cx_use(cx, "cx/io", false);
   cx_use(cx, "cx/math", false);
+  cx_use(cx, "cx/meta", false);
   cx_use(cx, "cx/stack/ops", false);
   cx_use(cx, "cx/stack/types", false);
   cx_use(cx, "cx/var", false);

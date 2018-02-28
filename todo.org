@@ -1,8 +1,6 @@
-* rename meta lib to bin
-* --
-* add meta lib with include:/use:
-** use in repl
 * move remaining types & rm dir
+* move call fn to func lib
+* move safe/unsafe to type lib
 * move types/int/++/-- to math lib
 ** move times to iter lib
 * move bool/t/f to cond lib

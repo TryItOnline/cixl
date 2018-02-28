@@ -5,9 +5,9 @@
 #include "cixl/buf.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
-#include "cixl/libs/stack.h"
 #include "cixl/op.h"
 #include "cixl/repl.h"
+#include "cixl/stack.h"
 #include "cixl/str.h"
 #include "cixl/scope.h"
 

@@ -5,6 +5,5 @@ struct cx;
 struct cx_lib;
 
 struct cx_lib *cx_init_meta(struct cx *cx);
-struct cx_lib *cx_init_meta_types(struct cx *cx);
 
 #endif
