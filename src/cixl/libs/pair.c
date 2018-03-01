@@ -83,7 +83,8 @@ static bool rezip_imp(struct cx_scope *scope) {
 }
 
 cx_lib(cx_init_pair, "cx/pair", {
-    if (!cx_use(cx, "cx/pair/types", false)) { return false; }
+    if (!cx_use(cx, "cx/iter", false) ||
+	!cx_use(cx, "cx/pair/types", false)) { return false; }
 
     cx_add_cfunc(cx, ".", 
 		 cx_args(cx_arg("x", cx->opt_type), cx_arg("y", cx->opt_type)),

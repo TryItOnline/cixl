@@ -118,6 +118,16 @@ static bool new_imp(struct cx_scope *scope) {
   return true;
 }
 
+static bool safe_imp(struct cx_scope *scope) {
+  scope->safe = true;
+  return true;
+}
+
+static bool unsafe_imp(struct cx_scope *scope) {
+  scope->safe = false;
+  return true;
+}
+
 cx_lib(cx_init_type, "cx/type", {
     cx_add_macro(cx, "trait:", trait_parse);
 
@@ -140,6 +150,9 @@ cx_lib(cx_init_type, "cx/type", {
 		 cx_args(cx_arg("t", cx->meta_type)),
 		 cx_args(cx_arg(NULL, cx->any_type)),
 		 new_imp);
-    
+
+    cx_add_cfunc(cx, "safe", cx_args(), cx_args(), safe_imp);
+    cx_add_cfunc(cx, "unsafe", cx_args(), cx_args(), unsafe_imp);
+
     return true;
   })

@@ -688,6 +688,7 @@ void cx_repl(struct cx *cx, FILE *in, FILE *out) {
   cx_use(cx, "cx/stack/ops", false);
   cx_use(cx, "cx/stack/types", false);
   cx_use(cx, "cx/var", false);
+  cx_use(cx, "cx/time", false);
 
   fprintf(out, "Cixl v%s, ", CX_VERSION);
 

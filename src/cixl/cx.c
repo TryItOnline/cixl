@@ -2,6 +2,7 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include <unistd.h>
 
 #include "cixl/arg.h"
@@ -42,7 +43,6 @@
 #include "cixl/scope.h"
 #include "cixl/stack.h"
 #include "cixl/str.h"
-#include "cixl/timer.h"
 #include "cixl/util.h"
 
 static const void *get_type_id(const void *value) {
@@ -58,33 +58,6 @@ static const void *get_macro_id(const void *value) {
 static const void *get_func_id(const void *value) {
   struct cx_func *const *func = value;
   return &(*func)->id;
-}
-
-static bool call_imp(struct cx_scope *scope) {
-  struct cx_box v = *cx_test(cx_pop(scope, false));
-  bool ok = cx_call(&v, scope);
-  cx_box_deinit(&v);
-  return ok;
-}
-
-static bool clock_imp(struct cx_scope *scope) {
-  struct cx_box v = *cx_test(cx_pop(scope, false));
-  cx_timer_t timer;
-  cx_timer_reset(&timer);
-  bool ok = cx_call(&v, scope);
-  cx_box_deinit(&v);
-  cx_box_init(cx_push(scope), scope->cx->int_type)->as_int = cx_timer_ns(&timer);
-  return ok;
-}
-
-static bool safe_imp(struct cx_scope *scope) {
-  scope->safe = true;
-  return true;
-}
-
-static bool unsafe_imp(struct cx_scope *scope) {
-  scope->safe = false;
-  return true;
 }
 
 static cx_lib(init_world, "cx", {
@@ -197,17 +170,7 @@ struct cx *cx_init(struct cx *cx) {
   
   cx->int_type = cx_init_int_type(cx);
   cx->bool_type = cx_init_bool_type(cx);
-  
-  cx_add_cfunc(cx, "call", cx_args(cx_arg("act", cx->any_type)), cx_args(), call_imp);
-
-  cx_add_cfunc(cx, "clock",
-	       cx_args(cx_arg("act", cx->any_type)),
-	       cx_args(cx_arg(NULL, cx->int_type)),
-	       clock_imp);
-  
-  cx_add_cfunc(cx, "safe", cx_args(), cx_args(), safe_imp);
-  cx_add_cfunc(cx, "unsafe", cx_args(), cx_args(), unsafe_imp);
-
+    
   cx->scope = NULL;
   cx->main = cx_begin(cx, NULL);
   srand((ptrdiff_t)cx + clock());

@@ -222,6 +222,13 @@ static bool imps_imp(struct cx_scope *scope) {
   return true;
 }
 
+static bool call_imp(struct cx_scope *scope) {
+  struct cx_box v = *cx_test(cx_pop(scope, false));
+  bool ok = cx_call(&v, scope);
+  cx_box_deinit(&v);
+  return ok;
+}
+
 static struct cx_call *get_fimp_call(struct cx *cx) {
   for (struct cx_call *c = cx_vec_peek(&cx->calls, 0);
        c >= (struct cx_call *)cx->calls.items;
@@ -285,6 +292,7 @@ cx_lib(cx_init_func, "cx/func", {
 	       cx_args(cx_arg(NULL, cx->stack_type)),
 	       imps_imp);
   
+  cx_add_cfunc(cx, "call", cx_args(cx_arg("act", cx->any_type)), cx_args(), call_imp);
   cx_add_cfunc(cx, "recall", cx_args(), cx_args(), recall_imp);
   cx_add_cfunc(cx, "upcall", cx_args(), cx_args(), upcall_imp);
 

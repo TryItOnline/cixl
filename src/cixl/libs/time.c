@@ -12,6 +12,7 @@
 #include "cixl/lib.h"
 #include "cixl/scope.h"
 #include "cixl/stack.h"
+#include "cixl/timer.h"
 #include "cixl/util.h"
 
 struct cx_time *cx_time_init(struct cx_time *time, int32_t months, int64_t ns) {
@@ -366,6 +367,16 @@ static bool mul_imp(struct cx_scope *scope) {
   return true;
 }
 
+static bool clock_imp(struct cx_scope *scope) {
+  struct cx_box v = *cx_test(cx_pop(scope, false));
+  cx_timer_t timer;
+  cx_timer_reset(&timer);
+  bool ok = cx_call(&v, scope);
+  cx_box_deinit(&v);
+  cx_box_init(cx_push(scope), scope->cx->int_type)->as_int = cx_timer_ns(&timer);
+  return ok;
+}
+
 cx_lib(cx_init_time, "cx/time", {
     if (!cx_use(cx, "cx/stack/types", false)) { return false; }
     if (!cx_use(cx, "cx/time/types", false)) { return false; }
@@ -539,6 +550,11 @@ cx_lib(cx_init_time, "cx/time", {
 		  cx_args(), cx_args(cx_arg(NULL, cx->time_type)),
 		  "now date");
 
+  cx_add_cfunc(cx, "clock",
+	       cx_args(cx_arg("act", cx->any_type)),
+	       cx_args(cx_arg(NULL, cx->int_type)),
+	       clock_imp);
+    
     return true;
   })
 

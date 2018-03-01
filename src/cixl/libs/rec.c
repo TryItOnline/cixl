@@ -270,6 +270,8 @@ static bool print_imp(struct cx_scope *scope) {
 }
 
 cx_lib(cx_init_rec, "cx/rec", { 
+    if (!cx_use(cx, "cx/sym/types", false)) { return false; }
+
     cx_add_macro(cx, "rec:", rec_parse); 
 
     cx_add_cfunc(cx, "=",
