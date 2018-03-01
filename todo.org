@@ -1,9 +1,28 @@
-* move remaining types & rm dir
+* add cx_lib.defs
+** change cx_lib to return static struct like op/tok types
+** add def, const_def, cfunc_def, cxfunc_def, type_def
+** add sym id, bool used and init fn to def
+*** add cx_lib_dep(lib, id)
+**** add lib.deps
+*** add cx_lib_const, cx_lib_cfunc, cx_lib_cxfunc fns
+**** store data in def and add in init
+** no more need for separate types/ops libraries
+** change cx_use fn to take lib and id
+*** use cx_lib accessors to get lib
+** add support for specifying names in use:
+*** init all names default
+*** init specified if TGROUP
 * move call fn to func lib
 * move safe/unsafe to type lib
+* move clock to time lib
+** use in repl
 * move types/int/++/-- to math lib
 ** move times to iter lib
 * move bool/t/f to cond lib
+* move int_type to math lib
+** use where needed
+* move bool_type to cond lib
+** use where needed
 * rename libs to lib
 * update tests
 * update benchmarks with use:

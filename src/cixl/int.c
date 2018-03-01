@@ -10,7 +10,7 @@
 #include "cixl/iter.h"
 #include "cixl/scope.h"
 #include "cixl/str.h"
-#include "cixl/types/int.h"
+#include "cixl/int.h"
 #include "cixl/util.h"
 
 struct cx_int_iter {

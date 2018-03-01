@@ -1,5 +1,5 @@
-#ifndef CX_TYPE_BOOL_H
-#define CX_TYPE_BOOL_H
+#ifndef CX_BOOL_H
+#define CX_BOOL_H
 
 struct cx;
 struct cx_type;
