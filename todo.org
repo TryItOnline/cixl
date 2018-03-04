@@ -1,12 +1,14 @@
 * move rec_type to rec lib
-* replace sub libs with specific uses/depends
-** add nids/ids params to cx_use
-*** rename to _cx_use and add macro wrapper
-** add support for TGROUPs to use:
 * move Iter, Rat, Pair, Ref, Table, Time types from lib to cixl
 ** extract cixl/table.h/c from lib
 ** extract cixl/pair.h/c from lib
 ** extract cixl/ref.h/c from lib
+
+* replace sub libs with specific uses/depends
+** add nids/ids params to cx_use
+*** rename to _cx_use and add macro wrapper
+** change cx_use: to support TGROUP (lib id...)
+** add support for TGROUPs to use:
 * move types/int/++/-- to math lib
 ** move times to iter lib
 * move bool/t/f to cond lib
@@ -19,7 +21,6 @@
 ** check init result in cx_use
 * extract cx_init_libs(cx)
 * add support for using specific ids from libs
-** change cx_use/use: to support TGROUP (lib id...)
 * replace cx_type.cx with lib
 * replace cx_func.cx with lib
 * ---

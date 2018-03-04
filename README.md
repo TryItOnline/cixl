@@ -31,7 +31,26 @@ Press Return twice to evaluate.
 $
 ```
 
-### Compiler
+### Scripting
+When launched with parameters, Cixl will interpret the first parameter as a filename to load code from, and push remaining parameters on the stack.
+
+test.cx
+```
+#!/usr/local/bin/cixl
+% upper say
+```
+
+```
+$ ./cixl test.cx foo
+FOO
+
+$ sudo cp ./cixl /usr/local/bin
+$ chmod +x test.cx
+$ ./test.cx foo
+FOO
+```
+
+### Compiling
 Executing ```cixl -e``` compiles the specified file to a native, statically linked executable. Flags following the filename are passed straight to ```gcc```.
 
 ```
@@ -47,7 +66,7 @@ Your guess:
 $
 ```
 
-### Modularity
+### Libraries
 The entire language is split into libraries to enable building custom languages on top of sub sets of existing functionality. ```use: cx;``` may be used as a short cut to import everything. The REPL starts with everything imported while the interpreter and compiler starts with nothing but ```use:``` and ```include:```. The following libraries are available.
 
 * cx/bin
@@ -323,25 +342,6 @@ test.cx:
    | 1 'test.cx' load
 ...
 [3]
-```
-
-### Scripting
-When launched with parameters, Cixl will interpret the first parameter as a filename to load code from, and push remaining parameters on the stack.
-
-test.cx
-```
-#!/usr/local/bin/cixl
-% upper say
-```
-
-```
-$ ./cixl test.cx foo
-FOO
-
-$ sudo cp ./cixl /usr/local/bin
-$ chmod +x test.cx
-$ ./test.cx foo
-FOO
 ```
 
 ### Serialization
