@@ -20,7 +20,6 @@
 ** check cx_use returns in inits
 ** check init result in cx_use
 * extract cx_init_libs(cx)
-* add support for using specific ids from libs
 * replace cx_type.cx with lib
 * replace cx_func.cx with lib
 * ---
@@ -43,10 +42,12 @@
 *** reuse sockets
 *** disconnect when connected and process next port
 * ---
+* extract #const literals as macro in abc lib
 * extract stack literals as macro in stack lib
 * extract sym literals as macro in sym lib
 * extract str literals as macro in str lib
 * extract char literals as macro in str lib
+* extract $var literals as macro in var lib
 * add lib: macro
 ** register in cx
 ** add data param to init fn
