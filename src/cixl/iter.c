@@ -34,3 +34,38 @@ void cx_iter_deref(struct cx_iter *iter) {
 bool cx_iter_next(struct cx_iter *iter, struct cx_box *out, struct cx_scope *scope) {
   return !iter->done && cx_test(iter->type->next)(iter, out, scope);
 }
+
+static bool equid_imp(struct cx_box *x, struct cx_box *y) {
+  return x->as_iter == y->as_iter;
+}
+
+static bool ok_imp(struct cx_box *v) {
+  return !v->as_iter->done;
+}
+
+static void copy_imp(struct cx_box *dst, const struct cx_box *src) {
+  dst->as_iter = cx_iter_ref(src->as_iter);
+}
+
+static struct cx_iter *iter_imp(struct cx_box *v) {
+  return cx_iter_ref(v->as_iter);
+}
+
+static void dump_imp(struct cx_box *v, FILE *out) {
+  fprintf(out, "Iter(%p)r%d", v->as_iter, v->as_iter->nrefs);
+}
+
+static void deinit_imp(struct cx_box *v) {
+  cx_iter_deref(v->as_iter);
+}
+
+struct cx_type *cx_init_iter_type(struct cx_lib *lib) {
+  struct cx_type *t = cx_add_type(lib, "Iter", lib->cx->seq_type);
+  t->equid = equid_imp;
+  t->ok = ok_imp;
+  t->copy = copy_imp;
+  t->iter = iter_imp;
+  t->dump = dump_imp;
+  t->deinit = deinit_imp;
+  return t;
+}

@@ -23,9 +23,6 @@ cx_lib(cx_init_abc, "cx/abc", {
     cx->num_type = cx_add_type(lib, "Num", cx->cmp_type);
     cx->num_type->trait = true;
   
-    cx->rec_type = cx_add_type(lib, "Rec", cx->cmp_type);
-    cx->rec_type->trait = true;
-
     cx->nil_type = cx_init_nil_type(lib);
     cx->meta_type = cx_init_meta_type(lib);
     cx->int_type = cx_init_int_type(lib);

@@ -18,6 +18,7 @@
 struct cx;
 struct cx_box;
 struct cx_iter;
+struct cx_lib;
 struct cx_scope;
 struct cx_type;
 
@@ -39,5 +40,7 @@ void cx_iter_free(struct cx_iter *iter);
 struct cx_iter *cx_iter_ref(struct cx_iter *iter);
 void cx_iter_deref(struct cx_iter *iter);
 bool cx_iter_next(struct cx_iter *iter, struct cx_box *out, struct cx_scope *scope);
+
+struct cx_type *cx_init_iter_type(struct cx_lib *lib);
 
 #endif

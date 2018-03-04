@@ -73,3 +73,37 @@ enum cx_cmp cx_cmp_rat(const void *x, const void *y) {
   if (xn < yn) { return CX_CMP_LT; }
   return (xn > yn) ? CX_CMP_GT : CX_CMP_EQ;
 }
+
+static bool equid_imp(struct cx_box *x, struct cx_box *y) {
+  struct cx_rat *xr = &x->as_rat, *yr = &y->as_rat;
+  return xr->num == yr->num && xr->den == yr->den;
+}
+
+static enum cx_cmp cmp_imp(const struct cx_box *x, const struct cx_box *y) {
+  return cx_cmp_rat(&x->as_rat, &y->as_rat);
+}
+
+static bool ok_imp(struct cx_box *v) {
+  struct cx_rat *r = &v->as_rat;
+  return r->num != 0;
+}
+
+static void write_imp(struct cx_box *v, FILE *out) {
+  struct cx_rat *r = &v->as_rat;
+  fprintf(out, "%s%" PRIu64 " %" PRIu64 " /", r->neg ? "-" : "", r->num, r->den);
+}
+
+static void dump_imp(struct cx_box *v, FILE *out) {
+  struct cx_rat *r = &v->as_rat;
+  fprintf(out, "%s%" PRIu64 "/%" PRIu64, r->neg ? "-" : "", r->num, r->den);
+}
+
+struct cx_type *cx_init_rat_type(struct cx_lib *lib) {
+  struct cx_type *t = cx_add_type(lib, "Rat", lib->cx->num_type);
+  t->equid = equid_imp;
+  t->cmp = cmp_imp;
+  t->ok = ok_imp;
+  t->write = write_imp;
+  t->dump = dump_imp;
+  return t;
+}

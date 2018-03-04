@@ -275,6 +275,9 @@ cx_lib(cx_init_rec, "cx/rec", {
     cx_use(cx, "cx/io");
     cx_use(cx, "cx/sym");
 
+    cx->rec_type = cx_add_type(lib, "Rec", cx->cmp_type);
+    cx->rec_type->trait = true;
+
     cx_add_macro(lib, "rec:", rec_parse); 
 
     cx_add_cfunc(lib, "=",

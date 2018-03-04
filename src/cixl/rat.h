@@ -23,4 +23,6 @@ void cx_rat_mul(struct cx_rat *dst, struct cx_rat *src);
 
 enum cx_cmp cx_cmp_rat(const void *x, const void *y);
 
+struct cx_type *cx_init_rat_type(struct cx_lib *lib);
+
 #endif

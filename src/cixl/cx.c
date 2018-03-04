@@ -39,10 +39,13 @@
 #include "cixl/lib/var.h"
 #include "cixl/nil.h"
 #include "cixl/op.h"
+#include "cixl/pair.h"
 #include "cixl/rec.h"
+#include "cixl/ref.h"
 #include "cixl/scope.h"
 #include "cixl/stack.h"
 #include "cixl/str.h"
+#include "cixl/table.h"
 #include "cixl/util.h"
 
 static const void *get_lib_id(const void *value) {
@@ -143,37 +146,23 @@ struct cx *cx_init(struct cx *cx) {
 
   cx_init_abc(cx);
   cx_init_bin(cx);
-  cx_init_bin_types(cx);
   cx_init_cond(cx);
   cx_init_error(cx);
   cx_init_func(cx);
-  cx_init_func_types(cx);
   cx_init_guid(cx);
-  cx_init_guid_types(cx);
   cx_init_io(cx);
-  cx_init_io_types(cx);
   cx_init_iter(cx);
-  cx_init_iter_types(cx);
   cx_init_math(cx);
-  cx_init_math_types(cx);
   cx_init_meta(cx);
   cx_init_net(cx);
-  cx_init_net_types(cx);
   cx_init_pair(cx);
-  cx_init_pair_types(cx);
   cx_init_rec(cx);
   cx_init_ref(cx);
-  cx_init_ref_types(cx);
   cx_init_stack(cx);
-  cx_init_stack_types(cx);
   cx_init_str(cx);
-  cx_init_str_types(cx);
   cx_init_sym(cx);
-  cx_init_sym_types(cx);
   cx_init_table(cx);
-  cx_init_table_types(cx);
   cx_init_time(cx);
-  cx_init_time_types(cx);
   cx_init_type(cx);
   cx_init_var(cx);
   init_world(cx);

@@ -1,6 +1,8 @@
 #ifndef CIXL_MALLOC_H
 #define CIXL_MALLOC_H
 
+#include <stddef.h>
+
 struct cx_malloc_slab;
 
 struct cx_malloc {

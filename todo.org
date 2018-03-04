@@ -1,9 +1,3 @@
-* move rec_type to rec lib
-* move Iter, Rat, Pair, Ref, Table, Time types from lib to cixl
-** extract cixl/table.h/c from lib
-** extract cixl/pair.h/c from lib
-** extract cixl/ref.h/c from lib
-
 * replace sub libs with specific uses/depends
 ** add nids/ids params to cx_use
 *** rename to _cx_use and add macro wrapper

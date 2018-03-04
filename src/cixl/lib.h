@@ -4,9 +4,13 @@
 #include <stdbool.h>
 
 #include "cixl/env.h"
+#include "cixl/fimp.h"
 #include "cixl/macro.h"
 #include "cixl/set.h"
 #include "cixl/sym.h"
+
+#define cx_add_type(cx, id, ...)		\
+  _cx_add_type(cx, id, ##__VA_ARGS__, NULL)	\
 
 #define cx_lib(cid, id, ...)				\
   struct cx_lib *cid(struct cx *_cx) {			\

@@ -166,7 +166,8 @@ static bool flip_imp(struct cx_scope *scope) {
 cx_lib(cx_init_stack, "cx/stack", {
     struct cx *cx = lib->cx;
     cx_use(cx, "cx/abc");
-    cx_use(cx, "cx/stack/types");
+
+    cx->stack_type = cx_init_stack_type(lib);
 
     cx_add_cfunc(lib, "len",
 		 cx_args(cx_arg("vec", cx->stack_type)),
@@ -213,11 +214,4 @@ cx_lib(cx_init_stack, "cx/stack", {
 		 cx_args(cx_arg("x", cx->opt_type), cx_arg("y", cx->opt_type)),
 		 cx_args(cx_narg(NULL, 1), cx_narg(NULL, 0)),
 		 flip_imp);
-  })
-
-cx_lib(cx_init_stack_types, "cx/stack/types", {
-    struct cx *cx = lib->cx;
-    cx_use(cx, "cx/abc");
-
-    cx->stack_type = cx_init_stack_type(lib);
   })

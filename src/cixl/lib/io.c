@@ -195,11 +195,19 @@ static bool lines_imp(struct cx_scope *scope) {
 cx_lib(cx_init_io, "cx/io", {    
     struct cx *cx = lib->cx;
     cx_use(cx, "cx/abc");
-    cx_use(cx, "cx/io/types");
     cx_use(cx, "cx/iter");
     cx_use(cx, "cx/str");
     cx_use(cx, "cx/sym");
+
+    cx->file_type = cx_init_file_type(lib, "File");
+    cx->rfile_type = cx_init_file_type(lib, "RFile", cx->file_type, cx->seq_type);
+    cx->rfile_type->iter = cx_file_iter;
     
+    cx->wfile_type = cx_init_file_type(lib, "WFile", cx->file_type);
+    cx->rwfile_type = cx_init_file_type(lib, "RWFile", 
+					cx->rfile_type, cx->wfile_type);
+    cx->rwfile_type->iter = cx_file_iter;
+
     cx_box_init(cx_set_const(lib, cx_sym(cx, "in"), false),
 		cx->rfile_type)->as_file = cx_file_new(stdin);
     
@@ -247,17 +255,4 @@ cx_lib(cx_init_io, "cx/io", {
 		  cx_args(cx_arg("v", cx->any_type)), cx_args(),
 		  "#out $v print\n"
 		  "#out @@n print");
-  })
-
-cx_lib(cx_init_io_types, "cx/io/types", {
-    struct cx *cx = lib->cx;
-    cx_use(cx, "cx/abc");
-    cx->file_type = cx_init_file_type(lib, "File");
-    cx->rfile_type = cx_init_file_type(lib, "RFile", cx->file_type, cx->seq_type);
-    cx->rfile_type->iter = cx_file_iter;
-    
-    cx->wfile_type = cx_init_file_type(lib, "WFile", cx->file_type);
-    cx->rwfile_type = cx_init_file_type(lib, "RWFile", 
-					cx->rfile_type, cx->wfile_type);
-    cx->rwfile_type->iter = cx_file_iter;
   })

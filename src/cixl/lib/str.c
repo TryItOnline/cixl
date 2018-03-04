@@ -247,7 +247,9 @@ cx_lib(cx_init_str, "cx/str", {
     struct cx *cx = lib->cx;
     cx_use(cx, "cx/abc");
     cx_use(cx, "cx/iter");
-    cx_use(cx, "cx/str/types");
+
+    cx->char_type = cx_init_char_type(lib);
+    cx->str_type = cx_init_str_type(lib);
 
     cx_add_cfunc(lib, "lines",
 		 cx_args(cx_arg("in", cx->seq_type)),
@@ -317,11 +319,3 @@ cx_lib(cx_init_str, "cx/str", {
 		 cx_args(cx_arg("s", cx->str_type)), cx_args(),
 		 str_lower_imp);
   })
-
-cx_lib(cx_init_str_types, "cx/str/types", {
-    struct cx *cx = lib->cx;
-    cx_use(cx, "cx/abc");
-
-    cx->char_type = cx_init_char_type(lib);
-    cx->str_type = cx_init_str_type(lib);
-  });

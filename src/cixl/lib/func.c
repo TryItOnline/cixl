@@ -253,8 +253,11 @@ static bool recall_imp(struct cx_scope *scope) {
 cx_lib(cx_init_func, "cx/func", {
     struct cx *cx = lib->cx;
     cx_use(cx, "cx/abc");
-    cx_use(cx, "cx/func/types");
-    cx_use(cx, "cx/stack/types");
+    cx_use(cx, "cx/stack");
+
+    cx->func_type = cx_init_func_type(lib);
+    cx->fimp_type = cx_init_fimp_type(lib);
+    cx->lambda_type = cx_init_lambda_type(lib);
 
     cx_add_macro(lib, "func:", func_parse);
 
@@ -269,12 +272,4 @@ cx_lib(cx_init_func, "cx/func", {
 	       call_imp);
   
   cx_add_cfunc(lib, "recall", cx_args(), cx_args(), recall_imp);
-  })
-
-cx_lib(cx_init_func_types, "cx/func/types", {
-    struct cx *cx = lib->cx;
-    cx_use(cx, "cx/abc");
-    cx->func_type = cx_init_func_type(lib);
-    cx->fimp_type = cx_init_fimp_type(lib);
-    cx->lambda_type = cx_init_lambda_type(lib);
   })

@@ -5,6 +5,5 @@ struct cx;
 struct cx_lib;
 
 struct cx_lib *cx_init_iter(struct cx *cx);
-struct cx_lib *cx_init_iter_types(struct cx *cx);
 
 #endif

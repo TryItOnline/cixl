@@ -210,8 +210,9 @@ static bool drop_imp(struct cx_scope *scope) {
 cx_lib(cx_init_iter, "cx/iter", {
     struct cx *cx = lib->cx;
     cx_use(cx, "cx/abc");
-    cx_use(cx, "cx/iter/types");
 
+    cx->iter_type = cx_init_iter_type(lib);
+    
     cx_add_cfunc(lib, "iter",
 		 cx_args(cx_arg("seq", cx->seq_type)),
 		 cx_args(cx_arg(NULL, cx->iter_type)),
@@ -241,41 +242,4 @@ cx_lib(cx_init_iter, "cx/iter", {
 		 cx_args(cx_arg("it", cx->iter_type), cx_arg("n", cx->int_type)),
 		 cx_args(),
 		 drop_imp);
-  })
-
-static bool equid_imp(struct cx_box *x, struct cx_box *y) {
-  return x->as_iter == y->as_iter;
-}
-
-static bool ok_imp(struct cx_box *v) {
-  return !v->as_iter->done;
-}
-
-static void copy_imp(struct cx_box *dst, const struct cx_box *src) {
-  dst->as_iter = cx_iter_ref(src->as_iter);
-}
-
-static struct cx_iter *iter_imp(struct cx_box *v) {
-  return cx_iter_ref(v->as_iter);
-}
-
-static void dump_imp(struct cx_box *v, FILE *out) {
-  fprintf(out, "Iter(%p)r%d", v->as_iter, v->as_iter->nrefs);
-}
-
-static void deinit_imp(struct cx_box *v) {
-  cx_iter_deref(v->as_iter);
-}
-
-cx_lib(cx_init_iter_types, "cx/iter/types", {
-    struct cx *cx = lib->cx;
-    cx_use(cx, "cx/abc");
-    struct cx_type *t = cx_add_type(lib, "Iter", cx->seq_type);
-    t->equid = equid_imp;
-    t->ok = ok_imp;
-    t->copy = copy_imp;
-    t->iter = iter_imp;
-    t->dump = dump_imp;
-    t->deinit = deinit_imp;
-    cx->iter_type = t;
   })

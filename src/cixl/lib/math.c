@@ -112,8 +112,9 @@ cx_lib(cx_init_math, "cx/math", {
     cx_use(cx, "cx/cond");
     cx_use(cx, "cx/func");
     cx_use(cx, "cx/iter");
-    cx_use(cx, "cx/math/types");
 
+    cx->rat_type = cx_init_rat_type(lib);
+    
     cx_add_cfunc(lib, "+",
 		 cx_args(cx_arg("x", cx->int_type), cx_arg("y", cx->int_type)),
 		 cx_args(cx_arg(NULL, cx->int_type)),
@@ -180,41 +181,4 @@ cx_lib(cx_init_math, "cx/math", {
 		  cx_args(cx_arg("in", cx->seq_type)),
 		  cx_args(cx_arg(NULL, cx->any_type)),
 		  "0 $in &+ for");
-  })
-
-static bool equid_imp(struct cx_box *x, struct cx_box *y) {
-  struct cx_rat *xr = &x->as_rat, *yr = &y->as_rat;
-  return xr->num == yr->num && xr->den == yr->den;
-}
-
-static enum cx_cmp cmp_imp(const struct cx_box *x, const struct cx_box *y) {
-  return cx_cmp_rat(&x->as_rat, &y->as_rat);
-}
-
-static bool ok_imp(struct cx_box *v) {
-  struct cx_rat *r = &v->as_rat;
-  return r->num != 0;
-}
-
-static void write_imp(struct cx_box *v, FILE *out) {
-  struct cx_rat *r = &v->as_rat;
-  fprintf(out, "%s%" PRIu64 " %" PRIu64 " /", r->neg ? "-" : "", r->num, r->den);
-}
-
-static void dump_imp(struct cx_box *v, FILE *out) {
-  struct cx_rat *r = &v->as_rat;
-  fprintf(out, "%s%" PRIu64 "/%" PRIu64, r->neg ? "-" : "", r->num, r->den);
-}
-
-cx_lib(cx_init_math_types, "cx/math/types", {
-    struct cx *cx = lib->cx;
-    cx_use(cx, "cx/abc");
-
-    struct cx_type *t = cx_add_type(lib, "Rat", cx->num_type);
-    t->equid = equid_imp;
-    t->cmp = cmp_imp;
-    t->ok = ok_imp;
-    t->write = write_imp;
-    t->dump = dump_imp;
-    cx->rat_type = t;
   })

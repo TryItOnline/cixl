@@ -12,9 +12,6 @@
 #define CX_VERSION "0.9.2"
 #define CX_SLAB_SIZE 20
 
-#define cx_add_type(cx, id, ...)		\
-  _cx_add_type(cx, id, ##__VA_ARGS__, NULL)	\
-
 struct cx_arg;
 struct cx_scope;
 struct cx_sym;

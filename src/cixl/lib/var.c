@@ -137,7 +137,7 @@ static bool get_imp(struct cx_scope *scope) {
 cx_lib(cx_init_var, "cx/var", {
     struct cx *cx = lib->cx;
     cx_use(cx, "cx/abc");
-    cx_use(cx, "cx/sym/types");
+    cx_use(cx, "cx/sym");
     
     cx_add_macro(lib, "let:", let_parse);
 
