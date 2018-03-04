@@ -37,9 +37,7 @@ struct cx_malloc *cx_malloc_init(struct cx_malloc *alloc,
 }
 
 struct cx_malloc *cx_malloc_deinit(struct cx_malloc *alloc) {
-  struct cx_malloc_slab *ns = NULL;
-  
-  for (struct cx_malloc_slab *s = alloc->root; s; s = ns) {
+  for (struct cx_malloc_slab *s = alloc->root, *ns = NULL; s; s = ns) {
     ns = s->next;
     free(s);
   }
