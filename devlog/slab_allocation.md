@@ -4,7 +4,7 @@
 ### Intro
 Manual memory management comes with its share of complexity and risks; but when it's the right tool for the job, it's the right tool for the job. On the more positive side, it allows using local knowledge about the problem being solved to custom tailor the allocation scheme. One opportunity for doing so when creating large numbers of equally sized values is to allocate multiple values at once and dish them out on request, also known as slab allocation. Advantages of slab allocation include reduced fragmentation compared to invidual allocations, which makes malloc's job easier; stable pointers as opposed to using realloc to grow allocations, without sacrificing data locality since values allocated in sequence are still placed next to each other in memory within slabs; and gradual memory use as opposed to pre-allocating a single heap block for all values. This post describes a minimal viable implementation of the idea in C, with the added twist of recycling freed values. The implementation is taken from [Cixl](https://github.com/basic-gongfu/cixl) which uses slab allocation [extensively](https://github.com/basic-gongfu/cixl/blob/bc38f8437de6d71d8482b75188ce0d0ad5f62548/src/cixl/cx.h#L22).
 
-Each allocator has a fixed slot size and number of slot per slab.
+Each allocator has a fixed slot size and number of slots per slab.
 
 ```C
 #include <stddef.h>
@@ -90,7 +90,7 @@ void *cx_malloc(struct cx_malloc *alloc) {
 }
 ```
 
-Freeing values adds them to the recycling list using the embedded next pointer.
+Freeing values registers them for recycling using the embedded next pointer.
 
 ```C
 void cx_free(struct cx_malloc *alloc, void *ptr) {
