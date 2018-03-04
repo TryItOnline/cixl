@@ -5,6 +5,7 @@
 
 struct cx_call {
   int row, col;
+  struct cx_func *func;
   struct cx_fimp *target;
   ssize_t return_pc;
   int recalls;

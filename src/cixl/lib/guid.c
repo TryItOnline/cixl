@@ -9,7 +9,7 @@
 #include "cixl/scope.h"
 #include "cixl/str.h"
 #include "cixl/lib.h"
-#include "cixl/libs/guid.h"
+#include "cixl/lib/guid.h"
 
 static bool guid_imp(struct cx_scope *scope) {
   struct cx *cx = scope->cx;
@@ -41,25 +41,24 @@ static bool str_imp(struct cx_scope *scope) {
 }
 
 cx_lib(cx_init_guid, "cx/guid", {
-    if (!cx_use(cx, "cx/guid/types", false) ||
-	!cx_use(cx, "cx/str/types", false)) {
-      return false;
-    }
+    struct cx *cx = lib->cx;
+    cx_use(cx, "cx/abc");
+    cx_use(cx, "cx/guid/types");
+    cx_use(cx, "cx/str/types");
 
-    cx_add_cfunc(cx, "guid",
+    cx_add_cfunc(lib, "guid",
 		 cx_args(cx_arg("s", cx->str_type)),
 		 cx_args(cx_arg(NULL, cx->guid_type)),
 		 guid_imp);
     
-    cx_add_cfunc(cx, "str",
+    cx_add_cfunc(lib, "str",
 		 cx_args(cx_arg("id", cx->guid_type)),
 		 cx_args(cx_arg(NULL, cx->str_type)),
 		 str_imp);
-
-    return true;
   })
 
 cx_lib(cx_init_guid_types, "cx/guid/types", {
-    cx->guid_type = cx_init_guid_type(cx);
-    return true;
+    struct cx *cx = lib->cx;
+    cx_use(cx, "cx/abc");
+    cx->guid_type = cx_init_guid_type(lib);
   })

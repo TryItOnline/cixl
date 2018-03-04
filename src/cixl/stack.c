@@ -171,18 +171,19 @@ static void deinit_imp(struct cx_box *v) {
 }
 
 
-struct cx_type *cx_init_stack_type(struct cx *cx) {
-    struct cx_type *t = cx_add_type(cx, "Stack", cx->cmp_type, cx->seq_type);
-    t->eqval = eqval_imp;
-    t->equid = equid_imp;
-    t->cmp = cmp_imp;
-    t->ok = ok_imp;
-    t->copy = copy_imp;
-    t->clone = clone_imp;
-    t->iter = iter_imp;
-    t->write = write_imp;
-    t->dump = dump_imp;
-    t->print = print_imp;
-    t->deinit = deinit_imp;
-    return t;
+struct cx_type *cx_init_stack_type(struct cx_lib *lib) {
+  struct cx *cx = lib->cx;
+  struct cx_type *t = cx_add_type(lib, "Stack", cx->cmp_type, cx->seq_type);
+  t->eqval = eqval_imp;
+  t->equid = equid_imp;
+  t->cmp = cmp_imp;
+  t->ok = ok_imp;
+  t->copy = copy_imp;
+  t->clone = clone_imp;
+  t->iter = iter_imp;
+  t->write = write_imp;
+  t->dump = dump_imp;
+  t->print = print_imp;
+  t->deinit = deinit_imp;
+  return t;
 }

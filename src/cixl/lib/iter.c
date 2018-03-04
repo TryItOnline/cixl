@@ -7,7 +7,7 @@
 #include "cixl/func.h"
 #include "cixl/iter.h"
 #include "cixl/lib.h"
-#include "cixl/libs/iter.h"
+#include "cixl/lib/iter.h"
 #include "cixl/scope.h"
 
 struct cx_map_iter {
@@ -208,39 +208,39 @@ static bool drop_imp(struct cx_scope *scope) {
 }
 
 cx_lib(cx_init_iter, "cx/iter", {
-    if (!cx_use(cx, "cx/iter/types", false)) { return false; }
+    struct cx *cx = lib->cx;
+    cx_use(cx, "cx/abc");
+    cx_use(cx, "cx/iter/types");
 
-    cx_add_cfunc(cx, "iter",
+    cx_add_cfunc(lib, "iter",
 		 cx_args(cx_arg("seq", cx->seq_type)),
 		 cx_args(cx_arg(NULL, cx->iter_type)),
 		 new_iter_imp);
 
-    cx_add_cfunc(cx, "for",
+    cx_add_cfunc(lib, "for",
 		 cx_args(cx_arg("seq", cx->seq_type), cx_arg("act", cx->any_type)),
 		 cx_args(),
 		 for_imp);
   
-    cx_add_cfunc(cx, "map",
+    cx_add_cfunc(lib, "map",
 		 cx_args(cx_arg("seq", cx->seq_type), cx_arg("act", cx->any_type)),
 		 cx_args(cx_arg(NULL, cx->iter_type)),
 		 map_imp);
   
-    cx_add_cfunc(cx, "filter",
+    cx_add_cfunc(lib, "filter",
 		 cx_args(cx_arg("seq", cx->seq_type), cx_arg("act", cx->any_type)),
 		 cx_args(cx_arg(NULL, cx->iter_type)),
 		 filter_imp);
   
-    cx_add_cfunc(cx, "next",
+    cx_add_cfunc(lib, "next",
 		 cx_args(cx_arg("it", cx->iter_type)),
 		 cx_args(cx_arg(NULL, cx->opt_type)),
 		 next_imp);
 
-    cx_add_cfunc(cx, "drop", 
+    cx_add_cfunc(lib, "drop", 
 		 cx_args(cx_arg("it", cx->iter_type), cx_arg("n", cx->int_type)),
 		 cx_args(),
 		 drop_imp);
-
-    return true;
   })
 
 static bool equid_imp(struct cx_box *x, struct cx_box *y) {
@@ -268,7 +268,9 @@ static void deinit_imp(struct cx_box *v) {
 }
 
 cx_lib(cx_init_iter_types, "cx/iter/types", {
-    struct cx_type *t = cx_add_type(cx, "Iter", cx->seq_type);
+    struct cx *cx = lib->cx;
+    cx_use(cx, "cx/abc");
+    struct cx_type *t = cx_add_type(lib, "Iter", cx->seq_type);
     t->equid = equid_imp;
     t->ok = ok_imp;
     t->copy = copy_imp;
@@ -276,5 +278,4 @@ cx_lib(cx_init_iter_types, "cx/iter/types", {
     t->dump = dump_imp;
     t->deinit = deinit_imp;
     cx->iter_type = t;
-    return true;
   })

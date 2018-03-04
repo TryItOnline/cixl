@@ -3,19 +3,18 @@
 
 #include "cixl/env.h"
 #include "cixl/fimp.h"
-#include "cixl/macro.h"
+#include "cixl/lib.h"
 #include "cixl/malloc.h"
 #include "cixl/parse.h"
 #include "cixl/set.h"
 #include "cixl/type.h"
 
-#define CX_VERSION "0.9.1"
+#define CX_VERSION "0.9.2"
 #define CX_SLAB_SIZE 20
 
 #define cx_add_type(cx, id, ...)		\
   _cx_add_type(cx, id, ##__VA_ARGS__, NULL)	\
 
-struct cx_arg;
 struct cx_arg;
 struct cx_scope;
 struct cx_sym;
@@ -27,8 +26,8 @@ struct cx {
     table_alloc, var_alloc, stack_alloc;
 
   struct cx_set libs;
+  struct cx_lib *lobby, *lib;
   
-  struct cx_set types;
   struct cx_type *any_type, *bin_type, *bool_type, *char_type, *cmp_type, *file_type,
     *fimp_type, *func_type, *guid_type, *int_type, *iter_type, *lambda_type,
     *meta_type, *nil_type, *num_type, *opt_type, *pair_type, *rat_type, *rec_type,
@@ -36,12 +35,13 @@ struct cx {
     *sym_type, *table_type, *time_type, *stack_type, *wfile_type;
 
   size_t next_sym_tag, next_type_tag;
-  struct cx_set syms, macros, funcs;
-  struct cx_env consts;
+  struct cx_set syms;
   
   struct cx_vec load_paths;
+  
   struct cx_vec scopes;
-  struct cx_scope *main, **scope;
+  struct cx_scope *root_scope, **scope;
+
   struct cx_vec calls;
   
   struct cx_bin *bin;
@@ -58,35 +58,7 @@ struct cx *cx_deinit(struct cx *cx);
 void cx_add_separators(struct cx *cx, const char *cs);
 bool cx_is_separator(struct cx *cx, char c);
 
-struct cx_type *_cx_add_type(struct cx *cx, const char *id, ...);
-struct cx_type *cx_vadd_type(struct cx *cx, const char *id, va_list parents);
-struct cx_rec_type *cx_add_rec_type(struct cx *cx, const char *id);
-struct cx_type *cx_get_type(struct cx *cx, const char *id, bool silent);
-
-struct cx_macro *cx_add_macro(struct cx *cx, const char *id, cx_macro_parse_t imp);
-struct cx_macro *cx_get_macro(struct cx *cx, const char *id, bool silent);
-
-struct cx_fimp *cx_add_func(struct cx *cx,
-			    const char *id,
-			    int nargs, struct cx_arg *args,
-			    int nrets, struct cx_arg *rets);
-
-struct cx_fimp *cx_add_cfunc(struct cx *cx,
-			     const char *id,
-			     int nargs, struct cx_arg *args,
-			     int nrets, struct cx_arg *rets,
-			     cx_fimp_ptr_t ptr);
-
-struct cx_fimp *cx_add_cxfunc(struct cx *cx,
-			      const char *id,
-			      int nargs, struct cx_arg *args,
-			      int nrets, struct cx_arg *rets,
-			      const char *body);
-
-struct cx_func *cx_get_func(struct cx *cx, const char *id, bool silent);
-
-struct cx_box *cx_get_const(struct cx *cx, struct cx_sym id, bool silent);
-struct cx_box *cx_set_const(struct cx *cx, struct cx_sym id, bool force);
+struct cx_lib *cx_add_lib(struct cx *cx, const char *id, cx_lib_init_t init);
 
 struct cx_sym cx_sym(struct cx *cx, const char *id);
 
@@ -101,7 +73,7 @@ bool cx_funcall(struct cx *cx, const char *id);
 char *cx_get_path(struct cx *cx, const char *path);
 bool cx_load_toks(struct cx *cx, const char *path, struct cx_vec *out);
 bool cx_load(struct cx *cx, const char *path, struct cx_bin *bin);
-bool cx_use(struct cx *cx, const char *id, bool silent);
+bool cx_use(struct cx *cx, const char *id);
 
 void cx_dump_errors(struct cx *cx, FILE *out);
 

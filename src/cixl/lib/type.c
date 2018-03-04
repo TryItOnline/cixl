@@ -5,7 +5,7 @@
 #include "cixl/fimp.h"
 #include "cixl/func.h"
 #include "cixl/lib.h"
-#include "cixl/libs/type.h"
+#include "cixl/lib/type.h"
 #include "cixl/op.h"
 #include "cixl/scope.h"
 
@@ -65,7 +65,7 @@ static bool trait_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   if (type) {
     cx_type_reinit(type);
   } else {
-    type = cx_add_type(cx, id_tok.as_ptr);
+    type = cx_add_type(cx->lib, id_tok.as_ptr);
     if (!type) { goto exit1; }
     type->trait = true;
   }
@@ -129,30 +129,31 @@ static bool unsafe_imp(struct cx_scope *scope) {
 }
 
 cx_lib(cx_init_type, "cx/type", {
-    cx_add_macro(cx, "trait:", trait_parse);
+    struct cx *cx = lib->cx;
+    cx_use(cx, "cx/abc");
 
-    cx_add_cfunc(cx, "type",
+    cx_add_macro(lib, "trait:", trait_parse);
+
+    cx_add_cfunc(lib, "type",
 		 cx_args(cx_arg("v", cx->opt_type)),
 		 cx_args(cx_arg(NULL, cx->meta_type)),
 		 type_imp);
   
-    cx_add_cxfunc(cx, "is",
-		  cx_args(cx_arg("x", cx->opt_type), cx_arg("y", cx->meta_type)),
-		  cx_args(cx_arg(NULL, cx->bool_type)),
-		  "$x type $y is");
-
-    cx_add_cfunc(cx, "is",
+    cx_add_cfunc(lib, "is",
 		 cx_args(cx_arg("x", cx->meta_type), cx_arg("y", cx->meta_type)),
 		 cx_args(cx_arg(NULL, cx->bool_type)),
 		 is_imp);
 
-    cx_add_cfunc(cx, "new",
+    cx_add_cxfunc(lib, "is",
+		  cx_args(cx_arg("x", cx->opt_type), cx_arg("y", cx->meta_type)),
+		  cx_args(cx_arg(NULL, cx->bool_type)),
+		  "$x type $y is");
+    
+    cx_add_cfunc(lib, "new",
 		 cx_args(cx_arg("t", cx->meta_type)),
 		 cx_args(cx_arg(NULL, cx->any_type)),
 		 new_imp);
 
-    cx_add_cfunc(cx, "safe", cx_args(), cx_args(), safe_imp);
-    cx_add_cfunc(cx, "unsafe", cx_args(), cx_args(), unsafe_imp);
-
-    return true;
+    cx_add_cfunc(lib, "safe", cx_args(), cx_args(), safe_imp);
+    cx_add_cfunc(lib, "unsafe", cx_args(), cx_args(), unsafe_imp);
   })

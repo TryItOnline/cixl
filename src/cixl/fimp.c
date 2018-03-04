@@ -16,16 +16,16 @@
 
 struct cx_fimp *cx_fimp_init(struct cx_fimp *imp,
 			     struct cx_func *func,
-			     char *id,
-			     size_t idx) {
+			     char *id) {
   imp->func = func;
   imp->id = id;
   imp->emit_id = cx_emit_id(func->emit_id, id);
-  imp->idx = idx;
   imp->ptr = NULL;
   imp->bin = NULL;
   imp->start_pc = imp->nops = 0;
   imp->scope = NULL;
+  imp->nrefs = 1;
+  
   cx_vec_init(&imp->args, sizeof(struct cx_arg));
   cx_vec_init(&imp->rets, sizeof(struct cx_arg));
   cx_vec_init(&imp->toks, sizeof(struct cx_tok));
@@ -50,19 +50,31 @@ struct cx_fimp *cx_fimp_deinit(struct cx_fimp *imp) {
   return imp;
 }
 
-bool cx_fimp_match(struct cx_fimp *imp, struct cx_scope *scope) {
+struct cx_fimp *cx_fimp_ref(struct cx_fimp *imp) {
+  imp->nrefs++;
+  return imp;
+}
+
+void cx_fimp_deref(struct cx_fimp *imp) {
+  cx_test(imp->nrefs);
+  imp->nrefs--;
+  if (!imp->nrefs) { free(cx_fimp_deinit(imp)); }
+}
+
+ssize_t cx_fimp_score(struct cx_fimp *imp, struct cx_scope *scope) {
   struct cx_vec *stack = &scope->stack;
-  if (stack->count < imp->args.count) { return false; }
-  if (!imp->args.count) { return true; }
+  if (stack->count < imp->args.count) { return -1; }
+  if (!imp->args.count) { return 0; }
   
   struct cx_arg *i = (struct cx_arg *)cx_vec_peek(&imp->args, 0);
   struct cx_box *j = (struct cx_box *)cx_vec_peek(stack, 0);
+  size_t score = 0;
   
   for (; i >= (struct cx_arg *)imp->args.items &&
 	 j >= (struct cx_box *)stack->items;
        i--, j--) {
     if (i->arg_type == CX_VARG) {
-      if (!cx_eqval(&i->value, j)) { return false; }
+      if (!cx_eqval(&i->value, j)) { return -1; }
       continue;
     }
     
@@ -80,10 +92,11 @@ bool cx_fimp_match(struct cx_fimp *imp, struct cx_scope *scope) {
       break;
     }
     
-    if (!cx_is(j->type, cx_test(t))) { return false; }
+    if (!cx_is(j->type, cx_test(t))) { return -1; }
+    score += cx_abs((ssize_t)j->type->level - t->level);
   }
 
-  return true;
+  return score;
 }
 
 static bool compile(struct cx_fimp *imp, size_t tok_idx, struct cx_bin *out) {
@@ -128,7 +141,7 @@ bool cx_fimp_inline(struct cx_fimp *imp,
 }
 
 bool cx_fimp_eval(struct cx_fimp *imp, struct cx_scope *scope) {
-  return cx_eval(imp->bin, imp->start_pc, scope->cx);
+  return cx_eval(cx_test(imp->bin), imp->start_pc, scope->cx);
 }
 
 bool cx_fimp_call(struct cx_fimp *imp, struct cx_scope *scope) {
@@ -151,7 +164,7 @@ static bool equid_imp(struct cx_box *x, struct cx_box *y) {
 static bool call_imp(struct cx_box *value, struct cx_scope *scope) {
   struct cx_fimp *imp = value->as_ptr;
 
-  if (scope->safe && !cx_fimp_match(imp, scope)) {
+  if (scope->safe && cx_fimp_score(imp, scope) == -1) {
     struct cx *cx = scope->cx;
     cx_error(cx, cx->row, cx->col, "Func not applicable: '%s'", imp->func->id);
     return -1;
@@ -184,8 +197,8 @@ static bool emit_imp(struct cx_box *v, const char *exp, FILE *out) {
   return true;
 }
 
-struct cx_type *cx_init_fimp_type(struct cx *cx) {
-  struct cx_type *t = cx_add_type(cx, "Fimp", cx->seq_type);
+struct cx_type *cx_init_fimp_type(struct cx_lib *lib) {
+  struct cx_type *t = cx_add_type(lib, "Fimp", lib->cx->seq_type);
   t->equid = equid_imp;
   t->call = call_imp;
   t->iter = iter_imp;

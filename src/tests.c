@@ -94,7 +94,7 @@ static void run(struct cx *cx, const char *in) {
 static void comment_tests() {
   struct cx cx;
   cx_init(&cx);
-  cx_use(&cx, "cx/meta", false);
+  cx_use(&cx, "cx/meta");
   
   run(&cx, "use: cx/error cx/math;");
   run(&cx, "1 //foo bar\n2 + 3 = check");
@@ -106,20 +106,20 @@ static void comment_tests() {
 static void type_tests() {
   struct cx cx;
   cx_init(&cx);
-  cx_use(&cx, "cx/meta", false);
+  cx_use(&cx, "cx/meta");
 
   run(&cx, "use: cx/cond cx/error cx/type;");
   run(&cx, "42 type Int = check");
   run(&cx, "Int A is check");
   run(&cx, "A Int is !check");
-
+  
   cx_deinit(&cx);
 }
 
 static void group_tests() {
   struct cx cx;
   cx_init(&cx);
-  cx_use(&cx, "cx/meta", false);
+  cx_use(&cx, "cx/meta");
 
   run(&cx, "use: cx/cond cx/error;");
   run(&cx, "(7 14 21) 21 = check");
@@ -130,7 +130,7 @@ static void group_tests() {
 static void if_tests() {
   struct cx cx;
   cx_init(&cx);
-  cx_use(&cx, "cx/meta", false);
+  cx_use(&cx, "cx/meta");
   
   run(&cx, "use: cx/cond cx/error cx/sym;");
   run(&cx, "#t 42 if 42 = check");
@@ -140,10 +140,11 @@ static void if_tests() {
   cx_deinit(&cx);
 }
 
+
 static void let_tests() {
   struct cx cx;
   cx_init(&cx);
-  cx_use(&cx, "cx/meta", false);
+  cx_use(&cx, "cx/meta");
 
   run(&cx, "use: cx/cond cx/error cx/math cx/str cx/var;");
   run(&cx, "(let: foo 42; $foo 42 = check)");
@@ -160,9 +161,9 @@ static void let_tests() {
 static void func_tests() {
   struct cx cx;
   cx_init(&cx);
-  cx_use(&cx, "cx/meta", false);
+  cx_use(&cx, "cx/meta");
 
-  run(&cx, "use: cx/func cx/cond cx/error cx/math cx/stack/ops cx/var;");
+  run(&cx, "use: cx/func cx/cond cx/error cx/math cx/stack cx/var;");
   run(&cx, "func: foo0()(Int) 42; foo0 42 = check");
   run(&cx, "func: foo2(x y)(Int) $x $y +; 1 2 foo2 3 = check");
   run(&cx, "func: foo3(op Func Int Int)(Int) $op call; &- 49 7 foo3 42 = check");
@@ -175,14 +176,8 @@ static void func_tests() {
       "42 fortytwo check");
 						       
   run(&cx, "(let: x 42; func: foo0()(Int) $x;) &foo0 call 42 = check");
-  run(&cx, "func: foo1(x A)(Int) $x 35 +; 7 foo1 42 = check");
+  run(&cx, "func: foo1(x A)(Int) $x 35 +; 7 foo1<A> 42 = check");
   run(&cx, "func: foo3(x y Int z Arg0)(Int) $x $y $z + +; 1 3 5 foo3 9 = check");
-
-  run(&cx,
-      "func: maybe-add(x Num y Arg0)(Arg0) $x $y +; "
-      "func: maybe-add(x y Int)(Int) $x 42 = 42 {$x $y upcall} if-else; "
-      "1 2 maybe-add 3 = check "
-      "42 2 maybe-add 42 = check");
 
   run(&cx,
       "func: answer(0)(Int) 0; "
@@ -198,7 +193,7 @@ static void func_tests() {
 static void iter_tests() {
   struct cx cx;
   cx_init(&cx);
-  cx_use(&cx, "cx/meta", false);
+  cx_use(&cx, "cx/meta");
 
   run(&cx, "use: cx/cond cx/error cx/iter cx/math;");
   run(&cx, "0 5 &++ map &+ for 15 = check");
@@ -209,7 +204,7 @@ static void iter_tests() {
 static void int_tests() {
   struct cx cx;
   cx_init(&cx);
-  cx_use(&cx, "cx/meta", false);
+  cx_use(&cx, "cx/meta");
 
   run(&cx, "use: cx/cond cx/error cx/iter cx/math cx/str;");
   run(&cx, "42 check");
@@ -224,7 +219,7 @@ static void int_tests() {
 static void char_tests() {
   struct cx cx;
   cx_init(&cx);
-  cx_use(&cx, "cx/meta", false);
+  cx_use(&cx, "cx/meta");
   
   run(&cx, "use: cx/cond cx/error cx/iter cx/math cx/str;");
   run(&cx, "@a upper @A = check");
@@ -236,10 +231,9 @@ static void char_tests() {
 static void str_tests() {
   struct cx cx;
   cx_init(&cx);
-  cx_use(&cx, "cx/meta", false);
+  cx_use(&cx, "cx/meta");
 
-  run(&cx, "use: cx/cond cx/error cx/str;");
-  run(&cx, "use: cx/stack/ops;");
+  run(&cx, "use: cx/cond cx/error cx/stack cx/str;");
   run(&cx, "'foo' check");
   run(&cx, "''! check");
   run(&cx, "'foo' 'foo' = check");
@@ -256,9 +250,9 @@ static void str_tests() {
 static void sym_tests() {
   struct cx cx;
   cx_init(&cx);
-  cx_use(&cx, "cx/meta", false);
+  cx_use(&cx, "cx/meta");
 
-  run(&cx, "use: cx/cond cx/error cx/stack/ops cx/sym cx/type;");
+  run(&cx, "use: cx/cond cx/error cx/stack cx/sym cx/type;");
   run(&cx, "`foo `foo == check");
   run(&cx, "`foo `bar == !check");
   run(&cx, "'foo' sym `foo = check");
@@ -271,7 +265,7 @@ static void sym_tests() {
 static void rat_tests() {
   struct cx cx;
   cx_init(&cx);
-  cx_use(&cx, "cx/meta", false);
+  cx_use(&cx, "cx/meta");
 
   run(&cx, "use: cx/cond cx/error cx/math;");
   run(&cx, "1 2 / 5 2 / * 5 4 / = check");
@@ -283,7 +277,7 @@ static void rat_tests() {
 static void time_tests() {
   struct cx cx;
   cx_init(&cx);
-  cx_use(&cx, "cx/meta", false);
+  cx_use(&cx, "cx/meta");
 
   run(&cx, "use: cx/cond cx/error cx/time;");
   run(&cx, "now now <= check");
@@ -297,9 +291,9 @@ static void time_tests() {
 static void guid_tests() {
   struct cx cx;
   cx_init(&cx);
-  cx_use(&cx, "cx/meta", false);
+  cx_use(&cx, "cx/meta");
 
-  run(&cx, "use: cx/cond cx/error cx/guid cx/stack/ops cx/type;");
+  run(&cx, "use: cx/cond cx/error cx/guid cx/stack cx/type;");
   run(&cx, "Guid % new ~ new = !check");
   run(&cx, "Guid new % str guid = check");
   
@@ -309,9 +303,9 @@ static void guid_tests() {
 static void ref_tests() {
   struct cx cx;
   cx_init(&cx);
-  cx_use(&cx, "cx/meta", false);
+  cx_use(&cx, "cx/meta");
 
-  run(&cx, "use: cx/cond cx/error cx/ref cx/stack/ops;");
+  run(&cx, "use: cx/cond cx/error cx/ref cx/stack;");
   run(&cx, "#nil ref % 42 put-ref get-ref 42 = check");
   
   cx_deinit(&cx);
@@ -320,9 +314,9 @@ static void ref_tests() {
 static void pair_tests() {
   struct cx cx;
   cx_init(&cx);
-  cx_use(&cx, "cx/meta", false);
+  cx_use(&cx, "cx/meta");
 
-  run(&cx, "use: cx/cond cx/error cx/math cx/pair cx/stack/ops;");
+  run(&cx, "use: cx/cond cx/error cx/math cx/pair cx/stack;");
   run(&cx, "1 2. % rezip unzip - 1 = check");
   run(&cx, "1 2. %% rezip unzip - -1 = check");
   
@@ -333,9 +327,9 @@ static void pair_tests() {
 static void stack_tests() {
   struct cx cx;
   cx_init(&cx);
-  cx_use(&cx, "cx/meta", false);
+  cx_use(&cx, "cx/meta");
 
-  run(&cx, "use: cx/cond cx/error cx/iter cx/math cx/stack cx/stack/ops;");
+  run(&cx, "use: cx/cond cx/error cx/iter cx/math cx/stack;");
   run(&cx, "1 2 [3 4 5] len 3 = check");
   run(&cx, "[1 2 3] pop 3 = check");
   run(&cx, "[1 2 3] % 4 push<Stack A> len 4 = check");
@@ -353,10 +347,10 @@ static void stack_tests() {
 static void table_tests() {
   struct cx cx;
   cx_init(&cx);
-  cx_use(&cx, "cx/meta", false);
+  cx_use(&cx, "cx/meta");
 
   run(&cx,
-      "use: cx/cond cx/error cx/iter cx/math cx/pair cx/stack cx/stack/ops "
+      "use: cx/cond cx/error cx/iter cx/math cx/pair cx/stack "
       "cx/table cx/var cx/type;");
 
   run(&cx, "(let: t Table new;"
@@ -376,7 +370,7 @@ static void table_tests() {
 static void math_tests() {
   struct cx cx;
   cx_init(&cx);
-  cx_use(&cx, "cx/meta", false);
+  cx_use(&cx, "cx/meta");
 
   run(&cx, "use: cx/cond cx/error cx/math;");
   run(&cx, "21 21 +<Int Int> 42 = check");
@@ -388,9 +382,9 @@ static void math_tests() {
 static void rec_tests() {
   struct cx cx;
   cx_init(&cx);
-  cx_use(&cx, "cx/meta", false);
+  cx_use(&cx, "cx/meta");
 
-  run(&cx, "use: cx/cond cx/error cx/func cx/rec cx/stack/ops cx/type cx/var;");
+  run(&cx, "use: cx/cond cx/error cx/func cx/rec cx/stack cx/type cx/var;");
 
   run(&cx,
       "rec: Foo() x Int y Str; "
@@ -421,9 +415,9 @@ static void rec_tests() {
 static void compile_tests() {
   struct cx cx;
   cx_init(&cx);
-  cx_use(&cx, "cx/meta", false);
+  cx_use(&cx, "cx/meta");
 
-  run(&cx, "use: cx/bin cx/cond cx/error cx/func cx/math cx/stack/ops cx/type;");
+  run(&cx, "use: cx/bin cx/cond cx/error cx/func cx/math cx/stack cx/type;");
   run(&cx, "Bin new % '1 2 +' compile call 3 = check");
   cx_deinit(&cx);
 }

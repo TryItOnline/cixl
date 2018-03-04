@@ -20,6 +20,6 @@ void cx_file_deref(struct cx_file *file);
 
 struct cx_iter *cx_file_iter(struct cx_box *v);
 
-struct cx_type *_cx_init_file_type(struct cx *cx, const char *name, ...);
+struct cx_type *_cx_init_file_type(struct cx_lib *lib, const char *name, ...);
 
 #endif

@@ -91,9 +91,10 @@ static void deinit_imp(struct cx_box *v) {
   cx_rec_deref(v->as_ptr);
 }
 
-static void type_deinit_imp(struct cx_type *t) {
+static void *type_deinit_imp(struct cx_type *t) {
   struct cx_rec_type *rt = cx_baseof(t, struct cx_rec_type, imp);
   cx_set_deinit(&rt->fields);
+  return rt;
 }
 
 struct cx_rec_type *cx_rec_type_init(struct cx_rec_type *type,
@@ -130,11 +131,6 @@ struct cx_rec_type *cx_rec_type_reinit(struct cx_rec_type *type) {
 
 struct cx_rec_type *cx_rec_type_new(struct cx *cx, const char *id) {
   return cx_rec_type_init(malloc(sizeof(struct cx_rec_type)), cx, id);
-}
-
-struct cx_rec_type *cx_rec_type_deinit(struct cx_rec_type *type) {
-  cx_type_deinit(&type->imp);
-  return type;
 }
 
 void cx_derive_rec(struct cx_rec_type *child, struct cx_type *parent) {

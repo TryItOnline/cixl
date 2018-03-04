@@ -8,7 +8,7 @@
 #include "cixl/guid.h"
 #include "cixl/rat.h"
 #include "cixl/sym.h"
-#include "cixl/libs/time.h"
+#include "cixl/lib/time.h"
 
 struct cx_file;
 struct cx_func;

@@ -1,3 +1,5 @@
+use: cx;
+
 unsafe
 rec: Foo() x Int y Str;
 {10000000 {Foo new % `x 42 put<Rec Sym A> `y 'bar' put<Rec Sym A>} times}

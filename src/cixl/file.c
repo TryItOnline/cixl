@@ -94,13 +94,13 @@ static void deinit_imp(struct cx_box *v) {
   cx_file_deref(v->as_file);
 }
 
-struct cx_type *_cx_init_file_type(struct cx *cx, const char *name, ...) {
+struct cx_type *_cx_init_file_type(struct cx_lib *lib, const char *name, ...) {
   va_list parents;
   va_start(parents, name);				
-  struct cx_type *t = cx_vadd_type(cx, name, parents);
+  struct cx_type *t = cx_vadd_type(lib, name, parents);
   va_end(parents);
 
-  cx_derive(t, cx->cmp_type);
+  cx_derive(t, lib->cx->cmp_type);
   
   t->equid = equid_imp;
   t->cmp = cmp_imp;

@@ -7,7 +7,7 @@
 #include "cixl/fimp.h"
 #include "cixl/func.h"
 #include "cixl/lib.h"
-#include "cixl/libs/meta.h"
+#include "cixl/lib/meta.h"
 #include "cixl/op.h"
 #include "cixl/scope.h"
 #include "cixl/str.h"
@@ -94,7 +94,7 @@ static bool use_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
       return false;
     }
     
-    if (!cx_use(cx, t->as_ptr, false)) {
+    if (!cx_use(cx, t->as_ptr)) {
       cx_macro_eval_deref(eval);
       return false;
     }
@@ -105,8 +105,10 @@ static bool use_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
 }
 
 cx_lib(cx_init_meta, "cx/meta", {
-    cx_add_macro(cx, "include:", include_parse);
-    cx_add_macro(cx, "use:", use_parse);
+    struct cx *cx = lib->cx;
+    cx_use(cx, "cx/abc");
+    cx_use(cx, "cx/str");
     
-    return true;
+    cx_add_macro(lib, "include:", include_parse);
+    cx_add_macro(lib, "use:", use_parse);
   })

@@ -56,14 +56,13 @@ static bool emit_imp(struct cx_box *v, const char *exp, FILE *out) {
   return true;
 }
 
-struct cx_type *cx_init_sym_type(struct cx *cx) {
-  struct cx_type *t = cx_add_type(cx, "Sym", cx->any_type);
+struct cx_type *cx_init_sym_type(struct cx_lib *lib) {
+  struct cx_type *t = cx_add_type(lib, "Sym", lib->cx->any_type);
   t->new = new_imp;
   t->equid = equid_imp;
   t->write = dump_imp;
   t->dump = dump_imp;
   t->print = print_imp;
   t->emit = emit_imp;
-    
   return t;
 }

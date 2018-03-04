@@ -6,7 +6,7 @@
 #include "cixl/func.h"
 #include "cixl/iter.h"
 #include "cixl/lib.h"
-#include "cixl/libs/stack.h"
+#include "cixl/lib/stack.h"
 #include "cixl/scope.h"
 #include "cixl/stack.h"
 
@@ -129,47 +129,6 @@ static bool sort_imp(struct cx_scope *scope) {
   return ok;
 }
 
-cx_lib(cx_init_stack, "cx/stack", {
-    if (!cx_use(cx, "cx/stack/types", false)) { return false; }
-
-    cx_add_cfunc(cx, "len",
-		 cx_args(cx_arg("vec", cx->stack_type)),
-		 cx_args(cx_arg(NULL, cx->int_type)),
-		 len_imp);
-  
-    cx_add_cfunc(cx, "push",
-		 cx_args(cx_arg("vec", cx->stack_type), cx_arg("val", cx->any_type)),
-		 cx_args(),
-		 push_imp);
-
-    cx_add_cfunc(cx, "pop",
-		 cx_args(cx_arg("vec", cx->stack_type)),
-		 cx_args(cx_arg(NULL, cx->opt_type)),
-		 pop_imp);
-
-    cx_add_cfunc(cx, "stack",
-		 cx_args(cx_arg("in", cx->seq_type)),
-		 cx_args(cx_arg(NULL, cx->stack_type)),
-		 seq_imp);
-
-    cx_add_cfunc(cx, "clear",
-		 cx_args(cx_arg("vec", cx->stack_type)), cx_args(),
-		 clear_imp);
-
-    cx_add_cfunc(cx, "sort",
-		 cx_args(cx_arg("vec", cx->stack_type), cx_arg("cmp", cx->opt_type)),
-		 cx_args(),
-		 sort_imp);
-
-    return true;
-  })
-
-
-cx_lib(cx_init_stack_types, "cx/stack/types", {
-    cx->stack_type = cx_init_stack_type(cx);
-    return true;
-  })
-
 static bool reset_imp(struct cx_scope *scope) {
   cx_do_vec(&scope->stack, struct cx_box, v) { cx_box_deinit(v); }
   cx_vec_clear(&scope->stack);
@@ -204,23 +163,61 @@ static bool flip_imp(struct cx_scope *scope) {
   return true;
 }
 
-cx_lib(cx_init_stack_ops, "cx/stack/ops", {
-    cx_add_cfunc(cx, "|", cx_args(), cx_args(), reset_imp);
+cx_lib(cx_init_stack, "cx/stack", {
+    struct cx *cx = lib->cx;
+    cx_use(cx, "cx/abc");
+    cx_use(cx, "cx/stack/types");
+
+    cx_add_cfunc(lib, "len",
+		 cx_args(cx_arg("vec", cx->stack_type)),
+		 cx_args(cx_arg(NULL, cx->int_type)),
+		 len_imp);
+  
+    cx_add_cfunc(lib, "push",
+		 cx_args(cx_arg("vec", cx->stack_type), cx_arg("val", cx->any_type)),
+		 cx_args(),
+		 push_imp);
+
+    cx_add_cfunc(lib, "pop",
+		 cx_args(cx_arg("vec", cx->stack_type)),
+		 cx_args(cx_arg(NULL, cx->opt_type)),
+		 pop_imp);
+
+    cx_add_cfunc(lib, "stack",
+		 cx_args(cx_arg("in", cx->seq_type)),
+		 cx_args(cx_arg(NULL, cx->stack_type)),
+		 seq_imp);
+
+    cx_add_cfunc(lib, "clear",
+		 cx_args(cx_arg("vec", cx->stack_type)), cx_args(),
+		 clear_imp);
+
+    cx_add_cfunc(lib, "sort",
+		 cx_args(cx_arg("vec", cx->stack_type), cx_arg("cmp", cx->opt_type)),
+		 cx_args(),
+		 sort_imp);
+
+    cx_add_cfunc(lib, "|", cx_args(), cx_args(), reset_imp);
     
-    cx_add_cfunc(cx, "_", cx_args(), cx_args(), zap_imp);
+    cx_add_cfunc(lib, "_", cx_args(), cx_args(), zap_imp);
     
-    cx_add_cfunc(cx, "%",
+    cx_add_cfunc(lib, "%",
 		 cx_args(cx_arg("v", cx->opt_type)), cx_args(cx_narg(NULL, 0)),
 		 copy_imp);
     
-    cx_add_cfunc(cx, "%%",
+    cx_add_cfunc(lib, "%%",
 		 cx_args(cx_arg("v", cx->opt_type)), cx_args(cx_narg(NULL, 0)),
 		 clone_imp);
     
-    cx_add_cfunc(cx, "~",
+    cx_add_cfunc(lib, "~",
 		 cx_args(cx_arg("x", cx->opt_type), cx_arg("y", cx->opt_type)),
 		 cx_args(cx_narg(NULL, 1), cx_narg(NULL, 0)),
 		 flip_imp);
+  })
 
-    return true;
+cx_lib(cx_init_stack_types, "cx/stack/types", {
+    struct cx *cx = lib->cx;
+    cx_use(cx, "cx/abc");
+
+    cx->stack_type = cx_init_stack_type(lib);
   })

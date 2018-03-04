@@ -188,7 +188,7 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
   }
   
   cx_do_set(&funcs, struct cx_func *, f) {
-    fprintf(out, "    %s = cx_test(cx_get_func(cx, \"%s\", false));\n",
+    fprintf(out, "    %s = cx_test(cx_get_func(cx->lib, \"%s\", false));\n",
 	    (*f)->emit_id, (*f)->id);
   }
 
@@ -202,7 +202,7 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
   }
 
   cx_do_set(&types, struct cx_type *, t) {
-    fprintf(out, "    %s = cx_test(cx_get_type(cx, \"%s\", false));\n",
+    fprintf(out, "    %s = cx_test(cx_get_type(cx->lib, \"%s\", false));\n",
 	    (*t)->emit_id, (*t)->id);
   }
   
@@ -290,14 +290,14 @@ static void deinit_imp(struct cx_box *value) {
   cx_bin_deref(b);
 }
 
-struct cx_type *cx_init_bin_type(struct cx *cx) {
-  struct cx_type *t = cx_add_type(cx, "Bin", cx->any_type);
+struct cx_type *cx_init_bin_type(struct cx_lib *lib) {
+  struct cx *cx = lib->cx;
+  struct cx_type *t = cx_add_type(lib, "Bin", cx->any_type);
   t->new = new_imp;
   t->equid = equid_imp;
   t->call = call_imp;
   t->copy = copy_imp;
   t->dump = dump_imp;
   t->deinit = deinit_imp;
-
   return t;
 }

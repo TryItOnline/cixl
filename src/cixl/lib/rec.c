@@ -9,7 +9,7 @@
 #include "cixl/fimp.h"
 #include "cixl/func.h"
 #include "cixl/lib.h"
-#include "cixl/libs/rec.h"
+#include "cixl/lib/rec.h"
 #include "cixl/op.h"
 #include "cixl/parse.h"
 #include "cixl/rec.h"
@@ -99,7 +99,7 @@ static bool rec_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
 
   struct cx_rec_type *rec_type = type
     ? cx_baseof(type, struct cx_rec_type, imp)
-    : cx_test(cx_add_rec_type(cx, type ? type->id : id.as_ptr));
+    : cx_test(cx_add_rec_type(cx->lib, type ? type->id : id.as_ptr));
 
   if (type) { cx_rec_type_reinit(rec_type); }
 
@@ -270,42 +270,37 @@ static bool print_imp(struct cx_scope *scope) {
 }
 
 cx_lib(cx_init_rec, "cx/rec", { 
-    if (!cx_use(cx, "cx/sym/types", false)) { return false; }
+    struct cx *cx = lib->cx;
+    cx_use(cx, "cx/abc");
+    cx_use(cx, "cx/io");
+    cx_use(cx, "cx/sym");
 
-    cx_add_macro(cx, "rec:", rec_parse); 
+    cx_add_macro(lib, "rec:", rec_parse); 
 
-    cx_add_cfunc(cx, "=",
+    cx_add_cfunc(lib, "=",
 		 cx_args(cx_arg("x", cx->rec_type), cx_arg("y", cx->rec_type)),
 		 cx_args(cx_arg(NULL, cx->bool_type)),
 		 eqval_imp);
 
-    cx_add_cfunc(cx, "?",
+    cx_add_cfunc(lib, "?",
 		 cx_args(cx_arg("rec", cx->rec_type)),
 		 cx_args(cx_arg(NULL, cx->bool_type)),
 		 ok_imp);
 
-    cx_add_cfunc(cx, "get",
+    cx_add_cfunc(lib, "get",
 		 cx_args(cx_arg("rec", cx->rec_type), cx_arg("fld", cx->sym_type)),
 		 cx_args(cx_arg(NULL, cx->opt_type)),
 		 get_imp);
 
-    cx_add_cfunc(cx, "put",
+    cx_add_cfunc(lib, "put",
 		 cx_args(cx_arg("rec", cx->rec_type),
 			 cx_arg("fld", cx->sym_type),
 			 cx_arg("val", cx->any_type)),
 		 cx_args(),
 		 put_imp);
 
-    return true;
-  })
-
-cx_lib(cx_init_rec_io, "cx/rec/io", {
-    if (!cx_use(cx, "cx/io/types", false)) { return false; }
-
-    cx_add_cfunc(cx, "print",
+    cx_add_cfunc(lib, "print",
 		 cx_args(cx_arg("out", cx->wfile_type), cx_arg("rec", cx->rec_type)),
 		 cx_args(),
 		 print_imp);
-
-    return true;
   })

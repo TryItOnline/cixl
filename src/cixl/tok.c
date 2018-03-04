@@ -61,8 +61,8 @@ cx_tok_type(CX_TFIMP, {
 static ssize_t func_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) {  
   struct cx_tok *tok = cx_vec_get(&bin->toks, tok_idx);  
   struct cx_func *func = tok->as_ptr;
-  struct cx_fimp *imp = (func->imps.count == 1)
-    ? *(struct cx_fimp **)cx_vec_start(&func->imps)
+  struct cx_fimp *imp = (func->imps.members.count == 1)
+    ? *(struct cx_fimp **)cx_vec_start(&func->imps.members)
     : NULL;
 
   if (imp && !imp->ptr && !cx_fimp_inline(imp, tok_idx, bin, cx)) { return -1; }
@@ -242,8 +242,10 @@ static ssize_t stack_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) 
   struct cx_tok *tok = cx_vec_get(&bin->toks, tok_idx);    
   struct cx_vec *toks = &tok->as_vec;
   
-  cx_op_init(bin, CX_OBEGIN(), tok_idx)->as_begin.child = true;
-
+  struct cx_op *op = cx_op_init(bin, CX_OBEGIN(), tok_idx);
+  op->as_begin.child = true;
+  op->as_begin.fimp = NULL;
+  
   if (!cx_compile(cx, cx_vec_start(toks), cx_vec_end(toks), bin)) {
     tok = cx_vec_get(&bin->toks, tok_idx);  
     cx_error(cx, tok->row, tok->col, "Failed compiling group");

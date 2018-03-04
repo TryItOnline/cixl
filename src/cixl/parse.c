@@ -20,7 +20,7 @@ static bool parse_type(struct cx *cx,
 		       const char *id,
 		       struct cx_vec *out,
 		       bool lookup) {
-  struct cx_type *t = cx_get_type(cx, id, !lookup);
+  struct cx_type *t = cx_get_type(cx->lib, id, !lookup);
   
   if (t) {
     cx_tok_init(cx_vec_push(out),
@@ -40,7 +40,7 @@ static bool parse_type(struct cx *cx,
 static bool parse_const(struct cx *cx,
 		       const char *id,
 		       struct cx_vec *out) {
-  struct cx_box *v = cx_get_const(cx, cx_sym(cx, id+1), false);
+  struct cx_box *v = cx_get_const(cx->lib, cx_sym(cx, id+1), false);
   if (!v) { return false; }
 
   if (v->type->emit) {
@@ -101,7 +101,7 @@ char *parse_fimp(struct cx *cx,
       
       if (s[len-1] == '>') {
 	s[len-1] = 0;
-	struct cx_type *type = cx_get_type(cx, s, false);
+	struct cx_type *type = cx_get_type(cx->lib, s, false);
 
 	if (!type) {
 	  cx_buf_close(&id);
@@ -140,14 +140,14 @@ char *parse_fimp(struct cx *cx,
 static bool parse_func(struct cx *cx, const char *id, FILE *in, struct cx_vec *out) {
   bool ref = id[0] == '&';
   int row = cx->row, col = cx->col;
-  struct cx_func *f = cx_get_func(cx, ref ? id+1 : id, false);
+  struct cx_func *f = cx_get_func(cx->lib, ref ? id+1 : id, false);
   if (!f) { return false; }
   
   struct cx_fimp *imp = NULL;
   char *imp_id = parse_fimp(cx, f, in, out);
 	  
   if (imp_id) {
-    struct cx_fimp **found = cx_set_get(&f->imp_lookup, &imp_id);
+    struct cx_fimp **found = cx_set_get(&f->imps, &imp_id);
     free(imp_id);
     
     if (!found) {
@@ -260,7 +260,7 @@ static bool parse_id(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
 
     if (ok) {
       char *s = id.data;
-      struct cx_macro *m = cx_get_macro(cx, s, true);
+      struct cx_macro *m = cx_get_macro(cx->lib, s, true);
       
       if (m) {
 	cx->col = col;

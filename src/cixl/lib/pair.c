@@ -9,7 +9,7 @@
 #include "cixl/func.h"
 #include "cixl/scope.h"
 #include "cixl/lib.h"
-#include "cixl/libs/pair.h"
+#include "cixl/lib/pair.h"
 
 struct cx_pair *cx_pair_new(struct cx *cx, struct cx_box *x, struct cx_box *y) {
   struct cx_pair *pair = cx_malloc(&cx->pair_alloc);
@@ -83,40 +83,40 @@ static bool rezip_imp(struct cx_scope *scope) {
 }
 
 cx_lib(cx_init_pair, "cx/pair", {
-    if (!cx_use(cx, "cx/iter", false) ||
-	!cx_use(cx, "cx/pair/types", false)) { return false; }
+    struct cx *cx = lib->cx;
+    cx_use(cx, "cx/abc");
+    cx_use(cx, "cx/iter");
+    cx_use(cx, "cx/pair/types");
 
-    cx_add_cfunc(cx, ".", 
+    cx_add_cfunc(lib, ".", 
 		 cx_args(cx_arg("x", cx->opt_type), cx_arg("y", cx->opt_type)),
 		 cx_args(cx_arg(NULL, cx->pair_type)),
 		 zip_imp);
 
-    cx_add_cfunc(cx, "unzip", 
+    cx_add_cfunc(lib, "unzip", 
 		 cx_args(cx_arg("p", cx->pair_type)),
 		 cx_args(cx_arg(NULL, cx->opt_type), cx_arg(NULL, cx->opt_type)),
 		 unzip_imp);
 
-    cx_add_cfunc(cx, "x",
+    cx_add_cfunc(lib, "x",
 		 cx_args(cx_arg("p", cx->pair_type)),
 		 cx_args(cx_arg(NULL, cx->any_type)),
 		 x_imp);
 
-    cx_add_cfunc(cx, "y",
+    cx_add_cfunc(lib, "y",
 		 cx_args(cx_arg("p", cx->pair_type)),
 		 cx_args(cx_arg(NULL, cx->any_type)),
 		 y_imp);
 
-    cx_add_cfunc(cx, "rezip", 
+    cx_add_cfunc(lib, "rezip", 
 		 cx_args(cx_arg("p", cx->pair_type)),
 		 cx_args(),
 		 rezip_imp);  
 
-    cx_add_cxfunc(cx, "rezip", 
+    cx_add_cxfunc(lib, "rezip", 
 		  cx_args(cx_arg("in", cx->seq_type)),
 		  cx_args(),
 		  "$in &rezip for");
-
-    return true;
   })
 
 static bool equid_imp(struct cx_box *x, struct cx_box *y) {
@@ -171,7 +171,10 @@ static void deinit_imp(struct cx_box *v) {
 }
 
 cx_lib(cx_init_pair_types, "cx/pair/types", {
-    struct cx_type *t = cx_add_type(cx, "Pair", cx->cmp_type);
+    struct cx *cx = lib->cx;
+    cx_use(cx, "cx/abc");
+
+    struct cx_type *t = cx_add_type(lib, "Pair", cx->cmp_type);
     t->eqval = eqval_imp;
     t->equid = equid_imp;
     t->cmp = cmp_imp;
@@ -181,7 +184,5 @@ cx_lib(cx_init_pair_types, "cx/pair/types", {
     t->write = write_imp;
     t->dump = dump_imp;
     t->deinit = deinit_imp;
-
     cx->pair_type = t;
-    return true;
   })

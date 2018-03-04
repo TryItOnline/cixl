@@ -162,7 +162,7 @@ static void fimp_emit_init(struct cx_op *op,
   struct cx_fimp *imp = op->as_fimp.imp;
 
   fprintf(out,
-	  CX_ITAB "struct cx_func *func = cx_get_func(cx, \"%s\", false);\n"
+	  CX_ITAB "struct cx_func *func = cx_get_func(cx->lib, \"%s\", false);\n"
 	  CX_ITAB "struct cx_fimp *imp = cx_get_fimp(func, \"%s\", false);\n"
 	  CX_ITAB "imp->bin = cx_bin_ref(cx->bin);\n"
 	  CX_ITAB "imp->start_pc = %zd;\n"
@@ -245,7 +245,7 @@ static void funcdef_emit_init(struct cx_op *op,
   fputs("};\n\n", out);
 
   fprintf(out,
-	  CX_ITAB "cx_add_func(cx, \"%s\", %zd, args, %zd, rets);\n",
+	  CX_ITAB "cx_add_func(cx->lib, \"%s\", %zd, args, %zd, rets);\n",
 	  imp->func->id, imp->args.count, imp->rets.count);
 }
 
@@ -279,17 +279,21 @@ static bool funcall_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
   struct cx_scope *s = cx_scope(cx, 0);
   
   if (imp) {
-    if (s->safe && !cx_fimp_match(imp, s)) { imp = NULL; }
+    if (s->safe && cx_fimp_score(imp, s) == -1) { imp = NULL; }
   } else {
-    imp = cx_func_match(func, s, 0);
+    imp = cx_func_match(func, s);
   }
   
   if (!imp) {
     cx_error(cx, cx->row, cx->col, "Func not applicable: %s", func->id);
     return false;
   }
-    
-  if (!imp->ptr && imp->bin == bin) {
+  
+  if (!imp->ptr && 
+      imp->bin != bin && 
+      !cx_fimp_inline(imp, op->tok_idx, bin, cx)) { return false; }
+  
+  if (!imp->ptr) {
     cx_call_init(cx_vec_push(&cx->calls), cx->row, cx->col, imp, cx->pc);
     cx->pc = imp->start_pc;
     return true;
@@ -312,10 +316,10 @@ static bool funcall_emit(struct cx_op *op,
   if (imp) {
     fprintf(out,
 	    "%s;\n\n"
-	    CX_TAB "if (s->safe && !cx_fimp_match(imp, s)) { imp = NULL; }\n\n",
+	    CX_TAB "if (s->safe && cx_fimp_score(imp, s) == -1) { imp = NULL; }\n\n",
 	    imp->emit_id);
   } else {
-    fputs("cx_func_match(func, s, 0);\n\n", out);
+    fputs("cx_func_match(func, s);\n\n", out);
   }
   
   fputs(CX_TAB "if (!imp) {\n"
@@ -370,7 +374,7 @@ cx_op_type(CX_OFUNCALL, {
   });
 
 static bool getconst_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
-  struct cx_box *v = cx_get_const(cx, op->as_getconst.id, false);
+  struct cx_box *v = cx_get_const(cx->lib, op->as_getconst.id, false);
   if (!v) { return false; }
   cx_copy(cx_push(cx_scope(cx, 0)), v);
   return true;
@@ -380,7 +384,7 @@ static bool getconst_emit(struct cx_op *op,
 			  struct cx_bin *bin,
 			  FILE *out,
 			  struct cx *cx) {
-  fprintf(out, CX_TAB "struct cx_box *v = cx_get_const(cx, %s, false);\n",
+  fprintf(out, CX_TAB "struct cx_box *v = cx_get_const(cx->lib, %s, false);\n",
 	  op->as_getconst.id.emit_id);
 
   fputs(CX_TAB "if (!v) { return false; }\n"
@@ -764,7 +768,7 @@ static bool return_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
     call->recalls--;
     struct cx_scope *s = cx_scope(cx, 0);
     
-    if (s->safe && !cx_fimp_match(imp, s)) {
+    if (s->safe && cx_fimp_score(imp, s) == -1) {
       cx_error(cx, cx->row, cx->col, "Recall not applicable");
       return false;
     }
@@ -864,7 +868,7 @@ static bool return_emit(struct cx_op *op,
 	out);
 
   fprintf(out,
-	  CX_TAB "  if (s->safe && !cx_fimp_match(%s, s)) {\n"
+	  CX_TAB "  if (s->safe && cx_fimp_score(%s, s) == -1) {\n"
 	  CX_TAB "    cx_error(cx, cx->row, cx->col, \"Recall not applicable\");\n"
 	  CX_TAB "    return false;\n"
 	  CX_TAB "  }\n\n"
@@ -1060,14 +1064,16 @@ static void typedef_emit_init(struct cx_op *op,
 
   if (cx_is(t, cx->rec_type)) {
     fprintf(out,
-	    CX_ITAB "struct cx_rec_type *t = cx_test(cx_add_rec_type(cx, \"%s\"));\n",
+	    CX_ITAB "struct cx_rec_type *t = "
+	            "cx_test(cx_add_rec_type(cx->lib, \"%s\"));\n",
 	    t->id);
 
     cx_do_set(&t->parents, struct cx_type *, pt) {
       if (*pt == cx->rec_type) { continue; }
       
       fprintf(out,
-	      CX_ITAB "cx_derive_rec(t, cx_test(cx_get_type(cx, \"%s\", false)));\n",
+	      CX_ITAB "cx_derive_rec(t, "
+	              "cx_test(cx_get_type(cx->lib, \"%s\", false)));\n",
 	      (*pt)->id);
     }
     
@@ -1077,7 +1083,7 @@ static void typedef_emit_init(struct cx_op *op,
       fprintf(out,
 	      CX_ITAB "cx_test(cx_add_field(t,\n"
 	      CX_ITAB "        cx_sym(cx, \"%s\"),\n"
-	      CX_ITAB "        cx_get_type(cx, \"%s\", false),\n"
+	      CX_ITAB "        cx_get_type(cx->lib, \"%s\", false),\n"
 	      CX_ITAB "        false));\n",
 	      f->id.id, f->type->id);
     }
@@ -1089,7 +1095,7 @@ static void typedef_emit_init(struct cx_op *op,
 
     cx_do_set(&t->children, struct cx_type *, ct) {
       fprintf(out,
-	      CX_ITAB "cx_derive(cx_get_type(cx, \"%s\", false), t);\n",
+	      CX_ITAB "cx_derive(cx_get_type(cx->lib, \"%s\", false), t);\n",
 	      (*ct)->id);
     }
   }
@@ -1116,7 +1122,7 @@ static void use_emit_init(struct cx_op *op,
 
   cx_do_vec(&e->toks, struct cx_tok, t) {
     fprintf(out,
-	    CX_ITAB "if (!cx_use(cx, \"%s\", false)) { return false; }\n",
+	    CX_ITAB "if (!cx_use(cx, \"%s\")) { return false; }\n",
 	    (char *)t->as_ptr);
   }
 }

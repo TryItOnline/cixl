@@ -12,7 +12,7 @@
 #include "cixl/func.h"
 #include "cixl/lambda.h"
 #include "cixl/lib.h"
-#include "cixl/libs/func.h"
+#include "cixl/lib/func.h"
 #include "cixl/op.h"
 #include "cixl/scope.h"
 #include "cixl/stack.h"
@@ -183,7 +183,7 @@ static bool func_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
     return false;
   }
 
-  struct cx_fimp *imp = cx_add_func(cx,
+  struct cx_fimp *imp = cx_add_func(cx->lib,
 				    id.as_ptr,
 				    func_args.count,
 				    (void *)func_args.items,
@@ -212,9 +212,7 @@ static bool imps_imp(struct cx_scope *scope) {
   struct cx_func *f = cx_test(cx_pop(scope, false))->as_ptr;
   struct cx_stack *is = cx_stack_new(cx);
 
-  for (struct cx_fimp **i = cx_vec_peek(&f->imps, 0);
-       i >= (struct cx_fimp **)f->imps.items;
-       i--) {
+  cx_do_set(&f->imps, struct cx_fimp *, i) {
     cx_box_init(cx_vec_push(&is->imp), cx->fimp_type)->as_ptr = *i;
   }
   
@@ -252,56 +250,31 @@ static bool recall_imp(struct cx_scope *scope) {
   return true;
 }
 
-static bool upcall_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  struct cx_call *call = get_fimp_call(cx);
-  
-  if (!call) {
-    cx_error(cx, cx->row, cx->col, "Nothing to upcall");
-    return false;
-  }
-
-  struct cx_fimp *imp = call->target;
-  struct cx_func *func = imp->func;
-  
-  if (!imp->idx) {
-    cx_error(cx, cx->row, cx->col, "No more fimps");
-    return false;
-  }
-  
-  imp = cx_func_match(func, scope, func->imps.count - imp->idx);
-  
-  if (!imp) {
-    cx_error(cx, cx->row, cx->col, "Upcall not applicable");
-    return false;
-  }
-  
-  return cx_fimp_call(imp, scope);  
-}
-
 cx_lib(cx_init_func, "cx/func", {
-    if (!cx_use(cx, "cx/func/types", false) ||
-	!cx_use(cx, "cx/stack/types", false)) {
-      return false;
-    }
+    struct cx *cx = lib->cx;
+    cx_use(cx, "cx/abc");
+    cx_use(cx, "cx/func/types");
+    cx_use(cx, "cx/stack/types");
 
-  cx_add_macro(cx, "func:", func_parse);
+    cx_add_macro(lib, "func:", func_parse);
 
-  cx_add_cfunc(cx, "imps",
-	       cx_args(cx_arg("f", cx->func_type)),
-	       cx_args(cx_arg(NULL, cx->stack_type)),
-	       imps_imp);
+    cx_add_cfunc(lib, "imps",
+		 cx_args(cx_arg("f", cx->func_type)),
+		 cx_args(cx_arg(NULL, cx->stack_type)),
+		 imps_imp);
   
-  cx_add_cfunc(cx, "call", cx_args(cx_arg("act", cx->any_type)), cx_args(), call_imp);
-  cx_add_cfunc(cx, "recall", cx_args(), cx_args(), recall_imp);
-  cx_add_cfunc(cx, "upcall", cx_args(), cx_args(), upcall_imp);
-
-  return true;
+  cx_add_cfunc(lib, "call",
+	       cx_args(cx_arg("act", cx->any_type)),
+	       cx_args(),
+	       call_imp);
+  
+  cx_add_cfunc(lib, "recall", cx_args(), cx_args(), recall_imp);
   })
 
 cx_lib(cx_init_func_types, "cx/func/types", {
-    cx->func_type = cx_init_func_type(cx);
-    cx->fimp_type = cx_init_fimp_type(cx);
-    cx->lambda_type = cx_init_lambda_type(cx);
-    return true;
+    struct cx *cx = lib->cx;
+    cx_use(cx, "cx/abc");
+    cx->func_type = cx_init_func_type(lib);
+    cx->fimp_type = cx_init_fimp_type(lib);
+    cx->lambda_type = cx_init_lambda_type(lib);
   })

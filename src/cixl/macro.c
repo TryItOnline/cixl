@@ -10,12 +10,24 @@ struct cx_macro *cx_macro_init(struct cx_macro *macro,
 			       cx_macro_parse_t imp) {
   macro->id = strdup(id);
   macro->imp = imp;
+  macro->nrefs = 1;
   return macro;
 }
 
 struct cx_macro *cx_macro_deinit(struct cx_macro *macro) {
   free(macro->id);
   return macro;
+}
+
+struct cx_macro *cx_macro_ref(struct cx_macro *macro) {
+  macro->nrefs++;
+  return macro;
+}
+
+void cx_macro_deref(struct cx_macro *macro) {
+  cx_test(macro->nrefs);
+  macro->nrefs--;
+  if (!macro->nrefs) { free(cx_macro_deinit(macro)); }
 }
 
 struct cx_macro_eval *cx_macro_eval_new(cx_macro_eval_t imp) {

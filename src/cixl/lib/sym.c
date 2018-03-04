@@ -4,7 +4,7 @@
 #include "cixl/fimp.h"
 #include "cixl/func.h"
 #include "cixl/lib.h"
-#include "cixl/libs/sym.h"
+#include "cixl/lib/sym.h"
 #include "cixl/scope.h"
 #include "cixl/str.h"
 #include "cixl/sym.h"
@@ -24,25 +24,25 @@ static bool str_imp(struct cx_scope *scope) {
 }
 
 cx_lib(cx_init_sym, "cx/sym", {
-    if (!cx_use(cx, "cx/sym/types", false) ||
-	!cx_use(cx, "cx/str/types", false)) {
-      return false;
-    }
+    struct cx *cx = lib->cx;
+    cx_use(cx, "cx/abc");
+    cx_use(cx, "cx/sym/types");
+    cx_use(cx, "cx/str/types");
 
-    cx_add_cfunc(cx, "sym",
+    cx_add_cfunc(lib, "sym",
 		 cx_args(cx_arg("id", cx->str_type)),
 		 cx_args(cx_arg(NULL, cx->sym_type)),
 		 sym_imp);
     
-    cx_add_cfunc(cx, "str",
+    cx_add_cfunc(lib, "str",
 		 cx_args(cx_arg("s", cx->sym_type)),
 		 cx_args(cx_arg(NULL, cx->str_type)),
 		 str_imp);
-   
-    return true;
   })
 
 cx_lib(cx_init_sym_types, "cx/sym/types", {
-    cx->sym_type = cx_init_sym_type(cx);
-    return true;
+    struct cx *cx = lib->cx;
+    cx_use(cx, "cx/abc");
+
+    cx->sym_type = cx_init_sym_type(lib);
   })

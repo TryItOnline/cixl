@@ -12,7 +12,7 @@
 #include "cixl/file.h"
 #include "cixl/iter.h"
 #include "cixl/lib.h"
-#include "cixl/libs/io.h"
+#include "cixl/lib/io.h"
 #include "cixl/scope.h"
 #include "cixl/str.h"
 
@@ -192,73 +192,72 @@ static bool lines_imp(struct cx_scope *scope) {
   return true;
 }
 
-cx_lib(cx_init_io, "cx/io", {
-    if (!cx_use(cx, "cx/io/types", false) ||
-	!cx_use(cx, "cx/iter/types", false) ||
-	!cx_use(cx, "cx/str/types", false) ||
-	!cx_use(cx, "cx/sym/types", false)) {
-      return false;
-    }
+cx_lib(cx_init_io, "cx/io", {    
+    struct cx *cx = lib->cx;
+    cx_use(cx, "cx/abc");
+    cx_use(cx, "cx/io/types");
+    cx_use(cx, "cx/iter");
+    cx_use(cx, "cx/str");
+    cx_use(cx, "cx/sym");
     
-    cx_box_init(cx_set_const(cx, cx_sym(cx, "in"), false),
+    cx_box_init(cx_set_const(lib, cx_sym(cx, "in"), false),
 		cx->rfile_type)->as_file = cx_file_new(stdin);
     
-    cx_box_init(cx_set_const(cx, cx_sym(cx, "out"), false),
+    cx_box_init(cx_set_const(lib, cx_sym(cx, "out"), false),
 		cx->wfile_type)->as_file = cx_file_new(stdout);
     
-    cx_add_cfunc(cx, "print",
+    cx_add_cfunc(lib, "print",
 		 cx_args(cx_arg("out", cx->wfile_type), cx_arg("v", cx->any_type)),
 		 cx_args(),
 		 print_imp);
     
-    cx_add_cfunc(cx, "ask",
+    cx_add_cfunc(lib, "ask",
 		 cx_args(cx_arg("prompt", cx->str_type)), cx_args(),
 		 ask_imp);
   
-    cx_add_cfunc(cx, "load",
+    cx_add_cfunc(lib, "load",
 		 cx_args(cx_arg("path", cx->str_type)), cx_args(),
 		 load_imp);  
 
-    cx_add_cfunc(cx, "fopen",
+    cx_add_cfunc(lib, "fopen",
 		 cx_args(cx_arg("path", cx->str_type), cx_arg("mode", cx->sym_type)),
 		 cx_args(cx_arg(NULL, cx->file_type)),
 		 fopen_imp);  
 
-    cx_add_cfunc(cx, "flush",
+    cx_add_cfunc(lib, "flush",
 		 cx_args(cx_arg("file", cx->wfile_type)), cx_args(),
 		 flush_imp);
 
-    cx_add_cfunc(cx, "read",
+    cx_add_cfunc(lib, "read",
 		 cx_args(cx_arg("f", cx->rfile_type)),
 		 cx_args(cx_arg(NULL, cx->opt_type)),
 		 read_imp);
 
-    cx_add_cfunc(cx, "write",
+    cx_add_cfunc(lib, "write",
 		 cx_args(cx_arg("f", cx->wfile_type), cx_arg("v", cx->opt_type)),
 		 cx_args(),
 		 write_imp);
 
-    cx_add_cfunc(cx, "lines",
+    cx_add_cfunc(lib, "lines",
 		 cx_args(cx_arg("f", cx->rfile_type)),
 		 cx_args(cx_arg(NULL, cx->iter_type)),
 		 lines_imp);
 
-    cx_add_cxfunc(cx, "say",
+    cx_add_cxfunc(lib, "say",
 		  cx_args(cx_arg("v", cx->any_type)), cx_args(),
 		  "#out $v print\n"
 		  "#out @@n print");
-
-    return true;
   })
 
 cx_lib(cx_init_io_types, "cx/io/types", {
-    cx->file_type = cx_init_file_type(cx, "File");
-    cx->rfile_type = cx_init_file_type(cx, "RFile", cx->file_type, cx->seq_type);
+    struct cx *cx = lib->cx;
+    cx_use(cx, "cx/abc");
+    cx->file_type = cx_init_file_type(lib, "File");
+    cx->rfile_type = cx_init_file_type(lib, "RFile", cx->file_type, cx->seq_type);
     cx->rfile_type->iter = cx_file_iter;
     
-    cx->wfile_type = cx_init_file_type(cx, "WFile", cx->file_type);
-    cx->rwfile_type = cx_init_file_type(cx, "RWFile", cx->rfile_type, cx->wfile_type);
+    cx->wfile_type = cx_init_file_type(lib, "WFile", cx->file_type);
+    cx->rwfile_type = cx_init_file_type(lib, "RWFile", 
+					cx->rfile_type, cx->wfile_type);
     cx->rwfile_type->iter = cx_file_iter;
-
-    return true;
   })

@@ -6,7 +6,7 @@
 #include "cixl/scope.h"
 #include "cixl/str.h"
 #include "cixl/lib.h"
-#include "cixl/libs/error.h"
+#include "cixl/lib/error.h"
 
 static bool check_imp(struct cx_scope *scope) {
   struct cx_box v = *cx_test(cx_pop(scope, false));
@@ -31,15 +31,15 @@ static bool fail_imp(struct cx_scope *scope) {
 }
 
 cx_lib(cx_init_error, "cx/error", {
-    if (!cx_use(cx, "cx/str/types", false)) { return false; }
+    struct cx *cx = lib->cx;
+    cx_use(cx, "cx/abc");
+    cx_use(cx, "cx/str/types");
 
-    cx_add_cfunc(cx, "check",
+    cx_add_cfunc(lib, "check",
 		 cx_args(cx_arg("v", cx->opt_type)), cx_args(),
 		 check_imp);
     
-    cx_add_cfunc(cx, "fail",
+    cx_add_cfunc(lib, "fail",
 		 cx_args(cx_arg("msg", cx->str_type)), cx_args(),
 		 fail_imp);
-
-    return true;
   })

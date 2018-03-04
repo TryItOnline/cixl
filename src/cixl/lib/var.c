@@ -9,7 +9,7 @@
 #include "cixl/func.h"
 #include "cixl/fimp.h"
 #include "cixl/lib.h"
-#include "cixl/libs/var.h"
+#include "cixl/lib/var.h"
 #include "cixl/op.h"
 #include "cixl/parse.h"
 #include "cixl/scope.h"
@@ -135,20 +135,19 @@ static bool get_imp(struct cx_scope *scope) {
 }
 
 cx_lib(cx_init_var, "cx/var", {
-    if (!cx_use(cx, "cx/sym/types", false)) { return false; }
+    struct cx *cx = lib->cx;
+    cx_use(cx, "cx/abc");
+    cx_use(cx, "cx/sym/types");
     
-    cx_add_macro(cx, "let:", let_parse);
+    cx_add_macro(lib, "let:", let_parse);
 
-    cx_add_cfunc(cx, "put-var",
+    cx_add_cfunc(lib, "put-var",
 		 cx_args(cx_arg("id", cx->sym_type), cx_arg("val", cx->any_type)),
 		 cx_args(),
 		 put_imp);
   
-    cx_add_cfunc(cx, "get-var",
+    cx_add_cfunc(lib, "get-var",
 		 cx_args(cx_arg("id", cx->sym_type)),
 		 cx_args(cx_arg(NULL, cx->opt_type)),
 		 get_imp);
-
-    return true;
-  
   })

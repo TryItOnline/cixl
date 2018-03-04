@@ -4,6 +4,6 @@
 struct cx;
 struct cx_type;
 
-struct cx_type *cx_init_char_type(struct cx *cx);
+struct cx_type *cx_init_char_type(struct cx_lib *lib);
 
 #endif

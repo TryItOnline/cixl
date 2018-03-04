@@ -7,6 +7,7 @@
   https://github.com/basic-gongfu/cixl#getting-started
 */
 
+use: cx;
 include: 'qdb.cx';
 
 (
@@ -23,7 +24,7 @@ let: next-booking-id 1 ref;
 rec: Resource()
   id       Sym
   quantity Int
-  calendar Vect;
+  calendar Stack;
 
 /*
   Capacities keep track of total and used quantity for a specific resource and
@@ -59,7 +60,7 @@ func: new-resource(id Sym q Int)(Resource)
   Capacities are split as needed during update.
 */
 
-func: update-capacity(in Capacity start end Time total used Int out Vect)()
+func: update-capacity(in Capacity start end Time total used Int out Stack)()
   $in `start get $start < {
     let: head $in %% ~ _;
     $head `end   $start put
@@ -90,7 +91,7 @@ func: intersects(in Capacity start end Time)(Bool)
   inconsistent calendars on failure.
 */
 
-func: update-calendar(in Vect start end Time total used Int)(Vect)
+func: update-calendar(in Stack start end Time total used Int)(Stack)
   let: out [];
 
   $in {

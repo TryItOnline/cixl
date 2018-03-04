@@ -19,7 +19,7 @@ $ cmake ..
 $ sudo make install
 $ rlwrap cixl
 
-Cixl v0.9.1, 18571/29582 bmips
+Cixl v0.9.2, 18571/29582 bmips
 
 Press Return twice to evaluate.
 
@@ -30,6 +30,45 @@ Press Return twice to evaluate.
    quit
 $
 ```
+
+### Compiler
+Executing ```cixl -e``` compiles the specified file to a native, statically linked executable. Flags following the filename are passed straight to ```gcc```.
+
+```
+$ cixl -e cixl/examples/guess.cx -o guess
+$ ls -all guess
+-rwxrwxr-x 1 a a 941856 Feb 17 18:53 guess
+$ ./guess
+Your guess: 50
+Too high!
+Your guess: 25
+Too low!
+Your guess:
+$
+```
+
+### Modularity
+The entire language is split into libraries to enable building custom languages on top of sub sets of existing functionality. ```use: cx;``` may be used as a short cut to import everything. The REPL starts with everything imported while the interpreter and compiler starts with nothing but ```use:``` and ```include:```. The following libraries are available.
+
+* cx/bin
+* cx/cond
+* cx/error
+* cx/func
+* cx/guid
+* cx/io
+* cx/iter
+* cx/math
+* cx/net
+* cx/pair
+* cx/rec
+* cx/ref
+* cx/stack
+* cx/str
+* cx/sym
+* cx/table
+* cx/time
+* cx/type
+* cx/var
 
 ### Stack
 Like Forth, Cixl expects arguments before operations and exposes the parameter stack to code. Basic stack operations have dedicated operators; ```%``` for copying the last value, ```_``` for dropping it, ```~``` for flipping the last two values and ```|``` for clearing the stack.
@@ -622,29 +661,12 @@ Func imp not found
 [42]
 ```
 
-A stack containing all implementations for a specific function in the order they are considered during dispatch may be retrieved by calling the ```imps``` function.
+A stack containing all implementations for a specific function may be retrieved by calling the ```imps``` function.
 
 ```
    | &+ imps
 ...
 [[Fimp(+ Rat Rat) Fimp(+ Int Int)]r1]
-```
-
-```upcall``` provides an easy way to call the next matching implementation.
-
-```
-   
-   func: maybe-add(x Num y Arg0)(Arg0)
-...  $x $y +;
-...func: maybe-add(x y Int)(Int)
-...  $x 42 = if-else 42 {upcall $x $y};
-...| 1 2 maybe-add
-...
-[3]
-
-   | 42 2 maybe-add
-...
-[42]
 ```
 
 Prefixing a function name with ```&``` pushes a reference on the stack.
@@ -1123,9 +1145,6 @@ int main() {
   return 0;
 }
 ```
-
-### Modularity
-The core language is split into libraries, and may be custom tailored to any level of functionality from C. This is an ongoing process, but you may get an idea of where it's going by having a look on existing [libs](https://github.com/basic-gongfu/cixl/tree/master/src/cixl/libs).
 
 ### Safety
 Type checking may be partly disabled for the current scope by calling ```unsafe```, which allows code to run slightly faster. New scopes inherit their safety level from the parent scope. Calling ```safe``` enables all type checks for the current scope.

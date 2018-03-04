@@ -7,6 +7,8 @@
   https://github.com/basic-gongfu/cixl#getting-started
 */
 
+use: cx;
+
 ((let: n 100 rand ++; {
   'Your guess: ' ask
   

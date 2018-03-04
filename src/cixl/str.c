@@ -123,8 +123,9 @@ static void deinit_imp(struct cx_box *v) {
   cx_str_deref(v->as_str);
 }
 
-struct cx_type *cx_init_str_type(struct cx *cx) {
-  struct cx_type *t = cx_add_type(cx, "Str", cx->cmp_type, cx->seq_type);
+struct cx_type *cx_init_str_type(struct cx_lib *lib) {
+  struct cx *cx = lib->cx;
+  struct cx_type *t = cx_add_type(lib, "Str", cx->cmp_type, cx->seq_type);
   t->eqval = eqval_imp;
   t->equid = equid_imp;
   t->cmp = cmp_imp;
@@ -137,6 +138,5 @@ struct cx_type *cx_init_str_type(struct cx *cx) {
   t->print = print_imp;
   t->emit = emit_imp;
   t->deinit = deinit_imp;
-
   return t;
 }

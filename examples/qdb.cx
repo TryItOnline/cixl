@@ -9,18 +9,20 @@
 
 /*
   Records are stored in tables indexed by record pointer and stored keys. Keys may be
-  composite and are implemented as vectors of values.
+  composite and are implemented as stacks of values.
 */
+
+use: cx;
 
 (
 
 rec: DBTable()
   file     RWFile
-  key      Vect
+  key      Stack
   key-recs Table
   rec-keys Table;
 
-func: new-db-table(n Str k Vect)(DBTable)
+func: new-db-table(n Str k Stack)(DBTable)
   let: t DBTable new;
   $t `file     $n `a+ fopen put
   $t `key      $k           put
@@ -28,8 +30,8 @@ func: new-db-table(n Str k Vect)(DBTable)
   $t `key-recs Table new    put
   $t;
 
-func: get-rec-key(t DBTable r Rec)(Vect)
-  $t `key get {$r ~ get} map vect;
+func: get-rec-key(t DBTable r Rec)(Stack)
+  $t `key get {$r ~ get} map stack;
 
 /*
   The transaction contains the current set of changes.
@@ -44,11 +46,11 @@ let: db-trans [];
 
 rec: DBChange()
   table DBTable
-  key   Vect
+  key   Stack
   rec   Rec
   op    Sym;
 
-func: push-change(t DBTable k Vect r Rec o Sym)()
+func: push-change(t DBTable k Stack r Rec o Sym)()
   let: c DBChange new;
   $c `table $t put
   $c `key   $k put

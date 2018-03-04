@@ -9,7 +9,7 @@
 #include "cixl/lib.h"
 #include "cixl/rat.h"
 #include "cixl/scope.h"
-#include "cixl/libs/math.h"
+#include "cixl/lib/math.h"
 
 static bool int_add_imp(struct cx_scope *scope) {
   struct cx_box
@@ -107,79 +107,79 @@ static bool rat_int_imp(struct cx_scope *scope) {
 }
 
 cx_lib(cx_init_math, "cx/math", {
-    if (!cx_use(cx, "cx/cond", false) ||
-	!cx_use(cx, "cx/func", false) ||
-	!cx_use(cx, "cx/iter", false) ||
-	!cx_use(cx, "cx/math/types", false)) { return false; }
+    struct cx *cx = lib->cx;
+    cx_use(cx, "cx/abc");
+    cx_use(cx, "cx/cond");
+    cx_use(cx, "cx/func");
+    cx_use(cx, "cx/iter");
+    cx_use(cx, "cx/math/types");
 
-    cx_add_cfunc(cx, "+",
+    cx_add_cfunc(lib, "+",
 		 cx_args(cx_arg("x", cx->int_type), cx_arg("y", cx->int_type)),
 		 cx_args(cx_arg(NULL, cx->int_type)),
 		 int_add_imp);
   
-    cx_add_cfunc(cx, "-",
+    cx_add_cfunc(lib, "-",
 		 cx_args(cx_arg("x", cx->int_type), cx_arg("y", cx->int_type)),
 		 cx_args(cx_arg(NULL, cx->int_type)),
 		 int_sub_imp);
   
-    cx_add_cfunc(cx, "*",
+    cx_add_cfunc(lib, "*",
 		 cx_args(cx_arg("x", cx->int_type), cx_arg("y", cx->int_type)),
 		 cx_args(cx_arg(NULL, cx->int_type)),
 		 int_mul_imp);
   
-    cx_add_cfunc(cx, "/",
+    cx_add_cfunc(lib, "/",
 		 cx_args(cx_arg("x", cx->int_type), cx_arg("y", cx->int_type)),
 		 cx_args(cx_arg(NULL, cx->rat_type)),
 		 int_div_imp);
 
-    cx_add_cfunc(cx, "abs",
+    cx_add_cfunc(lib, "abs",
 		 cx_args(cx_arg("n", cx->int_type)),
 		 cx_args(cx_arg(NULL, cx->int_type)),
 		 int_abs_imp);
 
-    cx_add_cfunc(cx, "rand",
+    cx_add_cfunc(lib, "rand",
 		 cx_args(cx_arg("n", cx->int_type)),
 		 cx_args(cx_arg(NULL, cx->int_type)),
 		 rand_imp);
 
-    cx_add_cfunc(cx, "+",
+    cx_add_cfunc(lib, "+",
 		 cx_args(cx_arg("x", cx->rat_type), cx_arg("y", cx->rat_type)),
 		 cx_args(cx_arg(NULL, cx->rat_type)),
 		 rat_add_imp);
   
-    cx_add_cfunc(cx, "*",
+    cx_add_cfunc(lib, "*",
 		 cx_args(cx_arg("x", cx->rat_type), cx_arg("y", cx->rat_type)),
 		 cx_args(cx_arg(NULL, cx->rat_type)),
 		 rat_mul_imp);
 
-    cx_add_cfunc(cx, "*",
+    cx_add_cfunc(lib, "*",
 		 cx_args(cx_arg("x", cx->rat_type), cx_arg("y", cx->int_type)),
 		 cx_args(cx_arg(NULL, cx->rat_type)),
 		 rat_scale_imp);
 
-    cx_add_cfunc(cx, "int",
+    cx_add_cfunc(lib, "int",
 		 cx_args(cx_arg("r", cx->rat_type)),
 		 cx_args(cx_arg(NULL, cx->int_type)),
 		 rat_int_imp);
   
-    cx_add_cxfunc(cx, "fib-rec",
+    cx_add_cxfunc(lib, "fib-rec",
 		  cx_args(cx_arg("a", cx->int_type),
 			  cx_arg("b", cx->int_type),
 			  cx_arg("n", cx->int_type)),
 		  cx_args(cx_arg(NULL, cx->int_type)),
 		  "$n?<Opt> {$b $a $b +<Int Int> $n -- recall} $a if-else");
 
-    cx_add_cxfunc(cx, "fib",
+    cx_add_cxfunc(lib, "fib",
 		  cx_args(cx_arg("n", cx->int_type)),
 		  cx_args(cx_arg(NULL, cx->int_type)),
 		  "0 1 $n fib-rec");
-
-    cx_add_cxfunc(cx, "sum",
+    
+    cx_add_cxfunc(lib, "sum",
 		  cx_args(cx_arg("in", cx->seq_type)),
 		  cx_args(cx_arg(NULL, cx->any_type)),
 		  "0 $in &+ for");
-
-    return true;
   })
 
 static bool equid_imp(struct cx_box *x, struct cx_box *y) {
@@ -207,12 +207,14 @@ static void dump_imp(struct cx_box *v, FILE *out) {
 }
 
 cx_lib(cx_init_math_types, "cx/math/types", {
-    struct cx_type *t = cx_add_type(cx, "Rat", cx->num_type);
+    struct cx *cx = lib->cx;
+    cx_use(cx, "cx/abc");
+
+    struct cx_type *t = cx_add_type(lib, "Rat", cx->num_type);
     t->equid = equid_imp;
     t->cmp = cmp_imp;
     t->ok = ok_imp;
     t->write = write_imp;
     t->dump = dump_imp;
     cx->rat_type = t;
-    return true;
   })

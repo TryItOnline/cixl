@@ -104,8 +104,9 @@ static bool emit_imp(struct cx_box *v, const char *exp, FILE *out) {
   return true;
 }
 
-struct cx_type *cx_init_int_type(struct cx *cx) {
-  struct cx_type *t = cx_add_type(cx, "Int", cx->num_type, cx->seq_type);
+struct cx_type *cx_init_int_type(struct cx_lib *lib) {
+  struct cx *cx = lib->cx;
+  struct cx_type *t = cx_add_type(lib, "Int", cx->num_type, cx->seq_type);
   t->equid = equid_imp;
   t->cmp = cmp_imp;
   t->ok = ok_imp;
@@ -114,15 +115,15 @@ struct cx_type *cx_init_int_type(struct cx *cx) {
   t->dump = dump_imp;
   t->emit = emit_imp;
   
-  cx_add_cfunc(cx, "++",
+  cx_add_cfunc(lib, "++",
 	       cx_args(cx_arg("v", t)), cx_args(cx_arg(NULL, t)),
 	       inc_imp);
   
-  cx_add_cfunc(cx, "--",
+  cx_add_cfunc(lib, "--",
 	       cx_args(cx_arg("v", t)), cx_args(cx_arg(NULL, t)),
 	       dec_imp);
     
-  cx_add_cfunc(cx, "times",
+  cx_add_cfunc(lib, "times",
 	       cx_args(cx_arg("n", t), cx_arg("act", cx->any_type)), cx_args(),
 	       times_imp);
   

@@ -23,20 +23,48 @@ struct cx_func *cx_func_init(struct cx_func *func,
   func->cx = cx;
   func->id = strdup(id);
   func->emit_id = cx_emit_id("func", id);
-  cx_set_init(&func->imp_lookup, sizeof(struct cx_fimp *), cx_cmp_cstr);
-  func->imp_lookup.key = get_imp_id;
-  cx_vec_init(&func->imps, sizeof(struct cx_fimp *));
+  cx_set_init(&func->imps, sizeof(struct cx_fimp *), cx_cmp_cstr);
+  func->imps.key = get_imp_id;
   func->nargs = nargs;
+  func->nrefs = 1;
   return func;
 }
 
 struct cx_func *cx_func_deinit(struct cx_func *func) {
   free(func->id);
   free(func->emit_id);
-  cx_do_set(&func->imp_lookup, struct cx_fimp *, i) { free(cx_fimp_deinit(*i)); }
-  cx_set_deinit(&func->imp_lookup);
-  cx_vec_deinit(&func->imps);
+  cx_do_set(&func->imps, struct cx_fimp *, i) { cx_fimp_deref(*i); }
+  cx_set_deinit(&func->imps);
   return func; 
+}
+
+struct cx_func *cx_func_ref(struct cx_func *func) {
+  func->nrefs++;
+  return func;
+}
+
+void cx_func_deref(struct cx_func *func) {
+  cx_test(func->nrefs);
+  func->nrefs--;
+  if (!func->nrefs) { free(cx_func_deinit(func)); }
+}
+
+bool cx_ensure_fimp(struct cx_func *func, struct cx_fimp *imp) {
+  struct cx_fimp **ok = cx_set_get(&func->imps, &imp->id);
+
+  if (ok) {
+    if (*ok != imp) {
+      cx_fimp_deref(*ok);
+      *ok = cx_fimp_ref(imp);
+      return true;
+    }
+
+    return false;
+  }
+
+  ok = cx_set_insert(&func->imps, &imp->id);
+  *ok = cx_fimp_ref(imp);
+  return true;
 }
 
 struct cx_fimp *cx_add_fimp(struct cx_func *func,
@@ -79,23 +107,19 @@ struct cx_fimp *cx_add_fimp(struct cx_func *func,
   }
 
   cx_buf_close(&id);
-  struct cx_fimp **found = cx_set_get(&func->imp_lookup, &id.data);
+  struct cx_fimp **found = cx_set_get(&func->imps, &id.data);
   struct cx_fimp *imp = NULL;
   
   if (found) {
     imp = *found;
-    size_t i = imp->idx;
-    cx_fimp_deinit(imp);
-    cx_fimp_init(imp, func, id.data, i);
-  } else {
-    imp = cx_fimp_init(malloc(sizeof(struct cx_fimp)),
-		       func,
-		       id.data,
-		       func->imps.count);
-    *(struct cx_fimp **)cx_set_insert(&func->imp_lookup, &id.data) = imp;
-    *(struct cx_fimp **)cx_vec_push(&func->imps) = imp;
+    cx_set_delete(&func->imps, &imp->id);
+    cx_fimp_deref(imp);
   }
-  
+
+  imp = cx_fimp_init(malloc(sizeof(struct cx_fimp)),
+		     func,
+		     id.data);
+  *(struct cx_fimp **)cx_set_insert(&func->imps, &id.data) = imp;
   imp->args = imp_args;
 
   if (nrets) {
@@ -130,7 +154,7 @@ struct cx_fimp *cx_add_fimp(struct cx_func *func,
 struct cx_fimp *cx_get_fimp(struct cx_func *func,
 			    const char *id,
 			    bool silent) {
-  struct cx_fimp **imp = cx_set_get(&func->imp_lookup, &id);
+  struct cx_fimp **imp = cx_set_get(&func->imps, &id);
   
   if (!imp && silent) {
     struct cx *cx = func->cx;
@@ -141,21 +165,27 @@ struct cx_fimp *cx_get_fimp(struct cx_func *func,
   return *imp;
 }
 
-struct cx_fimp *cx_func_match(struct cx_func *func,
-			      struct cx_scope *scope,
-			      size_t offs) {
-  if (offs >= func->imps.count) { return NULL; }
+struct cx_fimp *cx_func_match(struct cx_func *func, struct cx_scope *scope) {
+  struct cx_fimp *best_match = NULL;
+  ssize_t best_score = -1;
+  
+  cx_do_set(&func->imps, struct cx_fimp *, i) {
+    ssize_t s = cx_fimp_score(*i, scope);
 
-  for (struct cx_fimp **i = cx_vec_peek(&func->imps, offs);
-       i >= (struct cx_fimp **)func->imps.items;
-       i--) {
-    if ((!scope->safe && i == cx_vec_start(&func->imps)) ||
-	cx_fimp_match(*i, scope)) {
+    switch (s) {
+    case -1:
+      continue;
+    case 0:
       return *i;
+    }
+    
+    if (best_score == -1 || best_score > s) {
+      best_match = *i;
+      best_score = s;
     }
   }
 
-  return NULL;
+  return best_match;
 }
 
 static bool equid_imp(struct cx_box *x, struct cx_box *y) {
@@ -165,7 +195,7 @@ static bool equid_imp(struct cx_box *x, struct cx_box *y) {
 static bool call_imp(struct cx_box *value, struct cx_scope *scope) {
   struct cx *cx = scope->cx;
   struct cx_func *func = value->as_ptr;
-  struct cx_fimp *imp = cx_func_match(func, scope, 0);
+  struct cx_fimp *imp = cx_func_match(func, scope);
 
   if (!imp) {
     cx_error(cx, cx->row, cx->col, "Func not applicable: '%s'", func->id);
@@ -199,8 +229,9 @@ static bool emit_imp(struct cx_box *v, const char *exp, FILE *out) {
   return true;
 }
 
-struct cx_type *cx_init_func_type(struct cx *cx) {
-  struct cx_type *t = cx_add_type(cx, "Func", cx->any_type, cx->seq_type);
+struct cx_type *cx_init_func_type(struct cx_lib *lib) {
+  struct cx *cx = lib->cx;
+  struct cx_type *t = cx_add_type(lib, "Func", cx->any_type, cx->seq_type);
   t->equid = equid_imp;
   t->call = call_imp;
   t->iter = iter_imp;

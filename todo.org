@@ -1,19 +1,27 @@
+* move rec_type to rec lib
+* replace sub libs with specific uses/depends
+** add nids/ids params to cx_use
+*** rename to _cx_use and add macro wrapper
+** add support for TGROUPs to use:
+* move Iter, Rat, Pair, Ref, Table, Time types from lib to cixl
+** extract cixl/table.h/c from lib
+** extract cixl/pair.h/c from lib
+** extract cixl/ref.h/c from lib
 * move types/int/++/-- to math lib
 ** move times to iter lib
 * move bool/t/f to cond lib
-* move int_type to math lib
-** use where needed
 * move bool_type to cond lib
 ** use where needed
-* ---
-* extract cixl/table.h/c from lib
-* extract cixl/pair.h/c from lib
-* extract cixl/ref.h/c from lib
+* move nil_type and nil constant to abc lib
 ** rename ref_ref to ref_inc & deref to dec
-* rename libs to lib
-* update benchmarks with use:
-* update examples with use:
-* inc version & commit
+* change lib init to bool result
+** check cx_use returns in inits
+** check init result in cx_use
+* extract cx_init_libs(cx)
+* add support for using specific ids from libs
+** change cx_use/use: to support TGROUP (lib id...)
+* replace cx_type.cx with lib
+* replace cx_func.cx with lib
 * ---
 * add connect(Socket, ip, port) fn
 ** non-blocking
@@ -38,14 +46,14 @@
 * extract sym literals as macro in sym lib
 * extract str literals as macro in str lib
 * extract char literals as macro in str lib
-* add support for using specific ids from libs
-** change cx_use/use: to take lib and list of ids
 * add lib: macro
 ** register in cx
 ** add data param to init fn
 *** store in cx_lib
 ** copy macro toks
 *** compile into cx_bin in init
+* add meta.lib fn to return current lib
+** add cx.lib_type
 * ---
 * optimize startup
 ** parse fns on first use

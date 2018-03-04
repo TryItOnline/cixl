@@ -16,27 +16,27 @@
 #include "cixl/func.h"
 #include "cixl/int.h"
 #include "cixl/lambda.h"
-#include "cixl/lib.h"
-#include "cixl/libs/bin.h"
-#include "cixl/libs/cond.h"
-#include "cixl/libs/guid.h"
-#include "cixl/libs/error.h"
-#include "cixl/libs/func.h"
-#include "cixl/libs/io.h"
-#include "cixl/libs/iter.h"
-#include "cixl/libs/math.h"
-#include "cixl/libs/meta.h"
-#include "cixl/libs/net.h"
-#include "cixl/libs/pair.h"
-#include "cixl/libs/rec.h"
-#include "cixl/libs/ref.h"
-#include "cixl/libs/stack.h"
-#include "cixl/libs/str.h"
-#include "cixl/libs/sym.h"
-#include "cixl/libs/table.h"
-#include "cixl/libs/time.h"
-#include "cixl/libs/type.h"
-#include "cixl/libs/var.h"
+#include "cixl/lib/abc.h"
+#include "cixl/lib/bin.h"
+#include "cixl/lib/cond.h"
+#include "cixl/lib/guid.h"
+#include "cixl/lib/error.h"
+#include "cixl/lib/func.h"
+#include "cixl/lib/io.h"
+#include "cixl/lib/iter.h"
+#include "cixl/lib/math.h"
+#include "cixl/lib/meta.h"
+#include "cixl/lib/net.h"
+#include "cixl/lib/pair.h"
+#include "cixl/lib/rec.h"
+#include "cixl/lib/ref.h"
+#include "cixl/lib/stack.h"
+#include "cixl/lib/str.h"
+#include "cixl/lib/sym.h"
+#include "cixl/lib/table.h"
+#include "cixl/lib/time.h"
+#include "cixl/lib/type.h"
+#include "cixl/lib/var.h"
 #include "cixl/nil.h"
 #include "cixl/op.h"
 #include "cixl/rec.h"
@@ -45,44 +45,33 @@
 #include "cixl/str.h"
 #include "cixl/util.h"
 
-static const void *get_type_id(const void *value) {
-  struct cx_type *const *type = value;
-  return &(*type)->id;
-}
-
-static const void *get_macro_id(const void *value) {
-  struct cx_macro *const *macro = value;
-  return &(*macro)->id;
-}
-
-static const void *get_func_id(const void *value) {
-  struct cx_func *const *func = value;
-  return &(*func)->id;
+static const void *get_lib_id(const void *value) {
+  struct cx_lib *const *lib = value;
+  return &(*lib)->id;
 }
 
 static cx_lib(init_world, "cx", {
-    return
-      cx_use(cx, "cx/bin", false) &&
-      cx_use(cx, "cx/cond", false) &&
-      cx_use(cx, "cx/error", false) &&
-      cx_use(cx, "cx/func", false) &&
-      cx_use(cx, "cx/guid", false) &&
-      cx_use(cx, "cx/io", false) &&
-      cx_use(cx, "cx/iter", false) &&
-      cx_use(cx, "cx/math", false) &&
-      cx_use(cx, "cx/net", false) &&
-      cx_use(cx, "cx/pair", false) &&
-      cx_use(cx, "cx/rec", false) &&
-      cx_use(cx, "cx/rec/io", false) &&
-      cx_use(cx, "cx/ref", false) &&
-      cx_use(cx, "cx/stack", false) &&
-      cx_use(cx, "cx/stack/ops", false) &&
-      cx_use(cx, "cx/str", false) &&
-      cx_use(cx, "cx/sym", false) &&
-      cx_use(cx, "cx/table", false) &&
-      cx_use(cx, "cx/time", false) &&
-      cx_use(cx, "cx/type", false) &&
-      cx_use(cx, "cx/var", false);
+    struct cx *cx = lib->cx;
+    
+    cx_use(cx, "cx/bin");
+    cx_use(cx, "cx/cond");
+    cx_use(cx, "cx/error");
+    cx_use(cx, "cx/func");
+    cx_use(cx, "cx/guid");
+    cx_use(cx, "cx/io");
+    cx_use(cx, "cx/iter");
+    cx_use(cx, "cx/math");
+    cx_use(cx, "cx/net");
+    cx_use(cx, "cx/pair");
+    cx_use(cx, "cx/rec");
+    cx_use(cx, "cx/ref");
+    cx_use(cx, "cx/stack");
+    cx_use(cx, "cx/str");
+    cx_use(cx, "cx/sym");
+    cx_use(cx, "cx/table");
+    cx_use(cx, "cx/time");
+    cx_use(cx, "cx/type");
+    cx_use(cx, "cx/var");
   })
 
 struct cx *cx_init(struct cx *cx) {
@@ -107,38 +96,38 @@ struct cx *cx_init(struct cx *cx) {
   cx_set_init(&cx->syms, sizeof(struct cx_sym), cx_cmp_cstr);
   cx->syms.key_offs = offsetof(struct cx_sym, id);
 
-  cx_set_init(&cx->libs, sizeof(struct cx_lib), cx_cmp_sym);
-  cx->types.key_offs = offsetof(struct cx_lib, id);
-
-  cx_set_init(&cx->types, sizeof(struct cx_type *), cx_cmp_cstr);
-  cx->types.key = get_type_id;
-
-  cx_set_init(&cx->macros, sizeof(struct cx_macro *), cx_cmp_cstr);
-  cx->macros.key = get_macro_id;
-
-  cx_set_init(&cx->funcs, sizeof(struct cx_func *), cx_cmp_cstr);
-  cx->funcs.key = get_func_id;
-
-  cx_env_init(&cx->consts, &cx->var_alloc);
+  cx_set_init(&cx->libs, sizeof(struct cx_lib *), cx_cmp_sym);
+  cx->libs.key = get_lib_id;
+  cx->lib = cx->lobby = cx_add_lib(cx, "lobby", NULL);
   
   cx_vec_init(&cx->load_paths, sizeof(char *));
   cx_vec_init(&cx->scopes, sizeof(struct cx_scope *));
   cx_vec_init(&cx->calls, sizeof(struct cx_call));
   cx_vec_init(&cx->errors, sizeof(struct cx_error));
 
-  cx->bin_type =
+  cx->any_type =
+    cx->bin_type =
+    cx->bool_type =
     cx->char_type =
+    cx->cmp_type =
     cx->file_type =
     cx->fimp_type =
     cx->func_type =
     cx->guid_type =
+    cx->int_type =
     cx->iter_type =
     cx->lambda_type =
+    cx->nil_type =
+    cx->num_type =
+    cx->meta_type =
+    cx->opt_type =
     cx->pair_type =
     cx->rat_type =
+    cx->rec_type =
     cx->ref_type =
     cx->rfile_type =
     cx->rwfile_type =
+    cx->seq_type =
     cx->socket_type =
     cx->stack_type =
     cx->str_type =
@@ -147,34 +136,12 @@ struct cx *cx_init(struct cx *cx) {
     cx->time_type =
     cx->wfile_type = NULL;
   
-  cx->opt_type = cx_add_type(cx, "Opt");
-  cx->opt_type->trait = true;
-
-  cx->any_type = cx_add_type(cx, "A", cx->opt_type);
-  cx->any_type->trait = true;
-
-  cx->cmp_type = cx_add_type(cx, "Cmp", cx->any_type);
-  cx->cmp_type->trait = true;  
-
-  cx->seq_type = cx_add_type(cx, "Seq", cx->any_type);
-  cx->seq_type->trait = true;
-
-  cx->num_type = cx_add_type(cx, "Num", cx->cmp_type);
-  cx->num_type->trait = true;
-  
-  cx->rec_type = cx_add_type(cx, "Rec", cx->cmp_type);
-  cx->rec_type->trait = true;
-
-  cx->nil_type = cx_init_nil_type(cx);
-  cx->meta_type = cx_init_meta_type(cx);
-  
-  cx->int_type = cx_init_int_type(cx);
-  cx->bool_type = cx_init_bool_type(cx);
     
   cx->scope = NULL;
-  cx->main = cx_begin(cx, NULL);
+  cx->root_scope = cx_begin(cx, NULL);
   srand((ptrdiff_t)cx + clock());
 
+  cx_init_abc(cx);
   cx_init_bin(cx);
   cx_init_bin_types(cx);
   cx_init_cond(cx);
@@ -195,11 +162,9 @@ struct cx *cx_init(struct cx *cx) {
   cx_init_pair(cx);
   cx_init_pair_types(cx);
   cx_init_rec(cx);
-  cx_init_rec_io(cx);
   cx_init_ref(cx);
   cx_init_ref_types(cx);
   cx_init_stack(cx);
-  cx_init_stack_ops(cx);
   cx_init_stack_types(cx);
   cx_init_str(cx);
   cx_init_str_types(cx);
@@ -230,17 +195,7 @@ struct cx *cx_deinit(struct cx *cx) {
   cx_do_vec(&cx->load_paths, char *, p) { free(*p); }
   cx_vec_deinit(&cx->load_paths);
 
-  cx_env_deinit(&cx->consts);
-
-  cx_do_set(&cx->macros, struct cx_macro *, m) { free(cx_macro_deinit(*m)); }
-  cx_set_deinit(&cx->macros);
-
-  cx_do_set(&cx->funcs, struct cx_func *, f) { free(cx_func_deinit(*f)); }
-  cx_set_deinit(&cx->funcs);
-
-  cx_do_set(&cx->types, struct cx_type *, t) { free(cx_type_deinit(*t)); }
-  cx_set_deinit(&cx->types);
-
+  cx_do_set(&cx->libs, struct cx_lib *, l) { free(cx_lib_deinit(*l)); }
   cx_set_deinit(&cx->libs);
 
   cx_do_set(&cx->syms, struct cx_sym, s) { cx_sym_deinit(s); }
@@ -268,154 +223,16 @@ bool cx_is_separator(struct cx *cx, char c) {
   return cx_set_get(&cx->separators, &c);
 }
 
-struct cx_type *_cx_add_type(struct cx *cx, const char *id, ...) {
-  va_list parents;
-  va_start(parents, id);				
-  struct cx_type *t = cx_vadd_type(cx, id, parents);
-  va_end(parents);					
-  return t;
-}
- 
-struct cx_type *cx_vadd_type(struct cx *cx, const char *id, va_list parents) {
-  struct cx_type **t = cx_test(cx_set_insert(&cx->types, &id));
-
-  if (!t) {
-    cx_error(cx, cx->row, cx->col, "Duplicate type: '%s'", id);
-    return NULL;
+struct cx_lib *cx_add_lib(struct cx *cx, const char *id, cx_lib_init_t init) {
+  struct cx_sym sid = cx_sym(cx, id);
+  struct cx_lib **lib = cx_set_get(&cx->libs, &sid);
+  
+  if (!lib) {
+    lib = cx_set_insert(&cx->libs, &sid);
+    *lib = cx_lib_init(malloc(sizeof(struct cx_lib)), cx, sid, init);
   }
   
-  *t = cx_type_init(malloc(sizeof(struct cx_type)), cx, id);
-    
-  struct cx_type *pt = NULL;
-  while ((pt = va_arg(parents, struct cx_type *))) { cx_derive(*t, pt); }
-  return *t;
-}
-
-struct cx_rec_type *cx_add_rec_type(struct cx *cx, const char *id) {
-  struct cx_type **found = cx_set_get(&cx->types, &id);
-  if (found) { return NULL; }
-  
-  if (found) {
-    struct cx_rec_type *t = cx_baseof(*found, struct cx_rec_type, imp);
-    cx_rec_type_reinit(t);
-    return t;
-  }
-  
-  struct cx_rec_type *t = cx_rec_type_new(cx, id);
-  *(struct cx_type **)cx_test(cx_set_insert(&cx->types, &id)) = &t->imp;
-  return t;
-}
-
-struct cx_type *cx_get_type(struct cx *cx, const char *id, bool silent) {
-  struct cx_type **t = cx_set_get(&cx->types, &id);
-
-  if (!t && !silent) {
-    cx_error(cx, cx->row, cx->col, "Unknown type: '%s'", id);
-  }
-
-  return t ? *t : NULL;
-}
-
-struct cx_fimp *cx_add_func(struct cx *cx,
-			    const char *id,
-			    int nargs, struct cx_arg *args,
-			    int nrets, struct cx_arg *rets) {
-  struct cx_func **f = cx_set_get(&cx->funcs, &id);
-
-  if (f) {
-    if ((*f)->nargs != nargs) {
-      cx_error(cx,
-	       cx->row, cx->col,
-	       "Wrong number of args for func '%s': %d/%d",
-	       id, nargs, (*f)->nargs);
-      return NULL;
-    }
-  } else {
-    f = cx_set_insert(&cx->funcs, &id);
-    *f = cx_func_init(malloc(sizeof(struct cx_func)), cx, id, nargs);
-  }
-  
-  return cx_add_fimp(*f, nargs, args, nrets, rets);
-}
-
-struct cx_fimp *cx_add_cfunc(struct cx *cx,
-			     const char *id,
-			     int nargs, struct cx_arg *args,
-			     int nrets, struct cx_arg *rets,
-			     cx_fimp_ptr_t ptr) {
-  struct cx_fimp *imp = cx_add_func(cx, id, nargs, args, nrets, rets);
-  if (imp) { imp->ptr = ptr; }
-  return imp;
-}
-
-struct cx_fimp *cx_add_cxfunc(struct cx *cx,
-			    const char *id,
-			    int nargs, struct cx_arg *args,
-			    int nrets, struct cx_arg *rets,
-			    const char *body) {
-  struct cx_fimp *imp = cx_add_func(cx, id, nargs, args, nrets, rets);
-  if (imp) { cx_test(cx_parse_str(cx, body, &imp->toks)); }
-  return imp;
-}
-
-struct cx_func *cx_get_func(struct cx *cx, const char *id, bool silent) {
-  struct cx_func **f = cx_set_get(&cx->funcs, &id);
-
-  if (!f && !silent) {
-    cx_error(cx, cx->row, cx->col, "Unknown func: '%s'", id);
-  }
-
-  return f ? *f : NULL;
-}
-
-struct cx_macro *cx_add_macro(struct cx *cx, const char *id, cx_macro_parse_t imp) {
-  struct cx_macro **m = cx_test(cx_set_insert(&cx->macros, &id));
-
-  if (!m) {
-    cx_error(cx, cx->row, cx->col, "Duplicate macro: '%s'", id);
-    return NULL;
-  }
-
-  *m = cx_macro_init(malloc(sizeof(struct cx_macro)), id, imp); 
-  return *m;
-}
-
-struct cx_macro *cx_get_macro(struct cx *cx, const char *id, bool silent) {
-  struct cx_macro **m = cx_set_get(&cx->macros, &id);
-
-  if (!m && !silent) {
-    cx_error(cx, cx->row, cx->col, "Unknown macro: '%s'", id);
-  }
-  
-  return m ? *m : NULL;
-}
-
-struct cx_box *cx_get_const(struct cx *cx, struct cx_sym id, bool silent) {
-  struct cx_box *v = cx_env_get(&cx->consts, id);
-
-  if (!v) {
-    if (!silent) { cx_error(cx, cx->row, cx->col, "Unknown const: '%s'", id); }
-    return NULL;
-  }
-
-  return v;
-}
-
-struct cx_box *cx_set_const(struct cx *cx, struct cx_sym id, bool force) {
-  struct cx_box *v = cx_env_get(&cx->consts, id);
-
-  if (v) {
-    if (!force) {
-      cx_error(cx, cx->row, cx->col, "Attempt to rebind const: '%s'", id);
-      return NULL;
-    }
-      
-    cx_box_deinit(v);
-  } else {
-    v = cx_env_put(&cx->consts, id);
-  }
-
-  return v;
+  return *lib;
 }
 
 struct cx_sym cx_sym(struct cx *cx, const char *id) {
@@ -463,10 +280,10 @@ void cx_end(struct cx *cx) {
 }
 
 bool cx_funcall(struct cx *cx, const char *id) {
-  struct cx_func *func = cx_get_func(cx, id, false);
+  struct cx_func *func = cx_get_func(cx->lib, id, false);
   if (!func) { return false; }
   struct cx_scope *s = cx_scope(cx, 0);
-  struct cx_fimp *imp = cx_func_match(func, s, 0);
+  struct cx_fimp *imp = cx_func_match(func, s);
   
   if (!imp) {
     cx_error(cx, cx->row, cx->col, "Func not applicable: %s", func->id);
@@ -547,18 +364,56 @@ bool cx_load(struct cx *cx, const char *path, struct cx_bin *bin) {
   }
 }
 
-bool cx_use(struct cx *cx, const char *id, bool silent) {
+bool cx_use(struct cx *cx, const char *id) {
   struct cx_sym sid = cx_sym(cx, id);
-  struct cx_lib *lib = cx_set_get(&cx->libs, &sid);
+  struct cx_lib **ok = cx_set_get(&cx->libs, &sid);
 
-  if (!lib) {
-    if (!silent) { cx_error(cx, cx->row, cx->col, "Lib not found: %s", id); }
+  if (!ok) {
+    cx_error(cx, cx->row, cx->col, "Lib not found: %s", id);
     return false;
   }
 
-  if (!lib->used) {
-    lib->used = true;
-    if (!lib->init(cx)) { return false; }
+  struct cx_lib *lib = *ok;
+
+  if (lib->init) {
+    struct cx_lib *prev = cx->lib;
+    cx->lib = lib;
+    lib->init(lib);
+    lib->init = NULL;
+    cx->lib = prev;
+  }
+
+  cx_do_set(&lib->types, struct cx_type *, t) {
+    struct cx_type **ok = cx_set_insert(&cx->lib->types, &(*t)->id);
+    if (ok) { *ok = cx_type_ref(*t); }
+  }
+
+  cx_do_set(&lib->macros, struct cx_macro *, m) {
+    struct cx_macro **ok = cx_set_insert(&cx->lib->macros, &(*m)->id);
+    if (ok) { *ok = cx_macro_ref(*m); }
+  }
+
+  cx_do_set(&lib->funcs, struct cx_func *, f) {
+    struct cx_func **ok = cx_set_get(&cx->lib->funcs, &(*f)->id);
+    
+    if (ok) {
+      if ((*ok)->nargs != (*f)->nargs) {
+	cx_error(cx, cx->row, cx->col, "Wrong arity (%d/%d) for func: %s/%s",
+		 (*f)->nargs, (*ok)->nargs, lib->id.id, (*f)->id);
+	return false;
+      }
+      
+      cx_do_set(&(*f)->imps, struct cx_fimp *, i) {
+	cx_ensure_fimp(*ok, *i);
+      }
+    } else {
+      ok = cx_set_insert(&cx->lib->funcs, &(*f)->id);
+      *ok = cx_func_ref(*f);
+    }
+  }
+
+  cx_do_env(&lib->consts, v) {
+    cx_copy(cx_env_put(&cx->lib->consts, v->id), &v->value);
   }
 
   return true;

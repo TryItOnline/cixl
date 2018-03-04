@@ -9,6 +9,8 @@
   https://github.com/basic-gongfu/cixl#getting-started
 */
 
+use: cx;
+
 /*
   Split stdin into lowercase words and count them using a table.
 */
@@ -22,7 +24,7 @@
   sorted alphabetically since the table is sorted by key.
 */
 
-$ws vect % {y ~ y <=>} sort
+$ws stack % {y ~ y <=>} sort
 
 /*
   Print results to stdout.

@@ -19,6 +19,6 @@ struct cx_sym *cx_sym_deinit(struct cx_sym *sym);
 
 enum cx_cmp cx_cmp_sym(const void *x, const void *y);
 
-struct cx_type *cx_init_sym_type(struct cx *cx);
+struct cx_type *cx_init_sym_type(struct cx_lib *lib);
 
 #endif

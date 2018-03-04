@@ -12,7 +12,7 @@
 #include "cixl/func.h"
 #include "cixl/iter.h"
 #include "cixl/lib.h"
-#include "cixl/libs/str.h"
+#include "cixl/lib/str.h"
 #include "cixl/scope.h"
 #include "cixl/str.h"
 
@@ -244,84 +244,84 @@ static bool str_lower_imp(struct cx_scope *scope) {
 }
 
 cx_lib(cx_init_str, "cx/str", {
-    if (!cx_use(cx, "cx/iter/types", false) ||
-	!cx_use(cx, "cx/str/types", false)) {
-      return false;
-    }
+    struct cx *cx = lib->cx;
+    cx_use(cx, "cx/abc");
+    cx_use(cx, "cx/iter");
+    cx_use(cx, "cx/str/types");
 
-    cx_add_cfunc(cx, "lines",
+    cx_add_cfunc(lib, "lines",
 		 cx_args(cx_arg("in", cx->seq_type)),
 		 cx_args(cx_arg(NULL, cx->iter_type)),
 		 lines_imp);
 
-    cx_add_cfunc(cx, "words",
+    cx_add_cfunc(lib, "words",
 		 cx_args(cx_arg("in", cx->seq_type)),
 		 cx_args(cx_arg(NULL, cx->iter_type)),
 		 words_imp);
 
-    cx_add_cfunc(cx, "upper",
+    cx_add_cfunc(lib, "upper",
 		 cx_args(cx_arg("c", cx->char_type)),
 		 cx_args(cx_arg(NULL, cx->char_type)),
 		 char_upper_imp);
 
-    cx_add_cfunc(cx, "lower",
+    cx_add_cfunc(lib, "lower",
 		 cx_args(cx_arg("c", cx->char_type)),
 		 cx_args(cx_arg(NULL, cx->char_type)),
 		 char_lower_imp);
 
-    cx_add_cfunc(cx, "int",
+    cx_add_cfunc(lib, "int",
 		 cx_args(cx_arg("c", cx->char_type)),
 		 cx_args(cx_arg(NULL, cx->int_type)),
 		 char_int_imp);
 
-    cx_add_cfunc(cx, "char",
+    cx_add_cfunc(lib, "char",
 		 cx_args(cx_arg("v", cx->int_type)),
 		 cx_args(cx_arg(NULL, cx->char_type)),
 		 int_char_imp);
   
-    cx_add_cfunc(cx, "str",
+    cx_add_cfunc(lib, "str",
 		 cx_args(cx_arg("v", cx->int_type)),
 		 cx_args(cx_arg(NULL, cx->str_type)),
 		 int_str_imp);
 
-    cx_add_cfunc(cx, "len",
+    cx_add_cfunc(lib, "len",
 		 cx_args(cx_arg("s", cx->str_type)),
 		 cx_args(cx_arg(NULL, cx->int_type)),
 		 len_imp);
 
-    cx_add_cfunc(cx, "get",
+    cx_add_cfunc(lib, "get",
 		 cx_args(cx_arg("s", cx->str_type), cx_arg("i", cx->int_type)),
 		 cx_args(cx_arg(NULL, cx->char_type)),
 		 get_imp);
 
-    cx_add_cfunc(cx, "str",
+    cx_add_cfunc(lib, "str",
 		 cx_args(cx_arg("s", cx->seq_type)),
 		 cx_args(cx_arg(NULL, cx->str_type)),
 		 seq_imp);
 
-    cx_add_cfunc(cx, "int",
+    cx_add_cfunc(lib, "int",
 		 cx_args(cx_arg("s", cx->str_type)),
 		 cx_args(cx_arg(NULL, cx->opt_type)),
 		 str_int_imp);
 
-    cx_add_cfunc(cx, "-",
+    cx_add_cfunc(lib, "-",
 		 cx_args(cx_arg("x", cx->str_type), cx_arg("y", cx->str_type)),
 		 cx_args(cx_arg(NULL, cx->int_type)),
 		 str_sub_imp);
 
-    cx_add_cfunc(cx, "upper",
+    cx_add_cfunc(lib, "upper",
 		 cx_args(cx_arg("s", cx->str_type)), cx_args(),
 		 str_upper_imp);
 
-    cx_add_cfunc(cx, "lower",
+    cx_add_cfunc(lib, "lower",
 		 cx_args(cx_arg("s", cx->str_type)), cx_args(),
 		 str_lower_imp);
-
-    return true;
   })
 
 cx_lib(cx_init_str_types, "cx/str/types", {
-    cx->char_type = cx_init_char_type(cx);
-    cx->str_type = cx_init_str_type(cx);
-    return true;
+    struct cx *cx = lib->cx;
+    cx_use(cx, "cx/abc");
+
+    cx->char_type = cx_init_char_type(lib);
+    cx->str_type = cx_init_str_type(lib);
   });

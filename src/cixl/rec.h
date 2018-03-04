@@ -25,7 +25,6 @@ struct cx_rec_type *cx_rec_type_init(struct cx_rec_type *type,
 				     const char *id);
 
 struct cx_rec_type *cx_rec_type_reinit(struct cx_rec_type *type);
-struct cx_rec_type *cx_rec_type_deinit(struct cx_rec_type *type);
 
 void cx_derive_rec(struct cx_rec_type *child, struct cx_type *parent);
 

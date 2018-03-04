@@ -14,6 +14,7 @@
 int main(int argc, char *argv[]) {
   struct cx cx;
   cx_init(&cx);
+  cx_use(&cx, "cx/meta");
   
   bool emit = false;
   int argi = 1;
@@ -67,10 +68,12 @@ int main(int argc, char *argv[]) {
 	    "#include \"cixl/call.h\"\n"
 	    "#include \"cixl/cx.h\"\n"
             "#include \"cixl/error.h\"\n"
+            "#include \"cixl/func.h\"\n"
             "#include \"cixl/lambda.h\"\n"
             "#include \"cixl/rec.h\"\n"
             "#include \"cixl/op.h\"\n"
             "#include \"cixl/scope.h\"\n"
+            "#include \"cixl/stack.h\"\n"
             "#include \"cixl/str.h\"\n\n",
 	    out);
 
@@ -103,9 +106,10 @@ int main(int argc, char *argv[]) {
       }
       
       char *fn = argv[argi++];
-      
+      struct cx_scope *s = cx_scope(&cx, 0);
+
       for (; argi < argc; argi++) {
-	cx_box_init(cx_push(cx.main), cx.str_type)->as_str = cx_str_new(argv[argi]);
+	cx_box_init(cx_push(s), cx.str_type)->as_str = cx_str_new(argv[argi]);
       }
 
       struct cx_bin *bin = cx_bin_new();

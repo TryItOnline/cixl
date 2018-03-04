@@ -9,7 +9,7 @@
 #include "cixl/func.h"
 #include "cixl/scope.h"
 #include "cixl/lib.h"
-#include "cixl/libs/ref.h"
+#include "cixl/lib/ref.h"
 
 struct cx_ref *cx_ref_new(struct cx *cx, struct cx_box *value) {
   struct cx_ref *ref = cx_malloc(&cx->ref_alloc);
@@ -57,24 +57,24 @@ static bool put_imp(struct cx_scope *scope) {
 }
 
 cx_lib(cx_init_ref, "cx/ref", { 
-    if (!cx_use(cx, "cx/ref/types", false)) { return false; }
+    struct cx *cx = lib->cx;
+    cx_use(cx, "cx/abc");
+    cx_use(cx, "cx/ref/types");
 
-    cx_add_cfunc(cx, "ref",
+    cx_add_cfunc(lib, "ref",
 		 cx_args(cx_arg("val", cx->opt_type)),
 		 cx_args(cx_arg(NULL, cx->ref_type)),
 		 ref_imp);
   
-    cx_add_cfunc(cx, "get-ref",
+    cx_add_cfunc(lib, "get-ref",
 		 cx_args(cx_arg("ref", cx->ref_type)),
 		 cx_args(cx_arg(NULL, cx->opt_type)),
 		 get_imp);
 
-    cx_add_cfunc(cx, "put-ref",
+    cx_add_cfunc(lib, "put-ref",
 		 cx_args(cx_arg("ref", cx->ref_type), cx_arg("val", cx->opt_type)),
 		 cx_args(),
 		 put_imp);
-
-    return true;
   })
 
 static bool equid_imp(struct cx_box *x, struct cx_box *y) {
@@ -110,7 +110,9 @@ static void deinit_imp(struct cx_box *v) {
 }
 
 cx_lib(cx_init_ref_types, "cx/ref/types", {
-    struct cx_type *t = cx_add_type(cx, "Ref", cx->any_type);
+    struct cx *cx = lib->cx;
+    cx_use(cx, "cx/abc");
+    struct cx_type *t = cx_add_type(lib, "Ref", cx->any_type);
     t->eqval = eqval_imp;
     t->equid = equid_imp;
     t->ok = ok_imp;
@@ -119,5 +121,4 @@ cx_lib(cx_init_ref_types, "cx/ref/types", {
     t->dump = dump_imp;
     t->deinit = deinit_imp;
     cx->ref_type = t;
-    return true;
   })

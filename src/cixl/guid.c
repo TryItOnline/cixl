@@ -115,8 +115,8 @@ static void dump_imp(struct cx_box *v, FILE *out) {
   fputs(cx_guid_str(v->as_guid, s), out);
 }
 
-struct cx_type *cx_init_guid_type(struct cx *cx) {
-  struct cx_type *t = cx_add_type(cx, "Guid", cx->any_type);
+struct cx_type *cx_init_guid_type(struct cx_lib *lib) {
+  struct cx_type *t = cx_add_type(lib, "Guid", lib->cx->any_type);
   t->new = new_imp;
   t->equid = equid_imp;
   t->write = write_imp;

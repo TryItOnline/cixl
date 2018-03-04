@@ -52,8 +52,8 @@ static bool emit_imp(struct cx_box *v, const char *exp, FILE *out) {
   return true;
 }
 
-struct cx_type *cx_init_char_type(struct cx *cx) {
-  struct cx_type *t = cx_add_type(cx, "Char", cx->any_type);
+struct cx_type *cx_init_char_type(struct cx_lib *lib) {
+  struct cx_type *t = cx_add_type(lib, "Char", lib->cx->any_type);
   t->equid = equid_imp;
   t->ok = ok_imp;
   t->write = dump_imp;

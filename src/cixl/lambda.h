@@ -20,6 +20,6 @@ struct cx_lambda *cx_lambda_new(struct cx_scope *scope,
 struct cx_lambda *cx_lambda_ref(struct cx_lambda *lambda);
 void cx_lambda_deref(struct cx_lambda *lambda);
 
-struct cx_type *cx_init_lambda_type(struct cx *cx);
+struct cx_type *cx_init_lambda_type(struct cx_lib *lib);
 
 #endif

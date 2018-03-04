@@ -9,9 +9,8 @@
 #include "cixl/fimp.h"
 #include "cixl/iter.h"
 #include "cixl/lib.h"
-#include "cixl/libs/pair.h"
-#include "cixl/libs/rec.h"
-#include "cixl/libs/table.h"
+#include "cixl/lib/pair.h"
+#include "cixl/lib/table.h"
 #include "cixl/scope.h"
 #include "cixl/tok.h"
 
@@ -244,24 +243,24 @@ static bool seq_imp(struct cx_scope *scope) {
 }
 
 cx_lib(cx_init_table, "cx/table", {
-    if (!cx_use(cx, "cx/iter/types", false) ||
-	!cx_use(cx, "cx/table/types", false)) {
-      return false;
-    }
+    struct cx *cx = lib->cx;
+    cx_use(cx, "cx/abc");
+    cx_use(cx, "cx/iter/types");
+    cx_use(cx, "cx/table/types");
     
-    cx_add_cfunc(cx, "get",
+    cx_add_cfunc(lib, "get",
 		 cx_args(cx_arg("tbl", cx->table_type), cx_arg("key", cx->cmp_type)),
 		 cx_args(cx_arg(NULL, cx->opt_type)),
 		 get_imp);
 
-    cx_add_cfunc(cx, "put",
+    cx_add_cfunc(lib, "put",
 		 cx_args(cx_arg("tbl", cx->table_type),
 			 cx_arg("key", cx->cmp_type),
 			 cx_arg("val", cx->any_type)),
 		 cx_args(),
 		 put_imp);
 
-    cx_add_cfunc(cx, "put-else",
+    cx_add_cfunc(lib, "put-else",
 		 cx_args(cx_arg("tbl", cx->table_type),
 			 cx_arg("key", cx->cmp_type),
 			 cx_arg("upd", cx->any_type),
@@ -269,22 +268,20 @@ cx_lib(cx_init_table, "cx/table", {
 		 cx_args(),
 		 put_else_imp);
 
-    cx_add_cfunc(cx, "delete",
+    cx_add_cfunc(lib, "delete",
 		 cx_args(cx_arg("tbl", cx->table_type), cx_arg("key", cx->cmp_type)),
 		 cx_args(),
 		 delete_imp);
 
-    cx_add_cfunc(cx, "len",
+    cx_add_cfunc(lib, "len",
 		 cx_args(cx_arg("tbl", cx->table_type)),
 		 cx_args(cx_arg(NULL, cx->int_type)),
 		 len_imp);
 
-    cx_add_cfunc(cx, "table",
+    cx_add_cfunc(lib, "table",
 		 cx_args(cx_arg("in", cx->seq_type)),
 		 cx_args(cx_arg(NULL, cx->table_type)),
 		 seq_imp);
-
-    return true;
   })
 
 static void new_imp(struct cx_box *out) {
@@ -371,7 +368,10 @@ static void deinit_imp(struct cx_box *v) {
 }
 
 cx_lib(cx_init_table_types, "cx/table/types", {
-    struct cx_type *t = cx_add_type(cx, "Table", cx->seq_type);
+    struct cx *cx = lib->cx;
+    cx_use(cx, "cx/abc");
+
+    struct cx_type *t = cx_add_type(lib, "Table", cx->seq_type);
     t->new = new_imp;
     t->eqval = eqval_imp;
     t->equid = equid_imp;
@@ -382,7 +382,5 @@ cx_lib(cx_init_table_types, "cx/table/types", {
     t->write = write_imp;
     t->dump = dump_imp;
     t->deinit = deinit_imp;
-
     cx->table_type = t;
-    return true;
   })

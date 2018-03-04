@@ -17,6 +17,6 @@ struct cx_stack *cx_stack_ref(struct cx_stack *stack);
 void cx_stack_deref(struct cx_stack *stack);
 void cx_stack_dump(struct cx_vec *imp, FILE *out);
 
-struct cx_type *cx_init_stack_type(struct cx *cx);
+struct cx_type *cx_init_stack_type(struct cx_lib *lib);
 
 #endif

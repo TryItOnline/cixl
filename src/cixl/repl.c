@@ -21,27 +21,27 @@ static bool emit_bmips(struct cx *cx) {
     static bool init = true;
 
     static struct cx_func *func_SUSU;
-    static struct cx_func *func_clock;
     static struct cx_func *func_int;
     static struct cx_func *func_QU;
     static struct cx_func *func_ifSUelse;
     static struct cx_func *func_recall;
     static struct cx_func *func_AD;
-    static struct cx_func *func_fib;
     static struct cx_func *func_DI;
     static struct cx_func *func_fibSUrec;
+    static struct cx_func *func_fib;
     static struct cx_func *func__;
+    static struct cx_func *func_clock;
     static struct cx_fimp *func_SUSU_Int;
-    static struct cx_fimp *func_clock_A;
     static struct cx_fimp *func_QU_Opt;
     static struct cx_fimp *func_ifSUelse_OptAA;
     static struct cx_fimp *func_recall_;
-    static struct cx_fimp *func_AD_IntInt;
     static struct cx_fimp *func_DI_IntInt;
+    static struct cx_fimp *func_AD_IntInt;
     static struct cx_fimp *func_int_Rat;
     static struct cx_fimp *func_fibSUrec_IntIntInt;
     static struct cx_fimp *func_fib_Int;
     static struct cx_fimp *func___;
+    static struct cx_fimp *func_clock_A;
     static struct cx_sym sym_a;
     static struct cx_sym sym_b;
     static struct cx_sym sym_n;
@@ -51,7 +51,7 @@ static bool emit_bmips(struct cx *cx) {
       init = false;
 
       {
-	struct cx_func *func = cx_get_func(cx, "fib", false);
+	struct cx_func *func = cx_get_func(cx->lib, "fib", false);
 	struct cx_fimp *imp = cx_get_fimp(func, "Int", false);
 	imp->bin = cx_bin_ref(cx->bin);
 	imp->start_pc = 4;
@@ -59,39 +59,39 @@ static bool emit_bmips(struct cx *cx) {
       }
 
       {
-	struct cx_func *func = cx_get_func(cx, "fib-rec", false);
+	struct cx_func *func = cx_get_func(cx->lib, "fib-rec", false);
 	struct cx_fimp *imp = cx_get_fimp(func, "Int Int Int", false);
 	imp->bin = cx_bin_ref(cx->bin);
 	imp->start_pc = 10;
 	imp->nops = 16;
       }
 
-      func_SUSU = cx_test(cx_get_func(cx, "--", false));
-      func_clock = cx_test(cx_get_func(cx, "clock", false));
-      func_int = cx_test(cx_get_func(cx, "int", false));
-      func_QU = cx_test(cx_get_func(cx, "?", false));
-      func_ifSUelse = cx_test(cx_get_func(cx, "if-else", false));
-      func_recall = cx_test(cx_get_func(cx, "recall", false));
-      func_AD = cx_test(cx_get_func(cx, "+", false));
-      func_fib = cx_test(cx_get_func(cx, "fib", false));
-      func_DI = cx_test(cx_get_func(cx, "/", false));
-      func_fibSUrec = cx_test(cx_get_func(cx, "fib-rec", false));
-      func__ = cx_test(cx_get_func(cx, "_", false));
+      func_SUSU = cx_test(cx_get_func(cx->lib, "--", false));
+      func_int = cx_test(cx_get_func(cx->lib, "int", false));
+      func_QU = cx_test(cx_get_func(cx->lib, "?", false));
+      func_ifSUelse = cx_test(cx_get_func(cx->lib, "if-else", false));
+      func_recall = cx_test(cx_get_func(cx->lib, "recall", false));
+      func_AD = cx_test(cx_get_func(cx->lib, "+", false));
+      func_DI = cx_test(cx_get_func(cx->lib, "/", false));
+      func_fibSUrec = cx_test(cx_get_func(cx->lib, "fib-rec", false));
+      func_fib = cx_test(cx_get_func(cx->lib, "fib", false));
+      func__ = cx_test(cx_get_func(cx->lib, "_", false));
+      func_clock = cx_test(cx_get_func(cx->lib, "clock", false));
       func_SUSU_Int = cx_test(cx_get_fimp(func_SUSU, "Int", false));
-      func_clock_A = cx_test(cx_get_fimp(func_clock, "A", false));
       func_QU_Opt = cx_test(cx_get_fimp(func_QU, "Opt", false));
       func_ifSUelse_OptAA = cx_test(cx_get_fimp(func_ifSUelse, "Opt A A", false));
       func_recall_ = cx_test(cx_get_fimp(func_recall, "", false));
-      func_AD_IntInt = cx_test(cx_get_fimp(func_AD, "Int Int", false));
       func_DI_IntInt = cx_test(cx_get_fimp(func_DI, "Int Int", false));
+      func_AD_IntInt = cx_test(cx_get_fimp(func_AD, "Int Int", false));
       func_int_Rat = cx_test(cx_get_fimp(func_int, "Rat", false));
       func_fibSUrec_IntIntInt = cx_test(cx_get_fimp(func_fibSUrec, "Int Int Int", false));
       func_fib_Int = cx_test(cx_get_fimp(func_fib, "Int", false));
       func___ = cx_test(cx_get_fimp(func__, "", false));
+      func_clock_A = cx_test(cx_get_fimp(func_clock, "A", false));
       sym_a = cx_sym(cx, "a");
       sym_b = cx_sym(cx, "b");
       sym_n = cx_sym(cx, "n");
-      type_Int = cx_test(cx_get_type(cx, "Int", false));
+      type_Int = cx_test(cx_get_type(cx->lib, "Int", false));
     }
 
     static void *op_labels[35] = {
@@ -226,7 +226,7 @@ static bool emit_bmips(struct cx *cx) {
       struct cx_func *func = func_QU;
       struct cx_fimp *imp = func_QU_Opt;
 
-      if (s->safe && !cx_fimp_match(imp, s)) { imp = NULL; }
+      if (s->safe && cx_fimp_score(imp, s) == -1) { imp = NULL; }
 
       if (!imp) {
 	cx_error(cx, cx->row, cx->col, "Func not applicable: %s", func->id);
@@ -289,7 +289,7 @@ static bool emit_bmips(struct cx *cx) {
       struct cx_func *func = func_AD;
       struct cx_fimp *imp = func_AD_IntInt;
 
-      if (s->safe && !cx_fimp_match(imp, s)) { imp = NULL; }
+      if (s->safe && cx_fimp_score(imp, s) == -1) { imp = NULL; }
 
       if (!imp) {
 	cx_error(cx, cx->row, cx->col, "Func not applicable: %s", func->id);
@@ -322,7 +322,7 @@ static bool emit_bmips(struct cx *cx) {
       struct cx_func *func = func_SUSU;
       struct cx_fimp *imp = func_SUSU_Int;
 
-      if (s->safe && !cx_fimp_match(imp, s)) { imp = NULL; }
+      if (s->safe && cx_fimp_score(imp, s) == -1) { imp = NULL; }
 
       if (!imp) {
 	cx_error(cx, cx->row, cx->col, "Func not applicable: %s", func->id);
@@ -345,7 +345,7 @@ static bool emit_bmips(struct cx *cx) {
       struct cx_func *func = func_recall;
       struct cx_fimp *imp = func_recall_;
 
-      if (s->safe && !cx_fimp_match(imp, s)) { imp = NULL; }
+      if (s->safe && cx_fimp_score(imp, s) == -1) { imp = NULL; }
 
       if (!imp) {
 	cx_error(cx, cx->row, cx->col, "Func not applicable: %s", func->id);
@@ -385,7 +385,7 @@ static bool emit_bmips(struct cx *cx) {
       struct cx_func *func = func_ifSUelse;
       struct cx_fimp *imp = func_ifSUelse_OptAA;
 
-      if (s->safe && !cx_fimp_match(imp, s)) { imp = NULL; }
+      if (s->safe && cx_fimp_score(imp, s) == -1) { imp = NULL; }
 
       if (!imp) {
 	cx_error(cx, cx->row, cx->col, "Func not applicable: %s", func->id);
@@ -408,7 +408,7 @@ static bool emit_bmips(struct cx *cx) {
       struct cx_scope *s = cx_scope(cx, 0);
 
       if (call->recalls) {
-	if (s->safe && !cx_fimp_match(func_fibSUrec_IntIntInt, s)) {
+	if (s->safe && cx_fimp_score(func_fibSUrec_IntIntInt, s) == -1) {
 	  cx_error(cx, cx->row, cx->col, "Recall not applicable");
 	  return false;
 	}
@@ -470,7 +470,7 @@ static bool emit_bmips(struct cx *cx) {
       struct cx_func *func = func_fibSUrec;
       struct cx_fimp *imp = func_fibSUrec_IntIntInt;
 
-      if (s->safe && !cx_fimp_match(imp, s)) { imp = NULL; }
+      if (s->safe && cx_fimp_score(imp, s) == -1) { imp = NULL; }
 
       if (!imp) {
 	cx_error(cx, cx->row, cx->col, "Func not applicable: %s", func->id);
@@ -493,7 +493,7 @@ static bool emit_bmips(struct cx *cx) {
       struct cx_scope *s = cx_scope(cx, 0);
 
       if (call->recalls) {
-	if (s->safe && !cx_fimp_match(func_fib_Int, s)) {
+	if (s->safe && cx_fimp_score(func_fib_Int, s) == -1) {
 	  cx_error(cx, cx->row, cx->col, "Recall not applicable");
 	  return false;
 	}
@@ -555,7 +555,7 @@ static bool emit_bmips(struct cx *cx) {
       struct cx_func *func = func_fib;
       struct cx_fimp *imp = func_fib_Int;
 
-      if (s->safe && !cx_fimp_match(imp, s)) { imp = NULL; }
+      if (s->safe && cx_fimp_score(imp, s) == -1) { imp = NULL; }
 
       if (!imp) {
 	cx_error(cx, cx->row, cx->col, "Func not applicable: %s", func->id);
@@ -578,7 +578,7 @@ static bool emit_bmips(struct cx *cx) {
       struct cx_func *func = func__;
       struct cx_fimp *imp = func___;
 
-      if (s->safe && !cx_fimp_match(imp, s)) { imp = NULL; }
+      if (s->safe && cx_fimp_score(imp, s) == -1) { imp = NULL; }
 
       if (!imp) {
 	cx_error(cx, cx->row, cx->col, "Func not applicable: %s", func->id);
@@ -608,7 +608,7 @@ static bool emit_bmips(struct cx *cx) {
       struct cx_func *func = func_clock;
       struct cx_fimp *imp = func_clock_A;
 
-      if (s->safe && !cx_fimp_match(imp, s)) { imp = NULL; }
+      if (s->safe && cx_fimp_score(imp, s) == -1) { imp = NULL; }
 
       if (!imp) {
 	cx_error(cx, cx->row, cx->col, "Func not applicable: %s", func->id);
@@ -631,7 +631,7 @@ static bool emit_bmips(struct cx *cx) {
       struct cx_func *func = func_DI;
       struct cx_fimp *imp = func_DI_IntInt;
 
-      if (s->safe && !cx_fimp_match(imp, s)) { imp = NULL; }
+      if (s->safe && cx_fimp_score(imp, s) == -1) { imp = NULL; }
 
       if (!imp) {
 	cx_error(cx, cx->row, cx->col, "Func not applicable: %s", func->id);
@@ -654,7 +654,7 @@ static bool emit_bmips(struct cx *cx) {
       struct cx_func *func = func_int;
       struct cx_fimp *imp = func_int_Rat;
 
-      if (s->safe && !cx_fimp_match(imp, s)) { imp = NULL; }
+      if (s->safe && cx_fimp_score(imp, s) == -1) { imp = NULL; }
 
       if (!imp) {
 	cx_error(cx, cx->row, cx->col, "Func not applicable: %s", func->id);
@@ -682,14 +682,7 @@ static bool emit_bmips(struct cx *cx) {
 }
 
 void cx_repl(struct cx *cx, FILE *in, FILE *out) {
-  cx_use(cx, "cx/io", false);
-  cx_use(cx, "cx/math", false);
-  cx_use(cx, "cx/meta", false);
-  cx_use(cx, "cx/stack/ops", false);
-  cx_use(cx, "cx/stack/types", false);
-  cx_use(cx, "cx/var", false);
-  cx_use(cx, "cx/time", false);
-
+  cx_use(cx, "cx");
   fprintf(out, "Cixl v%s, ", CX_VERSION);
 
   cx_eval_str(cx, "1000000000 {50 fib _} clock / int<Rat>");
