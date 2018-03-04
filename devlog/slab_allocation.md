@@ -7,8 +7,6 @@ Manual memory management comes with its share of complexity and risks; but when 
 Each allocator has a fixed slot size and number of slots per slab.
 
 ```C
-#include <stddef.h>
-
 struct cx_malloc_slab;
 
 struct cx_malloc {
