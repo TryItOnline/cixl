@@ -1174,7 +1174,7 @@ func: fib(n Int)(Int)
 
 {10000 {50 fib _} times} clock 1000000 / int say
 
-$ cixl -e perf/bench1.cx -o bench1
+$ cixl -e cixl/perf/bench1.cx -o bench1
 $ ./bench1
 192
 ```
@@ -1194,7 +1194,7 @@ def test():
 
 print(int(timeit(test, number=1) * 1000))
 
-$ python3 perf/bench1.py 
+$ python3 cixl/perf/bench1.py 
 118
 ```
 
@@ -1203,7 +1203,7 @@ Next up is consing a stack.
 ```
 {let: v []; 10000000 {$v ~ push} for} clock 1000000 / int say
 
-$ cixl -e perf/bench2.cx -o bench2
+$ cixl -e cixl/perf/bench2.cx -o bench2
 $ ./bench2
 1217
 ```
@@ -1219,7 +1219,7 @@ def test():
 
 print(int(timeit(test, number=1) * 1000))
 
-$ python3 perf/bench2.py 
+$ python3 cixl/perf/bench2.py 
 1348
 ```
 
@@ -1230,7 +1230,8 @@ rec: Foo() x Int y Str;
 {10000000 {Foo new % `x 42 put<Rec Sym A> `y 'bar' put<Rec Sym A>} times}
 clock 1000000 / int say
 
-$ cixl perf/bench3.cx
+$ cixl -e cixl/perf/bench3.cx -o bench3
+$ ./bench3
 3207
 ```
 
@@ -1248,7 +1249,7 @@ def test():
 
 print(int(timeit(test, number=1) * 1000))
 
-$ python3 perf/bench3.py
+$ python3 cixl/perf/bench3.py
 3213
 ```
 

@@ -55,7 +55,8 @@ static const void *get_lib_id(const void *value) {
 
 static cx_lib(init_world, "cx", {
     struct cx *cx = lib->cx;
-    
+
+    cx_use(cx, "cx/abc");
     cx_use(cx, "cx/bin");
     cx_use(cx, "cx/cond");
     cx_use(cx, "cx/error");
