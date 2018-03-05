@@ -1,3 +1,9 @@
+* add cx.types/funcs/fimps vecs
+** push on alloc
+** deinit in cx_deinit
+** replaces ref counting
+** replaces fimp deref in func
+** run tests
 * fix bench1 emit
 *** add cx.libs stack like scopes
 *** change lib to cx_lib **
