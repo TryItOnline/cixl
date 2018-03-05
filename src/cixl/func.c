@@ -51,17 +51,8 @@ void cx_func_deref(struct cx_func *func) {
 
 bool cx_ensure_fimp(struct cx_func *func, struct cx_fimp *imp) {
   struct cx_fimp **ok = cx_set_get(&func->imps, &imp->id);
-
-  if (ok) {
-    if (*ok != imp) {
-      cx_fimp_deref(*ok);
-      *ok = cx_fimp_ref(imp);
-      return true;
-    }
-
-    return false;
-  }
-
+  if (ok) { return false; }
+  
   ok = cx_set_insert(&func->imps, &imp->id);
   *ok = cx_fimp_ref(imp);
   return true;
