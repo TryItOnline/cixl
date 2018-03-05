@@ -90,7 +90,7 @@ static bool trait_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
 
 static bool type_imp(struct cx_scope *scope) {
   struct cx_box v = *cx_test(cx_pop(scope, false));
-  cx_box_init(cx_push(scope), scope->cx->meta_type)->as_ptr = cx_type_ref(v.type);
+  cx_box_init(cx_push(scope), scope->cx->meta_type)->as_ptr = v.type;
   return true;
 }
 

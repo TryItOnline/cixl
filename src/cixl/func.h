@@ -14,7 +14,6 @@ struct cx_func {
   char *id, *emit_id;
   struct cx_set imps;
   int nargs;
-  unsigned int nrefs;
 };
 
 struct cx_func *cx_func_init(struct cx_func *func,
@@ -23,9 +22,6 @@ struct cx_func *cx_func_init(struct cx_func *func,
 			     int nargs);
 
 struct cx_func *cx_func_deinit(struct cx_func *func);
-
-struct cx_func *cx_func_ref(struct cx_func *func);
-void cx_func_deref(struct cx_func *func);
 
 bool cx_ensure_fimp(struct cx_func *func, struct cx_fimp *imp);
 

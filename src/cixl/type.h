@@ -17,7 +17,6 @@ struct cx_type {
   struct cx_set parents, children;
   struct cx_vec is;
   bool trait;
-  unsigned int nrefs;
   
   void (*new)(struct cx_box *);
   bool (*eqval)(struct cx_box *, struct cx_box *);
@@ -40,9 +39,6 @@ struct cx_type {
 struct cx_type *cx_type_init(struct cx_type *type, struct cx *cx, const char *id);
 struct cx_type *cx_type_reinit(struct cx_type *type);
 void *cx_type_deinit(struct cx_type *type);
-
-struct cx_type *cx_type_ref(struct cx_type *type);
-void cx_type_deref(struct cx_type *type);
 
 void cx_derive(struct cx_type *child, struct cx_type *parent);
 bool cx_is(const struct cx_type *child, const struct cx_type *parent);

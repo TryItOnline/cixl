@@ -14,7 +14,6 @@ typedef bool (*cx_macro_parse_t)(struct cx *cx, FILE *in, struct cx_vec *out);
 struct cx_macro {
   char *id;
   cx_macro_parse_t imp;
-  unsigned int nrefs;
 };
 
 struct cx_macro *cx_macro_init(struct cx_macro *macro,
@@ -22,9 +21,6 @@ struct cx_macro *cx_macro_init(struct cx_macro *macro,
 			       cx_macro_parse_t imp);
 
 struct cx_macro *cx_macro_deinit(struct cx_macro *macro);
-
-struct cx_macro *cx_macro_ref(struct cx_macro *macro);
-void cx_macro_deref(struct cx_macro *macro);
 
 typedef ssize_t (*cx_macro_eval_t)(struct cx_macro_eval *eval,
 				   struct cx_bin *bin,

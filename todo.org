@@ -1,13 +1,7 @@
-* add cx.types/funcs/fimps vecs
-** push on alloc
-** deinit in cx_deinit
-** replaces ref counting
-** replaces fimp deref in func
-** run tests
 * fix bench1 emit
-*** add cx.libs stack like scopes
-*** change lib to cx_lib **
-*** add cx_push_lib/pop_lib
+** add cx.libs stack like scopes
+** change lib to cx_lib **
+** add cx_push_lib/pop_lib
 ** replace cx_func.cx with lib
 ** call cx_push_lib on func entry & pop_lib on exit
 ** call push/pop_lib on lambda entry/exit

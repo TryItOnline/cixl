@@ -24,7 +24,6 @@ struct cx_fimp *cx_fimp_init(struct cx_fimp *imp,
   imp->bin = NULL;
   imp->start_pc = imp->nops = 0;
   imp->scope = NULL;
-  imp->nrefs = 1;
   
   cx_vec_init(&imp->args, sizeof(struct cx_arg));
   cx_vec_init(&imp->rets, sizeof(struct cx_arg));
@@ -48,17 +47,6 @@ struct cx_fimp *cx_fimp_deinit(struct cx_fimp *imp) {
   if (imp->bin) { cx_bin_deref(imp->bin); }
   if (imp->scope) { cx_scope_deref(imp->scope); }
   return imp;
-}
-
-struct cx_fimp *cx_fimp_ref(struct cx_fimp *imp) {
-  imp->nrefs++;
-  return imp;
-}
-
-void cx_fimp_deref(struct cx_fimp *imp) {
-  cx_test(imp->nrefs);
-  imp->nrefs--;
-  if (!imp->nrefs) { free(cx_fimp_deinit(imp)); }
 }
 
 ssize_t cx_fimp_score(struct cx_fimp *imp, struct cx_scope *scope) {

@@ -19,7 +19,6 @@ struct cx_fimp {
   struct cx_bin *bin;
   struct cx_scope *scope;
   size_t start_pc, nops;
-  unsigned int nrefs;
 };
 
 struct cx_fimp *cx_fimp_init(struct cx_fimp *imp,
@@ -27,9 +26,6 @@ struct cx_fimp *cx_fimp_init(struct cx_fimp *imp,
 			     char *id);
 
 struct cx_fimp *cx_fimp_deinit(struct cx_fimp *imp);
-
-struct cx_fimp *cx_fimp_ref(struct cx_fimp *imp);
-void cx_fimp_deref(struct cx_fimp *imp);
 
 ssize_t cx_fimp_score(struct cx_fimp *imp, struct cx_scope *scope);
 

@@ -26,27 +26,14 @@ struct cx_func *cx_func_init(struct cx_func *func,
   cx_set_init(&func->imps, sizeof(struct cx_fimp *), cx_cmp_cstr);
   func->imps.key = get_imp_id;
   func->nargs = nargs;
-  func->nrefs = 1;
   return func;
 }
 
 struct cx_func *cx_func_deinit(struct cx_func *func) {
   free(func->id);
   free(func->emit_id);
-  cx_do_set(&func->imps, struct cx_fimp *, i) { cx_fimp_deref(*i); }
   cx_set_deinit(&func->imps);
   return func; 
-}
-
-struct cx_func *cx_func_ref(struct cx_func *func) {
-  func->nrefs++;
-  return func;
-}
-
-void cx_func_deref(struct cx_func *func) {
-  cx_test(func->nrefs);
-  func->nrefs--;
-  if (!func->nrefs) { free(cx_func_deinit(func)); }
 }
 
 bool cx_ensure_fimp(struct cx_func *func, struct cx_fimp *imp) {
@@ -54,7 +41,7 @@ bool cx_ensure_fimp(struct cx_func *func, struct cx_fimp *imp) {
   if (ok) { return false; }
   
   ok = cx_set_insert(&func->imps, &imp->id);
-  *ok = cx_fimp_ref(imp);
+  *ok = imp;
   return true;
 }
 
@@ -109,12 +96,12 @@ struct cx_fimp *cx_add_fimp(struct cx_func *func,
   if (found) {
     imp = *found;
     cx_set_delete(&func->imps, &imp->id);
-    cx_fimp_deref(imp);
   }
 
   imp = cx_fimp_init(malloc(sizeof(struct cx_fimp)),
 		     func,
 		     id.data);
+  *(struct cx_fimp **)cx_vec_push(&cx->fimps) = imp;
   *(struct cx_fimp **)cx_set_insert(&func->imps, &id.data) = imp;
   imp->args = imp_args;
 

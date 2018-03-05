@@ -15,7 +15,6 @@ struct cx_type *cx_type_init(struct cx_type *type, struct cx *cx, const char *id
   type->tag = cx->next_type_tag++;
   type->level = 0;
   type->trait = false;
-  type->nrefs = 1;
 
   cx_vec_init(&type->is, sizeof(bool));
   *(bool *)cx_vec_put(&type->is, type->tag) = true;
@@ -81,17 +80,6 @@ void *cx_type_deinit(struct cx_type *type) {
   return ptr;  
 }
 
-struct cx_type *cx_type_ref(struct cx_type *type) {
-  type->nrefs++;
-  return type;
-}
-
-void cx_type_deref(struct cx_type *type) {
-  cx_test(type->nrefs);
-  type->nrefs--;
-  if (!type->nrefs) { free(cx_type_deinit(type)); }
-}
-
 void cx_derive(struct cx_type *child, struct cx_type *parent) {
   *(bool *)cx_vec_put(&child->is, parent->tag) = true;
   child->level = cx_max(child->level, parent->level+1);
@@ -116,10 +104,6 @@ static bool equid_imp(struct cx_box *x, struct cx_box *y) {
   return x->as_ptr == y->as_ptr;
 }
 
-static void copy_imp(struct cx_box *dst, const struct cx_box *src) {
-  dst->as_ptr = cx_type_ref(src->as_ptr);
-}
-
 static void dump_imp(struct cx_box *value, FILE *out) {
   struct cx_type *type = value->as_ptr;
   fputs(type->id, out);
@@ -129,23 +113,17 @@ static bool emit_imp(struct cx_box *v, const char *exp, FILE *out) {
   struct cx_type *t = v->as_ptr;
   
   fprintf(out,
-	  "cx_box_init(%s, cx->meta_type)->as_ptr = cx_type_ref(%s);\n",
+	  "cx_box_init(%s, cx->meta_type)->as_ptr = %s;\n",
 	  exp, t->emit_id);
   
   return true;
 }
 
-static void deinit_imp(struct cx_box *v) {
-  cx_type_deref(v->as_ptr);
-}
-
 struct cx_type *cx_init_meta_type(struct cx_lib *lib) {
   struct cx_type *t = cx_add_type(lib, "Type", lib->cx->any_type);
   t->equid = equid_imp;
-  t->copy = copy_imp;
   t->write = dump_imp;
   t->dump = dump_imp;
   t->emit = emit_imp;
-  t->deinit = deinit_imp;
   return t;
 }

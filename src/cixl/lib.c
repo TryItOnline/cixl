@@ -46,16 +46,9 @@ struct cx_lib *cx_lib_init(struct cx_lib *lib,
 
 struct cx_lib *cx_lib_deinit(struct cx_lib *lib) {
   cx_env_deinit(&lib->consts);
-
-  cx_do_set(&lib->funcs, struct cx_func *, f) { cx_func_deref(*f); }
   cx_set_deinit(&lib->funcs);
-
-  cx_do_set(&lib->macros, struct cx_macro *, m) { cx_macro_deref(*m); }
   cx_set_deinit(&lib->macros);
-
-  cx_do_set(&lib->types, struct cx_type *, t) { cx_type_deref(*t); }
   cx_set_deinit(&lib->types);
-
   return lib;
 }
 
@@ -77,13 +70,15 @@ struct cx_type *cx_vadd_type(struct cx_lib *lib, const char *id, va_list parents
   }
   
   *t = cx_type_init(malloc(sizeof(struct cx_type)), cx, id);
-    
+  *(struct cx_type **)cx_vec_push(&cx->types) = *t;
+  
   struct cx_type *pt = NULL;
   while ((pt = va_arg(parents, struct cx_type *))) { cx_derive(*t, pt); }
   return *t;
 }
 
 struct cx_rec_type *cx_add_rec_type(struct cx_lib *lib, const char *id) {
+  struct cx *cx = lib->cx;
   struct cx_type **found = cx_set_get(&lib->types, &id);
   if (found) { return NULL; }
   
@@ -93,7 +88,8 @@ struct cx_rec_type *cx_add_rec_type(struct cx_lib *lib, const char *id) {
     return t;
   }
   
-  struct cx_rec_type *t = cx_rec_type_new(lib->cx, id);
+  struct cx_rec_type *t = cx_rec_type_new(cx, id);
+  *(struct cx_type **)cx_vec_push(&cx->types) = &t->imp;
   *(struct cx_type **)cx_test(cx_set_insert(&lib->types, &id)) = &t->imp;
   return t;
 }
@@ -112,15 +108,16 @@ struct cx_type *cx_get_type(struct cx_lib *lib, const char *id, bool silent) {
 struct cx_macro *cx_add_macro(struct cx_lib *lib,
 			      const char *id,
 			      cx_macro_parse_t imp) {
+  struct cx *cx= lib->cx;
   struct cx_macro **m = cx_test(cx_set_insert(&lib->macros, &id));
 
   if (!m) {
-    struct cx *cx= lib->cx;
     cx_error(cx, cx->row, cx->col, "Duplicate macro: '%s'", id);
     return NULL;
   }
 
   *m = cx_macro_init(malloc(sizeof(struct cx_macro)), id, imp); 
+  *(struct cx_macro **)cx_vec_push(&cx->macros) = *m;
   return *m;
 }
 
@@ -153,6 +150,7 @@ struct cx_fimp *cx_add_func(struct cx_lib *lib,
   } else {
     f = cx_set_insert(&lib->funcs, &id);
     *f = cx_func_init(malloc(sizeof(struct cx_func)), cx, id, nargs);
+    *(struct cx_func **)cx_vec_push(&cx->funcs) = *f;
   }
   
   return cx_add_fimp(*f, nargs, args, nrets, rets);
@@ -224,12 +222,12 @@ struct cx_box *cx_set_const(struct cx_lib *lib, struct cx_sym id, bool force) {
 static void use_type(struct cx_type *t) {
   struct cx *cx = t->cx;
   struct cx_type **ok = cx_set_insert(&cx->lib->types, &t->id);
-  if (ok) { *ok = cx_type_ref(t); }
+  if (ok) { *ok = t; }
  }
 
 static void use_macro(struct cx_macro *m, struct cx *cx) {
   struct cx_macro **ok = cx_set_insert(&cx->lib->macros, &m->id);
-  if (ok) { *ok = cx_macro_ref(m); }
+  if (ok) { *ok = m; }
 }
 
 static bool use_func(struct cx_func *f) {
@@ -248,7 +246,7 @@ static bool use_func(struct cx_func *f) {
     }
   } else {
     ok = cx_set_insert(&cx->lib->funcs, &f->id);
-    *ok = cx_func_ref(f);
+    *ok = f;
   }
   
   return true;
