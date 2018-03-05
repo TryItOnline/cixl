@@ -88,16 +88,52 @@ static bool use_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   }
 
   cx_do_vec(&eval->toks, struct cx_tok, t) {
-    if (t->type != CX_TID()) {
+    if (t->type != CX_TID() && t->type != CX_TGROUP()) {
       cx_error(cx, t->row, t->col, "Invalid lib: %s", t->type->id);
       cx_macro_eval_deref(eval);
       return false;
     }
     
-    if (!cx_use(cx, t->as_ptr)) {
-      cx_macro_eval_deref(eval);
-      return false;
-    }
+    if (t->type == CX_TID()) {
+      if (!cx_use(cx, t->as_ptr)) {
+	cx_macro_eval_deref(eval);
+	return false;
+      }
+
+    } else {
+      struct cx_tok *tt = cx_vec_get(&t->as_vec, 0);
+
+      if (tt->type != CX_TID()) {
+	cx_error(cx, tt->row, tt->col, "Invalid id: %s", tt->type->id);
+	cx_macro_eval_deref(eval);
+	return false;
+      }
+
+      const char *lib = tt->as_ptr;
+      tt++;
+
+      struct cx_vec ids;
+      cx_vec_init(&ids, sizeof(const char *));
+
+      for (; tt != cx_vec_end(&t->as_vec); tt++) {
+	if (tt->type != CX_TID()) {
+	  cx_error(cx, tt->row, tt->col, "Invalid id: %s", tt->type->id);
+	  cx_vec_deinit(&ids);
+	  cx_macro_eval_deref(eval);
+	  return false;
+	}
+	
+	*(char **)cx_vec_push(&ids) = tt->as_ptr;
+      }
+
+      if (!_cx_use(cx, lib, ids.count, (const char **)ids.items)) {
+	cx_vec_deinit(&ids);
+	cx_macro_eval_deref(eval);
+	return false;
+      }
+
+      cx_vec_deinit(&ids);
+    }        
   }
   
   cx_tok_init(cx_vec_push(out), CX_TMACRO(), row, col)->as_ptr = eval;

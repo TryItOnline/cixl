@@ -1121,9 +1121,21 @@ static void use_emit_init(struct cx_op *op,
   struct cx_macro_eval *e = t->as_ptr;
 
   cx_do_vec(&e->toks, struct cx_tok, t) {
-    fprintf(out,
-	    CX_ITAB "if (!cx_use(cx, \"%s\")) { return false; }\n",
-	    (char *)t->as_ptr);
+    if (t->type == CX_TID()) {
+      fprintf(out,
+	      CX_ITAB "if (!cx_use(cx, \"%s\")) { return false; }\n",
+	      (char *)t->as_ptr);
+    } else {
+      struct cx_tok *tt = cx_vec_get(&t->as_vec, 0);
+      fprintf(out, CX_ITAB "if (!cx_use(cx, \"%s\"", (char *)tt->as_ptr);
+      tt++;
+
+      for (; tt != cx_vec_end(&t->as_vec); tt++) {
+	fprintf(out, ", \"%s\"", (char *)tt->as_ptr);
+      }
+      
+      fputs(")) { return false; }\n", out);
+    }
   }
 }
 

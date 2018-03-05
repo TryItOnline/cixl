@@ -1,11 +1,13 @@
-* add support for using/importing specific ids
-** change cx_use: to support TGROUP (lib id...)
+* add copy/deinit to meta type
+** call cx_type_ref when a type is put in a box
+** valgrind emit bench1.cx
 * add lib: n ...;  macro
 ** create new lib if !exists
 ** set cx->lib & eval toks
 * add meta.lib fn to return current lib
 ** add cx.lib_type
-
+*** add sym fn
+*** add sym fn for func
 * move types/int/++/-- to math lib
 ** move times to iter lib
 * move bool/t/f to cond lib
@@ -19,7 +21,6 @@
 * extract cx_init_libs(cx)
 * replace cx_type.cx with lib
 * replace cx_func.cx with lib
-* add macro.lib
 * ---
 * add connect(Socket, ip, port) fn
 ** non-blocking
