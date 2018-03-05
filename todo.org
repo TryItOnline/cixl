@@ -1,12 +1,18 @@
 * add support for using/importing specific ids
 ** change cx_use: to support TGROUP (lib id...)
+* add lib: n ...;  macro
+** create new lib if !exists
+** set cx->lib & eval toks
+* add meta.lib fn to return current lib
+** add cx.lib_type
+
 * move types/int/++/-- to math lib
 ** move times to iter lib
 * move bool/t/f to cond lib
 * move bool_type to cond lib
 ** use where needed
 * move nil_type and nil constant to abc lib
-** rename ref_ref to ref_inc & deref to dec
+* rename ref_ref to ref_inc & deref to dec
 * change lib init to bool result
 ** check cx_use returns in inits
 ** check init result in cx_use
@@ -40,14 +46,6 @@
 * extract str literals as macro in str lib
 * extract char literals as macro in str lib
 * extract $var literals as macro in var lib
-* add lib: macro
-** register in cx
-** add data param to init fn
-*** store in cx_lib
-** copy macro toks
-*** compile into cx_bin in init
-* add meta.lib fn to return current lib
-** add cx.lib_type
 * ---
 * optimize startup
 ** parse fns on first use
