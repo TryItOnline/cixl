@@ -88,7 +88,7 @@ ssize_t cx_fimp_score(struct cx_fimp *imp, struct cx_scope *scope) {
 }
 
 static bool compile(struct cx_fimp *imp, size_t tok_idx, struct cx_bin *out) {
-  struct cx *cx = imp->func->cx;
+  struct cx *cx = imp->func->lib->cx;
   size_t start_pc = out->ops.count;
   
   struct cx_op *op = cx_op_init(out, CX_OBEGIN(), tok_idx);

@@ -17,10 +17,10 @@ static const void *get_imp_id(const void *value) {
 }
 
 struct cx_func *cx_func_init(struct cx_func *func,
-			     struct cx *cx,
+			     struct cx_lib *lib,
 			     const char *id,
 			     int nargs) {
-  func->cx = cx;
+  func->lib = lib;
   func->id = strdup(id);
   func->emit_id = cx_emit_id("func", id);
   cx_set_init(&func->imps, sizeof(struct cx_fimp *), cx_cmp_cstr);
@@ -50,7 +50,7 @@ struct cx_fimp *cx_add_fimp(struct cx_func *func,
 			    int nrets, struct cx_arg *rets) {
   struct cx_vec imp_args;
   cx_vec_init(&imp_args, sizeof(struct cx_arg));
-  struct cx *cx = func->cx;
+  struct cx *cx = func->lib->cx;
   
   struct cx_buf id;
   cx_buf_open(&id);
@@ -82,7 +82,7 @@ struct cx_fimp *cx_add_fimp(struct cx_func *func,
       }
 
 
-      if (a->id) { a->sym_id = cx_sym(func->cx, a->id); }
+      if (a->id) { a->sym_id = cx_sym(cx, a->id); }
       *(struct cx_arg *)cx_vec_push(&imp_args) = *a;
       if (i) { fputc(' ', id.stream); }
       cx_arg_print(a, id.stream);
@@ -131,7 +131,7 @@ struct cx_fimp *cx_add_fimp(struct cx_func *func,
 	}
       }
       
-      if (r->id) { r->sym_id = cx_sym(func->cx, r->id); }
+      if (r->id) { r->sym_id = cx_sym(cx, r->id); }
       *(struct cx_arg *)cx_vec_push(&imp->rets) = *r;
     }
   }
@@ -145,7 +145,7 @@ struct cx_fimp *cx_get_fimp(struct cx_func *func,
   struct cx_fimp **imp = cx_set_get(&func->imps, &id);
   
   if (!imp && silent) {
-    struct cx *cx = func->cx;
+    struct cx *cx = func->lib->cx;
     cx_error(cx, cx->row, cx->col, "Fimp not found: %s<%s>", func->id, id);
     return NULL;
   }

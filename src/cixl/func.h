@@ -10,14 +10,14 @@ struct cx_scope;
 struct cx_type;
 
 struct cx_func {
-  struct cx *cx;
+  struct cx_lib *lib;
   char *id, *emit_id;
   struct cx_set imps;
   int nargs;
 };
 
 struct cx_func *cx_func_init(struct cx_func *func,
-			     struct cx *cx,
+			     struct cx_lib *lib,
 			     const char *id,
 			     int nargs);
 

@@ -25,7 +25,8 @@ struct cx {
   struct cx_vec types, macros, funcs, fimps;
 
   struct cx_set lib_lookup;
-  struct cx_lib *lobby, *lib;
+  struct cx_vec libs;
+  struct cx_lib *lobby, **lib;
 
   struct cx_type *any_type, *bin_type, *bool_type, *char_type, *cmp_type, *file_type,
     *fimp_type, *func_type, *guid_type, *int_type, *iter_type, *lambda_type,
@@ -58,6 +59,9 @@ void cx_add_separators(struct cx *cx, const char *cs);
 bool cx_is_separator(struct cx *cx, char c);
 
 struct cx_lib *cx_add_lib(struct cx *cx, const char *id, cx_lib_init_t init);
+
+void cx_push_lib(struct cx *cx, struct cx_lib *lib);
+void cx_pop_lib(struct cx *cx);
 
 struct cx_sym cx_sym(struct cx *cx, const char *id);
 

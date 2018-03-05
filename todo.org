@@ -1,14 +1,14 @@
 * fix bench1 emit
-** add cx.libs stack like scopes
-** change lib to cx_lib **
-** add cx_push_lib/pop_lib
-** replace cx_func.cx with lib
-** call cx_push_lib on func entry & pop_lib on exit
-** call push/pop_lib on lambda entry/exit
-* ---
+** fix fimp_emit init
+*** add cx_get_lib(const char *)
+*** use to find lib and push/pop
+** push
+* add OPUSHLIB/OPOPLIB
+** add on func entry/exit
+** add on lambda entry/exit
 * add lib: n ...;  macro
 ** create new lib if !exists
-** set cx->lib & eval toks
+** add opush/poplib around code on eval
 * add meta.lib fn to return current lib
 ** add cx.lib_type
 *** add sym fn

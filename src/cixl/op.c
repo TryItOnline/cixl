@@ -160,10 +160,10 @@ static void fimp_emit_init(struct cx_op *op,
 			   FILE *out,
 			   struct cx *cx) {
   struct cx_fimp *imp = op->as_fimp.imp;
-
+  
   fprintf(out,
 	  CX_ITAB "struct cx_func *func = "
-	          "cx_test(cx_get_func(cx->lib, \"%s\", false));\n"
+	          "cx_test(cx_get_func(*cx->lib, \"%s\", false));\n"
 	  CX_ITAB "struct cx_fimp *imp = cx_test(cx_get_fimp(func, \"%s\", false));\n"
 	  CX_ITAB "imp->bin = cx_bin_ref(cx->bin);\n"
 	  CX_ITAB "imp->start_pc = %zd;\n"
@@ -246,7 +246,7 @@ static void funcdef_emit_init(struct cx_op *op,
   fputs("};\n\n", out);
 
   fprintf(out,
-	  CX_ITAB "cx_add_func(cx->lib, \"%s\", %zd, args, %zd, rets);\n",
+	  CX_ITAB "cx_add_func(*cx->lib, \"%s\", %zd, args, %zd, rets);\n",
 	  imp->func->id, imp->args.count, imp->rets.count);
 }
 
@@ -375,7 +375,7 @@ cx_op_type(CX_OFUNCALL, {
   });
 
 static bool getconst_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
-  struct cx_box *v = cx_get_const(cx->lib, op->as_getconst.id, false);
+  struct cx_box *v = cx_get_const(*cx->lib, op->as_getconst.id, false);
   if (!v) { return false; }
   cx_copy(cx_push(cx_scope(cx, 0)), v);
   return true;
@@ -385,7 +385,7 @@ static bool getconst_emit(struct cx_op *op,
 			  struct cx_bin *bin,
 			  FILE *out,
 			  struct cx *cx) {
-  fprintf(out, CX_TAB "struct cx_box *v = cx_get_const(cx->lib, %s, false);\n",
+  fprintf(out, CX_TAB "struct cx_box *v = cx_get_const(*cx->lib, %s, false);\n",
 	  op->as_getconst.id.emit_id);
 
   fputs(CX_TAB "if (!v) { return false; }\n"
@@ -1066,7 +1066,7 @@ static void typedef_emit_init(struct cx_op *op,
   if (cx_is(t, cx->rec_type)) {
     fprintf(out,
 	    CX_ITAB "struct cx_rec_type *t = "
-	            "cx_test(cx_add_rec_type(cx->lib, \"%s\"));\n",
+	            "cx_test(cx_add_rec_type(*cx->lib, \"%s\"));\n",
 	    t->id);
 
     cx_do_set(&t->parents, struct cx_type *, pt) {
@@ -1074,7 +1074,7 @@ static void typedef_emit_init(struct cx_op *op,
       
       fprintf(out,
 	      CX_ITAB "cx_derive_rec(t, "
-	              "cx_test(cx_get_type(cx->lib, \"%s\", false)));\n",
+	              "cx_test(cx_get_type(*cx->lib, \"%s\", false)));\n",
 	      (*pt)->id);
     }
     
@@ -1084,7 +1084,7 @@ static void typedef_emit_init(struct cx_op *op,
       fprintf(out,
 	      CX_ITAB "cx_test(cx_add_field(t,\n"
 	      CX_ITAB "        cx_sym(cx, \"%s\"),\n"
-	      CX_ITAB "        cx_get_type(cx->lib, \"%s\", false),\n"
+	      CX_ITAB "        cx_get_type(*cx->lib, \"%s\", false),\n"
 	      CX_ITAB "        false));\n",
 	      f->id.id, f->type->id);
     }
@@ -1096,7 +1096,7 @@ static void typedef_emit_init(struct cx_op *op,
 
     cx_do_set(&t->children, struct cx_type *, ct) {
       fprintf(out,
-	      CX_ITAB "cx_derive(cx_get_type(cx->lib, \"%s\", false), t);\n",
+	      CX_ITAB "cx_derive(cx_get_type(*cx->lib, \"%s\", false), t);\n",
 	      (*ct)->id);
     }
   }

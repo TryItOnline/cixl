@@ -149,7 +149,7 @@ struct cx_fimp *cx_add_func(struct cx_lib *lib,
     }
   } else {
     f = cx_set_insert(&lib->funcs, &id);
-    *f = cx_func_init(malloc(sizeof(struct cx_func)), cx, id, nargs);
+    *f = cx_func_init(malloc(sizeof(struct cx_func)), lib, id, nargs);
     *(struct cx_func **)cx_vec_push(&cx->funcs) = *f;
   }
   
@@ -219,25 +219,24 @@ struct cx_box *cx_set_const(struct cx_lib *lib, struct cx_sym id, bool force) {
   return cx_env_put(&lib->consts, id);
 }
 
-static void use_type(struct cx_type *t) {
-  struct cx *cx = t->cx;
-  struct cx_type **ok = cx_set_insert(&cx->lib->types, &t->id);
+static void use_type(struct cx_type *t, struct cx_lib *dst) {
+  struct cx_type **ok = cx_set_insert(&dst->types, &t->id);
   if (ok) { *ok = t; }
  }
 
-static void use_macro(struct cx_macro *m, struct cx *cx) {
-  struct cx_macro **ok = cx_set_insert(&cx->lib->macros, &m->id);
+static void use_macro(struct cx_macro *m, struct cx_lib *dst) {
+  struct cx_macro **ok = cx_set_insert(&dst->macros, &m->id);
   if (ok) { *ok = m; }
 }
 
-static bool use_func(struct cx_func *f) {
-  struct cx *cx = f->cx;
-  struct cx_func **ok = cx_set_get(&cx->lib->funcs, &f->id);
+static bool use_func(struct cx_func *f, struct cx_lib *dst) {
+  struct cx_func **ok = cx_set_get(&dst->funcs, &f->id);
 
   if (ok) {
     if ((*ok)->nargs != f->nargs) {
+      struct cx *cx = f->lib->cx;
       cx_error(cx, cx->row, cx->col, "Wrong arity (%d/%d) for func: %s/%s",
-	       f->nargs, (*ok)->nargs, cx->lib->id.id, f->id);
+	       f->nargs, (*ok)->nargs, dst->id.id, f->id);
       return false;
     }
     
@@ -245,31 +244,30 @@ static bool use_func(struct cx_func *f) {
       cx_ensure_fimp(*ok, *i);
     }
   } else {
-    ok = cx_set_insert(&cx->lib->funcs, &f->id);
+    ok = cx_set_insert(&dst->funcs, &f->id);
     *ok = f;
   }
   
   return true;
 }
 
-static void use_const(struct cx_var *v) {
-  struct cx *cx = v->value.type->cx;
-  struct cx_var *prev = cx_env_get(&cx->lib->consts, v->id);
-  if (!prev) { cx_copy(cx_env_put(&cx->lib->consts, v->id), &v->value); }
+static void use_const(struct cx_var *v, struct cx_lib *dst) {
+  struct cx_var *prev = cx_env_get(&dst->consts, v->id);
+  if (!prev) { cx_copy(cx_env_put(&dst->consts, v->id), &v->value); }
 }
 
 static bool use_all(struct cx_lib *lib) {
   struct cx *cx = lib->cx;
   
-  cx_do_set(&lib->types, struct cx_type *, t) { use_type(*t); }
+  cx_do_set(&lib->types, struct cx_type *, t) { use_type(*t, *cx->lib); }
   
-  cx_do_set(&lib->macros, struct cx_macro *, m) { use_macro(*m, cx); }
+  cx_do_set(&lib->macros, struct cx_macro *, m) { use_macro(*m, *cx->lib); }
   
   cx_do_set(&lib->funcs, struct cx_func *, f) {
-    if (!use_func(*f)) { return false; }
+    if (!use_func(*f, *cx->lib)) { return false; }
   }
 
-  cx_do_env(&lib->consts, v) { use_const(v); }
+  cx_do_env(&lib->consts, v) { use_const(v, *cx->lib); }
   return true;
 }
 
@@ -280,26 +278,26 @@ static bool use_id(struct cx_lib *lib, const char *id) {
     struct cx_var *v = cx_env_get(&lib->consts, cx_sym(cx, id+1));
 
     if (v) {
-      use_const(v);
+      use_const(v, *cx->lib);
       return true;
     }
   } else if (isupper(id[0])) {
     struct cx_type **t = cx_set_get(&lib->types, &id);
     
     if (t) {
-      use_type(*t);
+      use_type(*t, *cx->lib);
       return true;
     }
   } else {
     struct cx_macro **m = cx_set_get(&lib->macros, &id);
 
     if (m) {
-      use_macro(*m, cx);
+      use_macro(*m, *cx->lib);
       return true;
     }
     
     struct cx_func **f = cx_set_get(&lib->funcs, &id);
-    if (f) { return use_func(*f); }
+    if (f) { return use_func(*f, *cx->lib); }
   }
 
   cx_error(cx, cx->row, cx->col, "%s/%s not found", lib->id.id, id);
@@ -320,11 +318,10 @@ bool _cx_use(struct cx *cx,
   struct cx_lib *lib = *ok;
 
   if (lib->init) {
-    struct cx_lib *prev = cx->lib;
-    cx->lib = lib;
+    cx_push_lib(cx, lib);
     lib->init(lib);
     lib->init = NULL;
-    cx->lib = prev;
+    cx_pop_lib(cx);
   }
 
   if (nids) {

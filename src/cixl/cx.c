@@ -107,7 +107,10 @@ struct cx *cx_init(struct cx *cx) {
   
   cx_set_init(&cx->lib_lookup, sizeof(struct cx_lib *), cx_cmp_sym);
   cx->lib_lookup.key = get_lib_id;
-  cx->lib = cx->lobby = cx_add_lib(cx, "lobby", NULL);
+  cx_vec_init(&cx->libs, sizeof(struct cx_lib *));
+
+  cx->lobby = cx_add_lib(cx, "lobby", NULL);
+  cx_push_lib(cx, cx->lobby);
   
   cx_vec_init(&cx->load_paths, sizeof(char *));
   cx_vec_init(&cx->scopes, sizeof(struct cx_scope *));
@@ -193,6 +196,8 @@ struct cx *cx_deinit(struct cx *cx) {
   cx_do_set(&cx->lib_lookup, struct cx_lib *, l) { free(cx_lib_deinit(*l)); }
   cx_set_deinit(&cx->lib_lookup);
   
+  cx_vec_deinit(&cx->libs);
+  
   cx_do_vec(&cx->macros, struct cx_macro *, m) { free(cx_macro_deinit(*m)); }
   cx_vec_deinit(&cx->macros);
 
@@ -242,6 +247,17 @@ struct cx_lib *cx_add_lib(struct cx *cx, const char *id, cx_lib_init_t init) {
   return *lib;
 }
 
+void cx_push_lib(struct cx *cx, struct cx_lib *lib) {
+  cx->lib = cx_vec_push(&cx->libs);
+  *cx->lib = lib;
+}
+
+void cx_pop_lib(struct cx *cx) {
+  cx_test(cx->libs.count > 1);
+  cx_vec_pop(&cx->libs);
+  cx->lib--;
+}
+
 struct cx_sym cx_sym(struct cx *cx, const char *id) {
   struct cx_sym *s = cx_set_get(&cx->syms, &id);
   return s ? *s : *cx_sym_init(cx_set_insert(&cx->syms, &id), id, cx->next_sym_tag++);
@@ -287,7 +303,7 @@ void cx_end(struct cx *cx) {
 }
 
 bool cx_funcall(struct cx *cx, const char *id) {
-  struct cx_func *func = cx_get_func(cx->lib, id, false);
+  struct cx_func *func = cx_get_func(*cx->lib, id, false);
   if (!func) { return false; }
   struct cx_scope *s = cx_scope(cx, 0);
   struct cx_fimp *imp = cx_func_match(func, s);

@@ -188,7 +188,7 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
   }
   
   cx_do_set(&funcs, struct cx_func *, f) {
-    fprintf(out, "    %s = cx_test(cx_get_func(cx->lib, \"%s\", false));\n",
+    fprintf(out, "    %s = cx_test(cx_get_func(*cx->lib, \"%s\", false));\n",
 	    (*f)->emit_id, (*f)->id);
   }
 
@@ -202,7 +202,7 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
   }
 
   cx_do_set(&types, struct cx_type *, t) {
-    fprintf(out, "    %s = cx_test(cx_get_type(cx->lib, \"%s\", false));\n",
+    fprintf(out, "    %s = cx_test(cx_get_type(*cx->lib, \"%s\", false));\n",
 	    (*t)->emit_id, (*t)->id);
   }
   

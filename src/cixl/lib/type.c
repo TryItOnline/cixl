@@ -65,7 +65,7 @@ static bool trait_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   if (type) {
     cx_type_reinit(type);
   } else {
-    type = cx_add_type(cx->lib, id_tok.as_ptr);
+    type = cx_add_type(*cx->lib, id_tok.as_ptr);
     if (!type) { goto exit1; }
     type->trait = true;
   }

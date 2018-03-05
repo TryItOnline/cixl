@@ -51,7 +51,7 @@ static bool emit_bmips(struct cx *cx) {
       init = false;
 
       {
-	struct cx_func *func = cx_get_func(cx->lib, "fib", false);
+	struct cx_func *func = cx_get_func(*cx->lib, "fib", false);
 	struct cx_fimp *imp = cx_get_fimp(func, "Int", false);
 	imp->bin = cx_bin_ref(cx->bin);
 	imp->start_pc = 4;
@@ -59,24 +59,24 @@ static bool emit_bmips(struct cx *cx) {
       }
 
       {
-	struct cx_func *func = cx_get_func(cx->lib, "fib-rec", false);
+	struct cx_func *func = cx_get_func(*cx->lib, "fib-rec", false);
 	struct cx_fimp *imp = cx_get_fimp(func, "Int Int Int", false);
 	imp->bin = cx_bin_ref(cx->bin);
 	imp->start_pc = 10;
 	imp->nops = 16;
       }
 
-      func_SUSU = cx_test(cx_get_func(cx->lib, "--", false));
-      func_int = cx_test(cx_get_func(cx->lib, "int", false));
-      func_QU = cx_test(cx_get_func(cx->lib, "?", false));
-      func_ifSUelse = cx_test(cx_get_func(cx->lib, "if-else", false));
-      func_recall = cx_test(cx_get_func(cx->lib, "recall", false));
-      func_AD = cx_test(cx_get_func(cx->lib, "+", false));
-      func_DI = cx_test(cx_get_func(cx->lib, "/", false));
-      func_fibSUrec = cx_test(cx_get_func(cx->lib, "fib-rec", false));
-      func_fib = cx_test(cx_get_func(cx->lib, "fib", false));
-      func__ = cx_test(cx_get_func(cx->lib, "_", false));
-      func_clock = cx_test(cx_get_func(cx->lib, "clock", false));
+      func_SUSU = cx_test(cx_get_func(*cx->lib, "--", false));
+      func_int = cx_test(cx_get_func(*cx->lib, "int", false));
+      func_QU = cx_test(cx_get_func(*cx->lib, "?", false));
+      func_ifSUelse = cx_test(cx_get_func(*cx->lib, "if-else", false));
+      func_recall = cx_test(cx_get_func(*cx->lib, "recall", false));
+      func_AD = cx_test(cx_get_func(*cx->lib, "+", false));
+      func_DI = cx_test(cx_get_func(*cx->lib, "/", false));
+      func_fibSUrec = cx_test(cx_get_func(*cx->lib, "fib-rec", false));
+      func_fib = cx_test(cx_get_func(*cx->lib, "fib", false));
+      func__ = cx_test(cx_get_func(*cx->lib, "_", false));
+      func_clock = cx_test(cx_get_func(*cx->lib, "clock", false));
       func_SUSU_Int = cx_test(cx_get_fimp(func_SUSU, "Int", false));
       func_QU_Opt = cx_test(cx_get_fimp(func_QU, "Opt", false));
       func_ifSUelse_OptAA = cx_test(cx_get_fimp(func_ifSUelse, "Opt A A", false));
@@ -91,7 +91,7 @@ static bool emit_bmips(struct cx *cx) {
       sym_a = cx_sym(cx, "a");
       sym_b = cx_sym(cx, "b");
       sym_n = cx_sym(cx, "n");
-      type_Int = cx_test(cx_get_type(cx->lib, "Int", false));
+      type_Int = cx_test(cx_get_type(*cx->lib, "Int", false));
     }
 
     static void *op_labels[35] = {
