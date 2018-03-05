@@ -84,7 +84,7 @@ struct cx_fimp *cx_add_fimp(struct cx_func *func,
       struct cx_arg *a = args+i;
 
       if (a->arg_type == CX_ARG && a->type == NULL) {
-	cx_error(cx, cx->row, cx->col, "Unknown type for arg %d", i);
+	cx_error(cx, cx->row, cx->col, "Unknown type for arg: %d", i);
 	return NULL;
       }
       
@@ -134,7 +134,7 @@ struct cx_fimp *cx_add_fimp(struct cx_func *func,
       struct cx_arg *r = rets+i;
       
       if (r->arg_type == CX_ARG && r->type == NULL) {
-	cx_error(cx, cx->row, cx->col, "Unknown type for result %d", i);
+	cx_error(cx, cx->row, cx->col, "Unknown type for result: %d", i);
 	return NULL;
       }
 

@@ -349,6 +349,7 @@ static bool if_else_imp(struct cx_scope *scope) {
 cx_lib(cx_init_cond, "cx/cond", {
     struct cx *cx = lib->cx;
     cx_use(cx, "cx/abc", "A", "Bool", "Opt");
+    cx_use(cx, "cx/sym", "Sym");
 
     cx_add_macro(lib, "switch:", switch_parse);
   

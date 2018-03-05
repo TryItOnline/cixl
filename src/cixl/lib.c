@@ -257,13 +257,7 @@ static bool use_func(struct cx_func *f) {
 static void use_const(struct cx_var *v) {
   struct cx *cx = v->value.type->cx;
   struct cx_var *prev = cx_env_get(&cx->lib->consts, v->id);
-
-  if (prev) {
-    cx_box_deinit(&prev->value);
-    cx_copy(&prev->value, &v->value);
-  }
-  
-  cx_copy(cx_env_put(&cx->lib->consts, v->id), &v->value);
+  if (!prev) { cx_copy(cx_env_put(&cx->lib->consts, v->id), &v->value); }
 }
 
 static bool use_all(struct cx_lib *lib) {
@@ -318,7 +312,7 @@ bool _cx_use(struct cx *cx,
 	     const char *lib_id,
 	     unsigned int nids, const char **ids) {
   struct cx_sym lid = cx_sym(cx, lib_id);
-  struct cx_lib **ok = cx_set_get(&cx->libs, &lid);
+  struct cx_lib **ok = cx_set_get(&cx->lib_lookup, &lid);
 
   if (!ok) {
     cx_error(cx, cx->row, cx->col, "Lib not found: %s", lib_id);

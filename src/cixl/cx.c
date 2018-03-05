@@ -100,8 +100,8 @@ struct cx *cx_init(struct cx *cx) {
   cx_set_init(&cx->syms, sizeof(struct cx_sym), cx_cmp_cstr);
   cx->syms.key_offs = offsetof(struct cx_sym, id);
 
-  cx_set_init(&cx->libs, sizeof(struct cx_lib *), cx_cmp_sym);
-  cx->libs.key = get_lib_id;
+  cx_set_init(&cx->lib_lookup, sizeof(struct cx_lib *), cx_cmp_sym);
+  cx->lib_lookup.key = get_lib_id;
   cx->lib = cx->lobby = cx_add_lib(cx, "lobby", NULL);
   
   cx_vec_init(&cx->load_paths, sizeof(char *));
@@ -185,8 +185,8 @@ struct cx *cx_deinit(struct cx *cx) {
   cx_do_vec(&cx->load_paths, char *, p) { free(*p); }
   cx_vec_deinit(&cx->load_paths);
 
-  cx_do_set(&cx->libs, struct cx_lib *, l) { free(cx_lib_deinit(*l)); }
-  cx_set_deinit(&cx->libs);
+  cx_do_set(&cx->lib_lookup, struct cx_lib *, l) { free(cx_lib_deinit(*l)); }
+  cx_set_deinit(&cx->lib_lookup);
 
   cx_do_set(&cx->syms, struct cx_sym, s) { cx_sym_deinit(s); }
   cx_set_deinit(&cx->syms);
@@ -215,10 +215,10 @@ bool cx_is_separator(struct cx *cx, char c) {
 
 struct cx_lib *cx_add_lib(struct cx *cx, const char *id, cx_lib_init_t init) {
   struct cx_sym sid = cx_sym(cx, id);
-  struct cx_lib **lib = cx_set_get(&cx->libs, &sid);
+  struct cx_lib **lib = cx_set_get(&cx->lib_lookup, &sid);
   
   if (!lib) {
-    lib = cx_set_insert(&cx->libs, &sid);
+    lib = cx_set_insert(&cx->lib_lookup, &sid);
     *lib = cx_lib_init(malloc(sizeof(struct cx_lib)), cx, sid, init);
   }
   

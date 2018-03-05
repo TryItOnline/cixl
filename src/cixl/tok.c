@@ -184,18 +184,10 @@ static ssize_t lambda_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx)
   return tok_idx+1;
 }
 
-static void lambda_copy(struct cx_tok *dst, struct cx_tok *src) {
-  group_copy(dst, src);
-}
-
-static void lambda_deinit(struct cx_tok *tok) {
-  group_deinit(tok);
-}
-
 cx_tok_type(CX_TLAMBDA, {
     type.compile = lambda_compile;
-    type.copy = lambda_copy;
-    type.deinit = lambda_deinit;
+    type.copy = group_copy;
+    type.deinit = group_deinit;
   });
 
 static ssize_t literal_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) {

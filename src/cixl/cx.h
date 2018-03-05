@@ -22,7 +22,7 @@ struct cx {
   struct cx_malloc lambda_alloc, pair_alloc, rec_alloc, ref_alloc, scope_alloc,
     stack_alloc, table_alloc, var_alloc;
 
-  struct cx_set libs;
+  struct cx_set lib_lookup;
   struct cx_lib *lobby, *lib;
   
   struct cx_type *any_type, *bin_type, *bool_type, *char_type, *cmp_type, *file_type,

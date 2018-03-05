@@ -8,7 +8,7 @@
 
 struct cx_arg *cx_arg_deinit(struct cx_arg *a) {
   if (a->id) { free(a->id); }
-  if (!a->type && a->narg == -1) { cx_box_deinit(&a->value); }
+  if (a->arg_type == CX_VARG) { cx_box_deinit(&a->value); }
   return a;
 }
 
