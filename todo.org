@@ -1,4 +1,9 @@
 * fix bench1 emit
+* rename cx.libs to lib_lookup
+** compile
+** add cx.libs stack like scopes
+** change lib to cx_lib **
+** add cx_push_lib/pop_lib
 * add lib: n ...;  macro
 ** create new lib if !exists
 ** set cx->lib & eval toks
