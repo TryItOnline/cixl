@@ -8,8 +8,8 @@
 ** add cx.lib_type
 *** add sym fn
 *** add sym fn for func
-* move types/int/++/-- to math lib
-** move times to iter lib
+* move ++/-- to math lib
+* move times to iter lib
 * move bool/t/f to cond lib
 * move bool_type to cond lib
 ** use where needed

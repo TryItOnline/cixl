@@ -1,4 +1,10 @@
-use: (cx/abc Int times) (cx/io say) (cx/math Rat / fib int) (cx_stack _) (cx/time clock) (cx/type unsafe);
+use:
+  (cx/abc   Int times)
+  (cx/io    say)
+  (cx/math  Rat / fib int)
+  (cx_stack _)
+  (cx/time  clock)
+  (cx/type  unsafe);
 
 unsafe
 {10000 {50 fib _} times} clock 1000000 / int say

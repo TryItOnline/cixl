@@ -83,6 +83,11 @@ struct cx_fimp *cx_add_fimp(struct cx_func *func,
     for (int i=0; i < nargs; i++) {
       struct cx_arg *a = args+i;
 
+      if (a->arg_type == CX_ARG && a->type == NULL) {
+	cx_error(cx, cx->row, cx->col, "Unknown type for arg %d", i);
+	return NULL;
+      }
+      
       if (a->arg_type == CX_NARG) {
 	if (a->narg >= nargs) {
 	  cx_error(cx, cx->row, cx->col, "Arg index out of bounds: %d", a->narg);
@@ -128,6 +133,11 @@ struct cx_fimp *cx_add_fimp(struct cx_func *func,
     for (int i=0; i < nrets; i++) {
       struct cx_arg *r = rets+i;
       
+      if (r->arg_type == CX_ARG && r->type == NULL) {
+	cx_error(cx, cx->row, cx->col, "Unknown type for result %d", i);
+	return NULL;
+      }
+
       if (r->arg_type == CX_NARG) {
 	if (r->narg >= nargs) {
 	  cx_error(cx, cx->row, cx->col, "Arg index out of bounds: %d", r->narg);
