@@ -9,12 +9,13 @@ struct cx_box *cx_box_new(struct cx_type *type) {
 }
 
 struct cx_box *cx_box_init(struct cx_box *box, struct cx_type *type) {
-  box->type = type;
+  box->type = cx_type_ref(type);
   return box;
 }
 
 struct cx_box *cx_box_deinit(struct cx_box *box) {
   if (box->type->deinit) { box->type->deinit(box); }
+  cx_type_deref(box->type);
   return box;
 }
 
@@ -55,11 +56,11 @@ bool cx_call(struct cx_box *box, struct cx_scope *scope) {
 
 struct cx_box *cx_copy(struct cx_box *dst, const struct cx_box *src) {
   if (src->type->copy) {
-    dst->type = src->type;
+    dst->type = cx_type_ref(src->type);
     src->type->copy(dst, src);
-  }
-  else {
+  } else {
     *dst = *src;
+    cx_type_ref(dst->type);
   }
 
   return dst;
@@ -67,7 +68,7 @@ struct cx_box *cx_copy(struct cx_box *dst, const struct cx_box *src) {
 
 struct cx_box *cx_clone(struct cx_box *dst, struct cx_box *src) {
   if (!src->type->clone) { return cx_copy(dst, src); }
-  dst->type = src->type;
+  dst->type = cx_type_ref(src->type);
   src->type->clone(dst, src);
   return dst;
 }

@@ -1,6 +1,4 @@
-* add copy/deinit to meta type
-** call cx_type_ref when a type is put in a box
-** valgrind emit bench1.cx
+* fix bench1 emit
 * add lib: n ...;  macro
 ** create new lib if !exists
 ** set cx->lib & eval toks
