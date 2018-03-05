@@ -1,9 +1,14 @@
 * fix bench1 emit
-* rename cx.libs to lib_lookup
-** compile
-** add cx.libs stack like scopes
-** change lib to cx_lib **
-** add cx_push_lib/pop_lib
+** rename cx.libs to lib_lookup
+*** compile
+*** add cx.libs stack like scopes
+*** change lib to cx_lib **
+*** add cx_push_lib/pop_lib
+** replace cx_func.cx with lib
+** call cx_push_lib on func entry & pop_lib on exit
+*** add OPUSHLIB/OPOPLIB
+** call push/pop_lib on lambda entry/exit
+* ---
 * add lib: n ...;  macro
 ** create new lib if !exists
 ** set cx->lib & eval toks
@@ -23,7 +28,6 @@
 ** check init result in cx_use
 * extract cx_init_libs(cx)
 * replace cx_type.cx with lib
-* replace cx_func.cx with lib
 * ---
 * add connect(Socket, ip, port) fn
 ** non-blocking
