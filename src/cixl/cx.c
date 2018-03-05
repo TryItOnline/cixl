@@ -247,6 +247,18 @@ struct cx_lib *cx_add_lib(struct cx *cx, const char *id, cx_lib_init_t init) {
   return *lib;
 }
 
+struct cx_lib *cx_get_lib(struct cx *cx, const char *id) {
+  struct cx_sym sid = cx_sym(cx, id);
+  struct cx_lib **ok = cx_set_get(&cx->lib_lookup, &sid);
+
+  if (!ok) {
+    cx_error(cx, cx->row, cx->col, "Lib not found: %s", id);
+    return NULL;
+  }
+
+  return *ok;
+}
+
 void cx_push_lib(struct cx *cx, struct cx_lib *lib) {
   cx->lib = cx_vec_push(&cx->libs);
   *cx->lib = lib;

@@ -34,6 +34,7 @@ typedef void (*cx_lib_init_t)(struct cx_lib *);
 struct cx_lib {
   struct cx *cx;
   struct cx_sym id;
+  char *emit_id;
   cx_lib_init_t init;
   
   struct cx_set types, macros, funcs;

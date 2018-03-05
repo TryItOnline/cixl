@@ -160,15 +160,16 @@ static void fimp_emit_init(struct cx_op *op,
 			   FILE *out,
 			   struct cx *cx) {
   struct cx_fimp *imp = op->as_fimp.imp;
-  
+
   fprintf(out,
+	  CX_ITAB "struct cx_lib *lib = cx_test(cx_get_lib(cx, \"%s\"));\n"
 	  CX_ITAB "struct cx_func *func = "
-	          "cx_test(cx_get_func(*cx->lib, \"%s\", false));\n"
+	          "cx_test(cx_get_func(lib, \"%s\", false));\n"
 	  CX_ITAB "struct cx_fimp *imp = cx_test(cx_get_fimp(func, \"%s\", false));\n"
 	  CX_ITAB "imp->bin = cx_bin_ref(cx->bin);\n"
 	  CX_ITAB "imp->start_pc = %zd;\n"
 	  CX_ITAB "imp->nops = %zd;\n",
-	  imp->func->id, imp->id, imp->start_pc, imp->nops);
+	  imp->func->lib->id.id, imp->func->id, imp->id, imp->start_pc, imp->nops);
 }
 
 static void fimp_emit_funcs(struct cx_op *op, struct cx_set *out, struct cx *cx) {

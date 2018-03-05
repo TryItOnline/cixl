@@ -1,6 +1,7 @@
 #include <ctype.h>
 
 #include "cixl/cx.h"
+#include "cixl/emit.h"
 #include "cixl/error.h"
 #include "cixl/func.h"
 #include "cixl/lib.h"
@@ -28,6 +29,7 @@ struct cx_lib *cx_lib_init(struct cx_lib *lib,
 			   cx_lib_init_t init) {
   lib->cx = cx;
   lib->id = id;
+  lib->emit_id = cx_emit_id("lib", id.id);
   lib->init = init;
   
   cx_set_init(&lib->types, sizeof(struct cx_type *), cx_cmp_cstr);
@@ -49,6 +51,7 @@ struct cx_lib *cx_lib_deinit(struct cx_lib *lib) {
   cx_set_deinit(&lib->funcs);
   cx_set_deinit(&lib->macros);
   cx_set_deinit(&lib->types);
+  free(lib->emit_id);
   return lib;
 }
 
@@ -193,7 +196,7 @@ struct cx_box *cx_get_const(struct cx_lib *lib, struct cx_sym id, bool silent) {
   if (!v) {
     if (!silent) {
       struct cx *cx = lib->cx;
-      cx_error(cx, cx->row, cx->col, "Unknown const: '%s'", id);
+      cx_error(cx, cx->row, cx->col, "Unknown const: '%s'", id.id);
     }
     
     return NULL;

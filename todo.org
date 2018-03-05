@@ -1,11 +1,10 @@
 * fix bench1 emit
-** fix fimp_emit init
-*** add cx_get_lib(const char *)
-*** use to find lib and push/pop
+** add OPUSHLIB/OPOPLIB
+*** add on func entry/exit
+*** add on lambda entry/exit
+** add emit_libs and implement for pushlib
+*** call in bin
 ** push
-* add OPUSHLIB/OPOPLIB
-** add on func entry/exit
-** add on lambda entry/exit
 * add lib: n ...;  macro
 ** create new lib if !exists
 ** add opush/poplib around code on eval

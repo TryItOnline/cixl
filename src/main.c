@@ -46,7 +46,7 @@ int main(int argc, char *argv[]) {
 
       struct cx_buf cmd;
       cx_buf_open(&cmd);
-      fputs("gcc -x c -std=gnu1x -Wall -Werror -O2 -g - -lcixl", cmd.stream);
+      fputs("gcc -x c -std=gnu1x -Wall -Werror -Wno-unused-but-set-variable -O2 -g - -lcixl", cmd.stream);
 
       for (; argi < argc; argi++) {
 	fprintf(cmd.stream, " %s", argv[argi]);
