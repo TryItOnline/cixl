@@ -31,7 +31,7 @@ struct cx_env {
 struct cx_env *cx_env_init(struct cx_env *env, struct cx_malloc *alloc);
 struct cx_env *cx_env_deinit(struct cx_env *env);
 
+struct cx_var *cx_env_get(struct cx_env *env, struct cx_sym id);
 struct cx_box *cx_env_put(struct cx_env *env, struct cx_sym id);
-struct cx_box *cx_env_get(struct cx_env *env, struct cx_sym id);
 
 #endif

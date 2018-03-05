@@ -106,8 +106,7 @@ static bool use_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
 
 cx_lib(cx_init_meta, "cx/meta", {
     struct cx *cx = lib->cx;
-    cx_use(cx, "cx/abc");
-    cx_use(cx, "cx/str");
+    cx_use(cx, "cx/str", "Str");
     
     cx_add_macro(lib, "include:", include_parse);
     cx_add_macro(lib, "use:", use_parse);

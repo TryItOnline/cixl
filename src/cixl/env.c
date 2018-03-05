@@ -24,6 +24,14 @@ struct cx_env *cx_env_deinit(struct cx_env *env) {
   return env;
 }
 
+struct cx_var *cx_env_get(struct cx_env *env, struct cx_sym id) {
+  for (struct cx_var *v = env->slots[id.tag % CX_ENV_SLOTS]; v; v = v->next) {
+    if (v->id.tag == id.tag) { return v; }
+  }
+  
+  return NULL;
+}
+
 struct cx_box *cx_env_put(struct cx_env *env, struct cx_sym id) {
   struct cx_var **slot = env->slots + id.tag % CX_ENV_SLOTS;
   struct cx_var *var = cx_malloc(env->alloc);
@@ -33,12 +41,4 @@ struct cx_box *cx_env_put(struct cx_env *env, struct cx_sym id) {
   var->next = *slot;
   *slot = var;
   return &var->value;
-}
-
-struct cx_box *cx_env_get(struct cx_env *env, struct cx_sym id) {
-  for (struct cx_var *v = env->slots[id.tag % CX_ENV_SLOTS]; v; v = v->next) {
-    if (v->id.tag == id.tag) { return &v->value; }
-  }
-  
-  return NULL;
 }

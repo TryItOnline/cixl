@@ -209,7 +209,7 @@ static bool drop_imp(struct cx_scope *scope) {
 
 cx_lib(cx_init_iter, "cx/iter", {
     struct cx *cx = lib->cx;
-    cx_use(cx, "cx/abc");
+    cx_use(cx, "cx/abc", "A", "Int", "Opt", "Seq");
 
     cx->iter_type = cx_init_iter_type(lib);
     

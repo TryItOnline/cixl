@@ -353,61 +353,6 @@ bool cx_load(struct cx *cx, const char *path, struct cx_bin *bin) {
   }
 }
 
-bool cx_use(struct cx *cx, const char *id) {
-  struct cx_sym sid = cx_sym(cx, id);
-  struct cx_lib **ok = cx_set_get(&cx->libs, &sid);
-
-  if (!ok) {
-    cx_error(cx, cx->row, cx->col, "Lib not found: %s", id);
-    return false;
-  }
-
-  struct cx_lib *lib = *ok;
-
-  if (lib->init) {
-    struct cx_lib *prev = cx->lib;
-    cx->lib = lib;
-    lib->init(lib);
-    lib->init = NULL;
-    cx->lib = prev;
-  }
-
-  cx_do_set(&lib->types, struct cx_type *, t) {
-    struct cx_type **ok = cx_set_insert(&cx->lib->types, &(*t)->id);
-    if (ok) { *ok = cx_type_ref(*t); }
-  }
-
-  cx_do_set(&lib->macros, struct cx_macro *, m) {
-    struct cx_macro **ok = cx_set_insert(&cx->lib->macros, &(*m)->id);
-    if (ok) { *ok = cx_macro_ref(*m); }
-  }
-
-  cx_do_set(&lib->funcs, struct cx_func *, f) {
-    struct cx_func **ok = cx_set_get(&cx->lib->funcs, &(*f)->id);
-    
-    if (ok) {
-      if ((*ok)->nargs != (*f)->nargs) {
-	cx_error(cx, cx->row, cx->col, "Wrong arity (%d/%d) for func: %s/%s",
-		 (*f)->nargs, (*ok)->nargs, lib->id.id, (*f)->id);
-	return false;
-      }
-      
-      cx_do_set(&(*f)->imps, struct cx_fimp *, i) {
-	cx_ensure_fimp(*ok, *i);
-      }
-    } else {
-      ok = cx_set_insert(&cx->lib->funcs, &(*f)->id);
-      *ok = cx_func_ref(*f);
-    }
-  }
-
-  cx_do_env(&lib->consts, v) {
-    cx_copy(cx_env_put(&cx->lib->consts, v->id), &v->value);
-  }
-
-  return true;
-}
-
 void cx_dump_errors(struct cx *cx, FILE *out) {
   cx_do_vec(&cx->errors, struct cx_error, e) {
     fprintf(out, "Error in row %d, col %d:\n%s\n", e->row, e->col, e->msg);
@@ -418,3 +363,4 @@ void cx_dump_errors(struct cx *cx, FILE *out) {
 
   cx_vec_clear(&cx->errors);
 }
+

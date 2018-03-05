@@ -194,17 +194,17 @@ void cx_rec_deref(struct cx_rec *rec) {
 }
 
 struct cx_box *cx_rec_get(struct cx_rec *rec, struct cx_sym fid) {
-  return cx_env_get(&rec->fields, fid);
+  struct cx_var *v = cx_env_get(&rec->fields, fid);
+  return v ? &v->value : NULL;
 }
 
 struct cx_box *cx_rec_put(struct cx_rec *rec, struct cx_sym fid) {
-  struct cx_box *v = cx_env_get(&rec->fields, fid);
+  struct cx_var *v = cx_env_get(&rec->fields, fid);
 
   if (v) {
-    cx_box_deinit(v);
-  } else {
-    v = cx_env_put(&rec->fields, fid);
+    cx_box_deinit(&v->value);
+    return &v->value;
   }
   
-  return v;
+  return cx_env_put(&rec->fields, fid);
 }

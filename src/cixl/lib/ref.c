@@ -41,7 +41,7 @@ static bool put_imp(struct cx_scope *scope) {
 
 cx_lib(cx_init_ref, "cx/ref", { 
     struct cx *cx = lib->cx;
-    cx_use(cx, "cx/abc");
+    cx_use(cx, "cx/abc", "A", "Opt");
 
     cx->ref_type = cx_init_ref_type(lib);
 

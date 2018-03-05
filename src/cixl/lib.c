@@ -1,3 +1,5 @@
+#include <ctype.h>
+
 #include "cixl/cx.h"
 #include "cixl/error.h"
 #include "cixl/func.h"
@@ -188,7 +190,7 @@ struct cx_func *cx_get_func(struct cx_lib *lib, const char *id, bool silent) {
 }
 
 struct cx_box *cx_get_const(struct cx_lib *lib, struct cx_sym id, bool silent) {
-  struct cx_box *v = cx_env_get(&lib->consts, id);
+  struct cx_var *v = cx_env_get(&lib->consts, id);
 
   if (!v) {
     if (!silent) {
@@ -199,11 +201,11 @@ struct cx_box *cx_get_const(struct cx_lib *lib, struct cx_sym id, bool silent) {
     return NULL;
   }
 
-  return v;
+  return &v->value;
 }
 
 struct cx_box *cx_set_const(struct cx_lib *lib, struct cx_sym id, bool force) {
-  struct cx_box *v = cx_env_get(&lib->consts, id);
+  struct cx_var *v = cx_env_get(&lib->consts, id);
 
   if (v) {
     if (!force) {
@@ -212,11 +214,134 @@ struct cx_box *cx_set_const(struct cx_lib *lib, struct cx_sym id, bool force) {
       return NULL;
     }
       
-    cx_box_deinit(v);
-  } else {
-    v = cx_env_put(&lib->consts, id);
+    cx_box_deinit(&v->value);
+    return &v->value;
   }
 
-  return v;
+  return cx_env_put(&lib->consts, id);
 }
 
+static void use_type(struct cx_type *t) {
+  struct cx *cx = t->cx;
+  struct cx_type **ok = cx_set_insert(&cx->lib->types, &t->id);
+  if (ok) { *ok = cx_type_ref(t); }
+ }
+
+static void use_macro(struct cx_macro *m, struct cx *cx) {
+  struct cx_macro **ok = cx_set_insert(&cx->lib->macros, &m->id);
+  if (ok) { *ok = cx_macro_ref(m); }
+}
+
+static bool use_func(struct cx_func *f) {
+  struct cx *cx = f->cx;
+  struct cx_func **ok = cx_set_get(&cx->lib->funcs, &f->id);
+
+  if (ok) {
+    if ((*ok)->nargs != f->nargs) {
+      cx_error(cx, cx->row, cx->col, "Wrong arity (%d/%d) for func: %s/%s",
+	       f->nargs, (*ok)->nargs, cx->lib->id.id, f->id);
+      return false;
+    }
+    
+    cx_do_set(&f->imps, struct cx_fimp *, i) {
+      cx_ensure_fimp(*ok, *i);
+    }
+  } else {
+    ok = cx_set_insert(&cx->lib->funcs, &f->id);
+    *ok = cx_func_ref(f);
+  }
+  
+  return true;
+}
+
+static void use_const(struct cx_var *v) {
+  struct cx *cx = v->value.type->cx;
+  struct cx_var *prev = cx_env_get(&cx->lib->consts, v->id);
+
+  if (prev) {
+    cx_box_deinit(&prev->value);
+    cx_copy(&prev->value, &v->value);
+  }
+  
+  cx_copy(cx_env_put(&cx->lib->consts, v->id), &v->value);
+}
+
+static bool use_all(struct cx_lib *lib) {
+  struct cx *cx = lib->cx;
+  
+  cx_do_set(&lib->types, struct cx_type *, t) { use_type(*t); }
+  
+  cx_do_set(&lib->macros, struct cx_macro *, m) { use_macro(*m, cx); }
+  
+  cx_do_set(&lib->funcs, struct cx_func *, f) {
+    if (!use_func(*f)) { return false; }
+  }
+
+  cx_do_env(&lib->consts, v) { use_const(v); }
+  return true;
+}
+
+static bool use_id(struct cx_lib *lib, const char *id) {
+  struct cx *cx = lib->cx;
+
+  if (id[0] == '#') {
+    struct cx_var *v = cx_env_get(&lib->consts, cx_sym(cx, id+1));
+
+    if (v) {
+      use_const(v);
+      return true;
+    }
+  } else if (isupper(id[0])) {
+    struct cx_type **t = cx_set_get(&lib->types, &id);
+    
+    if (t) {
+      use_type(*t);
+      return true;
+    }
+  } else {
+    struct cx_macro **m = cx_set_get(&lib->macros, &id);
+
+    if (m) {
+      use_macro(*m, cx);
+      return true;
+    }
+    
+    struct cx_func **f = cx_set_get(&lib->funcs, &id);
+    if (f) { return use_func(*f); }
+  }
+
+  cx_error(cx, cx->row, cx->col, "%s/%s not found", lib->id.id, id);
+  return false;
+}
+
+bool _cx_use(struct cx *cx,
+	     const char *lib_id,
+	     unsigned int nids, const char **ids) {
+  struct cx_sym lid = cx_sym(cx, lib_id);
+  struct cx_lib **ok = cx_set_get(&cx->libs, &lid);
+
+  if (!ok) {
+    cx_error(cx, cx->row, cx->col, "Lib not found: %s", lib_id);
+    return false;
+  }
+
+  struct cx_lib *lib = *ok;
+
+  if (lib->init) {
+    struct cx_lib *prev = cx->lib;
+    cx->lib = lib;
+    lib->init(lib);
+    lib->init = NULL;
+    cx->lib = prev;
+  }
+
+  if (nids) {
+    for (unsigned int i = 0; i < nids; i++) {
+      if (!use_id(lib, ids[i])) { return false; }
+    }
+
+    return true;
+  }
+  
+  return use_all(lib);
+}

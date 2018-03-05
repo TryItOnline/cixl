@@ -42,8 +42,8 @@ static bool str_imp(struct cx_scope *scope) {
 
 cx_lib(cx_init_guid, "cx/guid", {
     struct cx *cx = lib->cx;
-    cx_use(cx, "cx/abc");
-    cx_use(cx, "cx/str");
+    cx_use(cx, "cx/abc", "A");
+    cx_use(cx, "cx/str", "Str");
 
     cx->guid_type = cx_init_guid_type(lib);
 

@@ -108,7 +108,7 @@ static void type_tests() {
   cx_init(&cx);
   cx_use(&cx, "cx/meta");
 
-  run(&cx, "use: cx/cond cx/error cx/type;");
+  run(&cx, "use: cx/abc cx/cond cx/error cx/type;");
   run(&cx, "42 type Int = check");
   run(&cx, "Int A is check");
   run(&cx, "A Int is !check");
@@ -132,7 +132,7 @@ static void if_tests() {
   cx_init(&cx);
   cx_use(&cx, "cx/meta");
   
-  run(&cx, "use: cx/cond cx/error cx/sym;");
+  run(&cx, "use: cx/abc cx/cond cx/error cx/sym;");
   run(&cx, "#t 42 if 42 = check");
   run(&cx, "#f 42 else 42 = check");
   run(&cx, "#t `yes `no if-else `yes = check");
@@ -146,7 +146,7 @@ static void let_tests() {
   cx_init(&cx);
   cx_use(&cx, "cx/meta");
 
-  run(&cx, "use: cx/cond cx/error cx/math cx/str cx/var;");
+  run(&cx, "use: cx/abc cx/cond cx/error cx/math cx/str cx/var;");
   run(&cx, "(let: foo 42; $foo 42 = check)");
   run(&cx, "(let: (x y z) 1 2 3 4 +; $x $y $z + + 10 = check)");
   run(&cx, "(let: (foo Int bar Str) 7 '35'; $foo $bar int + 42 = check)");
@@ -163,7 +163,7 @@ static void func_tests() {
   cx_init(&cx);
   cx_use(&cx, "cx/meta");
 
-  run(&cx, "use: cx/func cx/cond cx/error cx/math cx/stack cx/var;");
+  run(&cx, "use: cx/abc cx/func cx/cond cx/error cx/math cx/stack cx/var;");
   run(&cx, "func: foo0()(Int) 42; foo0 42 = check");
   run(&cx, "func: foo2(x y)(Int) $x $y +; 1 2 foo2 3 = check");
   run(&cx, "func: foo3(op Func Int Int)(Int) $op call; &- 49 7 foo3 42 = check");
@@ -195,7 +195,7 @@ static void iter_tests() {
   cx_init(&cx);
   cx_use(&cx, "cx/meta");
 
-  run(&cx, "use: cx/cond cx/error cx/iter cx/math;");
+  run(&cx, "use: cx/abc cx/cond cx/error cx/iter cx/math;");
   run(&cx, "0 5 &++ map &+ for 15 = check");
   
   cx_deinit(&cx);
@@ -305,7 +305,7 @@ static void ref_tests() {
   cx_init(&cx);
   cx_use(&cx, "cx/meta");
 
-  run(&cx, "use: cx/cond cx/error cx/ref cx/stack;");
+  run(&cx, "use: cx/abc cx/cond cx/error cx/ref cx/stack;");
   run(&cx, "#nil ref % 42 put-ref get-ref 42 = check");
   
   cx_deinit(&cx);
@@ -329,7 +329,7 @@ static void stack_tests() {
   cx_init(&cx);
   cx_use(&cx, "cx/meta");
 
-  run(&cx, "use: cx/cond cx/error cx/iter cx/math cx/stack;");
+  run(&cx, "use: cx/abc cx/cond cx/error cx/iter cx/math cx/stack;");
   run(&cx, "1 2 [3 4 5] len 3 = check");
   run(&cx, "[1 2 3] pop 3 = check");
   run(&cx, "[1 2 3] % 4 push<Stack A> len 4 = check");
@@ -384,7 +384,7 @@ static void rec_tests() {
   cx_init(&cx);
   cx_use(&cx, "cx/meta");
 
-  run(&cx, "use: cx/cond cx/error cx/func cx/rec cx/stack cx/type cx/var;");
+  run(&cx, "use: cx/abc cx/cond cx/error cx/func cx/rec cx/stack cx/type cx/var;");
 
   run(&cx,
       "rec: Foo() x Int y Str; "

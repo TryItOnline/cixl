@@ -61,8 +61,8 @@ static bool rezip_imp(struct cx_scope *scope) {
 
 cx_lib(cx_init_pair, "cx/pair", {
     struct cx *cx = lib->cx;
-    cx_use(cx, "cx/abc");
-    cx_use(cx, "cx/iter");
+    cx_use(cx, "cx/abc", "A", "Cmp", "Opt", "Seq");
+    cx_use(cx, "cx/iter", "for");
 
     cx->pair_type = cx_init_pair_type(lib);
     

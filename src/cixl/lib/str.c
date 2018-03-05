@@ -245,8 +245,8 @@ static bool str_lower_imp(struct cx_scope *scope) {
 
 cx_lib(cx_init_str, "cx/str", {
     struct cx *cx = lib->cx;
-    cx_use(cx, "cx/abc");
-    cx_use(cx, "cx/iter");
+    cx_use(cx, "cx/abc", "A", "Cmp", "Int", "Opt", "Seq");
+    cx_use(cx, "cx/iter", "Iter");
 
     cx->char_type = cx_init_char_type(lib);
     cx->str_type = cx_init_str_type(lib);

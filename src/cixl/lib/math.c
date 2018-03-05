@@ -108,10 +108,10 @@ static bool rat_int_imp(struct cx_scope *scope) {
 
 cx_lib(cx_init_math, "cx/math", {
     struct cx *cx = lib->cx;
-    cx_use(cx, "cx/abc");
-    cx_use(cx, "cx/cond");
-    cx_use(cx, "cx/func");
-    cx_use(cx, "cx/iter");
+    cx_use(cx, "cx/abc", "A", "Int", "Num", "Opt", "Seq", "--");
+    cx_use(cx, "cx/cond", "=", "?", "if-else");
+    cx_use(cx, "cx/func", "Fimp", "Func", "recall");
+    cx_use(cx, "cx/iter", "for");
 
     cx->rat_type = cx_init_rat_type(lib);
     

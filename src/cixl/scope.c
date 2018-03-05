@@ -62,9 +62,9 @@ struct cx_box *cx_peek(struct cx_scope *scope, bool silent) {
 }
 
 struct cx_box *cx_get_var(struct cx_scope *scope, struct cx_sym id, bool silent) {
-  struct cx_box *val = cx_env_get(&scope->vars, id);
+  struct cx_var *v = cx_env_get(&scope->vars, id);
 
-  if (!val) {
+  if (!v) {
     if (scope->parent) { return cx_get_var(scope->parent, id, silent); }
 
     if (!silent) {
@@ -75,23 +75,22 @@ struct cx_box *cx_get_var(struct cx_scope *scope, struct cx_sym id, bool silent)
     return NULL;
   }
 
-  return val;
+  return &v->value;
 }
 
 struct cx_box *cx_put_var(struct cx_scope *scope, struct cx_sym id, bool force) {
-  struct cx_box *val = cx_env_get(&scope->vars, id);
+  struct cx_var *v = cx_env_get(&scope->vars, id);
 
-  if (val) {
+  if (v) {
     if (!force) {
       struct cx *cx = scope->cx;
       cx_error(cx, cx->row, cx->col, "Attempt to rebind var: %s", id.id);
       return NULL;
     }
       
-    cx_box_deinit(val);
-  } else {
-    val = cx_env_put(&scope->vars, id);
+    cx_box_deinit(&v->value);
+    return &v->value;
   }
 
-  return val;
+  return cx_env_put(&scope->vars, id);
 }

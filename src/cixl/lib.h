@@ -19,6 +19,12 @@
     return lib;						\
   }							\
 
+#define cx_use(cx, lib_id, ...) ({				\
+      const char *ids[] = {__VA_ARGS__};			\
+      unsigned int nids = sizeof(ids) / sizeof(char *);		\
+      _cx_use(cx, lib_id, nids, ids);				\
+    })								\
+
 struct cx;
 struct cx_arg;
 struct cx_lib;
@@ -73,5 +79,8 @@ struct cx_func *cx_get_func(struct cx_lib *lib, const char *id, bool silent);
 
 struct cx_box *cx_get_const(struct cx_lib *lib, struct cx_sym id, bool silent);
 struct cx_box *cx_set_const(struct cx_lib *lib, struct cx_sym id, bool force);
+
+bool _cx_use(struct cx *cx, const char *lib_id,
+	     unsigned int nids, const char **ids);
 
 #endif

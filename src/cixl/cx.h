@@ -10,7 +10,7 @@
 #include "cixl/type.h"
 
 #define CX_VERSION "0.9.2"
-#define CX_SLAB_SIZE 20
+#define CX_SLAB_SIZE 20				  
 
 struct cx_arg;
 struct cx_scope;
@@ -20,7 +20,7 @@ struct cx {
   struct cx_set separators;
 
   struct cx_malloc lambda_alloc, pair_alloc, rec_alloc, ref_alloc, scope_alloc,
-    table_alloc, var_alloc, stack_alloc;
+    stack_alloc, table_alloc, var_alloc;
 
   struct cx_set libs;
   struct cx_lib *lobby, *lib;
@@ -70,10 +70,7 @@ bool cx_funcall(struct cx *cx, const char *id);
 char *cx_get_path(struct cx *cx, const char *path);
 bool cx_load_toks(struct cx *cx, const char *path, struct cx_vec *out);
 bool cx_load(struct cx *cx, const char *path, struct cx_bin *bin);
-bool cx_use(struct cx *cx, const char *id);
 
 void cx_dump_errors(struct cx *cx, FILE *out);
-
-void cx_init_world(struct cx *cx);
 
 #endif

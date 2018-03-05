@@ -194,10 +194,10 @@ static bool lines_imp(struct cx_scope *scope) {
 
 cx_lib(cx_init_io, "cx/io", {    
     struct cx *cx = lib->cx;
-    cx_use(cx, "cx/abc");
-    cx_use(cx, "cx/iter");
-    cx_use(cx, "cx/str");
-    cx_use(cx, "cx/sym");
+    cx_use(cx, "cx/abc", "A", "Cmp", "Opt");
+    cx_use(cx, "cx/iter", "Iter");
+    cx_use(cx, "cx/str", "Char", "Str");
+    cx_use(cx, "cx/sym", "Sym");
 
     cx->file_type = cx_init_file_type(lib, "File");
     cx->rfile_type = cx_init_file_type(lib, "RFile", cx->file_type, cx->seq_type);

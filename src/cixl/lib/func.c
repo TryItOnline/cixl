@@ -252,8 +252,8 @@ static bool recall_imp(struct cx_scope *scope) {
 
 cx_lib(cx_init_func, "cx/func", {
     struct cx *cx = lib->cx;
-    cx_use(cx, "cx/abc");
-    cx_use(cx, "cx/stack");
+    cx_use(cx, "cx/abc", "A", "Seq");
+    cx_use(cx, "cx/stack", "Stack");
 
     cx->func_type = cx_init_func_type(lib);
     cx->fimp_type = cx_init_fimp_type(lib);

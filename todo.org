@@ -1,8 +1,5 @@
-* replace sub libs with specific uses/depends
-** add nids/ids params to cx_use
-*** rename to _cx_use and add macro wrapper
+* add support for using/importing specific ids
 ** change cx_use: to support TGROUP (lib id...)
-** add support for TGROUPs to use:
 * move types/int/++/-- to math lib
 ** move times to iter lib
 * move bool/t/f to cond lib
@@ -16,6 +13,7 @@
 * extract cx_init_libs(cx)
 * replace cx_type.cx with lib
 * replace cx_func.cx with lib
+* add macro.lib
 * ---
 * add connect(Socket, ip, port) fn
 ** non-blocking
