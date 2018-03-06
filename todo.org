@@ -11,11 +11,12 @@
 * call push/pop_lib on lambda enter/exit
 ** add lambda.lib
 *** init in cx_lambda_new
-** add test
+** add lib tests
 *** call and check lib inside
 * add lib: n ...;  macro
 ** create new lib if !exists
 ** add opush/poplib around code on macro eval
+** fix emit
 * ---
 * add connect(Socket, ip, port) fn
 ** non-blocking

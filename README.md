@@ -106,7 +106,7 @@ The default library is called the ```lobby```.
 [Lib(lobby)]
 ```
 
-All types, functions and constants belong to a library, ```lib``` may be used to find out which.
+All types and functions belong to a library, ```lib``` may be used to find out which.
 
 ```
    | Int lib
