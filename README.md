@@ -37,6 +37,12 @@ When launched with parameters, Cixl will interpret the first parameter as a file
 test.cx
 ```
 #!/usr/local/bin/cixl
+
+use:
+  (cx/stack %)
+  (cx/str   upper)
+  (cx/io    say);
+
 % upper say
 ```
 
@@ -1207,6 +1213,8 @@ There is still plenty of work remaining in the profiling and benchmarking depart
 Let's start with a tail-recursive fibonacci to exercise the interpreter loop, it's worth mentioning that Cixl uses 64-bit integers while Python settles for 32-bit.
 
 ```
+use: cx;
+
 func: fib-rec(a b n Int)(Int)
   $n?<Opt> {$b $a $b +<Int Int> $n -- recall} $a if-else;
 
@@ -1242,6 +1250,8 @@ $ python3 cixl/perf/bench1.py
 Next up is consing a stack.
 
 ```
+use: cx;
+
 {let: v []; 10000000 {$v ~ push} for} clock 1000000 / int say
 
 $ cixl -e cixl/perf/bench2.cx -o bench2
@@ -1267,7 +1277,9 @@ $ python3 cixl/perf/bench2.py
 Moving on to instantiating records.
 
 ```
+use: cx;
 rec: Foo() x Int y Str;
+
 {10000000 {Foo new % `x 42 put<Rec Sym A> `y 'bar' put<Rec Sym A>} times}
 clock 1000000 / int say
 
