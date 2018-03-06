@@ -10,12 +10,8 @@
 * call push/pop_lib on lambda enter/exit
 ** add lambda.lib
 *** init in cx_lambda_new
+* change lib macro to predeclare init fn
 * add lib: n (exports) ...;  macro
-** add lib.exports
-*** set of syms
-*** check in use
-** change lib macro to use varargs for exports
-*** predeclare init fn
 ** create new lib if !exists
 ** add opush/poplib around code on macro eval
 * ---
