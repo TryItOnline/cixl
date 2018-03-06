@@ -106,7 +106,7 @@ The default library is called the ```lobby```.
 [Lib(lobby)]
 ```
 
-### Stack
+### Stack Basics
 Like Forth, Cixl expects arguments before operations and exposes the parameter stack to code. Basic stack operations have dedicated operators; ```%``` for copying the last value, ```_``` for dropping it, ```~``` for flipping the last two values and ```|``` for clearing the stack.
 
 ```
