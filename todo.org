@@ -11,7 +11,7 @@
 ** add lambda.lib
 *** init in cx_lambda_new
 * change lib macro to predeclare init fn
-* add lib: n (exports) ...;  macro
+* add lib: n ...;  macro
 ** create new lib if !exists
 ** add opush/poplib around code on macro eval
 * ---
