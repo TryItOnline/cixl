@@ -30,7 +30,7 @@ enum cx_cmp cx_cmp_sym(const void *x, const void *y) {
 }
 
 static void new_imp(struct cx_box *out) {
-  struct cx *cx = out->type->cx;
+  struct cx *cx = out->type->lib->cx;
   char *id = cx_fmt("S%zd", cx->next_sym_tag);
   out->as_sym = cx_sym(cx, id);
   free(id);

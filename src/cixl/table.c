@@ -104,7 +104,7 @@ bool cx_table_delete(struct cx_table *table, struct cx_box *key) {
 }
 
 static void new_imp(struct cx_box *out) {
-  out->as_table = cx_table_new(out->type->cx);
+  out->as_table = cx_table_new(out->type->lib->cx);
 }
 
 static bool equid_imp(struct cx_box *x, struct cx_box *y) {
@@ -137,7 +137,10 @@ static void copy_imp(struct cx_box *dst, const struct cx_box *src) {
 }
 
 static void clone_imp(struct cx_box *dst, struct cx_box *src) {
-  struct cx_table *src_tbl = src->as_table, *dst_tbl = cx_table_new(src->type->cx);
+  struct cx_table
+    *src_tbl = src->as_table,
+    *dst_tbl = cx_table_new(src->type->lib->cx);
+  
   dst->as_table = dst_tbl;
 
   cx_do_set(&src_tbl->entries, struct cx_table_entry, se) {

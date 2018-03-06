@@ -22,7 +22,8 @@ cx_lib(cx_init_abc, "cx/abc") {
 
   cx->num_type = cx_add_type(lib, "Num", cx->cmp_type);
   cx->num_type->trait = true;
-  
+
+  cx->lib_type = cx_init_lib_type(lib);
   cx->meta_type = cx_init_meta_type(lib);
 
   cx->bool_type = cx_init_bool_type(lib);

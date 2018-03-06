@@ -194,11 +194,6 @@ struct cx *cx_deinit(struct cx *cx) {
 
   cx_do_vec(&cx->load_paths, char *, p) { free(*p); }
   cx_vec_deinit(&cx->load_paths);
-
-  cx_do_set(&cx->lib_lookup, struct cx_lib *, l) { free(cx_lib_deinit(*l)); }
-  cx_set_deinit(&cx->lib_lookup);
-  
-  cx_vec_deinit(&cx->libs);
   
   cx_do_vec(&cx->macros, struct cx_macro *, m) { free(cx_macro_deinit(*m)); }
   cx_vec_deinit(&cx->macros);
@@ -208,6 +203,11 @@ struct cx *cx_deinit(struct cx *cx) {
 
   cx_do_vec(&cx->fimps, struct cx_fimp *, f) { free(cx_fimp_deinit(*f)); }
   cx_vec_deinit(&cx->fimps);
+
+  cx_do_set(&cx->lib_lookup, struct cx_lib *, l) { free(cx_lib_deinit(*l)); }
+  cx_set_deinit(&cx->lib_lookup);
+  
+  cx_vec_deinit(&cx->libs);
 
   cx_do_vec(&cx->types, struct cx_type *, t) { free(cx_type_deinit(*t)); }
   cx_vec_deinit(&cx->types);

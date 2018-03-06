@@ -15,7 +15,7 @@ static bool equid_imp(struct cx_box *x, struct cx_box *y) {
 }
 
 static bool eqval_imp(struct cx_box *x, struct cx_box *y) {
-  struct cx *cx = x->type->cx;
+  struct cx *cx = x->type->lib->cx;
   struct cx_scope *s = cx_scope(cx, 0);
   cx_copy(cx_push(s), x);
   cx_copy(cx_push(s), y);
@@ -28,7 +28,7 @@ static enum cx_cmp cmp_imp(const struct cx_box *x, const struct cx_box *y) {
 }
 
 static bool ok_imp(struct cx_box *v) {
-  struct cx *cx = v->type->cx;
+  struct cx *cx = v->type->lib->cx;
   struct cx_scope *s = cx_scope(cx, 0);
   cx_copy(cx_push(s), v);
   if (!cx_funcall(cx, "?")) { return false; }
@@ -80,7 +80,7 @@ static void dump_imp(struct cx_box *v, FILE *out) {
 }
 
 static void print_imp(struct cx_box *v, FILE *out) {
-  struct cx *cx = v->type->cx;
+  struct cx *cx = v->type->lib->cx;
   struct cx_scope *s = cx_scope(cx, 0);
   cx_box_init(cx_push(s), cx->wfile_type)->as_file = cx_file_new(out);
   cx_copy(cx_push(s), v);
@@ -98,10 +98,10 @@ static void *type_deinit_imp(struct cx_type *t) {
 }
 
 struct cx_rec_type *cx_rec_type_init(struct cx_rec_type *type,
-				     struct cx *cx,
+				     struct cx_lib *lib,
 				     const char *id) {
-  cx_type_init(&type->imp, cx, id);
-  cx_derive(&type->imp, cx->rec_type);
+  cx_type_init(&type->imp, lib, id);
+  cx_derive(&type->imp, lib->cx->rec_type);
 
   type->imp.new = new_imp;
   type->imp.equid = equid_imp;
@@ -124,17 +124,17 @@ struct cx_rec_type *cx_rec_type_init(struct cx_rec_type *type,
 
 struct cx_rec_type *cx_rec_type_reinit(struct cx_rec_type *type) {
   cx_type_reinit(&type->imp);
-  cx_derive(&type->imp, type->imp.cx->rec_type);
+  cx_derive(&type->imp, type->imp.lib->cx->rec_type);
   cx_set_clear(&type->fields);
   return type;
 }
 
-struct cx_rec_type *cx_rec_type_new(struct cx *cx, const char *id) {
-  return cx_rec_type_init(malloc(sizeof(struct cx_rec_type)), cx, id);
+struct cx_rec_type *cx_rec_type_new(struct cx_lib *lib, const char *id) {
+  return cx_rec_type_init(malloc(sizeof(struct cx_rec_type)), lib, id);
 }
 
 void cx_derive_rec(struct cx_rec_type *child, struct cx_type *parent) {
-  struct cx *cx = parent->cx;
+  struct cx *cx = child->imp.lib->cx;
   cx_derive(&child->imp, parent);
 
   if (cx_is(parent, cx->rec_type)) {
@@ -154,7 +154,7 @@ bool cx_add_field(struct cx_rec_type *type,
 
   if (f) {
     if (!silent) {
-      struct cx *cx = type->imp.cx;
+      struct cx *cx = type->imp.lib->cx;
       
       cx_error(cx, cx->row, cx->col,
 	       "Field already exists in %s: %s",
@@ -171,9 +171,10 @@ bool cx_add_field(struct cx_rec_type *type,
 }
 
 struct cx_rec *cx_rec_new(struct cx_rec_type *type) {
-  struct cx_rec *rec = cx_malloc(&type->imp.cx->rec_alloc);
+  struct cx *cx = type->imp.lib->cx;
+  struct cx_rec *rec = cx_malloc(&cx->rec_alloc);
   rec->type = type;
-  cx_env_init(&rec->fields, &type->imp.cx->var_alloc);
+  cx_env_init(&rec->fields, &cx->var_alloc);
   rec->nrefs = 1;
   return rec;
 }
@@ -189,7 +190,7 @@ void cx_rec_deref(struct cx_rec *rec) {
   
   if (!rec->nrefs) {
     cx_env_deinit(&rec->fields);
-    cx_free(&rec->type->imp.cx->rec_alloc, rec);
+    cx_free(&rec->type->imp.lib->cx->rec_alloc, rec);
   }
 }
 

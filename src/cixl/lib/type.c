@@ -118,6 +118,13 @@ static bool new_imp(struct cx_scope *scope) {
   return true;
 }
 
+static bool lib_imp(struct cx_scope *scope) {
+  struct cx *cx = scope->cx;
+  struct cx_type *t = cx_test(cx_pop(scope, false))->as_ptr;
+  cx_box_init(cx_push(scope), cx->lib_type)->as_lib = t->lib;
+  return true;
+}
+
 static bool safe_imp(struct cx_scope *scope) {
   scope->safe = true;
   return true;
@@ -131,7 +138,7 @@ static bool unsafe_imp(struct cx_scope *scope) {
 cx_lib(cx_init_type, "cx/type") {
   struct cx *cx = lib->cx;
     
-  if (!cx_use(cx, "cx/abc", "A", "Bool", "Opt")) {
+  if (!cx_use(cx, "cx/abc", "A", "Bool", "Lib", "Opt")) {
     return false;
   }
 
@@ -156,6 +163,11 @@ cx_lib(cx_init_type, "cx/type") {
 	       cx_args(cx_arg("t", cx->meta_type)),
 	       cx_args(cx_arg(NULL, cx->any_type)),
 	       new_imp);
+
+  cx_add_cfunc(lib, "lib",
+	       cx_args(cx_arg("t", cx->meta_type)),
+	       cx_args(cx_arg(NULL, cx->lib_type)),
+	       lib_imp);
 
   cx_add_cfunc(lib, "safe", cx_args(), cx_args(), safe_imp);
   cx_add_cfunc(lib, "unsafe", cx_args(), cx_args(), unsafe_imp);

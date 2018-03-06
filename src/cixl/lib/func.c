@@ -207,6 +207,13 @@ static bool func_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   return true;
 }
 
+static bool func_lib_imp(struct cx_scope *scope) {
+  struct cx *cx = scope->cx;
+  struct cx_func *f = cx_test(cx_pop(scope, false))->as_ptr;
+  cx_box_init(cx_push(scope), cx->lib_type)->as_lib = f->lib;
+  return true;
+}
+
 static bool imps_imp(struct cx_scope *scope) {
   struct cx *cx = scope->cx;
   struct cx_func *f = cx_test(cx_pop(scope, false))->as_ptr;
@@ -264,6 +271,11 @@ cx_lib(cx_init_func, "cx/func") {
 
   cx_add_macro(lib, "func:", func_parse);
 
+  cx_add_cfunc(lib, "lib",
+	       cx_args(cx_arg("f", cx->func_type)),
+	       cx_args(cx_arg(NULL, cx->lib_type)),
+	       func_lib_imp);
+  
   cx_add_cfunc(lib, "imps",
 	       cx_args(cx_arg("f", cx->func_type)),
 	       cx_args(cx_arg(NULL, cx->stack_type)),

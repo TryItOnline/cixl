@@ -11,7 +11,7 @@ struct cx_iter;
 struct cx_scope;
 
 struct cx_type {
-  struct cx *cx;
+  struct cx_lib *lib;
   char *id, *emit_id;
   size_t tag, level;
   struct cx_set parents, children;
@@ -36,7 +36,10 @@ struct cx_type {
   void *(*type_deinit)(struct cx_type *);
 };
 
-struct cx_type *cx_type_init(struct cx_type *type, struct cx *cx, const char *id);
+struct cx_type *cx_type_init(struct cx_type *type,
+			     struct cx_lib *lib,
+			     const char *id);
+
 struct cx_type *cx_type_reinit(struct cx_type *type);
 void *cx_type_deinit(struct cx_type *type);
 

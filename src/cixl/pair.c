@@ -54,7 +54,7 @@ static void copy_imp(struct cx_box *dst, const struct cx_box *src) {
 }
 
 static void clone_imp(struct cx_box *dst, struct cx_box *src) {
-  dst->as_pair = cx_pair_new(src->type->cx, NULL, NULL);
+  dst->as_pair = cx_pair_new(src->type->lib->cx, NULL, NULL);
   cx_clone(&dst->as_pair->x, &src->as_pair->x);
   cx_clone(&dst->as_pair->y, &src->as_pair->y);
 }
@@ -75,7 +75,7 @@ static void dump_imp(struct cx_box *v, FILE *out) {
 }
 
 static void deinit_imp(struct cx_box *v) {
-  cx_pair_deref(v->as_pair, v->type->cx);
+  cx_pair_deref(v->as_pair, v->type->lib->cx);
 }
 
 struct cx_type *cx_init_pair_type(struct cx_lib *lib) {

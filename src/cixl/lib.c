@@ -72,7 +72,7 @@ struct cx_type *cx_vadd_type(struct cx_lib *lib, const char *id, va_list parents
     return NULL;
   }
   
-  *t = cx_type_init(malloc(sizeof(struct cx_type)), cx, id);
+  *t = cx_type_init(malloc(sizeof(struct cx_type)), lib, id);
   *(struct cx_type **)cx_vec_push(&cx->types) = *t;
   
   struct cx_type *pt = NULL;
@@ -91,7 +91,7 @@ struct cx_rec_type *cx_add_rec_type(struct cx_lib *lib, const char *id) {
     return t;
   }
   
-  struct cx_rec_type *t = cx_rec_type_new(cx, id);
+  struct cx_rec_type *t = cx_rec_type_new(lib, id);
   *(struct cx_type **)cx_vec_push(&cx->types) = &t->imp;
   *(struct cx_type **)cx_test(cx_set_insert(&lib->types, &id)) = &t->imp;
   return t;

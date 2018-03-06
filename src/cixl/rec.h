@@ -18,10 +18,10 @@ struct cx_field {
   struct cx_type *type;
 };
 
-struct cx_rec_type *cx_rec_type_new(struct cx *cx, const char *id);
+struct cx_rec_type *cx_rec_type_new(struct cx_lib *lib, const char *id);
 
 struct cx_rec_type *cx_rec_type_init(struct cx_rec_type *type,
-				     struct cx *cx,
+				     struct cx_lib *lib,
 				     const char *id);
 
 struct cx_rec_type *cx_rec_type_reinit(struct cx_rec_type *type);

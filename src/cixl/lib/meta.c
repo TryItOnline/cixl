@@ -168,13 +168,11 @@ static bool get_lib_imp(struct cx_scope *scope) {
 cx_lib(cx_init_meta, "cx/meta") {
   struct cx *cx = lib->cx;
     
-  if (!cx_use(cx, "cx/abc", "Opt") ||
+  if (!cx_use(cx, "cx/abc", "Lib", "Opt") ||
       !cx_use(cx, "cx/str", "Str") ||
       !cx_use(cx, "cx/sym", "Sym")) {
     return false;
   }
-
-  cx->lib_type = cx_init_lib_type(lib);
     
   cx_add_macro(lib, "include:", include_parse);
   cx_add_macro(lib, "use:", use_parse);

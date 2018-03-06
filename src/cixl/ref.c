@@ -18,7 +18,7 @@ struct cx_ref *cx_ref_ref(struct cx_ref *ref) {
 void cx_ref_deref(struct cx_ref *ref) {
   cx_test(ref->nrefs);
   ref->nrefs--;
-  if (!ref->nrefs) { cx_free(&ref->value.type->cx->ref_alloc, ref); }
+  if (!ref->nrefs) { cx_free(&ref->value.type->lib->cx->ref_alloc, ref); }
 }
 
 static bool equid_imp(struct cx_box *x, struct cx_box *y) {

@@ -20,7 +20,7 @@ struct cx_box *cx_box_deinit(struct cx_box *box) {
 
 bool cx_box_emit(struct cx_box *box, const char *exp, FILE *out) {
   if (!box->type->emit) {
-    struct cx *cx = box->type->cx;
+    struct cx *cx = box->type->lib->cx;
     cx_error(cx, cx->row, cx->col, "Emit not implemented: %s", box->type->id);
     return false;
   }
@@ -77,10 +77,12 @@ struct cx_iter *cx_iter(struct cx_box *box) {
 
 bool cx_write(struct cx_box *box, FILE *out) {
   if (!box->type->write) {
-    struct cx *cx = box->type->cx;
+    struct cx *cx = box->type->lib->cx;
+    
     cx_error(cx, cx->row, cx->col,
 	     "Write not implemented for type: %s",
 	     box->type->id);
+
     return false;
   }
   

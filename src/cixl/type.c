@@ -8,11 +8,13 @@
 #include "cixl/scope.h"
 #include "cixl/type.h"
 
-struct cx_type *cx_type_init(struct cx_type *type, struct cx *cx, const char *id) {
-  type->cx = cx;
+struct cx_type *cx_type_init(struct cx_type *type,
+			     struct cx_lib *lib,
+			     const char *id) {
+  type->lib = lib;
   type->id = strdup(id);
   type->emit_id = cx_emit_id("type", id);
-  type->tag = cx->next_type_tag++;
+  type->tag = lib->cx->next_type_tag++;
   type->level = 0;
   type->trait = false;
 

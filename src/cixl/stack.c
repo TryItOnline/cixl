@@ -125,7 +125,7 @@ static void copy_imp(struct cx_box *dst, const struct cx_box *src) {
 }
 
 static void clone_imp(struct cx_box *dst, struct cx_box *src) {
-  struct cx *cx = src->type->cx;
+  struct cx *cx = src->type->lib->cx;
   struct cx_stack *src_stack = src->as_ptr, *dst_stack = cx_stack_new(cx);
   dst->as_ptr = dst_stack;
 
