@@ -55,6 +55,8 @@ struct cx {
 struct cx *cx_init(struct cx *cx);
 struct cx *cx_deinit(struct cx *cx);
 
+void cx_init_libs(struct cx *cx);
+
 void cx_add_separators(struct cx *cx, const char *cs);
 bool cx_is_separator(struct cx *cx, char c);
 

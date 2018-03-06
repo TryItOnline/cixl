@@ -91,10 +91,15 @@ static void run(struct cx *cx, const char *in) {
   }
 }
 
+static void init_cx(struct cx *cx) {
+  cx_init(cx);
+  cx_init_libs(cx);
+  cx_use(cx, "cx/meta");
+}
+
 static void comment_tests() {
   struct cx cx;
-  cx_init(&cx);
-  cx_use(&cx, "cx/meta");
+  init_cx(&cx);
   
   run(&cx, "use: cx/error cx/math;");
   run(&cx, "1 //foo bar\n2 + 3 = check");
@@ -105,8 +110,7 @@ static void comment_tests() {
 
 static void type_tests() {
   struct cx cx;
-  cx_init(&cx);
-  cx_use(&cx, "cx/meta");
+  init_cx(&cx);
 
   run(&cx, "use: cx/abc cx/cond cx/error cx/type;");
   run(&cx, "42 type Int = check");
@@ -118,8 +122,7 @@ static void type_tests() {
 
 static void group_tests() {
   struct cx cx;
-  cx_init(&cx);
-  cx_use(&cx, "cx/meta");
+  init_cx(&cx);
 
   run(&cx, "use: cx/cond cx/error;");
   run(&cx, "(7 14 21) 21 = check");
@@ -129,8 +132,7 @@ static void group_tests() {
 
 static void if_tests() {
   struct cx cx;
-  cx_init(&cx);
-  cx_use(&cx, "cx/meta");
+  init_cx(&cx);
   
   run(&cx, "use: cx/abc cx/cond cx/error cx/sym;");
   run(&cx, "#t 42 if 42 = check");
@@ -143,8 +145,7 @@ static void if_tests() {
 
 static void let_tests() {
   struct cx cx;
-  cx_init(&cx);
-  cx_use(&cx, "cx/meta");
+  init_cx(&cx);
 
   run(&cx, "use: cx/abc cx/cond cx/error cx/math cx/str cx/var;");
   run(&cx, "(let: foo 42; $foo 42 = check)");
@@ -160,8 +161,7 @@ static void let_tests() {
 
 static void func_tests() {
   struct cx cx;
-  cx_init(&cx);
-  cx_use(&cx, "cx/meta");
+  init_cx(&cx);
 
   run(&cx, "use: cx/abc cx/func cx/cond cx/error cx/math cx/stack cx/var;");
   run(&cx, "func: foo0()(Int) 42; foo0 42 = check");
@@ -192,8 +192,7 @@ static void func_tests() {
 
 static void iter_tests() {
   struct cx cx;
-  cx_init(&cx);
-  cx_use(&cx, "cx/meta");
+  init_cx(&cx);
 
   run(&cx, "use: cx/abc cx/cond cx/error cx/iter cx/math;");
   run(&cx, "0 5 &++ map &+ for 15 = check");
@@ -203,8 +202,7 @@ static void iter_tests() {
 
 static void int_tests() {
   struct cx cx;
-  cx_init(&cx);
-  cx_use(&cx, "cx/meta");
+  init_cx(&cx);
 
   run(&cx, "use: cx/cond cx/error cx/iter cx/math cx/str;");
   run(&cx, "42 check");
@@ -218,8 +216,7 @@ static void int_tests() {
 
 static void char_tests() {
   struct cx cx;
-  cx_init(&cx);
-  cx_use(&cx, "cx/meta");
+  init_cx(&cx);
   
   run(&cx, "use: cx/cond cx/error cx/iter cx/math cx/str;");
   run(&cx, "@a upper @A = check");
@@ -230,8 +227,7 @@ static void char_tests() {
 
 static void str_tests() {
   struct cx cx;
-  cx_init(&cx);
-  cx_use(&cx, "cx/meta");
+  init_cx(&cx);
 
   run(&cx, "use: cx/cond cx/error cx/stack cx/str;");
   run(&cx, "'foo' check");
@@ -249,8 +245,7 @@ static void str_tests() {
 
 static void sym_tests() {
   struct cx cx;
-  cx_init(&cx);
-  cx_use(&cx, "cx/meta");
+  init_cx(&cx);
 
   run(&cx, "use: cx/cond cx/error cx/stack cx/sym cx/type;");
   run(&cx, "`foo `foo == check");
@@ -264,8 +259,7 @@ static void sym_tests() {
 
 static void rat_tests() {
   struct cx cx;
-  cx_init(&cx);
-  cx_use(&cx, "cx/meta");
+  init_cx(&cx);
 
   run(&cx, "use: cx/cond cx/error cx/math;");
   run(&cx, "1 2 / 5 2 / * 5 4 / = check");
@@ -276,8 +270,7 @@ static void rat_tests() {
 
 static void time_tests() {
   struct cx cx;
-  cx_init(&cx);
-  cx_use(&cx, "cx/meta");
+  init_cx(&cx);
 
   run(&cx, "use: cx/cond cx/error cx/time;");
   run(&cx, "now now <= check");
@@ -290,8 +283,7 @@ static void time_tests() {
 
 static void guid_tests() {
   struct cx cx;
-  cx_init(&cx);
-  cx_use(&cx, "cx/meta");
+  init_cx(&cx);
 
   run(&cx, "use: cx/cond cx/error cx/guid cx/stack cx/type;");
   run(&cx, "Guid % new ~ new = !check");
@@ -302,8 +294,7 @@ static void guid_tests() {
 
 static void ref_tests() {
   struct cx cx;
-  cx_init(&cx);
-  cx_use(&cx, "cx/meta");
+  init_cx(&cx);
 
   run(&cx, "use: cx/abc cx/cond cx/error cx/ref cx/stack;");
   run(&cx, "#nil ref % 42 put-ref get-ref 42 = check");
@@ -313,8 +304,7 @@ static void ref_tests() {
 
 static void pair_tests() {
   struct cx cx;
-  cx_init(&cx);
-  cx_use(&cx, "cx/meta");
+  init_cx(&cx);
 
   run(&cx, "use: cx/cond cx/error cx/math cx/pair cx/stack;");
   run(&cx, "1 2. % rezip unzip - 1 = check");
@@ -326,8 +316,7 @@ static void pair_tests() {
 
 static void stack_tests() {
   struct cx cx;
-  cx_init(&cx);
-  cx_use(&cx, "cx/meta");
+  init_cx(&cx);
 
   run(&cx, "use: cx/abc cx/cond cx/error cx/iter cx/math cx/stack;");
   run(&cx, "1 2 [3 4 5] len 3 = check");
@@ -346,8 +335,7 @@ static void stack_tests() {
 
 static void table_tests() {
   struct cx cx;
-  cx_init(&cx);
-  cx_use(&cx, "cx/meta");
+  init_cx(&cx);
 
   run(&cx,
       "use: cx/cond cx/error cx/iter cx/math cx/pair cx/stack "
@@ -369,8 +357,7 @@ static void table_tests() {
 
 static void math_tests() {
   struct cx cx;
-  cx_init(&cx);
-  cx_use(&cx, "cx/meta");
+  init_cx(&cx);
 
   run(&cx, "use: cx/cond cx/error cx/math;");
   run(&cx, "21 21 +<Int Int> 42 = check");
@@ -381,8 +368,7 @@ static void math_tests() {
 
 static void rec_tests() {
   struct cx cx;
-  cx_init(&cx);
-  cx_use(&cx, "cx/meta");
+  init_cx(&cx);
 
   run(&cx, "use: cx/abc cx/cond cx/error cx/func cx/rec cx/stack cx/type cx/var;");
 
@@ -414,8 +400,7 @@ static void rec_tests() {
 
 static void compile_tests() {
   struct cx cx;
-  cx_init(&cx);
-  cx_use(&cx, "cx/meta");
+  init_cx(&cx);
 
   run(&cx, "use: cx/bin cx/cond cx/error cx/func cx/math cx/stack cx/type;");
   run(&cx, "Bin new % '1 2 +' compile call 3 = check");

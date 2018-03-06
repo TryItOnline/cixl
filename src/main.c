@@ -14,6 +14,7 @@
 int main(int argc, char *argv[]) {
   struct cx cx;
   cx_init(&cx);
+  cx_init_libs(&cx);
   cx_use(&cx, "cx/meta");
   
   bool emit = false;
@@ -88,7 +89,8 @@ int main(int argc, char *argv[]) {
       
       fputs("int main() {\n"
 	    "  struct cx cx;\n"
-	    "  cx_init(&cx);\n\n"
+	    "  cx_init(&cx);\n"
+	    "  cx_init_libs(&cx);\n\n"
 	    "  if (!eval(&cx)) {\n"
 	    "    cx_dump_errors(&cx, stderr);\n"
 	    "    return -1;\n"

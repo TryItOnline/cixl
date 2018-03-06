@@ -149,12 +149,15 @@ struct cx *cx_init(struct cx *cx) {
     cx->table_type =
     cx->time_type =
     cx->wfile_type = NULL;
-  
-    
+      
   cx->scope = NULL;
   cx->root_scope = cx_begin(cx, NULL);
   srand((ptrdiff_t)cx + clock());
 
+  return cx;
+}
+
+void cx_init_libs(struct cx *cx) {
   cx_init_abc(cx);
   cx_init_bin(cx);
   cx_init_cond(cx);
@@ -177,7 +180,6 @@ struct cx *cx_init(struct cx *cx) {
   cx_init_type(cx);
   cx_init_var(cx);
   cx_init_world(cx);
-  return cx;
 }
 
 struct cx *cx_deinit(struct cx *cx) {

@@ -1,15 +1,12 @@
-* extract cx_init_libs(cx)
-** call from main and tests
-** extract new_cx() in tests.c
+* add lib: n ...;  macro
+** create new lib if !exists
+** add opush/poplib around code on macro eval
+** test emit
 * call push/pop_lib on lambda enter/exit
 ** add lambda.lib
 *** init in cx_lambda_new
 ** add lib tests
 *** call and check lib inside
-* add lib: n ...;  macro
-** create new lib if !exists
-** add opush/poplib around code on macro eval
-** test emit
 * ---
 * add support for type literal args
 ** use _ for anonymous args
