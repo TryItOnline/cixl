@@ -1,3 +1,6 @@
+* move Fimp, Func, Iter, Str, Sym & Stack types to abc
+* add cx-fimp
+** return opt top of call stack
 * rename ref_ref to ref_inc & deref to dec
 * change lib init to bool result
 ** check cx_use returns in inits
