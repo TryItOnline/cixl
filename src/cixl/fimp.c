@@ -15,8 +15,10 @@
 #include "cixl/tok.h"
 
 struct cx_fimp *cx_fimp_init(struct cx_fimp *imp,
+			     struct cx_lib *lib,
 			     struct cx_func *func,
 			     char *id) {
+  imp->lib = lib;
   imp->func = func;
   imp->id = id;
   imp->emit_id = cx_emit_id(func->emit_id, id);

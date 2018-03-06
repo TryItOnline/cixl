@@ -99,8 +99,10 @@ struct cx_fimp *cx_add_fimp(struct cx_func *func,
   }
 
   imp = cx_fimp_init(malloc(sizeof(struct cx_fimp)),
+		     *cx->lib,
 		     func,
 		     id.data);
+  
   *(struct cx_fimp **)cx_vec_push(&cx->fimps) = imp;
   *(struct cx_fimp **)cx_set_insert(&func->imps, &id.data) = imp;
   imp->args = imp_args;

@@ -49,7 +49,7 @@ static bool begin_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
     ? cx_scope(cx, 0)
     : op->as_begin.fimp->scope;
 
-  if (op->as_begin.fimp) { cx_push_lib(cx, op->as_begin.fimp->func->lib); }  
+  if (op->as_begin.fimp) { cx_push_lib(cx, op->as_begin.fimp->lib); }  
   cx_begin(cx, parent);
   return true;
 }
@@ -68,7 +68,7 @@ static bool begin_emit(struct cx_op *op,
     fprintf(out,
 	    "%s->scope;\n"
 	    CX_TAB "cx_push_lib(cx, %s);\n",
-	    imp->emit_id, imp->func->lib->emit_id);
+	    imp->emit_id, imp->lib->emit_id);
   }
 
   fputs(CX_TAB "cx_begin(cx, parent);\n", out);
@@ -175,7 +175,7 @@ static void fimp_emit_init(struct cx_op *op,
 	  CX_ITAB "imp->bin = cx_bin_ref(cx->bin);\n"
 	  CX_ITAB "imp->start_pc = %zd;\n"
 	  CX_ITAB "imp->nops = %zd;\n",
-	  imp->func->lib->id.id, imp->func->id, imp->id, imp->start_pc, imp->nops);
+	  imp->lib->id.id, imp->func->id, imp->id, imp->start_pc, imp->nops);
 }
 
 static void fimp_emit_funcs(struct cx_op *op, struct cx_set *out, struct cx *cx) {

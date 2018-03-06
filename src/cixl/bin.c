@@ -163,6 +163,11 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
     if (ok) { *ok = (*f)->lib; }
   }
 
+  cx_do_set(&fimps, struct cx_fimp *, f) {
+    struct cx_lib **ok = cx_set_insert(&libs, &(*f)->lib);
+    if (ok) { *ok = (*f)->lib; }
+  }
+
   cx_do_set(&libs, struct cx_lib *, l) {
     fprintf(out, "  static struct cx_lib *%s;\n", (*l)->emit_id);
   }

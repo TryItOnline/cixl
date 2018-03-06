@@ -113,9 +113,21 @@ All types and functions belong to a library, ```lib``` may be used to find out w
 ...
 [Lib(cx/abc)]
 
-   | &+ lib
+   | &=
 ...
-[Lib(cx/math)]
+[Func(=)]
+
+   lib
+...
+[Lib(cx/cond)]
+
+   | &=<Rec Rec>
+...
+[Fimp(= Rec Rec)]
+
+   lib
+...
+[Lib(cx/rec)]
 ```
 
 ### Stack Basics

@@ -1,9 +1,11 @@
-* add Fimp lib fn
-** add cx_fimp.lib
 * add cx-fimp
 ** return opt top of call stack
+* add Func id fn
+* add Fimp func fn
 * ---
-* move Fimp, Func, Iter, Lib, Str, Sym & Stack types to abc
+* add meta.get-func/get-type(lib id)
+* ---
+* move Fimp, Func, Iter, Str, Sym & Stack types to abc
 * rename ref_ref to ref_inc & deref to dec
 * extract cx_init_libs(cx)
 ** call from main and tests
@@ -16,7 +18,7 @@
 * add lib: n ...;  macro
 ** create new lib if !exists
 ** add opush/poplib around code on macro eval
-** fix emit
+** test emit
 * ---
 * add connect(Socket, ip, port) fn
 ** non-blocking

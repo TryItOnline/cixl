@@ -11,6 +11,7 @@ struct cx_type;
 typedef bool (*cx_fimp_ptr_t)(struct cx_scope *);
 
 struct cx_fimp {
+  struct cx_lib *lib;
   struct cx_func *func;
   char *id, *emit_id;
   struct cx_vec args, rets;
@@ -22,6 +23,7 @@ struct cx_fimp {
 };
 
 struct cx_fimp *cx_fimp_init(struct cx_fimp *imp,
+			     struct cx_lib *lib,
 			     struct cx_func *func,
 			     char *id);
 

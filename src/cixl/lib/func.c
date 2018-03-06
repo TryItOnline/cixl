@@ -214,6 +214,13 @@ static bool func_lib_imp(struct cx_scope *scope) {
   return true;
 }
 
+static bool fimp_lib_imp(struct cx_scope *scope) {
+  struct cx *cx = scope->cx;
+  struct cx_fimp *f = cx_test(cx_pop(scope, false))->as_ptr;
+  cx_box_init(cx_push(scope), cx->lib_type)->as_lib = f->lib;
+  return true;
+}
+
 static bool imps_imp(struct cx_scope *scope) {
   struct cx *cx = scope->cx;
   struct cx_func *f = cx_test(cx_pop(scope, false))->as_ptr;
@@ -275,7 +282,12 @@ cx_lib(cx_init_func, "cx/func") {
 	       cx_args(cx_arg("f", cx->func_type)),
 	       cx_args(cx_arg(NULL, cx->lib_type)),
 	       func_lib_imp);
-  
+
+  cx_add_cfunc(lib, "lib",
+	       cx_args(cx_arg("f", cx->fimp_type)),
+	       cx_args(cx_arg(NULL, cx->lib_type)),
+	       fimp_lib_imp);
+
   cx_add_cfunc(lib, "imps",
 	       cx_args(cx_arg("f", cx->func_type)),
 	       cx_args(cx_arg(NULL, cx->stack_type)),
