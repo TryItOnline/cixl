@@ -53,7 +53,7 @@ static const void *get_lib_id(const void *value) {
   return &(*lib)->id;
 }
 
-static cx_lib(init_world, "cx", {
+cx_lib(cx_init_world, "cx", {
     struct cx *cx = lib->cx;
 
     cx_use(cx, "cx/abc");
@@ -129,6 +129,7 @@ struct cx *cx_init(struct cx *cx) {
     cx->int_type =
     cx->iter_type =
     cx->lambda_type =
+    cx->lib_type = 
     cx->nil_type =
     cx->num_type =
     cx->meta_type =
@@ -174,7 +175,7 @@ struct cx *cx_init(struct cx *cx) {
   cx_init_time(cx);
   cx_init_type(cx);
   cx_init_var(cx);
-  init_world(cx);
+  cx_init_world(cx);
   return cx;
 }
 

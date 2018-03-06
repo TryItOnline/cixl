@@ -140,10 +140,34 @@ static bool use_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   return true;
 }
 
+static bool cx_lib_imp(struct cx_scope *scope) {
+  cx_box_init(cx_push(scope), scope->cx->lib_type)->as_lib = *scope->cx->lib;
+  return true;
+}
+
+static bool lib_id_imp(struct cx_scope *scope) {
+  struct cx_box lib = *cx_test(cx_pop(scope, false));
+  cx_box_init(cx_push(scope), scope->cx->sym_type)->as_sym = lib.as_lib->id;
+  return true;
+}
+
 cx_lib(cx_init_meta, "cx/meta", {
     struct cx *cx = lib->cx;
     cx_use(cx, "cx/str", "Str");
+    cx_use(cx, "cx/sym", "Sym");
+
+    cx->lib_type = cx_init_lib_type(lib);
     
     cx_add_macro(lib, "include:", include_parse);
     cx_add_macro(lib, "use:", use_parse);
+
+    cx_add_cfunc(lib, "cx-lib",
+		 cx_args(),
+		 cx_args(cx_arg(NULL, cx->lib_type)),
+		 cx_lib_imp);
+
+    cx_add_cfunc(lib, "id",
+		 cx_args(cx_arg("lib", cx->lib_type)),
+		 cx_args(cx_arg(NULL, cx->sym_type)),
+		 lib_id_imp);
   })

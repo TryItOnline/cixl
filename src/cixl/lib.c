@@ -337,3 +337,37 @@ bool _cx_use(struct cx *cx,
   
   return use_all(lib);
 }
+
+static bool equid_imp(struct cx_box *x, struct cx_box *y) {
+  return x->as_lib == y->as_lib;
+}
+
+static void write_imp(struct cx_box *v, FILE *out) {
+  fprintf(out, "`%s lib", v->as_lib->id.id);
+}
+
+static void dump_imp(struct cx_box *v, FILE *out) {
+  fprintf(out, "Lib(%s)", v->as_lib->id.id);
+}
+
+static void print_imp(struct cx_box *v, FILE *out) {
+  fputs(v->as_lib->id.id, out);
+}
+
+static bool emit_imp(struct cx_box *v, const char *exp, FILE *out) {
+  fprintf(out,
+	  "cx_box_init(%s, cx->lib_type)->as_lib = %s;\n",
+	  exp, v->as_lib->emit_id);
+  
+  return true;
+}
+
+struct cx_type *cx_init_lib_type(struct cx_lib *lib) {
+  struct cx_type *t = cx_add_type(lib, "Lib", lib->cx->any_type);
+  t->equid = equid_imp;
+  t->write = write_imp;
+  t->dump = dump_imp;
+  t->print = print_imp;
+  t->emit = emit_imp;
+  return t;
+}

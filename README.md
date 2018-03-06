@@ -69,6 +69,7 @@ $
 ### Libraries
 The entire language is split into libraries to enable building custom languages on top of sub sets of existing functionality. ```use: cx;``` may be used as a short cut to import everything. The REPL starts with everything imported while the interpreter and compiler starts with nothing but ```use:``` and ```include:```. The following libraries are available.
 
+* cx/abc
 * cx/bin
 * cx/cond
 * cx/error
@@ -88,6 +89,18 @@ The entire language is split into libraries to enable building custom languages 
 * cx/time
 * cx/type
 * cx/var
+
+The default library is called the ```lobby```.
+
+```
+   | cx-lib
+...
+[Lib(lobby)]
+
+   id
+...
+[`lobby]
+```
 
 ### Stack
 Like Forth, Cixl expects arguments before operations and exposes the parameter stack to code. Basic stack operations have dedicated operators; ```%``` for copying the last value, ```_``` for dropping it, ```~``` for flipping the last two values and ```|``` for clearing the stack.

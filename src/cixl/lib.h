@@ -84,4 +84,6 @@ struct cx_box *cx_set_const(struct cx_lib *lib, struct cx_sym id, bool force);
 bool _cx_use(struct cx *cx, const char *lib_id,
 	     unsigned int nids, const char **ids);
 
+struct cx_type *cx_init_lib_type(struct cx_lib *lib);
+
 #endif

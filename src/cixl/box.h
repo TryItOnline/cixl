@@ -14,6 +14,7 @@ struct cx_file;
 struct cx_func;
 struct cx_iter;
 struct cx_lambda;
+struct cx_lib;
 struct cx_pair;
 struct cx_ref;
 struct cx_scope;
@@ -31,6 +32,7 @@ struct cx_box {
     cx_guid_t        as_guid;
     int64_t          as_int;
     struct cx_iter  *as_iter;
+    struct cx_lib   *as_lib;
     struct cx_pair  *as_pair;
     void            *as_ptr;
     struct cx_rat    as_rat;

@@ -1,6 +1,3 @@
-* add meta.cx-lib fn to return current lib
-** add cx.lib_type
-*** add id fn
 * rename ref_ref to ref_inc & deref to dec
 * change lib init to bool result
 ** check cx_use returns in inits
@@ -13,10 +10,14 @@
 * call push/pop_lib on lambda enter/exit
 ** add lambda.lib
 *** init in cx_lambda_new
-* switch consts to cx_set
-* add lib: n (exported) ...;  macro
+* add lib: n (exports) ...;  macro
+** add lib.exports
+*** set of syms
+*** check in use
+** change lib macro to use varargs for exports
+*** predeclare init fn
 ** create new lib if !exists
-** add opush/poplib around code on eval
+** add opush/poplib around code on macro eval
 * ---
 * add connect(Socket, ip, port) fn
 ** non-blocking
