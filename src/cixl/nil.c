@@ -29,8 +29,5 @@ struct cx_type *cx_init_nil_type(struct cx_lib *lib) {
   t->write = dump_imp;
   t->dump = dump_imp;
   t->emit = emit_imp;
-  
-  cx_box_init(cx_set_const(lib, cx_sym(cx, "nil"), false), t);
-
   return t;
 }

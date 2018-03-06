@@ -207,6 +207,23 @@ static bool drop_imp(struct cx_scope *scope) {
   return true;
 }
 
+static bool times_imp(struct cx_scope *scope) {
+  struct cx_box
+    v = *cx_test(cx_pop(scope, false)),
+    reps = *cx_test(cx_pop(scope, false));
+
+  bool ok = false;
+  
+  for (int64_t i = 0; i < reps.as_int; i++) {
+    if (!cx_call(&v, scope)) { goto exit; }
+  }
+
+  ok = true;
+ exit:
+  cx_box_deinit(&v);
+  return ok;
+}
+
 cx_lib(cx_init_iter, "cx/iter", {
     struct cx *cx = lib->cx;
     cx_use(cx, "cx/abc", "A", "Int", "Opt", "Seq");
@@ -242,4 +259,9 @@ cx_lib(cx_init_iter, "cx/iter", {
 		 cx_args(cx_arg("it", cx->iter_type), cx_arg("n", cx->int_type)),
 		 cx_args(),
 		 drop_imp);
+
+    cx_add_cfunc(lib, "times",
+		 cx_args(cx_arg("n", cx->int_type),
+			 cx_arg("act", cx->any_type)), cx_args(),
+		 times_imp);
   })

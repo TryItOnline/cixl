@@ -30,9 +30,6 @@ struct cx_type *cx_init_bool_type(struct cx_lib *lib) {
   t->ok = ok_imp;
   t->write = dump_imp;
   t->dump = dump_imp;
-  t->emit = emit_imp;
-  
-  cx_box_init(cx_set_const(lib, cx_sym(cx, "t"), false), t)->as_bool = true;
-  cx_box_init(cx_set_const(lib, cx_sym(cx, "f"), false), t)->as_bool = false;
+  t->emit = emit_imp;  
   return t;
 }

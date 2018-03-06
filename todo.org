@@ -1,18 +1,12 @@
-* move nil_type and nil constant to abc lib
-* move ++/-- to math lib
-* move times to iter lib
-* move bool/t/f to cond lib
-* move bool_type to cond lib
-** use where needed
-
-* ---
+* add meta.lib fn to return current lib
+** add cx.lib_type
+*** add id fn
+* call push/pop_lib on lambda enter/exit
+** add lambda.lib
+** init in cx_lambda_new
 * add lib: n ...;  macro
 ** create new lib if !exists
 ** add opush/poplib around code on eval
-* add meta.lib fn to return current lib
-** add cx.lib_type
-*** add sym fn
-*** add sym fn for func
 * rename ref_ref to ref_inc & deref to dec
 * change lib init to bool result
 ** check cx_use returns in inits
@@ -46,8 +40,10 @@
 * extract char literals as macro in str lib
 * extract $var literals as macro in var lib
 * ---
-* optimize startup
-** parse fns on first use
+* parse cx fns on first use
+** add source field
+** add parsed flag
+** parse on demand
 * optimize const emit
 ** add op_type.emit_consts
 *** rewrite getconst emit

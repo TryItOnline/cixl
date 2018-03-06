@@ -11,6 +11,18 @@
 #include "cixl/scope.h"
 #include "cixl/lib/math.h"
 
+static bool inc_imp(struct cx_scope *scope) {
+  struct cx_box *v = cx_test(cx_peek(scope, false));
+  v->as_int++;
+  return true;
+}
+
+static bool dec_imp(struct cx_scope *scope) {
+  struct cx_box *v = cx_test(cx_peek(scope, false));
+  v->as_int--;
+  return true;
+}
+
 static bool int_add_imp(struct cx_scope *scope) {
   struct cx_box
     y = *cx_test(cx_pop(scope, false)),
@@ -108,13 +120,23 @@ static bool rat_int_imp(struct cx_scope *scope) {
 
 cx_lib(cx_init_math, "cx/math", {
     struct cx *cx = lib->cx;
-    cx_use(cx, "cx/abc", "A", "Int", "Num", "Opt", "Seq", "--");
+    cx_use(cx, "cx/abc", "A", "Int", "Num", "Opt", "Seq");
     cx_use(cx, "cx/cond", "=", "?", "if-else");
     cx_use(cx, "cx/func", "Fimp", "Func", "recall");
     cx_use(cx, "cx/iter", "for");
 
     cx->rat_type = cx_init_rat_type(lib);
-    
+
+    cx_add_cfunc(lib, "++",
+		 cx_args(cx_arg("v", cx->int_type)),
+		 cx_args(cx_arg(NULL, cx->int_type)),
+		 inc_imp);
+  
+    cx_add_cfunc(lib, "--",
+		 cx_args(cx_arg("v", cx->int_type)),
+		 cx_args(cx_arg(NULL, cx->int_type)),
+		 dec_imp);
+
     cx_add_cfunc(lib, "+",
 		 cx_args(cx_arg("x", cx->int_type), cx_arg("y", cx->int_type)),
 		 cx_args(cx_arg(NULL, cx->int_type)),

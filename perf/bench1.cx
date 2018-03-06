@@ -1,8 +1,9 @@
 use:
-  (cx/abc   Int times)
+  (cx/abc   Int)
   (cx/io    say)
+  (cx/iter  times)
   (cx/math  Rat / fib int)
-  (cx_stack _)
+  (cx/stack _)
   (cx/time  clock)
   (cx/type  unsafe);
 
