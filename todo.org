@@ -22,7 +22,8 @@
 * call push/pop_lib on lambda enter/exit
 ** add lambda.lib
 *** init in cx_lambda_new
-* add lib: n ...;  macro
+* switch consts to cx_set
+* add lib: n (exported) ...;  macro
 ** create new lib if !exists
 ** add opush/poplib around code on eval
 * ---

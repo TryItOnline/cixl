@@ -26,8 +26,7 @@ struct cx_sym *cx_sym_deinit(struct cx_sym *sym) {
 
 enum cx_cmp cx_cmp_sym(const void *x, const void *y) {
   const struct cx_sym *xs = x, *ys = y;
-  if (xs->tag == ys->tag) { return CX_CMP_EQ; }
-  return (strcmp(xs->id, ys->id) < 0) ? CX_CMP_LT : CX_CMP_GT;
+  return cx_cmp_int(&xs->tag, &ys->tag);
 }
 
 static void new_imp(struct cx_box *out) {
