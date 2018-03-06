@@ -381,8 +381,7 @@ static bool clock_imp(struct cx_scope *scope) {
 cx_lib(cx_init_time, "cx/time") {
   struct cx *cx = lib->cx;
     
-  if (!cx_use(cx, "cx/abc", "A", "Cmp", "Int", "Opt") ||
-      !cx_use(cx, "cx/stack", "Stack")) {
+  if (!cx_use(cx, "cx/abc", "A", "Cmp", "Int", "Opt", "Stack")) {
     return false;
   }
 

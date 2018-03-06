@@ -286,8 +286,7 @@ static bool cx_fimp_imp(struct cx_scope *scope) {
 cx_lib(cx_init_func, "cx/func") {
   struct cx *cx = lib->cx;
     
-  if (!cx_use(cx, "cx/abc", "A", "Lib", "Seq", "Sym") ||
-      !cx_use(cx, "cx/stack", "Stack")) {
+  if (!cx_use(cx, "cx/abc", "A", "Lib", "Seq", "Stack", "Sym")) {
     return false;
   }
 

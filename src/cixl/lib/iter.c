@@ -227,11 +227,9 @@ static bool times_imp(struct cx_scope *scope) {
 cx_lib(cx_init_iter, "cx/iter") {
   struct cx *cx = lib->cx;
     
-  if (!cx_use(cx, "cx/abc", "A", "Int", "Opt", "Seq")) {
+  if (!cx_use(cx, "cx/abc", "A", "Int", "Iter", "Opt", "Seq")) {
     return false;
   }
-
-  cx->iter_type = cx_init_iter_type(lib);
     
   cx_add_cfunc(lib, "iter",
 	       cx_args(cx_arg("seq", cx->seq_type)),

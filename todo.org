@@ -1,4 +1,3 @@
-* move Iter, Str & Stack types to abc
 * extract cx_init_libs(cx)
 ** call from main and tests
 ** extract new_cx() in tests.c
@@ -11,6 +10,10 @@
 ** create new lib if !exists
 ** add opush/poplib around code on macro eval
 ** test emit
+* ---
+* add support for type literal args
+** use _ for anonymous args
+** interpret as type literal if no ids
 * ---
 * add connect(Socket, ip, port) fn
 ** non-blocking

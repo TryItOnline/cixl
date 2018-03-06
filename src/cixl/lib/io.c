@@ -195,9 +195,7 @@ static bool lines_imp(struct cx_scope *scope) {
 cx_lib(cx_init_io, "cx/io") {    
   struct cx *cx = lib->cx;
     
-  if (!cx_use(cx, "cx/abc", "A", "Cmp", "Opt", "Sym") ||
-      !cx_use(cx, "cx/iter", "Iter") ||
-      !cx_use(cx, "cx/str", "Char", "Str")) {
+  if (!cx_use(cx, "cx/abc", "A", "Cmp", "Char", "Iter", "Opt", "Str", "Sym")) {
     return false;
   }
 

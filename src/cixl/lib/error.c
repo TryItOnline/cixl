@@ -33,8 +33,7 @@ static bool fail_imp(struct cx_scope *scope) {
 cx_lib(cx_init_error, "cx/error") {
   struct cx *cx = lib->cx;
     
-  if (!cx_use(cx, "cx/abc", "Opt") ||
-      !cx_use(cx, "cx/str", "Str")) {
+  if (!cx_use(cx, "cx/abc", "Opt", "Str")) {
     return false;
   }
 

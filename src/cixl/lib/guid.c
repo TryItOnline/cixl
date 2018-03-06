@@ -43,8 +43,7 @@ static bool str_imp(struct cx_scope *scope) {
 cx_lib(cx_init_guid, "cx/guid") {
   struct cx *cx = lib->cx;
 
-  if (!cx_use(cx, "cx/abc", "A") ||
-      !cx_use(cx, "cx/str", "Str")) {
+  if (!cx_use(cx, "cx/abc", "A", "Str")) {
     return false;
   }
 
