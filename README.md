@@ -1314,6 +1314,7 @@ $ python3 cixl/perf/bench3.py
 - Obvious is overrated
 - Symmetry beats consistency
 - Rules are for machines
+- Everything is not X
 - Only fools predict the future
 - Intuition goes with the flow
 - Duality of syntax is one honking great idea

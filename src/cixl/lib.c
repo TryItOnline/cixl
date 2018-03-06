@@ -344,7 +344,7 @@ static bool equid_imp(struct cx_box *x, struct cx_box *y) {
 }
 
 static void write_imp(struct cx_box *v, FILE *out) {
-  fprintf(out, "`%s lib", v->as_lib->id.id);
+  fprintf(out, "`%s get-lib", v->as_lib->id.id);
 }
 
 static void dump_imp(struct cx_box *v, FILE *out) {
