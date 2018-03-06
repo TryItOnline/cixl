@@ -155,7 +155,8 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
     if (op->type->emit_fimps) { op->type->emit_fimps(op, &fimps, cx); }
     if (op->type->emit_syms) { op->type->emit_syms(op, &syms, cx); }
     if (op->type->emit_types) {op->type->emit_types(op, &types, cx); }
-  }  
+    if (op->type->emit_libs) {op->type->emit_libs(op, &libs, cx); }
+  }
 
   cx_do_set(&funcs, struct cx_func *, f) {
     struct cx_lib **ok = cx_set_insert(&libs, &(*f)->lib);

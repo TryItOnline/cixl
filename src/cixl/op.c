@@ -29,6 +29,7 @@ struct cx_op_type *cx_op_type_init(struct cx_op_type *type, const char *id) {
   type->emit_fimps = NULL;
   type->emit_syms = NULL;
   type->emit_types = NULL;
+  type->emit_libs = NULL;
   return type;
 }
 
@@ -47,7 +48,8 @@ static bool begin_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
   struct cx_scope *parent = op->as_begin.child
     ? cx_scope(cx, 0)
     : op->as_begin.fimp->scope;
-  
+
+  if (op->as_begin.fimp) { cx_push_lib(cx, op->as_begin.fimp->func->lib); }  
   cx_begin(cx, parent);
   return true;
 }
@@ -62,7 +64,11 @@ static bool begin_emit(struct cx_op *op,
     fputs("cx_scope(cx, 0);\n", out);
   } else {
     struct cx_fimp *imp = op->as_begin.fimp;
-    fprintf(out, "%s->scope;\n", imp->emit_id);
+
+    fprintf(out,
+	    "%s->scope;\n"
+	    CX_TAB "cx_push_lib(cx, %s);\n",
+	    imp->emit_id, imp->func->lib->emit_id);
   }
 
   fputs(CX_TAB "cx_begin(cx, parent);\n", out);
@@ -494,6 +500,24 @@ cx_op_type(CX_OLAMBDA, {
     type.emit = lambda_emit;
   });
 
+static bool poplib_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
+  cx_pop_lib(cx);
+  return true;
+}
+
+static bool poplib_emit(struct cx_op *op,
+			 struct cx_bin *bin,
+			 FILE *out,
+			 struct cx *cx) {
+  fputs(CX_TAB "cx_pop_lib(cx);\n", out);
+  return true;
+}
+
+cx_op_type(CX_OPOPLIB, {
+    type.eval = poplib_eval;
+    type.emit = poplib_emit;
+  });
+
 static void push_deinit(struct cx_op *op) {
   cx_box_deinit(&op->as_push.value);
 }
@@ -555,6 +579,35 @@ cx_op_type(CX_OPUSH, {
     type.emit_fimps = push_emit_fimps;
     type.emit_syms = push_emit_syms;
     type.emit_types = push_emit_types;
+  });
+
+static bool pushlib_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
+  cx_push_lib(cx, op->as_pushlib.lib);
+  return true;
+}
+
+static bool pushlib_emit(struct cx_op *op,
+			 struct cx_bin *bin,
+			 FILE *out,
+			 struct cx *cx) {
+  fprintf(out,
+	  CX_TAB "cx_push_lib(cx, %s);\n",
+	  op->as_pushlib.lib->emit_id);
+
+  return true;
+}
+
+static void pushlib_emit_libs(struct cx_op *op, struct cx_set *out, struct cx *cx) {
+  struct cx_lib
+    *lib = op->as_pushlib.lib,
+    **ok = cx_set_insert(out, &lib);
+  if (ok) { *ok = lib; }
+}
+
+cx_op_type(CX_OPUSHLIB, {
+    type.eval = pushlib_eval;
+    type.emit = pushlib_emit;
+    type.emit_libs = pushlib_emit_libs;
   });
 
 static bool putargs_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
@@ -777,6 +830,7 @@ static bool return_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
     
     cx->pc = op->as_return.pc+1;
   } else {
+    cx_pop_lib(cx);
     struct cx_scope *ss = cx_scope(cx, 0);
     size_t si = 0;
     
@@ -877,6 +931,7 @@ static bool return_emit(struct cx_op *op,
 	  CX_TAB "  call->recalls--;\n"
 	  CX_TAB "  goto op%zd;\n"
 	  CX_TAB "} else {\n"
+	  CX_TAB "  cx_pop_lib(cx);\n"
 	  CX_TAB "  size_t si = 0;\n",
           imp->emit_id, op->as_return.pc+1);
 

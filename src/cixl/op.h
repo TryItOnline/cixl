@@ -39,6 +39,7 @@ struct cx_op_type {
   void (*emit_fimps)(struct cx_op *, struct cx_set *, struct cx *);
   void (*emit_syms)(struct cx_op *, struct cx_set *, struct cx *);
   void (*emit_types)(struct cx_op *, struct cx_set *, struct cx *);
+  void (*emit_libs)(struct cx_op *, struct cx_set *, struct cx *);
 };
 
 struct cx_op_type *cx_op_type_init(struct cx_op_type *type, const char *id);
@@ -85,6 +86,10 @@ struct cx_push_op {
   struct cx_box value;
 };
 
+struct cx_pushlib_op {
+  struct cx_lib *lib;
+};
+
 struct cx_putargs_op {
   struct cx_fimp *imp;
 };
@@ -119,6 +124,7 @@ struct cx_op {
     struct cx_jump_op as_jump;
     struct cx_lambda_op as_lambda;
     struct cx_push_op as_push;
+    struct cx_pushlib_op as_pushlib;
     struct cx_putargs_op as_putargs;
     struct cx_putvar_op as_putvar;
     struct cx_return_op as_return;
@@ -138,7 +144,9 @@ struct cx_op_type *CX_OGETCONST();
 struct cx_op_type *CX_OGETVAR();
 struct cx_op_type *CX_OJUMP();
 struct cx_op_type *CX_OLAMBDA();
+struct cx_op_type *CX_OPOPLIB();
 struct cx_op_type *CX_OPUSH();
+struct cx_op_type *CX_OPUSHLIB();
 struct cx_op_type *CX_OPUTARGS();
 struct cx_op_type *CX_OPUTVAR();
 struct cx_op_type *CX_ORETURN();

@@ -1,10 +1,11 @@
-* fix bench1 emit
-** add OPUSHLIB/OPOPLIB
-*** add on func entry/exit
-*** add on lambda entry/exit
-** add emit_libs and implement for pushlib
-*** call in bin
-** push
+* move nil_type and nil constant to abc lib
+* move ++/-- to math lib
+* move times to iter lib
+* move bool/t/f to cond lib
+* move bool_type to cond lib
+** use where needed
+
+* ---
 * add lib: n ...;  macro
 ** create new lib if !exists
 ** add opush/poplib around code on eval
@@ -12,12 +13,6 @@
 ** add cx.lib_type
 *** add sym fn
 *** add sym fn for func
-* move ++/-- to math lib
-* move times to iter lib
-* move bool/t/f to cond lib
-* move bool_type to cond lib
-** use where needed
-* move nil_type and nil constant to abc lib
 * rename ref_ref to ref_inc & deref to dec
 * change lib init to bool result
 ** check cx_use returns in inits
