@@ -1,6 +1,8 @@
 * add lib: n ...;  macro
 ** create new lib if !exists
 ** add opush/poplib around code on macro eval
+** add ostop at end
+*** call eval recursively on init
 ** rename lib.init to init_ptr
 *** add bool init flag
 *** add start_op & nops like fimp
