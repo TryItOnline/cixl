@@ -151,8 +151,23 @@ static bool lib_id_imp(struct cx_scope *scope) {
   return true;
 }
 
+static bool get_lib_imp(struct cx_scope *scope) {
+  struct cx *cx = scope->cx;
+  struct cx_box id = *cx_test(cx_pop(scope, false));
+  struct cx_lib *lib = cx_get_lib(cx, id.as_sym.id, true);
+
+  if (lib) {
+    cx_box_init(cx_push(scope), cx->lib_type)->as_lib = lib;
+  } else {
+    cx_box_init(cx_push(scope), cx->nil_type);
+  }
+  
+  return true;
+}
+
 cx_lib(cx_init_meta, "cx/meta", {
     struct cx *cx = lib->cx;
+    cx_use(cx, "cx/abc", "Opt");
     cx_use(cx, "cx/str", "Str");
     cx_use(cx, "cx/sym", "Sym");
 
@@ -170,4 +185,9 @@ cx_lib(cx_init_meta, "cx/meta", {
 		 cx_args(cx_arg("lib", cx->lib_type)),
 		 cx_args(cx_arg(NULL, cx->sym_type)),
 		 lib_id_imp);
-  })
+
+    cx_add_cfunc(lib, "get-lib",
+		 cx_args(cx_arg("id", cx->sym_type)),
+		 cx_args(cx_arg(NULL, cx->opt_type)),
+		 get_lib_imp);
+ })

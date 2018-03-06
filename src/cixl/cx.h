@@ -59,7 +59,7 @@ void cx_add_separators(struct cx *cx, const char *cs);
 bool cx_is_separator(struct cx *cx, char c);
 
 struct cx_lib *cx_add_lib(struct cx *cx, const char *id, cx_lib_init_t init);
-struct cx_lib *cx_get_lib(struct cx *cx, const char *id);
+struct cx_lib *cx_get_lib(struct cx *cx, const char *id, bool silent);
 
 void cx_push_lib(struct cx *cx, struct cx_lib *lib);
 void cx_pop_lib(struct cx *cx);

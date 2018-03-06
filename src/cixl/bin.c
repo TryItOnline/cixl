@@ -199,7 +199,7 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
   }
 
   cx_do_set(&libs, struct cx_lib *, l) {
-    fprintf(out, "    %s = cx_test(cx_get_lib(cx, \"%s\"));\n",
+    fprintf(out, "    %s = cx_test(cx_get_lib(cx, \"%s\", false));\n",
 	    (*l)->emit_id, (*l)->id.id);
   }
 

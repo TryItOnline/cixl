@@ -100,6 +100,10 @@ The default library is called the ```lobby```.
    id
 ...
 [`lobby]
+
+   get-lib
+...
+[Lib(lobby)]
 ```
 
 ### Stack
