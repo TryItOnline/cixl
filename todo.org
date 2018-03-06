@@ -1,7 +1,4 @@
-* add Fimp func fn
-* add meta.get-func/get-type(lib id)
 * move Iter, Str & Stack types to abc
-* rename ref_ref to ref_inc & deref to dec
 * extract cx_init_libs(cx)
 ** call from main and tests
 ** extract new_cx() in tests.c
@@ -34,6 +31,9 @@
 *** reuse sockets
 *** disconnect when connected and process next port
 * --
+* rename ref_ref to ref_inc & deref to dec
+* add meta.get-func/get-type(lib id)
+* add Fimp func fn
 * parse cx fns on first use
 ** add source field
 ** add parsed flag
