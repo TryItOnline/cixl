@@ -31,8 +31,6 @@ cx_lib(cx_init_sym, "cx/sym") {
     return false;
   }
 
-  cx->sym_type = cx_init_sym_type(lib);
-
   cx_add_cfunc(lib, "sym",
 	       cx_args(cx_arg("id", cx->str_type)),
 	       cx_args(cx_arg(NULL, cx->sym_type)),

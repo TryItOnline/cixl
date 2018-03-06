@@ -166,7 +166,7 @@ static bool flip_imp(struct cx_scope *scope) {
 cx_lib(cx_init_stack, "cx/stack") {
   struct cx *cx = lib->cx;
     
-  if (!cx_use(cx, "cx/abc", "A", "Cmp", "Int", "Opt", "Seq")) {
+  if (!cx_use(cx, "cx/abc", "A", "Cmp", "Int", "Opt", "Seq", "Sym")) {
     return false;
   }
 

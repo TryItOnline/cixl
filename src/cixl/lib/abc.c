@@ -1,9 +1,13 @@
 #include "cixl/bool.h"
 #include "cixl/cx.h"
+#include "cixl/fimp.h"
+#include "cixl/func.h"
 #include "cixl/int.h"
+#include "cixl/lambda.h"
 #include "cixl/lib.h"
 #include "cixl/nil.h"
 #include "cixl/lib/abc.h"
+#include "cixl/sym.h"
 
 cx_lib(cx_init_abc, "cx/abc") { 
   struct cx *cx = lib->cx;
@@ -36,6 +40,12 @@ cx_lib(cx_init_abc, "cx/abc") {
 
   cx->int_type = cx_init_int_type(lib);
   cx_box_init(cx_set_const(lib, cx_sym(cx, "nil"), false), cx->nil_type);
+
+  cx->sym_type = cx_init_sym_type(lib);
+
+  cx->func_type = cx_init_func_type(lib);
+  cx->fimp_type = cx_init_fimp_type(lib);
+  cx->lambda_type = cx_init_lambda_type(lib);
 
   return true;
 }

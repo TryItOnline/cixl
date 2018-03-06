@@ -207,6 +207,12 @@ static bool func_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   return true;
 }
 
+static bool func_id_imp(struct cx_scope *scope) {
+  struct cx_func *f = cx_test(cx_pop(scope, false))->as_ptr;
+  cx_box_init(cx_push(scope), scope->cx->sym_type)->as_sym = cx_sym(scope->cx, f->id);
+  return true;
+}
+
 static bool func_lib_imp(struct cx_scope *scope) {
   struct cx *cx = scope->cx;
   struct cx_func *f = cx_test(cx_pop(scope, false))->as_ptr;
@@ -264,19 +270,33 @@ static bool recall_imp(struct cx_scope *scope) {
   return true;
 }
 
+static bool cx_fimp_imp(struct cx_scope *scope) {
+  struct cx *cx = scope->cx;
+  
+  if (cx->calls.count > 1) {
+    struct cx_call *c = cx_vec_peek(&cx->calls, 1);
+    cx_box_init(cx_push(scope), cx->fimp_type)->as_ptr = c->target;
+  } else {
+    cx_box_init(cx_push(scope), cx->nil_type);
+  }
+  
+  return true;
+}
+
 cx_lib(cx_init_func, "cx/func") {
   struct cx *cx = lib->cx;
     
-  if (!cx_use(cx, "cx/abc", "A", "Seq") ||
+  if (!cx_use(cx, "cx/abc", "A", "Lib", "Seq", "Sym") ||
       !cx_use(cx, "cx/stack", "Stack")) {
     return false;
   }
 
-  cx->func_type = cx_init_func_type(lib);
-  cx->fimp_type = cx_init_fimp_type(lib);
-  cx->lambda_type = cx_init_lambda_type(lib);
-
   cx_add_macro(lib, "func:", func_parse);
+
+  cx_add_cfunc(lib, "id",
+	       cx_args(cx_arg("f", cx->func_type)),
+	       cx_args(cx_arg(NULL, cx->sym_type)),
+	       func_id_imp);
 
   cx_add_cfunc(lib, "lib",
 	       cx_args(cx_arg("f", cx->func_type)),
@@ -297,6 +317,12 @@ cx_lib(cx_init_func, "cx/func") {
 	       cx_args(cx_arg("act", cx->any_type)),
 	       cx_args(),
 	       call_imp);
+
+  cx_add_cfunc(lib, "cx-fimp",
+	       cx_args(),
+	       cx_args(cx_arg(NULL, cx->opt_type)),
+	       cx_fimp_imp);
+  
   
   cx_add_cfunc(lib, "recall", cx_args(), cx_args(), recall_imp);
 

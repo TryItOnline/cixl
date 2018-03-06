@@ -121,9 +121,9 @@ static bool rat_int_imp(struct cx_scope *scope) {
 cx_lib(cx_init_math, "cx/math") {
   struct cx *cx = lib->cx;
 
-  if (!cx_use(cx, "cx/abc", "A", "Int", "Num", "Opt", "Seq") ||
+  if (!cx_use(cx, "cx/abc", "A", "Fimp", "Func", "Int", "Num", "Opt", "Seq") ||
       !cx_use(cx, "cx/cond", "=", "?", "if-else") ||
-      !cx_use(cx, "cx/func", "Fimp", "Func", "recall") ||
+      !cx_use(cx, "cx/func", "recall") ||
       !cx_use(cx, "cx/iter", "for")) {
     return false;
   }

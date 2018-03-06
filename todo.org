@@ -1,11 +1,6 @@
-* add cx-fimp
-** return opt top of call stack
-* add Func id fn
 * add Fimp func fn
-* ---
 * add meta.get-func/get-type(lib id)
-* ---
-* move Fimp, Func, Iter, Str, Sym & Stack types to abc
+* move Iter, Str & Stack types to abc
 * rename ref_ref to ref_inc & deref to dec
 * extract cx_init_libs(cx)
 ** call from main and tests

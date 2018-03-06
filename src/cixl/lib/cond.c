@@ -349,8 +349,7 @@ static bool if_else_imp(struct cx_scope *scope) {
 cx_lib(cx_init_cond, "cx/cond") {
   struct cx *cx = lib->cx;
     
-  if (!cx_use(cx, "cx/abc", "A", "Bool", "Opt") ||
-      !cx_use(cx, "cx/sym", "Sym")) {
+  if (!cx_use(cx, "cx/abc", "A", "Bool", "Opt", "Sym")) {
     return false;
   }
 

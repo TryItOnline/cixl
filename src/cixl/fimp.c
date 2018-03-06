@@ -174,7 +174,13 @@ static void write_imp(struct cx_box *value, FILE *out) {
 
 static void dump_imp(struct cx_box *value, FILE *out) {
   struct cx_fimp *imp = value->as_ptr;
-  fprintf(out, "Fimp(%s %s)", imp->func->id, imp->id);
+  fprintf(out, "Fimp(%s", imp->func->id);
+
+  if (imp->func->nargs) {
+    fprintf(out, " %s)",  imp->id);
+  } else {
+    fputc(')', out);
+  }
 }
 
 static bool emit_imp(struct cx_box *v, const char *exp, FILE *out) {
