@@ -1,3 +1,4 @@
+#include "cixl/bool.h"
 #include "cixl/cx.h"
 #include "cixl/int.h"
 #include "cixl/lib.h"
@@ -22,9 +23,16 @@ cx_lib(cx_init_abc, "cx/abc", {
     cx->num_type = cx_add_type(lib, "Num", cx->cmp_type);
     cx->num_type->trait = true;
   
-    cx->nil_type = cx_init_nil_type(lib);
     cx->meta_type = cx_init_meta_type(lib);
-    cx->int_type = cx_init_int_type(lib);
 
+    cx->bool_type = cx_init_bool_type(lib);
+    cx_box_init(cx_set_const(lib, cx_sym(cx, "t"), false),
+		cx->bool_type)->as_bool = true;
+    cx_box_init(cx_set_const(lib, cx_sym(cx, "f"), false),
+		cx->bool_type)->as_bool = false;
+
+    cx->nil_type = cx_init_nil_type(lib);
+
+    cx->int_type = cx_init_int_type(lib);
     cx_box_init(cx_set_const(lib, cx_sym(cx, "nil"), false), cx->nil_type);
   })

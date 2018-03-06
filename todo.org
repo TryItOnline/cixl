@@ -1,12 +1,3 @@
-* remove abc lib
-** move Opt/Cmp/#nil to cond lib
-*** update uses
-** move Seq to iter lib
-*** update uses
-** move Num/Int to math lib
-*** update uses
-** move Num/Int to math lib
-*** update uses
 * add meta.cx-lib fn to return current lib
 ** add cx.lib_type
 *** add id fn

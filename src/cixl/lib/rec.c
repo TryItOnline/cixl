@@ -271,8 +271,7 @@ static bool print_imp(struct cx_scope *scope) {
 
 cx_lib(cx_init_rec, "cx/rec", { 
     struct cx *cx = lib->cx;
-    cx_use(cx, "cx/abc", "A", "Cmp", "Opt");
-    cx_use(cx, "cx/cond", "Bool");
+    cx_use(cx, "cx/abc", "A", "Bool", "Cmp", "Opt");
     cx_use(cx, "cx/io", "WFile");
     cx_use(cx, "cx/sym", "Sym");
 

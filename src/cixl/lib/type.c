@@ -130,8 +130,7 @@ static bool unsafe_imp(struct cx_scope *scope) {
 
 cx_lib(cx_init_type, "cx/type", {
     struct cx *cx = lib->cx;
-    cx_use(cx, "cx/abc", "A", "Opt");
-    cx_use(cx, "cx/cond", "Bool");
+    cx_use(cx, "cx/abc", "A", "Bool", "Opt");
 
     cx_add_macro(lib, "trait:", trait_parse);
 

@@ -1,6 +1,5 @@
 #include "cixl/arg.h"
 #include "cixl/bin.h"
-#include "cixl/bool.h"
 #include "cixl/box.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
@@ -349,15 +348,8 @@ static bool if_else_imp(struct cx_scope *scope) {
 
 cx_lib(cx_init_cond, "cx/cond", {
     struct cx *cx = lib->cx;
-    cx_use(cx, "cx/abc", "A", "Opt");
+    cx_use(cx, "cx/abc", "A", "Bool", "Opt");
     cx_use(cx, "cx/sym", "Sym");
-
-    cx->bool_type = cx_init_bool_type(lib);
-    
-    cx_box_init(cx_set_const(lib, cx_sym(cx, "t"), false),
-		cx->bool_type)->as_bool = true;
-    cx_box_init(cx_set_const(lib, cx_sym(cx, "f"), false),
-		cx->bool_type)->as_bool = false;
 
     cx_add_macro(lib, "switch:", switch_parse);
   
