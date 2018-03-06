@@ -346,86 +346,91 @@ static bool if_else_imp(struct cx_scope *scope) {
   return true;
 }
 
-cx_lib(cx_init_cond, "cx/cond", {
-    struct cx *cx = lib->cx;
-    cx_use(cx, "cx/abc", "A", "Bool", "Opt");
-    cx_use(cx, "cx/sym", "Sym");
+cx_lib(cx_init_cond, "cx/cond") {
+  struct cx *cx = lib->cx;
+    
+  if (!cx_use(cx, "cx/abc", "A", "Bool", "Opt") ||
+      !cx_use(cx, "cx/sym", "Sym")) {
+    return false;
+  }
 
-    cx_add_macro(lib, "switch:", switch_parse);
+  cx_add_macro(lib, "switch:", switch_parse);
   
-    cx_add_cfunc(lib, "int",
-		 cx_args(cx_arg("v", cx->bool_type)),
-		 cx_args(cx_arg(NULL, cx->int_type)),
-		 int_imp);
+  cx_add_cfunc(lib, "int",
+	       cx_args(cx_arg("v", cx->bool_type)),
+	       cx_args(cx_arg(NULL, cx->int_type)),
+	       int_imp);
 
-    cx_add_cfunc(lib, "=",
-		 cx_args(cx_arg("x", cx->opt_type), cx_narg("y", 0)),
-		 cx_args(cx_arg(NULL, cx->bool_type)),
-		 eqval_imp);
+  cx_add_cfunc(lib, "=",
+	       cx_args(cx_arg("x", cx->opt_type), cx_narg("y", 0)),
+	       cx_args(cx_arg(NULL, cx->bool_type)),
+	       eqval_imp);
   
-    cx_add_cfunc(lib, "==",
-		 cx_args(cx_arg("x", cx->opt_type), cx_narg("y", 0)),
-		 cx_args(cx_arg(NULL, cx->bool_type)),
-		 equid_imp);
+  cx_add_cfunc(lib, "==",
+	       cx_args(cx_arg("x", cx->opt_type), cx_narg("y", 0)),
+	       cx_args(cx_arg(NULL, cx->bool_type)),
+	       equid_imp);
 
-    cx_add_cfunc(lib, "<=>",
-		 cx_args(cx_arg("x", cx->cmp_type), cx_narg("y", 0)),
-		 cx_args(cx_arg(NULL, cx->sym_type)),
-		 cmp_imp);
+  cx_add_cfunc(lib, "<=>",
+	       cx_args(cx_arg("x", cx->cmp_type), cx_narg("y", 0)),
+	       cx_args(cx_arg(NULL, cx->sym_type)),
+	       cmp_imp);
   
-    cx_add_cfunc(lib, "<",
-		 cx_args(cx_arg("x", cx->cmp_type), cx_narg("y", 0)),
-		 cx_args(cx_arg(NULL, cx->bool_type)),
-		 lt_imp);
+  cx_add_cfunc(lib, "<",
+	       cx_args(cx_arg("x", cx->cmp_type), cx_narg("y", 0)),
+	       cx_args(cx_arg(NULL, cx->bool_type)),
+	       lt_imp);
   
-    cx_add_cfunc(lib, ">",
-		 cx_args(cx_arg("x", cx->cmp_type), cx_narg("y", 0)),
-		 cx_args(cx_arg(NULL, cx->bool_type)),
-		 gt_imp);
+  cx_add_cfunc(lib, ">",
+	       cx_args(cx_arg("x", cx->cmp_type), cx_narg("y", 0)),
+	       cx_args(cx_arg(NULL, cx->bool_type)),
+	       gt_imp);
   
-    cx_add_cfunc(lib, "<=",
-		 cx_args(cx_arg("x", cx->cmp_type), cx_narg("y", 0)),
-		 cx_args(cx_arg(NULL, cx->bool_type)),
-		 lte_imp);
+  cx_add_cfunc(lib, "<=",
+	       cx_args(cx_arg("x", cx->cmp_type), cx_narg("y", 0)),
+	       cx_args(cx_arg(NULL, cx->bool_type)),
+	       lte_imp);
   
-    cx_add_cfunc(lib, ">=",
-		 cx_args(cx_arg("x", cx->cmp_type), cx_narg("y", 0)),
-		 cx_args(cx_arg(NULL, cx->bool_type)),
-		 gte_imp);
+  cx_add_cfunc(lib, ">=",
+	       cx_args(cx_arg("x", cx->cmp_type), cx_narg("y", 0)),
+	       cx_args(cx_arg(NULL, cx->bool_type)),
+	       gte_imp);
   
-    cx_add_cfunc(lib, "?",
-		 cx_args(cx_arg("v", cx->opt_type)),
-		 cx_args(cx_arg(NULL, cx->bool_type)),
-		 ok_imp);
+  cx_add_cfunc(lib, "?",
+	       cx_args(cx_arg("v", cx->opt_type)),
+	       cx_args(cx_arg(NULL, cx->bool_type)),
+	       ok_imp);
   
-    cx_add_cfunc(lib, "!",
-		 cx_args(cx_arg("v", cx->opt_type)),
-		 cx_args(cx_arg(NULL, cx->bool_type)),
-		 not_imp);
+  cx_add_cfunc(lib, "!",
+	       cx_args(cx_arg("v", cx->opt_type)),
+	       cx_args(cx_arg(NULL, cx->bool_type)),
+	       not_imp);
   
-    cx_add_cfunc(lib, "and",
-		 cx_args(cx_arg("x", cx->opt_type), cx_arg("y", cx->opt_type)),
-		 cx_args(cx_arg(NULL, cx->opt_type)),
-		 and_imp);
+  cx_add_cfunc(lib, "and",
+	       cx_args(cx_arg("x", cx->opt_type), cx_arg("y", cx->opt_type)),
+	       cx_args(cx_arg(NULL, cx->opt_type)),
+	       and_imp);
   
-    cx_add_cfunc(lib, "or",
-		 cx_args(cx_arg("x", cx->opt_type), cx_arg("y", cx->opt_type)),
-		 cx_args(cx_arg(NULL, cx->opt_type)),
-		 or_imp);
+  cx_add_cfunc(lib, "or",
+	       cx_args(cx_arg("x", cx->opt_type), cx_arg("y", cx->opt_type)),
+	       cx_args(cx_arg(NULL, cx->opt_type)),
+	       or_imp);
   
-    cx_add_cfunc(lib, "if",
-		 cx_args(cx_arg("cnd", cx->opt_type), cx_arg("act", cx->any_type)),
-		 cx_args(),
-		 if_imp);
+  cx_add_cfunc(lib, "if",
+	       cx_args(cx_arg("cnd", cx->opt_type), cx_arg("act", cx->any_type)),
+	       cx_args(),
+	       if_imp);
 
-    cx_add_cfunc(lib, "else",
-		 cx_args(cx_arg("cnd", cx->opt_type), cx_arg("act", cx->any_type)),
-		 cx_args(),
-		 else_imp);
+  cx_add_cfunc(lib, "else",
+	       cx_args(cx_arg("cnd", cx->opt_type), cx_arg("act", cx->any_type)),
+	       cx_args(),
+	       else_imp);
 
-    cx_add_cfunc(lib, "if-else",
-		 cx_args(cx_arg("cnd", cx->opt_type),
-			 cx_arg("tact", cx->any_type), cx_arg("fact", cx->any_type)),
-		 cx_args(),
-		 if_else_imp);
-  })
+  cx_add_cfunc(lib, "if-else",
+	       cx_args(cx_arg("cnd", cx->opt_type),
+		       cx_arg("tact", cx->any_type), cx_arg("fact", cx->any_type)),
+	       cx_args(),
+	       if_else_imp);
+
+  return true;
+}

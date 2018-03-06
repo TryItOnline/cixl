@@ -12,24 +12,29 @@
 #define cx_add_type(cx, id, ...)		\
   _cx_add_type(cx, id, ##__VA_ARGS__, NULL)	\
 
-#define cx_lib(cid, id, ...)				\
-  struct cx_lib *cid(struct cx *_cx) {			\
-    void init(struct cx_lib *lib) __VA_ARGS__;		\
-    struct cx_lib *lib = cx_add_lib(_cx, id, init);	\
-    return lib;						\
-  }							\
+#define _cx_lib(_fn, cid, id)			\
+  bool _fn(struct cx_lib *);			\
+						\
+  struct cx_lib *cid(struct cx *_cx) {		\
+    return cx_add_lib(_cx, id, _fn);		\
+  }						\
+						\
+  bool _fn(struct cx_lib *lib)			\
+  
+#define cx_lib(cid, id)				\
+  _cx_lib(cx_cid(cid, _fn), cid, id)		\
 
-#define cx_use(cx, lib_id, ...) ({				\
-      const char *ids[] = {__VA_ARGS__};			\
-      unsigned int nids = sizeof(ids) / sizeof(char *);		\
-      _cx_use(cx, lib_id, nids, ids);				\
-    })								\
+#define cx_use(cx, lib_id, ...) ({			\
+      const char *ids[] = {__VA_ARGS__};		\
+      unsigned int nids = sizeof(ids) / sizeof(char *);	\
+      _cx_use(cx, lib_id, nids, ids);			\
+    })							\
 
 struct cx;
 struct cx_arg;
 struct cx_lib;
 
-typedef void (*cx_lib_init_t)(struct cx_lib *);
+typedef bool (*cx_lib_init_t)(struct cx_lib *);
 
 struct cx_lib {
   struct cx *cx;

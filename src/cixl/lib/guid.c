@@ -40,20 +40,25 @@ static bool str_imp(struct cx_scope *scope) {
   return true;
 }
 
-cx_lib(cx_init_guid, "cx/guid", {
-    struct cx *cx = lib->cx;
-    cx_use(cx, "cx/abc", "A");
-    cx_use(cx, "cx/str", "Str");
+cx_lib(cx_init_guid, "cx/guid") {
+  struct cx *cx = lib->cx;
 
-    cx->guid_type = cx_init_guid_type(lib);
+  if (!cx_use(cx, "cx/abc", "A") ||
+      !cx_use(cx, "cx/str", "Str")) {
+    return false;
+  }
 
-    cx_add_cfunc(lib, "guid",
-		 cx_args(cx_arg("s", cx->str_type)),
-		 cx_args(cx_arg(NULL, cx->guid_type)),
-		 guid_imp);
+  cx->guid_type = cx_init_guid_type(lib);
+
+  cx_add_cfunc(lib, "guid",
+	       cx_args(cx_arg("s", cx->str_type)),
+	       cx_args(cx_arg(NULL, cx->guid_type)),
+	       guid_imp);
     
-    cx_add_cfunc(lib, "str",
-		 cx_args(cx_arg("id", cx->guid_type)),
-		 cx_args(cx_arg(NULL, cx->str_type)),
-		 str_imp);
-  })
+  cx_add_cfunc(lib, "str",
+	       cx_args(cx_arg("id", cx->guid_type)),
+	       cx_args(cx_arg(NULL, cx->str_type)),
+	       str_imp);
+
+  return true;
+}

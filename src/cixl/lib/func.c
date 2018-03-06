@@ -250,21 +250,24 @@ static bool recall_imp(struct cx_scope *scope) {
   return true;
 }
 
-cx_lib(cx_init_func, "cx/func", {
-    struct cx *cx = lib->cx;
-    cx_use(cx, "cx/abc", "A", "Seq");
-    cx_use(cx, "cx/stack", "Stack");
+cx_lib(cx_init_func, "cx/func") {
+  struct cx *cx = lib->cx;
+    
+  if (!cx_use(cx, "cx/abc", "A", "Seq") ||
+      !cx_use(cx, "cx/stack", "Stack")) {
+    return false;
+  }
 
-    cx->func_type = cx_init_func_type(lib);
-    cx->fimp_type = cx_init_fimp_type(lib);
-    cx->lambda_type = cx_init_lambda_type(lib);
+  cx->func_type = cx_init_func_type(lib);
+  cx->fimp_type = cx_init_fimp_type(lib);
+  cx->lambda_type = cx_init_lambda_type(lib);
 
-    cx_add_macro(lib, "func:", func_parse);
+  cx_add_macro(lib, "func:", func_parse);
 
-    cx_add_cfunc(lib, "imps",
-		 cx_args(cx_arg("f", cx->func_type)),
-		 cx_args(cx_arg(NULL, cx->stack_type)),
-		 imps_imp);
+  cx_add_cfunc(lib, "imps",
+	       cx_args(cx_arg("f", cx->func_type)),
+	       cx_args(cx_arg(NULL, cx->stack_type)),
+	       imps_imp);
   
   cx_add_cfunc(lib, "call",
 	       cx_args(cx_arg("act", cx->any_type)),
@@ -272,4 +275,6 @@ cx_lib(cx_init_func, "cx/func", {
 	       call_imp);
   
   cx_add_cfunc(lib, "recall", cx_args(), cx_args(), recall_imp);
-  })
+
+  return true;
+}

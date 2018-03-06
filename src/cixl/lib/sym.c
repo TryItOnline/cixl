@@ -23,20 +23,25 @@ static bool str_imp(struct cx_scope *scope) {
   return true;
 }
 
-cx_lib(cx_init_sym, "cx/sym", {
-    struct cx *cx = lib->cx;
-    cx_use(cx, "cx/abc", "A");
-    cx_use(cx, "cx/str", "Str");
-
-    cx->sym_type = cx_init_sym_type(lib);
-
-    cx_add_cfunc(lib, "sym",
-		 cx_args(cx_arg("id", cx->str_type)),
-		 cx_args(cx_arg(NULL, cx->sym_type)),
-		 sym_imp);
+cx_lib(cx_init_sym, "cx/sym") {
+  struct cx *cx = lib->cx;
     
-    cx_add_cfunc(lib, "str",
-		 cx_args(cx_arg("s", cx->sym_type)),
-		 cx_args(cx_arg(NULL, cx->str_type)),
-		 str_imp);
-  })
+  if (!cx_use(cx, "cx/abc", "A") ||
+      !cx_use(cx, "cx/str", "Str")) {
+    return false;
+  }
+
+  cx->sym_type = cx_init_sym_type(lib);
+
+  cx_add_cfunc(lib, "sym",
+	       cx_args(cx_arg("id", cx->str_type)),
+	       cx_args(cx_arg(NULL, cx->sym_type)),
+	       sym_imp);
+    
+  cx_add_cfunc(lib, "str",
+	       cx_args(cx_arg("s", cx->sym_type)),
+	       cx_args(cx_arg(NULL, cx->str_type)),
+	       str_imp);
+
+  return true;
+}

@@ -1,19 +1,20 @@
-* move Fimp, Func, Iter, Str, Sym & Stack types to abc
+* replace cx_type.cx with lib
+* move Fimp, Func, Iter, Lib, Str, Sym & Stack types to abc
+* add Type lib fn
+* add Func lib fn
+* add Fimp lib fn
+** add cx_fimp.lib
 * add cx-fimp
 ** return opt top of call stack
 * rename ref_ref to ref_inc & deref to dec
-* change lib init to bool result
-** check cx_use returns in inits
-** check init result in cx_use
 * extract cx_init_libs(cx)
 ** call from main and tests
 ** extract new_cx() in tests.c
-* replace cx_type.cx with lib
-
 * call push/pop_lib on lambda enter/exit
 ** add lambda.lib
 *** init in cx_lambda_new
-* change lib macro to predeclare init fn
+** add test
+*** call and check lib inside
 * add lib: n ...;  macro
 ** create new lib if !exists
 ** add opush/poplib around code on macro eval
@@ -36,14 +37,7 @@
 ** try connecting n sockets
 *** reuse sockets
 *** disconnect when connected and process next port
-* ---
-* extract #const literals as macro in abc lib
-* extract stack literals as macro in stack lib
-* extract sym literals as macro in sym lib
-* extract str literals as macro in str lib
-* extract char literals as macro in str lib
-* extract $var literals as macro in var lib
-* ---
+* --
 * parse cx fns on first use
 ** add source field
 ** add parsed flag
@@ -78,9 +72,6 @@
 * add tell(file) fn
 * add len(file) fn
 * convert repl to use getline
-* change funcs to take cx instead of scope
-** grep all cx_scope *
-** use cx_scope to get current
 * add @@ char escape
 * more qdb
 ** add find-key(Vect) fn

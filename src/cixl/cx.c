@@ -53,30 +53,31 @@ static const void *get_lib_id(const void *value) {
   return &(*lib)->id;
 }
 
-cx_lib(cx_init_world, "cx", {
-    struct cx *cx = lib->cx;
-
-    cx_use(cx, "cx/abc");
-    cx_use(cx, "cx/bin");
-    cx_use(cx, "cx/cond");
-    cx_use(cx, "cx/error");
-    cx_use(cx, "cx/func");
-    cx_use(cx, "cx/guid");
-    cx_use(cx, "cx/io");
-    cx_use(cx, "cx/iter");
-    cx_use(cx, "cx/math");
-    cx_use(cx, "cx/net");
-    cx_use(cx, "cx/pair");
-    cx_use(cx, "cx/rec");
-    cx_use(cx, "cx/ref");
-    cx_use(cx, "cx/stack");
-    cx_use(cx, "cx/str");
-    cx_use(cx, "cx/sym");
-    cx_use(cx, "cx/table");
-    cx_use(cx, "cx/time");
-    cx_use(cx, "cx/type");
+cx_lib(cx_init_world, "cx") {
+  struct cx *cx = lib->cx;
+  
+  return
+    cx_use(cx, "cx/abc") &&
+    cx_use(cx, "cx/bin") &&
+    cx_use(cx, "cx/cond") &&
+    cx_use(cx, "cx/error") &&
+    cx_use(cx, "cx/func") &&
+    cx_use(cx, "cx/guid") &&
+    cx_use(cx, "cx/io") &&
+    cx_use(cx, "cx/iter") &&
+    cx_use(cx, "cx/math") &&
+    cx_use(cx, "cx/net") &&
+    cx_use(cx, "cx/pair") &&
+    cx_use(cx, "cx/rec") &&
+    cx_use(cx, "cx/ref") &&
+    cx_use(cx, "cx/stack") &&
+    cx_use(cx, "cx/str") &&
+    cx_use(cx, "cx/sym") &&
+    cx_use(cx, "cx/table") &&
+    cx_use(cx, "cx/time") &&
+    cx_use(cx, "cx/type") &&
     cx_use(cx, "cx/var");
-  })
+}
 
 struct cx *cx_init(struct cx *cx) {
   cx->next_sym_tag = cx->next_type_tag = 0;

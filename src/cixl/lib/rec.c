@@ -269,41 +269,46 @@ static bool print_imp(struct cx_scope *scope) {
   return true;
 }
 
-cx_lib(cx_init_rec, "cx/rec", { 
-    struct cx *cx = lib->cx;
-    cx_use(cx, "cx/abc", "A", "Bool", "Cmp", "Opt");
-    cx_use(cx, "cx/io", "WFile");
-    cx_use(cx, "cx/sym", "Sym");
+cx_lib(cx_init_rec, "cx/rec") { 
+  struct cx *cx = lib->cx;
+    
+  if (!cx_use(cx, "cx/abc", "A", "Bool", "Cmp", "Opt") ||
+      !cx_use(cx, "cx/io", "WFile") ||
+      !cx_use(cx, "cx/sym", "Sym")) {
+    return false;
+  }
 
-    cx->rec_type = cx_add_type(lib, "Rec", cx->cmp_type);
-    cx->rec_type->trait = true;
+  cx->rec_type = cx_add_type(lib, "Rec", cx->cmp_type);
+  cx->rec_type->trait = true;
 
-    cx_add_macro(lib, "rec:", rec_parse); 
+  cx_add_macro(lib, "rec:", rec_parse); 
 
-    cx_add_cfunc(lib, "=",
-		 cx_args(cx_arg("x", cx->rec_type), cx_arg("y", cx->rec_type)),
-		 cx_args(cx_arg(NULL, cx->bool_type)),
-		 eqval_imp);
+  cx_add_cfunc(lib, "=",
+	       cx_args(cx_arg("x", cx->rec_type), cx_arg("y", cx->rec_type)),
+	       cx_args(cx_arg(NULL, cx->bool_type)),
+	       eqval_imp);
 
-    cx_add_cfunc(lib, "?",
-		 cx_args(cx_arg("rec", cx->rec_type)),
-		 cx_args(cx_arg(NULL, cx->bool_type)),
-		 ok_imp);
+  cx_add_cfunc(lib, "?",
+	       cx_args(cx_arg("rec", cx->rec_type)),
+	       cx_args(cx_arg(NULL, cx->bool_type)),
+	       ok_imp);
 
-    cx_add_cfunc(lib, "get",
-		 cx_args(cx_arg("rec", cx->rec_type), cx_arg("fld", cx->sym_type)),
-		 cx_args(cx_arg(NULL, cx->opt_type)),
-		 get_imp);
+  cx_add_cfunc(lib, "get",
+	       cx_args(cx_arg("rec", cx->rec_type), cx_arg("fld", cx->sym_type)),
+	       cx_args(cx_arg(NULL, cx->opt_type)),
+	       get_imp);
 
-    cx_add_cfunc(lib, "put",
-		 cx_args(cx_arg("rec", cx->rec_type),
-			 cx_arg("fld", cx->sym_type),
-			 cx_arg("val", cx->any_type)),
-		 cx_args(),
-		 put_imp);
+  cx_add_cfunc(lib, "put",
+	       cx_args(cx_arg("rec", cx->rec_type),
+		       cx_arg("fld", cx->sym_type),
+		       cx_arg("val", cx->any_type)),
+	       cx_args(),
+	       put_imp);
 
-    cx_add_cfunc(lib, "print",
-		 cx_args(cx_arg("out", cx->wfile_type), cx_arg("rec", cx->rec_type)),
-		 cx_args(),
-		 print_imp);
-  })
+  cx_add_cfunc(lib, "print",
+	       cx_args(cx_arg("out", cx->wfile_type), cx_arg("rec", cx->rec_type)),
+	       cx_args(),
+	       print_imp);
+
+  return true;
+}

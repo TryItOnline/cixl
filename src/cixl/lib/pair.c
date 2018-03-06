@@ -59,40 +59,45 @@ static bool rezip_imp(struct cx_scope *scope) {
   return true;
 }
 
-cx_lib(cx_init_pair, "cx/pair", {
-    struct cx *cx = lib->cx;
-    cx_use(cx, "cx/abc", "A", "Cmp", "Opt", "Seq");
-    cx_use(cx, "cx/iter", "for");
-
-    cx->pair_type = cx_init_pair_type(lib);
+cx_lib(cx_init_pair, "cx/pair") {
+  struct cx *cx = lib->cx;
     
-    cx_add_cfunc(lib, ".", 
-		 cx_args(cx_arg("x", cx->opt_type), cx_arg("y", cx->opt_type)),
-		 cx_args(cx_arg(NULL, cx->pair_type)),
-		 zip_imp);
+  if (!cx_use(cx, "cx/abc", "A", "Cmp", "Opt", "Seq") ||
+      !cx_use(cx, "cx/iter", "for")) {
+    return false;
+  }
 
-    cx_add_cfunc(lib, "unzip", 
-		 cx_args(cx_arg("p", cx->pair_type)),
-		 cx_args(cx_arg(NULL, cx->opt_type), cx_arg(NULL, cx->opt_type)),
-		 unzip_imp);
+  cx->pair_type = cx_init_pair_type(lib);
+    
+  cx_add_cfunc(lib, ".", 
+	       cx_args(cx_arg("x", cx->opt_type), cx_arg("y", cx->opt_type)),
+	       cx_args(cx_arg(NULL, cx->pair_type)),
+	       zip_imp);
 
-    cx_add_cfunc(lib, "x",
-		 cx_args(cx_arg("p", cx->pair_type)),
-		 cx_args(cx_arg(NULL, cx->any_type)),
-		 x_imp);
+  cx_add_cfunc(lib, "unzip", 
+	       cx_args(cx_arg("p", cx->pair_type)),
+	       cx_args(cx_arg(NULL, cx->opt_type), cx_arg(NULL, cx->opt_type)),
+	       unzip_imp);
 
-    cx_add_cfunc(lib, "y",
-		 cx_args(cx_arg("p", cx->pair_type)),
-		 cx_args(cx_arg(NULL, cx->any_type)),
-		 y_imp);
+  cx_add_cfunc(lib, "x",
+	       cx_args(cx_arg("p", cx->pair_type)),
+	       cx_args(cx_arg(NULL, cx->any_type)),
+	       x_imp);
 
-    cx_add_cfunc(lib, "rezip", 
-		 cx_args(cx_arg("p", cx->pair_type)),
-		 cx_args(),
-		 rezip_imp);  
+  cx_add_cfunc(lib, "y",
+	       cx_args(cx_arg("p", cx->pair_type)),
+	       cx_args(cx_arg(NULL, cx->any_type)),
+	       y_imp);
 
-    cx_add_cxfunc(lib, "rezip", 
-		  cx_args(cx_arg("in", cx->seq_type)),
-		  cx_args(),
-		  "$in &rezip for");
-  })
+  cx_add_cfunc(lib, "rezip", 
+	       cx_args(cx_arg("p", cx->pair_type)),
+	       cx_args(),
+	       rezip_imp);  
+
+  cx_add_cxfunc(lib, "rezip", 
+		cx_args(cx_arg("in", cx->seq_type)),
+		cx_args(),
+		"$in &rezip for");
+
+  return true;
+}

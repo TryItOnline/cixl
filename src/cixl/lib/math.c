@@ -118,89 +118,94 @@ static bool rat_int_imp(struct cx_scope *scope) {
   return true;
 }
 
-cx_lib(cx_init_math, "cx/math", {
-    struct cx *cx = lib->cx;
-    cx_use(cx, "cx/abc", "A", "Int", "Num", "Opt", "Seq");
-    cx_use(cx, "cx/cond", "=", "?", "if-else");
-    cx_use(cx, "cx/func", "Fimp", "Func", "recall");
-    cx_use(cx, "cx/iter", "for");
+cx_lib(cx_init_math, "cx/math") {
+  struct cx *cx = lib->cx;
 
-    cx->rat_type = cx_init_rat_type(lib);
+  if (!cx_use(cx, "cx/abc", "A", "Int", "Num", "Opt", "Seq") ||
+      !cx_use(cx, "cx/cond", "=", "?", "if-else") ||
+      !cx_use(cx, "cx/func", "Fimp", "Func", "recall") ||
+      !cx_use(cx, "cx/iter", "for")) {
+    return false;
+  }
 
-    cx_add_cfunc(lib, "++",
-		 cx_args(cx_arg("v", cx->int_type)),
-		 cx_args(cx_arg(NULL, cx->int_type)),
-		 inc_imp);
+  cx->rat_type = cx_init_rat_type(lib);
+
+  cx_add_cfunc(lib, "++",
+	       cx_args(cx_arg("v", cx->int_type)),
+	       cx_args(cx_arg(NULL, cx->int_type)),
+	       inc_imp);
   
-    cx_add_cfunc(lib, "--",
-		 cx_args(cx_arg("v", cx->int_type)),
-		 cx_args(cx_arg(NULL, cx->int_type)),
-		 dec_imp);
+  cx_add_cfunc(lib, "--",
+	       cx_args(cx_arg("v", cx->int_type)),
+	       cx_args(cx_arg(NULL, cx->int_type)),
+	       dec_imp);
 
-    cx_add_cfunc(lib, "+",
-		 cx_args(cx_arg("x", cx->int_type), cx_arg("y", cx->int_type)),
-		 cx_args(cx_arg(NULL, cx->int_type)),
-		 int_add_imp);
+  cx_add_cfunc(lib, "+",
+	       cx_args(cx_arg("x", cx->int_type), cx_arg("y", cx->int_type)),
+	       cx_args(cx_arg(NULL, cx->int_type)),
+	       int_add_imp);
   
-    cx_add_cfunc(lib, "-",
-		 cx_args(cx_arg("x", cx->int_type), cx_arg("y", cx->int_type)),
-		 cx_args(cx_arg(NULL, cx->int_type)),
-		 int_sub_imp);
+  cx_add_cfunc(lib, "-",
+	       cx_args(cx_arg("x", cx->int_type), cx_arg("y", cx->int_type)),
+	       cx_args(cx_arg(NULL, cx->int_type)),
+	       int_sub_imp);
   
-    cx_add_cfunc(lib, "*",
-		 cx_args(cx_arg("x", cx->int_type), cx_arg("y", cx->int_type)),
-		 cx_args(cx_arg(NULL, cx->int_type)),
-		 int_mul_imp);
+  cx_add_cfunc(lib, "*",
+	       cx_args(cx_arg("x", cx->int_type), cx_arg("y", cx->int_type)),
+	       cx_args(cx_arg(NULL, cx->int_type)),
+	       int_mul_imp);
   
-    cx_add_cfunc(lib, "/",
-		 cx_args(cx_arg("x", cx->int_type), cx_arg("y", cx->int_type)),
-		 cx_args(cx_arg(NULL, cx->rat_type)),
-		 int_div_imp);
+  cx_add_cfunc(lib, "/",
+	       cx_args(cx_arg("x", cx->int_type), cx_arg("y", cx->int_type)),
+	       cx_args(cx_arg(NULL, cx->rat_type)),
+	       int_div_imp);
 
-    cx_add_cfunc(lib, "abs",
-		 cx_args(cx_arg("n", cx->int_type)),
-		 cx_args(cx_arg(NULL, cx->int_type)),
-		 int_abs_imp);
+  cx_add_cfunc(lib, "abs",
+	       cx_args(cx_arg("n", cx->int_type)),
+	       cx_args(cx_arg(NULL, cx->int_type)),
+	       int_abs_imp);
 
-    cx_add_cfunc(lib, "rand",
-		 cx_args(cx_arg("n", cx->int_type)),
-		 cx_args(cx_arg(NULL, cx->int_type)),
-		 rand_imp);
+  cx_add_cfunc(lib, "rand",
+	       cx_args(cx_arg("n", cx->int_type)),
+	       cx_args(cx_arg(NULL, cx->int_type)),
+	       rand_imp);
 
-    cx_add_cfunc(lib, "+",
-		 cx_args(cx_arg("x", cx->rat_type), cx_arg("y", cx->rat_type)),
-		 cx_args(cx_arg(NULL, cx->rat_type)),
-		 rat_add_imp);
+  cx_add_cfunc(lib, "+",
+	       cx_args(cx_arg("x", cx->rat_type), cx_arg("y", cx->rat_type)),
+	       cx_args(cx_arg(NULL, cx->rat_type)),
+	       rat_add_imp);
   
-    cx_add_cfunc(lib, "*",
-		 cx_args(cx_arg("x", cx->rat_type), cx_arg("y", cx->rat_type)),
-		 cx_args(cx_arg(NULL, cx->rat_type)),
-		 rat_mul_imp);
+  cx_add_cfunc(lib, "*",
+	       cx_args(cx_arg("x", cx->rat_type), cx_arg("y", cx->rat_type)),
+	       cx_args(cx_arg(NULL, cx->rat_type)),
+	       rat_mul_imp);
 
-    cx_add_cfunc(lib, "*",
-		 cx_args(cx_arg("x", cx->rat_type), cx_arg("y", cx->int_type)),
-		 cx_args(cx_arg(NULL, cx->rat_type)),
-		 rat_scale_imp);
+  cx_add_cfunc(lib, "*",
+	       cx_args(cx_arg("x", cx->rat_type), cx_arg("y", cx->int_type)),
+	       cx_args(cx_arg(NULL, cx->rat_type)),
+	       rat_scale_imp);
 
-    cx_add_cfunc(lib, "int",
-		 cx_args(cx_arg("r", cx->rat_type)),
-		 cx_args(cx_arg(NULL, cx->int_type)),
-		 rat_int_imp);
+  cx_add_cfunc(lib, "int",
+	       cx_args(cx_arg("r", cx->rat_type)),
+	       cx_args(cx_arg(NULL, cx->int_type)),
+	       rat_int_imp);
   
-    cx_add_cxfunc(lib, "fib-rec",
-		  cx_args(cx_arg("a", cx->int_type),
-			  cx_arg("b", cx->int_type),
-			  cx_arg("n", cx->int_type)),
-		  cx_args(cx_arg(NULL, cx->int_type)),
-		  "$n?<Opt> {$b $a $b +<Int Int> $n -- recall} $a if-else");
+  cx_add_cxfunc(lib, "fib-rec",
+		cx_args(cx_arg("a", cx->int_type),
+			cx_arg("b", cx->int_type),
+			cx_arg("n", cx->int_type)),
+		cx_args(cx_arg(NULL, cx->int_type)),
+		"$n?<Opt> {$b $a $b +<Int Int> $n -- recall} $a if-else");
 
-    cx_add_cxfunc(lib, "fib",
-		  cx_args(cx_arg("n", cx->int_type)),
-		  cx_args(cx_arg(NULL, cx->int_type)),
-		  "0 1 $n fib-rec");
+  cx_add_cxfunc(lib, "fib",
+		cx_args(cx_arg("n", cx->int_type)),
+		cx_args(cx_arg(NULL, cx->int_type)),
+		"0 1 $n fib-rec");
     
-    cx_add_cxfunc(lib, "sum",
-		  cx_args(cx_arg("in", cx->seq_type)),
-		  cx_args(cx_arg(NULL, cx->any_type)),
-		  "0 $in &+ for");
-  })
+  cx_add_cxfunc(lib, "sum",
+		cx_args(cx_arg("in", cx->seq_type)),
+		cx_args(cx_arg(NULL, cx->any_type)),
+		"0 $in &+ for");
+
+  return true;
+}

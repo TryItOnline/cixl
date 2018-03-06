@@ -57,20 +57,25 @@ static bool emit_imp(struct cx_scope *scope) {
   return ok;
 }
 
-cx_lib(cx_init_bin, "cx/bin", {
-    struct cx *cx = lib->cx;
-    cx_use(cx, "cx/abc", "A");
-    cx_use(cx, "cx/str", "Str");
-
-    cx->bin_type = cx_init_bin_type(lib);
-
-    cx_add_cfunc(lib, "compile",
-		 cx_args(cx_arg("out", cx->bin_type), cx_arg("in", cx->str_type)),
-		 cx_args(),
-		 compile_imp);
+cx_lib(cx_init_bin, "cx/bin") {
+  struct cx *cx = lib->cx;
     
-    cx_add_cfunc(lib, "emit",
-		 cx_args(cx_arg("in", cx->bin_type)),
-		 cx_args(cx_arg(NULL, cx->str_type)),
-		 emit_imp);
-  })
+  if (!cx_use(cx, "cx/abc", "A") ||
+      !cx_use(cx, "cx/str", "Str")) {
+    return false;
+  }
+
+  cx->bin_type = cx_init_bin_type(lib);
+
+  cx_add_cfunc(lib, "compile",
+	       cx_args(cx_arg("out", cx->bin_type), cx_arg("in", cx->str_type)),
+	       cx_args(),
+	       compile_imp);
+    
+  cx_add_cfunc(lib, "emit",
+	       cx_args(cx_arg("in", cx->bin_type)),
+	       cx_args(cx_arg(NULL, cx->str_type)),
+	       emit_imp);
+
+  return true;
+}

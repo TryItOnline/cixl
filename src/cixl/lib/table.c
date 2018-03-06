@@ -146,44 +146,49 @@ static bool seq_imp(struct cx_scope *scope) {
   return ok;
 }
 
-cx_lib(cx_init_table, "cx/table", {
-    struct cx *cx = lib->cx;
-    cx_use(cx, "cx/abc", "A", "Cmp", "Int", "Opt", "Seq");
-
-    cx->table_type = cx_init_table_type(lib);
+cx_lib(cx_init_table, "cx/table") {
+  struct cx *cx = lib->cx;
     
-    cx_add_cfunc(lib, "get",
-		 cx_args(cx_arg("tbl", cx->table_type), cx_arg("key", cx->cmp_type)),
-		 cx_args(cx_arg(NULL, cx->opt_type)),
-		 get_imp);
+  if (!cx_use(cx, "cx/abc", "A", "Cmp", "Int", "Opt", "Seq")) {
+    return false;
+  }
 
-    cx_add_cfunc(lib, "put",
-		 cx_args(cx_arg("tbl", cx->table_type),
-			 cx_arg("key", cx->cmp_type),
-			 cx_arg("val", cx->any_type)),
-		 cx_args(),
-		 put_imp);
+  cx->table_type = cx_init_table_type(lib);
+    
+  cx_add_cfunc(lib, "get",
+	       cx_args(cx_arg("tbl", cx->table_type), cx_arg("key", cx->cmp_type)),
+	       cx_args(cx_arg(NULL, cx->opt_type)),
+	       get_imp);
 
-    cx_add_cfunc(lib, "put-else",
-		 cx_args(cx_arg("tbl", cx->table_type),
-			 cx_arg("key", cx->cmp_type),
-			 cx_arg("upd", cx->any_type),
-			 cx_arg("ins", cx->any_type)),
-		 cx_args(),
-		 put_else_imp);
+  cx_add_cfunc(lib, "put",
+	       cx_args(cx_arg("tbl", cx->table_type),
+		       cx_arg("key", cx->cmp_type),
+		       cx_arg("val", cx->any_type)),
+	       cx_args(),
+	       put_imp);
 
-    cx_add_cfunc(lib, "delete",
-		 cx_args(cx_arg("tbl", cx->table_type), cx_arg("key", cx->cmp_type)),
-		 cx_args(),
-		 delete_imp);
+  cx_add_cfunc(lib, "put-else",
+	       cx_args(cx_arg("tbl", cx->table_type),
+		       cx_arg("key", cx->cmp_type),
+		       cx_arg("upd", cx->any_type),
+		       cx_arg("ins", cx->any_type)),
+	       cx_args(),
+	       put_else_imp);
 
-    cx_add_cfunc(lib, "len",
-		 cx_args(cx_arg("tbl", cx->table_type)),
-		 cx_args(cx_arg(NULL, cx->int_type)),
-		 len_imp);
+  cx_add_cfunc(lib, "delete",
+	       cx_args(cx_arg("tbl", cx->table_type), cx_arg("key", cx->cmp_type)),
+	       cx_args(),
+	       delete_imp);
 
-    cx_add_cfunc(lib, "table",
-		 cx_args(cx_arg("in", cx->seq_type)),
-		 cx_args(cx_arg(NULL, cx->table_type)),
-		 seq_imp);
-  })
+  cx_add_cfunc(lib, "len",
+	       cx_args(cx_arg("tbl", cx->table_type)),
+	       cx_args(cx_arg(NULL, cx->int_type)),
+	       len_imp);
+
+  cx_add_cfunc(lib, "table",
+	       cx_args(cx_arg("in", cx->seq_type)),
+	       cx_args(cx_arg(NULL, cx->table_type)),
+	       seq_imp);
+
+  return true;
+}

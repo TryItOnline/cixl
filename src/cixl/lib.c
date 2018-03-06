@@ -322,9 +322,10 @@ bool _cx_use(struct cx *cx,
 
   if (lib->init) {
     cx_push_lib(cx, lib);
-    lib->init(lib);
-    lib->init = NULL;
+    bool ok = lib->init(lib);
     cx_pop_lib(cx);
+    if (!ok) { return false; }
+    lib->init = NULL;
   }
 
   if (nids) {

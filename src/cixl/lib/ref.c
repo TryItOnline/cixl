@@ -39,24 +39,29 @@ static bool put_imp(struct cx_scope *scope) {
   return true;
 }
 
-cx_lib(cx_init_ref, "cx/ref", { 
-    struct cx *cx = lib->cx;
-    cx_use(cx, "cx/abc", "A", "Opt");
+cx_lib(cx_init_ref, "cx/ref") { 
+  struct cx *cx = lib->cx;
+    
+  if (!cx_use(cx, "cx/abc", "A", "Opt")) {
+    return false;
+  }
 
-    cx->ref_type = cx_init_ref_type(lib);
+  cx->ref_type = cx_init_ref_type(lib);
 
-    cx_add_cfunc(lib, "ref",
-		 cx_args(cx_arg("val", cx->opt_type)),
-		 cx_args(cx_arg(NULL, cx->ref_type)),
-		 ref_imp);
+  cx_add_cfunc(lib, "ref",
+	       cx_args(cx_arg("val", cx->opt_type)),
+	       cx_args(cx_arg(NULL, cx->ref_type)),
+	       ref_imp);
   
-    cx_add_cfunc(lib, "get-ref",
-		 cx_args(cx_arg("ref", cx->ref_type)),
-		 cx_args(cx_arg(NULL, cx->opt_type)),
-		 get_imp);
+  cx_add_cfunc(lib, "get-ref",
+	       cx_args(cx_arg("ref", cx->ref_type)),
+	       cx_args(cx_arg(NULL, cx->opt_type)),
+	       get_imp);
 
-    cx_add_cfunc(lib, "put-ref",
-		 cx_args(cx_arg("ref", cx->ref_type), cx_arg("val", cx->opt_type)),
-		 cx_args(),
-		 put_imp);
-  })
+  cx_add_cfunc(lib, "put-ref",
+	       cx_args(cx_arg("ref", cx->ref_type), cx_arg("val", cx->opt_type)),
+	       cx_args(),
+	       put_imp);
+
+  return true;
+}

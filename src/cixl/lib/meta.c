@@ -13,9 +13,9 @@
 #include "cixl/str.h"
 
 static ssize_t include_eval(struct cx_macro_eval *eval,
-			struct cx_bin *bin,
-			size_t tok_idx,
-			struct cx *cx) {
+			    struct cx_bin *bin,
+			    size_t tok_idx,
+			    struct cx *cx) {
   if (!cx_compile(cx, cx_vec_start(&eval->toks), cx_vec_end(&eval->toks), bin)) {
     cx_error(cx, cx->row, cx->col, "Failed compiling include");
     return -1;
@@ -165,29 +165,34 @@ static bool get_lib_imp(struct cx_scope *scope) {
   return true;
 }
 
-cx_lib(cx_init_meta, "cx/meta", {
-    struct cx *cx = lib->cx;
-    cx_use(cx, "cx/abc", "Opt");
-    cx_use(cx, "cx/str", "Str");
-    cx_use(cx, "cx/sym", "Sym");
-
-    cx->lib_type = cx_init_lib_type(lib);
+cx_lib(cx_init_meta, "cx/meta") {
+  struct cx *cx = lib->cx;
     
-    cx_add_macro(lib, "include:", include_parse);
-    cx_add_macro(lib, "use:", use_parse);
+  if (!cx_use(cx, "cx/abc", "Opt") ||
+      !cx_use(cx, "cx/str", "Str") ||
+      !cx_use(cx, "cx/sym", "Sym")) {
+    return false;
+  }
 
-    cx_add_cfunc(lib, "cx-lib",
-		 cx_args(),
-		 cx_args(cx_arg(NULL, cx->lib_type)),
-		 cx_lib_imp);
+  cx->lib_type = cx_init_lib_type(lib);
+    
+  cx_add_macro(lib, "include:", include_parse);
+  cx_add_macro(lib, "use:", use_parse);
 
-    cx_add_cfunc(lib, "id",
-		 cx_args(cx_arg("lib", cx->lib_type)),
-		 cx_args(cx_arg(NULL, cx->sym_type)),
-		 lib_id_imp);
+  cx_add_cfunc(lib, "cx-lib",
+	       cx_args(),
+	       cx_args(cx_arg(NULL, cx->lib_type)),
+	       cx_lib_imp);
 
-    cx_add_cfunc(lib, "get-lib",
-		 cx_args(cx_arg("id", cx->sym_type)),
-		 cx_args(cx_arg(NULL, cx->opt_type)),
-		 get_lib_imp);
- })
+  cx_add_cfunc(lib, "id",
+	       cx_args(cx_arg("lib", cx->lib_type)),
+	       cx_args(cx_arg(NULL, cx->sym_type)),
+	       lib_id_imp);
+
+  cx_add_cfunc(lib, "get-lib",
+	       cx_args(cx_arg("id", cx->sym_type)),
+	       cx_args(cx_arg(NULL, cx->opt_type)),
+	       get_lib_imp);
+
+  return true;
+}

@@ -134,20 +134,25 @@ static bool get_imp(struct cx_scope *scope) {
   return true;
 }
 
-cx_lib(cx_init_var, "cx/var", {
-    struct cx *cx = lib->cx;
-    cx_use(cx, "cx/abc", "A", "Opt");
-    cx_use(cx, "cx/sym", "Sym");
+cx_lib(cx_init_var, "cx/var") {
+  struct cx *cx = lib->cx;
     
-    cx_add_macro(lib, "let:", let_parse);
+  if (!cx_use(cx, "cx/abc", "A", "Opt") ||
+      !cx_use(cx, "cx/sym", "Sym")) {
+    return false;
+  }
+    
+  cx_add_macro(lib, "let:", let_parse);
 
-    cx_add_cfunc(lib, "put-var",
-		 cx_args(cx_arg("id", cx->sym_type), cx_arg("val", cx->any_type)),
-		 cx_args(),
-		 put_imp);
+  cx_add_cfunc(lib, "put-var",
+	       cx_args(cx_arg("id", cx->sym_type), cx_arg("val", cx->any_type)),
+	       cx_args(),
+	       put_imp);
   
-    cx_add_cfunc(lib, "get-var",
-		 cx_args(cx_arg("id", cx->sym_type)),
-		 cx_args(cx_arg(NULL, cx->opt_type)),
-		 get_imp);
-  })
+  cx_add_cfunc(lib, "get-var",
+	       cx_args(cx_arg("id", cx->sym_type)),
+	       cx_args(cx_arg(NULL, cx->opt_type)),
+	       get_imp);
+
+  return true;
+}

@@ -378,187 +378,192 @@ static bool clock_imp(struct cx_scope *scope) {
   return ok;
 }
 
-cx_lib(cx_init_time, "cx/time", {
-    struct cx *cx = lib->cx;
-    cx_use(cx, "cx/abc", "A", "Cmp", "Int", "Opt");
-    cx_use(cx, "cx/stack", "Stack");
-
-    cx->time_type = cx_init_time_type(lib);
+cx_lib(cx_init_time, "cx/time") {
+  struct cx *cx = lib->cx;
     
-    cx_time_init(&cx_box_init(cx_set_const(lib, cx_sym(cx, "min-time"), false),
-			      cx->time_type)->as_time,
-		 INT32_MIN, INT64_MIN);
-  
-    cx_time_init(&cx_box_init(cx_set_const(lib, cx_sym(cx, "max-time"), false),
-			      cx->time_type)->as_time,
-		 INT32_MAX, INT64_MAX);
-  
-    cx_add_cfunc(lib, "years",
-		 cx_args(cx_arg("n", cx->int_type)),
-		 cx_args(cx_arg(NULL, cx->time_type)),
-		 years_imp);
+  if (!cx_use(cx, "cx/abc", "A", "Cmp", "Int", "Opt") ||
+      !cx_use(cx, "cx/stack", "Stack")) {
+    return false;
+  }
 
-    cx_add_cfunc(lib, "months",
-		 cx_args(cx_arg("n", cx->int_type)),
-		 cx_args(cx_arg(NULL, cx->time_type)),
-		 months_imp);
+  cx->time_type = cx_init_time_type(lib);
+    
+  cx_time_init(&cx_box_init(cx_set_const(lib, cx_sym(cx, "min-time"), false),
+			    cx->time_type)->as_time,
+	       INT32_MIN, INT64_MIN);
   
-    cx_add_cfunc(lib, "days",
-		 cx_args(cx_arg("n", cx->int_type)),
-		 cx_args(cx_arg(NULL, cx->time_type)),
-		 days_imp);
+  cx_time_init(&cx_box_init(cx_set_const(lib, cx_sym(cx, "max-time"), false),
+			    cx->time_type)->as_time,
+	       INT32_MAX, INT64_MAX);
   
-    cx_add_cfunc(lib, "h",
-		 cx_args(cx_arg("n", cx->int_type)),
-		 cx_args(cx_arg(NULL, cx->time_type)),
-		 h_imp);
-  
-    cx_add_cfunc(lib, "m",
-		 cx_args(cx_arg("n", cx->int_type)),
-		 cx_args(cx_arg(NULL, cx->time_type)),
-		 m_imp);
+  cx_add_cfunc(lib, "years",
+	       cx_args(cx_arg("n", cx->int_type)),
+	       cx_args(cx_arg(NULL, cx->time_type)),
+	       years_imp);
 
-    cx_add_cfunc(lib, "s",
-		 cx_args(cx_arg("n", cx->int_type)),
-		 cx_args(cx_arg(NULL, cx->time_type)),
-		 s_imp);
+  cx_add_cfunc(lib, "months",
+	       cx_args(cx_arg("n", cx->int_type)),
+	       cx_args(cx_arg(NULL, cx->time_type)),
+	       months_imp);
   
-    cx_add_cfunc(lib, "ms",
-		 cx_args(cx_arg("n", cx->int_type)),
-		 cx_args(cx_arg(NULL, cx->time_type)),
-		 ms_imp);
+  cx_add_cfunc(lib, "days",
+	       cx_args(cx_arg("n", cx->int_type)),
+	       cx_args(cx_arg(NULL, cx->time_type)),
+	       days_imp);
   
-    cx_add_cfunc(lib, "us",
-		 cx_args(cx_arg("n", cx->int_type)),
-		 cx_args(cx_arg(NULL, cx->time_type)),
-		 us_imp);
+  cx_add_cfunc(lib, "h",
+	       cx_args(cx_arg("n", cx->int_type)),
+	       cx_args(cx_arg(NULL, cx->time_type)),
+	       h_imp);
   
-    cx_add_cfunc(lib, "ns",
-		 cx_args(cx_arg("n", cx->int_type)),
-		 cx_args(cx_arg(NULL, cx->time_type)),
-		 ns_imp);  
+  cx_add_cfunc(lib, "m",
+	       cx_args(cx_arg("n", cx->int_type)),
+	       cx_args(cx_arg(NULL, cx->time_type)),
+	       m_imp);
 
-    cx_add_cfunc(lib, "time",
-		 cx_args(cx_arg("in", cx->stack_type)),
-		 cx_args(cx_arg(NULL, cx->opt_type)),
-		 stack_time_imp);
+  cx_add_cfunc(lib, "s",
+	       cx_args(cx_arg("n", cx->int_type)),
+	       cx_args(cx_arg(NULL, cx->time_type)),
+	       s_imp);
   
-    cx_add_cfunc(lib, "now",
-		 cx_args(),
-		 cx_args(cx_arg(NULL, cx->time_type)),
-		 now_imp);
+  cx_add_cfunc(lib, "ms",
+	       cx_args(cx_arg("n", cx->int_type)),
+	       cx_args(cx_arg(NULL, cx->time_type)),
+	       ms_imp);
+  
+  cx_add_cfunc(lib, "us",
+	       cx_args(cx_arg("n", cx->int_type)),
+	       cx_args(cx_arg(NULL, cx->time_type)),
+	       us_imp);
+  
+  cx_add_cfunc(lib, "ns",
+	       cx_args(cx_arg("n", cx->int_type)),
+	       cx_args(cx_arg(NULL, cx->time_type)),
+	       ns_imp);  
 
-    cx_add_cfunc(lib, "date",
-		 cx_args(cx_arg("in", cx->time_type)),
-		 cx_args(cx_arg(NULL, cx->time_type)),
-		 time_date_imp);
+  cx_add_cfunc(lib, "time",
+	       cx_args(cx_arg("in", cx->stack_type)),
+	       cx_args(cx_arg(NULL, cx->opt_type)),
+	       stack_time_imp);
   
-    cx_add_cfunc(lib, "time",
-		 cx_args(cx_arg("in", cx->time_type)),
-		 cx_args(cx_arg(NULL, cx->time_type)),
-		 time_time_imp);
+  cx_add_cfunc(lib, "now",
+	       cx_args(),
+	       cx_args(cx_arg(NULL, cx->time_type)),
+	       now_imp);
 
-    cx_add_cfunc(lib, "year",
-		 cx_args(cx_arg("t", cx->time_type)),
-		 cx_args(cx_arg(NULL, cx->int_type)),
-		 time_years_imp);
+  cx_add_cfunc(lib, "date",
+	       cx_args(cx_arg("in", cx->time_type)),
+	       cx_args(cx_arg(NULL, cx->time_type)),
+	       time_date_imp);
   
-    cx_add_cfunc(lib, "years",
-		 cx_args(cx_arg("t", cx->time_type)),
-		 cx_args(cx_arg(NULL, cx->int_type)),
-		 time_years_imp);
-  
-    cx_add_cfunc(lib, "month",
-		 cx_args(cx_arg("t", cx->time_type)),
-		 cx_args(cx_arg(NULL, cx->int_type)),
-		 month_imp);
-  
-    cx_add_cfunc(lib, "months",
-		 cx_args(cx_arg("t", cx->time_type)),
-		 cx_args(cx_arg(NULL, cx->int_type)),
-		 time_months_imp);
-  
-    cx_add_cfunc(lib, "day",
-		 cx_args(cx_arg("t", cx->time_type)),
-		 cx_args(cx_arg(NULL, cx->int_type)),
-		 time_day_imp);
-  
-    cx_add_cfunc(lib, "days",
-		 cx_args(cx_arg("t", cx->time_type)),
-		 cx_args(cx_arg(NULL, cx->int_type)),
-		 time_days_imp);
+  cx_add_cfunc(lib, "time",
+	       cx_args(cx_arg("in", cx->time_type)),
+	       cx_args(cx_arg(NULL, cx->time_type)),
+	       time_time_imp);
 
-    cx_add_cfunc(lib, "hour",
-		 cx_args(cx_arg("t", cx->time_type)),
-		 cx_args(cx_arg(NULL, cx->int_type)),	       
-		 hour_imp);
+  cx_add_cfunc(lib, "year",
+	       cx_args(cx_arg("t", cx->time_type)),
+	       cx_args(cx_arg(NULL, cx->int_type)),
+	       time_years_imp);
   
-    cx_add_cfunc(lib, "minute",
-		 cx_args(cx_arg("t", cx->time_type)),
-		 cx_args(cx_arg(NULL, cx->int_type)),
-		 minute_imp);
+  cx_add_cfunc(lib, "years",
+	       cx_args(cx_arg("t", cx->time_type)),
+	       cx_args(cx_arg(NULL, cx->int_type)),
+	       time_years_imp);
   
-    cx_add_cfunc(lib, "second",
-		 cx_args(cx_arg("t", cx->time_type)),
-		 cx_args(cx_arg(NULL, cx->int_type)),
-		 second_imp);
+  cx_add_cfunc(lib, "month",
+	       cx_args(cx_arg("t", cx->time_type)),
+	       cx_args(cx_arg(NULL, cx->int_type)),
+	       month_imp);
   
-    cx_add_cfunc(lib, "nsecond",
-		 cx_args(cx_arg("t", cx->time_type)),
-		 cx_args(cx_arg(NULL, cx->int_type)),
-		 nsecond_imp);
+  cx_add_cfunc(lib, "months",
+	       cx_args(cx_arg("t", cx->time_type)),
+	       cx_args(cx_arg(NULL, cx->int_type)),
+	       time_months_imp);
   
-    cx_add_cfunc(lib, "h",
-		 cx_args(cx_arg("t", cx->time_type)),
-		 cx_args(cx_arg(NULL, cx->int_type)),	       
-		 time_h_imp);
+  cx_add_cfunc(lib, "day",
+	       cx_args(cx_arg("t", cx->time_type)),
+	       cx_args(cx_arg(NULL, cx->int_type)),
+	       time_day_imp);
   
-    cx_add_cfunc(lib, "m",
-		 cx_args(cx_arg("t", cx->time_type)),
-		 cx_args(cx_arg(NULL, cx->int_type)),
-		 time_m_imp);
-  
-    cx_add_cfunc(lib, "s",
-		 cx_args(cx_arg("t", cx->time_type)),
-		 cx_args(cx_arg(NULL, cx->int_type)),
-		 time_s_imp);
+  cx_add_cfunc(lib, "days",
+	       cx_args(cx_arg("t", cx->time_type)),
+	       cx_args(cx_arg(NULL, cx->int_type)),
+	       time_days_imp);
 
-    cx_add_cfunc(lib, "ms",
-		 cx_args(cx_arg("t", cx->time_type)),
-		 cx_args(cx_arg(NULL, cx->int_type)),	       
-		 time_ms_imp);
+  cx_add_cfunc(lib, "hour",
+	       cx_args(cx_arg("t", cx->time_type)),
+	       cx_args(cx_arg(NULL, cx->int_type)),	       
+	       hour_imp);
   
-    cx_add_cfunc(lib, "us",
-		 cx_args(cx_arg("t", cx->time_type)),
-		 cx_args(cx_arg(NULL, cx->int_type)),
-		 time_us_imp);
+  cx_add_cfunc(lib, "minute",
+	       cx_args(cx_arg("t", cx->time_type)),
+	       cx_args(cx_arg(NULL, cx->int_type)),
+	       minute_imp);
   
-    cx_add_cfunc(lib, "ns",
-		 cx_args(cx_arg("t", cx->time_type)),
-		 cx_args(cx_arg(NULL, cx->int_type)),
-		 time_ns_imp);
+  cx_add_cfunc(lib, "second",
+	       cx_args(cx_arg("t", cx->time_type)),
+	       cx_args(cx_arg(NULL, cx->int_type)),
+	       second_imp);
   
-    cx_add_cfunc(lib, "+", 
-		 cx_args(cx_arg("x", cx->time_type), cx_arg("y", cx->time_type)),
-		 cx_args(cx_arg(NULL, cx->time_type)),
-		 add_imp);
+  cx_add_cfunc(lib, "nsecond",
+	       cx_args(cx_arg("t", cx->time_type)),
+	       cx_args(cx_arg(NULL, cx->int_type)),
+	       nsecond_imp);
   
-    cx_add_cfunc(lib, "-", 
-		 cx_args(cx_arg("x", cx->time_type), cx_arg("y", cx->time_type)),
-		 cx_args(cx_arg(NULL, cx->time_type)),
-		 sub_imp);
+  cx_add_cfunc(lib, "h",
+	       cx_args(cx_arg("t", cx->time_type)),
+	       cx_args(cx_arg(NULL, cx->int_type)),	       
+	       time_h_imp);
   
-    cx_add_cfunc(lib, "*", 
-		 cx_args(cx_arg("x", cx->time_type), cx_arg("y", cx->int_type)),
-		 cx_args(cx_arg(NULL, cx->time_type)),
-		 mul_imp);
+  cx_add_cfunc(lib, "m",
+	       cx_args(cx_arg("t", cx->time_type)),
+	       cx_args(cx_arg(NULL, cx->int_type)),
+	       time_m_imp);
+  
+  cx_add_cfunc(lib, "s",
+	       cx_args(cx_arg("t", cx->time_type)),
+	       cx_args(cx_arg(NULL, cx->int_type)),
+	       time_s_imp);
 
-    cx_add_cxfunc(lib, "today",
-		  cx_args(), cx_args(cx_arg(NULL, cx->time_type)),
-		  "now date");
+  cx_add_cfunc(lib, "ms",
+	       cx_args(cx_arg("t", cx->time_type)),
+	       cx_args(cx_arg(NULL, cx->int_type)),	       
+	       time_ms_imp);
+  
+  cx_add_cfunc(lib, "us",
+	       cx_args(cx_arg("t", cx->time_type)),
+	       cx_args(cx_arg(NULL, cx->int_type)),
+	       time_us_imp);
+  
+  cx_add_cfunc(lib, "ns",
+	       cx_args(cx_arg("t", cx->time_type)),
+	       cx_args(cx_arg(NULL, cx->int_type)),
+	       time_ns_imp);
+  
+  cx_add_cfunc(lib, "+", 
+	       cx_args(cx_arg("x", cx->time_type), cx_arg("y", cx->time_type)),
+	       cx_args(cx_arg(NULL, cx->time_type)),
+	       add_imp);
+  
+  cx_add_cfunc(lib, "-", 
+	       cx_args(cx_arg("x", cx->time_type), cx_arg("y", cx->time_type)),
+	       cx_args(cx_arg(NULL, cx->time_type)),
+	       sub_imp);
+  
+  cx_add_cfunc(lib, "*", 
+	       cx_args(cx_arg("x", cx->time_type), cx_arg("y", cx->int_type)),
+	       cx_args(cx_arg(NULL, cx->time_type)),
+	       mul_imp);
 
-    cx_add_cfunc(lib, "clock",
-		 cx_args(cx_arg("act", cx->any_type)),
-		 cx_args(cx_arg(NULL, cx->int_type)),
-		 clock_imp);
-  })
+  cx_add_cxfunc(lib, "today",
+		cx_args(), cx_args(cx_arg(NULL, cx->time_type)),
+		"now date");
+
+  cx_add_cfunc(lib, "clock",
+	       cx_args(cx_arg("act", cx->any_type)),
+	       cx_args(cx_arg(NULL, cx->int_type)),
+	       clock_imp);
+
+  return true;
+}

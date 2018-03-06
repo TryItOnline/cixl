@@ -224,44 +224,49 @@ static bool times_imp(struct cx_scope *scope) {
   return ok;
 }
 
-cx_lib(cx_init_iter, "cx/iter", {
-    struct cx *cx = lib->cx;
-    cx_use(cx, "cx/abc", "A", "Int", "Opt", "Seq");
-
-    cx->iter_type = cx_init_iter_type(lib);
+cx_lib(cx_init_iter, "cx/iter") {
+  struct cx *cx = lib->cx;
     
-    cx_add_cfunc(lib, "iter",
-		 cx_args(cx_arg("seq", cx->seq_type)),
-		 cx_args(cx_arg(NULL, cx->iter_type)),
-		 new_iter_imp);
+  if (!cx_use(cx, "cx/abc", "A", "Int", "Opt", "Seq")) {
+    return false;
+  }
 
-    cx_add_cfunc(lib, "for",
-		 cx_args(cx_arg("seq", cx->seq_type), cx_arg("act", cx->any_type)),
-		 cx_args(),
-		 for_imp);
-  
-    cx_add_cfunc(lib, "map",
-		 cx_args(cx_arg("seq", cx->seq_type), cx_arg("act", cx->any_type)),
-		 cx_args(cx_arg(NULL, cx->iter_type)),
-		 map_imp);
-  
-    cx_add_cfunc(lib, "filter",
-		 cx_args(cx_arg("seq", cx->seq_type), cx_arg("act", cx->any_type)),
-		 cx_args(cx_arg(NULL, cx->iter_type)),
-		 filter_imp);
-  
-    cx_add_cfunc(lib, "next",
-		 cx_args(cx_arg("it", cx->iter_type)),
-		 cx_args(cx_arg(NULL, cx->opt_type)),
-		 next_imp);
+  cx->iter_type = cx_init_iter_type(lib);
+    
+  cx_add_cfunc(lib, "iter",
+	       cx_args(cx_arg("seq", cx->seq_type)),
+	       cx_args(cx_arg(NULL, cx->iter_type)),
+	       new_iter_imp);
 
-    cx_add_cfunc(lib, "drop", 
-		 cx_args(cx_arg("it", cx->iter_type), cx_arg("n", cx->int_type)),
-		 cx_args(),
-		 drop_imp);
+  cx_add_cfunc(lib, "for",
+	       cx_args(cx_arg("seq", cx->seq_type), cx_arg("act", cx->any_type)),
+	       cx_args(),
+	       for_imp);
+  
+  cx_add_cfunc(lib, "map",
+	       cx_args(cx_arg("seq", cx->seq_type), cx_arg("act", cx->any_type)),
+	       cx_args(cx_arg(NULL, cx->iter_type)),
+	       map_imp);
+  
+  cx_add_cfunc(lib, "filter",
+	       cx_args(cx_arg("seq", cx->seq_type), cx_arg("act", cx->any_type)),
+	       cx_args(cx_arg(NULL, cx->iter_type)),
+	       filter_imp);
+  
+  cx_add_cfunc(lib, "next",
+	       cx_args(cx_arg("it", cx->iter_type)),
+	       cx_args(cx_arg(NULL, cx->opt_type)),
+	       next_imp);
 
-    cx_add_cfunc(lib, "times",
-		 cx_args(cx_arg("n", cx->int_type),
-			 cx_arg("act", cx->any_type)), cx_args(),
-		 times_imp);
-  })
+  cx_add_cfunc(lib, "drop", 
+	       cx_args(cx_arg("it", cx->iter_type), cx_arg("n", cx->int_type)),
+	       cx_args(),
+	       drop_imp);
+
+  cx_add_cfunc(lib, "times",
+	       cx_args(cx_arg("n", cx->int_type),
+		       cx_arg("act", cx->any_type)), cx_args(),
+	       times_imp);
+
+  return true;
+}

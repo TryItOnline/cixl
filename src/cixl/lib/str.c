@@ -243,79 +243,84 @@ static bool str_lower_imp(struct cx_scope *scope) {
   return true;
 }
 
-cx_lib(cx_init_str, "cx/str", {
-    struct cx *cx = lib->cx;
-    cx_use(cx, "cx/abc", "A", "Cmp", "Int", "Opt", "Seq");
-    cx_use(cx, "cx/iter", "Iter");
+cx_lib(cx_init_str, "cx/str") {
+  struct cx *cx = lib->cx;
+    
+  if (!cx_use(cx, "cx/abc", "A", "Cmp", "Int", "Opt", "Seq") ||
+      !cx_use(cx, "cx/iter", "Iter")) {
+    return false;
+  }
 
-    cx->char_type = cx_init_char_type(lib);
-    cx->str_type = cx_init_str_type(lib);
+  cx->char_type = cx_init_char_type(lib);
+  cx->str_type = cx_init_str_type(lib);
 
-    cx_add_cfunc(lib, "lines",
-		 cx_args(cx_arg("in", cx->seq_type)),
-		 cx_args(cx_arg(NULL, cx->iter_type)),
-		 lines_imp);
+  cx_add_cfunc(lib, "lines",
+	       cx_args(cx_arg("in", cx->seq_type)),
+	       cx_args(cx_arg(NULL, cx->iter_type)),
+	       lines_imp);
 
-    cx_add_cfunc(lib, "words",
-		 cx_args(cx_arg("in", cx->seq_type)),
-		 cx_args(cx_arg(NULL, cx->iter_type)),
-		 words_imp);
+  cx_add_cfunc(lib, "words",
+	       cx_args(cx_arg("in", cx->seq_type)),
+	       cx_args(cx_arg(NULL, cx->iter_type)),
+	       words_imp);
 
-    cx_add_cfunc(lib, "upper",
-		 cx_args(cx_arg("c", cx->char_type)),
-		 cx_args(cx_arg(NULL, cx->char_type)),
-		 char_upper_imp);
+  cx_add_cfunc(lib, "upper",
+	       cx_args(cx_arg("c", cx->char_type)),
+	       cx_args(cx_arg(NULL, cx->char_type)),
+	       char_upper_imp);
 
-    cx_add_cfunc(lib, "lower",
-		 cx_args(cx_arg("c", cx->char_type)),
-		 cx_args(cx_arg(NULL, cx->char_type)),
-		 char_lower_imp);
+  cx_add_cfunc(lib, "lower",
+	       cx_args(cx_arg("c", cx->char_type)),
+	       cx_args(cx_arg(NULL, cx->char_type)),
+	       char_lower_imp);
 
-    cx_add_cfunc(lib, "int",
-		 cx_args(cx_arg("c", cx->char_type)),
-		 cx_args(cx_arg(NULL, cx->int_type)),
-		 char_int_imp);
+  cx_add_cfunc(lib, "int",
+	       cx_args(cx_arg("c", cx->char_type)),
+	       cx_args(cx_arg(NULL, cx->int_type)),
+	       char_int_imp);
 
-    cx_add_cfunc(lib, "char",
-		 cx_args(cx_arg("v", cx->int_type)),
-		 cx_args(cx_arg(NULL, cx->char_type)),
-		 int_char_imp);
+  cx_add_cfunc(lib, "char",
+	       cx_args(cx_arg("v", cx->int_type)),
+	       cx_args(cx_arg(NULL, cx->char_type)),
+	       int_char_imp);
   
-    cx_add_cfunc(lib, "str",
-		 cx_args(cx_arg("v", cx->int_type)),
-		 cx_args(cx_arg(NULL, cx->str_type)),
-		 int_str_imp);
+  cx_add_cfunc(lib, "str",
+	       cx_args(cx_arg("v", cx->int_type)),
+	       cx_args(cx_arg(NULL, cx->str_type)),
+	       int_str_imp);
 
-    cx_add_cfunc(lib, "len",
-		 cx_args(cx_arg("s", cx->str_type)),
-		 cx_args(cx_arg(NULL, cx->int_type)),
-		 len_imp);
+  cx_add_cfunc(lib, "len",
+	       cx_args(cx_arg("s", cx->str_type)),
+	       cx_args(cx_arg(NULL, cx->int_type)),
+	       len_imp);
 
-    cx_add_cfunc(lib, "get",
-		 cx_args(cx_arg("s", cx->str_type), cx_arg("i", cx->int_type)),
-		 cx_args(cx_arg(NULL, cx->char_type)),
-		 get_imp);
+  cx_add_cfunc(lib, "get",
+	       cx_args(cx_arg("s", cx->str_type), cx_arg("i", cx->int_type)),
+	       cx_args(cx_arg(NULL, cx->char_type)),
+	       get_imp);
 
-    cx_add_cfunc(lib, "str",
-		 cx_args(cx_arg("s", cx->seq_type)),
-		 cx_args(cx_arg(NULL, cx->str_type)),
-		 seq_imp);
+  cx_add_cfunc(lib, "str",
+	       cx_args(cx_arg("s", cx->seq_type)),
+	       cx_args(cx_arg(NULL, cx->str_type)),
+	       seq_imp);
 
-    cx_add_cfunc(lib, "int",
-		 cx_args(cx_arg("s", cx->str_type)),
-		 cx_args(cx_arg(NULL, cx->opt_type)),
-		 str_int_imp);
+  cx_add_cfunc(lib, "int",
+	       cx_args(cx_arg("s", cx->str_type)),
+	       cx_args(cx_arg(NULL, cx->opt_type)),
+	       str_int_imp);
 
-    cx_add_cfunc(lib, "-",
-		 cx_args(cx_arg("x", cx->str_type), cx_arg("y", cx->str_type)),
-		 cx_args(cx_arg(NULL, cx->int_type)),
-		 str_sub_imp);
+  cx_add_cfunc(lib, "-",
+	       cx_args(cx_arg("x", cx->str_type), cx_arg("y", cx->str_type)),
+	       cx_args(cx_arg(NULL, cx->int_type)),
+	       str_sub_imp);
 
-    cx_add_cfunc(lib, "upper",
-		 cx_args(cx_arg("s", cx->str_type)), cx_args(),
-		 str_upper_imp);
+  cx_add_cfunc(lib, "upper",
+	       cx_args(cx_arg("s", cx->str_type)), cx_args(),
+	       str_upper_imp);
 
-    cx_add_cfunc(lib, "lower",
-		 cx_args(cx_arg("s", cx->str_type)), cx_args(),
-		 str_lower_imp);
-  })
+  cx_add_cfunc(lib, "lower",
+	       cx_args(cx_arg("s", cx->str_type)), cx_args(),
+	       str_lower_imp);
+
+  return true;
+}

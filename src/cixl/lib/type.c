@@ -128,32 +128,37 @@ static bool unsafe_imp(struct cx_scope *scope) {
   return true;
 }
 
-cx_lib(cx_init_type, "cx/type", {
-    struct cx *cx = lib->cx;
-    cx_use(cx, "cx/abc", "A", "Bool", "Opt");
-
-    cx_add_macro(lib, "trait:", trait_parse);
-
-    cx_add_cfunc(lib, "type",
-		 cx_args(cx_arg("v", cx->opt_type)),
-		 cx_args(cx_arg(NULL, cx->meta_type)),
-		 type_imp);
-  
-    cx_add_cfunc(lib, "is",
-		 cx_args(cx_arg("x", cx->meta_type), cx_arg("y", cx->meta_type)),
-		 cx_args(cx_arg(NULL, cx->bool_type)),
-		 is_imp);
-
-    cx_add_cxfunc(lib, "is",
-		  cx_args(cx_arg("x", cx->opt_type), cx_arg("y", cx->meta_type)),
-		  cx_args(cx_arg(NULL, cx->bool_type)),
-		  "$x type $y is");
+cx_lib(cx_init_type, "cx/type") {
+  struct cx *cx = lib->cx;
     
-    cx_add_cfunc(lib, "new",
-		 cx_args(cx_arg("t", cx->meta_type)),
-		 cx_args(cx_arg(NULL, cx->any_type)),
-		 new_imp);
+  if (!cx_use(cx, "cx/abc", "A", "Bool", "Opt")) {
+    return false;
+  }
 
-    cx_add_cfunc(lib, "safe", cx_args(), cx_args(), safe_imp);
-    cx_add_cfunc(lib, "unsafe", cx_args(), cx_args(), unsafe_imp);
-  })
+  cx_add_macro(lib, "trait:", trait_parse);
+
+  cx_add_cfunc(lib, "type",
+	       cx_args(cx_arg("v", cx->opt_type)),
+	       cx_args(cx_arg(NULL, cx->meta_type)),
+	       type_imp);
+  
+  cx_add_cfunc(lib, "is",
+	       cx_args(cx_arg("x", cx->meta_type), cx_arg("y", cx->meta_type)),
+	       cx_args(cx_arg(NULL, cx->bool_type)),
+	       is_imp);
+
+  cx_add_cxfunc(lib, "is",
+		cx_args(cx_arg("x", cx->opt_type), cx_arg("y", cx->meta_type)),
+		cx_args(cx_arg(NULL, cx->bool_type)),
+		"$x type $y is");
+    
+  cx_add_cfunc(lib, "new",
+	       cx_args(cx_arg("t", cx->meta_type)),
+	       cx_args(cx_arg(NULL, cx->any_type)),
+	       new_imp);
+
+  cx_add_cfunc(lib, "safe", cx_args(), cx_args(), safe_imp);
+  cx_add_cfunc(lib, "unsafe", cx_args(), cx_args(), unsafe_imp);
+
+  return true;
+}
