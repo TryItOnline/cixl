@@ -1,23 +1,21 @@
-* add lib: n ...;  macro
-** create new lib if !exists
-** add opush/poplib around code on macro eval
-** add ostop at end
-*** call eval recursively on init
-** rename lib.init to init_ptr
-*** add bool init flag
-*** add start_op & nops like fimp
-** add OLIBDEF
-*** add lib in emit_init
-*** jump in eval/emit
-** test emit
-* ---
+* fix lib: emit
+** remove emit_id from type/func/fimp
+** remove emit_types/funcs/fimps
+** call get_type/func/fimp instead
+** test.cx
+* move include: to cx/io
 * call push/pop_lib on lambda enter/exit
 ** add lambda.lib
 *** init in cx_lambda_new
 ** add lib tests
 *** call and check lib inside
-* remove OFIMP 
-** move into OFUNCDEF
+* ---
+* rewrite fib without using vars
+** cmp perf
+* sort cx_env chains
+* add max var to fimp_score
+** stop checking if >= max && return -1
+** add fimp_match fn that calls _score with size_t max
 * add support for type literal args
 ** use _ for anonymous args
 ** interpret as type literal if no ids
@@ -44,10 +42,6 @@
 * rename ref_ref to ref_inc & deref to dec
 * add meta.get-func/get-type(lib id)
 * add Fimp func fn
-* parse cx fns on first use
-** add source field
-** add parsed flag
-** parse on demand
 * optimize const emit
 ** add op_type.emit_consts
 *** rewrite getconst emit

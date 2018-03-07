@@ -240,14 +240,14 @@ static bool parse_id(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
   
   while (true) {
     char c = fgetc(in);
-    if (c == EOF) { goto exit; }
+    if (c == EOF) { goto done; }
     bool sep = cx_is_separator(cx, c);
 
     if (col != cx->col &&
 	(col-cx->col > 2 || pc != '&') &&
 	(sep || c == '<')) {
       ok = ungetc(c, in) != EOF;
-      goto exit;
+      goto done;
     }
 
     fputc(c, id.stream);
@@ -255,39 +255,43 @@ static bool parse_id(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
     if (sep) { break; }
     pc = c;
   }
- exit: {
+ done: {
     cx_buf_close(&id);
 
     if (ok) {
       char *s = id.data;
-      struct cx_macro *m = cx_get_macro(*cx->lib, s, true);
-      
-      if (m) {
-	cx->col = col;
-	ok = m->imp(cx, in, out);
+      if (isupper(s[0])) {
+	ok = parse_type(cx, s, out, lookup);
+      } else if (s[0] == '#') {
+	ok = parse_const(cx, s, out);
+      } else if (!lookup || s[0] == '$') {
+	cx_tok_init(cx_vec_push(out),
+		    CX_TID(),
+		    cx->row, cx->col)->as_ptr = strdup(s);
+      } else if (s[0] == '/' && s[1] == '/') {
+	ok = parse_line_comment(cx, in);
+      } else if (s[0] == '/' && s[1] == '*') {
+	ok = parse_block_comment(cx, in);
       } else {
-	if (isupper(s[0])) {
-	  ok = parse_type(cx, s, out, lookup);
-	} else if (s[0] == '#') {
-	  ok = parse_const(cx, s, out);
-	} else if (!lookup || s[0] == '$') {
-	  cx_tok_init(cx_vec_push(out),
-		      CX_TID(),
-		      cx->row, cx->col)->as_ptr = strdup(s);
-	} else if (s[0] == '/' && s[1] == '/') {
-	  ok = parse_line_comment(cx, in);
-	} else if (s[0] == '/' && s[1] == '*') {
-	  ok = parse_block_comment(cx, in);
-	} else {
-	  ok = parse_func(cx, s, in, out);
+	if (lookup) {
+	  struct cx_macro *m = cx_get_macro(*cx->lib, s, true);
+	  
+	  if (m) {
+	    cx->col = col;
+	    ok = m->imp(cx, in, out);
+	    goto exit;
+	  }
 	}
-
-	cx->col = col;
+	
+	ok = parse_func(cx, s, in, out);
       }
+
+      cx->col = col;
     } else {
       cx_error(cx, cx->row, cx->col, "Failed parsing id");
     }
-    
+
+  exit:
     free(id.data);
     return ok;
   }

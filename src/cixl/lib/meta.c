@@ -12,6 +12,67 @@
 #include "cixl/scope.h"
 #include "cixl/str.h"
 
+static ssize_t lib_eval(struct cx_macro_eval *eval,
+			    struct cx_bin *bin,
+			    size_t tok_idx,
+			    struct cx *cx) {
+  struct cx_tok *t = cx_vec_start(&eval->toks);
+  struct cx_lib *lib = t->as_lib;
+  struct cx_op *op = cx_op_init(bin, CX_OLIBDEF(), tok_idx);
+  op->as_libdef.lib = lib;
+  op->as_libdef.init = lib->inits.count;
+  size_t start_pc = bin->ops.count;
+  cx_op_init(bin, CX_OPUSHLIB(), tok_idx)->as_pushlib.lib = lib;
+  t++;
+  
+  if (!cx_compile(cx, t, cx_vec_end(&eval->toks), bin)) {
+    cx_error(cx, cx->row, cx->col, "Failed compiling lib");
+    return -1;
+  }
+
+  cx_op_init(bin, CX_OPOPLIB(), tok_idx);
+  cx_op_init(bin, CX_OSTOP(), tok_idx);
+  cx_lib_push_init(lib, cx_lib_ops(bin, start_pc, bin->ops.count-start_pc));
+  return tok_idx+1;
+}
+
+static bool lib_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
+  int row = cx->row, col = cx->col;
+  struct cx_macro_eval *eval = cx_macro_eval_new(lib_eval);
+
+  if (!cx_parse_tok(cx, in, &eval->toks, false)) {
+    cx_error(cx, row, col, "Missing lib id");
+    cx_macro_eval_deref(eval);
+    return false;
+  }
+
+  struct cx_tok *id = cx_vec_peek(&eval->toks, 0);
+
+  if (id->type != CX_TID()) {
+    cx_error(cx, id->row, id->col, "Invalid lib id: %s", id->type->id);
+    cx_macro_eval_deref(eval);
+    return false;
+  }
+
+  struct cx_lib *lib = cx_add_lib(cx, id->as_ptr);
+  cx_tok_deinit(id);
+  cx_tok_init(id, CX_TLIB(), id->row, id->col)->as_lib = lib;
+  struct cx_lib *prev = *cx->lib;
+  cx_push_lib(cx, lib);
+  cx_lib_use(prev);
+  
+  if (!cx_parse_end(cx, in, &eval->toks, true)) {
+    if (!cx->errors.count) { cx_error(cx, row, col, "Missing lib: end"); }
+    cx_pop_lib(cx);
+    cx_macro_eval_deref(eval);
+    return false;
+  }
+
+  cx_pop_lib(cx);
+  cx_tok_init(cx_vec_push(out), CX_TMACRO(), row, col)->as_ptr = eval;
+  return true;
+}
+
 static ssize_t include_eval(struct cx_macro_eval *eval,
 			    struct cx_bin *bin,
 			    size_t tok_idx,
@@ -126,7 +187,7 @@ static bool use_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
 	*(char **)cx_vec_push(&ids) = tt->as_ptr;
       }
 
-      if (!_cx_use(cx, lib, ids.count, (const char **)ids.items)) {
+      if (!cx_vuse(cx, lib, ids.count, (const char **)ids.items)) {
 	cx_vec_deinit(&ids);
 	cx_macro_eval_deref(eval);
 	return false;
@@ -173,6 +234,7 @@ cx_lib(cx_init_meta, "cx/meta") {
   }
     
   cx_add_macro(lib, "include:", include_parse);
+  cx_add_macro(lib, "lib:", lib_parse);
   cx_add_macro(lib, "use:", use_parse);
 
   cx_add_cfunc(lib, "cx-lib",

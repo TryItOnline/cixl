@@ -19,6 +19,7 @@
   }						\
 
 struct cx_bin;
+struct cx_lib;
 struct cx_tok;
 
 struct cx_tok_type {
@@ -37,8 +38,9 @@ struct cx_tok {
   union {
     struct cx_box as_box;
     int64_t as_int;
-    struct cx_vec as_vec;
+    struct cx_lib *as_lib;
     void *as_ptr;
+    struct cx_vec as_vec;
   };
 };
 
@@ -55,6 +57,7 @@ struct cx_tok_type *CX_TFIMP();
 struct cx_tok_type *CX_TFUNC();
 struct cx_tok_type *CX_TGROUP();
 struct cx_tok_type *CX_TID();
+struct cx_tok_type *CX_TLIB();
 struct cx_tok_type *CX_TLAMBDA();
 struct cx_tok_type *CX_TLITERAL();
 struct cx_tok_type *CX_TMACRO();

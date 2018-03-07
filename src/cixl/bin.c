@@ -196,11 +196,7 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
   for (struct cx_op *op = cx_vec_start(&bin->ops);
        op != cx_vec_end(&bin->ops);
        op++) {
-    if (op->type->emit_init) {
-      fputs("    {\n", out);
-      op->type->emit_init(op, bin, out, cx);
-      fputs("    }\n\n", out);
-    }
+    if (op->type->emit_init) { op->type->emit_init(op, bin, out, cx); }
   }
 
   cx_do_set(&libs, struct cx_lib *, l) {

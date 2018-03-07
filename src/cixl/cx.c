@@ -110,7 +110,7 @@ struct cx *cx_init(struct cx *cx) {
   cx->lib_lookup.key = get_lib_id;
   cx_vec_init(&cx->libs, sizeof(struct cx_lib *));
 
-  cx->lobby = cx_add_lib(cx, "lobby", NULL);
+  cx->lobby = cx_add_lib(cx, "lobby");
   cx_push_lib(cx, cx->lobby);
   
   cx_vec_init(&cx->load_paths, sizeof(char *));
@@ -239,13 +239,13 @@ bool cx_is_separator(struct cx *cx, char c) {
   return cx_set_get(&cx->separators, &c);
 }
 
-struct cx_lib *cx_add_lib(struct cx *cx, const char *id, cx_lib_init_t init) {
+struct cx_lib *cx_add_lib(struct cx *cx, const char *id) {
   struct cx_sym sid = cx_sym(cx, id);
   struct cx_lib **lib = cx_set_get(&cx->lib_lookup, &sid);
   
   if (!lib) {
     lib = cx_set_insert(&cx->lib_lookup, &sid);
-    *lib = cx_lib_init(malloc(sizeof(struct cx_lib)), cx, sid, init);
+    *lib = cx_lib_init(malloc(sizeof(struct cx_lib)), cx, sid);
   }
   
   return *lib;

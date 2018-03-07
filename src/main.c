@@ -4,6 +4,7 @@
 #include "cixl/bin.h"
 #include "cixl/buf.h"
 #include "cixl/cx.h"
+#include "cixl/emit.h"
 #include "cixl/error.h"
 #include "cixl/op.h"
 #include "cixl/repl.h"
@@ -18,11 +19,14 @@ int main(int argc, char *argv[]) {
   cx_use(&cx, "cx/meta");
   
   bool emit = false;
+  bool compile = false;
   int argi = 1;
   
   for (; argi < argc && *argv[argi] == '-'; argi++) {
     if (strcmp(argv[argi], "-e") == 0) {
       emit = true;
+    } else if (strcmp(argv[argi], "-c") == 0) {
+      compile = true;
     } else {
       fprintf(stderr, "Invalid option %s\n", argv[argi]);
       return -1;
@@ -33,74 +37,38 @@ int main(int argc, char *argv[]) {
     cx_repl(&cx, stdin, stdout);
   } else {
     if (emit) {
-      struct cx_bin *bin = cx_bin_new();
-
       if (argi == argc) {
 	fputs("Missing filename\n", stderr);
 	return -1;
       }
 
-      if (!cx_load(&cx, argv[argi++], bin)) {
-	cx_dump_errors(&cx, stderr);
-	return -1;
-      }
+      const char *fname = argv[argi++];
 
-      struct cx_buf cmd;
-      cx_buf_open(&cmd);
-      fputs("gcc -x c -std=gnu1x -Wall -Werror -Wno-unused-but-set-variable -O2 -g - -lcixl", cmd.stream);
+      if (compile) {
+	if (!cx_emit_file(&cx, fname, stdout)) { return -1; }	
+      } else {
+	struct cx_buf cmd;
+	cx_buf_open(&cmd);
+      
+	fputs("gcc -x c -std=gnu1x "
+	      "-Wall -Werror -Wno-unused-but-set-variable "
+	      "-O2 -g - -lcixl",
+	      cmd.stream);
+	
+	for (; argi < argc; argi++) { fprintf(cmd.stream, " %s", argv[argi]); }
+	cx_buf_close(&cmd);
+	FILE *out = popen(cmd.data, "w");
+	
+	if (!out) {
+	  fprintf(stderr, "Failed executing compiler: %d\n%s\n", errno, cmd.data);
+	  free(cmd.data);
+	  return -1;
+	}
 
-      for (; argi < argc; argi++) {
-	fprintf(cmd.stream, " %s", argv[argi]);
-      }
-
-      cx_buf_close(&cmd);
-      FILE *out = popen(cmd.data, "w");
-
-      if (!out) {
-	fprintf(stderr, "Failed executing compiler: %d\n%s\n", errno, cmd.data);
 	free(cmd.data);
-	return -1;
-      }
-
-      free(cmd.data);
-
-      fputs("#include \"cixl/arg.h\"\n"
-	    "#include \"cixl/bin.h\"\n"
-	    "#include \"cixl/call.h\"\n"
-	    "#include \"cixl/cx.h\"\n"
-            "#include \"cixl/error.h\"\n"
-            "#include \"cixl/func.h\"\n"
-            "#include \"cixl/lambda.h\"\n"
-            "#include \"cixl/rec.h\"\n"
-            "#include \"cixl/op.h\"\n"
-            "#include \"cixl/scope.h\"\n"
-            "#include \"cixl/stack.h\"\n"
-            "#include \"cixl/str.h\"\n\n",
-	    out);
-
-      if (!cx_emit(bin, out, &cx)) {
-	cx_dump_errors(&cx, stderr);
-	cx_bin_deref(bin);
+	if (!cx_emit_file(&cx, fname, out)) { return -1; }
 	pclose(out);
-	return -1;
       }
-      
-      cx_bin_deref(bin);
-      
-      fputs("int main() {\n"
-	    "  struct cx cx;\n"
-	    "  cx_init(&cx);\n"
-	    "  cx_init_libs(&cx);\n\n"
-	    "  if (!eval(&cx)) {\n"
-	    "    cx_dump_errors(&cx, stderr);\n"
-	    "    return -1;\n"
-	    "  }\n\n"
-	    "  cx_deinit(&cx);\n"
-	    "  return 0;\n"
-	    "}",
-	    out);
-      
-      pclose(out);
     } else {
       if (argi == argc) {
 	fputs("Error: Missing file\n", stderr);

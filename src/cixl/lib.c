@@ -1,5 +1,6 @@
 #include <ctype.h>
 
+#include "cixl/bin.h"
 #include "cixl/cx.h"
 #include "cixl/emit.h"
 #include "cixl/error.h"
@@ -7,6 +8,24 @@
 #include "cixl/lib.h"
 #include "cixl/rec.h"
 #include "cixl/set.h"
+
+struct cx_lib_init cx_lib_ptr(cx_lib_init_ptr_t ptr) {
+  return (struct cx_lib_init){
+    .ptr = ptr,
+      .bin = NULL,
+      .start_pc = 0,
+      .nops = 0,
+      .done = false };
+}
+
+struct cx_lib_init cx_lib_ops(struct cx_bin *bin, size_t start_pc, size_t nops) {
+  return (struct cx_lib_init){
+    .ptr = NULL,
+      .bin = cx_bin_ref(bin),
+      .start_pc = start_pc,
+      .nops = nops,
+      .done = false };
+}
 
 static const void *get_type_id(const void *value) {
   struct cx_type *const *type = value;
@@ -23,14 +42,12 @@ static const void *get_func_id(const void *value) {
   return &(*func)->id;
 }
 
-struct cx_lib *cx_lib_init(struct cx_lib *lib,
-			   struct cx *cx,
-			   struct cx_sym id,
-			   cx_lib_init_t init) {
+struct cx_lib *cx_lib_init(struct cx_lib *lib, struct cx *cx, struct cx_sym id) {
   lib->cx = cx;
   lib->id = id;
   lib->emit_id = cx_emit_id("lib", id.id);
-  lib->init = init;
+
+  cx_vec_init(&lib->inits, sizeof(struct cx_lib_init));
   
   cx_set_init(&lib->types, sizeof(struct cx_type *), cx_cmp_cstr);
   lib->types.key = get_type_id;
@@ -46,13 +63,25 @@ struct cx_lib *cx_lib_init(struct cx_lib *lib,
   return lib;
 }
 
+static void deinit(struct cx_lib_init *i) {
+  if (i->bin) { cx_bin_deref(i->bin); }
+}
+
 struct cx_lib *cx_lib_deinit(struct cx_lib *lib) {
   cx_env_deinit(&lib->consts);
   cx_set_deinit(&lib->funcs);
   cx_set_deinit(&lib->macros);
   cx_set_deinit(&lib->types);
+  
+  cx_do_vec(&lib->inits, struct cx_lib_init, i) { deinit(i); }
+  cx_vec_deinit(&lib->inits);
+
   free(lib->emit_id);
   return lib;
+}
+
+void cx_lib_push_init(struct cx_lib *lib, struct cx_lib_init init) {
+  *(struct cx_lib_init *)cx_vec_push(&lib->inits) = init;
 }
 
 struct cx_type *_cx_add_type(struct cx_lib *lib, const char *id, ...) {
@@ -307,25 +336,28 @@ static bool use_id(struct cx_lib *lib, const char *id) {
   return false;
 }
 
-bool _cx_use(struct cx *cx,
-	     const char *lib_id,
-	     unsigned int nids, const char **ids) {
-  struct cx_sym lid = cx_sym(cx, lib_id);
-  struct cx_lib **ok = cx_set_get(&cx->lib_lookup, &lid);
-
-  if (!ok) {
-    cx_error(cx, cx->row, cx->col, "Lib not found: %s", lib_id);
-    return false;
-  }
-
-  struct cx_lib *lib = *ok;
-
-  if (lib->init) {
+bool cx_lib_vuse(struct cx_lib *lib, unsigned int nids, const char **ids) {
+  struct cx *cx = lib->cx;
+  
+  if (lib->inits.count) {
     cx_push_lib(cx, lib);
-    bool ok = lib->init(lib);
+    bool ok = true;
+    
+    cx_do_vec(&lib->inits, struct cx_lib_init, i) {
+      if (i->done) { continue; }
+      
+      if (i->ptr) {
+	ok = i->ptr(lib);
+      } else {
+	ok = cx_eval(i->bin, i->start_pc, cx);
+      }
+      
+      if (!ok) { break; }
+      i->done = true;
+    }
+    
     cx_pop_lib(cx);
     if (!ok) { return false; }
-    lib->init = NULL;
   }
 
   if (nids) {
@@ -361,6 +393,20 @@ static bool emit_imp(struct cx_box *v, const char *exp, FILE *out) {
 	  exp, v->as_lib->emit_id);
   
   return true;
+}
+
+bool cx_vuse(struct cx *cx,
+	     const char *lib_id,
+	     unsigned int nids, const char **ids) {
+  struct cx_sym lid = cx_sym(cx, lib_id);
+  struct cx_lib **ok = cx_set_get(&cx->lib_lookup, &lid);
+
+  if (!ok) {
+    cx_error(cx, cx->row, cx->col, "Lib not found: %s", lib_id);
+    return false;
+  }
+
+  return cx_lib_vuse(*ok, nids, ids);
 }
 
 struct cx_type *cx_init_lib_type(struct cx_lib *lib) {

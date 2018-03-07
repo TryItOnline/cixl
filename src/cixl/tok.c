@@ -128,6 +128,19 @@ cx_tok_type(CX_TGROUP, {
     type.deinit = group_deinit;
   });
 
+static ssize_t lib_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) {
+  struct cx_tok *tok = cx_vec_get(&bin->toks, tok_idx);
+  struct cx_lib *lib = tok->as_lib;
+  tok->type = CX_TLITERAL();
+  cx_box_init(&tok->as_box, cx->lib_type)->as_lib = lib;    
+  cx_copy(&cx_op_init(bin, CX_OPUSH(), tok_idx)->as_push.value, &tok->as_box);
+  return tok_idx+1;
+}
+
+cx_tok_type(CX_TLIB, {
+    type.compile = lib_compile;
+  });
+
 static ssize_t id_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) {
   struct cx_tok *tok = cx_vec_get(&bin->toks, tok_idx);
   char *id = tok->as_ptr;

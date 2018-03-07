@@ -57,7 +57,7 @@ void cx_arg_emit(struct cx_arg *a, FILE *out) {
 	fputs("NULL", out);
       }
 
-      fprintf(out, ", cx_get_type(cx->lib, \"%s\", false))", a->type->id);
+      fprintf(out, ", cx_get_type(*cx->lib, \"%s\", false))", a->type->id);
       break;
     case CX_NARG:
       fputs(CX_ITAB "cx_narg(", out);

@@ -2,7 +2,7 @@ use:
   (cx/abc   Int)
   (cx/io    say)
   (cx/iter  times)
-  (cx/math  Rat / fib int)
+  (cx/math  / fib int)
   (cx/stack _)
   (cx/time  clock)
   (cx/type  unsafe);

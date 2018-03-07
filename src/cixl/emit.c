@@ -1,6 +1,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "cixl/bin.h"
+#include "cixl/cx.h"
 #include "cixl/emit.h"
 
 char *cx_emit_id(const char *prefix, const char *in) {
@@ -71,4 +73,45 @@ char *cx_emit_id(const char *prefix, const char *in) {
 
   *p = 0;
   return out;
+}
+
+bool cx_emit_file(struct cx *cx, const char *fname, FILE *out) {
+  struct cx_bin *bin = cx_bin_new();
+  bool ok = false;
+  
+  if (!cx_load(cx, fname, bin)) { goto exit; }
+
+  fputs("#include \"cixl/arg.h\"\n"
+	"#include \"cixl/bin.h\"\n"
+	"#include \"cixl/call.h\"\n"
+	"#include \"cixl/cx.h\"\n"
+	"#include \"cixl/error.h\"\n"
+	"#include \"cixl/func.h\"\n"
+	"#include \"cixl/lambda.h\"\n"
+	"#include \"cixl/rec.h\"\n"
+	"#include \"cixl/op.h\"\n"
+	"#include \"cixl/scope.h\"\n"
+	"#include \"cixl/stack.h\"\n"
+	"#include \"cixl/str.h\"\n\n",
+	out);
+  
+  if (!cx_emit(bin, out, cx)) { goto exit; }
+      
+  fputs("int main() {\n"
+	"  struct cx cx;\n"
+	"  cx_init(&cx);\n"
+	"  cx_init_libs(&cx);\n\n"
+	"  if (!eval(&cx)) {\n"
+	"    cx_dump_errors(&cx, stderr);\n"
+	"    return -1;\n"
+	"  }\n\n"
+	"  cx_deinit(&cx);\n"
+	"  return 0;\n"
+	"}",
+	out);
+
+  ok = true;
+ exit:
+  cx_bin_deref(bin);
+  return ok;
 }
