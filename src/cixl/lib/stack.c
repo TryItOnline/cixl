@@ -130,8 +130,7 @@ static bool sort_imp(struct cx_scope *scope) {
 }
 
 static bool reset_imp(struct cx_scope *scope) {
-  cx_do_vec(&scope->stack, struct cx_box, v) { cx_box_deinit(v); }
-  cx_vec_clear(&scope->stack);
+  cx_reset(scope);
   return true;
 }
 

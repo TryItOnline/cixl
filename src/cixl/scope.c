@@ -94,3 +94,8 @@ struct cx_box *cx_put_var(struct cx_scope *scope, struct cx_sym id, bool force) 
 
   return cx_env_put(&scope->vars, id);
 }
+
+void cx_reset(struct cx_scope *scope) {
+  cx_do_vec(&scope->stack, struct cx_box, v) { cx_box_deinit(v); }
+  cx_vec_clear(&scope->stack);
+}

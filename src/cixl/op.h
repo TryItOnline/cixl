@@ -99,6 +99,10 @@ struct cx_putargs_op {
   struct cx_fimp *imp;
 };
 
+struct cx_putconst_op {
+  struct cx_sym id;
+};
+
 struct cx_putvar_op {
   struct cx_sym id;
   struct cx_type *type;
@@ -132,6 +136,7 @@ struct cx_op {
     struct cx_push_op as_push;
     struct cx_pushlib_op as_pushlib;
     struct cx_putargs_op as_putargs;
+    struct cx_putconst_op as_putconst;
     struct cx_putvar_op as_putvar;
     struct cx_return_op as_return;
     struct cx_typedef_op as_typedef;
@@ -155,6 +160,7 @@ struct cx_op_type *CX_OPOPLIB();
 struct cx_op_type *CX_OPUSH();
 struct cx_op_type *CX_OPUSHLIB();
 struct cx_op_type *CX_OPUTARGS();
+struct cx_op_type *CX_OPUTCONST();
 struct cx_op_type *CX_OPUTVAR();
 struct cx_op_type *CX_ORETURN();
 struct cx_op_type *CX_OSTASH();

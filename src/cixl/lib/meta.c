@@ -188,6 +188,7 @@ static bool define_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
 
   if (id_tok.type == CX_TID()) {
     if (!put(id_tok.as_ptr, NULL)) { goto exit2; }
+    ok = true;
   } else {
     struct cx_vec *id_toks = &id_tok.as_vec, ids, types;
     cx_vec_init(&ids, sizeof(struct cx_tok));
@@ -229,8 +230,10 @@ static bool define_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
     cx_vec_deinit(&ids);
     cx_vec_deinit(&types);
   }
-  
+
+  if (ok && s->stack.count) { cx_error(cx, row, col, "Too many values in define"); }
  exit2:
+  cx_reset(s);
   cx_end(cx);
  exit1: {
     cx_do_vec(&toks, struct cx_tok, t) { cx_tok_deinit(t); }

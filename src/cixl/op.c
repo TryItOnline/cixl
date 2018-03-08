@@ -786,6 +786,39 @@ cx_op_type(CX_OPUTARGS, {
     type.emit_syms = putargs_emit_syms;
   });
 
+static bool putconst_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
+  return true;
+}
+
+static bool putconst_emit(struct cx_op *op,
+			struct cx_bin *bin,
+			FILE *out,
+			struct cx *cx) {
+  struct cx_sym id = op->as_putconst.id;
+  struct cx_box *v = cx_get_const(*cx->lib, id, false);
+  if (!v) { return false; }
+
+  fprintf(out,
+	  CX_TAB "struct cx_box *v = cx_put_const(*cx->lib, %s, false);\n",
+	  id.emit_id);
+
+  return cx_box_emit(v, "v", out);
+}
+
+static void putconst_emit_syms(struct cx_op *op, struct cx_set *out, struct cx *cx) {
+  struct cx_sym
+    id = op->as_putconst.id,
+    *ok = cx_set_insert(out, &id);
+
+  if (ok) { *ok = id; }
+}
+
+cx_op_type(CX_OPUTCONST, {
+    type.eval = putconst_eval;
+    type.emit = putconst_emit;
+    type.emit_syms = putconst_emit_syms;
+  });
+
 static bool putvar_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
   struct cx_scope *s = cx_scope(cx, 0);
   struct cx_box *src = cx_pop(s, false);

@@ -19,6 +19,7 @@
 #include "cixl/lib/abc.h"
 #include "cixl/lib/bin.h"
 #include "cixl/lib/cond.h"
+#include "cixl/lib/const.h"
 #include "cixl/lib/guid.h"
 #include "cixl/lib/error.h"
 #include "cixl/lib/func.h"
@@ -60,6 +61,7 @@ cx_lib(cx_init_world, "cx") {
     cx_use(cx, "cx/abc") &&
     cx_use(cx, "cx/bin") &&
     cx_use(cx, "cx/cond") &&
+    cx_use(cx, "cx/const") &&
     cx_use(cx, "cx/error") &&
     cx_use(cx, "cx/func") &&
     cx_use(cx, "cx/guid") &&
@@ -162,6 +164,7 @@ void cx_init_libs(struct cx *cx) {
   cx_init_abc(cx);
   cx_init_bin(cx);
   cx_init_cond(cx);
+  cx_init_const(cx);
   cx_init_error(cx);
   cx_init_func(cx);
   cx_init_guid(cx);
