@@ -160,6 +160,11 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
     if (op->type->emit_syms) { op->type->emit_syms(op, &syms, cx); }
   }
 
+  cx_do_set(&types, struct cx_type *, t) {
+    struct cx_lib **ok = cx_set_insert(&libs, &(*t)->lib);
+    if (ok) { *ok = (*t)->lib; }
+  }
+
   cx_do_set(&funcs, struct cx_func *, f) {
     struct cx_lib **ok = cx_set_insert(&libs, &(*f)->lib);
     if (ok) { *ok = (*f)->lib; }

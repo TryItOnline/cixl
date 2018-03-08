@@ -194,23 +194,12 @@ static void fimp_emit_fimps(struct cx_op *op, struct cx_set *out, struct cx *cx)
   if (ok) { *ok = imp; }
 }
 
-static void fimp_emit_libs(struct cx_op *op,
-			   struct cx_bin *bin,
-			   struct cx_set *out,
-			   struct cx *cx) {
-  struct cx_lib
-    *lib = op->as_fimp.imp->func->lib,
-    **ok = cx_set_insert(out, &lib);
-  if (ok) { *ok = lib; }
-}
-
 cx_op_type(CX_OFIMP, {
     type.eval = fimp_eval;
     type.emit = fimp_emit;
     type.emit_init = fimp_emit_init;
     type.emit_funcs = fimp_emit_funcs;
     type.emit_fimps = fimp_emit_fimps;
-    type.emit_libs = fimp_emit_libs;
   });
 
 static bool funcdef_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
