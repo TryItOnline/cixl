@@ -213,6 +213,20 @@ The same functionality may be accessed symbolically.
 [42]
 ```
 
+### Constants
+Constants may be bound using the ```define:``` macro. They behave much like variables; but live in a separate, library global namespace prefixed by ```#``` rather than ```$```; and are bound at compile time rather than evaluation.
+
+```
+   func: launch-rockets()(_ Int)
+...  'Launching rockets!' say
+...  42;
+...define: (nrockets Int) launch-rockets;
+...| #nrockets
+...
+Launching rockets!
+[42]
+```
+
 ### Equality
 Two flavors of equality are provided.
 
