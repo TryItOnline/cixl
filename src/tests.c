@@ -94,7 +94,7 @@ static void run(struct cx *cx, const char *in) {
 static void init_cx(struct cx *cx) {
   cx_init(cx);
   cx_init_libs(cx);
-  cx_use(cx, "cx/meta");
+  cx_use(cx, "cx/meta", "use:");
 }
 
 static void comment_tests() {
@@ -104,6 +104,25 @@ static void comment_tests() {
   run(&cx, "use: cx/error cx/math;");
   run(&cx, "1 //foo bar\n2 + 3 = check");
   run(&cx, "1 /*foo \n bar*/2 + 3 = check");
+
+  cx_deinit(&cx);
+}
+
+static void lib_tests() {
+  struct cx cx;
+  init_cx(&cx);
+
+  run(&cx, "use: "
+      "(cx/abc Int) "
+      "(cx/cond =) "
+      "(cx/const define:) "
+      "(cx/func func:) "
+      "(cx/meta lib: use:) "
+      "(cx/error check);");
+  
+  run(&cx, "lib: foo define: (bar Int) 42;; use: (foo #bar); #bar 42 = check");
+
+  run(&cx, "lib: foo func: bar()(_ Int) 42;; use: (foo bar); bar 42 = check");
 
   cx_deinit(&cx);
 }
@@ -412,6 +431,7 @@ int main() {
   set_tests();
   
   comment_tests();
+  lib_tests();
   type_tests();
   group_tests();
   if_tests();

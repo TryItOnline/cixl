@@ -1,9 +1,10 @@
-* add specific use: to benchmarks
 * call push/pop_lib on lambda enter/exit
 ** add lambda.lib
 *** init in cx_lambda_new
 ** add lib tests
 *** call and check lib inside
+* add specific use: to benchmarks
+* add qdb library
 * ---
 * rewrite fib without using vars
 ** cmp perf
@@ -64,6 +65,7 @@
 * add tell(file) fn
 * add len(file) fn
 * convert type id to sym
+* convert macro id to sym
 * convert func id to sym
 * convert repl to use getline
 * add @@ char escape
