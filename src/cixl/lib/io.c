@@ -16,6 +16,63 @@
 #include "cixl/scope.h"
 #include "cixl/str.h"
 
+static ssize_t include_eval(struct cx_macro_eval *eval,
+			    struct cx_bin *bin,
+			    size_t tok_idx,
+			    struct cx *cx) {
+  if (!cx_compile(cx, cx_vec_start(&eval->toks), cx_vec_end(&eval->toks), bin)) {
+    cx_error(cx, cx->row, cx->col, "Failed compiling include");
+    return -1;
+  }
+
+  return tok_idx+1;
+}
+
+static bool include_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
+  int row = cx->row, col = cx->col;
+  bool ok = false;
+  
+  struct cx_vec fns;
+  cx_vec_init(&fns, sizeof(struct cx_tok));
+  
+  if (!cx_parse_end(cx, in, &fns, false)) {
+    if (!cx->errors.count) { cx_error(cx, row, col, "Missing include: end"); }
+    goto exit1;
+  }
+
+  struct cx_macro_eval *eval = cx_macro_eval_new(include_eval);
+
+  cx_do_vec(&fns, struct cx_tok, t) {
+    if (t->type != CX_TLITERAL()) {
+      cx_error(cx, t->row, t->col, "Invalid include token: %s", t->type->id);
+      goto exit2;
+    }
+
+    if (t->as_box.type != cx->str_type) {
+      cx_error(cx, t->row, t->col,
+	       "Invalid filename: %s", t->as_box.type->id);
+      goto exit2;
+    }
+
+    char *full_path = cx_get_path(cx, t->as_box.as_str->data);
+    bool ok = cx_load_toks(cx, full_path, &eval->toks);
+    free(full_path);
+    free(*(char **)cx_vec_pop(&cx->load_paths));
+    if (!ok) { goto exit2; }
+  }
+  
+  cx_tok_init(cx_vec_push(out), CX_TMACRO(), row, col)->as_ptr = eval;
+  ok = true;
+  goto exit1;
+ exit2:
+  cx_macro_eval_deref(eval);
+ exit1: {
+    cx_do_vec(&fns, struct cx_tok, t) { cx_tok_deinit(t); }
+    cx_vec_deinit(&fns);
+    return ok;
+  }
+}
+
 struct line_iter {
   struct cx_iter iter;
   struct cx_file *in;
@@ -214,6 +271,8 @@ cx_lib(cx_init_io, "cx/io") {
   cx_box_init(cx_set_const(lib, cx_sym(cx, "out"), false),
 	      cx->wfile_type)->as_file = cx_file_new(stdout);
     
+  cx_add_macro(lib, "include:", include_parse);
+
   cx_add_cfunc(lib, "print",
 	       cx_args(cx_arg("out", cx->wfile_type), cx_arg("v", cx->any_type)),
 	       cx_args(),

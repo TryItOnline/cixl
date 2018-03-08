@@ -1,4 +1,3 @@
-* move include: to cx/io
 * call push/pop_lib on lambda enter/exit
 ** add lambda.lib
 *** init in cx_lambda_new
