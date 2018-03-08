@@ -220,10 +220,13 @@ Constants may be bound using the ```define:``` macro. They behave much like vari
    func: launch-rockets()(_ Int)
 ...  'Launching rockets!' say
 ...  42;
-...define: (nrockets Int) launch-rockets;
-...| #nrockets
+...| define: (nrockets Int) launch-rockets;
 ...
 Launching rockets!
+[]
+
+...#nrockets
+...
 [42]
 ```
 
