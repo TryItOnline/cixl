@@ -68,8 +68,7 @@ static ssize_t let_eval(struct cx_macro_eval *eval,
     
     for (; id >= (struct cx_tok *)ids.items; id--, type--) {
       put(id->as_ptr, *type);
-    }
-    
+    }    
   exit:
     cx_vec_deinit(&ids);
     cx_vec_deinit(&types);
@@ -96,7 +95,7 @@ static bool let_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   }
 
   if (!cx_parse_end(cx, in, &eval->toks, true)) {
-    if (!cx->errors.count) { cx_error(cx, row, col, "Missing let: end"); }
+    if (!cx->errors.count) { cx_error(cx, row, col, "Missing let end"); }
     goto error;
   }
   

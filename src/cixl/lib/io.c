@@ -264,10 +264,10 @@ cx_lib(cx_init_io, "cx/io") {
 				      cx->rfile_type, cx->wfile_type);
   cx->rwfile_type->iter = cx_file_iter;
 
-  cx_box_init(cx_set_const(lib, cx_sym(cx, "in"), false),
+  cx_box_init(cx_put_const(lib, cx_sym(cx, "in"), false),
 	      cx->rfile_type)->as_file = cx_file_new(stdin);
     
-  cx_box_init(cx_set_const(lib, cx_sym(cx, "out"), false),
+  cx_box_init(cx_put_const(lib, cx_sym(cx, "out"), false),
 	      cx->wfile_type)->as_file = cx_file_new(stdout);
     
   cx_add_macro(lib, "include:", include_parse);

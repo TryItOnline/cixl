@@ -387,11 +387,11 @@ cx_lib(cx_init_time, "cx/time") {
 
   cx->time_type = cx_init_time_type(lib);
     
-  cx_time_init(&cx_box_init(cx_set_const(lib, cx_sym(cx, "min-time"), false),
+  cx_time_init(&cx_box_init(cx_put_const(lib, cx_sym(cx, "min-time"), false),
 			    cx->time_type)->as_time,
 	       INT32_MIN, INT64_MIN);
   
-  cx_time_init(&cx_box_init(cx_set_const(lib, cx_sym(cx, "max-time"), false),
+  cx_time_init(&cx_box_init(cx_put_const(lib, cx_sym(cx, "max-time"), false),
 			    cx->time_type)->as_time,
 	       INT32_MAX, INT64_MAX);
   

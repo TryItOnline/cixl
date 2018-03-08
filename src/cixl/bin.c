@@ -108,25 +108,25 @@ bool cx_eval(struct cx_bin *bin, size_t start_pc, struct cx *cx) {
   return ok;
 }
 
+bool cx_eval_toks(struct cx *cx, struct cx_vec *in) {
+  if (!in->count) { return true; }
+  bool ok = false;
+  struct cx_bin *bin = cx_bin_new();
+  if (!cx_compile(cx, cx_vec_start(in), cx_vec_end(in), bin)) { goto exit; }
+  if (!cx_eval(bin, 0, cx)) { goto exit; }
+  ok = true;
+ exit:
+  cx_bin_deref(bin);
+  return ok;
+}
+
 bool cx_eval_str(struct cx *cx, const char *in) {
   struct cx_vec toks;
   cx_vec_init(&toks, sizeof(struct cx_tok));
   bool ok = false;
-  
-  if (!cx_parse_str(cx, in, &toks)) { goto exit1; }
-
-  if (!toks.count) {
-    ok = true;
-    goto exit1;
-  }
-
-  struct cx_bin *bin = cx_bin_new();
-  if (!cx_compile(cx, cx_vec_start(&toks), cx_vec_end(&toks), bin)) { goto exit2; }
-  if (!cx_eval(bin, 0, cx)) { goto exit2; }
-  ok = true;
- exit2:
-  cx_bin_deref(bin);
- exit1: {
+  if (!cx_parse_str(cx, in, &toks)) { goto exit; }
+  ok = cx_eval_toks(cx, &toks);
+ exit: {
     cx_do_vec(&toks, struct cx_tok, t) { cx_tok_deinit(t); }
     cx_vec_deinit(&toks);
     return ok;

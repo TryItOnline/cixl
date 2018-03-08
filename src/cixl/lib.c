@@ -234,7 +234,7 @@ struct cx_box *cx_get_const(struct cx_lib *lib, struct cx_sym id, bool silent) {
   return &v->value;
 }
 
-struct cx_box *cx_set_const(struct cx_lib *lib, struct cx_sym id, bool force) {
+struct cx_box *cx_put_const(struct cx_lib *lib, struct cx_sym id, bool force) {
   struct cx_var *v = cx_env_get(&lib->consts, id);
 
   if (v) {

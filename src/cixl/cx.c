@@ -66,6 +66,7 @@ cx_lib(cx_init_world, "cx") {
     cx_use(cx, "cx/io") &&
     cx_use(cx, "cx/iter") &&
     cx_use(cx, "cx/math") &&
+    cx_use(cx, "cx/meta") &&
     cx_use(cx, "cx/net") &&
     cx_use(cx, "cx/pair") &&
     cx_use(cx, "cx/rec") &&
