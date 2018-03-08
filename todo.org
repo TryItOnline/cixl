@@ -11,9 +11,6 @@
 * add max var to fimp_score
 ** stop checking if >= max && return -1
 ** add fimp_match fn that calls _score with size_t max
-* add support for type literal args
-** use _ for anonymous args
-** interpret as type literal if no ids
 * ---
 * add connect(Socket, ip, port) fn
 ** non-blocking

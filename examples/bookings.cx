@@ -35,7 +35,7 @@ rec: Capacity()
   start end  Time
   total used Int;
 
-func: new-capacity(start end Time total used Int)(Capacity)
+func: new-capacity(start end Time total used Int)(_ Capacity)
   let: c Capacity new;
   $c `start $start put
   $c `end   $end   put
@@ -47,7 +47,7 @@ func: new-capacity(start end Time total used Int)(Capacity)
   Resources start out with one continous segment of full capacity in the calendar.
 */
 
-func: new-resource(id Sym q Int)(Resource)
+func: new-resource(id Sym q Int)(_ Resource)
   let: r Resource new;
   let: c [#min-time #max-time $q 0 new-capacity];
   $r `id       $id put
@@ -83,7 +83,7 @@ func: update-capacity(in Capacity start end Time total used Int out Stack)()
   $in `total $t put
   $in `used  $u put;
 
-func: intersects(in Capacity start end Time)(Bool)
+func: intersects(in Capacity start end Time)(_ Bool)
   {$in `start get $end <} {$in `end get $start >} and;
 
 /*
@@ -91,7 +91,7 @@ func: intersects(in Capacity start end Time)(Bool)
   inconsistent calendars on failure.
 */
 
-func: update-calendar(in Stack start end Time total used Int)(Stack)
+func: update-calendar(in Stack start end Time total used Int)(_ Stack)
   let: out [];
 
   $in {
@@ -116,12 +116,12 @@ rec: Booking()
   start end Time
   quantity  Int;
 
-func: next-booking-id()(Int)
+func: next-booking-id()(_ Int)
   let: id $next-booking-id get-ref;
   $next-booking-id $id ++ put-ref 
   $id;
 
-func: new-booking(r Resource start end Time q Int)(Booking)
+func: new-booking(r Resource start end Time q Int)(_ Booking)
   $start $end < {'Invalid booking length' fail} else
   let: b Booking new;
   $b `id       next-booking-id put

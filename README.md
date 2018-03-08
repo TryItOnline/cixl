@@ -622,11 +622,11 @@ Hi stranger!
 []
 ```
 
-All arguments and results have types, ```A``` may be used to match any type and is used as a default when no type is specified.
+Function arguments and results may optionally be anonymous and/or typed. ```_``` may be used in place of a name for anonymous arguments and results. ```A``` may be used to match any type and is used as default when no type is specified.
 
 ```
-   func: int-add(x y Int)(Int) $x $y +;
-...| 7 35 int-add
+   func: any-add(x y)(_ A) $x $y +;
+...| 7 35 any-add
 ...
 [42]
 ```
@@ -634,7 +634,7 @@ All arguments and results have types, ```A``` may be used to match any type and 
 Previous argument types may be referenced by index, it is substituted for the actual type on evaluation.
 
 ```
-   func: same-add(x Num y Arg0)(Arg0) $x $y +;
+   func: same-add(x Num y Arg0)(_ Arg0) $x $y +;
 ...| 7 34 same-add
 ...
 [42]
@@ -648,7 +648,7 @@ Func not applicable: baz
 Literal values may used instead of types. Anonymous arguments are pushed on the function stack before evaluation.
 
 ```
-   func: is-fortytwo(Int)(#t) _;
+   func: is-fortytwo(_ Int)(#t) _;
 ...func: is-fortytwo(42)(#f);
 ...| 41 is-fortytwo
 ...
@@ -662,7 +662,7 @@ Literal values may used instead of types. Anonymous arguments are pushed on the 
 Functions may return multiple results.
 
 ```
-   func: flip(x y Opt)(Arg1 Arg0)
+   func: flip(x y Opt)(_ Arg1 _ Arg0)
 ...  $y $x;
 ...1 2 flip
 ...
@@ -673,7 +673,7 @@ Overriding existing implementations is as easy as defining a function with the s
 
 ```
 
-   func: +(x y Int)(Int) 42;
+   func: +(x y Int)(_ Int) 42;
 ...| 1 2 +
 ...
 [42]
@@ -682,9 +682,9 @@ Overriding existing implementations is as easy as defining a function with the s
 ```recall``` may be used to call the current function recursively in the same scope. The call may be placed anywhere, but the actual calling doesn't take place until the current call exits.
 
 ```  
-   func: fib-rec(a b n Int)(Int)
+   func: fib-rec(a b n Int)(_ Int)
 ...  $n? {$b $a $b + $n -- recall} $a if-else;
-...func: fib(n Int)(Int)
+...func: fib(n Int)(_ Int)
 ...  0 1 $n fib-rec;
 ...| 50 fib
 ...
@@ -771,7 +771,7 @@ The ```#nil``` value may be used to represent missing values. Since ```Nil``` is
 
 ```
 ...func: foo(x A)();
-...func: bar(x Opt)(Int) 42;
+...func: bar(x Opt)(_ Int) 42;
 ...| #nil foo
 ...
 Error in row 1, col 1:
@@ -917,7 +917,7 @@ Iterators may be created manually by calling ```iter``` on any sequence and cons
 Functions and lambdas are sequences, calling ```iter``` creates an iterator that keeps returning values until the target returns ```#nil```.
 
 ```
-   func: forever(n Int)(Lambda) {$n};
+   func: forever(n Int)(_ Lambda) {$n};
 ...| 42 forever iter
 ...% next ~ next
 ...
@@ -1099,7 +1099,7 @@ Records support full deep equality by default, but ```=``` may be implemented to
 ...
 [#f]
 
-   func: =(a b Foo)(Bool) $a `x get $b `x get =;
+   func: =(a b Foo)(_ Bool) $a `x get $b `x get =;
 ...| $bar $baz =
 ...
 [#t]
@@ -1215,10 +1215,10 @@ Let's start with a tail-recursive fibonacci to exercise the interpreter loop, it
 ```
 use: cx;
 
-func: fib-rec(a b n Int)(Int)
+func: fib-rec(a b n Int)(_ Int)
   $n?<Opt> {$b $a $b +<Int Int> $n -- recall} $a if-else;
 
-func: fib(n Int)(Int)
+func: fib(n Int)(_ Int)
   0 1 $n fib-rec;
 
 {10000 {50 fib _} times} clock 1000000 / int say

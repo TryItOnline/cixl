@@ -21,7 +21,7 @@ static bool parse_args(struct cx *cx, struct cx_vec *toks, struct cx_vec *args) 
   struct cx_vec tmp_ids;
   cx_vec_init(&tmp_ids, sizeof(struct cx_tok));
   bool ok = false;
-  
+
   cx_do_vec(toks, struct cx_tok, t) {
     if (t->type == CX_TID()) {
       char *id = t->as_ptr;
@@ -35,7 +35,8 @@ static bool parse_args(struct cx *cx, struct cx_vec *toks, struct cx_vec *args) 
 
 	if (tmp_ids.count) {
 	  cx_do_vec(&tmp_ids, struct cx_tok, id) {
-	    *(struct cx_arg *)cx_vec_push(args) = cx_narg(id->as_ptr, i);      
+	    const char *n = strcmp(id->as_ptr, "_") ? id->as_ptr : NULL;
+	    *(struct cx_arg *)cx_vec_push(args) = cx_narg(n, i);
 	  }
 	  
 	  cx_vec_clear(&tmp_ids);
@@ -52,12 +53,15 @@ static bool parse_args(struct cx *cx, struct cx_vec *toks, struct cx_vec *args) 
 
       if (tmp_ids.count) {
 	cx_do_vec(&tmp_ids, struct cx_tok, id) {
-	  *(struct cx_arg *)cx_vec_push(args) = cx_arg(id->as_ptr, type);      
+	  const char *n = strcmp(id->as_ptr, "_") ? id->as_ptr : NULL;
+	  *(struct cx_arg *)cx_vec_push(args) = cx_arg(n, type);      
 	}
       
 	cx_vec_clear(&tmp_ids);
       } else {
-	*(struct cx_arg *)cx_vec_push(args) = cx_arg(NULL, type);
+	struct cx_box v;
+	cx_box_init(&v, cx->meta_type)->as_ptr = type;
+	*(struct cx_arg *)cx_vec_push(args) = cx_varg(&v);
       }
     } else {
       cx_error(cx, t->row, t->col, "Unexpected tok: %d", t->type);

@@ -164,25 +164,25 @@ static void func_tests() {
   init_cx(&cx);
 
   run(&cx, "use: cx/abc cx/func cx/cond cx/error cx/math cx/stack cx/var;");
-  run(&cx, "func: foo0()(Int) 42; foo0 42 = check");
-  run(&cx, "func: foo2(x y)(Int) $x $y +; 1 2 foo2 3 = check");
-  run(&cx, "func: foo3(op Func Int Int)(Int) $op call; &- 49 7 foo3 42 = check");
+  run(&cx, "func: foo0()(_ Int) 42; foo0 42 = check");
+  run(&cx, "func: foo2(x y)(_ Int) $x $y +; 1 2 foo2 3 = check");
+  run(&cx, "func: foo3(op Func _ _ Int)(_ Int) $op call; &- 49 7 foo3 42 = check");
   run(&cx, "func: foo1(x Int)(result Int) let: result $x 2 *;; 21 foo1 42 = check");
 
   run(&cx,
-      "func: fortytwo(Int)(#f) _;"
+      "func: fortytwo(_ Int)(#f) _;"
       "func: fortytwo(42)(#t);"
       "21 fortytwo !check "
       "42 fortytwo check");
 						       
-  run(&cx, "(let: x 42; func: foo0()(Int) $x;) &foo0 call 42 = check");
-  run(&cx, "func: foo1(x A)(Int) $x 35 +; 7 foo1<A> 42 = check");
-  run(&cx, "func: foo3(x y Int z Arg0)(Int) $x $y $z + +; 1 3 5 foo3 9 = check");
+  run(&cx, "(let: x 42; func: foo0()(_ Int) $x;) &foo0 call 42 = check");
+  run(&cx, "func: foo1(x A)(_ Int) $x 35 +; 7 foo1<A> 42 = check");
+  run(&cx, "func: foo3(x y Int z Arg0)(_ Int) $x $y $z + +; 1 3 5 foo3 9 = check");
 
   run(&cx,
-      "func: answer(0)(Int) 0; "
-      "func: answer(x Int)(Int) $x; "
-      "func: answer(42)(Sym) `correct; "
+      "func: answer(0)(_ Int) 0; "
+      "func: answer(x Int)(_ Int) $x; "
+      "func: answer(42)(_ Sym) `correct; "
       "0 answer 0 = check "
       "1 answer 1 = check "
       "42 answer `correct = check");
@@ -392,7 +392,7 @@ static void rec_tests() {
       "$bar $baz = !check");
   
   run(&cx,
-      "func: =(a b Foo)(Bool) $a `x get $b `x get =; "
+      "func: =(a b Foo)(_ Bool) $a `x get $b `x get =; "
       "$bar $baz = check");
   
   cx_deinit(&cx);

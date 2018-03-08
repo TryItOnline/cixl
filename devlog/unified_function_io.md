@@ -49,10 +49,10 @@ Next up was multiple results, which added the requirement of specifying result l
 At this point the code for dealing with arguments and results was turning complex enough that the duplication began to bother me, so I took a step back and started combing through the differences.
 
 #### Anonymous Arguments
-Forth encourages using the stack and not naming values; since Cixl supports some of the same techniques, extending that support to functions seemed like step in the right direction. Anonymous arguments may appear anywhere in the argument list and are pushed on the function stack in the same order.
+Forth encourages using the stack and not naming values; since Cixl supports some of the same techniques, extending that support to functions seemed like step in the right direction. Anonymous arguments may be declared using ```_``` and are pushed on the function stack in order of appearance.
 
 ```
-   func: repeat(Int c Char)(Str) {_ $c} map str;
+   func: repeat(_ Int c Char)(_ Str) {_ $c} map str;
 ...| 3 @a repeat
 ...
 ['aaa'r1]
@@ -75,7 +75,7 @@ Named results is one of those features that people either love or hate; I guess 
 While I wouldn't have thought of adding support for literal results unless pushed in that direction; the more I thought about it, the more arbitrary it seemed to only support literal arguments. The specified value is pushed on the calling stack. 
 
 ```
-   func: is-fortytwo2(Int)(#f) _;
+   func: is-fortytwo2(_ Int)(#f) _;
 ...func: is-fortytwo2(42)(#t);
 ...| 21 is-fortytwo2
 ...

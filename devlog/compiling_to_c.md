@@ -103,7 +103,7 @@ It was clear from the start that the compiler had to support embedded use, I als
 Included below is a slightly more elaborate example with a function definition.
 
 ```
-| Bin new % 'func: foo(x y Int) (Int) $x $y +; 35 7 foo' compile emit
+| Bin new % 'func: foo(x y Int) (_ Int) $x $y +; 35 7 foo' compile emit
 ...
 
 ['bool eval(struct cx *cx) {

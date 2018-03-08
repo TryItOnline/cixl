@@ -22,7 +22,7 @@ rec: DBTable()
   key-recs Table
   rec-keys Table;
 
-func: new-db-table(n Str k Stack)(DBTable)
+func: new-db-table(n Str k Stack)(_ DBTable)
   let: t DBTable new;
   $t `file     $n `a+ fopen put
   $t `key      $k           put
@@ -30,7 +30,7 @@ func: new-db-table(n Str k Stack)(DBTable)
   $t `key-recs Table new    put
   $t;
 
-func: get-rec-key(t DBTable r Rec)(Stack)
+func: get-rec-key(t DBTable r Rec)(_ Stack)
   $t `key get {$r ~ get} map stack;
 
 /*

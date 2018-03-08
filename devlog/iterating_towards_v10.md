@@ -58,7 +58,7 @@ Iterators may be created manually by calling ```iter``` on any sequence and cons
 Calling ```iter``` on functions and lambdas creates an iterator that keeps returning values until the target returns ```#nil```.
 
 ```
-   func: forever(n Int) (Lambda) {$n};
+   func: forever(n Int)(_ Lambda) {$n};
 ...| 42 forever iter
 ...% next ~ next
 ...
