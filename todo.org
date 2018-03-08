@@ -1,3 +1,4 @@
+* rename let: to var:
 * add specific use: to benchmarks
 * call push/pop_lib on lambda enter/exit
 ** add lambda.lib
