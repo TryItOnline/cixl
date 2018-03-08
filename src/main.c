@@ -51,7 +51,7 @@ int main(int argc, char *argv[]) {
 	cx_buf_open(&cmd);
       
 	fputs("gcc -x c -std=gnu1x "
-	      "-Wall -Werror -Wno-unused-but-set-variable "
+	      "-Wall -Werror -Wno-unused-function -Wno-unused-but-set-variable "
 	      "-O2 -g - -lcixl",
 	      cmd.stream);
 	

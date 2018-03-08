@@ -187,7 +187,7 @@ static bool emit_imp(struct cx_box *v, const char *exp, FILE *out) {
   struct cx_func *fimp = v->as_ptr;
   
   fprintf(out,
-	  "cx_box_init(%s, cx->fimp_type)->as_ptr = %s;\n",
+	  "cx_box_init(%s, cx->fimp_type)->as_ptr = %s();\n",
 	  exp, fimp->emit_id);
 
   return true;

@@ -389,7 +389,7 @@ static void print_imp(struct cx_box *v, FILE *out) {
 
 static bool emit_imp(struct cx_box *v, const char *exp, FILE *out) {
   fprintf(out,
-	  "cx_box_init(%s, cx->lib_type)->as_lib = %s;\n",
+	  "cx_box_init(%s, cx->lib_type)->as_lib = %s();\n",
 	  exp, v->as_lib->emit_id);
   
   return true;

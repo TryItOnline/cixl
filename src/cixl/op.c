@@ -66,8 +66,8 @@ static bool begin_emit(struct cx_op *op,
     struct cx_fimp *imp = op->as_begin.fimp;
 
     fprintf(out,
-	    "%s->scope;\n"
-	    CX_TAB "cx_push_lib(cx, %s);\n",
+	    "%s()->scope;\n"
+	    CX_TAB "cx_push_lib(cx, %s());\n",
 	    imp->emit_id, imp->lib->emit_id);
   }
 
@@ -170,16 +170,12 @@ static void fimp_emit_init(struct cx_op *op,
   fprintf(out,
 	  "\n"
 	  CX_ITAB "{\n"
-	  CX_ITAB "  struct cx_lib *lib = cx_test(cx_get_lib(cx, \"%s\", false));\n"
-	  CX_ITAB "  struct cx_func *func = "
-	          "cx_test(cx_get_func(lib, \"%s\", false));\n"
-	  CX_ITAB "  struct cx_fimp *imp = "
-	          "cx_test(cx_get_fimp(func, \"%s\", false));\n"
+	  CX_ITAB "  struct cx_fimp *imp = %s();\n"
 	  CX_ITAB "  imp->bin = cx_bin_ref(cx->bin);\n"
 	  CX_ITAB "  imp->start_pc = %zd;\n"
 	  CX_ITAB "  imp->nops = %zd;\n"
 	  CX_ITAB "}\n\n",
-	  imp->lib->id.id, imp->func->id, imp->id, imp->start_pc, imp->nops);
+	  imp->emit_id, imp->start_pc, imp->nops);
 }
 
 static void fimp_emit_funcs(struct cx_op *op, struct cx_set *out, struct cx *cx) {
@@ -198,12 +194,23 @@ static void fimp_emit_fimps(struct cx_op *op, struct cx_set *out, struct cx *cx)
   if (ok) { *ok = imp; }
 }
 
+static void fimp_emit_libs(struct cx_op *op,
+			   struct cx_bin *bin,
+			   struct cx_set *out,
+			   struct cx *cx) {
+  struct cx_lib
+    *lib = op->as_fimp.imp->func->lib,
+    **ok = cx_set_insert(out, &lib);
+  if (ok) { *ok = lib; }
+}
+
 cx_op_type(CX_OFIMP, {
     type.eval = fimp_eval;
     type.emit = fimp_emit;
     type.emit_init = fimp_emit_init;
     type.emit_funcs = fimp_emit_funcs;
     type.emit_fimps = fimp_emit_fimps;
+    type.emit_libs = fimp_emit_libs;
   });
 
 static bool funcdef_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
@@ -217,7 +224,7 @@ static bool funcdef_emit(struct cx_op *op,
 			 FILE *out,
 			 struct cx *cx) {
   fprintf(out,
-	  CX_TAB "%s->scope = cx_scope_ref(cx_scope(cx, 0));\n",
+	  CX_TAB "%s()->scope = cx_scope_ref(cx_scope(cx, 0));\n",
 	  op->as_funcdef.imp->emit_id);
   
   return true;  
@@ -258,38 +265,17 @@ static void funcdef_emit_init(struct cx_op *op,
   }
   
   fputs("};\n\n", out);
-
+  
   fprintf(out,
-	  CX_ITAB "  %s = cx_add_func(*cx->lib, \"%s\", %zd, args, %zd, rets);\n"
-	  CX_ITAB "  %s = %s->func;\n"
+	  CX_ITAB "  cx_add_func(*cx->lib, \"%s\", %zd, args, %zd, rets);\n"
 	  CX_ITAB "}\n\n",
-	  imp->emit_id, imp->func->id, imp->args.count, imp->rets.count,
-	  imp->func->emit_id, imp->emit_id);
+	  imp->func->id, imp->args.count, imp->rets.count);
 }
-
-/*
-static void funcdef_emit_funcs(struct cx_op *op, struct cx_set *out, struct cx *cx) {
-  struct cx_func
-    *func = op->as_funcdef.imp->func,
-    **ok = cx_set_insert(out, &func);
-
-  if (ok) { *ok = func; }
-}
-
-static void funcdef_emit_fimps(struct cx_op *op, struct cx_set *out, struct cx *cx) {
-  struct cx_fimp
-    *imp = op->as_fimp.imp,
-    **ok = cx_set_insert(out, &imp);
-
-  if (ok) { *ok = imp; }
-  }*/
 
 cx_op_type(CX_OFUNCDEF, {
     type.eval = funcdef_eval;
     type.emit = funcdef_emit;
     type.emit_init = funcdef_emit_init;
-    //type.emit_funcs = funcdef_emit_funcs;
-    //type.emit_fimps = funcdef_emit_fimps;
   });
 
 static bool funcall_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
@@ -329,12 +315,12 @@ static bool funcall_emit(struct cx_op *op,
   struct cx_fimp *imp = op->as_funcall.imp;
 
   fputs(CX_TAB "struct cx_scope *s = cx_scope(cx, 0);\n", out);
-  fprintf(out, CX_TAB "struct cx_func *func = %s;\n", func->emit_id);
+  fprintf(out, CX_TAB "struct cx_func *func = %s();\n", func->emit_id);
   fputs(CX_TAB "struct cx_fimp *imp = ", out);
   
   if (imp) {
     fprintf(out,
-	    "%s;\n\n"
+	    "%s();\n\n"
 	    CX_TAB "if (s->safe && cx_fimp_score(imp, s) == -1) { imp = NULL; }\n\n",
 	    imp->emit_id);
   } else {
@@ -649,7 +635,7 @@ static bool pushlib_emit(struct cx_op *op,
 			 FILE *out,
 			 struct cx *cx) {
   fprintf(out,
-	  CX_TAB "cx_push_lib(cx, %s);\n",
+	  CX_TAB "cx_push_lib(cx, %s());\n",
 	  op->as_pushlib.lib->emit_id);
 
   return true;
@@ -660,11 +646,14 @@ static void pushlib_emit_init(struct cx_op *op,
 			      FILE *out,
 			      struct cx *cx) {
   fprintf(out,
-	  CX_ITAB "cx_push_lib(cx, cx_test(cx_get_lib(cx, \"%s\", false)));\n",
-	  op->as_pushlib.lib->id.id);
+	  CX_ITAB "cx_push_lib(cx, %s());\n",
+	  op->as_pushlib.lib->emit_id);
 }
 
-static void pushlib_emit_libs(struct cx_op *op, struct cx_set *out, struct cx *cx) {
+static void pushlib_emit_libs(struct cx_op *op,
+			      struct cx_bin *bin,
+			      struct cx_set *out,
+			      struct cx *cx) {
   struct cx_lib
     *lib = op->as_pushlib.lib,
     **ok = cx_set_insert(out, &lib);
@@ -839,7 +828,7 @@ static bool putvar_emit(struct cx_op *op,
 
   if (op->as_putvar.type) {
     fprintf(out,
-	    CX_TAB "if (!cx_is(src->type, %s)) {\n"
+	    CX_TAB "if (!cx_is(src->type, %s())) {\n"
 	    CX_TAB "  cx_error(cx, cx->row, cx->col,\n"
 	    CX_TAB "           \"Expected type %s, actual: %%s\",\n"
 	    CX_TAB "           src->type->id);\n\n"
@@ -992,7 +981,7 @@ static bool return_emit(struct cx_op *op,
 	out);
 
   fprintf(out,
-	  CX_TAB "  if (s->safe && cx_fimp_score(%s, s) == -1) {\n"
+	  CX_TAB "  if (s->safe && cx_fimp_score(%s(), s) == -1) {\n"
 	  CX_TAB "    cx_error(cx, cx->row, cx->col, \"Recall not applicable\");\n"
 	  CX_TAB "    return false;\n"
 	  CX_TAB "  }\n\n"
@@ -1040,7 +1029,7 @@ static bool return_emit(struct cx_op *op,
 
       switch (r->arg_type) {
       case CX_ARG:
-	fprintf(out, CX_TAB "     struct cx_type *t = %s;\n", r->type->emit_id);
+	fprintf(out, CX_TAB "     struct cx_type *t = %s();\n", r->type->emit_id);
 	break;
       case CX_NARG: {
 	struct cx_arg *a = cx_vec_get(&imp->args, r->narg);
@@ -1186,6 +1175,7 @@ static void typedef_emit_init(struct cx_op *op,
 			      FILE *out,
 			      struct cx *cx) {
   struct cx_type *t = op->as_typedef.type;
+  
   if (cx_is(t, cx->rec_type)) {
     fprintf(out,
 	    "\n"
@@ -1209,7 +1199,7 @@ static void typedef_emit_init(struct cx_op *op,
       fprintf(out,
 	      CX_ITAB "  cx_test(cx_add_field(t,\n"
 	      CX_ITAB "          cx_sym(cx, \"%s\"),\n"
-	      CX_ITAB "          cx_get_type(*cx->lib, \"%s\", false),\n"
+	      CX_ITAB "          cx_test(cx_get_type(*cx->lib, \"%s\", false)),\n"
 	      CX_ITAB "          false));\n",
 	      f->id.id, f->type->id);
     }
@@ -1225,7 +1215,7 @@ static void typedef_emit_init(struct cx_op *op,
 
     cx_do_set(&t->children, struct cx_type *, ct) {
       fprintf(out,
-	      CX_ITAB "  cx_derive(cx_get_type(*cx->lib, \"%s\", false), t);\n",
+	      CX_ITAB "  cx_derive(cx_test(cx_get_type(*cx->lib, \"%s\", false)), t);\n",
 	      (*ct)->id);
     }
 
@@ -1271,7 +1261,28 @@ static void use_emit_init(struct cx_op *op,
   }
 }
 
+static void use_emit_libs(struct cx_op *op,
+			  struct cx_bin *bin,
+			  struct cx_set *out,
+			  struct cx *cx) {
+  struct cx_tok *t = cx_vec_get(&bin->toks, op->tok_idx);
+  struct cx_macro_eval *e = t->as_ptr;
+
+  cx_do_vec(&e->toks, struct cx_tok, tt) {
+    if (tt->type == CX_TGROUP()) {
+      tt = cx_vec_get(&tt->as_vec, 0);
+    }
+
+    struct cx_lib
+      *lib = cx_test(cx_get_lib(cx, tt->as_ptr, false)),
+      **ok = cx_set_insert(out, &lib);
+    
+    if (ok) { *ok = lib; }
+  }
+}
+
 cx_op_type(CX_OUSE, {
     type.emit = use_emit;
     type.emit_init = use_emit_init;
+    type.emit_libs = use_emit_libs;
   });

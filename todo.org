@@ -1,8 +1,3 @@
-* fix lib: emit
-** remove emit_id from type/func/fimp
-** remove emit_types/funcs/fimps
-** call get_type/func/fimp instead
-** test.cx
 * move include: to cx/io
 * call push/pop_lib on lambda enter/exit
 ** add lambda.lib
