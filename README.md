@@ -225,7 +225,7 @@ Constants may be bound using the ```define:``` macro. They behave much like vari
 Launching rockets!
 []
 
-...#nrockets
+   #nrockets
 ...
 [42]
 ```
