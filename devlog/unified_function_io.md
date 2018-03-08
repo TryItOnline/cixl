@@ -87,6 +87,6 @@ While I wouldn't have thought of adding support for literal results unless pushe
 ```
 
 ### Limitations
-Type literals are not supported since Cixl uses the casing of the first letter to differentiate between identifiers and types; I feel like this is a small price to pay for a simple, unified syntax. Referring to literal arguments by index signals an error, since that's most probably not what was indended. Referring to arguments by index in a result list requires the argument to be named; since Cixl needs to be able to get its type at the point of return.
+Referring to literal arguments by index signals an error, since that's most probably not what was indended. Referring to arguments by index in a result list requires the argument to be named; since Cixl needs to be able to get its type at the point of return.
 
-Give me a yell if something is unclear, wrong or missing. And please consider helping out with a donation via [paypal](https://paypal.me/basicgongfu) or [liberapay](https://liberapay.com/basic-gongfu/donate) if you find this worthwhile, every contribution counts. You may find more of the same kind of material [here](https://github.com/basic-gongfu/cixl/tree/master/devlog).
+Give me a yell if something is unclear, wrong or missing. And please consider helping out with a donation via [paypal](https://paypal.me/basicgongfu) or [liberapay](https://liberapay.com/basic-gongfu/donate) if you find this worthwhile, every contribution counts. You may find more posts in the same spirit [here](https://github.com/basic-gongfu/cixl/tree/master/devlog).
