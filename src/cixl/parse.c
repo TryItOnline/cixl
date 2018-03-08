@@ -262,7 +262,7 @@ static bool parse_id(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
       char *s = id.data;
       if (isupper(s[0])) {
 	ok = parse_type(cx, s, out, lookup);
-      } else if (s[0] == '#') {
+      } else if (lookup && s[0] == '#') {
 	ok = parse_const(cx, s, out);
       } else if (!lookup || s[0] == '$') {
 	cx_tok_init(cx_vec_push(out),

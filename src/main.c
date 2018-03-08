@@ -45,7 +45,10 @@ int main(int argc, char *argv[]) {
       const char *fname = argv[argi++];
 
       if (compile) {
-	if (!cx_emit_file(&cx, fname, stdout)) { return -1; }	
+	if (!cx_emit_file(&cx, fname, stdout)) {
+	  cx_dump_errors(&cx, stderr);
+	  return -1;
+	}	
       } else {
 	struct cx_buf cmd;
 	cx_buf_open(&cmd);
@@ -66,7 +69,12 @@ int main(int argc, char *argv[]) {
 	}
 
 	free(cmd.data);
-	if (!cx_emit_file(&cx, fname, out)) { return -1; }
+
+	if (!cx_emit_file(&cx, fname, out)) {
+	  cx_dump_errors(&cx, stderr);
+	  return -1;
+	}
+
 	pclose(out);
       }
     } else {

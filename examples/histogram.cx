@@ -9,7 +9,17 @@
   https://github.com/basic-gongfu/cixl#getting-started
 */
 
-use: cx;
+use:
+  (cx/cond <=>)
+  (cx/iter for)
+  (cx/io #in say)
+  (cx/math ++)
+  (cx/pair x y)
+  (cx/stack | ~ % sort stack)
+  (cx/str lower words)
+  (cx/table Table put-else)
+  (cx/type new)
+  (cx/var let:);
 
 /*
   Split stdin into lowercase words and count them using a table.
