@@ -215,7 +215,7 @@ cx_op_type(CX_OFIMP, {
 
 static bool funcdef_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
   struct cx_fimp *imp = op->as_funcdef.imp;
-  if (!imp->scope) { cx_scope_ref(cx_scope(cx, 0)); }
+  if (!imp->scope) { imp->scope = cx_scope_ref(cx_scope(cx, 0)); }
   return true;
 }
 
@@ -224,7 +224,8 @@ static bool funcdef_emit(struct cx_op *op,
 			 FILE *out,
 			 struct cx *cx) {
   fprintf(out,
-	  CX_TAB "%s()->scope = cx_scope_ref(cx_scope(cx, 0));\n",
+	  CX_TAB "struct cx_fimp *i = %s();\n"
+	  CX_TAB "if (!i->scope) { i->scope = cx_scope_ref(cx_scope(cx, 0)); }\n",
 	  op->as_funcdef.imp->emit_id);
   
   return true;  
