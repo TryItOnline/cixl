@@ -26,7 +26,11 @@ static bool parse_args(struct cx *cx, struct cx_vec *toks, struct cx_vec *args) 
     if (t->type == CX_TID()) {
       char *id = t->as_ptr;
 
-      if (strncmp(id, "Arg", 3) == 0 && isdigit(id[3])) {
+      if (id[0] == '#') {
+	struct cx_box *v = cx_get_const(*cx->lib, cx_sym(cx, id+1), false);
+	if (!v) { goto exit; }
+	*(struct cx_arg *)cx_vec_push(args) = cx_varg(v);
+      } else if (strncmp(id, "Arg", 3) == 0 && isdigit(id[3])) {
 	int i = strtoimax(id+3, NULL, 10);
 
 	if (tmp_ids.count) {
@@ -81,7 +85,7 @@ static ssize_t func_eval(struct cx_macro_eval *eval,
 	     CX_OFUNCDEF(),
 	     tok_idx)->as_funcdef.imp = f->as_ptr;
 
-  if (!cx_fimp_inline(f->as_ptr, tok_idx, bin, cx)) { return -1; }
+  cx_fimp_inline(f->as_ptr, tok_idx, bin, cx);
   return tok_idx+1;
 }
 

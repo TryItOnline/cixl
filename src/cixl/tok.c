@@ -44,13 +44,14 @@ static ssize_t fimp_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) {
   struct cx_tok *tok = cx_vec_get(&bin->toks, tok_idx);  
   struct cx_fimp *imp = tok->as_ptr;
 
-  if (!imp->ptr && !cx_fimp_inline(imp, tok_idx, bin, cx)) { return -1; }
+  if (!imp->ptr && !cx_fimp_inline(imp, tok_idx, bin, cx)) { goto exit; }
 
   struct cx_funcall_op *op = &cx_op_init(bin,
 					 CX_OFUNCALL(),
 					 tok_idx)->as_funcall;
   op->func = imp->func;
   op->imp = imp;
+ exit:
   return tok_idx+1;
 }
 
@@ -65,13 +66,14 @@ static ssize_t func_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) {
     ? *(struct cx_fimp **)cx_vec_start(&func->imps.members)
     : NULL;
 
-  if (imp && !imp->ptr && !cx_fimp_inline(imp, tok_idx, bin, cx)) { return -1; }
+  if (imp && !imp->ptr && !cx_fimp_inline(imp, tok_idx, bin, cx)) { goto exit; }
 
   struct cx_funcall_op *op = &cx_op_init(bin,
 					 CX_OFUNCALL(),
 					 tok_idx)->as_funcall;
   op->func = func;
   op->imp = imp;
+ exit:
   return tok_idx+1;
 }
 
@@ -91,12 +93,13 @@ static ssize_t group_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) 
     if (!cx_compile(cx, cx_vec_start(toks), cx_vec_end(toks), bin)) {
       tok = cx_vec_get(&bin->toks, tok_idx);  
       cx_error(cx, tok->row, tok->col, "Failed compiling group");
-      return -1;
+      goto exit;
     }
     
     cx_op_init(bin, CX_OEND(), tok_idx);
   }
-  
+
+ exit:
   return tok_idx+1;
 }
 
@@ -153,9 +156,10 @@ static ssize_t id_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) {
     cx_op_init(bin, CX_OGETVAR(), tok_idx)->as_getvar.id = cx_sym(cx, id+1);
   } else {
     cx_error(cx, tok->row, tok->col, "Unknown id: '%s'", id);
-    return -1;
+    goto exit;
   }
 
+ exit:
   return tok_idx+1;
 }
 
@@ -187,13 +191,15 @@ static ssize_t lambda_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx)
     if (!cx_compile(cx, cx_vec_start(toks), cx_vec_end(toks), bin)) {
       tok = cx_vec_get(&bin->toks, tok_idx);  
       cx_error(cx, tok->row, tok->col, "Failed compiling lambda");
-      return -1;
+      goto exit;
     }
   }
   
   cx_op_init(bin, CX_OSTOP(), tok_idx);
   struct cx_op *op = cx_vec_get(&bin->ops, i);
   op->as_lambda.nops = bin->ops.count - op->as_lambda.start_op;
+  
+ exit:
   return tok_idx+1;
 }
 
@@ -254,11 +260,13 @@ static ssize_t stack_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) 
   if (!cx_compile(cx, cx_vec_start(toks), cx_vec_end(toks), bin)) {
     tok = cx_vec_get(&bin->toks, tok_idx);  
     cx_error(cx, tok->row, tok->col, "Failed compiling group");
-    return -1;
+    goto exit;
   }
 
   cx_op_init(bin, CX_OSTASH(), tok_idx);
   cx_op_init(bin, CX_OEND(), tok_idx);
+  
+ exit:
   return tok_idx+1;
 }
 

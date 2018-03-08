@@ -630,11 +630,9 @@ bool cx_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   cx->row = 1;
   cx->col = 0;
   
-  while (true) {
-    if (!cx_parse_tok(cx, in, out, true)) { break; }
-  }
+  while (!feof(in)) { cx_parse_tok(cx, in, out, true); }
 
-  return cx->errors.count == 0;
+  return !cx->errors.count;
 }
 
 bool cx_parse_str(struct cx *cx, const char *in, struct cx_vec *out) {

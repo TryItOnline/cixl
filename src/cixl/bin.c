@@ -77,10 +77,10 @@ bool cx_compile(struct cx *cx,
       return false;
     }
     
-    if ((tok_idx = tok->type->compile(out, tok_idx, cx)) == -1) { return false; }
+    tok_idx = tok->type->compile(out, tok_idx, cx);
   }
 
-  return true;
+  return !cx->errors.count;
 }
 
 void cx_init_ops(struct cx_bin *bin) {

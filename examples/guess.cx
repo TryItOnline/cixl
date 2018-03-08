@@ -7,7 +7,15 @@
   https://github.com/basic-gongfu/cixl#getting-started
 */
 
-use: cx;
+use:
+  (cx/abc   #nil #t)
+  (cx/cond  = <=> if-else switch:)
+  (cx/io    ask say)
+  (cx/iter  for)
+  (cx/math  ++ rand)
+  (cx/stack _ %)
+  (cx/str   int)
+  (cx/var   let:);
 
 ((let: n 100 rand ++; {
   'Your guess: ' ask

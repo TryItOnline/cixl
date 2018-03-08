@@ -22,7 +22,6 @@ static ssize_t include_eval(struct cx_macro_eval *eval,
 			    struct cx *cx) {
   if (!cx_compile(cx, cx_vec_start(&eval->toks), cx_vec_end(&eval->toks), bin)) {
     cx_error(cx, cx->row, cx->col, "Failed compiling include");
-    return -1;
   }
 
   return tok_idx+1;

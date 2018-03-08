@@ -21,7 +21,7 @@ static ssize_t let_eval(struct cx_macro_eval *eval,
 			struct cx *cx) {
   if (!cx_compile(cx, cx_vec_get(&eval->toks, 1), cx_vec_end(&eval->toks), bin)) {
     cx_error(cx, cx->row, cx->col, "Failed compiling let");
-    return -1;
+    return tok_idx+1;
   }
   
   void put(const char *id, struct cx_type *type) {
@@ -38,7 +38,6 @@ static ssize_t let_eval(struct cx_macro_eval *eval,
     struct cx_vec *toks = &id_tok->as_vec, ids, types;
     cx_vec_init(&ids, sizeof(struct cx_tok));
     cx_vec_init(&types, sizeof(struct cx_type *));
-    bool ok = false;
     
     bool push_type(struct cx_type *type) {
       if (ids.count == types.count) {
@@ -71,12 +70,9 @@ static ssize_t let_eval(struct cx_macro_eval *eval,
       put(id->as_ptr, *type);
     }
     
-    ok = true;
-    
   exit:
     cx_vec_deinit(&ids);
     cx_vec_deinit(&types);
-    if (!ok) { return -1; }
   }
 
   return tok_idx+1;

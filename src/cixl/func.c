@@ -189,7 +189,7 @@ static bool call_imp(struct cx_box *value, struct cx_scope *scope) {
 
   if (!imp) {
     cx_error(cx, cx->row, cx->col, "Func not applicable: '%s'", func->id);
-    return -1;
+    return false;
   }
 
   return cx_fimp_call(imp, scope);
