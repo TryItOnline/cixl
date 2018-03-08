@@ -146,102 +146,6 @@ static bool use_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   return true;
 }
 
-static bool define_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
-  int row = cx->row, col = cx->col;
-  struct cx_vec toks;
-  cx_vec_init(&toks, sizeof(struct cx_tok));
-  bool ok = false;
-  
-  if (!cx_parse_tok(cx, in, &toks, false)) {
-    cx_error(cx, row, col, "Missing define id");
-    goto exit1;
-  }
-
-  struct cx_tok id_tok = *(struct cx_tok *)cx_vec_pop(&toks);
-
-  if (id_tok.type != CX_TID() && id_tok.type != CX_TGROUP()) {
-    cx_error(cx, id_tok.row, id_tok.col, "Invalid define id");
-    goto exit1;
-  }
-
-  if (!cx_parse_end(cx, in, &toks, true)) {
-    if (!cx->errors.count) { cx_error(cx, row, col, "Missing define end"); }
-    goto exit1;
-  }
-
-  struct cx_scope *s = cx_begin(cx, NULL);
-  if (!cx_eval_toks(cx, &toks)) { goto exit2; }
-
-  bool put(const char *id, struct cx_type *type) {
-    struct cx_box *src = cx_pop(s, true);
-
-    if (!src) {
-      cx_error(cx, row, col, "Missing value for id: %s", id);
-      return false;
-    }
-    
-    struct cx_box *dst = cx_put_const(*cx->lib, cx_sym(cx, id), false);
-    if (!dst) { return false; }
-    *dst = *src;
-    return true;
-  }
-
-  if (id_tok.type == CX_TID()) {
-    if (!put(id_tok.as_ptr, NULL)) { goto exit2; }
-    ok = true;
-  } else {
-    struct cx_vec *id_toks = &id_tok.as_vec, ids, types;
-    cx_vec_init(&ids, sizeof(struct cx_tok));
-    cx_vec_init(&types, sizeof(struct cx_type *));
-    
-    bool push_type(struct cx_type *type) {
-      if (ids.count == types.count) {
-	cx_error(cx, cx->row, cx->col, "Missing define id");
-	return false;
-      }
-      
-      for (struct cx_tok *id = cx_vec_get(&ids, types.count);
-	   id != cx_vec_end(&ids);
-	   id++) {
-	*(struct cx_type **)cx_vec_push(&types) = type;	
-      }
-
-      return true;
-    }
-    
-    cx_do_vec(id_toks, struct cx_tok, t) {
-      if (t->type == CX_TID()) {
-	*(struct cx_tok *)cx_vec_push(&ids) = *t;
-      } else if (t->type == CX_TTYPE() && !push_type(t->as_ptr)) {
-	goto exit3;
-      }
-    }
-
-    if (ids.count > types.count && !push_type(NULL)) { goto exit3; }
-    struct cx_tok *id = cx_vec_peek(&ids, 0);
-    struct cx_type **type = cx_vec_peek(&types, 0);
-    
-    for (; id >= (struct cx_tok *)ids.items; id--, type--) {
-      if (!put(id->as_ptr, *type)) { goto exit3; }
-    }    
-
-    ok = true;
-  exit3:
-    cx_vec_deinit(&ids);
-    cx_vec_deinit(&types);
-  }
-
-  if (ok && s->stack.count) { cx_error(cx, row, col, "Too many values in define"); }
- exit2:
-  cx_reset(s);
-  cx_end(cx);
- exit1: {
-    cx_do_vec(&toks, struct cx_tok, t) { cx_tok_deinit(t); }
-    cx_vec_deinit(&toks);
-    return ok;
-  }
-}
-
 static bool cx_lib_imp(struct cx_scope *scope) {
   cx_box_init(cx_push(scope), scope->cx->lib_type)->as_lib = *scope->cx->lib;
   return true;
@@ -276,7 +180,6 @@ cx_lib(cx_init_meta, "cx/meta") {
     
   cx_add_macro(lib, "lib:", lib_parse);
   cx_add_macro(lib, "use:", use_parse);
-  cx_add_macro(lib, "define:", define_parse);
 
   cx_add_cfunc(lib, "cx-lib",
 	       cx_args(),
