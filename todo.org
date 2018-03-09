@@ -1,7 +1,3 @@
-* add qdb library
-* rewrite fib without using vars
-** cmp perf
-* sort cx_env chains
 * add max var to fimp_score
 ** stop checking if >= max && return -1
 ** add fimp_match fn that calls _score with size_t max
@@ -76,4 +72,3 @@ sudo rm -rf /usr/local/include/cixl
 | Bin new % '50 fib' compile emit
 | Bin new % '{10000 {50 fib _} times} clock 1000000 / int say' compile emit
 | Bin new % 'func: fortytwo(Int)(#f) _; func: fortytwo(42)(#t); 21 fortytwo say' compile emit
-
