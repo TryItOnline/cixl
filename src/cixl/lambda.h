@@ -4,9 +4,12 @@
 #include "cixl/vec.h"
 
 struct cx;
+struct cx_lib;
+struct cx_scope;
 struct cx_type;
 
 struct cx_lambda {
+  struct cx_lib *lib;
   struct cx_scope *scope;
   struct cx_bin *bin;  
   size_t start_pc, nops;

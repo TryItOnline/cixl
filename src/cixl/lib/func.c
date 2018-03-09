@@ -70,7 +70,8 @@ static bool parse_args(struct cx *cx, struct cx_vec *toks, struct cx_vec *args) 
   }
 
   cx_do_vec(&tmp_ids, struct cx_tok, id) {
-    *(struct cx_arg *)cx_vec_push(args) = cx_arg(id->as_ptr, cx->any_type);      
+    const char *n = strcmp(id->as_ptr, "_") ? id->as_ptr : NULL;
+    *(struct cx_arg *)cx_vec_push(args) = cx_arg(n, cx->any_type);      
   }
   
   ok = true;

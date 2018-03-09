@@ -16,6 +16,7 @@ struct cx_lambda *cx_lambda_new(struct cx_scope *scope,
 				size_t nops) {
   struct cx *cx = scope->cx;
   struct cx_lambda *l = cx_malloc(&cx->lambda_alloc);
+  l->lib = *cx->lib;
   l->scope = cx_scope_ref(scope);
   l->bin = cx_bin_ref(cx->bin);
   l->start_pc = start_pc;
@@ -48,8 +49,13 @@ static bool equid_imp(struct cx_box *x, struct cx_box *y) {
 static bool call_imp(struct cx_box *value, struct cx_scope *scope) {
   struct cx *cx = scope->cx;
   struct cx_lambda *l = value->as_ptr;
-  bool pop_scope = false;
+  bool pop_lib = false, pop_scope = false;
   
+  if (*cx->lib != l->lib) {
+    cx_push_lib(cx, l->lib);
+    pop_lib = true;
+  }
+
   if (scope != l->scope) {
     cx_push_scope(cx, l->scope);
     pop_scope = true;
@@ -57,6 +63,7 @@ static bool call_imp(struct cx_box *value, struct cx_scope *scope) {
 
   bool ok = cx_eval(l->bin, l->start_pc, cx);
   if (pop_scope) { cx_pop_scope(cx, false); }
+  if (pop_lib) { cx_pop_lib(cx); }
   return ok;
 }
 

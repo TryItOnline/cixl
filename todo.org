@@ -1,8 +1,3 @@
-* call push/pop_lib on lambda enter/exit
-** add lambda.lib
-*** init in cx_lambda_new
-** add lib tests
-*** call and check lib inside
 * add specific use: to benchmarks
 * add qdb library
 * ---
