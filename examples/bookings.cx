@@ -9,6 +9,7 @@
 
 use: cx;
 include: 'qdb.cx';
+use: (qdb new-db-table upsert);
 
 (
 

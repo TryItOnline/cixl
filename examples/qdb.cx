@@ -12,9 +12,11 @@
   composite and are implemented as stacks of values.
 */
 
-use: cx;
+use: (cx/meta lib:);
 
-(
+lib: qdb (
+
+use: cx;
 
 rec: DBTable()
   file     RWFile
@@ -119,4 +121,4 @@ func: rollback()()
   } for
 
   $db-trans clear;
-)
+);
