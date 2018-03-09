@@ -71,7 +71,7 @@ sudo rm -rf /usr/local/include/cixl
 
 | Bin new % 'trait: IntStr Int Str; let: (x IntStr) 42; $x say' compile emit
 | Bin new % '1 2 +' compile emit
-| Bin new % '1000000000 {50 fib _} clock / int<Rat>' compile emit
+| Bin new % '10000000000 {10 {50 fib _} times} clock / int' compile emit
 | Bin new % '#out 42 print<WFile A>' compile emit
 | Bin new % '42 say' compile emit
 | Bin new % '50 fib' compile emit
