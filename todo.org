@@ -1,4 +1,3 @@
-* add specific use: to benchmarks
 * add qdb library
 * rewrite fib without using vars
 ** cmp perf

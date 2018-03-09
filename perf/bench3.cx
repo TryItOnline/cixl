@@ -1,4 +1,12 @@
-use: cx;
+use:
+  (cx/abc   A Int Str Sym)
+  (cx/math  / int)
+  (cx/io    say)
+  (cx/iter  times)
+  (cx/rec   Rec put rec:)
+  (cx/stack %)
+  (cx/time  clock)
+  (cx/type  new unsafe);
 
 unsafe
 rec: Foo() x Int y Str;

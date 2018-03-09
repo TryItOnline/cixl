@@ -1,4 +1,11 @@
-use: cx;
+use:
+  (cx/io    say)
+  (cx/iter  for)
+  (cx/math  / int)
+  (cx/stack ~ push)
+  (cx/time  clock)
+  (cx/type  unsafe)
+  (cx/var   let:);
 
 unsafe
 {let: v []; 10000000 {$v ~ push} for} clock 1000000 / int say

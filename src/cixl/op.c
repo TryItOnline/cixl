@@ -1212,8 +1212,8 @@ static void typedef_emit_init(struct cx_op *op,
       
       fprintf(out,
 	      CX_ITAB "  cx_derive_rec(t, "
-	              "cx_test(cx_get_type(*cx->lib, \"%s\", false)));\n",
-	      (*pt)->id);
+	              "cx_test(cx_get_type(%s(), \"%s\", false)));\n",
+	      (*pt)->lib->emit_id, (*pt)->id);
     }
     
     struct cx_rec_type *rt = cx_baseof(t, struct cx_rec_type, imp);
