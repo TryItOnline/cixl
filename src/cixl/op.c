@@ -274,7 +274,7 @@ static bool funcall_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
   struct cx_scope *s = cx_scope(cx, 0);
   
   if (imp) {
-    if (s->safe && cx_fimp_score(imp, s) == -1) { imp = NULL; }
+    if (s->safe && !cx_fimp_match(imp, s)) { imp = NULL; }
   } else {
     imp = cx_func_match(func, s);
   }
@@ -903,7 +903,7 @@ static bool return_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
     call->recalls--;
     struct cx_scope *s = cx_scope(cx, 0);
     
-    if (s->safe && cx_fimp_score(imp, s) == -1) {
+    if (s->safe && !cx_fimp_match(imp, s)) {
       cx_error(cx, cx->row, cx->col, "Recall not applicable");
       return false;
     }

@@ -160,7 +160,7 @@ struct cx_fimp *cx_func_match(struct cx_func *func, struct cx_scope *scope) {
   ssize_t best_score = -1;
   
   cx_do_set(&func->imps, struct cx_fimp *, i) {
-    ssize_t s = cx_fimp_score(*i, scope);
+    ssize_t s = cx_fimp_score(*i, scope, best_score);
 
     switch (s) {
     case -1:

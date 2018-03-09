@@ -1,7 +1,3 @@
-* add max var to fimp_score
-** stop checking if >= max && return -1
-** add fimp_match fn that calls _score with size_t max
-* ---
 * add connect(Socket, ip, port) fn
 ** non-blocking
 * add is-connected(Socket) fn

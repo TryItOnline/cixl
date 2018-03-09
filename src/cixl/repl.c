@@ -398,7 +398,7 @@ static bool emit_bmips(struct cx *cx) {
       struct cx_func *func = func_QU();
       struct cx_fimp *imp = func_QU_Opt();
 
-      if (s->safe && cx_fimp_score(imp, s) == -1) { imp = NULL; }
+      if (s->safe && cx_fimp_score(imp, s, -1) == -1) { imp = NULL; }
 
       if (!imp) {
 	cx_error(cx, cx->row, cx->col, "Func not applicable: %s", func->id);
@@ -461,7 +461,7 @@ static bool emit_bmips(struct cx *cx) {
       struct cx_func *func = func_AD();
       struct cx_fimp *imp = func_AD_IntInt();
 
-      if (s->safe && cx_fimp_score(imp, s) == -1) { imp = NULL; }
+      if (s->safe && cx_fimp_score(imp, s, -1) == -1) { imp = NULL; }
 
       if (!imp) {
 	cx_error(cx, cx->row, cx->col, "Func not applicable: %s", func->id);
@@ -494,7 +494,7 @@ static bool emit_bmips(struct cx *cx) {
       struct cx_func *func = func_SUSU();
       struct cx_fimp *imp = func_SUSU_Int();
 
-      if (s->safe && cx_fimp_score(imp, s) == -1) { imp = NULL; }
+      if (s->safe && cx_fimp_score(imp, s, -1) == -1) { imp = NULL; }
 
       if (!imp) {
 	cx_error(cx, cx->row, cx->col, "Func not applicable: %s", func->id);
@@ -517,7 +517,7 @@ static bool emit_bmips(struct cx *cx) {
       struct cx_func *func = func_recall();
       struct cx_fimp *imp = func_recall_();
 
-      if (s->safe && cx_fimp_score(imp, s) == -1) { imp = NULL; }
+      if (s->safe && cx_fimp_score(imp, s, -1) == -1) { imp = NULL; }
 
       if (!imp) {
 	cx_error(cx, cx->row, cx->col, "Func not applicable: %s", func->id);
@@ -557,7 +557,7 @@ static bool emit_bmips(struct cx *cx) {
       struct cx_func *func = func_ifSUelse();
       struct cx_fimp *imp = func_ifSUelse_OptAA();
 
-      if (s->safe && cx_fimp_score(imp, s) == -1) { imp = NULL; }
+      if (s->safe && cx_fimp_score(imp, s, -1) == -1) { imp = NULL; }
 
       if (!imp) {
 	cx_error(cx, cx->row, cx->col, "Func not applicable: %s", func->id);
@@ -580,7 +580,7 @@ static bool emit_bmips(struct cx *cx) {
       struct cx_scope *s = cx_scope(cx, 0);
 
       if (call->recalls) {
-	if (s->safe && cx_fimp_score(func_fibSUrec_IntIntInt(), s) == -1) {
+	if (s->safe && cx_fimp_score(func_fibSUrec_IntIntInt(), s, -1) == -1) {
 	  cx_error(cx, cx->row, cx->col, "Recall not applicable");
 	  return false;
 	}
@@ -643,7 +643,7 @@ static bool emit_bmips(struct cx *cx) {
       struct cx_func *func = func_fibSUrec();
       struct cx_fimp *imp = func_fibSUrec_IntIntInt();
 
-      if (s->safe && cx_fimp_score(imp, s) == -1) { imp = NULL; }
+      if (s->safe && cx_fimp_score(imp, s, -1) == -1) { imp = NULL; }
 
       if (!imp) {
 	cx_error(cx, cx->row, cx->col, "Func not applicable: %s", func->id);
@@ -666,7 +666,7 @@ static bool emit_bmips(struct cx *cx) {
       struct cx_scope *s = cx_scope(cx, 0);
 
       if (call->recalls) {
-	if (s->safe && cx_fimp_score(func_fib_Int(), s) == -1) {
+	if (s->safe && cx_fimp_score(func_fib_Int(), s, -1) == -1) {
 	  cx_error(cx, cx->row, cx->col, "Recall not applicable");
 	  return false;
 	}
@@ -729,7 +729,7 @@ static bool emit_bmips(struct cx *cx) {
       struct cx_func *func = func_fib();
       struct cx_fimp *imp = func_fib_Int();
 
-      if (s->safe && cx_fimp_score(imp, s) == -1) { imp = NULL; }
+      if (s->safe && cx_fimp_score(imp, s, -1) == -1) { imp = NULL; }
 
       if (!imp) {
 	cx_error(cx, cx->row, cx->col, "Func not applicable: %s", func->id);
@@ -752,7 +752,7 @@ static bool emit_bmips(struct cx *cx) {
       struct cx_func *func = func__();
       struct cx_fimp *imp = func___();
 
-      if (s->safe && cx_fimp_score(imp, s) == -1) { imp = NULL; }
+      if (s->safe && cx_fimp_score(imp, s, -1) == -1) { imp = NULL; }
 
       if (!imp) {
 	cx_error(cx, cx->row, cx->col, "Func not applicable: %s", func->id);
@@ -782,7 +782,7 @@ static bool emit_bmips(struct cx *cx) {
       struct cx_func *func = func_times();
       struct cx_fimp *imp = func_times_IntA();
 
-      if (s->safe && cx_fimp_score(imp, s) == -1) { imp = NULL; }
+      if (s->safe && cx_fimp_score(imp, s, -1) == -1) { imp = NULL; }
 
       if (!imp) {
 	cx_error(cx, cx->row, cx->col, "Func not applicable: %s", func->id);
@@ -812,7 +812,7 @@ static bool emit_bmips(struct cx *cx) {
       struct cx_func *func = func_clock();
       struct cx_fimp *imp = func_clock_A();
 
-      if (s->safe && cx_fimp_score(imp, s) == -1) { imp = NULL; }
+      if (s->safe && cx_fimp_score(imp, s, -1) == -1) { imp = NULL; }
 
       if (!imp) {
 	cx_error(cx, cx->row, cx->col, "Func not applicable: %s", func->id);
@@ -835,7 +835,7 @@ static bool emit_bmips(struct cx *cx) {
       struct cx_func *func = func_DI();
       struct cx_fimp *imp = func_DI_IntInt();
 
-      if (s->safe && cx_fimp_score(imp, s) == -1) { imp = NULL; }
+      if (s->safe && cx_fimp_score(imp, s, -1) == -1) { imp = NULL; }
 
       if (!imp) {
 	cx_error(cx, cx->row, cx->col, "Func not applicable: %s", func->id);

@@ -51,7 +51,7 @@ struct cx_fimp *cx_fimp_deinit(struct cx_fimp *imp) {
   return imp;
 }
 
-ssize_t cx_fimp_score(struct cx_fimp *imp, struct cx_scope *scope) {
+ssize_t cx_fimp_score(struct cx_fimp *imp, struct cx_scope *scope, ssize_t max) {
   struct cx_vec *stack = &scope->stack;
   if (stack->count < imp->args.count) { return -1; }
   if (!imp->args.count) { return 0; }
@@ -63,6 +63,8 @@ ssize_t cx_fimp_score(struct cx_fimp *imp, struct cx_scope *scope) {
   for (; i >= (struct cx_arg *)imp->args.items &&
 	 j >= (struct cx_box *)stack->items;
        i--, j--) {
+    if (max > -1 && score >= max) { return -1; }
+
     if (i->arg_type == CX_VARG) {
       if (!cx_eqval(&i->value, j)) { return -1; }
       continue;
@@ -87,6 +89,10 @@ ssize_t cx_fimp_score(struct cx_fimp *imp, struct cx_scope *scope) {
   }
 
   return score;
+}
+
+bool cx_fimp_match(struct cx_fimp *imp, struct cx_scope *scope) {
+  return cx_fimp_score(imp, scope, -1) > -1;
 }
 
 static bool compile(struct cx_fimp *imp, size_t tok_idx, struct cx_bin *out) {
@@ -154,7 +160,7 @@ static bool equid_imp(struct cx_box *x, struct cx_box *y) {
 static bool call_imp(struct cx_box *value, struct cx_scope *scope) {
   struct cx_fimp *imp = value->as_ptr;
 
-  if (scope->safe && cx_fimp_score(imp, scope) == -1) {
+  if (scope->safe && !cx_fimp_match(imp, scope)) {
     struct cx *cx = scope->cx;
     cx_error(cx, cx->row, cx->col, "Func not applicable: '%s'", imp->func->id);
     return false;

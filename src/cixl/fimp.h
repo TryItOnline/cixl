@@ -29,7 +29,8 @@ struct cx_fimp *cx_fimp_init(struct cx_fimp *imp,
 
 struct cx_fimp *cx_fimp_deinit(struct cx_fimp *imp);
 
-ssize_t cx_fimp_score(struct cx_fimp *imp, struct cx_scope *scope);
+ssize_t cx_fimp_score(struct cx_fimp *imp, struct cx_scope *scope, ssize_t max);
+bool cx_fimp_match(struct cx_fimp *imp, struct cx_scope *scope);
 
 bool cx_fimp_inline(struct cx_fimp *imp,
 		    size_t tok_idx,
