@@ -10,7 +10,7 @@ cx_lib(cx_init_net, "cx/net") {
     return false;
   }
 
-  cx->socket_type = cx_init_file_type(lib, "Socket", cx->rwfile_type);
+  cx->ip_client_type = cx_init_file_type(lib, "IPClient", cx->rwfile_type);
 
   return true;
 }

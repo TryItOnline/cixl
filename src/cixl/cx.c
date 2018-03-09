@@ -132,6 +132,7 @@ struct cx *cx_init(struct cx *cx) {
     cx->guid_type =
     cx->int_type =
     cx->iter_type =
+    cx->ip_client_type =
     cx->lambda_type =
     cx->lib_type = 
     cx->nil_type =
@@ -145,7 +146,6 @@ struct cx *cx_init(struct cx *cx) {
     cx->rfile_type =
     cx->rwfile_type =
     cx->seq_type =
-    cx->socket_type =
     cx->stack_type =
     cx->str_type =
     cx->sym_type =

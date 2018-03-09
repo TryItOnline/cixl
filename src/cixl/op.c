@@ -311,7 +311,7 @@ static bool funcall_emit(struct cx_op *op,
   if (imp) {
     fprintf(out,
 	    "%s();\n\n"
-	    CX_TAB "if (s->safe && cx_fimp_score(imp, s) == -1) { imp = NULL; }\n\n",
+	    CX_TAB "if (s->safe && !cx_fimp_match(imp, s)) { imp = NULL; }\n\n",
 	    imp->emit_id);
   } else {
     fputs("cx_func_match(func, s);\n\n", out);
@@ -1004,7 +1004,7 @@ static bool return_emit(struct cx_op *op,
 	out);
 
   fprintf(out,
-	  CX_TAB "  if (s->safe && cx_fimp_score(%s(), s) == -1) {\n"
+	  CX_TAB "  if (s->safe && !cx_fimp_match(%s(), s)) {\n"
 	  CX_TAB "    cx_error(cx, cx->row, cx->col, \"Recall not applicable\");\n"
 	  CX_TAB "    return false;\n"
 	  CX_TAB "  }\n\n"

@@ -28,11 +28,21 @@ struct cx {
   struct cx_vec libs;
   struct cx_lib *lobby, **lib;
 
-  struct cx_type *any_type, *bin_type, *bool_type, *char_type, *cmp_type, *file_type,
-    *fimp_type, *func_type, *guid_type, *int_type, *iter_type, *lambda_type,
-    *lib_type, *meta_type, *nil_type, *num_type, *opt_type, *pair_type, *rat_type,
-    *rec_type, *ref_type, *rfile_type, *rwfile_type, *seq_type, *socket_type,
-    *str_type, *sym_type, *table_type, *time_type, *stack_type, *wfile_type;
+  struct cx_type *any_type,
+    *bin_type, *bool_type,
+    *char_type, *cmp_type,
+    *file_type, *fimp_type, *func_type,
+    *guid_type,
+    *int_type, *iter_type, *ip_client_type,
+    *lambda_type, *lib_type,
+    *meta_type,
+    *nil_type, *num_type,
+    *opt_type,
+    *pair_type,
+    *rat_type, *rec_type, *ref_type, *rfile_type, *rwfile_type,
+    *seq_type, *stack_type, *str_type, *sym_type,
+    *table_type, *time_type,
+    *wfile_type;
 
   size_t next_sym_tag, next_type_tag;
   struct cx_set syms;

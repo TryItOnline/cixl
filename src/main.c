@@ -16,7 +16,7 @@ int main(int argc, char *argv[]) {
   struct cx cx;
   cx_init(&cx);
   cx_init_libs(&cx);
-  cx_use(&cx, "cx/meta", "use:");
+  cx_use(&cx, "cx/meta", "lib:", "use:");
   
   bool emit = false;
   bool compile = false;

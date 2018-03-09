@@ -12,8 +12,6 @@
   composite and are implemented as stacks of values.
 */
 
-use: (cx/meta lib:);
-
 lib: qdb (
 
 use: cx;

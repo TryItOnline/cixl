@@ -73,7 +73,7 @@ $
 ```
 
 ### Libraries
-The entire language is split into libraries to enable building custom languages on top of sub sets of existing functionality. ```use: cx;``` may be used as a short cut to import everything. The REPL starts with everything imported while the interpreter and compiler starts with nothing but ```use:``` and ```include:```. The following libraries are available.
+The entire language is split into libraries to enable building custom languages on top of sub sets of existing functionality. ```use: cx;``` may be used as a short cut to import everything. The REPL starts with everything imported while the interpreter and compiler starts with nothing but ```lib:``` and ```use:```. The following libraries are available.
 
 * cx/abc
 * cx/bin
