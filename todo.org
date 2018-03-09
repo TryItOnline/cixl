@@ -1,6 +1,5 @@
 * add specific use: to benchmarks
 * add qdb library
-* ---
 * rewrite fib without using vars
 ** cmp perf
 * sort cx_env chains
@@ -18,7 +17,6 @@
 *** add cx_file_ptr(struct cx_file *)
 *** rename var to _ptr
 ** call close on fd instead of fclose
-* ---
 * handle argv in emit main
 ** push strings like load main
 * add port scanner example

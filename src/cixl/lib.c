@@ -238,12 +238,7 @@ struct cx_box *cx_put_const(struct cx_lib *lib, struct cx_sym id, bool force) {
   struct cx_var *v = cx_env_get(&lib->consts, id);
 
   if (v) {
-    if (!force) {
-      struct cx *cx = lib->cx;
-      cx_error(cx, cx->row, cx->col, "Attempt to rebind const: '%s'", id);
-      return NULL;
-    }
-      
+    if (!force) { return NULL; }
     cx_box_deinit(&v->value);
     return &v->value;
   }

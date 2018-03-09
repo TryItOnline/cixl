@@ -69,10 +69,12 @@ static bool define_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
       return false;
     }
     
-    struct cx_box *dst = cx_put_const(*cx->lib, cx_sym(cx, id->as_ptr), true);
-    if (!dst) { return false; }
-    *dst = *src;
-    cx_tok_copy(cx_vec_push(&eval->toks), id); 
+    struct cx_box *dst = cx_put_const(*cx->lib, cx_sym(cx, id->as_ptr), false);
+
+    if (dst) {
+      *dst = *src;
+      cx_tok_copy(cx_vec_push(&eval->toks), id);
+    }
 
     return true;
   }
