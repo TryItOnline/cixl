@@ -1,7 +1,3 @@
-* add Poll len fn
-** check in tcpscan
-*** only poll if len > #max-queue
-** compare perf
 * optimize poll set access
 ** use find to get index
 ** compare perf
@@ -54,6 +50,8 @@
 ** add find-key(Vect) fn
 ** add is-dirty fn
 ** add delete fn
+* replace clone fallback to copy with error
+* switch read-bytes to use fread if _ptr
 
 sudo rm -rf /usr/local/include/cixl
 
@@ -67,5 +65,3 @@ sudo rm -rf /usr/local/include/cixl
 | Bin new % 'func: fortytwo(Int)(#f) _; func: fortytwo(42)(#t); 21 fortytwo say' compile emit
 
 '127.0.0.1' 80 tcp-connect
-* replace clone fallback to copy with error
-* switch read-bytes to use fread if _ptr
