@@ -1273,7 +1273,7 @@ use: cx;
 
 $ cixl -e cixl/perf/bench2.cx -o bench2
 $ ./bench2
-1217
+1184
 ```
 
 ```

@@ -32,10 +32,7 @@ struct cx_vec *cx_vec_deinit(struct cx_vec *vec) {
 
 void cx_vec_grow(struct cx_vec *vec, size_t capac) {
   if (capac > vec->capac) {
-    if (vec->alloc && vec->items && vec->capac == CX_VEC_MIN) {
-      cx_free(vec->alloc, vec->items);
-      vec->items = NULL;
-    }
+    size_t prev_capac = vec->capac;
       
     if (vec->capac) {
       while (vec->capac < capac) { vec->capac *= CX_VEC_GROW; }
@@ -47,7 +44,14 @@ void cx_vec_grow(struct cx_vec *vec, size_t capac) {
       cx_test(!vec->items);
       vec->items = cx_malloc(vec->alloc);
     } else {
-      vec->items = realloc(vec->items, vec->capac*vec->item_size);
+      if (vec->alloc && prev_capac == CX_VEC_MIN) {
+	void *prev_items = vec->items;
+	vec->items = malloc(vec->capac*vec->item_size);
+	memcpy(vec->items, prev_items, vec->count*vec->item_size);
+	cx_free(vec->alloc, prev_items);
+      } else {
+	vec->items = realloc(vec->items, vec->capac*vec->item_size);
+      }
     }
   }
 }
