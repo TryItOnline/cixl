@@ -62,6 +62,13 @@ static bool wait_imp(struct cx_scope *scope) {
   return true;
 }
 
+static bool len_imp(struct cx_scope *scope) {
+  struct cx *cx = scope->cx;
+  struct cx_box p = *cx_test(cx_pop(scope, false));
+  cx_box_init(cx_push(scope), cx->int_type)->as_int = p.as_poll->files.members.count;
+  return true;
+}
+
 cx_lib(cx_init_poll, "cx/io/poll") {    
   struct cx *cx = lib->cx;
     
@@ -88,6 +95,11 @@ cx_lib(cx_init_poll, "cx/io/poll") {
 	       cx_args(cx_arg("p", cx->poll_type), cx_arg("ms", cx->int_type)),
 	       cx_args(cx_arg(NULL, cx->int_type)),
 	       wait_imp);
+
+  cx_add_cfunc(lib, "len",
+	       cx_args(cx_arg("p", cx->poll_type)),
+	       cx_args(cx_arg(NULL, cx->int_type)),
+	       len_imp);
 
   return true;
 }

@@ -14,11 +14,11 @@
 use:
   (cx/abc     Int is-nil)
   (cx/buf     Buf clear len)
-  (cx/cond    ? = if else)
+  (cx/cond    ? = > if else)
   (cx/const   define:)
   (cx/func    func:)
   (cx/io      close read-bytes say)
-  (cx/io/poll Poll delete on-read wait)
+  (cx/io/poll Poll delete len on-read wait)
   (cx/iter    for while)
   (cx/net     tcp-connect)
   (cx/math    + -)
@@ -27,7 +27,8 @@ use:
   (cx/type    new)
   (cx/var     let:);
 
-define: max-wait-ms 10;
+define: max-wait-ms 5;
+define: max-queue   30;
 
 let: max-read int;
 let: (max-port min-port) int ~ int;
@@ -61,7 +62,7 @@ func: scan(port Int)()
 
 $max-port $min-port - {
   $min-port + scan
-  $poll 0 wait _
+  $poll len #max-queue > {$poll 0 wait _} if
 } for
 
 /*

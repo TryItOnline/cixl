@@ -1,4 +1,3 @@
-* add io/poll lib
 * add Poll len fn
 ** check in tcpscan
 *** only poll if len > #max-queue
@@ -28,6 +27,7 @@
 *** store as box.file
 **** use cx_baseof to get mfile
 ** derive RWFile
+* extract cx/math/rat lib
 * add seq zip/unzip fns
 * add and/or tests
 * add filter tests
