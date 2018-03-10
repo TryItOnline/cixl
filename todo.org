@@ -1,10 +1,7 @@
-* finish tcpscan
-** add clear(Buf) fn
-** switch read-buf to use fread if _ptr
-*** reuse buf
+* switch read-buf to use fread if _ptr
 * handle argv in emit main
 ** push strings like load main
-* --
+** test tcpscan emit
 * rename ref_ref to ref_inc & deref to dec
 * add meta.get-func/get-type(lib id)
 * add Fimp func fn
