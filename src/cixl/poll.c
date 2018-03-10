@@ -40,7 +40,10 @@ void cx_poll_deref(struct cx_poll *p) {
   p->nrefs--;
 
   if (!p->nrefs) {
-    cx_do_set(&p->files, struct cx_poll_file, f) {
+    struct cx_poll_file *f = cx_vec_start(&p->files.members);
+    struct pollfd *fd = cx_vec_start(&p->fds.members);
+
+    for (; f != cx_vec_end(&p->files.members); f++, fd++) {
       file_deinit(f, cx_test(cx_set_get(&p->fds, &f->fd)));
     }
     
@@ -51,31 +54,36 @@ void cx_poll_deref(struct cx_poll *p) {
 }
 
 bool cx_poll_read(struct cx_poll *p, struct cx_file *f, struct cx_box *a) {
-  struct cx_poll_file *ok = cx_set_get(&p->files, &f->fd);
+  void *found = NULL;
+  size_t i = cx_set_find(&p->files, &f->fd, 0, &found);
+  
+  struct cx_poll_file *pf = NULL;
   struct pollfd *pfd = NULL;
   
-  if (ok) {
-    pfd = cx_test(cx_set_get(&p->fds, &f->fd));
+  if (found) {
+    pf = found;
+    pfd = cx_test(cx_vec_get(&p->fds.members, i));
     if (pfd->events & POLLIN) { return false; }
   } else {
-    ok = file_init(cx_set_insert(&p->files, &f->fd), f->fd);
-    pfd = cx_test(cx_set_insert(&p->fds, &f->fd));
+    pf = file_init(cx_vec_insert(&p->files.members, i), f->fd);
+    pfd = cx_vec_insert(&p->fds.members, i);
     pfd->fd = f->fd;
     pfd->events = 0;
     pfd->events = 0;
   }
 
-  cx_copy(&ok->on_read, a);
+  cx_copy(&pf->on_read, a);
   pfd->events |= POLLIN;
   return true;
 }
 
 bool cx_poll_delete(struct cx_poll *p, struct cx_file *f) {
-  struct cx_poll_file *ok = cx_set_get(&p->files, &f->fd);
-  if (!ok) { return false; }
-  file_deinit(ok, cx_set_get(&p->fds, &f->fd));
-  cx_test(cx_set_delete(&p->files, &f->fd));
-  cx_test(cx_set_delete(&p->fds, &f->fd));
+  void *found = NULL;
+  size_t i = cx_set_find(&p->files, &f->fd, 0, &found);
+  if (!found) { return false; }
+  file_deinit(found, cx_vec_get(&p->fds.members, i));
+  cx_vec_delete(&p->files.members, i);
+  cx_vec_delete(&p->fds.members, i);
   return true;
 }
 
@@ -86,10 +94,13 @@ int cx_poll_wait(struct cx_poll *p, int ms, struct cx_scope *s) {
     num = poll((struct pollfd *)fds->items, fds->count, ms),
     rem = num;
   
-  struct cx_poll_file *f = cx_vec_start(&p->files.members);
+  struct cx_poll_file
+    *f = cx_vec_start(&p->files.members),
+    *fend = cx_vec_end(&p->files.members);
+  
   struct pollfd *fd = cx_vec_start(&p->fds.members);
   
-  for (; f != cx_vec_end(&p->files.members) && rem;) {
+  for (; f != fend && rem;) {
     int prev_fd = f->fd;
     
     if (fd->revents) {
