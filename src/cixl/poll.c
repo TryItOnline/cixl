@@ -81,6 +81,7 @@ bool cx_poll_delete(struct cx_poll *p, struct cx_file *f) {
 
 int cx_poll_wait(struct cx_poll *p, int ms, struct cx_scope *s) {
   struct cx_vec *fds = &p->fds.members; 
+
   int
     num = poll((struct pollfd *)fds->items, fds->count, ms),
     rem = num;

@@ -315,22 +315,28 @@ static bool if_imp(struct cx_scope *scope) {
   struct cx_box
     x = *cx_test(cx_pop(scope, false)),
     c = *cx_test(cx_pop(scope, false));
-  
-  if (cx_ok(&c)) { cx_call(&x, scope); }
+
+  bool ok = false;
+  if (cx_ok(&c) && !cx_call(&x, scope)) { goto exit; }
+  ok = true;
+ exit:
   cx_box_deinit(&x);
   cx_box_deinit(&c);
-  return true;
+  return ok;
 }
 
 static bool else_imp(struct cx_scope *scope) {
   struct cx_box
     x = *cx_test(cx_pop(scope, false)),
     c = *cx_test(cx_pop(scope, false));
-  
-  if (!cx_ok(&c)) { cx_call(&x, scope); }
+
+  bool ok = false;
+  if (!cx_ok(&c) && !cx_call(&x, scope)) { goto exit; }
+  ok = true;
+ exit:
   cx_box_deinit(&x);
   cx_box_deinit(&c);
-  return true;
+  return ok;
 }
 
 static bool if_else_imp(struct cx_scope *scope) {

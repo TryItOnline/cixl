@@ -1,3 +1,4 @@
+* trace scope_init/deinit
 * optimize poll set access
 ** use find to get index
 ** compare perf
