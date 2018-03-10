@@ -43,7 +43,7 @@ func: scan(port Int)()
 
   $c? {
     $poll $c {
-      $c $max-read $in read-bytes
+      $c $in $max-read read-bytes
       is-nil {[$port @@s $in] say} else
       $in clear
       $poll $c delete

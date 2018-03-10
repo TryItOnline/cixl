@@ -242,8 +242,8 @@ static bool read_bytes_imp(struct cx_scope *scope) {
   bool ok = false;
 
   struct cx_box
-    out = *cx_test(cx_pop(scope, false)),
     nbytes = *cx_test(cx_pop(scope, false)),
+    out = *cx_test(cx_pop(scope, false)),
     in = *cx_test(cx_pop(scope, false));
 
   struct cx_buf *o = out.as_buf;
@@ -400,8 +400,8 @@ cx_lib(cx_init_io, "cx/io") {
 
   cx_add_cfunc(lib, "read-bytes",
 	       cx_args(cx_arg("in", cx->rfile_type),
-		       cx_arg("nbytes", cx->int_type),
-		       cx_arg("out", cx->buf_type)),
+		       cx_arg("out", cx->buf_type),
+		       cx_arg("nbytes", cx->int_type)),
 	       cx_args(cx_arg(NULL, cx->opt_type)),
 	       read_bytes_imp);
 
