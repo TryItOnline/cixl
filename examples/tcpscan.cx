@@ -13,34 +13,37 @@ use:
   (cx/abc   Int)
   (cx/cond  ? if)
   (cx/func  func:)
-  (cx/io    close poll-clear poll-read poll-wait say)
-  (cx/iter  for)
+  (cx/io    Poll close delete on-read say wait)
+  (cx/iter  for while)
   (cx/net   tcp-connect)
   (cx/math  + -)
   (cx/stack ~ _)
   (cx/str   int)
+  (cx/type  new)
   (cx/var   let:);
 
-let: (max min) int ~ int;
+let: (max-port min-port) int ~ int;
 let: host;
+let: poll Poll new;
 
-['Scanning ports ' $min @- $max ' on ' $host @@n] say
+['Scanning ports ' $min-port @- $max-port ' on ' $host @@n] say
 
-func: connect(p Int)()
-  let: c $host $p tcp-connect;
+func: connect(port Int)()
+  let: c $host $port tcp-connect;
 
   $c? {
-    $c {
-      $p say
-      $c poll-clear
+    $poll $c {
+      $port say
+      $poll $c delete
       $c close      
-    } poll-read
+    } on-read
   } if;
 
-$max $min - {
-  $min + connect
-  0 poll-wait _
+$max-port $min-port - {
+  $min-port + connect
+  $poll 0 wait _
 } for
 
-100 poll-wait
+{$poll 100 wait} while
+
 'Done!' say

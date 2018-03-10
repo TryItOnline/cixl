@@ -224,6 +224,31 @@ static bool times_imp(struct cx_scope *scope) {
   return ok;
 }
 
+static bool while_imp(struct cx_scope *scope) {
+  struct cx *cx = scope->cx;
+  struct cx_box a = *cx_test(cx_pop(scope, false));
+  bool ok = false;
+  
+  while (true) {
+    if (!cx_call(&a, scope)) { goto exit; }
+    struct cx_box *vp = cx_pop(scope, false);
+
+    if (!vp) {
+      cx_error(cx, cx->row, cx->col, "Missing while condition");
+      goto exit;
+    }
+
+    struct cx_box v = *vp;
+    if (!cx_ok(&v)) { break; }
+    cx_box_deinit(&v);
+  }
+
+  ok = true;
+ exit:
+  cx_box_deinit(&a);
+  return ok;
+}
+
 cx_lib(cx_init_iter, "cx/iter") {
   struct cx *cx = lib->cx;
     
@@ -265,6 +290,10 @@ cx_lib(cx_init_iter, "cx/iter") {
 	       cx_args(cx_arg("n", cx->int_type),
 		       cx_arg("act", cx->any_type)), cx_args(),
 	       times_imp);
+
+  cx_add_cfunc(lib, "while",
+	       cx_args(cx_arg("act", cx->any_type)), cx_args(),
+	       while_imp);
 
   return true;
 }

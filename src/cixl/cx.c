@@ -41,7 +41,6 @@
 #include "cixl/nil.h"
 #include "cixl/op.h"
 #include "cixl/pair.h"
-#include "cixl/poll.h"
 #include "cixl/rec.h"
 #include "cixl/ref.h"
 #include "cixl/scope.h"
@@ -85,7 +84,6 @@ cx_lib(cx_init_world, "cx") {
 
 struct cx *cx_init(struct cx *cx) {
   cx->next_sym_tag = cx->next_type_tag = 0;
-  cx->poll = NULL;
   cx->bin = NULL;
   cx->pc = 0;
   cx->stop = false;
@@ -124,35 +122,19 @@ struct cx *cx_init(struct cx *cx) {
   cx_vec_init(&cx->errors, sizeof(struct cx_error));
 
   cx->any_type =
-    cx->bin_type =
-    cx->bool_type =
-    cx->char_type =
-    cx->cmp_type =
-    cx->file_type =
-    cx->fimp_type =
-    cx->func_type =
+    cx->bin_type = cx->bool_type =
+    cx->char_type = cx->cmp_type =
+    cx->file_type = cx->fimp_type = cx->func_type =
     cx->guid_type =
-    cx->int_type =
-    cx->iter_type =
-    cx->lambda_type =
-    cx->lib_type = 
-    cx->nil_type =
-    cx->num_type =
+    cx->int_type = cx->iter_type =
+    cx->lambda_type = cx->lib_type = 
+    cx->nil_type = cx->num_type =
     cx->meta_type =
     cx->opt_type =
-    cx->pair_type =
-    cx->rat_type =
-    cx->rec_type =
-    cx->ref_type =
-    cx->rfile_type =
-    cx->rwfile_type =
-    cx->seq_type =
-    cx->stack_type =
-    cx->str_type =
-    cx->sym_type =
-    cx->table_type =
-    cx->tcp_client_type =
-    cx->time_type =
+    cx->pair_type = cx->poll_type =
+    cx->rat_type = cx->rec_type = cx->ref_type = cx->rfile_type = cx->rwfile_type =
+    cx->seq_type = cx->stack_type = cx->str_type = cx->sym_type =
+    cx->table_type = cx->tcp_client_type = cx->time_type =
     cx->wfile_type = NULL;
       
   cx->scope = NULL;
@@ -194,12 +176,14 @@ struct cx *cx_deinit(struct cx *cx) {
   cx_do_vec(&cx->errors, struct cx_error, e) { cx_error_deinit(e); }
   cx_vec_deinit(&cx->errors);
 
-  if (cx->poll) { free(cx_poll_deinit(cx->poll)); }
-
   cx_do_vec(&cx->calls, struct cx_call, c) { cx_call_deinit(c); }
   cx_vec_deinit(&cx->calls);
 
-  cx_do_vec(&cx->scopes, struct cx_scope *, s) { cx_scope_deref(*s); }
+  cx_do_vec(&cx->scopes, struct cx_scope *, s) {
+    cx_env_clear(&(*s)->vars);
+    cx_scope_deref(*s);
+  }
+  
   cx_vec_deinit(&cx->scopes);
 
   cx_do_vec(&cx->load_paths, char *, p) { free(*p); }
@@ -408,11 +392,6 @@ bool cx_load(struct cx *cx, const char *path, struct cx_bin *bin) {
     free(full_path);
     return ok;
   }
-}
-
-struct cx_poll *cx_poll(struct cx *cx) {
-  if (!cx->poll) { cx->poll = cx_poll_init(malloc(sizeof(struct cx_poll))); }
-  return cx->poll;
 }
 
 void cx_dump_errors(struct cx *cx, FILE *out) {

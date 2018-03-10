@@ -333,37 +333,35 @@ static bool use_id(struct cx_lib *lib, const char *id) {
 
 bool cx_lib_vuse(struct cx_lib *lib, unsigned int nids, const char **ids) {
   struct cx *cx = lib->cx;
+  bool ok = true;
   
   if (lib->inits.count) {
     cx_push_lib(cx, lib);
-    bool ok = true;
     
     cx_do_vec(&lib->inits, struct cx_lib_init, i) {
       if (i->done) { continue; }
       
       if (i->ptr) {
-	ok = i->ptr(lib);
+	ok = i->ptr(lib) && ok;
       } else {
-	ok = cx_eval(i->bin, i->start_pc, cx);
+	ok = cx_eval(i->bin, i->start_pc, cx) && ok;
       }
       
-      if (!ok) { break; }
       i->done = true;
     }
     
     cx_pop_lib(cx);
-    if (!ok) { return false; }
   }
 
   if (nids) {
     for (unsigned int i = 0; i < nids; i++) {
-      if (!use_id(lib, ids[i])) { return false; }
+      ok = use_id(lib, ids[i]) && ok;
     }
 
     return true;
   }
   
-  return use_all(lib);
+  return use_all(lib) && ok;
 }
 
 static bool equid_imp(struct cx_box *x, struct cx_box *y) {

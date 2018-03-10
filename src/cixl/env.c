@@ -12,15 +12,7 @@ struct cx_env *cx_env_init(struct cx_env *env, struct cx_malloc *alloc) {
 }
 
 struct cx_env *cx_env_deinit(struct cx_env *env) {
-  for (unsigned int i = 0; i < CX_ENV_SLOTS; i++) {
-    for (struct cx_var *v = env->slots[i]; v;) {
-      struct cx_var *nv = v->next;
-      cx_box_deinit(&v->value);
-      cx_free(env->alloc, v);
-      v = nv;
-    }
-  }
-
+  cx_env_clear(env);
   return env;
 }
 
@@ -54,4 +46,19 @@ struct cx_box *cx_env_put(struct cx_env *env, struct cx_sym id) {
   
   env->count++;
   return &var->value;
+}
+
+void cx_env_clear(struct cx_env *env) {
+  for (unsigned int i = 0; i < CX_ENV_SLOTS; i++) {
+    for (struct cx_var *v = env->slots[i]; v;) {
+      struct cx_var *nv = v->next;
+      cx_box_deinit(&v->value);
+      cx_free(env->alloc, v);
+      v = nv;
+    }
+
+    env->slots[i] = NULL;
+  }
+
+  env->count = 0;
 }

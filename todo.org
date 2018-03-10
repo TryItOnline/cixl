@@ -1,15 +1,5 @@
 * finish tcpscan
-** add cx.poll_type
-*** replaces cx.poll
-*** create with Poll new
-*** add ? fn
-**** return true if files.count
-*** $poll $c {} on-read
-*** $poll $c delete
-*** $poll 1000 wait
-*** add
-** add while-loop to iter
-** rename cx_buf to 
+** rename cx_buf to cx_mfile
 ** add io/Buf type
 *** vec<unsigned char> && nrefs
 ** add read-bytes(File n Buf) fn
@@ -35,7 +25,9 @@
 ** convert read to iter
 *** keep bin ref
 ** update example and add to post
-* add MFile based on cx_buf
+* add MFile type
+** use struct cx_mfile
+*** add nrefs
 ** derive RWFile
 * add seq zip/unzip fns
 * add and/or tests

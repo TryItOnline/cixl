@@ -6,16 +6,21 @@
 struct cx;
 struct cx_box;
 struct cx_file;
+struct cx_type;
 
 struct cx_poll {
   struct cx_set files, fds;
+  unsigned int nrefs;
 };
 
-struct cx_poll *cx_poll_init(struct cx_poll *poll);
-struct cx_poll *cx_poll_deinit(struct cx_poll *poll);
+struct cx_poll *cx_poll_new();
+struct cx_poll *cx_poll_ref(struct cx_poll *p);
+void cx_poll_deref(struct cx_poll *p);
 
-bool cx_poll_read(struct cx_poll *poll, struct cx_file *file, struct cx_box *act);
-bool cx_poll_clear(struct cx_poll *poll, struct cx_file *file);
-int cx_poll_wait(struct cx_poll *poll, int msecs, struct cx_scope *scope);
+bool cx_poll_read(struct cx_poll *p, struct cx_file *f, struct cx_box *a);
+bool cx_poll_delete(struct cx_poll *p, struct cx_file *f);
+int cx_poll_wait(struct cx_poll *p, int ms, struct cx_scope *s);
+
+struct cx_type *cx_init_poll_type(struct cx_lib *lib);
 
 #endif
