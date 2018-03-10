@@ -12,19 +12,20 @@
 */
 
 use:
-  (cx/abc   Int is-nil)
-  (cx/buf   Buf clear len)
-  (cx/cond  ? = if else)
-  (cx/const define:)
-  (cx/func  func:)
-  (cx/io    Poll close delete on-read read-bytes say wait)
-  (cx/iter  for while)
-  (cx/net   tcp-connect)
-  (cx/math  + -)
-  (cx/stack ~ _)
-  (cx/str   int)
-  (cx/type  new)
-  (cx/var   let:);
+  (cx/abc     Int is-nil)
+  (cx/buf     Buf clear len)
+  (cx/cond    ? = if else)
+  (cx/const   define:)
+  (cx/func    func:)
+  (cx/io      close read-bytes say)
+  (cx/io/poll Poll delete on-read wait)
+  (cx/iter    for while)
+  (cx/net     tcp-connect)
+  (cx/math    + -)
+  (cx/stack   ~ _)
+  (cx/str     int)
+  (cx/type    new)
+  (cx/var     let:);
 
 define: max-wait-ms 10;
 

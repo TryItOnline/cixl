@@ -31,6 +31,7 @@
 #include "cixl/lib/meta.h"
 #include "cixl/lib/net.h"
 #include "cixl/lib/pair.h"
+#include "cixl/lib/poll.h"
 #include "cixl/lib/rec.h"
 #include "cixl/lib/ref.h"
 #include "cixl/lib/stack.h"
@@ -74,6 +75,7 @@ cx_lib(cx_init_world, "cx") {
     cx_use(cx, "cx/meta") &&
     cx_use(cx, "cx/net") &&
     cx_use(cx, "cx/pair") &&
+    cx_use(cx, "cx/poll") &&
     cx_use(cx, "cx/rec") &&
     cx_use(cx, "cx/ref") &&
     cx_use(cx, "cx/stack") &&
@@ -163,6 +165,7 @@ void cx_init_libs(struct cx *cx) {
   cx_init_meta(cx);
   cx_init_net(cx);
   cx_init_pair(cx);
+  cx_init_poll(cx);
   cx_init_rec(cx);
   cx_init_ref(cx);
   cx_init_stack(cx);

@@ -14,7 +14,6 @@
 #include "cixl/iter.h"
 #include "cixl/lib.h"
 #include "cixl/lib/io.h"
-#include "cixl/poll.h"
 #include "cixl/scope.h"
 #include "cixl/str.h"
 
@@ -293,53 +292,6 @@ static bool lines_imp(struct cx_scope *scope) {
   return true;
 }
 
-static bool on_read_imp(struct cx_scope *scope) {
-  struct cx_box
-    a = *cx_test(cx_pop(scope, false)),
-    f = *cx_test(cx_pop(scope, false)),
-    p = *cx_test(cx_pop(scope, false));
-  
-  bool ok = cx_poll_read(p.as_poll, f.as_file, &a);
-
-  cx_box_deinit(&a);
-  cx_box_deinit(&f);
-  cx_box_deinit(&p);
-  return ok;
-}
-
-static bool poll_delete_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-
-  struct cx_box
-    f = *cx_test(cx_pop(scope, false)),
-    p = *cx_test(cx_pop(scope, false));
-
-  bool ok = cx_poll_delete(p.as_poll, f.as_file);
-  if (!ok) { cx_error(cx, cx->row, cx->col, "File is not polled"); }
-  cx_box_deinit(&f);
-  cx_box_deinit(&p);
-  return ok;
-}
-
-static bool poll_wait_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-
-  struct cx_box
-    ms = *cx_test(cx_pop(scope, false)),
-    p = *cx_test(cx_pop(scope, false));
-
-  int n = cx_poll_wait(p.as_poll, ms.as_int, scope);
-  cx_box_deinit(&p);
-
-  if (n == -1) {
-    cx_error(cx, cx->row, cx->col, "Failed polling");
-    return false;
-  }
-  
-  cx_box_init(cx_push(scope), cx->int_type)->as_int = n;
-  return true;
-}
-
 cx_lib(cx_init_io, "cx/io") {    
   struct cx *cx = lib->cx;
     
@@ -357,8 +309,6 @@ cx_lib(cx_init_io, "cx/io") {
 				      cx->rfile_type, cx->wfile_type);
   cx->rwfile_type->iter = cx_file_iter;
 
-  cx->poll_type = cx_init_poll_type(lib);
-  
   cx_box_init(cx_put_const(lib, cx_sym(cx, "in"), false),
 	      cx->rfile_type)->as_file = cx_file_new(fileno(stdin), NULL, stdin);
     
@@ -419,23 +369,6 @@ cx_lib(cx_init_io, "cx/io") {
 		cx_args(cx_arg("v", cx->any_type)), cx_args(),
 		"#out $v print\n"
 		"#out @@n print");
-
-  cx_add_cfunc(lib, "on-read",
-	       cx_args(cx_arg("p", cx->poll_type),
-		       cx_arg("f", cx->rfile_type),
-		       cx_arg("a", cx->any_type)),
-	       cx_args(),
-	       on_read_imp);
-
-  cx_add_cfunc(lib, "delete",
-	       cx_args(cx_arg("p", cx->poll_type), cx_arg("f", cx->file_type)),
-	       cx_args(),
-	       poll_delete_imp);
-
-  cx_add_cfunc(lib, "wait",
-	       cx_args(cx_arg("p", cx->poll_type), cx_arg("ms", cx->int_type)),
-	       cx_args(cx_arg(NULL, cx->int_type)),
-	       poll_wait_imp);
 
   return true;
 }
