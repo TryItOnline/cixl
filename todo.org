@@ -1,17 +1,10 @@
 * optimize poll set access
 ** use find to get index
 ** compare perf
-* implement Buf clone
 * handle argv in emit main
 ** push strings like load main
 ** test tcpscan emit
 * rename ref_ref to ref_inc & deref to dec
-* optimize const emit
-** add op_type.emit_consts
-*** rewrite getconst emit
-** add cx_getconst_op.value
-*** set in parse_const
-*** change eval to push value
 * add read-iter to io lib
 ** convert read to iter
 *** keep bin ref
@@ -24,6 +17,7 @@
 **** use cx_baseof to get mfile
 ** derive RWFile
 * extract cx/math/rat lib
+* implement Buf clone
 * add seq zip/unzip fns
 * add and/or tests
 * add filter tests
@@ -34,6 +28,12 @@
 * add vect put/get fns
 * add rat sub/div
 ** move fns to math lib
+* optimize const emit
+** add op_type.emit_consts
+*** rewrite getconst emit
+** add cx_getconst_op.value
+*** set in parse_const
+*** change eval to push value
 * implement Cmp for Sym/Guid
 * replace cx_tok.as_ptr with as_id, as_literal etc.
 ** use cx_sym for CX_TID?
