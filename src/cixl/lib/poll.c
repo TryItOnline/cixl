@@ -66,6 +66,7 @@ static bool len_imp(struct cx_scope *scope) {
   struct cx *cx = scope->cx;
   struct cx_box p = *cx_test(cx_pop(scope, false));
   cx_box_init(cx_push(scope), cx->int_type)->as_int = p.as_poll->files.members.count;
+  cx_box_deinit(&p);
   return true;
 }
 

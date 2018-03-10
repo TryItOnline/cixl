@@ -83,7 +83,7 @@ static void print_imp(struct cx_box *v, FILE *out) {
   struct cx *cx = v->type->lib->cx;
   struct cx_scope *s = cx_scope(cx, 0);
   cx_box_init(cx_push(s), cx->wfile_type)->as_file =
-    cx_file_new(fileno(out), NULL, out);
+    cx_file_new(cx, fileno(out), NULL, out);
   cx_copy(cx_push(s), v);
   cx_funcall(cx, "print");
 }

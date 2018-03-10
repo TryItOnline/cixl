@@ -59,7 +59,6 @@ bool cx_poll_read(struct cx_poll *p, struct cx_file *f, struct cx_box *a) {
     if (pfd->events & POLLIN) { return false; }
   } else {
     ok = file_init(cx_set_insert(&p->files, &f->fd), f->fd);
-
     pfd = cx_test(cx_set_insert(&p->fds, &f->fd));
     pfd->fd = f->fd;
     pfd->events = 0;

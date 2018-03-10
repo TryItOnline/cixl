@@ -46,8 +46,9 @@ static struct cx_iter *char_iter_new(struct cx_file *in) {
   return &it->iter;
 }
 
-struct cx_file *cx_file_new(int fd, const char *mode, FILE *ptr) {
-  struct cx_file *file = malloc(sizeof(struct cx_file));
+struct cx_file *cx_file_new(struct cx *cx, int fd, const char *mode, FILE *ptr) {
+  struct cx_file *file = cx_malloc(&cx->file_alloc);
+  file->cx = cx;
   file->fd = fd;
   file->mode = mode;
   file->_ptr = ptr;
@@ -66,7 +67,7 @@ void cx_file_deref(struct cx_file *file) {
   
   if (!file->nrefs) {
     cx_file_close(file);
-    free(file);
+    cx_free(&file->cx->file_alloc, file);
   }
 }
 

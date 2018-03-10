@@ -39,7 +39,7 @@ static bool connect_imp(struct cx_scope *scope) {
       errno != EINPROGRESS) {
     cx_box_init(cx_push(scope), scope->cx->nil_type);
   } else {
-    struct cx_file *f = cx_file_new(fd, "r+", NULL);
+    struct cx_file *f = cx_file_new(cx, fd, "r+", NULL);
     cx_box_init(cx_push(scope), scope->cx->tcp_client_type)->as_file = f;
   }
 

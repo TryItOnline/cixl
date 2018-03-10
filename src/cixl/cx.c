@@ -14,6 +14,7 @@
 #include "cixl/cx.h"
 #include "cixl/env.h"
 #include "cixl/error.h"
+#include "cixl/file.h"
 #include "cixl/func.h"
 #include "cixl/int.h"
 #include "cixl/lambda.h"
@@ -95,6 +96,7 @@ struct cx *cx_init(struct cx *cx) {
   cx->row = cx->col = -1;
   
   cx_malloc_init(&cx->buf_alloc, CX_SLAB_SIZE, sizeof(struct cx_buf));
+  cx_malloc_init(&cx->file_alloc, CX_SLAB_SIZE, sizeof(struct cx_file));
   cx_malloc_init(&cx->lambda_alloc, CX_SLAB_SIZE, sizeof(struct cx_lambda));
   cx_malloc_init(&cx->pair_alloc, CX_SLAB_SIZE, sizeof(struct cx_pair));
   cx_malloc_init(&cx->rec_alloc, CX_SLAB_SIZE, sizeof(struct cx_rec));
@@ -217,6 +219,7 @@ struct cx *cx_deinit(struct cx *cx) {
   cx_set_deinit(&cx->syms);
   
   cx_malloc_deinit(&cx->buf_alloc);
+  cx_malloc_deinit(&cx->file_alloc);
   cx_malloc_deinit(&cx->lambda_alloc);
   cx_malloc_deinit(&cx->pair_alloc);
   cx_malloc_deinit(&cx->rec_alloc);

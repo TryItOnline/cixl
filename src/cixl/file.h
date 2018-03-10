@@ -12,13 +12,14 @@ struct cx_lib;
 struct cx_type;
 
 struct cx_file {
+  struct cx *cx;
   int fd;
   const char *mode;
   FILE *_ptr;
   unsigned int nrefs;
 };
 
-struct cx_file *cx_file_new(int fd, const char *mode, FILE *ptr);
+struct cx_file *cx_file_new(struct cx *cx, int fd, const char *mode, FILE *ptr);
 struct cx_file *cx_file_ref(struct cx_file *file);
 void cx_file_deref(struct cx_file *file);
 

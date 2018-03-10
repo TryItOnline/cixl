@@ -176,7 +176,7 @@ static bool fopen_imp(struct cx_scope *scope) {
     goto exit;
   }
   
-  cx_box_init(cx_push(scope), ft)->as_file = cx_file_new(fileno(f), NULL, f);
+  cx_box_init(cx_push(scope), ft)->as_file = cx_file_new(cx, fileno(f), NULL, f);
   ok = true;
  exit:
   cx_box_deinit(&p);
@@ -309,11 +309,11 @@ cx_lib(cx_init_io, "cx/io") {
 				      cx->rfile_type, cx->wfile_type);
   cx->rwfile_type->iter = cx_file_iter;
 
-  cx_box_init(cx_put_const(lib, cx_sym(cx, "in"), false),
-	      cx->rfile_type)->as_file = cx_file_new(fileno(stdin), NULL, stdin);
+  cx_box_init(cx_put_const(lib, cx_sym(cx, "in"), false), cx->rfile_type)->as_file =
+    cx_file_new(cx, fileno(stdin), NULL, stdin);
     
-  cx_box_init(cx_put_const(lib, cx_sym(cx, "out"), false),
-	      cx->wfile_type)->as_file = cx_file_new(fileno(stdout), NULL, stdout);
+  cx_box_init(cx_put_const(lib, cx_sym(cx, "out"), false), cx->wfile_type)->as_file =
+    cx_file_new(cx, fileno(stdout), NULL, stdout);
     
   cx_add_macro(lib, "include:", include_parse);
 
