@@ -27,8 +27,8 @@ use:
   (cx/type    new)
   (cx/var     let:);
 
-define: max-wait-ms 5;
 define: min-queue   30;
+define: max-wait-ms  5;
 
 let: max-read int;
 let: (max-port min-port) int ~ int;
