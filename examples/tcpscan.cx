@@ -15,6 +15,7 @@ use:
   (cx/abc   Int is-nil)
   (cx/buf   Buf clear len)
   (cx/cond  ? = if else)
+  (cx/const define:)
   (cx/func  func:)
   (cx/io    Poll close delete on-read read-bytes say wait)
   (cx/iter  for while)
@@ -24,6 +25,8 @@ use:
   (cx/str   int)
   (cx/type  new)
   (cx/var   let:);
+
+define: max-wait-ms 10;
 
 let: max-read int;
 let: (max-port min-port) int ~ int;
@@ -61,7 +64,7 @@ $max-port $min-port - {
 } for
 
 /*
-  Dispatch remaining events with 100ms timeout.
+  Dispatch remaining events with specified timeout.
 */
 
-{$poll 100 wait} while
+{$poll #max-wait-ms wait} while

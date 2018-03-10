@@ -1,4 +1,10 @@
-* switch read-bytes to use fread if _ptr
+* add Poll len fn
+** check in tcpscan
+*** only poll if len > #max-queue
+** compare perf
+* optimize poll set access
+** use find to get index
+** compare perf
 * implement Buf clone
 * handle argv in emit main
 ** push strings like load main
@@ -61,3 +67,4 @@ sudo rm -rf /usr/local/include/cixl
 
 '127.0.0.1' 80 tcp-connect
 * replace clone fallback to copy with error
+* switch read-bytes to use fread if _ptr
