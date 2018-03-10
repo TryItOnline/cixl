@@ -15,12 +15,15 @@
 #define cx_do_vec(vec, type, var)		\
   _cx_do_vec(cx_gencid(i), vec, type, var)	\
 
-#define CX_VEC_MIN 10
+#define CX_VEC_MIN 5
 #define CX_VEC_GROW 3
+
+struct cx_malloc;
 
 struct cx_vec {
   size_t count, capac, item_size;
   unsigned char *items;
+  struct cx_malloc *alloc;
   int nrefs;
 };
 

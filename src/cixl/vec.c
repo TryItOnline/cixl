@@ -2,6 +2,7 @@
 #include <string.h>
 
 #include "cixl/error.h"
+#include "cixl/malloc.h"
 #include "cixl/util.h"
 #include "cixl/vec.h"
 
@@ -13,23 +14,41 @@ struct cx_vec *cx_vec_init(struct cx_vec *vec, size_t item_size) {
   vec->item_size = item_size;
   vec->count = vec->capac = 0;
   vec->items = NULL;
+  vec->alloc = NULL;
   return vec;
 }
 
 struct cx_vec *cx_vec_deinit(struct cx_vec *vec) {
-  if (vec->items) { free(vec->items); }
+  if (vec->items) {
+    if (vec->alloc && vec->capac == CX_VEC_MIN) {
+      cx_free(vec->alloc, vec->items);
+    } else {
+      free(vec->items);
+    }
+  }
+  
   return vec;
 }
 
 void cx_vec_grow(struct cx_vec *vec, size_t capac) {
   if (capac > vec->capac) {
+    if (vec->alloc && vec->items && vec->capac == CX_VEC_MIN) {
+      cx_free(vec->alloc, vec->items);
+      vec->items = NULL;
+    }
+      
     if (vec->capac) {
       while (vec->capac < capac) { vec->capac *= CX_VEC_GROW; }
     } else {
       vec->capac = cx_max(capac, CX_VEC_MIN);
     }
-    
-    vec->items = realloc(vec->items, vec->capac*vec->item_size);
+
+    if (vec->alloc && vec->capac == CX_VEC_MIN) {
+      cx_test(!vec->items);
+      vec->items = cx_malloc(vec->alloc);
+    } else {
+      vec->items = realloc(vec->items, vec->capac*vec->item_size);
+    }
   }
 }
 

@@ -20,7 +20,7 @@ struct cx {
   struct cx_set separators;
 
   struct cx_malloc buf_alloc, file_alloc, lambda_alloc, pair_alloc, rec_alloc,
-    ref_alloc, scope_alloc, stack_alloc, table_alloc, var_alloc;
+    ref_alloc, scope_alloc, stack_alloc, stack_items_alloc, table_alloc, var_alloc;
 
   struct cx_vec types, macros, funcs, fimps;
 

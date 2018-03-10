@@ -71,12 +71,12 @@ cx_lib(cx_init_world, "cx") {
     cx_use(cx, "cx/func") &&
     cx_use(cx, "cx/guid") &&
     cx_use(cx, "cx/io") &&
+    cx_use(cx, "cx/io/poll") &&
     cx_use(cx, "cx/iter") &&
     cx_use(cx, "cx/math") &&
     cx_use(cx, "cx/meta") &&
     cx_use(cx, "cx/net") &&
     cx_use(cx, "cx/pair") &&
-    cx_use(cx, "cx/poll") &&
     cx_use(cx, "cx/rec") &&
     cx_use(cx, "cx/ref") &&
     cx_use(cx, "cx/stack") &&
@@ -105,6 +105,10 @@ struct cx *cx_init(struct cx *cx) {
   cx_malloc_init(&cx->table_alloc, CX_SLAB_SIZE, sizeof(struct cx_table));
   cx_malloc_init(&cx->var_alloc, CX_SLAB_SIZE, sizeof(struct cx_var));
   cx_malloc_init(&cx->stack_alloc, CX_SLAB_SIZE, sizeof(struct cx_stack));
+  
+  cx_malloc_init(&cx->stack_items_alloc,
+		 CX_SLAB_SIZE,
+		 sizeof(struct cx_box)*CX_VEC_MIN);
 
   cx_set_init(&cx->separators, sizeof(char), cx_cmp_char);
   cx_add_separators(cx, " \t\n;,.|_?!()[]{}");
@@ -228,6 +232,7 @@ struct cx *cx_deinit(struct cx *cx) {
   cx_malloc_deinit(&cx->table_alloc);
   cx_malloc_deinit(&cx->var_alloc);
   cx_malloc_deinit(&cx->stack_alloc);
+  cx_malloc_deinit(&cx->stack_items_alloc);
 
   return cx;
 }

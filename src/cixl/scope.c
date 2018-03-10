@@ -9,6 +9,7 @@ struct cx_scope *cx_scope_new(struct cx *cx, struct cx_scope *parent) {
   scope->cx = cx;
   scope->parent = parent ? cx_scope_ref(parent) : NULL;
   cx_vec_init(&scope->stack, sizeof(struct cx_box));
+  scope->stack.alloc = &cx->stack_items_alloc;
   cx_env_init(&scope->vars, &cx->var_alloc);
   scope->safe = cx->scopes.count ? cx_scope(cx, 0)->safe : true;
   scope->nrefs = 0;

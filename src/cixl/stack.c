@@ -50,6 +50,7 @@ struct cx_stack *cx_stack_new(struct cx *cx) {
   struct cx_stack *v = cx_malloc(&cx->stack_alloc);
   v->cx = cx;
   cx_vec_init(&v->imp, sizeof(struct cx_box));
+  v->imp.alloc = &cx->stack_items_alloc;
   v->nrefs = 1;
   return v;
 }
