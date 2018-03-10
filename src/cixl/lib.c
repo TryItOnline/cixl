@@ -72,7 +72,7 @@ struct cx_lib *cx_lib_deinit(struct cx_lib *lib) {
   cx_set_deinit(&lib->funcs);
   cx_set_deinit(&lib->macros);
   cx_set_deinit(&lib->types);
-  
+
   cx_do_vec(&lib->inits, struct cx_lib_init, i) { deinit(i); }
   cx_vec_deinit(&lib->inits);
 

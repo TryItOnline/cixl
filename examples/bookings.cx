@@ -1,8 +1,8 @@
 /*
   The humble beginnings of a booking system.
 
-  Once Cixl is installed, tests may be run by executing
-  "load '../examples/bookings.cx'" followed by "run-tests".
+  Tests may be run by executing "load 'cixl/examples/bookings.cx'" followed by
+  "run-tests" from the REPL.
 
   https://github.com/basic-gongfu/cixl#getting-started
 */

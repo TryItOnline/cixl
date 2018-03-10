@@ -41,6 +41,7 @@
 #include "cixl/nil.h"
 #include "cixl/op.h"
 #include "cixl/pair.h"
+#include "cixl/poll.h"
 #include "cixl/rec.h"
 #include "cixl/ref.h"
 #include "cixl/scope.h"
@@ -84,6 +85,7 @@ cx_lib(cx_init_world, "cx") {
 
 struct cx *cx_init(struct cx *cx) {
   cx->next_sym_tag = cx->next_type_tag = 0;
+  cx->poll = NULL;
   cx->bin = NULL;
   cx->pc = 0;
   cx->stop = false;
@@ -132,7 +134,6 @@ struct cx *cx_init(struct cx *cx) {
     cx->guid_type =
     cx->int_type =
     cx->iter_type =
-    cx->ip_client_type =
     cx->lambda_type =
     cx->lib_type = 
     cx->nil_type =
@@ -150,6 +151,7 @@ struct cx *cx_init(struct cx *cx) {
     cx->str_type =
     cx->sym_type =
     cx->table_type =
+    cx->tcp_client_type =
     cx->time_type =
     cx->wfile_type = NULL;
       
@@ -192,6 +194,8 @@ struct cx *cx_deinit(struct cx *cx) {
   cx_do_vec(&cx->errors, struct cx_error, e) { cx_error_deinit(e); }
   cx_vec_deinit(&cx->errors);
 
+  if (cx->poll) { free(cx_poll_deinit(cx->poll)); }
+
   cx_do_vec(&cx->calls, struct cx_call, c) { cx_call_deinit(c); }
   cx_vec_deinit(&cx->calls);
 
@@ -212,7 +216,6 @@ struct cx *cx_deinit(struct cx *cx) {
 
   cx_do_set(&cx->lib_lookup, struct cx_lib *, l) { free(cx_lib_deinit(*l)); }
   cx_set_deinit(&cx->lib_lookup);
-  
   cx_vec_deinit(&cx->libs);
 
   cx_do_vec(&cx->types, struct cx_type *, t) { free(cx_type_deinit(*t)); }
@@ -220,7 +223,7 @@ struct cx *cx_deinit(struct cx *cx) {
 
   cx_do_set(&cx->syms, struct cx_sym, s) { cx_sym_deinit(s); }
   cx_set_deinit(&cx->syms);
-
+  
   cx_malloc_deinit(&cx->lambda_alloc);
   cx_malloc_deinit(&cx->pair_alloc);
   cx_malloc_deinit(&cx->rec_alloc);
@@ -405,6 +408,11 @@ bool cx_load(struct cx *cx, const char *path, struct cx_bin *bin) {
     free(full_path);
     return ok;
   }
+}
+
+struct cx_poll *cx_poll(struct cx *cx) {
+  if (!cx->poll) { cx->poll = cx_poll_init(malloc(sizeof(struct cx_poll))); }
+  return cx->poll;
 }
 
 void cx_dump_errors(struct cx *cx, FILE *out) {

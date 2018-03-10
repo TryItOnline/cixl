@@ -13,6 +13,7 @@
 #include "cixl/iter.h"
 #include "cixl/lib.h"
 #include "cixl/lib/io.h"
+#include "cixl/poll.h"
 #include "cixl/scope.h"
 #include "cixl/str.h"
 
@@ -84,7 +85,7 @@ static bool line_next(struct cx_iter *iter,
 		      struct cx_scope *scope) {
   struct line_iter *it = cx_baseof(iter, struct line_iter, iter);
 
-  if (!cx_get_line(&it->line, &it->len, it->in->ptr)) {
+  if (!cx_get_line(&it->line, &it->len, cx_file_ptr(it->in))) {
     iter->done = true;
     return false;
   }
@@ -119,7 +120,7 @@ static bool print_imp(struct cx_scope *scope) {
     v = *cx_test(cx_pop(scope, false)),
     out = *cx_test(cx_pop(scope, false));
   
-  cx_print(&v, out.as_file->ptr);
+  cx_print(&v, cx_file_ptr(out.as_file));
   cx_box_deinit(&v);
   cx_box_deinit(&out);
   return true;
@@ -175,7 +176,7 @@ static bool fopen_imp(struct cx_scope *scope) {
     goto exit;
   }
   
-  cx_box_init(cx_push(scope), ft)->as_file = cx_file_new(f);
+  cx_box_init(cx_push(scope), ft)->as_file = cx_file_new(fileno(f), NULL, f);
   ok = true;
  exit:
   cx_box_deinit(&p);
@@ -186,7 +187,7 @@ static bool flush_imp(struct cx_scope *scope) {
   struct cx_box *f = cx_test(cx_pop(scope, false));
   bool ok = false;
   
-  if (fflush(f->as_file->ptr)) {
+  if (f->as_file->_ptr && fflush(f->as_file->_ptr)) {
     struct cx *cx = scope->cx;
     cx_error(cx, cx->row, cx->col, "Failed flushing file: %d", errno);
     goto exit;
@@ -194,6 +195,15 @@ static bool flush_imp(struct cx_scope *scope) {
 
   ok = true;
  exit:
+  cx_box_deinit(f);
+  return ok;
+}
+
+static bool close_imp(struct cx_scope *scope) {
+  struct cx *cx = scope->cx;
+  struct cx_box *f = cx_test(cx_pop(scope, false));
+  bool ok = cx_file_close(f->as_file);
+  if (!ok) { cx_error(cx, cx->row, cx->col, "File not open"); }
   cx_box_deinit(f);
   return ok;
 }
@@ -206,7 +216,7 @@ static bool read_imp(struct cx_scope *scope) {
   cx_vec_init(&toks, sizeof(struct cx_tok));
   bool ok = false;
   
-  if (!cx_parse_tok(cx, in.as_file->ptr, &toks, true)) {
+  if (!cx_parse_tok(cx, cx_file_ptr(in.as_file), &toks, true)) {
     if (!cx->errors.count) { cx_box_init(cx_push(scope), cx->nil_type); }
     goto exit1;
   }
@@ -230,21 +240,49 @@ static bool write_imp(struct cx_scope *scope) {
   struct cx_box
     v = *cx_test(cx_pop(scope, false)),
     out = *cx_test(cx_pop(scope, false));
-  
-  bool ok = cx_write(&v, out.as_file->ptr);
-  fputc('\n', out.as_file->ptr);
+
+  FILE *f = cx_file_ptr(out.as_file);
+  bool ok = cx_write(&v, f);
+  fputc('\n', f);
   cx_box_deinit(&v);
   cx_box_deinit(&out);
   return ok;
 }
 
 static bool lines_imp(struct cx_scope *scope) {
-  struct cx_box
-    in = *cx_test(cx_pop(scope, false));
-
+  struct cx_box in = *cx_test(cx_pop(scope, false));
   struct cx_iter *it = line_iter_new(in.as_file);
   cx_box_init(cx_push(scope), scope->cx->iter_type)->as_iter = it;
   cx_box_deinit(&in);
+  return true;
+}
+
+static bool poll_read_imp(struct cx_scope *scope) {
+  struct cx_box
+    a = *cx_test(cx_pop(scope, false)),
+    f = *cx_test(cx_pop(scope, false));
+  
+  bool ok = cx_poll_read(cx_poll(scope->cx), f.as_file, &a);
+  cx_box_deinit(&a);
+  cx_box_deinit(&f);
+  return ok;
+}
+
+static bool poll_clear_imp(struct cx_scope *scope) {
+  struct cx *cx = scope->cx;
+  struct cx_box f = *cx_test(cx_pop(scope, false));
+  bool ok = cx_poll_clear(cx_poll(scope->cx), f.as_file);
+  if (!ok) { cx_error(cx, cx->row, cx->col, "File is not polled"); }
+  cx_box_deinit(&f);
+  return ok;
+}
+
+static bool poll_wait_imp(struct cx_scope *scope) {
+  struct cx *cx = scope->cx;
+  struct cx_box msecs = *cx_test(cx_pop(scope, false));
+  int n = cx_poll_wait(cx_poll(cx), msecs.as_int, scope);
+  if (n == -1) { return false; }
+  cx_box_init(cx_push(scope), cx->int_type)->as_int = n;
   return true;
 }
 
@@ -265,10 +303,10 @@ cx_lib(cx_init_io, "cx/io") {
   cx->rwfile_type->iter = cx_file_iter;
 
   cx_box_init(cx_put_const(lib, cx_sym(cx, "in"), false),
-	      cx->rfile_type)->as_file = cx_file_new(stdin);
+	      cx->rfile_type)->as_file = cx_file_new(fileno(stdin), NULL, stdin);
     
   cx_box_init(cx_put_const(lib, cx_sym(cx, "out"), false),
-	      cx->wfile_type)->as_file = cx_file_new(stdout);
+	      cx->wfile_type)->as_file = cx_file_new(fileno(stdout), NULL, stdout);
     
   cx_add_macro(lib, "include:", include_parse);
 
@@ -294,6 +332,10 @@ cx_lib(cx_init_io, "cx/io") {
 	       cx_args(cx_arg("file", cx->wfile_type)), cx_args(),
 	       flush_imp);
 
+  cx_add_cfunc(lib, "close",
+	       cx_args(cx_arg("file", cx->wfile_type)), cx_args(),
+	       close_imp);
+
   cx_add_cfunc(lib, "read",
 	       cx_args(cx_arg("f", cx->rfile_type)),
 	       cx_args(cx_arg(NULL, cx->opt_type)),
@@ -313,6 +355,21 @@ cx_lib(cx_init_io, "cx/io") {
 		cx_args(cx_arg("v", cx->any_type)), cx_args(),
 		"#out $v print\n"
 		"#out @@n print");
+
+  cx_add_cfunc(lib, "poll-read",
+	       cx_args(cx_arg("f", cx->rfile_type), cx_arg("a", cx->any_type)),
+	       cx_args(),
+	       poll_read_imp);
+
+  cx_add_cfunc(lib, "poll-clear",
+	       cx_args(cx_arg("f", cx->rfile_type)),
+	       cx_args(),
+	       poll_clear_imp);
+
+  cx_add_cfunc(lib, "poll-wait",
+	       cx_args(cx_arg("msecs", cx->int_type)),
+	       cx_args(cx_arg(NULL, cx->int_type)),
+	       poll_wait_imp);
 
   return true;
 }

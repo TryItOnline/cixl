@@ -1,3 +1,5 @@
+#include <unistd.h>
+
 #include "cixl/box.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
@@ -15,7 +17,7 @@ static bool char_next(struct cx_iter *iter,
 		      struct cx_box *out,
 		      struct cx_scope *scope) {
   struct char_iter *it = cx_baseof(iter, struct char_iter, iter);
-  int c = fgetc(it->in->ptr);
+  int c = fgetc(cx_file_ptr(it->in));
   
   if (c == EOF) {
     iter->done = true;
@@ -44,9 +46,11 @@ static struct cx_iter *char_iter_new(struct cx_file *in) {
   return &it->iter;
 }
 
-struct cx_file *cx_file_new(FILE *ptr) {
+struct cx_file *cx_file_new(int fd, const char *mode, FILE *ptr) {
   struct cx_file *file = malloc(sizeof(struct cx_file));
-  file->ptr = ptr;
+  file->fd = fd;
+  file->mode = mode;
+  file->_ptr = ptr;
   file->nrefs = 1;
   return file;
 }
@@ -61,9 +65,14 @@ void cx_file_deref(struct cx_file *file) {
   file->nrefs--;
   
   if (!file->nrefs) {
-    if (file->ptr != stdin && file->ptr != stdout) { fclose(file->ptr); }
+    cx_file_close(file);
     free(file);
   }
+}
+
+FILE *cx_file_ptr(struct cx_file *file) {
+  if (!file->_ptr) { file->_ptr = fdopen(file->fd, file->mode); }
+  return file->_ptr;
 }
 
 static bool equid_imp(struct cx_box *x, struct cx_box *y) {
@@ -75,7 +84,7 @@ static enum cx_cmp cmp_imp(const struct cx_box *x, const struct cx_box *y) {
 }
 
 static bool ok_imp(struct cx_box *v) {
-  return feof(v->as_file->ptr);
+  return v->as_file->fd != -1;
 }
 
 static void copy_imp(struct cx_box *dst, const struct cx_box *src) {
@@ -84,6 +93,22 @@ static void copy_imp(struct cx_box *dst, const struct cx_box *src) {
 
 struct cx_iter *cx_file_iter(struct cx_box *v) {
   return char_iter_new(v->as_file);
+}
+
+bool cx_file_close(struct cx_file *file) {
+  if (file->_ptr == stdin || file->_ptr == stdout) { return true; }
+  
+  if (file->_ptr) {
+    fclose(file->_ptr);
+    file->_ptr = NULL;
+  } else if (file->fd != -1) {
+    close(file->fd);
+  } else {
+    return false;
+  }
+
+  file->fd = -1;
+  return true;
 }
 
 static void dump_imp(struct cx_box *v, FILE *out) {

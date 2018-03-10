@@ -581,6 +581,7 @@ bool cx_parse_tok(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
       return parse_sym(cx, in, out);
     case '-': {
       char c1 = fgetc(in);
+      
       if (isdigit(c1)) {
 	ungetc(c1, in);
 	ungetc(c, in);

@@ -263,7 +263,7 @@ static bool print_imp(struct cx_scope *scope) {
   struct cx_box
     r = *cx_test(cx_pop(scope, false)),
     out = *cx_test(cx_pop(scope, false));
-  cx_dump(&r, out.as_file->ptr);
+  cx_dump(&r, cx_file_ptr(out.as_file));
   cx_box_deinit(&r);
   cx_box_deinit(&out);
   return true;

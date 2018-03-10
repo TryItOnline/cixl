@@ -3,7 +3,7 @@
 /*
   Produces a word histogram from stdin.
   
-  Execute ```./cixl ../examples/histogram.cx < file1 ... fileN``` to get a histogram
+  Execute ```cixl cixl/examples/histogram.cx < file1 ... fileN``` to get a histogram
   of words in file1-N.
   
   https://github.com/basic-gongfu/cixl#getting-started

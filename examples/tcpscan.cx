@@ -1,0 +1,46 @@
+#!/usr/local/bin/cixl
+
+/*
+  Scans a range of TCP/IP ports for a host and prints status to stdout.
+  
+  Execute ```cixl cixl/examples/tcpscan.cx 127.0.0.1 1 100``` to scan
+  ports 1-100 on localhost.
+  
+  https://github.com/basic-gongfu/cixl#getting-started
+*/
+
+use:
+  (cx/abc   Int)
+  (cx/cond  ? if)
+  (cx/func  func:)
+  (cx/io    close poll-clear poll-read poll-wait say)
+  (cx/iter  for)
+  (cx/net   tcp-connect)
+  (cx/math  + -)
+  (cx/stack ~ _)
+  (cx/str   int)
+  (cx/var   let:);
+
+let: (max min) int ~ int;
+let: host;
+
+['Scanning ports ' $min @- $max ' on ' $host @@n] say
+
+func: connect(p Int)()
+  let: c $host $p tcp-connect;
+
+  $c? {
+    $c {
+      $p say
+      $c poll-clear
+      $c close      
+    } poll-read
+  } if;
+
+$max $min - {
+  $min + connect
+  0 poll-wait _
+} for
+
+100 poll-wait
+'Done!' say

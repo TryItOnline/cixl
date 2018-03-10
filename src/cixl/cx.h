@@ -13,6 +13,7 @@
 #define CX_SLAB_SIZE 20				  
 
 struct cx_arg;
+struct cx_poll;
 struct cx_scope;
 struct cx_sym;
 
@@ -33,7 +34,7 @@ struct cx {
     *char_type, *cmp_type,
     *file_type, *fimp_type, *func_type,
     *guid_type,
-    *int_type, *iter_type, *ip_client_type,
+    *int_type, *iter_type,
     *lambda_type, *lib_type,
     *meta_type,
     *nil_type, *num_type,
@@ -41,7 +42,7 @@ struct cx {
     *pair_type,
     *rat_type, *rec_type, *ref_type, *rfile_type, *rwfile_type,
     *seq_type, *stack_type, *str_type, *sym_type,
-    *table_type, *time_type,
+    *table_type, *tcp_client_type, *time_type,
     *wfile_type;
 
   size_t next_sym_tag, next_type_tag;
@@ -53,6 +54,7 @@ struct cx {
   struct cx_scope *root_scope, **scope;
 
   struct cx_vec calls;
+  struct cx_poll *poll;
   
   struct cx_bin *bin;
   size_t pc;
@@ -90,6 +92,7 @@ char *cx_get_path(struct cx *cx, const char *path);
 bool cx_load_toks(struct cx *cx, const char *path, struct cx_vec *out);
 bool cx_load(struct cx *cx, const char *path, struct cx_bin *bin);
 
+struct cx_poll *cx_poll(struct cx *cx);
 void cx_dump_errors(struct cx *cx, FILE *out);
 
 #endif

@@ -1,20 +1,20 @@
-* add connect(Socket, ip, port) fn
-** non-blocking
-* add is-connected(Socket) fn
-** use getsockopt to check
-* add cx_file.fd
-** init stream when needed using fdopen
-** take mode parameter in file constructor
-*** add cx_file_ptr(struct cx_file *)
-*** rename var to _ptr
-** call close on fd instead of fclose
+* finish tcpscan
+** add poll_type
+*** replaces cx.poll
+*** create with Poll new
+*** add ? fn
+**** return true if any files polled
+*** $poll $c {} on-read
+*** $poll $c delete
+*** $poll 1000 wait
+** add while-loop to iter
+*** add Buf type
+**** vec<unsigned char> && nrefs
+**** add read-bytes(File n Buf) fn
+*** perform unblocking read of N bytes on connect into buf
+*** collect results in Table Int->Buf
 * handle argv in emit main
 ** push strings like load main
-* add port scanner example
-** take host and port range params
-** try connecting n sockets
-*** reuse sockets
-*** disconnect when connected and process next port
 * --
 * rename ref_ref to ref_inc & deref to dec
 * add meta.get-func/get-type(lib id)
@@ -68,3 +68,5 @@ sudo rm -rf /usr/local/include/cixl
 | Bin new % '50 fib' compile emit
 | Bin new % '{10000 {50 fib _} times} clock 1000000 / int say' compile emit
 | Bin new % 'func: fortytwo(Int)(#f) _; func: fortytwo(42)(#t); 21 fortytwo say' compile emit
+
+'127.0.0.1' 80 tcp-connect

@@ -1,8 +1,8 @@
 /*
   A number guessing game implemented as a lambda iterator.
 
-  Once Cixl is installed, the game may be started by executing
-  "load '../examples/guess.cx'".
+  The game may be started by executing "load 'cixl/examples/guess.cx'" from the
+  REPL.
 
   https://github.com/basic-gongfu/cixl#getting-started
 */
