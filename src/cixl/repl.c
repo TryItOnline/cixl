@@ -5,7 +5,7 @@
 
 #include "cixl/bin.h"
 #include "cixl/box.h"
-#include "cixl/buf.h"
+#include "cixl/mfile.h"
 #include "cixl/call.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
@@ -893,8 +893,8 @@ void cx_repl(struct cx *cx, FILE *in, FILE *out) {
   fputs("Press Return twice to evaluate.\n\n", out);
   if (cx->errors.count) { cx_dump_errors(cx, out); }
 
-  struct cx_buf body;
-  cx_buf_open(&body);
+  struct cx_mfile body;
+  cx_mfile_open(&body);
   char line[CX_REPL_LINE_MAX];
 
   while (true) {
@@ -904,7 +904,7 @@ void cx_repl(struct cx *cx, FILE *in, FILE *out) {
     if (fgets(line, sizeof(line), in) == NULL) { break; }
 
     if (strcmp(line, "\n") == 0) {
-      cx_buf_close(&body);
+      cx_mfile_close(&body);
 
       if (cx_eval_str(cx, body.data)) {
 	cx_stack_dump(&cx_scope(cx, 0)->stack, out);
@@ -914,13 +914,13 @@ void cx_repl(struct cx *cx, FILE *in, FILE *out) {
       }
 
       free(body.data);
-      cx_buf_open(&body);
+      cx_mfile_open(&body);
     } else {
       if (strcmp(line, "quit\n") == 0) { break; }
       fputs(line, body.stream);
     }
   }
 
-  cx_buf_close(&body);
+  cx_mfile_close(&body);
   free(body.data);
 }

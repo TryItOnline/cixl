@@ -4,13 +4,13 @@
 #include "cixl/arg.h"
 #include "cixl/bin.h"
 #include "cixl/box.h"
-#include "cixl/buf.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
 #include "cixl/fimp.h"
 #include "cixl/func.h"
 #include "cixl/lib.h"
 #include "cixl/lib/bin.h"
+#include "cixl/mfile.h"
 #include "cixl/scope.h"
 #include "cixl/str.h"
 
@@ -43,8 +43,8 @@ static bool emit_imp(struct cx_scope *scope) {
   struct cx *cx = scope->cx;
   struct cx_box in = *cx_test(cx_pop(scope, false));
   struct cx_bin *bin = in.as_ptr;
-  struct cx_buf out;
-  cx_buf_open(&out);  
+  struct cx_mfile out;
+  cx_mfile_open(&out);  
   bool ok = cx_emit(bin, out.stream, cx);
   if (!ok) { goto exit; }
   fflush(out.stream);
@@ -52,7 +52,7 @@ static bool emit_imp(struct cx_scope *scope) {
   ok = true;
  exit:
   cx_box_deinit(&in);
-  cx_buf_close(&out);
+  cx_mfile_close(&out);
   free(out.data);
   return ok;
 }

@@ -6,7 +6,7 @@
 #include <string.h>
 
 #include "cixl/box.h"
-#include "cixl/buf.h"
+#include "cixl/mfile.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
 #include "cixl/func.h"
@@ -69,14 +69,14 @@ char *parse_fimp(struct cx *cx,
   }
   
   int row = cx->row, col = cx->col;
-  struct cx_buf id;
-  cx_buf_open(&id);
+  struct cx_mfile id;
+  cx_mfile_open(&id);
   char sep = 0;
   
   while (true) {
     if (!cx_parse_tok(cx, in, out, false)) {
       cx_error(cx, row, col, "Invalid func type");
-      cx_buf_close(&id);
+      cx_mfile_close(&id);
       free(id.data);
       return NULL;
     }
@@ -104,7 +104,7 @@ char *parse_fimp(struct cx *cx,
 	struct cx_type *type = cx_get_type(*cx->lib, s, false);
 
 	if (!type) {
-	  cx_buf_close(&id);
+	  cx_mfile_close(&id);
 	  free(id.data);
 	  return NULL;
 	}
@@ -118,13 +118,13 @@ char *parse_fimp(struct cx *cx,
 	fputs(s, id.stream);
       } else {
 	cx_error(cx, row, col, "Invalid func type: %s", s);
-	cx_buf_close(&id);
+	cx_mfile_close(&id);
 	free(id.data);
 	return NULL;
       }
     } else {
       cx_error(cx, row, col, "Invalid func type: %s", tok->type->id);
-      cx_buf_close(&id);
+      cx_mfile_close(&id);
       free(id.data);
       return NULL;
     }
@@ -133,7 +133,7 @@ char *parse_fimp(struct cx *cx,
   }
   
  exit:
-  cx_buf_close(&id);
+  cx_mfile_close(&id);
   return id.data;
 }
 
@@ -232,8 +232,8 @@ static bool parse_block_comment(struct cx *cx, FILE *in) {
 }
 
 static bool parse_id(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
-  struct cx_buf id;
-  cx_buf_open(&id);
+  struct cx_mfile id;
+  cx_mfile_open(&id);
   bool ok = true;
   int col = cx->col;
   char pc = 0;
@@ -256,7 +256,7 @@ static bool parse_id(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
     pc = c;
   }
  done: {
-    cx_buf_close(&id);
+    cx_mfile_close(&id);
 
     if (ok) {
       char *s = id.data;
@@ -298,8 +298,8 @@ static bool parse_id(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
 }
 
 static bool parse_int(struct cx *cx, FILE *in, struct cx_vec *out) {
-  struct cx_buf value;
-  cx_buf_open(&value);
+  struct cx_mfile value;
+  cx_mfile_open(&value);
   int col = cx->col;
   bool ok = true;
   
@@ -317,7 +317,7 @@ static bool parse_int(struct cx *cx, FILE *in, struct cx_vec *out) {
   }
   
  exit: {
-    cx_buf_close(&value);
+    cx_mfile_close(&value);
     
     if (ok) {
       int64_t int_value = strtoimax(value.data, NULL, 10);
@@ -387,8 +387,8 @@ static bool parse_char(struct cx *cx, FILE *in, struct cx_vec *out) {
 }
 
 static bool parse_str(struct cx *cx, FILE *in, struct cx_vec *out) {
-  struct cx_buf value;
-  cx_buf_open(&value);
+  struct cx_mfile value;
+  cx_mfile_open(&value);
   int row = cx->row, col = cx->col;
   bool ok = false;
   
@@ -422,7 +422,7 @@ static bool parse_str(struct cx *cx, FILE *in, struct cx_vec *out) {
 
   ok = true;
  exit: {
-    cx_buf_close(&value);
+    cx_mfile_close(&value);
     
     if (ok) {
       struct cx_box *box = &cx_tok_init(cx_vec_push(out),
@@ -438,8 +438,8 @@ static bool parse_str(struct cx *cx, FILE *in, struct cx_vec *out) {
 }
 
 static bool parse_sym(struct cx *cx, FILE *in, struct cx_vec *out) {
-  struct cx_buf id;
-  cx_buf_open(&id);
+  struct cx_mfile id;
+  cx_mfile_open(&id);
   int col = cx->col;
   bool ok = true;
   
@@ -458,7 +458,7 @@ static bool parse_sym(struct cx *cx, FILE *in, struct cx_vec *out) {
 
   ok = true;
  exit:
-  cx_buf_close(&id);
+  cx_mfile_close(&id);
 
   if (ok) {
     struct cx_box *box = &cx_tok_init(cx_vec_push(out),

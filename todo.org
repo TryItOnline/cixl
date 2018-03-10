@@ -1,13 +1,6 @@
 * finish tcpscan
-** rename cx_buf to cx_mfile
-** add io/Buf type
-*** vec<unsigned char> && nrefs
-** add read-bytes(File n Buf) fn
-*** use posix read on fd
-*** return opt
-**** #nil if nothing was available to read (EAGAIN)
-**** otherwise n
-** perform unblocking read of N bytes on connect into buf
+** add clear(Buf) fn
+** switch read-buf to use fread if _ptr
 *** reuse buf
 * handle argv in emit main
 ** push strings like load main
@@ -28,6 +21,9 @@
 * add MFile type
 ** use struct cx_mfile
 *** add nrefs
+*** embed file
+*** store as box.file
+**** use cx_baseof to get mfile
 ** derive RWFile
 * add seq zip/unzip fns
 * add and/or tests

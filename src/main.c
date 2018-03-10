@@ -2,10 +2,10 @@
 #include <string.h>
 
 #include "cixl/bin.h"
-#include "cixl/buf.h"
 #include "cixl/cx.h"
 #include "cixl/emit.h"
 #include "cixl/error.h"
+#include "cixl/mfile.h"
 #include "cixl/op.h"
 #include "cixl/repl.h"
 #include "cixl/stack.h"
@@ -50,8 +50,8 @@ int main(int argc, char *argv[]) {
 	  return -1;
 	}	
       } else {
-	struct cx_buf cmd;
-	cx_buf_open(&cmd);
+	struct cx_mfile cmd;
+	cx_mfile_open(&cmd);
       
 	fputs("gcc -x c -std=gnu1x "
 	      "-Wall -Werror -Wno-unused-function -Wno-unused-but-set-variable "
@@ -59,7 +59,7 @@ int main(int argc, char *argv[]) {
 	      cmd.stream);
 	
 	for (; argi < argc; argi++) { fprintf(cmd.stream, " %s", argv[argi]); }
-	cx_buf_close(&cmd);
+	cx_mfile_close(&cmd);
 	FILE *out = popen(cmd.data, "w");
 	
 	if (!out) {

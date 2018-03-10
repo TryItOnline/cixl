@@ -5,7 +5,6 @@
 #include "cixl/arg.h"
 #include "cixl/cx.h"
 #include "cixl/box.h"
-#include "cixl/buf.h"
 #include "cixl/error.h"
 #include "cixl/fimp.h"
 #include "cixl/func.h"

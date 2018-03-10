@@ -1,6 +1,8 @@
+#include "cixl/arg.h"
 #include "cixl/bool.h"
 #include "cixl/char.h"
 #include "cixl/cx.h"
+#include "cixl/error.h"
 #include "cixl/fimp.h"
 #include "cixl/func.h"
 #include "cixl/int.h"
@@ -9,9 +11,18 @@
 #include "cixl/lib.h"
 #include "cixl/nil.h"
 #include "cixl/lib/abc.h"
+#include "cixl/scope.h"
 #include "cixl/stack.h"
 #include "cixl/str.h"
 #include "cixl/sym.h"
+
+static bool is_nil_imp(struct cx_scope *scope) {
+  struct cx *cx = scope->cx;
+  struct cx_box v = *cx_test(cx_pop(scope, false));
+  cx_box_init(cx_push(scope), cx->bool_type)->as_bool = v.type == cx->nil_type;
+  cx_box_deinit(&v);
+  return true;
+}
 
 cx_lib(cx_init_abc, "cx/abc") { 
   struct cx *cx = lib->cx;
@@ -54,5 +65,9 @@ cx_lib(cx_init_abc, "cx/abc") {
   cx->iter_type = cx_init_iter_type(lib);
   cx->stack_type = cx_init_stack_type(lib);
 
+  cx_add_cfunc(lib, "is-nil",
+	       cx_args(cx_arg("v", cx->opt_type)), cx_args(),
+	       is_nil_imp);
+  
   return true;
 }

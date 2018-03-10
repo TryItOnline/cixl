@@ -4,7 +4,6 @@
 
 #include "cixl/arg.h"
 #include "cixl/box.h"
-#include "cixl/buf.h"
 #include "cixl/char.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
@@ -13,6 +12,7 @@
 #include "cixl/iter.h"
 #include "cixl/lib.h"
 #include "cixl/lib/str.h"
+#include "cixl/mfile.h"
 #include "cixl/scope.h"
 #include "cixl/str.h"
 
@@ -22,7 +22,7 @@ struct cx_split_iter {
   struct cx_iter iter;
   struct cx_iter *in;
   cx_split_t split;
-  struct cx_buf out;
+  struct cx_mfile out;
 };
 
 bool split_next(struct cx_iter *iter, struct cx_box *out, struct cx_scope *scope) {
@@ -51,17 +51,17 @@ bool split_next(struct cx_iter *iter, struct cx_box *out, struct cx_scope *scope
     }
   }
 
-  cx_buf_close(&it->out);
+  cx_mfile_close(&it->out);
   cx_box_init(out, cx->str_type)->as_str = cx_str_new(it->out.data);
   free(it->out.data);
-  cx_buf_open(&it->out);
+  cx_mfile_open(&it->out);
   return true;
 }
 
 void *split_deinit(struct cx_iter *iter) {
   struct cx_split_iter *it = cx_baseof(iter, struct cx_split_iter, iter);
   cx_iter_deref(it->in);
-  cx_buf_close(&it->out);
+  cx_mfile_close(&it->out);
   free(it->out.data);
   return it;
 }
@@ -76,7 +76,7 @@ struct cx_iter *cx_split_iter_new(struct cx_iter *in, cx_split_t split) {
   cx_iter_init(&it->iter, split_iter());
   it->in = in;
   it->split = split;
-  cx_buf_open(&it->out);
+  cx_mfile_open(&it->out);
   return &it->iter;
 }
 
@@ -175,21 +175,21 @@ static bool seq_imp(struct cx_scope *scope) {
   struct cx_box in = *cx_test(cx_pop(scope, false));
   struct cx_iter *it = cx_iter(&in);
   bool ok = false;
-  struct cx_buf out;
-  cx_buf_open(&out);
+  struct cx_mfile out;
+  cx_mfile_open(&out);
   struct cx_box c;
   
   while (cx_iter_next(it, &c, scope)) {
     if (c.type != cx->char_type) {
       cx_error(cx, cx->row, cx->col, "Expected type Char, actual: %s", c.type->id);
-      cx_buf_close(&out);
+      cx_mfile_close(&out);
       goto exit;
     }
     
     fputc(c.as_char, out.stream);
   }
 
-  cx_buf_close(&out);
+  cx_mfile_close(&out);
   cx_box_init(cx_push(scope), cx->str_type)->as_str = cx_str_new(out.data);
   ok = true;
  exit:

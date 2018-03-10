@@ -2,13 +2,13 @@
 #include <string.h>
 
 #include "cixl/arg.h"
-#include "cixl/buf.h"
 #include "cixl/call_iter.h"
 #include "cixl/cx.h"
 #include "cixl/emit.h"
 #include "cixl/error.h"
 #include "cixl/fimp.h"
 #include "cixl/func.h"
+#include "cixl/mfile.h"
 #include "cixl/scope.h"
 
 static const void *get_imp_id(const void *value) {
@@ -52,8 +52,8 @@ struct cx_fimp *cx_add_fimp(struct cx_func *func,
   cx_vec_init(&imp_args, sizeof(struct cx_arg));
   struct cx *cx = func->lib->cx;
   
-  struct cx_buf id;
-  cx_buf_open(&id);
+  struct cx_mfile id;
+  cx_mfile_open(&id);
   
   if (nargs) {
     cx_vec_grow(&imp_args, nargs);
@@ -89,7 +89,7 @@ struct cx_fimp *cx_add_fimp(struct cx_func *func,
     }
   }
 
-  cx_buf_close(&id);
+  cx_mfile_close(&id);
   struct cx_fimp **found = cx_set_get(&func->imps, &id.data);
   struct cx_fimp *imp = NULL;
   

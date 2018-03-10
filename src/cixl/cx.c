@@ -9,6 +9,7 @@
 #include "cixl/bin.h"
 #include "cixl/box.h"
 #include "cixl/bool.h"
+#include "cixl/buf.h"
 #include "cixl/call.h"
 #include "cixl/cx.h"
 #include "cixl/env.h"
@@ -18,6 +19,7 @@
 #include "cixl/lambda.h"
 #include "cixl/lib/abc.h"
 #include "cixl/lib/bin.h"
+#include "cixl/lib/buf.h"
 #include "cixl/lib/cond.h"
 #include "cixl/lib/const.h"
 #include "cixl/lib/guid.h"
@@ -60,6 +62,7 @@ cx_lib(cx_init_world, "cx") {
   return
     cx_use(cx, "cx/abc") &&
     cx_use(cx, "cx/bin") &&
+    cx_use(cx, "cx/buf") &&
     cx_use(cx, "cx/cond") &&
     cx_use(cx, "cx/const") &&
     cx_use(cx, "cx/error") &&
@@ -89,6 +92,7 @@ struct cx *cx_init(struct cx *cx) {
   cx->stop = false;
   cx->row = cx->col = -1;
   
+  cx_malloc_init(&cx->buf_alloc, CX_SLAB_SIZE, sizeof(struct cx_buf));
   cx_malloc_init(&cx->lambda_alloc, CX_SLAB_SIZE, sizeof(struct cx_lambda));
   cx_malloc_init(&cx->pair_alloc, CX_SLAB_SIZE, sizeof(struct cx_pair));
   cx_malloc_init(&cx->rec_alloc, CX_SLAB_SIZE, sizeof(struct cx_rec));
@@ -122,7 +126,7 @@ struct cx *cx_init(struct cx *cx) {
   cx_vec_init(&cx->errors, sizeof(struct cx_error));
 
   cx->any_type =
-    cx->bin_type = cx->bool_type =
+    cx->bin_type = cx->bool_type = cx->buf_type = 
     cx->char_type = cx->cmp_type =
     cx->file_type = cx->fimp_type = cx->func_type =
     cx->guid_type =
@@ -147,6 +151,7 @@ struct cx *cx_init(struct cx *cx) {
 void cx_init_libs(struct cx *cx) {
   cx_init_abc(cx);
   cx_init_bin(cx);
+  cx_init_buf(cx);
   cx_init_cond(cx);
   cx_init_const(cx);
   cx_init_error(cx);
@@ -208,6 +213,7 @@ struct cx *cx_deinit(struct cx *cx) {
   cx_do_set(&cx->syms, struct cx_sym, s) { cx_sym_deinit(s); }
   cx_set_deinit(&cx->syms);
   
+  cx_malloc_deinit(&cx->buf_alloc);
   cx_malloc_deinit(&cx->lambda_alloc);
   cx_malloc_deinit(&cx->pair_alloc);
   cx_malloc_deinit(&cx->rec_alloc);

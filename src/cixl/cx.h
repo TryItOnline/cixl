@@ -19,8 +19,8 @@ struct cx_sym;
 struct cx {
   struct cx_set separators;
 
-  struct cx_malloc lambda_alloc, pair_alloc, rec_alloc, ref_alloc, scope_alloc,
-    stack_alloc, table_alloc, var_alloc;
+  struct cx_malloc buf_alloc, lambda_alloc, pair_alloc, rec_alloc, ref_alloc,
+    scope_alloc, stack_alloc, table_alloc, var_alloc;
 
   struct cx_vec types, macros, funcs, fimps;
 
@@ -29,7 +29,7 @@ struct cx {
   struct cx_lib *lobby, **lib;
 
   struct cx_type *any_type,
-    *bin_type, *bool_type,
+    *bin_type, *bool_type, *buf_type,
     *char_type, *cmp_type,
     *file_type, *fimp_type, *func_type,
     *guid_type,
