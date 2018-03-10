@@ -1,18 +1,24 @@
 * finish tcpscan
-** add poll_type
+** add cx.poll_type
 *** replaces cx.poll
 *** create with Poll new
 *** add ? fn
-**** return true if any files polled
+**** return true if files.count
 *** $poll $c {} on-read
 *** $poll $c delete
 *** $poll 1000 wait
+*** add
 ** add while-loop to iter
-*** add Buf type
-**** vec<unsigned char> && nrefs
-**** add read-bytes(File n Buf) fn
-*** perform unblocking read of N bytes on connect into buf
-*** collect results in Table Int->Buf
+** rename cx_buf to 
+** add io/Buf type
+*** vec<unsigned char> && nrefs
+** add read-bytes(File n Buf) fn
+*** use posix read on fd
+*** return opt
+**** #nil if nothing was available to read (EAGAIN)
+**** otherwise n
+** perform unblocking read of N bytes on connect into buf
+*** reuse buf
 * handle argv in emit main
 ** push strings like load main
 * --
