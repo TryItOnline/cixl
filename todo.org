@@ -1,4 +1,3 @@
-* rename ref_ref to ref_inc & deref to dec
 * handle argv in emit main
 ** push strings like load main
 ** test tcpscan emit

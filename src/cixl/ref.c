@@ -10,12 +10,12 @@ struct cx_ref *cx_ref_new(struct cx *cx, struct cx_box *value) {
   return ref;
 }
 
-struct cx_ref *cx_ref_ref(struct cx_ref *ref) {
+struct cx_ref *cx_ref_inc(struct cx_ref *ref) {
   ref->nrefs++;
   return ref;
 }
 
-void cx_ref_deref(struct cx_ref *ref) {
+void cx_ref_dec(struct cx_ref *ref) {
   cx_test(ref->nrefs);
   ref->nrefs--;
   if (!ref->nrefs) { cx_free(&ref->value.type->lib->cx->ref_alloc, ref); }
@@ -34,7 +34,7 @@ static bool ok_imp(struct cx_box *v) {
 }
 
 static void copy_imp(struct cx_box *dst, const struct cx_box *src) {
-  dst->as_ref = cx_ref_ref(src->as_ref);
+  dst->as_ref = cx_ref_inc(src->as_ref);
 }
 
 static void write_imp(struct cx_box *v, FILE *out) {
@@ -50,7 +50,7 @@ static void dump_imp(struct cx_box *v, FILE *out) {
 }
 
 static void deinit_imp(struct cx_box *v) {
-  cx_ref_deref(v->as_ref);
+  cx_ref_dec(v->as_ref);
 }
 
 struct cx_type *cx_init_ref_type(struct cx_lib *lib) {
