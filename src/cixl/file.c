@@ -1,3 +1,4 @@
+#include <errno.h>
 #include <unistd.h>
 
 #include "cixl/box.h"
@@ -16,15 +17,25 @@ struct char_iter {
 static bool char_next(struct cx_iter *iter,
 		      struct cx_box *out,
 		      struct cx_scope *scope) {
+  struct cx *cx = scope->cx;
   struct char_iter *it = cx_baseof(iter, struct char_iter, iter);
-  int c = fgetc(cx_file_ptr(it->in));
-  
+  FILE *fptr = cx_file_ptr(it->in);
+  int c = fgetc(fptr);
+
   if (c == EOF) {
-    iter->done = true;
-    return false;
+    if (feof(fptr)) {
+      iter->done = true;
+      return false;
+    } else if (errno == EAGAIN) {
+      cx_box_init(out, cx->nil_type);
+    } else {
+      cx_error(cx, cx->row, cx->col, "Failed reading char: %d", errno);
+      return false;
+    }
+  } else {
+    cx_box_init(out, cx->char_type)->as_char = c;
   }
   
-  cx_box_init(out, scope->cx->char_type)->as_char = c;
   return true;
 }
 

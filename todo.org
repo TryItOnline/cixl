@@ -1,7 +1,7 @@
+* rename ref_ref to ref_inc & deref to dec
 * handle argv in emit main
 ** push strings like load main
 ** test tcpscan emit
-* rename ref_ref to ref_inc & deref to dec
 * change cx_fimp to use separate bin if not inlined
 ** update OFUNCALL to call if bin != cx->bin
 ** recursive eval

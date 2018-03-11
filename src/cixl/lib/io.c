@@ -83,14 +83,24 @@ struct line_iter {
 static bool line_next(struct cx_iter *iter,
 		      struct cx_box *out,
 		      struct cx_scope *scope) {
+  struct cx *cx = scope->cx;
   struct line_iter *it = cx_baseof(iter, struct line_iter, iter);
-
+  FILE *fptr = cx_file_ptr(it->in);
+    
   if (!cx_get_line(&it->line, &it->len, cx_file_ptr(it->in))) {
-    iter->done = true;
-    return false;
+    if (feof(fptr)) {
+      iter->done = true;
+      return false;
+    } else if (errno == EAGAIN) {
+      cx_box_init(out, cx->nil_type);
+    } else {
+      cx_error(cx, cx->row, cx->col, "Failed reading line: %d", errno);
+      return false;
+    }
+  } else {
+    cx_box_init(out, cx->str_type)->as_str = cx_str_new(it->line);
   }
   
-  cx_box_init(out, scope->cx->str_type)->as_str = cx_str_new(it->line);
   return true;
 }
 
