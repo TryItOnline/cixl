@@ -16,6 +16,11 @@
 * debug row/col
 * ---
 * add TCPServer
+** add new support
+* add accept fn
+* add write-bytes support
+** add cx_buf.pos
+** use as offset and inc
 * ---
 * add MFile type
 ** use struct cx_mfile
