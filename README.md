@@ -1138,7 +1138,7 @@ Traits are abstract types that may be used to simplify type checking and/or func
 [#t #t #f]
 ```
 
-### Meta
+### Binaries
 A ```Bin``` represents a block of compiled code. The compiler may be invoked from within the language through the ```compile``` function. Binaries may be passed around and called, which simply executes the compiled operations in the current scope.
 
 ```
