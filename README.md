@@ -77,11 +77,14 @@ The entire language is split into libraries to enable building custom languages 
 
 * cx/abc
 * cx/bin
+* cx/buf
 * cx/cond
+* cx/const
 * cx/error
 * cx/func
 * cx/guid
 * cx/io
+* cx/io/poll
 * cx/iter
 * cx/math
 * cx/net
@@ -1035,36 +1038,38 @@ and scaled.
 ### Types
 Cixl is statically and strongly typed; but since it's approach to typing is gradual, it allows you to be exactly as precise as you feel like. All types have capitalized names, the following are defined out of the box:
 
-| Type   | Parents     |
-| ------ | ----------- |
-| A      | Opt         |
-| Bin    | A           |
-| Bool   | A           |
-| Cmp    | A           |
-| File   | Cmp         |
-| Fimp   | Seq         |
-| Func   | Seq         |
-| Guid   | A           |
-| Int    | Num Seq     |
-| Iter   | Seq         |
-| Lambda | Seq         |
-| Nil    | Opt         |
-| Num    | Cmp         |
-| Opt    |             |
-| Pair   | Cmp         |
-| Rat    | Num         |
-| Rec    | Cmp         |
-| Ref    | A           |
-| RFile  | File        |
-| RWFile | RFile WFile |
-| Seq    | A           |
-| Stack  | Cmp Seq     |
-| Str    | Cmp Seq     |
-| Sym    | A           |
-| Table  | Seq         |
-| Time   | Cmp         |
-| Type   | A           |
-| WFile  | File        |
+| Type      | Parents     |
+| --------- | ----------- |
+| A         | Opt         |
+| Bin       | A           |
+| Buf       | A           |
+| Bool      | A           |
+| Cmp       | A           |
+| File      | Cmp         |
+| Fimp      | Seq         |
+| Func      | Seq         |
+| Guid      | A           |
+| Int       | Num Seq     |
+| Iter      | Seq         |
+| Lambda    | Seq         |
+| Nil       | Opt         |
+| Num       | Cmp         |
+| Opt       |             |
+| Pair      | Cmp         |
+| Rat       | Num         |
+| Rec       | Cmp         |
+| Ref       | A           |
+| RFile     | File        |
+| RWFile    | RFile WFile |
+| Seq       | A           |
+| Stack     | Cmp Seq     |
+| Str       | Cmp Seq     |
+| Sym       | A           |
+| Table     | Seq         |
+| TCPClient | RWFile      |
+| Time      | Cmp         |
+| Type      | A           |
+| WFile     | File        |
 
 ```
    | 42 type
