@@ -20,7 +20,7 @@ use:
   (cx/io      close read-bytes say)
   (cx/io/poll Poll delete len on-read wait)
   (cx/iter    for while)
-  (cx/net     tcp-connect)
+  (cx/net     connect)
   (cx/math    + -)
   (cx/stack   ~ _)
   (cx/str     int)
@@ -44,7 +44,7 @@ let: in Buf new;
 */
 
 func: scan-port(port Int)()
-  let: c $host $port tcp-connect;
+  let: c $host $port connect;
 
   $c? {
     $poll $c {

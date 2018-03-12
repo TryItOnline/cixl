@@ -60,7 +60,7 @@ cx_lib(cx_init_net, "cx/net") {
 
   cx->tcp_client_type = cx_init_file_type(lib, "TCPClient", cx->rwfile_type);
   
-  cx_add_cfunc(lib, "tcp-connect",
+  cx_add_cfunc(lib, "connect",
 	       cx_args(cx_arg("host", cx->str_type), cx_arg("port", cx->int_type)),
 	       cx_args(cx_arg(NULL, cx->opt_type)),
 	       connect_imp);

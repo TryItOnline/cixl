@@ -1,19 +1,17 @@
 * change cx_fimp to use separate bin if not inlined
 ** update OFUNCALL to call if bin != cx->bin
 ** recursive eval
-* switch read-bytes to use fread if _ptr
-* switch file char iter to use read if !_ptr
-** check == 0 instead of feof
 * add read-iter to io lib
 ** convert read to iter
 *** keep bin ref
 ** update example and add to post
 * add Buf Seq support
+** iterate chars like Str
 * implement Buf clone
 * debug row/col
 * ---
 * add TCPServer
-** add new support
+** add listen fn
 * add accept fn
 * add write-bytes support
 ** add cx_buf.pos
@@ -27,6 +25,9 @@
 **** use cx_baseof to get mfile
 ** derive RWFile
 * extract cx/math/rat lib
+* switch read-bytes to use fread if _ptr
+* switch file char iter to use read if !_ptr
+** check == 0 instead of feof
 * add seq zip/unzip fns
 * add and/or tests
 * add filter tests
