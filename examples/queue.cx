@@ -1,0 +1,47 @@
+#!/usr/local/bin/cixl
+
+/*
+  Demonstrates the use of IO queues to hook into the poll event loop.
+  Execute ```cixl cixl/examples/queue.cx``` to run.
+  
+  https://github.com/basic-gongfu/cixl#getting-started
+*/
+
+use:
+  cx/abc
+  cx/io cx/io/poll cx/io/queue
+  cx/iter
+  cx/type
+  cx/var;
+
+let: queue Queue new;
+
+/*
+  Register a queue handler.
+  Several handlers may be registered on the same queue.
+*/
+
+$queue {
+  let: v;
+  ['Popped ' $v] say
+} on-pop
+
+$queue 42 push
+
+/*
+  Create an event loop and hook in the queue.
+  The same queue may be hooked into multiple loops.
+*/
+
+let: poll Poll new;
+$queue $poll poll
+$queue 'foo' push
+
+['Queue: ' $queue len] say
+
+{
+  'Polling' say
+  $poll 0 wait
+} while
+
+['Queue: ' $queue len] say

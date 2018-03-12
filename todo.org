@@ -1,7 +1,3 @@
-* finish Queue type
-** split poll fn into poll/pop
-** run test2.cx
-* ---
 * handle argv in emit main
 ** push strings like load main
 ** test tcpscan emit

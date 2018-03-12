@@ -82,17 +82,21 @@ static bool on_read(void *_q) {
   }
 
   while (rn--) {
-    struct cx_box
-      *v = cx_vec_get(&q->buf, q->read_pos++),
-      *qp = cx_vec_get(&q->procs, q->proc_pos++);
-    
-    if (q->proc_pos == q->procs.count) { q->proc_pos = 0; }
+    struct cx_box *v = cx_vec_get(&q->buf, q->read_pos++);
 
-    struct cx_scope *s = cx_scope(q->cx, 0);
-    *cx_push(s) = *v;
-    if (!cx_call(qp, s)) { return false; } 
+    cx_do_vec(&q->procs, struct cx_box, qp) {
+      struct cx_scope *s = cx_scope(q->cx, 0);
+      cx_copy(cx_push(s), v);
+
+      if (!cx_call(qp, s)) {
+	cx_box_deinit(v);
+	return false;
+      } 
+    }
+
+    cx_box_deinit(v);
   }
-
+  
   if (q->read_pos == q->buf.count) {
     cx_vec_clear(&q->buf);
     q->read_pos = q->write_pos = 0;
