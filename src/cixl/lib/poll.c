@@ -4,7 +4,6 @@
 
 #include "cixl/arg.h"
 #include "cixl/cx.h"
-#include "cixl/box.h"
 #include "cixl/error.h"
 #include "cixl/fimp.h"
 #include "cixl/func.h"
@@ -21,12 +20,13 @@ static bool on_read_imp(struct cx_scope *scope) {
     f = *cx_test(cx_pop(scope, false)),
     p = *cx_test(cx_pop(scope, false));
   
-  bool ok = cx_poll_read(p.as_poll, f.as_file, &a);
+  struct cx_poll_file *pf = cx_poll_read(p.as_poll, f.as_file->fd);
+  cx_copy(&pf->read_value, &a);
 
   cx_box_deinit(&a);
   cx_box_deinit(&f);
   cx_box_deinit(&p);
-  return ok;
+  return true;
 }
 
 static bool delete_imp(struct cx_scope *scope) {
@@ -36,7 +36,7 @@ static bool delete_imp(struct cx_scope *scope) {
     f = *cx_test(cx_pop(scope, false)),
     p = *cx_test(cx_pop(scope, false));
 
-  bool ok = cx_poll_delete(p.as_poll, f.as_file);
+  bool ok = cx_poll_delete(p.as_poll, f.as_file->fd);
   if (!ok) { cx_error(cx, cx->row, cx->col, "File is not polled"); }
   cx_box_deinit(&f);
   cx_box_deinit(&p);
@@ -50,6 +50,7 @@ static bool wait_imp(struct cx_scope *scope) {
     ms = *cx_test(cx_pop(scope, false)),
     p = *cx_test(cx_pop(scope, false));
 
+  if (ms.type == cx->nil_type) { ms.as_int = -1; }
   int n = cx_poll_wait(p.as_poll, ms.as_int, scope);
   cx_box_deinit(&p);
 
@@ -73,7 +74,7 @@ static bool len_imp(struct cx_scope *scope) {
 cx_lib(cx_init_poll, "cx/io/poll") {    
   struct cx *cx = lib->cx;
     
-  if (!cx_use(cx, "cx/abc", "A", "Int") ||
+  if (!cx_use(cx, "cx/abc", "A", "Int", "Opt") ||
       !cx_use(cx, "cx/io", "File", "RFile")) {
     return false;
   }
@@ -93,7 +94,7 @@ cx_lib(cx_init_poll, "cx/io/poll") {
 	       delete_imp);
 
   cx_add_cfunc(lib, "wait",
-	       cx_args(cx_arg("p", cx->poll_type), cx_arg("ms", cx->int_type)),
+	       cx_args(cx_arg("p", cx->poll_type), cx_arg("ms", cx->opt_type)),
 	       cx_args(cx_arg(NULL, cx->int_type)),
 	       wait_imp);
 

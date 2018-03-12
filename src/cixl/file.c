@@ -58,13 +58,7 @@ static struct cx_iter *char_iter_new(struct cx_file *in) {
 }
 
 struct cx_file *cx_file_new(struct cx *cx, int fd, const char *mode, FILE *ptr) {
-  struct cx_file *file = cx_malloc(&cx->file_alloc);
-  file->cx = cx;
-  file->fd = fd;
-  file->mode = mode;
-  file->_ptr = ptr;
-  file->nrefs = 1;
-  return file;
+  return cx_file_init(cx_malloc(&cx->file_alloc), cx, fd, mode, ptr);
 }
 
 struct cx_file *cx_file_ref(struct cx_file *file) {
@@ -72,14 +66,28 @@ struct cx_file *cx_file_ref(struct cx_file *file) {
   return file;
 }
 
-void cx_file_deref(struct cx_file *file) {
-  cx_test(file->nrefs);
-  file->nrefs--;
-  
-  if (!file->nrefs) {
-    cx_file_close(file);
-    cx_free(&file->cx->file_alloc, file);
-  }
+void cx_file_deref(struct cx_file *f) {
+  cx_test(f->nrefs);
+  f->nrefs--;
+  if (!f->nrefs) { cx_free(&f->cx->file_alloc, cx_file_deinit(f)); }
+}
+
+struct cx_file *cx_file_init(struct cx_file *f,
+			     struct cx *cx,
+			     int fd,
+			     const char *mode,
+			     FILE *ptr) {
+  f->cx = cx;
+  f->fd = fd;
+  f->mode = mode;
+  f->_ptr = ptr;
+  f->nrefs = 1;
+  return f;
+}
+
+struct cx_file *cx_file_deinit(struct cx_file *f) {
+  cx_file_close(f);
+  return f;
 }
 
 FILE *cx_file_ptr(struct cx_file *file) {

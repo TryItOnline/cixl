@@ -6,18 +6,16 @@
 #include "cixl/file.h"
 #include "cixl/poll.h"
 
-struct cx_poll_file {
-  int fd;
-  struct cx_box on_read;
-};
-
 static struct cx_poll_file *file_init(struct cx_poll_file *pf, int fd) {
   pf->fd = fd;
+  pf->read_data = pf->write_data = NULL;
+  pf->read_fn = pf->write_fn = NULL;
   return pf;
 }
 
 static void file_deinit(struct cx_poll_file *f, struct pollfd *pfd) {
-  if (pfd->events & POLLIN) { cx_box_deinit(&f->on_read); }
+  if (pfd->events & POLLIN && !f->read_fn) { cx_box_deinit(&f->read_value); }
+  if (pfd->events & POLLOUT && !f->write_fn) { cx_box_deinit(&f->write_value); }
 }
 
 struct cx_poll *cx_poll_new() {
@@ -53,33 +51,69 @@ void cx_poll_deref(struct cx_poll *p) {
   }
 }
 
-bool cx_poll_read(struct cx_poll *p, struct cx_file *f, struct cx_box *a) {
+struct cx_poll_file *cx_poll_read(struct cx_poll *p, int fd) {
   void *found = NULL;
-  size_t i = cx_set_find(&p->files, &f->fd, 0, &found);
+  size_t i = cx_set_find(&p->files, &fd, 0, &found);
   
   struct cx_poll_file *pf = NULL;
   struct pollfd *pfd = NULL;
   
   if (found) {
     pf = found;
-    pfd = cx_test(cx_vec_get(&p->fds.members, i));
-    if (pfd->events & POLLIN) { return false; }
+    pfd = cx_vec_get(&p->fds.members, i);
+    
+    if (pfd->events & POLLIN) {
+      if (pf->read_fn) {
+	pf->read_fn = NULL;
+	pf->read_data = NULL;
+      } else {
+	cx_box_deinit(&pf->read_value);
+      }
+    }
   } else {
-    pf = file_init(cx_vec_insert(&p->files.members, i), f->fd);
+    pf = file_init(cx_vec_insert(&p->files.members, i), fd);
     pfd = cx_vec_insert(&p->fds.members, i);
-    pfd->fd = f->fd;
-    pfd->events = 0;
+    pfd->fd = fd;
     pfd->events = 0;
   }
 
-  cx_copy(&pf->on_read, a);
   pfd->events |= POLLIN;
-  return true;
+  return pf;
 }
 
-bool cx_poll_delete(struct cx_poll *p, struct cx_file *f) {
+struct cx_poll_file *cx_poll_write(struct cx_poll *p, int fd) {
   void *found = NULL;
-  size_t i = cx_set_find(&p->files, &f->fd, 0, &found);
+  size_t i = cx_set_find(&p->files, &fd, 0, &found);
+  
+  struct cx_poll_file *pf = NULL;
+  struct pollfd *pfd = NULL;
+  
+  if (found) {
+    pf = found;
+    pfd = cx_vec_get(&p->fds.members, i);
+    
+    if (pfd->events & POLLOUT) {
+      if (pf->write_fn) {
+	pf->write_fn = NULL;
+	pf->write_data = NULL;
+      } else {
+	cx_box_deinit(&pf->write_value);
+      }
+    }
+  } else {
+    pf = file_init(cx_vec_insert(&p->files.members, i), fd);
+    pfd = cx_vec_insert(&p->fds.members, i);
+    pfd->fd = fd;
+    pfd->events = 0;
+  }
+
+  pfd->events |= POLLOUT;
+  return pf;
+}
+
+bool cx_poll_delete(struct cx_poll *p, int fd) {
+  void *found = NULL;
+  size_t i = cx_set_find(&p->files, &fd, 0, &found);
   if (!found) { return false; }
   file_deinit(found, cx_vec_get(&p->fds.members, i));
   cx_vec_delete(&p->files.members, i);
@@ -99,13 +133,30 @@ int cx_poll_wait(struct cx_poll *p, int ms, struct cx_scope *s) {
     *fend = cx_vec_end(&p->files.members);
   
   struct pollfd *fd = cx_vec_start(&p->fds.members);
-  
+
   for (; f != fend && rem;) {
     int prev_fd = f->fd;
     
     if (fd->revents) {
-      if ((fd->revents & POLLIN) && !cx_call(&f->on_read, s)) { return -1; }
-      rem--;
+      if (fd->revents & POLLIN) {
+	if (f->read_fn) {
+	  if (!f->read_fn(f->read_data)) { return -1; }
+	} else if (!cx_call(&f->read_value, s)) {
+	  return -1;
+	}
+	
+	rem--;
+      }
+
+      if (fd->revents & POLLOUT) {
+	if (f->write_fn) {
+	  if (!f->write_fn(f->write_data)) { return -1; }
+	} else if (!cx_call(&f->write_value, s)) {
+	  return -1;
+	}
+
+	rem--;
+      }      
     }
 
     if (f->fd == prev_fd) {

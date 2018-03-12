@@ -23,6 +23,14 @@ struct cx_file *cx_file_new(struct cx *cx, int fd, const char *mode, FILE *ptr);
 struct cx_file *cx_file_ref(struct cx_file *file);
 void cx_file_deref(struct cx_file *file);
 
+struct cx_file *cx_file_init(struct cx_file *f,
+			     struct cx *cx,
+			     int fd,
+			     const char *mode,
+			     FILE *ptr);
+
+struct cx_file *cx_file_deinit(struct cx_file *f);
+
 FILE *cx_file_ptr(struct cx_file *file);
 struct cx_iter *cx_file_iter(struct cx_box *v);
 bool cx_file_close(struct cx_file *file);

@@ -85,6 +85,7 @@ The entire language is split into libraries to enable building custom languages 
 * cx/guid
 * cx/io
 * cx/io/poll
+* cx/io/queue
 * cx/iter
 * cx/math
 * cx/net
@@ -1038,39 +1039,40 @@ and scaled.
 ### Types
 Cixl is statically and strongly typed; but since it's approach to typing is gradual, it allows you to be exactly as precise as you feel like. All types have capitalized names, the following are defined out of the box:
 
-| Type      | Parents     | Lib        |
-| --------- | ----------- |------------|
-| A         | Opt         | cx/abc     |
-| Bin       | A           | cx/bin     |
-| Buf       | A           | cx/buf     |
-| Bool      | A           | cx/abc     |
-| Cmp       | A           | cx/abc     |
-| File      | Cmp         | cx/io      |
-| Fimp      | Seq         | cx/abc     |
-| Func      | Seq         | cx/abc     |
-| Guid      | A           | cx/guid    |
-| Int       | Num Seq     | cx/abc     |
-| Iter      | Seq         | cx/abc     |
-| Lambda    | Seq         | cx/abc     |
-| Nil       | Opt         | cx/abc     |
-| Num       | Cmp         | cx/abc     |
-| Opt       |             | cx/abc     |
-| Pair      | Cmp         | cx/pair    |
-| Poll      | A           | cx/io/poll |
-| Rat       | Num         | cx/math    |
-| Rec       | Cmp         | cx/rec     |
-| Ref       | A           | cx/ref     |
-| RFile     | File        | cx/io      |
-| RWFile    | RFile WFile | cx/io      |
-| Seq       | A           | cx/abc     |
-| Stack     | Cmp Seq     | cx/abc     |
-| Str       | Cmp Seq     | cx/abc     |
-| Sym       | A           | cx/abc     |
-| Table     | Seq         | cx/table   |
-| TCPClient | RWFile      | cx/net     |
-| Time      | Cmp         | cx/time    |
-| Type      | A           | cx/abc     |
-| WFile     | File        | cx/io      |
+| Type      | Parents     | Lib         |
+| --------- | ----------- |-------------|
+| A         | Opt         | cx/abc      |
+| Bin       | A           | cx/bin      |
+| Buf       | A           | cx/buf      |
+| Bool      | A           | cx/abc      |
+| Cmp       | A           | cx/abc      |
+| File      | Cmp         | cx/io       |  
+| Fimp      | Seq         | cx/abc      |
+| Func      | Seq         | cx/abc      |
+| Guid      | A           | cx/guid     |
+| Int       | Num Seq     | cx/abc      |
+| Iter      | Seq         | cx/abc      |
+| Lambda    | Seq         | cx/abc      |
+| Nil       | Opt         | cx/abc      |
+| Num       | Cmp         | cx/abc      |
+| Opt       |             | cx/abc      |
+| Pair      | Cmp         | cx/pair     |
+| Poll      | A           | cx/io/poll  |
+| Queue     | A           | cx/io/queue |
+| Rat       | Num         | cx/math     |
+| Rec       | Cmp         | cx/rec      |
+| Ref       | A           | cx/ref      |
+| RFile     | File        | cx/io       |
+| RWFile    | RFile WFile | cx/io       |
+| Seq       | A           | cx/abc      |
+| Stack     | Cmp Seq     | cx/abc      |
+| Str       | Cmp Seq     | cx/abc      |
+| Sym       | A           | cx/abc      |  
+| Table     | Seq         | cx/table    |
+| TCPClient | RWFile      | cx/net      |
+| Time      | Cmp         | cx/time     |
+| Type      | A           | cx/abc      |
+| WFile     | File        | cx/io       |
 
 ```
    | 42 type

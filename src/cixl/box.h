@@ -18,6 +18,7 @@ struct cx_lambda;
 struct cx_lib;
 struct cx_pair;
 struct cx_poll;
+struct cx_queue;
 struct cx_ref;
 struct cx_scope;
 struct cx_str;
@@ -39,6 +40,7 @@ struct cx_box {
     struct cx_pair  *as_pair;
     struct cx_poll  *as_poll;
     void            *as_ptr;
+    struct cx_queue *as_queue;
     struct cx_rat    as_rat;
     struct cx_ref   *as_ref;
     struct cx_str   *as_str;
