@@ -205,7 +205,7 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
     fprintf(out,
 	    "  struct cx_func *%s() {\n"
 	    "    static struct cx_func *f = NULL;\n"
-	    "    if (!f) { f = cx_test(cx_get_func(%s(), \"%s\", false));\n }\n"
+	    "    if (!f) { f = cx_test(cx_get_func(%s(), \"%s\", false)); }\n"
 	    "    return f;\n"
 	    "  }\n\n",
 	    (*f)->emit_id, (*f)->lib->emit_id, (*f)->id);
@@ -229,6 +229,8 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
   cx_do_set(&syms, struct cx_sym, s) {
     fprintf(out, "    %s = cx_sym(cx, \"%s\");\n", s->emit_id, s->id);
   }
+
+  fputc('\n', out);
   
   for (struct cx_op *op = cx_vec_start(&bin->ops);
        op != cx_vec_end(&bin->ops);

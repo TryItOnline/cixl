@@ -97,10 +97,15 @@ bool cx_emit_file(struct cx *cx, const char *fname, FILE *out) {
   
   if (!cx_emit(bin, out, cx)) { goto exit; }
       
-  fputs("int main() {\n"
+  fputs("int main(int argc, char *argv[]) {\n"
 	"  struct cx cx;\n"
 	"  cx_init(&cx);\n"
-	"  cx_init_libs(&cx);\n\n"
+	"  cx_init_libs(&cx);\n"
+	"  cx_use(&cx, \"cx/abc\", \"Str\");\n\n"
+	"  for (int i=1; i < argc; i++) {\n"
+	"    cx_box_init(cx_push(cx.root_scope), cx.str_type)->as_str = "
+	      "cx_str_new(argv[i]);\n"
+	"  }\n\n"
 	"  if (!eval(&cx)) {\n"
 	"    cx_dump_errors(&cx, stderr);\n"
 	"    return -1;\n"

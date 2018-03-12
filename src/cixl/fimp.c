@@ -81,7 +81,7 @@ ssize_t cx_fimp_score(struct cx_fimp *imp, struct cx_scope *scope, ssize_t max) 
     default:
       break;
     }
-    
+
     score += cx_abs((ssize_t)j->type->level - t->level);
     if (max > -1 && score >= max) { return -1; }
     if (!cx_is(j->type, cx_test(t))) { return -1; }

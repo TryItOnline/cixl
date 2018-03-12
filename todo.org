@@ -1,6 +1,3 @@
-* handle argv in emit main
-** push strings like load main
-** test tcpscan emit
 * change cx_fimp to use separate bin if not inlined
 ** update OFUNCALL to call if bin != cx->bin
 ** recursive eval
