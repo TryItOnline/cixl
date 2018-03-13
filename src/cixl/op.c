@@ -284,11 +284,7 @@ static bool funcall_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
     return false;
   }
   
-  if (!imp->ptr && 
-      imp->bin != bin && 
-      !cx_fimp_inline(imp, op->tok_idx, bin, cx)) { return false; }
-  
-  if (!imp->ptr) {
+  if (!imp->ptr && imp->bin == cx->bin) {
     cx_call_init(cx_vec_push(&cx->calls), cx->row, cx->col, imp, cx->pc);
     cx->pc = imp->start_pc;
     return true;
