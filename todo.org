@@ -1,16 +1,10 @@
-* add read-iter to io lib
-** convert read to iter
-*** keep bin ref
-** update example and add to post
 * debug row/col
-* ---
 * add TCPServer
 ** add listen fn
 * add accept fn
 * add write-bytes support
 ** add cx_buf.pos
 ** use as offset and inc
-* ---
 * separate Buf read/write polling
 ** read/write boxes through pipe
 * add MFile type

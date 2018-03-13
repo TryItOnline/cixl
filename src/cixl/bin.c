@@ -35,15 +35,21 @@ struct cx_bin *cx_bin_init(struct cx_bin *bin) {
 }
 
 struct cx_bin *cx_bin_deinit(struct cx_bin *bin) {
-  cx_do_vec(&bin->toks, struct cx_tok, t) { cx_tok_deinit(t); }
+  cx_bin_clear(bin);
   cx_vec_deinit(&bin->toks);  
+  cx_vec_deinit(&bin->ops);
+  return bin;
+}
+
+void cx_bin_clear(struct cx_bin *bin) {
+  cx_do_vec(&bin->toks, struct cx_tok, t) { cx_tok_deinit(t); }
+  cx_vec_clear(&bin->toks);  
 
   cx_do_vec(&bin->ops, struct cx_op, o) {
     if (o->type->deinit) { o->type->deinit(o); }
   }
   
-  cx_vec_deinit(&bin->ops);
-  return bin;
+  cx_vec_clear(&bin->ops);
 }
 
 struct cx_bin *cx_bin_ref(struct cx_bin *bin) {

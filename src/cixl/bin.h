@@ -24,6 +24,7 @@ struct cx_bin *cx_bin_new();
 struct cx_bin *cx_bin_init(struct cx_bin *bin);
 struct cx_bin *cx_bin_deinit(struct cx_bin *bin);
 
+void cx_bin_clear(struct cx_bin *bin);
 struct cx_bin *cx_bin_ref(struct cx_bin *bin);
 void cx_bin_deref(struct cx_bin *bin);
 

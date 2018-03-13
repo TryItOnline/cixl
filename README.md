@@ -431,6 +431,10 @@ While calling ```read``` will parse and evaluate one value at a time from the sp
 ```
    | #in read
 ...
+[Iter(0x5475950)r1]
+
+   next
+...
 [2018 0 12 1 25 12 123436182] time
 [Time(2018/0/12 1:25:12.123436182)]
 ```
