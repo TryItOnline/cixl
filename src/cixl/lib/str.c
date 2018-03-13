@@ -50,17 +50,21 @@ bool split_next(struct cx_iter *iter, struct cx_box *out, struct cx_scope *scope
     if (it->split_fn) {
       split = it->split_fn(c.as_char);
     } else {
-      *cx_push(scope) = c;
-      if (!cx_call(&it->split, scope)) { goto exit; }
-      struct cx_box *res = cx_pop(scope, true);
-
-      if (!res) {
-	cx_error(cx, cx->row, cx->col, "Missing split result");
-	goto exit;
+      if (it->split.type == cx->char_type) {
+	split = c.as_char == it->split.as_char;
+      } else {
+	*cx_push(scope) = c;
+	if (!cx_call(&it->split, scope)) { goto exit; }
+	struct cx_box *res = cx_pop(scope, true);
+	
+	if (!res) {
+	  cx_error(cx, cx->row, cx->col, "Missing split result");
+	  goto exit;
+	}
+	
+	split = res->as_bool;
       }
-
-      split = res->as_bool;
-    }
+    } 
     
     if (split) {
       fflush(it->out.stream);
@@ -283,6 +287,8 @@ static bool str_lower_imp(struct cx_scope *scope) {
 }
 
 static bool join_imp(struct cx_scope *scope) {
+  struct cx *cx = scope->cx;
+  
   struct cx_box
     sep = *cx_test(cx_pop(scope, false)),
     in = *cx_test(cx_pop(scope, false));
@@ -297,12 +303,12 @@ static bool join_imp(struct cx_scope *scope) {
     if (print_sep) { cx_print(&sep, out.stream); }
     cx_print(&v, out.stream);
     cx_box_deinit(&v);
-    print_sep = true;
+    print_sep = sep.type != cx->nil_type;
   }
 
   cx_iter_deref(it);
   cx_mfile_close(&out);
-  cx_box_init(cx_push(scope), scope->cx->str_type)->as_str = cx_str_new(out.data);
+  cx_box_init(cx_push(scope), cx->str_type)->as_str = cx_str_new(out.data);
   free(out.data);
   cx_box_deinit(&sep);
   cx_box_deinit(&in);

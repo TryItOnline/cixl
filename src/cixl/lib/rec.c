@@ -213,7 +213,7 @@ static bool put_imp(struct cx_scope *scope) {
     goto exit;
   }
 
-  if (!cx_is(v.type, f->type)) {
+  if (v.type != cx->nil_type && !cx_is(v.type, f->type)) {
     cx_error(cx, cx->row, cx->col, "Expected %s, was %s", f->type->id, v.type->id);
     cx_box_deinit(&v);
     goto exit;
@@ -300,7 +300,7 @@ cx_lib(cx_init_rec, "cx/rec") {
   cx_add_cfunc(lib, "put",
 	       cx_args(cx_arg("rec", cx->rec_type),
 		       cx_arg("fld", cx->sym_type),
-		       cx_arg("val", cx->any_type)),
+		       cx_arg("val", cx->opt_type)),
 	       cx_args(),
 	       put_imp);
 

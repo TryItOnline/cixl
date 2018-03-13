@@ -1,3 +1,5 @@
+* add support for char split
+* don't join in new-chan
 * add join-chan(u User cs Str)
 ** split n on @/
 ** start from c.chan, find child and join

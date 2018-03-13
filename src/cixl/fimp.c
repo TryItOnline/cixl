@@ -64,7 +64,7 @@ ssize_t cx_fimp_score(struct cx_fimp *imp, struct cx_scope *scope, ssize_t max) 
 	 j >= (struct cx_box *)stack->items;
        i--, j--) {
     if (i->arg_type == CX_VARG) {
-      if (!cx_eqval(&i->value, j)) { return -1; }
+      if (j->type != i->value.type || !cx_eqval(&i->value, j)) { return -1; }
       continue;
     }
     
