@@ -21,7 +21,8 @@ typedef bool (*cx_split_t)(unsigned char c);
 struct cx_split_iter {
   struct cx_iter iter;
   struct cx_iter *in;
-  cx_split_t split;
+  cx_split_t split_fn;
+  struct cx_box split;
   struct cx_mfile out;
 };
 
@@ -29,21 +30,39 @@ bool split_next(struct cx_iter *iter, struct cx_box *out, struct cx_scope *scope
   struct cx_split_iter *it = cx_baseof(iter, struct cx_split_iter, iter);
   struct cx *cx = scope->cx;
   struct cx_box c;
-
+  bool ok = false;
+  
   while (true) {
     if (!cx_iter_next(it->in, &c, scope)) {
       iter->done = true;
       fflush(it->out.stream);
       if (it->out.data[0]) { break; }
-      return false;
+      goto exit;
     }
 
     if (c.type != cx->char_type) {
       cx_error(cx, cx->row, cx->col, "Expected type Char, actual: %s", c.type->id);
-      return false;
+      goto exit;
+    }
+
+    bool split = false;
+    
+    if (it->split_fn) {
+      split = it->split_fn(c.as_char);
+    } else {
+      *cx_push(scope) = c;
+      if (!cx_call(&it->split, scope)) { goto exit; }
+      struct cx_box *res = cx_pop(scope, true);
+
+      if (!res) {
+	cx_error(cx, cx->row, cx->col, "Missing split result");
+	goto exit;
+      }
+
+      split = res->as_bool;
     }
     
-    if (it->split(c.as_char)) {
+    if (split) {
       fflush(it->out.stream);
       if (it->out.data[0]) { break; }
     } else {
@@ -51,18 +70,25 @@ bool split_next(struct cx_iter *iter, struct cx_box *out, struct cx_scope *scope
     }
   }
 
-  cx_mfile_close(&it->out);
   cx_box_init(out, cx->str_type)->as_str = cx_str_new(it->out.data);
+  ok = true;
+ exit:
+  cx_mfile_close(&it->out);
   free(it->out.data);
-  cx_mfile_open(&it->out);
-  return true;
+  if (!iter->done) { cx_mfile_open(&it->out); }
+  return ok;
 }
 
 void *split_deinit(struct cx_iter *iter) {
   struct cx_split_iter *it = cx_baseof(iter, struct cx_split_iter, iter);
   cx_iter_deref(it->in);
-  cx_mfile_close(&it->out);
-  free(it->out.data);
+
+  if (it->out.stream) {
+    cx_mfile_close(&it->out);
+    free(it->out.data);
+  }
+  
+  if (!it->split_fn) { cx_box_deinit(&it->split); }
   return it;
 }
 
@@ -71,21 +97,22 @@ cx_iter_type(split_iter, {
     type.deinit = split_deinit;
   });
 
-struct cx_iter *cx_split_iter_new(struct cx_iter *in, cx_split_t split) {
+struct cx_split_iter *cx_split_iter_new(struct cx_iter *in) {
   struct cx_split_iter *it = malloc(sizeof(struct cx_split_iter));
   cx_iter_init(&it->iter, split_iter());
   it->in = in;
-  it->split = split;
   cx_mfile_open(&it->out);
-  return &it->iter;
+  it->split_fn = NULL;
+  return it;
 }
 
 bool split_lines(unsigned char c) { return c == '\r' || c == '\n'; }
 
 static bool lines_imp(struct cx_scope *scope) {
   struct cx_box in = *cx_test(cx_pop(scope, false));
-  struct cx_iter *it = cx_split_iter_new(cx_iter(&in), split_lines);
-  cx_box_init(cx_push(scope), scope->cx->iter_type)->as_iter = it;
+  struct cx_split_iter *it = cx_split_iter_new(cx_iter(&in));
+  it->split_fn = split_lines;
+  cx_box_init(cx_push(scope), scope->cx->iter_type)->as_iter = &it->iter;
   cx_box_deinit(&in);
   return true;
 }
@@ -96,8 +123,20 @@ bool split_words(unsigned char c) {
 
 static bool words_imp(struct cx_scope *scope) {
   struct cx_box in = *cx_test(cx_pop(scope, false));
-  struct cx_iter *it = cx_split_iter_new(cx_iter(&in), split_words);
-  cx_box_init(cx_push(scope), scope->cx->iter_type)->as_iter = it;
+  struct cx_split_iter *it = cx_split_iter_new(cx_iter(&in));
+  it->split_fn = split_words;
+  cx_box_init(cx_push(scope), scope->cx->iter_type)->as_iter = &it->iter;
+  cx_box_deinit(&in);
+  return true;
+}
+
+static bool split_imp(struct cx_scope *scope) {
+  struct cx_box
+    s = *cx_test(cx_pop(scope, false)),
+    in = *cx_test(cx_pop(scope, false));
+  struct cx_split_iter *it = cx_split_iter_new(cx_iter(&in));
+  it->split = s;
+  cx_box_init(cx_push(scope), scope->cx->iter_type)->as_iter = &it->iter;
   cx_box_deinit(&in);
   return true;
 }
@@ -287,6 +326,11 @@ cx_lib(cx_init_str, "cx/str") {
 	       cx_args(cx_arg("in", cx->seq_type)),
 	       cx_args(cx_arg(NULL, cx->iter_type)),
 	       words_imp);
+
+  cx_add_cfunc(lib, "split",
+	       cx_args(cx_arg("in", cx->seq_type), cx_arg("s", cx->any_type)),
+	       cx_args(cx_arg(NULL, cx->iter_type)),
+	       split_imp);
 
   cx_add_cfunc(lib, "upper",
 	       cx_args(cx_arg("c", cx->char_type)),

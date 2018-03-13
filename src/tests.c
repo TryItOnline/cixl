@@ -264,7 +264,8 @@ static void str_tests() {
   run(&cx, "'42' int 42 = check");
   run(&cx, "'@n' 0 get @@n = check");
   run(&cx, "['foo' 'bar' 'baz'] @/ join 'foo/bar/baz' = check");
-
+  run(&cx, "'foo bar baz' {@@s =} split stack ['foo' 'bar' 'baz'] = check");
+  
   cx_deinit(&cx);
 }
 
