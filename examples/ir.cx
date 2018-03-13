@@ -29,16 +29,16 @@ func: get-path(n Str)(_ Str)
 '' get-path make-dir
 
 let: users 'users.db' get-path [`name] new-db-table;
-let: chans 'chans.db' get-path [`id] new-db-table;
+let: channels 'channels.db' get-path [`id] new-db-table;
 
-rec: Chan ()
+rec: Channel ()
   id       Guid
   name     Sym
   info     Str
-  parent   Chan
+  parent   Channel
   children Table;
 
-func: save(c Chan)()
+func: save(c Channel)()
   let: r Table new;
   $r `id $c `id get put
   $r `name $c `name get put
@@ -46,9 +46,9 @@ func: save(c Chan)()
   
   let: p $c `parent get;
   $p {$r `parent $p `id get put} if
-  $chans $r upsert;
+  $channels $r upsert;
 
-func: add-chan(p c Chan)()
+func: add-channel(p c Channel)()
   let: pc $p `children get;
   
   $pc {
@@ -61,13 +61,13 @@ func: add-chan(p c Chan)()
 
 rec: User ()
   name Sym
-  chan Chan;
+  channel Channel;
 
 func: save(u User)()
   let: r Table new;
   $r `name $u `name get put
-  let: c $u `chan get;
-  $c {$r `chan $c `id get put} if
+  let: c $u `channel get;
+  $c {$r `channel $c `id get put} if
   $users $r upsert;
 
 func: new-user (n Sym)(_ User)
@@ -76,27 +76,27 @@ func: new-user (n Sym)(_ User)
   $u save
   $u;
 
-func: new-chan(u User n Sym)(_ Chan)
-  let: c Chan new;
+func: new-channel(u User n Sym)(_ Channel)
+  let: c Channel new;
   let: id Guid new;
   
   $c `id $id put
   $c `name $n put
   $c `info '' put
   
-  let: pc $u `chan get;
+  let: pc $u `channel get;
   
   $pc {
     $c `parent $pc put
-    $pc $c add-chan
+    $pc $c add-channel
   } if
 
-  $u `chan $c put
+  $u `channel $c put
   $c save
   $c;
 
 let: u `me new-user;
-$u `foo new-chan _
-$u `bar new-chan _
+$u `foo new-channel _
+$u `bar new-channel _
 commit
-$u `chan get `name get say
+$u `channel get `name get say

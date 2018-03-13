@@ -45,18 +45,20 @@ define: db-trans [];
 */
 
 rec: DBChange()
-  table DBTable
-  key   Stack
-  rec   A
-  op    Sym;
+  tstamp Time
+  table  DBTable
+  key    Stack
+  rec    A
+  op     Sym;
 
 func: push-change(t DBTable k Stack r A o Sym)()
   let: c DBChange new;
-  $c `table $t put
-  $c `key   $k put
-  $c `rec   $r put
-  $c `op    $o put
-  #db-trans $c push;
+  $c `tstamp now put
+  $c `table  $t  put
+  $c `key    $k  put
+  $c `rec    $r  put
+  $c `op     $o  put
+  #db-trans  $c  push;
 
 /*
   Records are looked up via the record pointer, which must remain the same;
@@ -92,7 +94,7 @@ func: commit()()
   #db-trans {
     let: c;
     let: f $c `table get `file get;
-    $f [now $c `op get $c `key get $c `rec get] write
+    $f [$c `tstamp get $c `op get $c `key get $c `rec get] write
     $dirty $f #t put
   } for
 
