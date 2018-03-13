@@ -260,6 +260,7 @@ static bool parse_id(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
 
     if (ok) {
       char *s = id.data;
+
       if (isupper(s[0])) {
 	ok = parse_type(cx, s, out, lookup);
       } else if (lookup && s[0] == '#') {
@@ -549,6 +550,7 @@ bool cx_parse_tok(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
       done = true;
       break;
     case ' ':
+    case '\t':
       cx->col++;
       break;
     case '\n':

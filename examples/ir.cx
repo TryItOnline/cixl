@@ -7,8 +7,8 @@
 */
 
 use:
-  (cx/abc Opt Stack Str Sym #nil is-nil)
-  (cx/cond = else if if-else)
+  (cx/abc Opt Stack Str Sym #nil #t is-nil)
+  (cx/cond = else if if-else switch:)
   (cx/error fail)
   (cx/func func:)
   (cx/guid Guid)
@@ -16,7 +16,7 @@ use:
   (cx/io/poll Poll on-read wait)
   (cx/iter for next while)
   (cx/rec ? rec: get put)
-  (cx/str join split)
+  (cx/str join split words)
   (cx/sym sym)
   (cx/sys home-dir make-dir)
   (cx/stack _ push)
@@ -37,7 +37,7 @@ let: chans 'chans.db' get-path [`id] new-db-table;
 let: root Table new;
 
 rec: Chan ()
-  id       Str
+  id       Sym
   name     Sym
   info     Str
   parent   Chan
@@ -99,11 +99,11 @@ func: new-chan(u User n Sym)()
     $id $pc `id get push
   } {
     #nil $c add-chan
-    $id @/ push
+    $id '' push
   } if-else
 
   $id $n push
-  $c `id $id @/ join put
+  $c `id $id @/ join sym put
   $c save;
 
 func: join-chan(u User cns Str)()
@@ -141,19 +141,11 @@ func: prompt(out WFile u User)()
   $out [$u `name get @@s $u get-chan-id @> @@s] print;
 
 let: u `me new-user;
-commit
-
-/*
 $u `foo new-chan
 $u 'foo' join-chan
 $u `bar new-chan
-$u '/' join-chan
-$u 'foo/bar' join-chan
-$u '../bar' join-chan
-$u '/..' join-chan
-
-$u `chan get `name get say
-*/
+$u 'bar' join-chan
+commit
 
 let: poll Poll new;
 let: in #in lines;
@@ -162,6 +154,21 @@ $poll #in {
   let: line $in next;
   
   $line is-nil {
+    $line {
+      $line 0 get @: = {
+        let: cmd $line @@s split;
+        let: cmd-id $cmd next sym;
+
+	switch:
+	  (($cmd-id `:join =)
+	    $u $cmd next join-chan)
+	  (#t
+            ['Invalid cmd: ' $cmd-id] #nil join fail);
+      } {
+        'message' say
+      } if-else
+    } if
+    
     #out $u prompt
     #out flush
   } else
