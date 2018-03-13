@@ -7,18 +7,19 @@
 */
 
 use:
-  (cx/abc Opt Stack Str Sym #nil)
+  (cx/abc Opt Stack Str Sym #nil is-nil)
   (cx/cond = else if if-else)
   (cx/error fail)
   (cx/func func:)
   (cx/guid Guid)
-  (cx/io include: say)
-  (cx/iter for)
+  (cx/io WFile #in #out flush include: lines print say)
+  (cx/io/poll Poll on-read wait)
+  (cx/iter for next while)
   (cx/rec ? rec: get put)
   (cx/str join split)
   (cx/sym sym)
   (cx/sys home-dir make-dir)
-  (cx/stack _)
+  (cx/stack _ push)
   (cx/table Table put)
   (cx/type new)
   (cx/var let:);
@@ -36,7 +37,7 @@ let: chans 'chans.db' get-path [`id] new-db-table;
 let: root Table new;
 
 rec: Chan ()
-  id       Guid
+  id       Str
   name     Sym
   info     Str
   parent   Chan
@@ -85,9 +86,8 @@ func: new-user (n Sym)(_ User)
 
 func: new-chan(u User n Sym)()
   let: c Chan new;
-  let: id Guid new;
+  let: id [];
   
-  $c `id $id put
   $c `name $n put
   $c `info '' put
   
@@ -96,10 +96,14 @@ func: new-chan(u User n Sym)()
   $pc {
     $c `parent $pc put
     $pc $c add-chan
+    $id $pc `id get push
   } {
     #nil $c add-chan
+    $id @/ push
   } if-else
 
+  $id $n push
+  $c `id $id @/ join put
   $c save;
 
 func: join-chan(u User cns Str)()
@@ -129,7 +133,17 @@ func: join-chan(u User cns Str)()
     } if-else
   } for;
 
+func: get-chan-id(u User)(_ Sym)
+  let: c $u `chan get;
+  $c {$c `id get} `/ if-else;
+
+func: prompt(out WFile u User)()
+  $out [$u `name get @@s $u get-chan-id @> @@s] print;
+
 let: u `me new-user;
+commit
+
+/*
 $u `foo new-chan
 $u 'foo' join-chan
 $u `bar new-chan
@@ -137,6 +151,23 @@ $u '/' join-chan
 $u 'foo/bar' join-chan
 $u '../bar' join-chan
 $u '/..' join-chan
-commit
 
 $u `chan get `name get say
+*/
+
+let: poll Poll new;
+let: in #in lines;
+
+$poll #in {
+  let: line $in next;
+  
+  $line is-nil {
+    #out $u prompt
+    #out flush
+  } else
+} on-read
+
+#out $u prompt
+#out flush
+
+{$poll -1 wait} while
