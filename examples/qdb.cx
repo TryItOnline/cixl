@@ -92,7 +92,7 @@ func: commit()()
   #db-trans {
     let: c;
     let: f $c `table get `file get;
-    $f [$c `op get $c `key get $c `rec get] write
+    $f [now $c `op get $c `key get $c `rec get] write
     $dirty $f #t put
   } for
 

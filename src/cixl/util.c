@@ -1,7 +1,9 @@
+#include <errno.h>
 #include <pwd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
 
@@ -84,4 +86,22 @@ const char *cx_home_dir() {
   const char *d = getenv("HOME");
   if (!d) { d = getpwuid(getuid())->pw_dir; }
   return d;
+}
+
+bool cx_make_dir(const char *path) {
+  char *p = strdup(path);
+  bool ok = false;
+  
+  for (char *c = p+1; *c; c++) {
+    if (*c == '/') {
+      *c = '\0';
+      if (mkdir(p, S_IRWXU) != 0 && errno != EEXIST) { goto exit; }
+      *c = '/';
+    }
+  }
+
+  ok = mkdir(p, S_IRWXU) == 0 || errno == EEXIST;
+ exit:
+  free(p);
+  return ok;
 }

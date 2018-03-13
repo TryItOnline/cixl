@@ -15,6 +15,13 @@ static bool home_dir_imp(struct cx_scope *scope) {
   return true;
 }
 
+static bool make_dir_imp(struct cx_scope *scope) {
+  struct cx_box p = *cx_test(cx_pop(scope, false));
+  bool ok = cx_make_dir(p.as_str->data);
+  cx_box_deinit(&p);
+  return ok;
+}
+
 cx_lib(cx_init_sys, "cx/sys") {
   struct cx *cx = lib->cx;
     
@@ -26,6 +33,11 @@ cx_lib(cx_init_sys, "cx/sys") {
 	       cx_args(),
 	       cx_args(cx_arg(NULL, cx->str_type)),
 	       home_dir_imp);
-    
+
+  cx_add_cfunc(lib, "make-dir",
+	       cx_args(cx_arg("p", cx->str_type)),
+	       cx_args(),
+	       make_dir_imp);
+
   return true;
 }

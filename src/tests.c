@@ -263,6 +263,7 @@ static void str_tests() {
   run(&cx, "'foobar' 3 get @b = check");
   run(&cx, "'42' int 42 = check");
   run(&cx, "'@n' 0 get @@n = check");
+  run(&cx, "['foo' 'bar' 'baz'] @/ join 'foo/bar/baz' = check");
 
   cx_deinit(&cx);
 }

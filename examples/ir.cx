@@ -14,7 +14,7 @@ use:
   (cx/io include: say)
   (cx/rec ? rec: get put)
   (cx/str join)
-  (cx/sys home-dir)
+  (cx/sys home-dir make-dir)
   (cx/stack _)
   (cx/table Table put)
   (cx/type new)
@@ -23,11 +23,13 @@ use:
 include: 'qdb.cx';
 use: (qdb commit new-db-table upsert);
 
-func: db-path(n Str)(_ Str)
+func: get-path(n Str)(_ Str)
   [home-dir '.ircx' $n] '/' join;
 
-let: users 'users.db' db-path [`name] new-db-table;
-let: chans 'chans.db' db-path [`id] new-db-table;
+'' get-path make-dir
+
+let: users 'users.db' get-path [`name] new-db-table;
+let: chans 'chans.db' get-path [`id] new-db-table;
 
 rec: Chan ()
   id       Guid
@@ -96,5 +98,5 @@ func: new-chan(u User n Sym)(_ Chan)
 let: u `me new-user;
 $u `foo new-chan _
 $u `bar new-chan _
-$u `chan get `name get say
 commit
+$u `chan get `name get say

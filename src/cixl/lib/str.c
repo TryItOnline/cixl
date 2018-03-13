@@ -261,9 +261,12 @@ static bool join_imp(struct cx_scope *scope) {
     print_sep = true;
   }
 
+  cx_iter_deref(it);
   cx_mfile_close(&out);
   cx_box_init(cx_push(scope), scope->cx->str_type)->as_str = cx_str_new(out.data);
   free(out.data);
+  cx_box_deinit(&sep);
+  cx_box_deinit(&in);
   return true;
 }
 
