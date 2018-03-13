@@ -26,7 +26,7 @@ static bool str_imp(struct cx_scope *scope) {
 cx_lib(cx_init_sym, "cx/sym") {
   struct cx *cx = lib->cx;
     
-  if (!cx_use(cx, "cx/abc", "A", "Str", "Sym")) {
+  if (!cx_use(cx, "cx/abc", "Str", "Sym")) {
     return false;
   }
 

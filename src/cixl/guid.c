@@ -98,11 +98,20 @@ static void new_imp(struct cx_box *out) {
 }
 
 static bool equid_imp(struct cx_box *x, struct cx_box *y) {
-  for (int i = 0; i < 4; i++) {
+  for (int i=0; i < 4; i++) {
     if (x->as_guid[i] != y->as_guid[i]) { return false; }
   }
   
   return true;
+}
+
+static enum cx_cmp cmp_imp(const struct cx_box *x, const struct cx_box *y) {
+  for (int i=0; i < 4; i++) {
+    enum cx_cmp c = cx_cmp_cint(x->as_guid+i, y->as_guid+i);
+    if (c != CX_CMP_EQ) { return c; }
+  }
+
+  return CX_CMP_EQ;
 }
 
 static void write_imp(struct cx_box *v, FILE *out) {
@@ -116,9 +125,10 @@ static void dump_imp(struct cx_box *v, FILE *out) {
 }
 
 struct cx_type *cx_init_guid_type(struct cx_lib *lib) {
-  struct cx_type *t = cx_add_type(lib, "Guid", lib->cx->any_type);
+  struct cx_type *t = cx_add_type(lib, "Guid", lib->cx->cmp_type);
   t->new = new_imp;
   t->equid = equid_imp;
+  t->cmp = cmp_imp;
   t->write = write_imp;
   t->dump = dump_imp;
   return t;

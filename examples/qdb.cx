@@ -30,14 +30,14 @@ func: new-db-table(n Str k Stack)(_ DBTable)
   $t `key-recs Table new    put
   $t;
 
-func: get-rec-key(t DBTable r Rec)(_ Stack)
+func: get-rec-key(t DBTable r A)(_ Stack)
   $t `key get {$r ~ get} map stack;
 
 /*
   The transaction contains the current set of changes.
 */
 
-let: db-trans [];
+define: db-trans [];
 
 /*
   Changes are pushed for each performed table operation, and contain the information
@@ -47,23 +47,23 @@ let: db-trans [];
 rec: DBChange()
   table DBTable
   key   Stack
-  rec   Rec
+  rec   A
   op    Sym;
 
-func: push-change(t DBTable k Stack r Rec o Sym)()
+func: push-change(t DBTable k Stack r A o Sym)()
   let: c DBChange new;
   $c `table $t put
   $c `key   $k put
   $c `rec   $r put
   $c `op    $o put
-  $db-trans $c push;
+  #db-trans $c push;
 
 /*
   Records are looked up via the record pointer, which must remain the same;
   and cloned to enable change management.
 */
 
-func: upsert(t DBTable r Rec)()
+func: upsert(t DBTable r A)()
   let: krs $t `key-recs get;
   let: rks $t `rec-keys get;  
   let: tk $rks $r get;
@@ -89,7 +89,7 @@ func: upsert(t DBTable r Rec)()
 func: commit()()
   let: dirty Table new;
 
-  $db-trans {
+  #db-trans {
     let: c;
     let: f $c `table get `file get;
     $f [$c `op get $c `key get $c `rec get] write
@@ -97,14 +97,14 @@ func: commit()()
   } for
 
   $dirty &x map &flush for
-  $db-trans clear;
+  #db-trans clear;
 
 /*
   Or reverted on rollback.
 */
 
 func: rollback()()
-  $db-trans {
+  #db-trans {
     let: c;
     let: t $c `table get;
     let: krs $t `key-recs get;
@@ -118,5 +118,5 @@ func: rollback()()
     } if-else
   } for
 
-  $db-trans clear;
+  #db-trans clear;
 );

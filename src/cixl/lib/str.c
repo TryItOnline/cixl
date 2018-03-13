@@ -243,6 +243,31 @@ static bool str_lower_imp(struct cx_scope *scope) {
   return true;
 }
 
+static bool join_imp(struct cx_scope *scope) {
+  struct cx_box
+    sep = *cx_test(cx_pop(scope, false)),
+    in = *cx_test(cx_pop(scope, false));
+
+  struct cx_iter *it = cx_iter(&in);
+  struct cx_mfile out;
+  cx_mfile_open(&out);
+  struct cx_box v;
+  bool print_sep = false;
+  
+  while (cx_iter_next(it, &v, scope)) {
+    if (print_sep) { cx_print(&sep, out.stream); }
+    cx_print(&v, out.stream);
+    cx_box_deinit(&v);
+    print_sep = true;
+  }
+
+  cx_mfile_close(&out);
+  cx_box_init(cx_push(scope), scope->cx->str_type)->as_str = cx_str_new(out.data);
+  free(out.data);
+  return true;
+}
+
+
 cx_lib(cx_init_str, "cx/str") {
   struct cx *cx = lib->cx;
     
@@ -317,6 +342,12 @@ cx_lib(cx_init_str, "cx/str") {
   cx_add_cfunc(lib, "lower",
 	       cx_args(cx_arg("s", cx->str_type)), cx_args(),
 	       str_lower_imp);
+
+  cx_add_cfunc(lib, "join",
+	       cx_args(cx_arg("in", cx->seq_type),
+		       cx_arg("sep", cx->opt_type)),
+	       cx_args(cx_arg(NULL, cx->str_type)),
+	      join_imp);
 
   return true;
 }

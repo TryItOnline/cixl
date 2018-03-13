@@ -39,6 +39,7 @@
 #include "cixl/lib/stack.h"
 #include "cixl/lib/str.h"
 #include "cixl/lib/sym.h"
+#include "cixl/lib/sys.h"
 #include "cixl/lib/table.h"
 #include "cixl/lib/time.h"
 #include "cixl/lib/type.h"
@@ -84,6 +85,7 @@ cx_lib(cx_init_world, "cx") {
     cx_use(cx, "cx/stack") &&
     cx_use(cx, "cx/str") &&
     cx_use(cx, "cx/sym") &&
+    cx_use(cx, "cx/sys") &&
     cx_use(cx, "cx/table") &&
     cx_use(cx, "cx/time") &&
     cx_use(cx, "cx/type") &&
@@ -181,6 +183,7 @@ void cx_init_libs(struct cx *cx) {
   cx_init_stack(cx);
   cx_init_str(cx);
   cx_init_sym(cx);
+  cx_init_sys(cx);
   cx_init_table(cx);
   cx_init_time(cx);
   cx_init_type(cx);

@@ -1,6 +1,9 @@
+#include <pwd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #include "cixl/error.h"
 #include "cixl/util.h"
@@ -75,4 +78,10 @@ bool cx_get_line(char **out, size_t *len, FILE *in) {
   }
 
   return true;
+}
+
+const char *cx_home_dir() {
+  const char *d = getenv("HOME");
+  if (!d) { d = getpwuid(getuid())->pw_dir; }
+  return d;
 }

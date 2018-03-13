@@ -1,0 +1,100 @@
+#!/usr/local/bin/cixl
+
+/*
+  The seed of a distributed, simplified IRC alternative.
+
+  https://github.com/basic-gongfu/cixl#getting-started
+*/
+
+use:
+  (cx/abc Stack Str Sym)
+  (cx/cond if if-else)
+  (cx/func func:)
+  (cx/guid Guid)
+  (cx/io include: say)
+  (cx/rec ? rec: get put)
+  (cx/str join)
+  (cx/sys home-dir)
+  (cx/stack _)
+  (cx/table Table put)
+  (cx/type new)
+  (cx/var let:);
+
+include: 'qdb.cx';
+use: (qdb commit new-db-table upsert);
+
+func: db-path(n Str)(_ Str)
+  [home-dir '.ircx' $n] '/' join;
+
+let: users 'users.db' db-path [`name] new-db-table;
+let: chans 'chans.db' db-path [`id] new-db-table;
+
+rec: Chan ()
+  id       Guid
+  name     Sym
+  info     Str
+  parent   Chan
+  children Table;
+
+func: save(c Chan)()
+  let: r Table new;
+  $r `id $c `id get put
+  $r `name $c `name get put
+  $r `info $c `info get put
+  
+  let: p $c `parent get;
+  $p {$r `parent $p `id get put} if
+  $chans $r upsert;
+
+func: add-chan(p c Chan)()
+  let: pc $p `children get;
+  
+  $pc {
+    $pc $c `id get $c put
+  } {
+    let: pc Table new;
+    $p `children $pc put
+    $pc $c `id get $c put    
+  } if-else;
+
+rec: User ()
+  name Sym
+  chan Chan;
+
+func: save(u User)()
+  let: r Table new;
+  $r `name $u `name get put
+  let: c $u `chan get;
+  $c {$r `chan $c `id get put} if
+  $users $r upsert;
+
+func: new-user (n Sym)(_ User)
+  let: u User new;
+  $u `name $n put
+  $u save
+  $u;
+
+func: new-chan(u User n Sym)(_ Chan)
+  let: c Chan new;
+  let: id Guid new;
+  
+  $c `id $id put
+  $c `name $n put
+  $c `info '' put
+  
+  let: pc $u `chan get;
+  
+  $pc {
+    $c `parent $pc put
+    $pc $c add-chan
+  } if
+
+  $u `chan $c put
+  $c save
+  $c;
+
+let: u `me new-user;
+$u `foo new-chan _
+$u `bar new-chan _
+$u `chan get `name get say
+commit

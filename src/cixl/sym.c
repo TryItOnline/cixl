@@ -40,6 +40,10 @@ static bool equid_imp(struct cx_box *x, struct cx_box *y) {
   return x->as_sym.tag == y->as_sym.tag;
 }
 
+static enum cx_cmp cmp_imp(const struct cx_box *x, const struct cx_box *y) {
+  return cx_cmp_sym(&x->as_sym, &y->as_sym);
+}
+
 static void dump_imp(struct cx_box *v, FILE *out) {
   fprintf(out, "`%s", v->as_sym.id);
 }
@@ -56,9 +60,10 @@ static bool emit_imp(struct cx_box *v, const char *exp, FILE *out) {
 }
 
 struct cx_type *cx_init_sym_type(struct cx_lib *lib) {
-  struct cx_type *t = cx_add_type(lib, "Sym", lib->cx->any_type);
+  struct cx_type *t = cx_add_type(lib, "Sym", lib->cx->cmp_type);
   t->new = new_imp;
   t->equid = equid_imp;
+  t->cmp = cmp_imp;
   t->write = dump_imp;
   t->dump = dump_imp;
   t->print = print_imp;

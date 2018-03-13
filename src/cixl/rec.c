@@ -65,18 +65,7 @@ static void write_imp(struct cx_box *v, FILE *out) {
 
 static void dump_imp(struct cx_box *v, FILE *out) {
   struct cx_rec *r = v->as_ptr;
-  fprintf(out, "%s(", v->type->id);
-  char sep = 0;
-  
-  cx_do_env(&r->fields, v) {
-    if (sep) { fputc(sep, out); }
-    fprintf(out, "(%s ", v->id.id);
-    cx_dump(&v->value, out);
-    fputc(')', out);
-    sep = ' ';
-  }
-
-  fprintf(out, ")r%d", r->nrefs);
+  fprintf(out, "%s(%p)r%d", v->type->id, r, r->nrefs);
 }
 
 static void print_imp(struct cx_box *v, FILE *out) {

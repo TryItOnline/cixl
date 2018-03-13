@@ -1,3 +1,7 @@
+* add join-chan(u User cs Str)
+** split n on @/
+** start from c.chan, find child and join
+* ---
 * change cx_fimp to use separate bin if not inlined
 ** update OFUNCALL to call if bin != cx->bin
 ** recursive eval
@@ -44,7 +48,6 @@
 ** add cx_getconst_op.value
 *** set in parse_const
 *** change eval to push value
-* implement Cmp for Sym/Guid
 * replace cx_tok.as_ptr with as_id, as_literal etc.
 ** use cx_sym for CX_TID?
 * replace box.as_ptr with as_func/fimp/etc

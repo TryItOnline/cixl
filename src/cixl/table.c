@@ -128,6 +128,10 @@ static bool eqval_imp(struct cx_box *x, struct cx_box *y) {
   return true;
 }
 
+static enum cx_cmp cmp_imp(const struct cx_box *x, const struct cx_box *y) {
+  return cx_cmp_ptr(&x->as_table, &y->as_table);
+}
+
 static bool ok_imp(struct cx_box *v) {
   return v->as_table->entries.members.count;
 }
@@ -190,10 +194,12 @@ static void deinit_imp(struct cx_box *v) {
 }
 
 struct cx_type *cx_init_table_type(struct cx_lib *lib) {
-  struct cx_type *t = cx_add_type(lib, "Table", lib->cx->seq_type);
+  struct cx *cx = lib->cx;
+  struct cx_type *t = cx_add_type(lib, "Table", cx->cmp_type, cx->seq_type);
   t->new = new_imp;
   t->eqval = eqval_imp;
   t->equid = equid_imp;
+  t->cmp = cmp_imp;
   t->ok = ok_imp;
   t->copy = copy_imp;
   t->clone = clone_imp;
