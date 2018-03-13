@@ -27,7 +27,7 @@ include: 'qdb.cx';
 use: (qdb commit new-db-table upsert);
 
 func: get-path(n Str)(_ Str)
-  [home-dir '.ircx' $n] '/' join;
+  [home-dir '.ircx' $n] @/ join;
 
 '' get-path make-dir
 
@@ -109,18 +109,23 @@ func: join-chan(u User cns Str)()
     let: n;
     let: uc $u `chan get;
 
-    $uc {
-      let: ccs $uc `children get;
-      $ccs { ['Chan not found: ' $n] #nil join fail } else
-    
-      let: c $ccs $n sym get;
-      $c { ['Chan not found: ' $n] #nil join fail } else
-
-      $u `chan $c put
+    $n '..' = {
+      $uc {'Chan not found: ..' fail} else
+      $u `chan $uc `parent get put  
     } {
-      let: c $root $n sym get;
-      $c { ['Chan not found: ' $n] #nil join fail } else      
-      $u `chan $c put
+      $uc {
+        let: ccs $uc `children get;
+        $ccs {['Chan not found: ' $n] #nil join fail} else
+    
+        let: c $ccs $n sym get;
+        $c {['Chan not found: ' $n] #nil join fail} else
+
+        $u `chan $c put
+      } {
+        let: c $root $n sym get;
+        $c {['Chan not found: ' $n] #nil join fail} else      
+        $u `chan $c put
+      } if-else
     } if-else
   } for;
 
@@ -130,6 +135,8 @@ $u 'foo' join-chan
 $u `bar new-chan
 $u '/' join-chan
 $u 'foo/bar' join-chan
+$u '../bar' join-chan
+$u '/..' join-chan
 commit
 
 $u `chan get `name get say

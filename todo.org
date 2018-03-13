@@ -17,6 +17,8 @@
 ** add cx_buf.pos
 ** use as offset and inc
 * ---
+* separate Buf read/write polling
+** read/write boxes through pipe
 * add MFile type
 ** use struct cx_mfile
 *** add nrefs
