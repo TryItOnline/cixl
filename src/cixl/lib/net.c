@@ -1,5 +1,6 @@
 #include <arpa/inet.h>
 #include <errno.h>
+#include <fcntl.h>
 #include <netinet/in.h>
 #include <poll.h>
 #include <sys/types.h>
@@ -66,16 +67,24 @@ static bool accept_imp(struct cx_scope *scope) {
   struct cx *cx = scope->cx;
   struct cx_box server = *cx_test(cx_pop(scope, false));
   int fd = accept(server.as_file->fd, NULL, NULL);
-
+  bool ok = false;
+  
   if (fd == -1) {
     cx_box_init(cx_push(scope), cx->nil_type);
   } else {
+    if (fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) | O_NONBLOCK) == -1) {
+      cx_error(cx, cx->row, cx->col, "Failed unblocking socket: %d", errno);
+      goto exit;
+    }
+    
     struct cx_file *f = cx_file_new(cx, fd, "r+", NULL);
     cx_box_init(cx_push(scope), cx->tcp_client_type)->as_file = f;
   }
-  
+
+  ok = true;
+ exit:
   cx_box_deinit(&server);
-  return true;
+  return ok;
 }
 
 

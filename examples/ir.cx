@@ -9,19 +9,19 @@
 use:
   (cx/abc A Opt Stack Str Sym #nil #t is-nil)
   (cx/buf Buf push write-bytes)
-  (cx/cond = else if if-else switch:)
+  (cx/cond = == else if if-else switch:)
   (cx/error fail)
   (cx/func func:)
   (cx/guid Guid)
-  (cx/io RFile WFile #in #out ask include: lines print say)
+  (cx/io RFile WFile #in #out ask close include: lines print say)
   (cx/io/poll Poll delete no-write on-read on-write wait)
-  (cx/iter Iter for next while)
+  (cx/iter Iter for is-done next while)
   (cx/net TCPServer accept listen)
   (cx/rec ? rec: get put)
   (cx/str join split words)
   (cx/sym sym)
   (cx/sys home-dir make-dir)
-  (cx/stack _ push)
+  (cx/stack _ % ~ push)
   (cx/table Table put)
   (cx/type new)
   (cx/var let:);
@@ -35,17 +35,17 @@ func: get-path(n Str)(_ Str)
 '' get-path make-dir
 
 let: users 'users.db' get-path [`name] new-db-table;
-let: threads 'threads.db' get-path [`id] new-db-table;
+let: topics 'topics.db' get-path [`id] new-db-table;
 let: root Table new;
 let: poll Poll new;
 
-rec: Thread ()
+rec: Topic ()
   id name  Sym
   info     Str
-  parent   Thread
+  parent   Topic
   children Table;
 
-func: save(t Thread)()
+func: save(t Topic)()
   let: rec Table new;
   $rec `id $t `id get put
   $rec `name $t `name get put
@@ -53,9 +53,9 @@ func: save(t Thread)()
   
   let: pt $t `parent get;
   $pt {$rec `parent $pt `id get put} if
-  $threads $rec upsert;
+  $topics $rec upsert;
 
-func: add-thread(pt Opt t Thread)()
+func: add-topic(pt Opt t Topic)()
   let: pc $pt `children get;
 
   $pc {
@@ -66,18 +66,18 @@ func: add-thread(pt Opt t Thread)()
     $pc $t `name get $t put    
   } if-else;
 
-func: add-thread(#nil t Thread)()
+func: add-topic(#nil t Topic)()
   $root $t `name get $t put;
 
 rec: User ()
   name   Sym
-  thread Thread;
+  topic Topic;
 
 func: save(u User)()
   let: rec Table new;
   $rec `name $u `name get put
-  let: t $u `thread get;
-  $t {$rec `thread $t `id get put} if
+  let: t $u `topic get;
+  $t {$rec `topic $t `id get put} if
   $users $rec upsert;
 
 func: new-user (n Sym)(_ User)
@@ -86,21 +86,21 @@ func: new-user (n Sym)(_ User)
   $u save
   $u;
 
-func: new-thread(u User n Sym)()
-  let: t Thread new;
+func: new-topic(u User n Sym)()
+  let: t Topic new;
   let: id [];
   
   $t `name $n put
   $t `info '' put
   
-  let: pt $u `thread get;
+  let: pt $u `topic get;
   
   $pt {
     $t `parent $pt put
-    $pt $t add-thread
+    $pt $t add-topic
     $id $pt `id get push
   } {
-    #nil $t add-thread
+    #nil $t add-topic
     $id '' push
   } if-else
 
@@ -108,40 +108,40 @@ func: new-thread(u User n Sym)()
   $t `id $id @/ join sym put
   $t save;
 
-func: join-thread(u User ns Str)()
-  $ns 0 get @/ = {$u `thread #nil put} if
+func: join-topic(u User ns Str)()
+  $ns 0 get @/ = {$u `topic #nil put} if
   
   $ns @/ split {
     let: n;
-    let: ut $u `thread get;
+    let: ut $u `topic get;
 
     $n '..' = {
-      $ut {'Thread not found: ..' fail} else
-      $u `thread $ut `parent get put  
+      $ut {'Topic not found: ..' fail} else
+      $u `topic $ut `parent get put  
     } {
       $ut {
         let: tc $ut `children get;
-        $tc {['Thread not found: ' $n] #nil join fail} else
+        $tc {['Topic not found: ' $n] #nil join fail} else
     
         let: t $tc $n sym get;
-        $t {['Thread not found: ' $n] #nil join fail} else
+        $t {['Topic not found: ' $n] #nil join fail} else
 
-        $u `thread $t put
+        $u `topic $t put
       } {
         let: t $root $n sym get;
-        $t {['Thread not found: ' $n] #nil join fail} else      
-        $u `thread $t put
+        $t {['Topic not found: ' $n] #nil join fail} else      
+        $u `topic $t put
       } if-else
     } if-else
   } for;
 
-func: get-thread-id(u User)(_ Sym)
-  let: t $u `thread get;
+func: get-topic-id(u User)(_ Sym)
+  let: t $u `topic get;
   $t {$t `id get} `/ if-else;
 
 rec: Client ()
   user User
-  in   Iter
+  in   RFile
   out  WFile
   buf  Buf;
 
@@ -165,10 +165,20 @@ func: prompt(c Client)()
   $u {
     $c $u `name get push-out
     $c @@s push-out
-    $c $u get-thread-id push-out
+    $c $u get-topic-id push-out
     $c '> ' push-out
   } {
     $c 'login> ' push-out
+  } if-else;
+
+func: disconnect(c Client)()
+  let: (in out) $c % `in get ~ `out get;
+  $poll $in delete
+
+  $in $out == {
+    $in close
+  } {
+    $poll $out delete
   } if-else;
 
 func: handle-in(c Client in Str)()
@@ -180,7 +190,7 @@ func: handle-in(c Client in Str)()
 
         switch:
           (($cmd `:join =)
-            $c `user get $ins next join-thread)
+            $c `user get $ins next join-topic)
           (#t
             ['Invalid cmd: ' $cmd] #nil join fail);
       } {
@@ -188,25 +198,31 @@ func: handle-in(c Client in Str)()
       } if-else
     } if
   } {
-    $c `user $in sym new-user put
+    $in {
+      $c `user $in sym new-user put
+    } {
+      $c disconnect
+    } if-else
   } if-else;
 
 func: new-client(in RFile out WFile u Opt)()
   let: c Client new;
   let: ils $in lines;
 
-  $c `in $ils put
+  $c `in $in put
   $c `out $out put
   $c `buf Buf new put
   $u {$c `user $u put} if
   
   $poll $in {
     let: l $ils next;
-  
+
     $l is-nil {
+      $ils is-done {$c disconnect} if
+    } {
       $c $l handle-in
       $c prompt
-    } else
+    } if-else
   } on-read
 
   $c prompt;
@@ -221,10 +237,10 @@ $users len {
 } else
 
 let: u `me new-user;
-$u `foo new-thread
-$u 'foo' join-thread
-$u `bar new-thread
-$u 'bar' join-thread
+$u `foo new-topic
+$u 'foo' join-topic
+$u `bar new-topic
+$u 'bar' join-topic
 commit
 
 #in #out $u new-client

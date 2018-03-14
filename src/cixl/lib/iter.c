@@ -206,6 +206,13 @@ static bool drop_imp(struct cx_scope *scope) {
   return true;
 }
 
+static bool is_done_imp(struct cx_scope *scope) {
+  struct cx_box it = *cx_test(cx_pop(scope, false));
+  cx_box_init(cx_push(scope), scope->cx->bool_type)->as_bool = it.as_iter->done;
+  cx_box_deinit(&it);
+  return true;
+}
+
 static bool times_imp(struct cx_scope *scope) {
   struct cx_box
     v = *cx_test(cx_pop(scope, false)),
@@ -284,6 +291,11 @@ cx_lib(cx_init_iter, "cx/iter") {
 	       cx_args(cx_arg("it", cx->iter_type), cx_arg("n", cx->int_type)),
 	       cx_args(),
 	       drop_imp);
+
+  cx_add_cfunc(lib, "is-done", 
+	       cx_args(cx_arg("it", cx->iter_type)),
+	       cx_args(cx_arg(NULL, cx->bool_type)),
+	       is_done_imp);
 
   cx_add_cfunc(lib, "times",
 	       cx_args(cx_arg("n", cx->int_type),

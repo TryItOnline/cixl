@@ -1,3 +1,5 @@
+* add new-post fn
+** forward to all clients in topic/parents
 * add settings table
 ** add `operator-name setting
 *** set in database setup
@@ -7,7 +9,6 @@
 ** check if user exists in handle-in
 * load tables on startup
 
-* disconnect on empty login
 * add :list command
 * ---
 * debug row/col
