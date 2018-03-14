@@ -33,6 +33,9 @@ func: new-db-table(n Str k Stack)(_ DBTable)
 func: get-rec-key(t DBTable r A)(_ Stack)
   $t `key get {$r ~ get} map stack;
 
+func: len(t DBTable)(_ Int)
+  $t `key-recs get len;
+
 /*
   The transaction contains the current set of changes.
 */

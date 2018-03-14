@@ -12,7 +12,7 @@ use:
   (cx/error fail)
   (cx/func func:)
   (cx/guid Guid)
-  (cx/io RFile WFile #in #out flush include: lines print say)
+  (cx/io RFile WFile #in #out ask flush include: lines print say)
   (cx/io/poll Poll on-read wait)
   (cx/iter Iter for next while)
   (cx/net TCPServer accept listen)
@@ -26,7 +26,7 @@ use:
   (cx/var let:);
 
 include: 'qdb.cx';
-use: (qdb commit new-db-table upsert);
+use: (qdb commit len new-db-table upsert);
 
 func: get-path(n Str)(_ Str)
   [home-dir '.ircx' $n] @/ join;
@@ -34,49 +34,49 @@ func: get-path(n Str)(_ Str)
 '' get-path make-dir
 
 let: users 'users.db' get-path [`name] new-db-table;
-let: chans 'chans.db' get-path [`id] new-db-table;
+let: threads 'threads.db' get-path [`id] new-db-table;
 let: root Table new;
 
-rec: Chan ()
+rec: Thread ()
   id name  Sym
   info     Str
-  parent   Chan
+  parent   Thread
   children Table;
 
-func: save(c Chan)()
-  let: r Table new;
-  $r `id $c `id get put
-  $r `name $c `name get put
-  $r `info $c `info get put
+func: save(t Thread)()
+  let: rec Table new;
+  $rec `id $t `id get put
+  $rec `name $t `name get put
+  $rec `info $t `info get put
   
-  let: p $c `parent get;
-  $p {$r `parent $p `id get put} if
-  $chans $r upsert;
+  let: pt $t `parent get;
+  $pt {$rec `parent $pt `id get put} if
+  $threads $rec upsert;
 
-func: add-chan(p Opt c Chan)()
-  let: pc $p `children get;
+func: add-thread(pt Opt t Thread)()
+  let: pc $pt `children get;
 
   $pc {
-    $pc $c `name get $c put
+    $pc $t `name get $t put
   } {
     let: pc Table new;
-    $p `children $pc put
-    $pc $c `name get $c put    
+    $pt `children $pc put
+    $pc $t `name get $t put    
   } if-else;
 
-func: add-chan(#nil c Chan)()
-  $root $c `name get $c put;
+func: add-thread(#nil t Thread)()
+  $root $t `name get $t put;
 
 rec: User ()
-  name Sym
-  chan Chan;
+  name   Sym
+  thread Thread;
 
 func: save(u User)()
-  let: r Table new;
-  $r `name $u `name get put
-  let: c $u `chan get;
-  $c {$r `chan $c `id get put} if
-  $users $r upsert;
+  let: rec Table new;
+  $rec `name $u `name get put
+  let: t $u `thread get;
+  $t {$rec `thread $t `id get put} if
+  $users $rec upsert;
 
 func: new-user (n Sym)(_ User)
   let: u User new;
@@ -84,62 +84,62 @@ func: new-user (n Sym)(_ User)
   $u save
   $u;
 
-func: new-chan(u User n Sym)()
-  let: c Chan new;
+func: new-thread(u User n Sym)()
+  let: t Thread new;
   let: id [];
   
-  $c `name $n put
-  $c `info '' put
+  $t `name $n put
+  $t `info '' put
   
-  let: pc $u `chan get;
+  let: pt $u `thread get;
   
-  $pc {
-    $c `parent $pc put
-    $pc $c add-chan
-    $id $pc `id get push
+  $pt {
+    $t `parent $pt put
+    $pt $t add-thread
+    $id $pt `id get push
   } {
-    #nil $c add-chan
+    #nil $t add-thread
     $id '' push
   } if-else
 
   $id $n push
-  $c `id $id @/ join sym put
-  $c save;
+  $t `id $id @/ join sym put
+  $t save;
 
-func: join-chan(u User cns Str)()
-  $cns 0 get @/ = {$u `chan #nil put} if
+func: join-thread(u User ns Str)()
+  $ns 0 get @/ = {$u `thread #nil put} if
   
-  $cns @/ split {
+  $ns @/ split {
     let: n;
-    let: uc $u `chan get;
+    let: ut $u `thread get;
 
     $n '..' = {
-      $uc {'Chan not found: ..' fail} else
-      $u `chan $uc `parent get put  
+      $ut {'Thread not found: ..' fail} else
+      $u `thread $ut `parent get put  
     } {
-      $uc {
-        let: ccs $uc `children get;
-        $ccs {['Chan not found: ' $n] #nil join fail} else
+      $ut {
+        let: tc $ut `children get;
+        $tc {['Thread not found: ' $n] #nil join fail} else
     
-        let: c $ccs $n sym get;
-        $c {['Chan not found: ' $n] #nil join fail} else
+        let: t $tc $n sym get;
+        $t {['Thread not found: ' $n] #nil join fail} else
 
-        $u `chan $c put
+        $u `thread $t put
       } {
-        let: c $root $n sym get;
-        $c {['Chan not found: ' $n] #nil join fail} else      
-        $u `chan $c put
+        let: t $root $n sym get;
+        $t {['Thread not found: ' $n] #nil join fail} else      
+        $u `thread $t put
       } if-else
     } if-else
   } for;
 
-func: get-chan-id(u User)(_ Sym)
-  let: c $u `chan get;
-  $c {$c `id get} `/ if-else;
+func: get-thread-id(u User)(_ Sym)
+  let: t $u `thread get;
+  $t {$t `id get} `/ if-else;
 
-func: prompt(out WFile user Opt)()
-  $user {
-    $out [$user `name get @@s $user get-chan-id @> @@s] print
+func: prompt(out WFile u Opt)()
+  $u {
+    $out [$u `name get @@s $u get-thread-id @> @@s] print
   } {
     $out 'login> ' print
   } if-else
@@ -153,8 +153,8 @@ rec: Client ()
 
 let: poll Poll new;
 
-func: handle-input(client Client in Str)()
-  let: user $client `user get;
+func: handle-input(c Client in Str)()
+  let: user $c `user get;
 
   $user {
     $in 0 get @: = {
@@ -163,23 +163,23 @@ func: handle-input(client Client in Str)()
 
       switch:
         (($cmd `:join =)
-          $u $ins next join-chan)
+          $u $ins next join-thread)
         (#t
           ['Invalid cmd: ' $cmd] #nil join fail);
     } {
       'message' say
     } if-else
   } {
-    $client `user $in sym new-user put
+    $c `user $in sym new-user put
   } if-else;
 
-func: new-client(in RFile out WFile user Opt)()
+func: new-client(in RFile out WFile u Opt)()
   let: c Client new;
   let: ils $in lines;
 
   $c `in $ils put
   $c `out $out put
-  $user {$c `user $user put} if
+  $u {$c `user $u put} if
   
   $poll $in {
     let: l $ils next;
@@ -192,11 +192,20 @@ func: new-client(in RFile out WFile user Opt)()
 
   $out $c `user get prompt;
 
+['ir.cx v0.1' @@n] say
+
+$users len {
+  ['Database Setup' @@n] say
+  'Operator Name: ' ask
+  sym new-user
+  [@@n 'Done!' @@n] say
+} else
+
 let: u `me new-user;
-$u `foo new-chan
-$u 'foo' join-chan
-$u `bar new-chan
-$u 'bar' join-chan
+$u `foo new-thread
+$u 'foo' join-thread
+$u `bar new-thread
+$u 'bar' join-thread
 commit
 
 #in #out $u new-client

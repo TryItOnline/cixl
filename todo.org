@@ -5,6 +5,13 @@
 * add Client.out_buf
 ** append output to buf instead of printing
 ** register write poll on append and remove when buf is empty
+* add settings table
+** add `operator-name setting
+*** set in database setup
+*** use to get console user
+* add qdb.find-key
+** use to get user
+* load tables on startup
 * add :list command
 * ---
 * debug row/col
@@ -14,6 +21,7 @@
 ** read/write boxes through pipe
 ** add atomic counter for len
 *** stdatomic.h
+** rename to Chan and move out of io
 * add MFile type
 ** use struct cx_mfile
 *** add nrefs
