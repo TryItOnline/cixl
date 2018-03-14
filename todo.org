@@ -1,17 +1,13 @@
-* add write-bytes support
-** add cx_buf.pos
-** use as offset and inc
-** disconnect on empty login
-* add Client.out_buf
-** append output to buf instead of printing
-** register write poll on append and remove when buf is empty
 * add settings table
 ** add `operator-name setting
 *** set in database setup
 *** use to get console user
 * add qdb.find-key
 ** use to get user
+** check if user exists in handle-in
 * load tables on startup
+
+* disconnect on empty login
 * add :list command
 * ---
 * debug row/col

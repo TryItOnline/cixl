@@ -7,13 +7,14 @@
 */
 
 use:
-  (cx/abc Opt Stack Str Sym #nil #t is-nil)
+  (cx/abc A Opt Stack Str Sym #nil #t is-nil)
+  (cx/buf Buf push write-bytes)
   (cx/cond = else if if-else switch:)
   (cx/error fail)
   (cx/func func:)
   (cx/guid Guid)
-  (cx/io RFile WFile #in #out ask flush include: lines print say)
-  (cx/io/poll Poll on-read wait)
+  (cx/io RFile WFile #in #out ask include: lines print say)
+  (cx/io/poll Poll delete no-write on-read on-write wait)
   (cx/iter Iter for next while)
   (cx/net TCPServer accept listen)
   (cx/rec ? rec: get put)
@@ -36,6 +37,7 @@ func: get-path(n Str)(_ Str)
 let: users 'users.db' get-path [`name] new-db-table;
 let: threads 'threads.db' get-path [`id] new-db-table;
 let: root Table new;
+let: poll Poll new;
 
 rec: Thread ()
   id name  Sym
@@ -137,38 +139,54 @@ func: get-thread-id(u User)(_ Sym)
   let: t $u `thread get;
   $t {$t `id get} `/ if-else;
 
-func: prompt(out WFile u Opt)()
-  $u {
-    $out [$u `name get @@s $u get-thread-id @> @@s] print
-  } {
-    $out 'login> ' print
-  } if-else
-  
-  $out flush;
-
 rec: Client ()
   user User
   in   Iter
-  out  WFile;
+  out  WFile
+  buf  Buf;
 
-let: poll Poll new;
+func: push-out(c Client v A)()
+  let: buf $c `buf get;
 
-func: handle-input(c Client in Str)()
-  let: user $c `user get;
+  $buf {
+    let: out $c `out get;
+    
+    $poll $out {
+      $out $buf write-bytes
+      $buf {$poll $out no-write} else
+    } on-write
+  } else
 
-  $user {
-    $in 0 get @: = {
-      let: ins $in @@s split;
-      let: cmd $ins next sym;
+  $buf $v push;
 
-      switch:
-        (($cmd `:join =)
-          $u $ins next join-thread)
-        (#t
-          ['Invalid cmd: ' $cmd] #nil join fail);
-    } {
-      'message' say
-    } if-else
+func: prompt(c Client)()
+  let: u $c `user get;
+  
+  $u {
+    $c $u `name get push-out
+    $c @@s push-out
+    $c $u get-thread-id push-out
+    $c '> ' push-out
+  } {
+    $c 'login> ' push-out
+  } if-else;
+
+func: handle-in(c Client in Str)()
+  $c `user get {
+    $in {
+      $in 0 get @: = {
+        let: ins $in @@s split;
+        let: cmd $ins next sym;
+
+        switch:
+          (($cmd `:join =)
+            $c `user get $ins next join-thread)
+          (#t
+            ['Invalid cmd: ' $cmd] #nil join fail);
+      } {
+        'post' say
+      } if-else
+    } if
   } {
     $c `user $in sym new-user put
   } if-else;
@@ -179,18 +197,19 @@ func: new-client(in RFile out WFile u Opt)()
 
   $c `in $ils put
   $c `out $out put
+  $c `buf Buf new put
   $u {$c `user $u put} if
   
   $poll $in {
     let: l $ils next;
   
     $l is-nil {
-      $c $l handle-input
-      $out $c `user get prompt
+      $c $l handle-in
+      $c prompt
     } else
   } on-read
 
-  $out $c `user get prompt;
+  $c prompt;
 
 ['ir.cx v0.1' @@n] say
 

@@ -13,11 +13,11 @@
 
 use:
   (cx/abc     Int is-nil)
-  (cx/buf     Buf clear len)
+  (cx/buf     Buf clear len read-bytes)
   (cx/cond    ? = > if else)
   (cx/const   define:)
   (cx/func    func:)
-  (cx/io      close read-bytes say)
+  (cx/io      close say)
   (cx/io/poll Poll delete len on-read wait)
   (cx/iter    for while)
   (cx/net     connect)

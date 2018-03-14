@@ -289,41 +289,6 @@ static bool read_imp(struct cx_scope *scope) {
   return true;
 }
 
-static bool read_bytes_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  bool ok = false;
-
-  struct cx_box
-    nbytes = *cx_test(cx_pop(scope, false)),
-    out = *cx_test(cx_pop(scope, false)),
-    in = *cx_test(cx_pop(scope, false));
-
-  struct cx_buf *o = out.as_buf;
-  cx_vec_grow(&o->data, o->data.count+nbytes.as_int);  
-  int rbytes = read(in.as_file->fd, o->data.items, nbytes.as_int);
-
-  if (!rbytes || (rbytes == -1 && errno == ECONNREFUSED)) {
-    cx_box_init(cx_push(scope), cx->nil_type);
-    ok = true;
-    goto exit;
-  }
-
-  if (rbytes == -1 && errno == EAGAIN) { rbytes = 0; }
-
-  if (rbytes == -1) {
-    cx_error(cx, cx->row, cx->col, "Failed reading: %d", errno);
-    goto exit;
-  }
-
-  o->data.count += rbytes;
-  cx_box_init(cx_push(scope), cx->int_type)->as_int = rbytes;
-  ok = true;
- exit:
-  cx_box_deinit(&out);
-  cx_box_deinit(&in);
-  return ok;
-}
-
 static bool write_imp(struct cx_scope *scope) {
   struct cx_box
     v = *cx_test(cx_pop(scope, false)),
@@ -348,8 +313,7 @@ static bool lines_imp(struct cx_scope *scope) {
 cx_lib(cx_init_io, "cx/io") {    
   struct cx *cx = lib->cx;
     
-  if (!cx_use(cx, "cx/abc", "A", "Cmp", "Char", "Iter", "Opt", "Str", "Sym") ||
-      !cx_use(cx, "cx/buf", "Buf")) {
+  if (!cx_use(cx, "cx/abc", "A", "Cmp", "Char", "Iter", "Opt", "Str", "Sym")) {
     return false;
   }
 
@@ -400,13 +364,6 @@ cx_lib(cx_init_io, "cx/io") {
 	       cx_args(cx_arg("f", cx->rfile_type)),
 	       cx_args(cx_arg(NULL, cx->iter_type)),
 	       read_imp);
-
-  cx_add_cfunc(lib, "read-bytes",
-	       cx_args(cx_arg("in", cx->rfile_type),
-		       cx_arg("out", cx->buf_type),
-		       cx_arg("nbytes", cx->int_type)),
-	       cx_args(cx_arg(NULL, cx->opt_type)),
-	       read_bytes_imp);
 
   cx_add_cfunc(lib, "write",
 	       cx_args(cx_arg("f", cx->wfile_type), cx_arg("v", cx->opt_type)),

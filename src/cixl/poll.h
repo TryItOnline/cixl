@@ -28,8 +28,9 @@ struct cx_poll *cx_poll_ref(struct cx_poll *p);
 void cx_poll_deref(struct cx_poll *p);
 
 struct cx_poll_file *cx_poll_read(struct cx_poll *p, int fd);
+bool cx_poll_no_read(struct cx_poll *p, int fd);
 struct cx_poll_file *cx_poll_write(struct cx_poll *p, int fd);
-
+bool cx_poll_no_write(struct cx_poll *p, int fd);
 bool cx_poll_delete(struct cx_poll *p, int fd);
 int cx_poll_wait(struct cx_poll *p, int ms, struct cx_scope *s);
 

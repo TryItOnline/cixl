@@ -29,6 +29,45 @@ static bool on_read_imp(struct cx_scope *scope) {
   return true;
 }
 
+static bool no_read_imp(struct cx_scope *scope) {
+  struct cx_box
+    f = *cx_test(cx_pop(scope, false)),
+    p = *cx_test(cx_pop(scope, false));
+  
+  bool ok = cx_poll_no_read(p.as_poll, f.as_file->fd);
+
+  cx_box_deinit(&f);
+  cx_box_deinit(&p);
+  return ok;
+}
+
+static bool on_write_imp(struct cx_scope *scope) {
+  struct cx_box
+    a = *cx_test(cx_pop(scope, false)),
+    f = *cx_test(cx_pop(scope, false)),
+    p = *cx_test(cx_pop(scope, false));
+  
+  struct cx_poll_file *pf = cx_poll_write(p.as_poll, f.as_file->fd);
+  cx_copy(&pf->write_value, &a);
+
+  cx_box_deinit(&a);
+  cx_box_deinit(&f);
+  cx_box_deinit(&p);
+  return true;
+}
+
+static bool no_write_imp(struct cx_scope *scope) {
+  struct cx_box
+    f = *cx_test(cx_pop(scope, false)),
+    p = *cx_test(cx_pop(scope, false));
+  
+  bool ok = cx_poll_no_write(p.as_poll, f.as_file->fd);
+
+  cx_box_deinit(&f);
+  cx_box_deinit(&p);
+  return ok;
+}
+
 static bool delete_imp(struct cx_scope *scope) {
   struct cx *cx = scope->cx;
 
@@ -87,6 +126,23 @@ cx_lib(cx_init_poll, "cx/io/poll") {
 		       cx_arg("a", cx->any_type)),
 	       cx_args(),
 	       on_read_imp);
+
+  cx_add_cfunc(lib, "no-read",
+	       cx_args(cx_arg("p", cx->poll_type), cx_arg("f", cx->rfile_type)),
+	       cx_args(),
+	       no_read_imp);
+
+  cx_add_cfunc(lib, "on-write",
+	       cx_args(cx_arg("p", cx->poll_type),
+		       cx_arg("f", cx->wfile_type),
+		       cx_arg("a", cx->any_type)),
+	       cx_args(),
+	       on_write_imp);
+
+  cx_add_cfunc(lib, "no-write",
+	       cx_args(cx_arg("p", cx->poll_type), cx_arg("f", cx->wfile_type)),
+	       cx_args(),
+	       no_write_imp);
 
   cx_add_cfunc(lib, "delete",
 	       cx_args(cx_arg("p", cx->poll_type), cx_arg("f", cx->file_type)),

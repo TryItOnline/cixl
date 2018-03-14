@@ -81,6 +81,14 @@ struct cx_poll_file *cx_poll_read(struct cx_poll *p, int fd) {
   return pf;
 }
 
+bool cx_poll_no_read(struct cx_poll *p, int fd) {
+  struct pollfd *pfd = cx_set_get(&p->fds, &fd);
+  if (!pfd) { return false; }
+  if (!(pfd->events & POLLIN)) { return false; }
+  pfd->events ^= POLLIN;
+  return true;
+}
+
 struct cx_poll_file *cx_poll_write(struct cx_poll *p, int fd) {
   void *found = NULL;
   size_t i = cx_set_find(&p->files, &fd, 0, &found);
@@ -109,6 +117,14 @@ struct cx_poll_file *cx_poll_write(struct cx_poll *p, int fd) {
 
   pfd->events |= POLLOUT;
   return pf;
+}
+
+bool cx_poll_no_write(struct cx_poll *p, int fd) {
+  struct pollfd *pfd = cx_set_get(&p->fds, &fd);
+  if (!pfd) { return false; }
+  if (!(pfd->events & POLLOUT)) { return false; }
+  pfd->events ^= POLLOUT;
+  return true;
 }
 
 bool cx_poll_delete(struct cx_poll *p, int fd) {
