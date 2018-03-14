@@ -1,16 +1,10 @@
 * add write-bytes support
 ** add cx_buf.pos
 ** use as offset and inc
-* add Client type
-** user User
-** out-buf Buf
-** io File
-* display user> prompt until logged in on connect
-** disconnect if empty
-** lookup user in users table
-*** add if not exists 
-** create session with user
-* connect with telnet
+** disconnect on empty login
+* add Client.out_buf
+** append output to buf instead of printing
+** register write poll on append and remove when buf is empty
 * add :list command
 * ---
 * debug row/col

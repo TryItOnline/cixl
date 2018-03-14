@@ -12,9 +12,9 @@ use:
   (cx/error fail)
   (cx/func func:)
   (cx/guid Guid)
-  (cx/io WFile #in #out flush include: lines print say)
+  (cx/io RFile WFile #in #out flush include: lines print say)
   (cx/io/poll Poll on-read wait)
-  (cx/iter for next while)
+  (cx/iter Iter for next while)
   (cx/net TCPServer accept listen)
   (cx/rec ? rec: get put)
   (cx/str join split words)
@@ -137,8 +137,60 @@ func: get-chan-id(u User)(_ Sym)
   let: c $u `chan get;
   $c {$c `id get} `/ if-else;
 
-func: prompt(out WFile u User)()
-  $out [$u `name get @@s $u get-chan-id @> @@s] print;
+func: prompt(out WFile user Opt)()
+  $user {
+    $out [$user `name get @@s $user get-chan-id @> @@s] print
+  } {
+    $out 'login> ' print
+  } if-else
+  
+  $out flush;
+
+rec: Client ()
+  user User
+  in   Iter
+  out  WFile;
+
+let: poll Poll new;
+
+func: handle-input(client Client in Str)()
+  let: user $client `user get;
+
+  $user {
+    $in 0 get @: = {
+      let: ins $in @@s split;
+      let: cmd $ins next sym;
+
+      switch:
+        (($cmd `:join =)
+          $u $ins next join-chan)
+        (#t
+          ['Invalid cmd: ' $cmd] #nil join fail);
+    } {
+      'message' say
+    } if-else
+  } {
+    $client `user $in sym new-user put
+  } if-else;
+
+func: new-client(in RFile out WFile user Opt)()
+  let: c Client new;
+  let: ils $in lines;
+
+  $c `in $ils put
+  $c `out $out put
+  $user {$c `user $user put} if
+  
+  $poll $in {
+    let: l $ils next;
+  
+    $l is-nil {
+      $c $l handle-input
+      $out $c `user get prompt
+    } else
+  } on-read
+
+  $out $c `user get prompt;
 
 let: u `me new-user;
 $u `foo new-chan
@@ -147,44 +199,13 @@ $u `bar new-chan
 $u 'bar' join-chan
 commit
 
-let: poll Poll new;
-let: in #in lines;
-
-$poll #in {
-  let: line $in next;
-  
-  $line is-nil {
-    $line {
-      $line 0 get @: = {
-        let: cmd $line @@s split;
-        let: cmd-id $cmd next sym;
-
-	switch:
-	  (($cmd-id `:join =)
-	    $u $cmd next join-chan)
-	  (#t
-            ['Invalid cmd: ' $cmd-id] #nil join fail);
-      } {
-        'message' say
-      } if-else
-    } if
-    
-    #out $u prompt
-    #out flush
-  } else
-} on-read
-
-#out $u prompt
-#out flush
+#in #out $u new-client
 
 let: server #nil 7707 3 listen;
 
 $poll $server {
       let: c $server accept;
-      
-      $c {
-        'new connection' say
-      } if
+      $c {$c $c #nil new-client} if
 } on-read
 
 {$poll -1 wait} while
