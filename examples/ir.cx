@@ -1,7 +1,7 @@
 #!/usr/local/bin/cixl
 
 /*
-  The seed of a distributed, simplified IRC alternative.
+  The seed of a simplified IRC.
 
   https://github.com/basic-gongfu/cixl#getting-started
 */
@@ -37,8 +37,7 @@ let: chans 'chans.db' get-path [`id] new-db-table;
 let: root Table new;
 
 rec: Chan ()
-  id       Sym
-  name     Sym
+  id name  Sym
   info     Str
   parent   Chan
   children Table;

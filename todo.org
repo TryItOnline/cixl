@@ -1,3 +1,15 @@
+* add Client type
+** user User
+** out-buf Stack
+** io File
+* display user> prompt until logged in on connect
+** disconnect if empty
+** lookup user in users table
+*** add if not exists 
+** create session with user
+* connect with telnet
+* add :list command
+* ---
 * debug row/col
 * add TCPServer
 ** add listen fn
@@ -5,8 +17,10 @@
 * add write-bytes support
 ** add cx_buf.pos
 ** use as offset and inc
-* separate Buf read/write polling
+* separate Queue read/write polling
 ** read/write boxes through pipe
+** add atomic counter for len
+*** stdatomic.h
 * add MFile type
 ** use struct cx_mfile
 *** add nrefs
