@@ -151,7 +151,7 @@ struct cx *cx_init(struct cx *cx) {
     cx->queue_type = 
     cx->rat_type = cx->rec_type = cx->ref_type = cx->rfile_type = cx->rwfile_type =
     cx->seq_type = cx->stack_type = cx->str_type = cx->sym_type =
-    cx->table_type = cx->tcp_client_type = cx->time_type =
+    cx->table_type = cx->tcp_client_type = cx->tcp_server_type = cx->time_type =
     cx->wfile_type = NULL;
       
   cx->scope = NULL;

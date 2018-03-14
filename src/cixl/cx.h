@@ -42,7 +42,7 @@ struct cx {
     *queue_type,
     *rat_type, *rec_type, *ref_type, *rfile_type, *rwfile_type,
     *seq_type, *stack_type, *str_type, *sym_type,
-    *table_type, *tcp_client_type, *time_type,
+    *table_type, *tcp_client_type, *tcp_server_type, *time_type,
     *wfile_type;
 
   size_t next_sym_tag, next_type_tag;

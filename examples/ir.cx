@@ -15,6 +15,7 @@ use:
   (cx/io WFile #in #out flush include: lines print say)
   (cx/io/poll Poll on-read wait)
   (cx/iter for next while)
+  (cx/net TCPServer accept listen)
   (cx/rec ? rec: get put)
   (cx/str join split words)
   (cx/sym sym)
@@ -175,5 +176,15 @@ $poll #in {
 
 #out $u prompt
 #out flush
+
+let: server #nil 7707 3 listen;
+
+$poll $server {
+      let: c $server accept;
+      
+      $c {
+        'new connection' say
+      } if
+} on-read
 
 {$poll -1 wait} while
