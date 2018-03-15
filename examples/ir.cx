@@ -43,7 +43,7 @@ let: poll Poll new;
 
 func: get-option(id Sym)(_ Opt)
   let: rec $options [$id] find-key;
-  $rec {$rec `value get} #nil if-else;
+  $rec {$rec `value get} and;
 
 func: set-option(id Sym v A)()
   let: rec Table new;
@@ -192,7 +192,7 @@ func: fmt-post(c Client in Str)(_ Str)
   let: (h m) now % hour ~ minute;
   let: u $c `user get;
   let: t $c `topic get;
-  [$h @: $m @@s @@ $u `name get @@s $t `id get $in @@n] #nil join;
+  [$h @: $m @@s @@ $u `name get @@s $t `id get @@s $in @@n] #nil join;
 
 func: new-post(c Client in Str)()
   let: u $c `user get;
