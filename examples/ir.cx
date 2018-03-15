@@ -9,7 +9,7 @@
 use:
   (cx/abc A Opt Stack Str Sym #nil #t is-nil)
   (cx/buf Buf push write-bytes)
-  (cx/cond = == and else if if-else switch:)
+  (cx/cond = == and else if if-else or switch:)
   (cx/error fail)
   (cx/func func: recall)
   (cx/guid Guid)
@@ -150,6 +150,10 @@ func: pick-topic(c Client ns Str)()
 
   $c `topic get `clients get $c #t put;
 
+func: pick-topic(c Client t Topic)()
+  $c `topic $t put
+  $c `topic get `clients get $c #t put;
+
 func: push-out(c Client v A)()
   let: buf $c `buf get;
   $buf $v push;
@@ -219,7 +223,7 @@ func: handle-in(c Client in Str)()
 
         switch:
           (($cmd `pick =)
-            $c $ins next pick-topic)
+	    $c $ins next $root or pick-topic)
           (#t
             ['Invalid cmd: ' $cmd] #nil join fail);
       } {
@@ -286,8 +290,8 @@ $c % prompt poll-out
 let: server #nil 7707 3 listen;
 
 $poll $server {
-      let: io $server accept;
-      $io {$io $io new-client % prompt poll-out} if
+  let: io $server accept;
+  $io {$io $io new-client % prompt poll-out} if
 } on-read
 
 {$poll -1 wait} while
