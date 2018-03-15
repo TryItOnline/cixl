@@ -21,6 +21,15 @@
 * extract global cmds Table
 ** call with param iter pushed
 ** extract join/list
+* add Topic.log
+** open in new-topic and log all posts
+** add :search command
+*** process log file using poll
+*** prompt Text: if no arg
+*** exit if empty
+*** show 10 first hits
+*** keep looping Text:
+**** next 10 if empty
 * ---
 * debug row/col
 * switch func arg and fimp parsing to ids
