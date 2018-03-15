@@ -9,7 +9,7 @@
 use:
   (cx/abc A Opt Stack Str Sym #nil #t is-nil)
   (cx/buf Buf push write-bytes)
-  (cx/cond = == else if if-else switch:)
+  (cx/cond = == and else if if-else switch:)
   (cx/error fail)
   (cx/func func: recall)
   (cx/guid Guid)
@@ -29,16 +29,27 @@ use:
   (cx/var let:);
 
 include: 'qdb.cx';
-use: (qdb commit len new-db-table upsert);
+use: (qdb commit find-key len new-db-table upsert);
 
 func: get-path(n Str)(_ Str)
   [home-dir '.ircx' $n] @/ join;
 
 '' get-path make-dir
 
+let: options 'options.db' get-path [`id] new-db-table;
 let: users 'users.db' get-path [`name] new-db-table;
 let: topics 'topics.db' get-path [`id] new-db-table;
 let: poll Poll new;
+
+func: get-option(id Sym)(_ Opt)
+  let: rec $options [$id] find-key;
+  $rec {$rec `value get} #nil if-else;
+
+func: set-option(id Sym v A)()
+  let: rec Table new;
+  $rec `id $id put
+  $rec `value $v put
+  $options $rec upsert;
 
 rec: Topic ()
   id name  Sym
@@ -74,6 +85,15 @@ func: add-topic(pt t Topic)()
 rec: User ()
   name  Sym;
 
+func: load-user(rec Table)(_ User)
+  let: u User new;
+  $u `name $rec `name get put
+  $u;
+
+func: find-user(name Sym)(_ Opt)
+  let: rec $users [$name] find-key;
+  $rec {$rec load-user} and;
+  
 func: save(u User)()
   let: rec Table new;
   $rec `name $u `name get put
@@ -142,6 +162,7 @@ func: prompt(c Client)()
     $c $u `name get push-out
     $c @@s push-out
     $c % `topic get `id get push-out
+    $c @@s push-out
   } {
     $c 'User: ' push-out
   } if-else;
@@ -243,12 +264,15 @@ func: new-client(in RFile out WFile)(_ Client)
 $users len {
   ['Database Setup' @@n] say
   'Operator Name: ' ask
-  sym new-user _
+  let: n sym;
+  $n new-user _
+  `operator-name $n set-option
   [@@n 'Done!' @@n] say
 } else
 
-let: u `me new-user;
 let: c #in #out new-client;
+let: u `operator-name get-option find-user;
+$u {'Operator not found' fail} else
 $c `user $u put
 
 $c `foo new-topic

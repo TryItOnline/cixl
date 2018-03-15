@@ -1,13 +1,12 @@
-* add settings table
-** add `operator-name setting
-*** set in database setup
-*** use to get console user
-* add qdb.find-key
-** use to get user
-** check if user exists in handle-in
 * load tables on startup
-
 * add :list command
+* add :new-topic command
+** add admins table
+*** Key on User name and Topic id
+*** add is-admin fn
+**** check topic parent chain
+** add user as admin for new topics
+** add operator as admin for root topic in db setup
 * add support for @-mention
 ** add user.out Stack
 *** init in new-user
@@ -16,20 +15,13 @@
 *** process user.out before checking
 *** process and move to buf in new-client & poll loop 
 * add User.password
-** ask on database setup
+** add Client.state Sym 
+*** `user/password/command
+** ask on database< setup
 ** ask on login if !is-nil
-* extract global cmds Table
-** call with param iter pushed
-** extract join/list
 * add Topic.log
+** name file after topic id
 ** open in new-topic and log all posts
-** add :search command
-*** process log file using poll
-*** prompt Text: if no arg
-*** exit if empty
-*** show 10 first hits
-*** keep looping Text:
-**** next 10 if empty
 * ---
 * debug row/col
 * switch func arg and fimp parsing to ids

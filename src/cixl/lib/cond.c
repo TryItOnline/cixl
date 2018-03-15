@@ -422,18 +422,18 @@ cx_lib(cx_init_cond, "cx/cond") {
 	       or_imp);
   
   cx_add_cfunc(lib, "if",
-	       cx_args(cx_arg("cnd", cx->opt_type), cx_arg("act", cx->any_type)),
+	       cx_args(cx_arg("cnd", cx->opt_type), cx_arg("act", cx->opt_type)),
 	       cx_args(),
 	       if_imp);
 
   cx_add_cfunc(lib, "else",
-	       cx_args(cx_arg("cnd", cx->opt_type), cx_arg("act", cx->any_type)),
+	       cx_args(cx_arg("cnd", cx->opt_type), cx_arg("act", cx->opt_type)),
 	       cx_args(),
 	       else_imp);
 
   cx_add_cfunc(lib, "if-else",
 	       cx_args(cx_arg("cnd", cx->opt_type),
-		       cx_arg("tact", cx->any_type), cx_arg("fact", cx->any_type)),
+		       cx_arg("tact", cx->opt_type), cx_arg("fact", cx->opt_type)),
 	       cx_args(),
 	       if_else_imp);
 

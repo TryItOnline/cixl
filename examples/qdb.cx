@@ -33,6 +33,9 @@ func: new-db-table(n Str k Stack)(_ DBTable)
 func: get-rec-key(t DBTable r A)(_ Stack)
   $t `key get {$r ~ get} map stack;
 
+func: find-key(t DBTable k Stack)(_ Opt)
+  $t `key-recs get $k get;
+
 func: len(t DBTable)(_ Int)
   $t `key-recs get len;
 
