@@ -151,6 +151,8 @@ func: pick-topic(c Client ns Str)()
   $c `topic get `clients get $c #t put;
 
 func: pick-topic(c Client t Topic)()
+  let: ct $c `topic get;
+  $ct {$ct `clients get $c delete} if
   $c `topic $t put
   $c `topic get `clients get $c #t put;
 
@@ -246,8 +248,7 @@ func: new-client(in RFile out WFile)(_ Client)
   $c `in $in put
   $c `out $out put
   $c `buf Buf new put
-  $c `topic $root put
-  $root `clients get $c #t put
+  $c $root pick-topic
     
   $poll $in {
     let: l $ils next;
