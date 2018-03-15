@@ -368,13 +368,17 @@ static bool parse_char(struct cx *cx, FILE *in, struct cx_vec *out) {
     default:
       ungetc(c, in);
       
-      if (!parse_int(cx, in, out)) {
-	cx_error(cx, row, col, "Invalid char literal");
-	return false;
+      if (isdigit(c)) {
+	if (!parse_int(cx, in, out)) {
+	  cx_error(cx, row, col, "Invalid char literal");
+	  return false;
+	}
+	
+	struct cx_tok *t = cx_vec_pop(out);
+	c = t->as_box.as_int;
+      } else {
+	c = '@';
       }
-
-      struct cx_tok *t = cx_vec_pop(out);
-      c = t->as_box.as_int;
     }
   }
   
@@ -382,8 +386,8 @@ static bool parse_char(struct cx *cx, FILE *in, struct cx_vec *out) {
 				    CX_TLITERAL(),
 				    cx->row, cx->col)->as_box;
   cx_box_init(box, cx->char_type)->as_char = c;
-  
   cx->col++;
+  
   return true;
 }
 

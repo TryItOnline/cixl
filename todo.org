@@ -1,5 +1,4 @@
-* add new-post fn
-** forward to all clients in topic/parents
+* move topic from User to Client
 * add settings table
 ** add `operator-name setting
 *** set in database setup
@@ -10,6 +9,7 @@
 * load tables on startup
 
 * add :list command
+* add support for @-mentions
 * ---
 * debug row/col
 * switch func arg and fimp parsing to ids

@@ -94,7 +94,7 @@ static bool wait_imp(struct cx_scope *scope) {
   cx_box_deinit(&p);
 
   if (n == -1) {
-    cx_error(cx, cx->row, cx->col, "Failed polling");
+    cx_error(cx, cx->row, cx->col, "Failed polling: %d", errno);
     return false;
   }
   
