@@ -72,35 +72,32 @@ func: add-topic(pt t Topic)()
   } if-else;
 
 rec: User ()
-  name  Sym
-  topic Topic;
+  name  Sym;
 
 func: save(u User)()
   let: rec Table new;
   $rec `name $u `name get put
-  let: t $u `topic get;
-  $t {$rec `topic $t `id get put} if
   $users $rec upsert;
 
 func: new-user (n Sym)(_ User)
   let: u User new;
   $u `name $n put
-  $u `topic $root put
   $u save
   $u;
 
 rec: Client ()
-  user User
-  in   RFile
-  out  WFile
-  buf  Buf;
+  user  User
+  topic Topic
+  in    RFile
+  out   WFile
+  buf   Buf;
 
 func: new-topic(c Client n Sym)()
   let: t Topic new;  
   $t `name $n put
   $t `clients Table new put
   
-  let: pt $c `user get `topic get;
+  let: pt $c `topic get;
   $t `parent $pt put
   $pt $t add-topic
 
@@ -108,32 +105,30 @@ func: new-topic(c Client n Sym)()
   $t save;
 
 func: join-topic(c Client ns Str)()
-  let: u $c `user get;
-  $u `topic get `clients get $c delete
-
-  $ns 0 get @/ = {$u `topic $root put} if
+  $c `topic get `clients get $c delete
+  $ns 0 get @/ = {$c `topic $root put} if
   
   $ns @/ split {
     let: n;
-    let: ut $u `topic get;
+    let: t $c `topic get;
 
     $n '..' = {
-      $ut {'Topic not found: ..' fail} else
-      let: pt $ut `parent get;
+      $t {'Topic not found: ..' fail} else
+      let: pt $t `parent get;
       $pt {'Topic not found: ..' fail} else
-      $u `topic $pt put
+      $c `topic $pt put
     } {
-      let: tc $ut `children get;
+      let: tc $t `children get;
       $tc {['Topic not found: ' $n] #nil join fail} else
     
-      let: t $tc $n sym get;
-      $t {['Topic not found: ' $n] #nil join fail} else
+      let: ct $tc $n sym get;
+      $ct {['Topic not found: ' $n] #nil join fail} else
 
-      $u `topic $t put
+      $c `topic $ct put
     } if-else
   } for
 
-  $u `topic get `clients get $c #t put;
+  $c `topic get `clients get $c #t put;
 
 func: push-out(c Client v A)()
   let: buf $c `buf get;
@@ -143,9 +138,10 @@ func: prompt(c Client)()
   let: u $c `user get;
   
   $u {
+    $c @@ push-out
     $c $u `name get push-out
     $c @@s push-out
-    $c $u `topic get `id get push-out
+    $c % `topic get `id get push-out
   } {
     $c 'User: ' push-out
   } if-else;
@@ -160,7 +156,7 @@ func: disconnect(c Client)()
     $poll $out delete
   } if-else
 
-  $c `user get `topic get `clients get $c delete;
+  $c `topic get `clients get $c delete;
 
 func: push-post(u User t Topic in Str)()
   $t `clients get {
@@ -171,9 +167,10 @@ func: push-post(u User t Topic in Str)()
   let: pt $t `parent get;
   $pt {$u $pt $in recall} if;
 
-func: new-post(u User in Str)()
-  let: t $u `topic get;
+func: new-post(c Client in Str)()
   let: (h m) now % hour ~ minute;
+  let: u $c `user get;
+  let: t $c `topic get;
   let: p [$h @: $m @@s @@ $u `name get @@s $t `id get $in @@n] #nil join;
   $u $t $p push-post;
 
@@ -199,7 +196,7 @@ func: handle-in(c Client in Str)()
           (#t
             ['Invalid cmd: ' $cmd] #nil join fail);
       } {
-        $c `user get $in new-post
+        $c $in new-post
       } if-else
     } if
   } {
@@ -218,6 +215,8 @@ func: new-client(in RFile out WFile)(_ Client)
   $c `in $in put
   $c `out $out put
   $c `buf Buf new put
+  $c `topic $root put
+  $root `clients get $c #t put
     
   $poll $in {
     let: l $ils next;
@@ -244,9 +243,7 @@ $users len {
 
 let: u `me new-user;
 let: c #in #out new-client;
-
 $c `user $u put
-$u `topic get `clients get $c #t put
 
 $c `foo new-topic
 $c 'foo' join-topic

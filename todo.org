@@ -1,4 +1,3 @@
-* move topic from User to Client
 * add settings table
 ** add `operator-name setting
 *** set in database setup
