@@ -56,8 +56,16 @@ static ssize_t let_eval(struct cx_macro_eval *eval,
     
     cx_do_vec(toks, struct cx_tok, t) {
       if (t->type == CX_TID()) {
-	*(struct cx_tok *)cx_vec_push(&ids) = *t;
-      } else if (t->type == CX_TTYPE() && !push_type(t->as_ptr)) {
+	char *id = t->as_ptr;
+
+	if (isupper(id[0])) {
+	  struct cx_type *type = cx_get_type(*cx->lib, id, false);
+	  if (!type || !push_type(type)) { goto exit; }
+	} else {
+	  *(struct cx_tok *)cx_vec_push(&ids) = *t;
+	}
+      } else {
+	cx_error(cx, t->row, t->col, "Invalid let tok: %s", t->type->id);
 	goto exit;
       }
     }

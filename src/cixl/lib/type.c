@@ -34,29 +34,26 @@ static bool trait_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   }
 
   struct cx_tok id_tok = *(struct cx_tok *)cx_vec_pop(&toks);
-  struct cx_type *type = NULL;
 
-  if (id_tok.type == CX_TTYPE()) {
-    type = id_tok.as_ptr;
-    
-    if (!type->trait) {
-      cx_error(cx, row, col, "Attempt to redefine %s as trait", type->id);
-      goto exit1;
-    }
-  }
-
-  if (id_tok.type != CX_TID() && id_tok.type != CX_TTYPE()) {
-    cx_error(cx, row, col, "Invalid trait id");
+  if (id_tok.type != CX_TID()) {
+    cx_error(cx, row, col, "Invalid trait id: %s", id_tok.type->id);
     goto exit1;
   }
 
+  struct cx_type *type = cx_get_type(*cx->lib, id_tok.as_ptr, true);
+  
+  if (type && !type->trait) {
+    cx_error(cx, row, col, "Attempt to redefine %s as trait", type->id);
+    goto exit1;
+  }
+  
   if (!cx_parse_end(cx, in, &toks, false)) {
     if (!cx->errors.count) { cx_error(cx, cx->row, cx->col, "Missing trait end"); }
     goto exit1;
   }
 
   cx_do_vec(&toks, struct cx_tok, t) {
-    if (t->type != CX_TTYPE()) {
+    if (t->type != CX_TID()) {
       cx_error(cx, row, col, "Invalid trait arg");
       goto exit1;
     }
@@ -71,7 +68,8 @@ static bool trait_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   }
   
   cx_do_vec(&toks, struct cx_tok, t) {
-    struct cx_type *child = t->as_ptr;
+    struct cx_type *child = cx_get_type(*cx->lib, t->as_ptr, false);
+    if (!child) { goto exit1; }
     cx_derive(child, type);
   }
 

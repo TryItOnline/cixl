@@ -43,26 +43,27 @@ static bool parse_args(struct cx *cx, struct cx_vec *toks, struct cx_vec *args) 
 	} else {
 	  *(struct cx_arg *)cx_vec_push(args) = cx_narg(NULL, i);      
 	}	
+      } else if (isupper(id[0])) {
+	struct cx_type *type = cx_get_type(*cx->lib, t->as_ptr, false);
+	if (!type) { goto exit; }
+
+	if (tmp_ids.count) {
+	  cx_do_vec(&tmp_ids, struct cx_tok, id) {
+	    const char *n = strcmp(id->as_ptr, "_") ? id->as_ptr : NULL;
+	    *(struct cx_arg *)cx_vec_push(args) = cx_arg(n, type);      
+	  }
+      
+	  cx_vec_clear(&tmp_ids);
+	} else {
+	  struct cx_box v;
+	  cx_box_init(&v, cx->meta_type)->as_ptr = type;
+	  *(struct cx_arg *)cx_vec_push(args) = cx_varg(&v);
+	}	
       } else {
 	*(struct cx_tok *)cx_vec_push(&tmp_ids) = *t;
       }
     } else if (t->type == CX_TLITERAL()) {
       *(struct cx_arg *)cx_vec_push(args) = cx_varg(&t->as_box);        
-    } else if (t->type == CX_TTYPE()) {
-      struct cx_type *type = t->as_ptr;
-
-      if (tmp_ids.count) {
-	cx_do_vec(&tmp_ids, struct cx_tok, id) {
-	  const char *n = strcmp(id->as_ptr, "_") ? id->as_ptr : NULL;
-	  *(struct cx_arg *)cx_vec_push(args) = cx_arg(n, type);      
-	}
-      
-	cx_vec_clear(&tmp_ids);
-      } else {
-	struct cx_box v;
-	cx_box_init(&v, cx->meta_type)->as_ptr = type;
-	*(struct cx_arg *)cx_vec_push(args) = cx_varg(&v);
-      }
     } else {
       cx_error(cx, t->row, t->col, "Unexpected tok: %d", t->type);
       goto exit;

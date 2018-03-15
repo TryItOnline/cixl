@@ -41,29 +41,24 @@ static bool rec_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   }
 
   struct cx_tok id = *(struct cx_tok *)cx_vec_pop(&toks);
-  struct cx_type *type = NULL;
 
-  if (id.type == CX_TTYPE()) {
-    type = id.as_ptr;
-    
-    if (!cx_is(type, cx->rec_type)) {
-      cx_error(cx, id.row, id.col, "Attempt to redefine %s as rec", type->id);
-      goto exit2;
-    }
-  }
-
-  if (id.type != CX_TID() && id.type != CX_TTYPE()) {
-    cx_error(cx, id.row, id.col, "Invalid rec id");
+  if (id.type != CX_TID()) {
+    cx_error(cx, id.row, id.col, "Invalid rec id: %s", id.type->id);
     goto exit2;
   }
 
-  if (id.type == CX_TID()) {
-    char *s = id.as_ptr;
+  char *s = id.as_ptr;
+  
+  if (!isupper(s[0])) {
+    cx_error(cx, id.row, id.col, "Invalid rec id: %s", s);
+    goto exit2;
+  }
 
-    if (!isupper(s[0])) {
-      cx_error(cx, id.row, id.col, "Invalid rec id: %s", s);
+  struct cx_type *type = cx_get_type(*cx->lib, s, true);
+  
+  if (type && !cx_is(type, cx->rec_type)) {
+      cx_error(cx, id.row, id.col, "Attempt to redefine %s as rec", type->id);
       goto exit2;
-    }
   }
 
   if (!cx_parse_tok(cx, in, &toks, false)) {
@@ -79,15 +74,15 @@ static bool rec_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   }
 
   cx_do_vec(&parents.as_vec, struct cx_tok, t) {
-    if (t->type != CX_TTYPE()) {
+    if (t->type != CX_TID()) {
       cx_error(cx, t->row, t->col, "Invalid rec parent");
       goto exit3;
     }
 
-    struct cx_type *tt = t->as_ptr;
+    struct cx_type *pt = cx_get_type(*cx->lib, t->as_ptr, false);
     
-    if (!tt->trait && !cx_is(tt, cx->rec_type)) {
-      cx_error(cx, t->row, t->col, "Invalid rec parent: %s", tt->id);
+    if (!pt->trait && !cx_is(pt, cx->rec_type)) {
+      cx_error(cx, t->row, t->col, "Invalid rec parent: %s", pt->id);
       goto exit3;
     }
   }
@@ -125,17 +120,14 @@ static bool rec_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
       char *s = t->as_ptr;
       
       if (isupper(s[0])) {
-	if (strcmp(s, id.as_ptr) != 0) {
-	  cx_error(cx, t->row, t->col, "Invalid field type: %s", s);
-	  goto exit4;
-	}
-	
-	if (!push_type(&rec_type->imp, t->row, t->col)) { goto exit4; }
+	struct cx_type *ft = cx_get_type(*cx->lib, s, false);
+	if (!ft || !push_type(ft, t->row, t->col)) { goto exit4; }
       } else {
 	*(struct cx_tok *)cx_vec_push(&fids) = *t;
       }
-    } else if (t->type == CX_TTYPE()) {
-      if (!push_type(t->as_ptr, t->row, t->col)) { goto exit4; }
+    } else {
+      cx_error(cx, t->row, t->col, "Invalid rec tok: %s", t->type->id);
+      goto exit4;
     }
   }
 

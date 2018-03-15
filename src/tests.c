@@ -140,7 +140,7 @@ static void type_tests() {
   run(&cx, "42 type Int = check");
   run(&cx, "Int A is check");
   run(&cx, "A Int is !check");
-  
+  run(&cx, "trait: StrInt Str Int; 42 StrInt is check");
   cx_deinit(&cx);
 }
 

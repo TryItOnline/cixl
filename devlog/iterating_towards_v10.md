@@ -110,10 +110,10 @@ When it comes to error handling, it seems like we've gotten collectively stuck i
 ```
    |(
      catch:
-       Int `int ~ .
-       Opt `opt ~ .
-       Nil `nil;
-     (42 fail `foo)
+       (Int `int ~ .)
+       (Opt `opt ~ .)
+       (Nil `nil);
+     42 fail `foo
      `bar
    )
 ...

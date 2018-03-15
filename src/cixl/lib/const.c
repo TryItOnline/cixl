@@ -1,3 +1,4 @@
+#include <ctype.h>
 #include <string.h>
 
 #include "cixl/arg.h"
@@ -104,8 +105,14 @@ static bool define_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
     
     cx_do_vec(id_toks, struct cx_tok, t) {
       if (t->type == CX_TID()) {
-	*(struct cx_tok *)cx_vec_push(&ids) = *t;
-      } else if (t->type == CX_TTYPE() && !push_type(t->as_ptr)) {
+	char *id = t->as_ptr;
+	if (isupper(id[0])) {
+	  struct cx_type *type = cx_get_type(*cx->lib, id, false);
+	  if (!type || !push_type(type)) { goto exit3; }
+	} else {
+	  *(struct cx_tok *)cx_vec_push(&ids) = *t;
+	}
+      } else {
 	goto exit3;
       }
     }

@@ -1,3 +1,7 @@
+* add scope.catchers
+** scan in cx_error
+*** recurse parent scope
+* ---
 * load tables on startup
 * add :list command
 * add :new-topic command
@@ -5,6 +9,7 @@
 *** Key on User name and Topic id
 *** add is-admin fn
 **** check topic parent chain
+** add operator as admin for all topics
 ** add user as admin for new topics
 ** add operator as admin for root topic in db setup
 * add support for @-mention
@@ -17,15 +22,13 @@
 * add User.password
 ** add Client.state Sym 
 *** `user/password/command
-** ask on database< setup
+** ask on database setup
 ** ask on login if !is-nil
 * add Topic.log
 ** name file after topic id
 ** open in new-topic and log all posts
 * ---
 * debug row/col
-* switch func arg and fimp parsing to ids
-** disable type parsing if !lookup
 * separate Queue read/write polling
 ** read/write boxes through pipe
 ** add atomic counter for len

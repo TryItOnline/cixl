@@ -20,18 +20,17 @@ static bool parse_type(struct cx *cx,
 		       const char *id,
 		       struct cx_vec *out,
 		       bool lookup) {
-  struct cx_type *t = cx_get_type(*cx->lib, id, !lookup);
-  
-  if (t) {
+  if (lookup) {
+    struct cx_type *t = cx_get_type(*cx->lib, id, false);
+    if (!t) { return false; }
+    
     cx_tok_init(cx_vec_push(out),
 		CX_TTYPE(),
 		cx->row, cx->col)->as_ptr = t;
-  } else if (!lookup) {
+  } else {
     cx_tok_init(cx_vec_push(out),
 		CX_TID(),
 		cx->row, cx->col)->as_ptr = strdup(id);
-  } else {
-    return false;
   }
 
   return true;
@@ -72,8 +71,9 @@ char *parse_fimp(struct cx *cx,
   struct cx_mfile id;
   cx_mfile_open(&id);
   char sep = 0;
+  bool done = false;
   
-  while (true) {
+  while (!done) {
     if (!cx_parse_tok(cx, in, out, false)) {
       cx_error(cx, row, col, "Invalid func type");
       cx_mfile_close(&id);
@@ -90,49 +90,42 @@ char *parse_fimp(struct cx *cx,
 
     if (sep) { fputc(sep, id.stream); }
     
-    if (tok->type == CX_TTYPE()) {
-      struct cx_type *type = tok->as_ptr;
-      fputs(type->id, id.stream);
-    } else if (tok->type == CX_TLITERAL()) {
+    if (tok->type == CX_TLITERAL()) {
       cx_dump(&tok->as_box, id.stream);
     } else if (tok->type == CX_TID()) {
       char *s = tok->as_ptr;
       size_t len = strlen(s);
-      
+
       if (s[len-1] == '>') {
 	s[len-1] = 0;
-	struct cx_type *type = cx_get_type(*cx->lib, s, false);
-
-	if (!type) {
-	  cx_mfile_close(&id);
-	  free(id.data);
-	  return NULL;
-	}
-	
-	fputs(type->id, id.stream);
-	cx_tok_deinit(tok);
-	goto exit;
+	done = true;
       }
-      
+
       if (strncmp(s, "Arg", 3) == 0 && isdigit(s[3])) {
 	fputs(s, id.stream);
+      } else if (isupper(s[0])) {
+	struct cx_type *type = cx_get_type(*cx->lib, s, false);
+	if (!type) { return NULL; }
+	fputs(type->id, id.stream);
       } else {
 	cx_error(cx, row, col, "Invalid func type: %s", s);
+	cx_tok_deinit(tok);
 	cx_mfile_close(&id);
 	free(id.data);
 	return NULL;
       }
     } else {
       cx_error(cx, row, col, "Invalid func type: %s", tok->type->id);
+      cx_tok_deinit(tok);
       cx_mfile_close(&id);
       free(id.data);
       return NULL;
     }
 
+    cx_tok_deinit(tok);
     sep = ' ';
   }
-  
- exit:
+
   cx_mfile_close(&id);
   return id.data;
 }
