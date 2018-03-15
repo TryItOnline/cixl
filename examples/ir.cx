@@ -104,7 +104,7 @@ func: new-topic(c Client n Sym)()
   $t `id [$pt `id get $n @/] #nil join sym put
   $t save;
 
-func: join-topic(c Client ns Str)()
+func: pick-topic(c Client ns Str)()
   $c `topic get `clients get $c delete
   $ns 0 get @/ = {$c `topic $root put} if
   
@@ -167,12 +167,16 @@ func: push-post(u User t Topic in Str)()
   let: pt $t `parent get;
   $pt {$u $pt $in recall} if;
 
-func: new-post(c Client in Str)()
+func: fmt-post(c Client in Str)(_ Str)
   let: (h m) now % hour ~ minute;
   let: u $c `user get;
   let: t $c `topic get;
-  let: p [$h @: $m @@s @@ $u `name get @@s $t `id get $in @@n] #nil join;
-  $u $t $p push-post;
+  [$h @: $m @@s @@ $u `name get @@s $t `id get $in @@n] #nil join;
+
+func: new-post(c Client in Str)()
+  let: u $c `user get;
+  let: t $c `topic get;
+  $u $t $c $in fmt-post push-post;
 
 func: poll-out(c Client)()
   let: out $c `out get;
@@ -191,8 +195,8 @@ func: handle-in(c Client in Str)()
         let: cmd $ins next sym;
 
         switch:
-          (($cmd `:join =)
-            $c $ins next join-topic)
+          (($cmd `:pick =)
+            $c $ins next pick-topic)
           (#t
             ['Invalid cmd: ' $cmd] #nil join fail);
       } {
@@ -246,9 +250,9 @@ let: c #in #out new-client;
 $c `user $u put
 
 $c `foo new-topic
-$c 'foo' join-topic
+$c 'foo' pick-topic
 $c `bar new-topic
-$c 'bar' join-topic
+$c 'bar' pick-topic
 commit
 
 $c % prompt poll-out

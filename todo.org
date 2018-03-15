@@ -1,3 +1,6 @@
+* add User.password
+** ask on database setup
+** ask on login if !is-nil
 * add settings table
 ** add `operator-name setting
 *** set in database setup
@@ -8,7 +11,11 @@
 * load tables on startup
 
 * add :list command
-* add support for @-mentions
+* add support for @-mention
+** add clients lookup
+*** index on user name
+*** overwrite on login
+*** forward to client
 * ---
 * debug row/col
 * switch func arg and fimp parsing to ids
