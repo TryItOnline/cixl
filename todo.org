@@ -1,6 +1,3 @@
-* add User.password
-** ask on database setup
-** ask on login if !is-nil
 * add settings table
 ** add `operator-name setting
 *** set in database setup
@@ -12,10 +9,18 @@
 
 * add :list command
 * add support for @-mention
-** add clients lookup
-*** index on user name
-*** overwrite on login
-*** forward to client
+** add user.out Stack
+*** init in new-user
+*** push mentions on stack
+*** move client.buf check into poll-out
+*** process user.out before checking
+*** process and move to buf in new-client & poll loop 
+* add User.password
+** ask on database setup
+** ask on login if !is-nil
+* extract global cmds Table
+** call with param iter pushed
+** extract join/list
 * ---
 * debug row/col
 * switch func arg and fimp parsing to ids

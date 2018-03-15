@@ -15,7 +15,7 @@ use:
   (cx/guid Guid)
   (cx/io RFile WFile #in #out ask close include: lines print say)
   (cx/io/poll Poll delete no-write on-read on-write wait)
-  (cx/iter Iter for is-done next while)
+  (cx/iter Iter for is-done iter next while)
   (cx/net TCPServer accept listen)
   (cx/pair x)
   (cx/rec ? rec: get put)
@@ -190,12 +190,14 @@ func: poll-out(c Client)()
 func: handle-in(c Client in Str)()
   $c `user get {
     $in {
-      $in 0 get @: = {
-        let: ins $in @@s split;
+      let: it $in iter;
+      
+      $it next @: = {
+        let: ins $it @@s split;
         let: cmd $ins next sym;
 
         switch:
-          (($cmd `:pick =)
+          (($cmd `pick =)
             $c $ins next pick-topic)
           (#t
             ['Invalid cmd: ' $cmd] #nil join fail);
