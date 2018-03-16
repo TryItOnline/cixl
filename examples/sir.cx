@@ -140,7 +140,7 @@ func: new-topic(c Client n Sym)()
   $t `log-path [$pt `log-path get $pt `name get] @/ join put
   $t save;
 
-func: change-topic(c Client ns Str)()
+func: join-topic(c Client ns Str)()
   $c `topic get `clients get $c delete
   $ns 0 get @/ = {$c `topic $root put} if
   
@@ -166,7 +166,7 @@ func: change-topic(c Client ns Str)()
 
   $c `topic get `clients get $c #t put;
 
-func: change-topic(c Client t Topic)()
+func: join-topic(c Client t Topic)()
   let: ct $c `topic get;
   $ct {$ct `clients get $c delete} if
   $c `topic $t put
@@ -246,12 +246,12 @@ func: handle-in(c Client in Str)()
         let: cmd {$it next % {% @@s = {_ #nil} if} if} iter str sym;
 
         switch:
-          (($cmd `change =)
-	    $c $it str $root or change-topic)
+          (($cmd `join =)
+	    $c $it str $root or join-topic)
 	  (($cmd `list =)
 	    $c % `topic get #f list-topics)
           (#t
-            ['Invalid cmd: ' $cmd] throw);
+            ['Invalid command: ' $cmd] throw);
       } {
         $c $in new-post
       } if-else
@@ -278,7 +278,7 @@ func: new-client(in RFile out WFile)(_ Client)
   $c `in $in put
   $c `out $out put
   $c `buf Buf new put
-  $c $root change-topic
+  $c $root join-topic
     
   $poll $in {
     let: l $ils next;
@@ -312,9 +312,9 @@ $u {'Operator not found' throw} else
 $c `user $u put
 
 $c `foo new-topic
-$c 'foo' change-topic
+$c 'foo' join-topic
 $c `bar new-topic
-$c 'bar' change-topic
+$c 'bar' join-topic
 commit
 
 $c % prompt poll-out
