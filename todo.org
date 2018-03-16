@@ -27,6 +27,11 @@
 ** open in new-topic and log all posts
 * ---
 * debug row/col
+* add support for nil catch
+** #nil instead of type
+** catch.type is NULL
+** process in catch loop without breaking
+*** call without error pushed
 * change CX_TGROUP to dump everything to outer stack on exit
 ** update README
 * separate Queue read/write polling
