@@ -1,13 +1,7 @@
 * catch errors from handle-in
 ** send back 'Error: ...\n' + prompt
-* load tables on startup
 * add :list command
-* add :new-topic command
-* add User.password
-** add Client.state Sym 
-*** `user/password/command
-** ask on database setup
-** ask on login if !is-nil
+** list all child channels
 * add support for @-mention
 ** add user.out Stack
 *** init in new-user
@@ -15,6 +9,14 @@
 *** move client.buf check into poll-out
 *** process user.out before checking
 *** process and move to buf in new-client & poll loop 
+
+* load tables on startup
+* add :new-topic command
+* add User.password
+** add Client.state Sym 
+*** `user/password/command
+** ask on database setup
+** ask on login if !is-nil
 * add admins table
 *** Key on User name and Topic id
 *** add is-admin fn

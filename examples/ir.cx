@@ -58,18 +58,18 @@ rec: Topic ()
   parent   Topic
   children Table
   clients  Table
-  path     Str
+  log-path Str
   log      WFile;
 
 let: root Topic new;
 $root `name `root put
 $root `id `/ put
-$root `path 'log' get-path put
+$root `log-path 'log' get-path put
 $root `clients Table new put
 
 func: get-log(t Topic)(_ WFile)
   $t `log get {
-    let: p $t `path get;
+    let: p $t `log-path get;
     $p make-dir
     
     let: l [$p @/ $t `name get '.txt'] #nil join `a fopen;
@@ -137,7 +137,7 @@ func: new-topic(c Client n Sym)()
   $pt $t add-topic
 
   $t `id [$pt `id get $n @/] #nil join sym put
-  $t `path [$pt `path get $pt `name get] @/ join put
+  $t `log-path [$pt `log-path get $pt `name get] @/ join put
   $t save;
 
 func: change-topic(c Client ns Str)()
@@ -212,16 +212,13 @@ func: push-post(u User t Topic in Str)()
   let: pt $t `parent get;
   $pt {$u $pt $in recall} if;
 
-func: fmt-post(c Client in Str)(_ Str)
+func: new-post(c Client in Str)()
   let: (h m) now % hour ~ minute;
   let: u $c `user get;
   let: t $c `topic get;
-  [$h @: $m @@s @@ $u `name get @@s $t `id get @@s $in @@n] #nil join;
-
-func: new-post(c Client in Str)()
-  let: u $c `user get;
-  let: t $c `topic get;
-  $u $t $c $in fmt-post push-post;
+  $u $t
+  [$h @: $m @@s @@ $u `name get @@s $t `id get @@s $in @@n] #nil join
+  push-post;
 
 func: poll-out(c Client)()
   let: out $c `out get;
