@@ -1,3 +1,4 @@
+* use lambda char iter to split cmd on space
 * catch errors from handle-in
 ** send back 'Error: ...\n' + prompt
 * load tables on startup

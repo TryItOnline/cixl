@@ -62,7 +62,7 @@ static bool call_imp(struct cx_box *value, struct cx_scope *scope) {
   }
 
   bool ok = cx_eval(l->bin, l->start_pc, cx);
-  if (pop_scope) { cx_pop_scope(cx, false); }
+  if (pop_scope && cx_scope(cx, 0) == l->scope) { cx_pop_scope(cx, false); }
   if (pop_lib) { cx_pop_lib(cx); }
   return ok;
 }

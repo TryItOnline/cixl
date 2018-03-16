@@ -35,10 +35,13 @@ struct cx_error *cx_error_deinit(struct cx_error *e) {
 }
 
 struct cx_error *new_error(struct cx *cx, int row, int col, struct cx_box *v) {
+  struct cx_error e;
+  cx_error_init(&e, cx, row, col, v);
+
   while (true) {
     struct cx_scope *s = cx_scope(cx, 0);
-
-    if (s->catches.count) {
+      
+    if (s->catches.count) {  
       for (struct cx_catch *c = cx_vec_peek(&s->catches, 0);
 	   s->catches.count;
 	   c--, s->catches.count--) {
@@ -52,6 +55,7 @@ struct cx_error *new_error(struct cx *cx, int row, int col, struct cx_box *v) {
 	  cx_copy(cx_push(s), v);
 	  cx_catch_eval(c);
 	  cx_catch_deinit(c);
+	  cx_error_deinit(&e);
 	  return NULL;	  
 	}
 
@@ -62,8 +66,10 @@ struct cx_error *new_error(struct cx *cx, int row, int col, struct cx_box *v) {
     if (s == cx->root_scope) { break; }
     cx_end(cx);
   }
-  
-  return cx_error_init(cx_vec_push(&cx->errors), cx, row, col, v);
+
+  struct cx_error *ep = cx_vec_push(&cx->errors);
+  *ep = e;
+  return ep;
 }
 
 struct cx_error *cx_error(struct cx *cx, int row, int col, const char *spec, ...) {

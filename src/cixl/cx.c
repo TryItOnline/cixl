@@ -307,6 +307,7 @@ void cx_push_scope(struct cx *cx, struct cx_scope *scope) {
 struct cx_scope *cx_pop_scope(struct cx *cx, bool silent) {
   if (cx->scopes.count == 1) {
     if (!silent) { cx_error(cx, cx->row, cx->col, "No open scopes"); }
+    cx_test(false);
     return NULL;
   }
   
