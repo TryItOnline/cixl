@@ -12,7 +12,7 @@ use:
   (cx/cond = == and else if if-else or switch:)
   (cx/error throw)
   (cx/func func: recall)
-  (cx/io RFile WFile #in #out ask close include: lines print say)
+  (cx/io RFile WFile #in #out ask close flush fopen include: lines print say)
   (cx/io/poll Poll delete no-write on-read on-write wait)
   (cx/iter Iter for is-done iter next while)
   (cx/net TCPServer accept listen)
@@ -29,6 +29,9 @@ use:
 
 include: 'qdb.cx';
 use: (qdb commit find-key len new-db-table upsert);
+
+func: get-path(n Str)(_ Str)
+  [home-dir '.ircx' $n] @/ join;
 
 func: get-path(n Str)(_ Str)
   [home-dir '.ircx' $n] @/ join;
@@ -54,12 +57,25 @@ rec: Topic ()
   id name  Sym
   parent   Topic
   children Table
-  clients  Table;
+  clients  Table
+  path     Str
+  log      WFile;
 
 let: root Topic new;
-$root `id `/ put
 $root `name `root put
+$root `id `/ put
+$root `path 'log' get-path put
 $root `clients Table new put
+
+func: get-log(t Topic)(_ WFile)
+  $t `log get {
+    let: p $t `path get;
+    $p make-dir
+    
+    let: l [$p @/ $t `name get '.txt'] #nil join `a fopen;
+    $t `log $l put
+    $l
+  } or;
 
 func: save(t Topic)()
   let: rec Table new;
@@ -121,6 +137,7 @@ func: new-topic(c Client n Sym)()
   $pt $t add-topic
 
   $t `id [$pt `id get $n @/] #nil join sym put
+  $t `path [$pt `path get $pt `name get] @/ join put
   $t save;
 
 func: change-topic(c Client ns Str)()
@@ -185,6 +202,8 @@ func: disconnect(c Client)()
   $c `topic get `clients get $c delete;
 
 func: push-post(u User t Topic in Str)()
+  $t get-log % $in print flush
+  
   $t `clients get {
     let: c x;
     $c `user get $u == {$c $in push-out} else

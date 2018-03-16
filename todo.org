@@ -15,9 +15,6 @@
 *** move client.buf check into poll-out
 *** process user.out before checking
 *** process and move to buf in new-client & poll loop 
-* add Topic.log
-** name file after topic id
-** open in new-topic and log all posts
 * add admins table
 *** Key on User name and Topic id
 *** add is-admin fn
@@ -35,11 +32,6 @@
 ** call in scope deref before deinit
 * change CX_TGROUP to dump everything to outer stack on exit
 ** update README
-* separate Queue read/write polling
-** read/write boxes through pipe
-** add atomic counter for len
-*** stdatomic.h
-** rename to Chan and move out of io
 * add MFile type
 ** use struct cx_mfile
 *** add nrefs

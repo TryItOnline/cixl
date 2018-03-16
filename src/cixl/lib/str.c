@@ -213,6 +213,23 @@ static bool get_imp(struct cx_scope *scope) {
   return ok;
 }
 
+static bool pop_imp(struct cx_scope *scope) {
+  struct cx *cx = scope->cx;
+  struct cx_box in = *cx_test(cx_pop(scope, false));
+  struct cx_str *s = in.as_str;
+  
+  if (s->len) {
+    cx_box_init(cx_push(scope), cx->char_type)->as_char = s->data[s->len-1];
+    s->len--;
+    s->data[s->len] = 0;
+  } else {
+    cx_box_init(cx_push(scope), cx->nil_type);
+  }
+
+  cx_box_deinit(&in);
+  return true;
+}
+
 static bool seq_imp(struct cx_scope *scope) {
   struct cx *cx = scope->cx;
   struct cx_box in = *cx_test(cx_pop(scope, false));
@@ -372,6 +389,11 @@ cx_lib(cx_init_str, "cx/str") {
 	       cx_args(cx_arg("s", cx->str_type), cx_arg("i", cx->int_type)),
 	       cx_args(cx_arg(NULL, cx->char_type)),
 	       get_imp);
+
+  cx_add_cfunc(lib, "pop",
+	       cx_args(cx_arg("s", cx->str_type)),
+	       cx_args(cx_arg(NULL, cx->opt_type)),
+	       pop_imp);
 
   cx_add_cfunc(lib, "str",
 	       cx_args(cx_arg("s", cx->seq_type)),
