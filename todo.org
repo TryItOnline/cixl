@@ -1,5 +1,5 @@
 * add :list command
-** list all child channels
+** list child topics recursively
 * add support for @-mention
 ** add user.out Stack
 *** init in new-user

@@ -126,7 +126,7 @@ static bool write_bytes_imp(struct cx_scope *scope) {
 cx_lib(cx_init_buf, "cx/buf") {    
   struct cx *cx = lib->cx;
     
-  if (!cx_use(cx, "cx/abc", "A", "Int", "Opt", "Stack", "Str", "Sym") ||
+  if (!cx_use(cx, "cx/abc", "A", "Int", "Opt", "Seq", "Str", "Sym") ||
       !cx_use(cx, "cx/io", "RFile", "WFile") ||
       !cx_use(cx, "cx/iter", "for") ||
       !cx_use(cx, "cx/stack", "~")) {
@@ -151,7 +151,7 @@ cx_lib(cx_init_buf, "cx/buf") {
 	       push_sym_imp);
 
   cx_add_cxfunc(lib, "push",
-		cx_args(cx_arg("b", cx->buf_type), cx_arg("v", cx->stack_type)),
+		cx_args(cx_arg("b", cx->buf_type), cx_arg("v", cx->seq_type)),
 		cx_args(),
 		"$v {$b ~ push} for");
 
