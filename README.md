@@ -82,10 +82,8 @@ The entire language is split into libraries to enable building custom languages 
 * cx/const
 * cx/error
 * cx/func
-* cx/guid
 * cx/io
 * cx/io/poll
-* cx/io/queue
 * cx/iter
 * cx/math
 * cx/net
@@ -1068,7 +1066,6 @@ Cixl is statically and strongly typed; but since it's approach to typing is grad
 | File      | Cmp         | cx/io       |  
 | Fimp      | Seq         | cx/abc      |
 | Func      | Seq         | cx/abc      |
-| Guid      | A           | cx/guid     |
 | Int       | Num Seq     | cx/abc      |
 | Iter      | Seq         | cx/abc      |
 | Lambda    | Seq         | cx/abc      |
@@ -1077,7 +1074,6 @@ Cixl is statically and strongly typed; but since it's approach to typing is grad
 | Opt       |             | cx/abc      |
 | Pair      | Cmp         | cx/pair     |
 | Poll      | A           | cx/io/poll  |
-| Queue     | A           | cx/io/queue |
 | Rat       | Num         | cx/math     |
 | Rec       | Cmp         | cx/rec      |
 | Ref       | A           | cx/ref      |
@@ -1089,6 +1085,7 @@ Cixl is statically and strongly typed; but since it's approach to typing is grad
 | Sym       | A           | cx/abc      |  
 | Table     | Seq         | cx/table    |
 | TCPClient | RWFile      | cx/net      |
+| TCPServer | RFile       | cx/net      |
 | Time      | Cmp         | cx/time     |
 | Type      | A           | cx/abc      |
 | WFile     | File        | cx/io       |

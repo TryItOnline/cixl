@@ -312,17 +312,6 @@ static void time_tests() {
   cx_deinit(&cx);
 }
 
-static void guid_tests() {
-  struct cx cx;
-  init_cx(&cx);
-
-  run(&cx, "use: cx/cond cx/error cx/guid cx/stack cx/type;");
-  run(&cx, "Guid % new ~ new = !check");
-  run(&cx, "Guid new % str guid = check");
-  
-  cx_deinit(&cx);
-}
-
 static void ref_tests() {
   struct cx cx;
   init_cx(&cx);
@@ -457,7 +446,6 @@ int main() {
   sym_tests();
   rat_tests();
   time_tests();
-  guid_tests();
   ref_tests();
   pair_tests();
   stack_tests();

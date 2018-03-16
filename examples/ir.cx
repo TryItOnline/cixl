@@ -12,7 +12,6 @@ use:
   (cx/cond = == and else if if-else or switch:)
   (cx/error throw)
   (cx/func func: recall)
-  (cx/guid Guid)
   (cx/io RFile WFile #in #out ask close include: lines print say)
   (cx/io/poll Poll delete no-write on-read on-write wait)
   (cx/iter Iter for is-done iter next while)

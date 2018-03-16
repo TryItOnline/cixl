@@ -23,7 +23,6 @@
 #include "cixl/lib/buf.h"
 #include "cixl/lib/cond.h"
 #include "cixl/lib/const.h"
-#include "cixl/lib/guid.h"
 #include "cixl/lib/error.h"
 #include "cixl/lib/func.h"
 #include "cixl/lib/io.h"
@@ -33,7 +32,6 @@
 #include "cixl/lib/net.h"
 #include "cixl/lib/pair.h"
 #include "cixl/lib/poll.h"
-#include "cixl/lib/queue.h"
 #include "cixl/lib/rec.h"
 #include "cixl/lib/ref.h"
 #include "cixl/lib/stack.h"
@@ -71,10 +69,8 @@ cx_lib(cx_init_world, "cx") {
     cx_use(cx, "cx/const") &&
     cx_use(cx, "cx/error") &&
     cx_use(cx, "cx/func") &&
-    cx_use(cx, "cx/guid") &&
     cx_use(cx, "cx/io") &&
     cx_use(cx, "cx/io/poll") &&
-    cx_use(cx, "cx/io/queue") &&
     cx_use(cx, "cx/iter") &&
     cx_use(cx, "cx/math") &&
     cx_use(cx, "cx/meta") &&
@@ -141,14 +137,12 @@ struct cx *cx_init(struct cx *cx) {
     cx->bin_type = cx->bool_type = cx->buf_type = 
     cx->char_type = cx->cmp_type =
     cx->file_type = cx->fimp_type = cx->func_type =
-    cx->guid_type =
     cx->int_type = cx->iter_type =
     cx->lambda_type = cx->lib_type = 
     cx->nil_type = cx->num_type =
     cx->meta_type =
     cx->opt_type =
     cx->pair_type = cx->poll_type =
-    cx->queue_type = 
     cx->rat_type = cx->rec_type = cx->ref_type = cx->rfile_type = cx->rwfile_type =
     cx->seq_type = cx->stack_type = cx->str_type = cx->sym_type =
     cx->table_type = cx->tcp_client_type = cx->tcp_server_type = cx->time_type =
@@ -169,7 +163,6 @@ void cx_init_libs(struct cx *cx) {
   cx_init_const(cx);
   cx_init_error(cx);
   cx_init_func(cx);
-  cx_init_guid(cx);
   cx_init_io(cx);
   cx_init_iter(cx);
   cx_init_math(cx);
@@ -177,7 +170,6 @@ void cx_init_libs(struct cx *cx) {
   cx_init_net(cx);
   cx_init_pair(cx);
   cx_init_poll(cx);
-  cx_init_queue(cx);
   cx_init_rec(cx);
   cx_init_ref(cx);
   cx_init_stack(cx);
