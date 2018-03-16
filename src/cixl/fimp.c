@@ -150,8 +150,9 @@ bool cx_fimp_call(struct cx_fimp *imp, struct cx_scope *scope) {
   }
 
   if (!imp->bin) {
-    imp->bin = cx_bin_new();
-    if (!cx_fimp_inline(imp, 0, imp->bin, scope->cx)) { return false; }
+    struct cx_bin *bin = cx_bin_new();
+    if (!cx_fimp_inline(imp, 0, bin, scope->cx)) { return false; }
+    cx_bin_deref(bin);
   }
   
   return cx_fimp_eval(imp, scope);

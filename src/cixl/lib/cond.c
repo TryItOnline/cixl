@@ -343,11 +343,11 @@ static bool if_else_imp(struct cx_scope *scope) {
     x = *cx_test(cx_pop(scope, false)),
     c = *cx_test(cx_pop(scope, false));
   
-  cx_call(cx_ok(&c) ? &x : &y, scope);
+  bool ok = cx_call(cx_ok(&c) ? &x : &y, scope);
   cx_box_deinit(&x);
   cx_box_deinit(&y);
   cx_box_deinit(&c);
-  return true;
+  return ok;
 }
 
 cx_lib(cx_init_cond, "cx/cond") {

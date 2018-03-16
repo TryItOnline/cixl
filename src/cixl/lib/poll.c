@@ -93,13 +93,13 @@ static bool wait_imp(struct cx_scope *scope) {
   int n = cx_poll_wait(p.as_poll, ms.as_int, scope);
   cx_box_deinit(&p);
 
-  if (n == -1 && errno == EEXIST) { n = 0; }
+  if (n == -1 && errno == EEXIST) { n = 1; }
   
   if (n == -1) {
     cx_error(cx, cx->row, cx->col, "Failed polling: %d", errno);
     return false;
   }
-  
+
   cx_box_init(cx_push(scope), cx->int_type)->as_int = n;
   return true;
 }
