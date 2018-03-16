@@ -7,7 +7,7 @@
 */
 
 use:
-  (cx/abc A Opt Stack Str Sym #nil #t is-nil)
+  (cx/abc A Bool Opt Stack Str Sym #nil #t #f is-nil)
   (cx/buf Buf push write-bytes)
   (cx/cond = == and else if if-else or switch:)
   (cx/error catch: throw)
@@ -16,7 +16,7 @@ use:
   (cx/io/poll Poll delete no-write on-read on-write wait)
   (cx/iter Iter for is-done iter next while)
   (cx/net TCPServer accept listen)
-  (cx/pair x)
+  (cx/pair x y)
   (cx/rec ? rec: get put)
   (cx/str join split str words)
   (cx/sym sym)
@@ -176,6 +176,18 @@ func: push-out(c Client v A)()
   let: buf $c `buf get;
   $buf $v push;
 
+func: list-topics(c Client t Topic push-id Bool)()
+  let: cts $t `children get;
+
+  $cts {
+    $cts {
+      let: ct y;
+      $c $ct #t recall
+    } for
+  } {
+    $push-id {$c [$t `id get @@n] push-out} if
+  } if-else;
+
 func: prompt(c Client)()
   let: u $c `user get;
   
@@ -231,11 +243,13 @@ func: handle-in(c Client in Str)()
       let: it $in iter;
       
       $it next @: = {
-        let: cmd {$it next % @@s = {_ #nil} if} iter str sym;
+        let: cmd {$it next % {% @@s = {_ #nil} if} if} iter str sym;
 
         switch:
           (($cmd `change =)
 	    $c $it str $root or change-topic)
+	  (($cmd `list =)
+	    $c % `topic get #f list-topics)
           (#t
             ['Invalid cmd: ' $cmd] throw);
       } {
@@ -281,7 +295,7 @@ func: new-client(in RFile out WFile)(_ Client)
 
   $c;
 
-['ir.cx v0.1' @@n] say
+['sir.cx v0.2' @@n] say
 
 $users len {
   ['Database Setup' @@n] say

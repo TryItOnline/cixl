@@ -1,5 +1,3 @@
-* add :list command
-** list child topics recursively
 * add support for @-mention
 ** add user.out Stack
 *** init in new-user
@@ -11,9 +9,7 @@
 * load tables on startup
 * add :new-topic command
 * add User.password
-** add Client.state Sym 
-*** `user/password/command
-** ask on database setup
+** ask on database setup and startup
 ** ask on login if !is-nil
 * add admins table
 *** Key on User name and Topic id
