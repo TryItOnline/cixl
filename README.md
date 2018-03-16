@@ -2,7 +2,7 @@
 <a href="https://paypal.me/basicgongfu"><img alt="Donate using PayPal" src="paypal.png?raw=true"></a><a href="https://liberapay.com/basic-gongfu/donate"><img alt="Donate using Liberapay" src="https://liberapay.com/assets/widgets/donate.svg"></a>
 #### Cixl - a Lispy Forth in C
 
-Cixl shares many ideas with C, Forth and Common Lisp; as well as the hacker mindset that unites them. The language is implemented as a straight forward 3-stage (parse/compile/eval) interpreter that is designed to be as fast as possible without compromising on simplicity, transparency and flexibility; combined with a C code generator for compiling native executables. The codebase has no external dependencies and is currently hovering around 10 kloc including tests and standard library. A Reddit [page](https://www.reddit.com/r/cixl/) has been created for accumulating information and discussions about the language.
+Cixl shares many ideas with C, Forth and Common Lisp; as well as the hacker mindset that unites them. The language is implemented as a straight forward 3-stage (parse/compile/eval) interpreter that is designed to be as fast as possible without compromising on simplicity, transparency and flexibility; combined with a C code generator for compiling native executables. The codebase has no external dependencies and is currently hovering around 10 kloc including tests and standard library.
 
 ### Status
 Examples should work in the most recent version and run clean in ```valgrind```, outside of that I can't really promise much at the moment. Current work is focused on profiling and filling obvious gaps in functionality.
