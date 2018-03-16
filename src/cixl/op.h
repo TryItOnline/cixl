@@ -49,6 +49,11 @@ struct cx_begin_op {
   struct cx_fimp *fimp;
 };
 
+struct cx_catch_op {
+  struct cx_type *type;
+  size_t nops;
+};
+
 struct cx_else_op {
   size_t nops;
 };
@@ -75,7 +80,7 @@ struct cx_getvar_op {
 };
 
 struct cx_jump_op {
-  size_t nops;
+  ssize_t pc;
 };
 
 struct cx_lambda_op {
@@ -124,6 +129,7 @@ struct cx_op {
   
   union {
     struct cx_begin_op as_begin;
+    struct cx_catch_op as_catch;
     struct cx_else_op as_else;
     struct cx_fimp_op as_fimp;
     struct cx_funcdef_op as_funcdef;
@@ -146,6 +152,7 @@ struct cx_op {
 struct cx_op *cx_op_init(struct cx_bin *bin, struct cx_op_type *type, size_t tok_idx);
 
 struct cx_op_type *CX_OBEGIN();
+struct cx_op_type *CX_OCATCH();
 struct cx_op_type *CX_OEND();
 struct cx_op_type *CX_OELSE();
 struct cx_op_type *CX_OFIMP();

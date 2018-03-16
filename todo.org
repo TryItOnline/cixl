@@ -1,7 +1,5 @@
-* add scope.catchers
-** scan in cx_error
-*** recurse parent scope
-* ---
+* catch errors from handle-in
+** send back 'Error: ...\n' + prompt
 * load tables on startup
 * add :list command
 * add :new-topic command
@@ -29,6 +27,8 @@
 ** open in new-topic and log all posts
 * ---
 * debug row/col
+* change CX_TGROUP to dump everything to outer stack on exit
+** update README
 * separate Queue read/write polling
 ** read/write boxes through pipe
 ** add atomic counter for len
@@ -91,3 +91,6 @@ sudo rm -rf /usr/local/include/cixl
 | Bin new % '50 fib' compile emit
 | Bin new % '{10000 {50 fib _} times} clock 1000000 / int say' compile emit
 | Bin new % 'func: fortytwo(Int)(#f) _; func: fortytwo(42)(#t); 21 fortytwo say' compile emit
+
+
+catch: ((Int `int ~.) (A `a ~.)) 42 throw `foo; `bar

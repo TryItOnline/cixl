@@ -29,6 +29,7 @@ int main(int argc, char *argv[]) {
       compile = true;
     } else {
       fprintf(stderr, "Invalid option %s\n", argv[argi]);
+      cx_deinit(&cx);
       return -1;
     }
   }
@@ -39,6 +40,7 @@ int main(int argc, char *argv[]) {
     if (emit) {
       if (argi == argc) {
 	fputs("Missing filename\n", stderr);
+	cx_deinit(&cx);
 	return -1;
       }
 
@@ -47,6 +49,7 @@ int main(int argc, char *argv[]) {
       if (compile) {
 	if (!cx_emit_file(&cx, fname, stdout)) {
 	  cx_dump_errors(&cx, stderr);
+	  cx_deinit(&cx);
 	  return -1;
 	}	
       } else {
@@ -65,6 +68,7 @@ int main(int argc, char *argv[]) {
 	if (!out) {
 	  fprintf(stderr, "Failed executing compiler: %d\n%s\n", errno, cmd.data);
 	  free(cmd.data);
+	  cx_deinit(&cx);
 	  return -1;
 	}
 
@@ -72,6 +76,7 @@ int main(int argc, char *argv[]) {
 
 	if (!cx_emit_file(&cx, fname, out)) {
 	  cx_dump_errors(&cx, stderr);
+	  cx_deinit(&cx);
 	  return -1;
 	}
 
@@ -80,6 +85,7 @@ int main(int argc, char *argv[]) {
     } else {
       if (argi == argc) {
 	fputs("Error: Missing file\n", stderr);
+	cx_deinit(&cx);
 	return -1;
       }
       
@@ -95,6 +101,7 @@ int main(int argc, char *argv[]) {
       if (!cx_load(&cx, fn, bin) || !cx_eval(bin, 0, &cx)) {
 	cx_dump_errors(&cx, stderr);
 	cx_bin_deref(bin);
+	cx_deinit(&cx);
 	return -1;
       }
 

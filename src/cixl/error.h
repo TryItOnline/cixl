@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "cixl/box.h"
 #include "cixl/vec.h"
 
 #define cx_test(cond) ({				\
@@ -24,12 +25,18 @@ struct cx;
 struct cx_error {
   int row, col;
   struct cx_vec stack;
-  char *msg;
+  struct cx_box value;
+  unsigned int nrefs;
 };
 
-struct cx_error *cx_error_init(struct cx_error *e, int row, int col, char *msg);
+struct cx_error *cx_error_init(struct cx_error *e,
+			       struct cx *cx,
+			       int row, int col,
+			       struct cx_box *v);
+
 struct cx_error *cx_error_deinit(struct cx_error *e);
 
 struct cx_error *cx_error(struct cx *cx, int row, int col, const char *spec, ...);
+struct cx_error *cx_throw(struct cx *cx, struct cx_box *v);
 
 #endif

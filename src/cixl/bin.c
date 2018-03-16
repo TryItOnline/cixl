@@ -18,8 +18,9 @@ static bool eval(struct cx *cx) {
     struct cx_op *op = cx_vec_get(&cx->bin->ops, cx->pc++);
     cx->row = op->row; cx->col = op->col;
     
-    if (op->type->eval &&
-	(!op->type->eval(op, cx->bin, cx) || cx->errors.count)) { return false; }
+    if (op->type->eval) {
+      if (!op->type->eval(op, cx->bin, cx) || cx->errors.count) { return false; }
+    }
   }
   
   return true;

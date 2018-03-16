@@ -894,12 +894,13 @@ void cx_repl(struct cx *cx, FILE *in, FILE *out) {
 
     if (strcmp(line, "\n") == 0) {
       cx_mfile_close(&body);
-
-      if (cx_eval_str(cx, body.data)) {
+      cx_eval_str(cx, body.data);
+      
+      if (cx->errors.count) {
+	cx_dump_errors(cx, out);
+      } else {
 	cx_stack_dump(&cx_scope(cx, 0)->stack, out);
 	fputc('\n', out);
-      } else {
-	cx_dump_errors(cx, out);
       }
 
       free(body.data);

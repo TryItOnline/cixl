@@ -82,7 +82,7 @@ func: update-capacity(in Capacity start end Time total used Int out Stack)()
 
   let: t $in `total get $total +;
   let: u $in `used get $used +;
-  $u $t > {'Overbook' fail} if
+  $u $t > {'Overbook' throw} if
   $in `total $t put
   $in `used  $u put;
 
@@ -125,7 +125,7 @@ func: next-booking-id()(_ Int)
   $id;
 
 func: new-booking(r Resource start end Time q Int)(_ Booking)
-  $start $end < {'Invalid booking length' fail} else
+  $start $end < {'Invalid booking length' throw} else
   let: b Booking new;
   $b `id       next-booking-id put
   $b `resource $r              put

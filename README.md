@@ -500,22 +500,37 @@ Two kinds of code comments are supported, line comments and block comments.
 ```
 
 ### Errors
-Error handling is a work in progress, but two functions are provided for signalling errors. ```fail``` may be used to signal an error with specified error message.
+Besides [optionals](https://github.com/basic-gongfu/cixl#optionals), Cixl provides basic exceptions. Two functions are provided for signalling errors. ```throw``` may be used to throw any value as an error.
 
 ```
-   'Going down!' fail
+   'Going down!' throw
 ...
 Error in row 1, col 6:
 Going down!
 ```
 
-While ```check``` may be used to signal an error when the specified condition doesn't hold.
+While ```check``` may be used to throw an error when the specified condition doesn't hold.
 
 ```
    | 1 2 = check
 ...
 Error in row 1, col 7:
 Check failed
+```
+
+Thrown values may be caught using ```catch:```, the first matching clause is evaluated with the error pushed on stack.
+
+```
+   | catch: (
+...      (Int `int ~.)
+...      (A   `a ~.)
+...    )
+...
+...    42 throw
+...    `foo;
+...`bar
+...
+[(`int 42)r1 `bar]
 ```
 
 ### Lambdas

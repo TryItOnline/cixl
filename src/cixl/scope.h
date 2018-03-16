@@ -13,6 +13,8 @@ struct cx_scope {
   struct cx_scope *parent;
   struct cx_vec stack;
   struct cx_env vars;
+  struct cx_vec catches;
+
   bool safe;
   unsigned int nrefs;
 };

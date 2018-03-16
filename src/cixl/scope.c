@@ -1,4 +1,5 @@
 #include "cixl/box.h"
+#include "cixl/catch.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
 #include "cixl/scope.h"
@@ -11,6 +12,7 @@ struct cx_scope *cx_scope_new(struct cx *cx, struct cx_scope *parent) {
   cx_vec_init(&scope->stack, sizeof(struct cx_box));
   scope->stack.alloc = &cx->stack_items_alloc;
   cx_env_init(&scope->vars, &cx->var_alloc);
+  cx_vec_init(&scope->catches, sizeof(struct cx_catch));
   scope->safe = cx->scopes.count ? cx_scope(cx, 0)->safe : true;
   scope->nrefs = 0;
   return scope;
@@ -32,7 +34,7 @@ void cx_scope_deref(struct cx_scope *scope) {
     cx_vec_deinit(&scope->stack);
     
     cx_env_deinit(&scope->vars);
-
+    cx_vec_deinit(&scope->catches);
     cx_free(&scope->cx->scope_alloc, scope);
   }
 }

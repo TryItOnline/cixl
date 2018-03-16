@@ -41,9 +41,7 @@ static ssize_t switch_eval(struct cx_macro_eval *eval,
   for (struct cx_op *op = cx_vec_get(&bin->ops, start);
        op != cx_vec_end(&bin->ops);
        op++) {    
-    if (op->type == CX_OJUMP()) {
-      op->as_jump.nops = (struct cx_op *)cx_vec_end(&bin->ops)-op-1;
-    }
+    if (op->type == CX_OJUMP()) { op->as_jump.pc = bin->ops.count; }
   }
   
   return tok_idx+1;

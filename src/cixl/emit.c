@@ -13,7 +13,7 @@ char *cx_emit_id(const char *prefix, const char *in) {
   for (const char *c=in; *c; c++) {
     switch (*c) {
     case ' ':
-      break;      
+      break;
     case '+':
       *p++ = 'A';
       *p++ = 'D';
@@ -30,6 +30,10 @@ char *cx_emit_id(const char *prefix, const char *in) {
       *p++ = 'D';
       *p++ = 'I';
       break;
+    case '.':
+      *p++ = 'D';
+      *p++ = 'O';
+      break;      
     case '=':
       *p++ = 'E';
       *p++ = 'Q';
@@ -84,6 +88,7 @@ bool cx_emit_file(struct cx *cx, const char *fname, FILE *out) {
   fputs("#include \"cixl/arg.h\"\n"
 	"#include \"cixl/bin.h\"\n"
 	"#include \"cixl/call.h\"\n"
+	"#include \"cixl/catch.h\"\n"
 	"#include \"cixl/cx.h\"\n"
 	"#include \"cixl/error.h\"\n"
 	"#include \"cixl/func.h\"\n"

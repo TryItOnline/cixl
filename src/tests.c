@@ -76,18 +76,11 @@ void set_tests() {
 
 static void run(struct cx *cx, const char *in) {
   cx_vec_clear(&cx_scope(cx, 0)->stack);
-  
-  if (!cx_eval_str(cx, in)) {
+  cx_eval_str(cx, in);
+
+  if (cx->errors.count) {
     printf("%s\n", in);
-    
-    cx_do_vec(&cx->errors, struct cx_error, e) {
-      printf("Error in row %d, col %d:\n%s\n", e->row, e->col, e->msg);
-      cx_stack_dump(&e->stack, stdout);
-      fputs("\n\n", stdout);
-      cx_error_deinit(e);
-    }
-    
-    cx_vec_clear(&cx->errors);
+    cx_dump_errors(cx, stdout);
   }
 }
 
@@ -104,6 +97,17 @@ static void comment_tests() {
   run(&cx, "use: cx/error cx/math;");
   run(&cx, "1 //foo bar\n2 + 3 = check");
   run(&cx, "1 /*foo \n bar*/2 + 3 = check");
+
+  cx_deinit(&cx);
+}
+
+static void error_tests() {
+  struct cx cx;
+  init_cx(&cx);
+  
+  run(&cx, "use: cx/abc cx/cond cx/error cx/pair cx/stack;");
+  run(&cx, "catch: (A `error ~.) 42 throw 21; `error 42. = check");
+  run(&cx, "catch: (Int `int ~.) (A `a ~.) (42 throw) 21; `int 42. = check");
 
   cx_deinit(&cx);
 }
@@ -439,6 +443,7 @@ int main() {
   set_tests();
   
   comment_tests();
+  error_tests();
   lib_tests();
   type_tests();
   group_tests();

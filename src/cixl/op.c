@@ -1,6 +1,7 @@
 #include "cixl/arg.h"
 #include "cixl/bin.h"
 #include "cixl/call.h"
+#include "cixl/catch.h"
 #include "cixl/cx.h"
 #include "cixl/emit.h"
 #include "cixl/error.h"
@@ -98,6 +99,44 @@ cx_op_type(CX_OBEGIN, {
     type.emit = begin_emit;
     type.emit_funcs = begin_emit_funcs;
     type.emit_fimps = begin_emit_fimps;
+  });
+
+static bool catch_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
+  cx_catch_init(cx_vec_push(&cx_scope(cx, 0)->catches),
+		op->as_catch.type,
+		bin,
+		op->tok_idx,
+		op->pc+1, op->as_catch.nops);
+
+  cx->pc += op->as_catch.nops;
+  return true;
+}
+
+static bool catch_emit(struct cx_op *op,
+			struct cx_bin *bin,
+			FILE *out,
+			struct cx *cx) {
+  fprintf(out,
+	  CX_TAB "cx_catch_init(cx_vec_push(&cx_scope(cx, 0)->catches),\n"
+	  CX_TAB "              %s(), cx->bin, %zd, %zd, %zd);\n",
+	  op->as_catch.type->emit_id, op->tok_idx, op->pc+1, op->as_catch.nops);
+
+  fprintf(out, CX_TAB "goto op%zd;\n", op->pc+op->as_catch.nops+1);
+  return true;
+}
+
+static void catch_emit_types(struct cx_op *op, struct cx_set *out, struct cx *cx) {
+  struct cx_type
+    *t = op->as_catch.type,
+    **ok = cx_set_insert(out, &t);
+
+  if (ok) { *ok = t; }
+}
+
+cx_op_type(CX_OCATCH, {
+    type.eval = catch_eval;
+    type.emit = catch_emit;
+    type.emit_types = catch_emit_types;
   });
 
 static bool else_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
@@ -438,7 +477,7 @@ cx_op_type(CX_OGETVAR, {
   });
 
 static bool jump_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
-  cx->pc += op->as_jump.nops;
+  cx->pc = op->as_jump.pc;
   return true;
 }
 
@@ -446,7 +485,7 @@ static bool jump_emit(struct cx_op *op,
 		      struct cx_bin *bin,
 		      FILE *out,
 		      struct cx *cx) {
-  fprintf(out, CX_TAB "goto op%zd;\n", op->pc+op->as_jump.nops+1);
+  fprintf(out, CX_TAB "goto op%zd;\n", op->as_jump.pc);
   return true;
 }
 

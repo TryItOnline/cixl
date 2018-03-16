@@ -10,7 +10,7 @@ use:
   (cx/abc A Opt Stack Str Sym #nil #t is-nil)
   (cx/buf Buf push write-bytes)
   (cx/cond = == and else if if-else or switch:)
-  (cx/error fail)
+  (cx/error throw)
   (cx/func func: recall)
   (cx/guid Guid)
   (cx/io RFile WFile #in #out ask close include: lines print say)
@@ -133,16 +133,16 @@ func: pick-topic(c Client ns Str)()
     let: t $c `topic get;
 
     $n '..' = {
-      $t {'Topic not found: ..' fail} else
+      $t {'Topic not found: ..' throw} else
       let: pt $t `parent get;
-      $pt {'Topic not found: ..' fail} else
+      $pt {'Topic not found: ..' throw} else
       $c `topic $pt put
     } {
       let: tc $t `children get;
-      $tc {['Topic not found: ' $n] #nil join fail} else
+      $tc {['Topic not found: ' $n] throw} else
     
       let: ct $tc $n sym get;
-      $ct {['Topic not found: ' $n] #nil join fail} else
+      $ct {['Topic not found: ' $n] throw} else
 
       $c `topic $ct put
     } if-else
@@ -227,7 +227,7 @@ func: handle-in(c Client in Str)()
           (($cmd `pick =)
 	    $c $ins next $root or pick-topic)
           (#t
-            ['Invalid cmd: ' $cmd] #nil join fail);
+            ['Invalid cmd: ' $cmd] throw);
       } {
         $c $in new-post
       } if-else
@@ -277,7 +277,7 @@ $users len {
 
 let: c #in #out new-client;
 let: u `operator-name get-option find-user;
-$u {'Operator not found' fail} else
+$u {'Operator not found' throw} else
 $c `user $u put
 
 $c `foo new-topic

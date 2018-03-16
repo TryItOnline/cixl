@@ -7,9 +7,6 @@
 ### C?
 C is taking quite a beating these days. And I get it, it's unsafe; chainsaw unsafe. But it's a feature, not a bug; that's why it's used so much, not because it's users are ignorant or stupid. It takes a lot of practice to learn, the first few years of any C coders output will have undefined behaviour written all over. Sometimes I still mess up in spectacular ways, and I've written plenty of C over 30-ish years. But if you have any kind of common sense, you soon start developing strategies to deal with weak points in any language. And the risks come with power and flexibility, that allow a unique level of control over a computer.
 
-### Postfix??
-The instant Forth clicked for me, my mind started skunkworking strategies for sneaking out of postfix prison. Being stuck anywhere is bad enough; I happen to prefer many operations expressed as infix operators, even with more than one parameter on either side; and I suspect many would agree once they start admitting the possibility. It turns out that the order of functions and parameters isn't as critical as we like to pretend; letting go of it actually allows expressing intent more clearly since you're now free to move the pieces around. If you think that sounds crazy, I don't blame you; I didn't make much progress myself until I had enough experience from Forth, Lisp and Haskell. I mostly considered the question answered, infix with exceptions was as good as it was going to get. Someone said that it's fruitful to question what you can't think.
-
 ### Iterators
 Since their inception, iterators have come to play an increasingly important role in Cixl. Contrary to most languages; they are seemlessly integrated into the language, rather than bolted onto the side as an additional feature. I keep finding more uses for them so this story has at least a couple of chapters remaining to be written. All iterable types derive ```Seq```; functions, lambdas, integers, strings, vectors, tables and readable files are all iterable. Mapping an action over a sequence results in an iterator; which is, drumroll, iterable.
 
@@ -104,16 +101,17 @@ Due to health and logistic reasons outside of my control; I'm currently unemploy
 ### Modularity
 Library facilities need to be put into code; the basic structure is there, but much remains to be done. The idea is that definitions are tagged with the categories they belong to, and only definitions for which all categories have been imported are even parsed. It's libraries in most other languages turned inside out, if that makes any sense. This solves the dependency problem; and in combination with most language features being definitions, and a finely grained division into categories; it provides a convenient and flexible method for customizing the language to fit the needs of each application/use. Imagine a function that takes a string parameter and returns an iterator, and uses; it would need to be tagged with both ```Str``` and ```Iter```; and would only be visible, even parsed; once both categories are imported. Any categories that the function uses internally would also have to be tagged.
 
+
 ### Error Handling
 When it comes to error handling, it seems like we've gotten collectively stuck in the mindset of finding the one strategy to rule them all. But not all errors are created equal, some need to be handled immediately; some are more optional. What is often needed regardless is a way to pass information out of band. I don't consider encoding the error in the return value a viable approach, it's too cumbersome to use and doesn't allow mixing strategies. It's fine to return #nil, indicating that something went wrong; but the specifics are better dealt with using other means. The idea is to add two kinds of errors, ```fail``` for errors that unwind the stack until dealt with, and ```throw```/```catch:``` for passing specifics out of band. Any value may be used as an error and both failures and thrown values are trapped in ```catch:```; catching ```Opt``` always executes the specified action, while catching ```Nil``` only runs when there are no errors.
 
 ```
    |(
      catch:
-       (Int `int ~ .)
-       (Opt `opt ~ .)
-       (Nil `nil);
-     42 fail `foo
+       Int `int ~ .
+       Opt `opt ~ .
+       Nil `nil;
+     (42 fail `foo)
      `bar
    )
 ...

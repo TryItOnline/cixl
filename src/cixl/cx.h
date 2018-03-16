@@ -13,6 +13,7 @@
 #define CX_SLAB_SIZE 20				  
 
 struct cx_arg;
+struct cx_catch;
 struct cx_scope;
 struct cx_sym;
 
@@ -54,7 +55,7 @@ struct cx {
   struct cx_scope *root_scope, **scope;
 
   struct cx_vec calls;
-  
+
   struct cx_bin *bin;
   size_t pc;
   bool stop;

@@ -74,6 +74,11 @@ static void dump_imp(struct cx_box *v, FILE *out) {
   fprintf(out, ")r%d", v->as_pair->nrefs);
 }
 
+static void print_imp(struct cx_box *v, FILE *out) {
+  cx_print(&v->as_pair->x, out);
+  cx_print(&v->as_pair->y, out);
+}
+
 static void deinit_imp(struct cx_box *v) {
   cx_pair_deref(v->as_pair, v->type->lib->cx);
 }
@@ -88,6 +93,7 @@ struct cx_type *cx_init_pair_type(struct cx_lib *lib) {
   t->copy = copy_imp;
   t->write = write_imp;
   t->dump = dump_imp;
+  t->print = print_imp;
   t->deinit = deinit_imp;
   return t;
 }
