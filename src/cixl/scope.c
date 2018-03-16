@@ -34,6 +34,8 @@ void cx_scope_deref(struct cx_scope *scope) {
     cx_vec_deinit(&scope->stack);
     
     cx_env_deinit(&scope->vars);
+    cx_do_vec(&scope->catches, struct cx_catch, c) { cx_catch_deinit(c); }
+    
     cx_vec_deinit(&scope->catches);
     cx_free(&scope->cx->scope_alloc, scope);
   }

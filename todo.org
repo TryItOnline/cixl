@@ -32,6 +32,7 @@
 ** catch.type is NULL
 ** process in catch loop without breaking
 *** call without error pushed
+** call in scope deref before deinit
 * change CX_TGROUP to dump everything to outer stack on exit
 ** update README
 * separate Queue read/write polling
