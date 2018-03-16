@@ -1,16 +1,13 @@
-* use lambda char iter to split cmd on space
 * catch errors from handle-in
 ** send back 'Error: ...\n' + prompt
 * load tables on startup
 * add :list command
 * add :new-topic command
-** add admins table
-*** Key on User name and Topic id
-*** add is-admin fn
-**** check topic parent chain
-** add operator as admin for all topics
-** add user as admin for new topics
-** add operator as admin for root topic in db setup
+* add User.password
+** add Client.state Sym 
+*** `user/password/command
+** ask on database setup
+** ask on login if !is-nil
 * add support for @-mention
 ** add user.out Stack
 *** init in new-user
@@ -18,14 +15,16 @@
 *** move client.buf check into poll-out
 *** process user.out before checking
 *** process and move to buf in new-client & poll loop 
-* add User.password
-** add Client.state Sym 
-*** `user/password/command
-** ask on database setup
-** ask on login if !is-nil
 * add Topic.log
 ** name file after topic id
 ** open in new-topic and log all posts
+* add admins table
+*** Key on User name and Topic id
+*** add is-admin fn
+**** check topic parent chain
+** add operator as admin for all topics
+** add user as admin for new topics
+** add operator as admin for root topic in db setup
 * ---
 * debug row/col
 * add support for nil catch

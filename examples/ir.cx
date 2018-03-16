@@ -19,7 +19,7 @@ use:
   (cx/net TCPServer accept listen)
   (cx/pair x)
   (cx/rec ? rec: get put)
-  (cx/str join split words)
+  (cx/str join split str words)
   (cx/sym sym)
   (cx/sys home-dir make-dir)
   (cx/stack _ % ~ push)
@@ -124,7 +124,7 @@ func: new-topic(c Client n Sym)()
   $t `id [$pt `id get $n @/] #nil join sym put
   $t save;
 
-func: pick-topic(c Client ns Str)()
+func: change-topic(c Client ns Str)()
   $c `topic get `clients get $c delete
   $ns 0 get @/ = {$c `topic $root put} if
   
@@ -150,7 +150,7 @@ func: pick-topic(c Client ns Str)()
 
   $c `topic get `clients get $c #t put;
 
-func: pick-topic(c Client t Topic)()
+func: change-topic(c Client t Topic)()
   let: ct $c `topic get;
   $ct {$ct `clients get $c delete} if
   $c `topic $t put
@@ -220,12 +220,11 @@ func: handle-in(c Client in Str)()
       let: it $in iter;
       
       $it next @: = {
-        let: ins $it @@s split;
-        let: cmd $ins next sym;
+        let: cmd {$it next % @@s = {_ #nil} if} iter str sym;
 
         switch:
-          (($cmd `pick =)
-	    $c $ins next $root or pick-topic)
+          (($cmd `change =)
+	    $c $it str $root or change-topic)
           (#t
             ['Invalid cmd: ' $cmd] throw);
       } {
@@ -248,7 +247,7 @@ func: new-client(in RFile out WFile)(_ Client)
   $c `in $in put
   $c `out $out put
   $c `buf Buf new put
-  $c $root pick-topic
+  $c $root change-topic
     
   $poll $in {
     let: l $ils next;
@@ -281,9 +280,9 @@ $u {'Operator not found' throw} else
 $c `user $u put
 
 $c `foo new-topic
-$c 'foo' pick-topic
+$c 'foo' change-topic
 $c `bar new-topic
-$c 'bar' pick-topic
+$c 'bar' change-topic
 commit
 
 $c % prompt poll-out
