@@ -1,7 +1,7 @@
 #!/usr/local/bin/cixl
 
 /*
-  The seed of a simple chat server.
+  The seed of a simple, text based collaboration server.
 
   https://github.com/basic-gongfu/cixl#getting-started
 */
@@ -33,10 +33,10 @@ include: 'qdb.cx';
 use: (qdb commit find-key len new-db-table upsert);
 
 func: get-path(n Str)(_ Str)
-  [home-dir '.ircx' $n] @/ join;
+  [home-dir '.sircx' $n] @/ join;
 
 func: get-path(n Str)(_ Str)
-  [home-dir '.ircx' $n] @/ join;
+  [home-dir '.sircx' $n] @/ join;
 
 '' get-path make-dir
 
@@ -219,7 +219,7 @@ func: new-post(c Client in Str)()
   let: u $c `user get;
   let: t $c `topic get;
   $u $t
-  [now '%H:%M ' fmt @@ $u `name get @@s $t `id get @@s $in @@n] #nil join
+  [now '%d %H:%M ' fmt @@ $u `name get @@s $t `id get @@s $in @@n] #nil join
   push-post;
 
 func: poll-out(c Client)()
@@ -288,7 +288,7 @@ func: new-client(io TCPClient)(_ Client)
 
   $c;
 
-['sir.cx v0.2' @@n] say
+['Sir.cx v0.2' @@n] say
 
 $users len {
   ['Database Setup' @@n] say

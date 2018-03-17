@@ -6,10 +6,10 @@
 * add :branch X command
 ** create new topic
 ** commit
+* load tables on startup
 * add tail command
 ** add File tails fn
 *** add tails-iter
-* load tables on startup
 * add User.password
 ** ask on database setup
 ** ask on startup
