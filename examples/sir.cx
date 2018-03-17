@@ -35,9 +35,6 @@ use: (qdb commit find-key len new-db-table upsert);
 func: get-path(n Str)(_ Str)
   [home-dir '.sircx' $n] @/ join;
 
-func: get-path(n Str)(_ Str)
-  [home-dir '.sircx' $n] @/ join;
-
 '' get-path make-dir
 
 let: options 'options.db' get-path [`id] new-db-table;
