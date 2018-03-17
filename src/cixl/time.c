@@ -1,10 +1,46 @@
 #include <inttypes.h>
 #include <stdbool.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
 
 #include "cixl/box.h"
 #include "cixl/cx.h"
 #include "cixl/lib.h"
 #include "cixl/time.h"
+
+struct cx_time *cx_time_init(struct cx_time *time, int32_t months, int64_t ns) {
+  time->months = months;
+  time->ns = ns;
+  return time;
+}
+
+char *cx_time_fmt(struct cx_time *t, const char *fmt) {
+  struct tm tm = {0};
+
+  tm.tm_year = t->months / 12 + 1 - 1900;
+  tm.tm_mon = t->months % 12;
+  tm.tm_mday = t->ns / CX_DAY;
+
+  int64_t ns = t->ns % CX_DAY;
+  tm.tm_hour = ns / CX_HOUR;
+  ns %= CX_HOUR;
+  tm.tm_min = ns / CX_MIN;
+  ns %= CX_MIN;
+  tm.tm_sec = ns / CX_SEC;
+  ns %= CX_SEC;
+  
+  size_t max = strlen(fmt)*2;
+  char *out = malloc(max);
+  
+  while(true) {
+    if (strftime(out, max, fmt, &tm)) { break; }
+    max *= 2;
+    out = realloc(out, max);
+  }
+
+  return out;
+}
 
 static bool equid_imp(struct cx_box *x, struct cx_box *y) {
   struct cx_time *xt = &x->as_time, *yt = &y->as_time;

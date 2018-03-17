@@ -12,14 +12,9 @@
 #include "cixl/lib/time.h"
 #include "cixl/scope.h"
 #include "cixl/stack.h"
+#include "cixl/str.h"
 #include "cixl/timer.h"
 #include "cixl/util.h"
-
-struct cx_time *cx_time_init(struct cx_time *time, int32_t months, int64_t ns) {
-  time->months = months;
-  time->ns = ns;
-  return time;
-}
 
 static bool is_leap_year(int year) {
   return !(year%4) && ((year%100) || !(year%400));
@@ -377,6 +372,20 @@ static bool clock_imp(struct cx_scope *scope) {
   return ok;
 }
 
+static bool fmt_imp(struct cx_scope *scope) {
+  struct cx *cx = scope->cx;
+  struct cx_box
+    f = *cx_test(cx_pop(scope, false)),
+    t = *cx_test(cx_pop(scope, false));
+
+  char *s = cx_time_fmt(&t.as_time, f.as_str->data);
+  cx_box_init(cx_push(scope), cx->str_type)->as_str = cx_str_new(s);
+  free(s);
+  
+  cx_box_deinit(&f);
+  return true;
+}
+
 cx_lib(cx_init_time, "cx/time") {
   struct cx *cx = lib->cx;
     
@@ -562,6 +571,11 @@ cx_lib(cx_init_time, "cx/time") {
 	       cx_args(cx_arg("act", cx->any_type)),
 	       cx_args(cx_arg(NULL, cx->int_type)),
 	       clock_imp);
+
+  cx_add_cfunc(lib, "fmt",
+	       cx_args(cx_arg("t", cx->time_type), cx_arg("f", cx->str_type)),
+	       cx_args(cx_arg(NULL, cx->str_type)),
+	       fmt_imp);
 
   return true;
 }

@@ -19,6 +19,7 @@ struct cx_time {
 };
 
 struct cx_time *cx_time_init(struct cx_time *time, int32_t months, int64_t ns);
+char *cx_time_fmt(struct cx_time *t, const char *fmt);
 
 struct cx_type *cx_init_time_type(struct cx_lib *lib);
 

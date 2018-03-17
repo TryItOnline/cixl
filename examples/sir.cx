@@ -23,7 +23,7 @@ use:
   (cx/sys home-dir make-dir)
   (cx/stack _ % ~ push)
   (cx/table Table put)
-  (cx/time hour now minute)
+  (cx/time fmt now)
   (cx/type new)
   (cx/var let:);
 
@@ -221,11 +221,10 @@ func: push-post(u User t Topic in Str)()
   $pt {$u $pt $in recall} if;
 
 func: new-post(c Client in Str)()
-  let: (h m) now % hour ~ minute;
   let: u $c `user get;
   let: t $c `topic get;
   $u $t
-  [$h @: $m @@s @@ $u `name get @@s $t `id get @@s $in @@n] #nil join
+  [now '%H:%M ' fmt @@ $u `name get @@s $t `id get @@s $in @@n] #nil join
   push-post;
 
 func: poll-out(c Client)()
