@@ -69,6 +69,18 @@ size_t cx_str_dist(const char *x, const char *y) {
   return res;
 }
 
+void cx_reverse(char *s) {
+  char *j = s;
+  while (*j) { j++; }
+  j--;
+  
+  for (char *i = s; i < j; i++, j--) {
+    char c = *i;
+    *i = *j;
+    *j = c;
+  }
+}
+
 bool cx_get_line(char **out, size_t *len, FILE *in) {
   if (getline(out, len, in) == -1) { return false; }
 

@@ -14,6 +14,7 @@
 #include "cixl/iter.h"
 #include "cixl/lib.h"
 #include "cixl/lib/io.h"
+#include "cixl/mfile.h"
 #include "cixl/scope.h"
 #include "cixl/str.h"
 
@@ -122,6 +123,64 @@ static struct cx_iter *line_iter_new(struct cx_file *in) {
   it->in = cx_file_ref(in);
   it->line = NULL;
   it->len = 0;
+  return &it->iter;
+}
+
+struct reverse_iter {
+  struct cx_iter iter;
+  struct cx_file *in;
+  ssize_t offs;
+};
+
+static bool reverse_next(struct cx_iter *iter,
+		      struct cx_box *out,
+		      struct cx_scope *scope) {
+  struct cx *cx = scope->cx;
+  struct reverse_iter *it = cx_baseof(iter, struct reverse_iter, iter);
+  FILE *fptr = cx_file_ptr(it->in);
+  it->offs--;
+    
+  if (fseek(fptr, it->offs, SEEK_SET)) {
+    cx_error(cx, cx->row, cx->col, "Failed seeking: %d", errno);
+    return false;
+  }
+
+  int c = fgetc(fptr);
+
+  if (c == EOF) {
+    if (errno == EAGAIN) {
+      cx_box_init(out, cx->nil_type);
+      return true;
+    }
+      
+    cx_error(cx, cx->row, cx->col, "Failed reading: %d", errno);
+    return false;
+  }
+
+  cx_box_init(out, cx->char_type)->as_char = c;
+  if (!it->offs) { iter->done = true; }
+  return true;
+}
+
+static void *reverse_deinit(struct cx_iter *iter) {
+  struct reverse_iter *it = cx_baseof(iter, struct reverse_iter, iter);
+  cx_file_deref(it->in);
+  return it;
+}
+
+static cx_iter_type(reverse_iter, {
+    type.next = reverse_next;
+    type.deinit = reverse_deinit;
+  });
+
+static struct cx_iter *reverse_iter_new(struct cx_file *in) {
+  struct reverse_iter *it = malloc(sizeof(struct reverse_iter));
+  cx_iter_init(&it->iter, reverse_iter());
+  it->in = cx_file_ref(in);
+  FILE *fptr = cx_file_ptr(in);
+  fseek(fptr, 0, SEEK_END);
+  it->offs = ftell(cx_file_ptr(in));
+  it->iter.done = !it->offs;
   return &it->iter;
 }
 
@@ -257,6 +316,13 @@ static bool fopen_imp(struct cx_scope *scope) {
   return ok;
 }
 
+static bool unblock_imp(struct cx_scope *scope) {
+  struct cx_box *f = cx_test(cx_pop(scope, false));
+  bool ok = cx_file_unblock(f->as_file);
+  cx_box_deinit(f);
+  return ok;
+}
+
 static bool flush_imp(struct cx_scope *scope) {
   struct cx_box *f = cx_test(cx_pop(scope, false));
   bool ok = false;
@@ -310,6 +376,14 @@ static bool lines_imp(struct cx_scope *scope) {
   return true;
 }
 
+static bool reverse_imp(struct cx_scope *scope) {
+  struct cx_box in = *cx_test(cx_pop(scope, false));
+  struct cx_iter *it = reverse_iter_new(in.as_file);
+  cx_box_init(cx_push(scope), scope->cx->iter_type)->as_iter = it;
+  cx_box_deinit(&in);
+  return true;
+}
+
 cx_lib(cx_init_io, "cx/io") {    
   struct cx *cx = lib->cx;
     
@@ -352,12 +426,16 @@ cx_lib(cx_init_io, "cx/io") {
 	       cx_args(cx_arg(NULL, cx->file_type)),
 	       fopen_imp);  
 
+  cx_add_cfunc(lib, "unblock",
+	       cx_args(cx_arg("file", cx->file_type)), cx_args(),
+	       unblock_imp);
+  
   cx_add_cfunc(lib, "flush",
 	       cx_args(cx_arg("file", cx->wfile_type)), cx_args(),
 	       flush_imp);
 
   cx_add_cfunc(lib, "close",
-	       cx_args(cx_arg("file", cx->wfile_type)), cx_args(),
+	       cx_args(cx_arg("file", cx->file_type)), cx_args(),
 	       close_imp);
 
   cx_add_cfunc(lib, "read",
@@ -374,6 +452,11 @@ cx_lib(cx_init_io, "cx/io") {
 	       cx_args(cx_arg("f", cx->rfile_type)),
 	       cx_args(cx_arg(NULL, cx->iter_type)),
 	       lines_imp);
+
+  cx_add_cfunc(lib, "reverse",
+	       cx_args(cx_arg("f", cx->rfile_type)),
+	       cx_args(cx_arg(NULL, cx->iter_type)),
+	       reverse_imp);
 
   cx_add_cxfunc(lib, "say",
 		cx_args(cx_arg("v", cx->any_type)), cx_args(),

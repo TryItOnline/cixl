@@ -48,7 +48,8 @@ static bool equid_imp(struct cx_box *x, struct cx_box *y) {
 
 static bool call_imp(struct cx_box *value, struct cx_scope *scope) {
   struct cx *cx = scope->cx;
-  struct cx_lambda *l = value->as_ptr;
+  struct cx_lambda *l = cx_lambda_ref(value->as_ptr);
+  
   bool pop_lib = false;
   
   if (*cx->lib != l->lib) {
@@ -56,15 +57,19 @@ static bool call_imp(struct cx_box *value, struct cx_scope *scope) {
     pop_lib = true;
   }
 
-  struct cx_scope *child_scope = NULL;
-  
-  if (scope != l->scope) {
-    for (child_scope = scope;
-	 child_scope->parent;
-	 child_scope = child_scope->parent);
-    cx_scope_ref(child_scope)->parent = l->scope;
-  }
+  struct cx_scope *child_scope = (scope == l->scope) ? NULL : scope;
 
+  if (child_scope) {
+    for (; child_scope->parent; child_scope = child_scope->parent) {
+      if (child_scope == l->scope) {
+	child_scope = NULL;
+	break;
+      }
+    }
+    
+    if (child_scope) { cx_scope_ref(child_scope)->parent = l->scope; }
+  }
+  
   bool ok = cx_eval(l->bin, l->start_pc, cx);
 
   if (child_scope) {
@@ -73,6 +78,7 @@ static bool call_imp(struct cx_box *value, struct cx_scope *scope) {
   }
 
   if (pop_lib) { cx_pop_lib(cx); }
+  cx_lambda_deref(l);
   return ok;
 }
 

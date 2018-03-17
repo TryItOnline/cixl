@@ -1,7 +1,7 @@
 #!/usr/local/bin/cixl
 
 /*
-  The seed of a simple, text based collaboration server.
+  The Seed of a Text Based Collab Server.
 
   https://github.com/basic-gongfu/cixl#getting-started
 */
@@ -12,13 +12,14 @@ use:
   (cx/cond = == and else if if-else or switch:)
   (cx/error catch: throw dump)
   (cx/func func: recall)
-  (cx/io RFile WFile ask close flush fopen include: lines print say)
+  (cx/io File RFile WFile
+         ask close flush fopen include: lines print reverse say unblock)
   (cx/io/poll Poll delete no-write on-read on-write wait)
   (cx/iter Iter for is-done iter next while)
   (cx/net TCPClient TCPServer accept listen)
   (cx/pair x y)
   (cx/rec ? rec: get put)
-  (cx/str int join split str words)
+  (cx/str int join reverse split str words)
   (cx/sym sym)
   (cx/sys home-dir make-dir)
   (cx/stack _ % ~ push)
@@ -66,13 +67,18 @@ $root `id `/ put
 $root `log-path 'log' get-path put
 $root `clients Table new put
 
+func: open-log(t Topic m Sym)(_ File)
+  let: p $t `log-path get;
+  [$p @/ $t `name get '.txt'] #nil join $m fopen;
+
 func: get-log(t Topic)(_ WFile)
   $t `log get {
     let: p $t `log-path get;
     $p make-dir
-    
-    let: l [$p @/ $t `name get '.txt'] #nil join `a fopen;
+
+    let: l $t `a open-log;    
     $t `log $l put
+    
     $l
   } or;
 
@@ -122,10 +128,11 @@ func: new-user (n Sym)(_ User)
   $u;
 
 rec: Client ()
-  user  User
-  topic Topic
-  io    TCPClient
-  buf   Buf;
+  user     User
+  topic    Topic
+  io       TCPClient
+  buf      Buf
+  is-muted Bool;
 
 func: join-topic(c Client ns Str)()
   $c `topic get `clients get $c delete
@@ -178,6 +185,46 @@ func: push-out(c Client v A)()
   let: buf $c `buf get;
   $buf $v push;
 
+func: poll-out(c Client)()
+  let: io $c `io get;
+
+  $poll $io {
+    let: buf $c `buf get;
+    $io $buf write-bytes
+    $buf {$poll $io no-write} else
+  } on-write;
+
+func: prompt(c Client)()
+  let: u $c `user get;
+  
+  $u {
+    $c [$c `topic get `id get @@s] push-out
+  } {
+    $c 'User: ' push-out
+  } if-else;
+
+func: topic-tail(c Client)()
+  let: t $c `topic get;
+  let: in $t `r open-log % unblock;
+  let: it $in reverse lines;
+  $c `is-muted #t put
+
+  $poll $in {
+    let: l $it next;
+    
+    $l {
+      $c [$l % reverse @@n] push-out
+    } {
+      $it is-done {
+	$c `is-muted #f put
+        $c poll-out
+        $poll $in delete
+	$in close
+	$c prompt
+      } if
+    } if-else
+  } on-read;
+
 func: list-topics(c Client t Topic push-id Bool)()
   let: cts $t `children get;
 
@@ -188,15 +235,6 @@ func: list-topics(c Client t Topic push-id Bool)()
     } for
   } {
     $push-id {$c [$t `id get @@n] push-out} if
-  } if-else;
-
-func: prompt(c Client)()
-  let: u $c `user get;
-  
-  $u {
-    $c [@@ $u `name get @@s $c `topic get `id get @@s] push-out
-  } {
-    $c 'User: ' push-out
   } if-else;
 
 func: disconnect(c Client)()
@@ -210,7 +248,7 @@ func: push-post(u User t Topic in Str)()
   
   $t `clients get {
     let: c x;
-    $c `user get $u == {$c $in push-out} else
+    $c `user get $u == {$c `is-muted get} or {$c $in push-out} else
   } for
 
   let: pt $t `parent get;
@@ -222,15 +260,6 @@ func: new-post(c Client in Str)()
   $u $t
   [now '%d %H:%M ' fmt @@ $u `name get @@s $t `id get @@s $in @@n] #nil join
   push-post;
-
-func: poll-out(c Client)()
-  let: io $c `io get;
-
-  $poll $io {
-    let: buf $c `buf get;
-    $io $buf write-bytes
-    $buf {$poll $io no-write} else
-  } on-write;
 
 func: handle-in(c Client in Str)()
   $c `user get {
@@ -244,21 +273,28 @@ func: handle-in(c Client in Str)()
 	  (($cmd `branch =)
 	    let: n $it str;
 	    $n {'Missing topic name' throw} else
-	    $c $n sym branch-topic)
+	    $c $n sym branch-topic
+	    $c prompt)
           (($cmd `join =)
-	    $c $it str $root or join-topic)
+	    $c $it str $root or join-topic
+	    $c prompt)
 	  (($cmd `list =)
-	    $c % `topic get #f list-topics)
+	    $c % `topic get #f list-topics
+	    $c prompt)
+	  (($cmd `tail =)
+	    $c topic-tail)
           (#t
             ['Invalid command: ' $cmd] throw);
       } {
         $c $in new-post
+	$c prompt
       } if-else
     } if
   } {
     $in {
       $c `user $in sym new-user put
       $root `clients get $c #t put
+      $c prompt
     } {
       $c disconnect
     } if-else
@@ -276,22 +312,22 @@ func: new-client(io TCPClient)(_ Client)
 
   $c `io $io put
   $c `buf Buf new put
+  $c `is-muted #f put
   $c $root join-topic
-    
+  
   $poll $io {
     let: l $ils next;
 
     $l is-nil {
       $ils is-done {$c disconnect} if
     } {
-      catch: (A $c ~ push-error dump rollback)
+      catch: (A $c ~ push-error $c prompt dump rollback)
         $c $l handle-in
 	commit;
-      $c prompt
       $c poll-out
     } if-else
   } on-read
-
+  
   $c;
 
 ['Sir.cx v0.2' @@n] say

@@ -164,7 +164,7 @@ int cx_poll_wait(struct cx_poll *p, int ms, struct cx_scope *s) {
 	rem--;
       }
 
-      if (fd->revents & POLLOUT) {
+      if (f->fd == prev_fd && fd->revents & POLLOUT) {
 	if (f->write_fn) {
 	  if (!f->write_fn(f->write_data)) { return -1; }
 	} else if (!cx_call(&f->write_value, s)) {

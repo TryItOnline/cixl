@@ -1,4 +1,5 @@
 #include <errno.h>
+#include <fcntl.h>
 #include <unistd.h>
 
 #include "cixl/box.h"
@@ -95,6 +96,32 @@ FILE *cx_file_ptr(struct cx_file *file) {
   return file->_ptr;
 }
 
+bool cx_file_unblock(struct cx_file *file) {
+  if (fcntl(file->fd, F_SETFL, fcntl(file->fd, F_GETFL, 0) | O_NONBLOCK) == -1) {
+    struct cx *cx = file->cx;
+    cx_error(cx, cx->row, cx->col, "Failed unblocking file: %d", errno);
+    return false;
+  }
+
+  return true;
+}
+
+bool cx_file_close(struct cx_file *file) {
+  if (file->_ptr == stdin || file->_ptr == stdout) { return true; }
+  
+  if (file->_ptr) {
+    fclose(file->_ptr);
+    file->_ptr = NULL;
+  } else if (file->fd != -1) {
+    close(file->fd);
+  } else {
+    return false;
+  }
+
+  file->fd = -1;
+  return true;
+}
+
 static bool equid_imp(struct cx_box *x, struct cx_box *y) {
   return x->as_file == y->as_file;
 }
@@ -113,22 +140,6 @@ static void copy_imp(struct cx_box *dst, const struct cx_box *src) {
 
 struct cx_iter *cx_file_iter(struct cx_box *v) {
   return char_iter_new(v->as_file);
-}
-
-bool cx_file_close(struct cx_file *file) {
-  if (file->_ptr == stdin || file->_ptr == stdout) { return true; }
-  
-  if (file->_ptr) {
-    fclose(file->_ptr);
-    file->_ptr = NULL;
-  } else if (file->fd != -1) {
-    close(file->fd);
-  } else {
-    return false;
-  }
-
-  file->fd = -1;
-  return true;
 }
 
 static void dump_imp(struct cx_box *v, FILE *out) {

@@ -33,6 +33,7 @@ struct cx_file *cx_file_deinit(struct cx_file *f);
 
 FILE *cx_file_ptr(struct cx_file *file);
 struct cx_iter *cx_file_iter(struct cx_box *v);
+bool cx_file_unblock(struct cx_file *file);
 bool cx_file_close(struct cx_file *file);
 
 struct cx_type *_cx_init_file_type(struct cx_lib *lib, const char *name, ...);

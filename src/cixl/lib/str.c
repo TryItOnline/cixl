@@ -303,6 +303,13 @@ static bool str_lower_imp(struct cx_scope *scope) {
   return true;
 }
 
+static bool str_reverse_imp(struct cx_scope *scope) {
+  struct cx_box s = *cx_test(cx_pop(scope, false));
+  cx_reverse(s.as_str->data);
+  cx_box_deinit(&s);
+  return true;
+}
+
 static bool join_imp(struct cx_scope *scope) {
   struct cx *cx = scope->cx;
   
@@ -331,7 +338,6 @@ static bool join_imp(struct cx_scope *scope) {
   cx_box_deinit(&in);
   return true;
 }
-
 
 cx_lib(cx_init_str, "cx/str") {
   struct cx *cx = lib->cx;
@@ -417,6 +423,10 @@ cx_lib(cx_init_str, "cx/str") {
   cx_add_cfunc(lib, "lower",
 	       cx_args(cx_arg("s", cx->str_type)), cx_args(),
 	       str_lower_imp);
+
+  cx_add_cfunc(lib, "reverse",
+	       cx_args(cx_arg("s", cx->str_type)), cx_args(),
+	       str_reverse_imp);
 
   cx_add_cfunc(lib, "join",
 	       cx_args(cx_arg("in", cx->seq_type),

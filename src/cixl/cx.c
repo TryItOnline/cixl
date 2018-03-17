@@ -151,7 +151,6 @@ struct cx *cx_init(struct cx *cx) {
       
   cx->scope = NULL;
   cx->root_scope = cx_begin(cx, NULL);
-  srand((ptrdiff_t)cx + clock());
 
   return cx;
 }

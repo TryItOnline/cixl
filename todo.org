@@ -1,11 +1,15 @@
-* add tail command
-** add File tails fn
-*** add tails-iter
+* solve problem with multiple clients
+* add :tail N command
+** add n-param
+*** done once n lines are accumulated
 * load tables on startup
 ** look up user on login
 * add User.password
 ** ask on database setup
 ** ask on login
+* add :user command
+** print info about current user
+* change log writing to use non-blocking io
 * ---
 * debug row/col
 * add support for nil catch
@@ -73,3 +77,7 @@ sudo rm -rf /usr/local/include/cixl
 | Bin new % '50 fib' compile emit
 | Bin new % '{10000 {50 fib _} times} clock 1000000 / int say' compile emit
 | Bin new % 'func: fortytwo(Int)(#f) _; func: fortytwo(42)(#t); 21 fortytwo say' compile emit
+
+rename tail_iter to reverse_iter
+
+'test2.cx' `r fopen reverse lines {% reverse} for

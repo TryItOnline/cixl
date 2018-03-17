@@ -1,5 +1,7 @@
 #include <errno.h>
 #include <string.h>
+#include <time.h>
+#include <sys/stat.h>
 
 #include "cixl/bin.h"
 #include "cixl/cx.h"
@@ -13,6 +15,8 @@
 #include "cixl/scope.h"
 
 int main(int argc, char *argv[]) {
+  srand((ptrdiff_t)argv + clock());
+
   struct cx cx;
   cx_init(&cx);
   cx_init_libs(&cx);

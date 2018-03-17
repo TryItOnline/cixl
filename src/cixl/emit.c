@@ -85,7 +85,9 @@ bool cx_emit_file(struct cx *cx, const char *fname, FILE *out) {
   
   if (!cx_load(cx, fname, bin)) { goto exit; }
 
-  fputs("#include \"cixl/arg.h\"\n"
+  fputs("#include <stdlib.h>\n"
+	"#include <time.h>\n"
+	"#include \"cixl/arg.h\"\n"
 	"#include \"cixl/bin.h\"\n"
 	"#include \"cixl/call.h\"\n"
 	"#include \"cixl/catch.h\"\n"
@@ -103,6 +105,7 @@ bool cx_emit_file(struct cx *cx, const char *fname, FILE *out) {
   if (!cx_emit(bin, out, cx)) { goto exit; }
       
   fputs("int main(int argc, char *argv[]) {\n"
+	"  srand((ptrdiff_t)argv + clock());\n"
 	"  struct cx cx;\n"
 	"  cx_init(&cx);\n"
 	"  cx_init_libs(&cx);\n"
