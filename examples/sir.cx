@@ -289,10 +289,9 @@ func: new-client(io TCPClient)(_ Client)
 
 $users len {
   ['Database Setup' @@n] say
-  'Operator Name: ' ask
+  'User: ' ask
   let: n sym;
   $n new-user _
-  `operator-name $n set-option
   [@@n 'Done!' @@n] say
 } else
 
