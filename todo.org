@@ -3,15 +3,18 @@
 ** change lambda to insert scope in parent chain
 *** search first NULL parent
 *** replaces push/pop
+* add :branch X command
+** create new topic
+** commit
 * add tail command
 ** add File tails fn
 *** add tails-iter
 * load tables on startup
-* add :new-topic command
 * add User.password
 ** ask on database setup
 ** ask on startup
 ** ask on login
+* add Network Port (7707): to db setup
 * ---
 * debug row/col
 * add support for nil catch
