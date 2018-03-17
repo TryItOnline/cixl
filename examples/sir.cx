@@ -97,7 +97,8 @@ func: add-topic(pt t Topic)()
   } if-else;
 
 rec: User ()
-  name  Sym;
+  name  Sym
+  is-op Bool;
 
 func: load-user(rec Table)(_ User)
   let: u User new;
@@ -116,6 +117,7 @@ func: save(u User)()
 func: new-user (n Sym)(_ User)
   let: u User new;
   $u `name $n put
+  $u `is-op #f put
   $u save
   $u;
 
@@ -291,7 +293,7 @@ $users len {
   ['Database Setup' @@n] say
   'User: ' ask
   let: n sym;
-  $n new-user _
+  $n new-user `is-op #t put
   [@@n 'Done!' @@n] say
 } else
 
