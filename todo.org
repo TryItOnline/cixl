@@ -1,18 +1,13 @@
-* fix disconnect poll error
-** value is pushed in wrong scope because of lambda
-** change lambda to insert scope in parent chain
-*** search first NULL parent
-*** replaces push/pop
 * add :branch X command
 ** create new topic
 ** commit
 * load tables on startup
+** look up user on login
 * add tail command
 ** add File tails fn
 *** add tails-iter
 * add User.password
 ** ask on database setup
-** ask on startup
 ** ask on login
 * add port param
 * ---
