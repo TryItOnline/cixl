@@ -14,7 +14,8 @@ struct cx_scope {
   struct cx_vec stack;
   struct cx_env vars;
   struct cx_vec catches;
-
+  struct cx_vec var_scopes;
+  
   bool safe;
   unsigned int nrefs;
 };
