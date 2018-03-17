@@ -168,10 +168,11 @@ Variables may be bound once per scope using the ```let:``` macro.
 ...
 ['bar'r2]
 
-   let: foo 'baz';
+   | let: foo 'baz';
 ...
 Error in row 1, col 10:
 Attempt to rebind variable: 'foo'
+[]
 ```
 
 Multiple names may be bound at the same time by enclosing them in parens.
@@ -187,10 +188,10 @@ Types may be specified for documentation and type checking.
 
 ```
    | let: (x y Int z Str) 1 2 3;
-...$x $y $z
 ...
 Error in row 1, col 5:
 Expected type Str, actual: Int
+[1 2]
 ```
 
 Since ```let:``` doesn't introduce its own scope, values already on the stack may be bound using the same construct.
@@ -501,10 +502,11 @@ Two kinds of code comments are supported, line comments and block comments.
 Besides [optionals](https://github.com/basic-gongfu/cixl#optionals), Cixl provides basic exceptions. Two functions are provided for signalling errors. ```throw``` may be used to throw any value as an error.
 
 ```
-   'Going down!' throw
+   | 'Going down!' throw
 ...
 Error in row 1, col 6:
 Going down!
+[]
 ```
 
 While ```check``` may be used to throw an error when the specified condition doesn't hold.
@@ -514,6 +516,7 @@ While ```check``` may be used to throw an error when the specified condition doe
 ...
 Error in row 1, col 7:
 Check failed
+[]
 ```
 
 Thrown values may be caught using ```catch:```, the first matching clause is evaluated with the error pushed on stack.
@@ -529,6 +532,16 @@ Thrown values may be caught using ```catch:```, the first matching clause is eva
 ...`bar
 ...
 [(`int 42)r1 `bar]
+```
+
+```dump``` may be used to print information about the current error within a catch clause.
+
+```
+   | catch: (A _ dump) 42 throw;
+...
+Error in row 1, col 21:
+42
+[]
 ```
 
 ### Lambdas
@@ -680,7 +693,8 @@ Previous argument types may be referenced by index, it is substituted for the ac
    | 7 'foo' same-add
 ...
 Error in row 1, col 7:
-Func not applicable: baz
+Func not applicable: same-add
+[7 'foo'r1]
 ```
 
 Literal values may used instead of types. Anonymous arguments are pushed on the function stack before evaluation.
@@ -736,10 +750,11 @@ Argument types may be specified in angle brackets to select a specific function 
 ...
 [Fimp(+ Int Int)]
 
-   &+<Str Str>
+   | &+<Str Str>
 ...
 Error in row 1, col 4:
-Func imp not found
+Fimp not found: +<Str Str>
+[]
 
    | 7 35 +<Int Int>
 ...
@@ -813,7 +828,8 @@ The ```#nil``` value may be used to represent missing values. Since ```Nil``` is
 ...| #nil foo
 ...
 Error in row 1, col 1:
-Func not applicable: 'foo'
+Func not applicable: foo
+[#nil]
 
    | #nil bar
 ...
