@@ -1,7 +1,7 @@
 #!/usr/local/bin/cixl
 
 /*
-  The seed of a simplified IRC.
+  The seed of a simple chat server.
 
   https://github.com/basic-gongfu/cixl#getting-started
 */

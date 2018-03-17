@@ -128,8 +128,7 @@ static bool dump_imp(struct cx_scope *scope) {
     return false;
   }
 
-  struct cx_error *e = cx_vec_peek(&cx->throwing, 0);
-  cx_error_dump(e, stderr);
+  cx_do_vec(&cx->throwing, struct cx_error, e) { cx_error_dump(e, stderr); }  
   return true;
 }
 

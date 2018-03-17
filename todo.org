@@ -1,3 +1,8 @@
+* fix disconnect poll error
+** value is pushed in wrong scope
+** change lambda to insert scope in parent chain
+*** search first NULL parent
+*** replaces push/pop
 * add tail command
 ** add File tails fn
 *** add tails-iter
