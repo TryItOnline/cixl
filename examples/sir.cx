@@ -30,7 +30,7 @@ use:
 let: port int;
 
 include: 'qdb.cx';
-use: (qdb commit find-key len new-db-table upsert);
+use: (qdb commit find-key len new-db-table rollback upsert);
 
 func: get-path(n Str)(_ Str)
   [home-dir '.sircx' $n] @/ join;
@@ -127,19 +127,6 @@ rec: Client ()
   io    TCPClient
   buf   Buf;
 
-func: new-topic(c Client n Sym)()
-  let: t Topic new;  
-  $t `name $n put
-  $t `clients Table new put
-  
-  let: pt $c `topic get;
-  $t `parent $pt put
-  $pt $t add-topic
-
-  $t `id [$pt `id get $n @/] #nil join sym put
-  $t `log-path [$pt `log-path get $pt `name get] @/ join put
-  $t save;
-
 func: join-topic(c Client ns Str)()
   $c `topic get `clients get $c delete
   $ns 0 get @/ = {$c `topic $root put} if
@@ -171,6 +158,21 @@ func: join-topic(c Client t Topic)()
   $ct {$ct `clients get $c delete} if
   $c `topic $t put
   $c `topic get `clients get $c #t put;
+
+func: branch-topic(c Client n Sym)()
+  let: t Topic new;  
+  $t `name $n put
+  $t `clients Table new put
+  
+  let: pt $c `topic get;
+  $t `parent $pt put
+  $pt $t add-topic
+
+  $t `id [$pt `id get $n @/] #nil join sym put
+  $t `log-path [$pt `log-path get $pt `name get] @/ join put
+  $t save
+
+  $c $t join-topic;
 
 func: push-out(c Client v A)()
   let: buf $c `buf get;
@@ -239,6 +241,10 @@ func: handle-in(c Client in Str)()
         let: cmd {$it next % {% @@s = {_ #nil} if} if} iter str sym;
 
         switch:
+	  (($cmd `branch =)
+	    let: n $it str;
+	    $n {'Missing topic name' throw} else
+	    $c $n sym branch-topic)
           (($cmd `join =)
 	    $c $it str $root or join-topic)
 	  (($cmd `list =)
@@ -278,8 +284,9 @@ func: new-client(io TCPClient)(_ Client)
     $l is-nil {
       $ils is-done {$c disconnect} if
     } {
-      catch: (A $c ~ push-error dump)
-        $c $l handle-in;
+      catch: (A $c ~ push-error dump rollback)
+        $c $l handle-in
+	commit;
       $c prompt
       $c poll-out
     } if-else
@@ -295,6 +302,7 @@ $users len {
   let: n sym;
   $n new-user `is-op #t put
   [@@n 'Done!' @@n] say
+  commit
 } else
 
 let: server #nil $port 3 listen;

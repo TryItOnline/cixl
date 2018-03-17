@@ -1,15 +1,11 @@
-* add :branch X command
-** create new topic
-** commit
-* load tables on startup
-** look up user on login
 * add tail command
 ** add File tails fn
 *** add tails-iter
+* load tables on startup
+** look up user on login
 * add User.password
 ** ask on database setup
 ** ask on login
-* add port param
 * ---
 * debug row/col
 * add support for nil catch
