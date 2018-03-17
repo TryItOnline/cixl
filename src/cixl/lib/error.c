@@ -120,6 +120,19 @@ static bool throw_imp(struct cx_scope *scope) {
   return false;
 }
 
+static bool dump_imp(struct cx_scope *scope) {
+  struct cx *cx = scope->cx;
+  
+  if (!cx->throwing.count) {
+    cx_error(cx, cx->row, cx->col, "Nothing to dump");
+    return false;
+  }
+
+  struct cx_error *e = cx_vec_peek(&cx->throwing, 0);
+  cx_error_dump(e, stderr);
+  return true;
+}
+
 cx_lib(cx_init_error, "cx/error") {
   struct cx *cx = lib->cx;
     
@@ -136,6 +149,10 @@ cx_lib(cx_init_error, "cx/error") {
   cx_add_cfunc(lib, "throw",
 	       cx_args(cx_arg("e", cx->any_type)), cx_args(),
 	       throw_imp);
+
+  cx_add_cfunc(lib, "dump",
+	       cx_args(), cx_args(),
+	       dump_imp);
 
   return true;
 }

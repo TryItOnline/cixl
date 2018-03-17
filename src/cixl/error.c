@@ -6,6 +6,7 @@
 #include "cixl/cx.h"
 #include "cixl/error.h"
 #include "cixl/scope.h"
+#include "cixl/stack.h"
 #include "cixl/str.h"
 #include "cixl/util.h"
 
@@ -34,9 +35,16 @@ struct cx_error *cx_error_deinit(struct cx_error *e) {
   return e;
 }
 
+void cx_error_dump(struct cx_error *e, FILE *out) {
+  fprintf(out, "Error in row %d, col %d:\n", e->row, e->col);
+  cx_print(&e->value, out);
+  fputc('\n', out);
+  cx_stack_dump(&e->stack, out);
+  fputs("\n\n", out);
+}
+
 struct cx_error *new_error(struct cx *cx, int row, int col, struct cx_box *v) {
-  struct cx_error e;
-  cx_error_init(&e, cx, row, col, v);
+  struct cx_error *e = cx_error_init(cx_vec_push(&cx->throwing), cx, row, col, v);
 
   while (true) {
     struct cx_scope *s = cx_scope(cx, 0);
@@ -55,7 +63,8 @@ struct cx_error *new_error(struct cx *cx, int row, int col, struct cx_box *v) {
 	  cx_copy(cx_push(s), v);
 	  cx_catch_eval(c);
 	  cx_catch_deinit(c);
-	  cx_error_deinit(&e);
+	  cx_error_deinit(e);
+	  cx_vec_pop(&cx->throwing);
 	  return NULL;	  
 	}
 
@@ -68,7 +77,8 @@ struct cx_error *new_error(struct cx *cx, int row, int col, struct cx_box *v) {
   }
 
   struct cx_error *ep = cx_vec_push(&cx->errors);
-  *ep = e;
+  cx_vec_pop(&cx->throwing);
+  *ep = *e;
   return ep;
 }
 

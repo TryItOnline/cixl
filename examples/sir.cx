@@ -10,7 +10,7 @@ use:
   (cx/abc A Bool Opt Stack Str Sym #nil #t #f is-nil)
   (cx/buf Buf push write-bytes)
   (cx/cond = == and else if if-else or switch:)
-  (cx/error catch: throw)
+  (cx/error catch: throw dump)
   (cx/func func: recall)
   (cx/io RFile WFile #in #out ask close flush fopen include: lines print say)
   (cx/io/poll Poll delete no-write on-read on-write wait)
@@ -286,7 +286,7 @@ func: new-client(in RFile out WFile)(_ Client)
     $l is-nil {
       $ils is-done {$c disconnect} if
     } {
-      catch: (A $c ~ push-error)
+      catch: (A #in $in = {_ dump} {$c ~ push-error} if-else)
         $c $l handle-in;
       $c prompt
       $c poll-out

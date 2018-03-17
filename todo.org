@@ -1,3 +1,6 @@
+* add tail command
+** add File tails fn
+*** add tails-iter
 * load tables on startup
 * add :new-topic command
 * add User.password

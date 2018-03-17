@@ -59,7 +59,7 @@ struct cx {
   bool stop;
   
   int row, col;
-  struct cx_vec errors;
+  struct cx_vec throwing, errors;
 };
 
 struct cx *cx_init(struct cx *cx);
