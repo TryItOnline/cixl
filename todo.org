@@ -14,7 +14,7 @@
 ** ask on database setup
 ** ask on startup
 ** ask on login
-* add Network Port (7707): to db setup
+* add port param
 * ---
 * debug row/col
 * add support for nil catch

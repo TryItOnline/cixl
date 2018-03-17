@@ -18,7 +18,7 @@ use:
   (cx/net TCPClient TCPServer accept listen)
   (cx/pair x y)
   (cx/rec ? rec: get put)
-  (cx/str join split str words)
+  (cx/str int join split str words)
   (cx/sym sym)
   (cx/sys home-dir make-dir)
   (cx/stack _ % ~ push)
@@ -26,6 +26,8 @@ use:
   (cx/time fmt now)
   (cx/type new)
   (cx/var let:);
+
+let: port int;
 
 include: 'qdb.cx';
 use: (qdb commit find-key len new-db-table upsert);
@@ -296,8 +298,6 @@ $users len {
   `operator-name $n set-option
   [@@n 'Done!' @@n] say
 } else
-
-let: port 7707;
 
 let: server #nil $port 3 listen;
 
