@@ -25,7 +25,7 @@ func: load-rec(t DBTable in A)()
   let: r $in pop;
 
   $r {
-    $t `recs get $in {_ $r} $r put-else
+    $t `recs get $in $r {_ $r} put-else
   } {
     $t `recs get $in delete
   } if-else;
@@ -87,10 +87,11 @@ func: upsert(t DBTable r A)()
   let: k $t $r get-rec-key;
 
   $rs $k {
-    _ $r
-    $t $k $r `update push-change
-  } {
     $t $k $r `insert push-change
+    $r
+  } {
+    _
+    $t $k $r `update push-change
     $r
   } put-else;
 
@@ -102,7 +103,7 @@ func: commit()()
     let: f $c `table get `file get;
     let: op $c `op get;
     let: r $op `delete = #nil {$c `rec get} if-else;
-    $f $c `key get % $r push write
+    $f $c `key get %% ~ _ % $r push write
     $dirty $f #t put
   } for
 

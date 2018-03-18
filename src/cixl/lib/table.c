@@ -73,8 +73,8 @@ static bool put_imp(struct cx_scope *scope) {
 
 static bool put_else_imp(struct cx_scope *scope) {
   struct cx_box
-    ins = *cx_test(cx_pop(scope, false)),    
     upd = *cx_test(cx_pop(scope, false)),    
+    ins = *cx_test(cx_pop(scope, false)),    
     key = *cx_test(cx_pop(scope, false)),
     tbl = *cx_test(cx_pop(scope, false));
 
@@ -170,8 +170,8 @@ cx_lib(cx_init_table, "cx/table") {
   cx_add_cfunc(lib, "put-else",
 	       cx_args(cx_arg("tbl", cx->table_type),
 		       cx_arg("key", cx->cmp_type),
-		       cx_arg("upd", cx->any_type),
-		       cx_arg("ins", cx->any_type)),
+		       cx_arg("ins", cx->any_type),
+		       cx_arg("upd", cx->any_type)),
 	       cx_args(),
 	       put_else_imp);
 

@@ -1,7 +1,7 @@
 #!/usr/local/bin/cixl
 
 /*
-  The seed of a text based collab server.
+  The seed of a collab server.
 
   https://github.com/basic-gongfu/cixl#getting-started
 */
@@ -9,7 +9,7 @@
 use:
   (cx/abc A Bool Int Opt Stack Str Sym #nil #t #f is-nil)
   (cx/buf Buf push write-bytes)
-  (cx/cond = == and else if if-else or switch:)
+  (cx/cond ! = == and else if if-else or switch:)
   (cx/const define:)
   (cx/error catch: throw dump)
   (cx/func func: recall)
@@ -47,7 +47,7 @@ let: topics 'topics.db' get-path [`id] new-db-table;
 let: poll Poll new;
 
 define: backlog 3;
-define: tail-max 24;
+define: tail-default 24;
 
 func: get-option(id Sym)(_ Opt)
   let: rec $options [$id] find-key;
@@ -296,29 +296,26 @@ func: handle-cmd(c Client cmd Sym in Iter)()
       $c % `topic get #f list-topics
       $c prompt)
     (($cmd `mute =)
-      $c `is-mute #t put
+      let: m $c `is-mute get;
+      $c `is-mute $m! put
       $c prompt)
     (($cmd `tail =)
       let: n $in str int;
-      $c $n #tail-max or topic-tail)
-    (($cmd `unmute =)
-      $c `is-mute #f put
-      $c prompt)
+      $c $n #tail-default or topic-tail)
     (#t
       ['Invalid command: ' $cmd] throw);;
 
 func: state-handle-in(`auth-user c Client in Str)()
   $in {
     let: name $in sym;
-    let: rec $users [$name] find-key;
+    let: u $name find-user;
 
-    $rec {
-      $c `user $rec load-user put 
+    $u {
+      $c `user $u put
     } {
       $c `user $name new-user put
     } if-else
     
-    $root `clients get $c #t put  
     $c `state `auth-password put
     $c prompt
   } {
@@ -340,6 +337,7 @@ func: state-handle-in(`auth-password c Client in Str)()
     } else
   } if-else
   
+  $root `clients get $c #t put  
   $c `state `ok put
   $c prompt;
 

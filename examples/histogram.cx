@@ -27,7 +27,7 @@ use:
 
 | let: ws Table new;
 
-#in words { % lower $ws ~ &++ 1 put-else } for
+#in words { % lower $ws ~ 1 &++ put-else } for
 
 /*
   Convert table to vector of pairs and sort by descending value, pairs are already
