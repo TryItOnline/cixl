@@ -115,22 +115,25 @@ rec: User ()
 func: load-user(rec Table)(_ User)
   let: u User new;
   $u `name $rec `name get put
+  $u `password $rec `password get put
+  $u `is-op $rec `is-op get put
   $u;
-
-func: find-user(name Sym)(_ Opt)
-  let: rec $users [$name] find-key;
-  $rec {$rec load-user} and;
   
 func: save(u User)()
   let: rec Table new;
   $rec `name $u `name get put
+  $rec `password $u `password get put
+  $rec `is-op $u `is-op get put
   $users $rec upsert;
+
+func: find-user(name Sym)(_ Opt)
+  let: rec $users [$name] find-key;
+  $rec {$rec load-user} and;
 
 func: new-user (n Sym)(_ User)
   let: u User new;
   $u `name $n put
   $u `is-op #f put
-  $u save
   $u;
 
 rec: Client ()
@@ -305,8 +308,16 @@ func: handle-cmd(c Client cmd Sym in Iter)()
 
 func: state-handle-in(`auth-user c Client in Str)()
   $in {
-    $c `user $in sym new-user put
-    $root `clients get $c #t put
+    let: name $in sym;
+    let: rec $users [$name] find-key;
+
+    $rec {
+      $c `user $rec load-user put 
+    } {
+      $c `user $name new-user put
+    } if-else
+    
+    $root `clients get $c #t put  
     $c `state `auth-password put
     $c prompt
   } {
@@ -314,7 +325,21 @@ func: state-handle-in(`auth-user c Client in Str)()
   } if-else;
 
 func: state-handle-in(`auth-password c Client in Str)()
-  $c `user get `password $in put
+  let: u $c `user get;
+  let: p $u `password get;
+
+  $p is-nil {
+    $u `password $in put
+    $u save
+    commit
+  } {
+    $p $in = {
+      $c `user #nil put
+      $c `state `auth-user put
+      'Authentication failed' throw
+    } else
+  } if-else
+  
   $c `state `ok put
   $c prompt;
 
@@ -369,14 +394,15 @@ func: new-client(io TCPClient)(_ Client)
 ['Collabri v0.2' @@n] say
 
 $users len {
-  ['Operator Setup' @@n] say
-
-  let: u 'Name: ' ask sym new-user;
+  ['Server Setup' @@n] say
+  
+  let: u 'User: ' ask sym new-user;
   $u `password 'Password: ' ask put
-  $u `is-op #t put  
-
-  [@@n 'Done!' @@n] say
+  $u `is-op #t put
+  $u save
   commit
+  
+  [@@n 'Done!' @@n] say
 } else
 
 let: server #nil $port 3 listen;

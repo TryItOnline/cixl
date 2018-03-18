@@ -1,7 +1,7 @@
-* lookup user on login
 * break up handle-cmd
 ** match fns on cmd sym
 * change log writing to use non-blocking io
+* add option
 * ---
 * debug row/col
 * add support for nil catch

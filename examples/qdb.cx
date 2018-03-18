@@ -25,7 +25,7 @@ func: load-rec(t DBTable in A)()
   let: r $in pop;
 
   $r {
-    $t `recs get $in $r put
+    $t `recs get $in {_ $r} $r put-else
   } {
     $t `recs get $in delete
   } if-else;
