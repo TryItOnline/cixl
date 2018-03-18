@@ -108,8 +108,9 @@ func: add-topic(pt t Topic)()
   } if-else;
 
 rec: User ()
-  name  Sym
-  is-op Bool;
+  name     Sym
+  password Str
+  is-op    Bool;
 
 func: load-user(rec Table)(_ User)
   let: u User new;
@@ -133,6 +134,7 @@ func: new-user (n Sym)(_ User)
   $u;
 
 rec: Client ()
+  state   Sym
   user    User
   topic   Topic
   io      TCPClient
@@ -199,14 +201,17 @@ func: poll-out(c Client)()
     $buf {$poll $io no-write} else
   } on-write;
 
+func: state-prompt(`auth-user c Client)()
+  $c 'User: ' push-out;
+
+func: state-prompt(`auth-password c Client)()
+  $c 'Password: ' push-out;
+
+func: state-prompt(`ok c Client)()
+  $c [$c `is-mute get {'M '} if $c `topic get `id get @@s] push-out;
+
 func: prompt(c Client)()
-  let: u $c `user get;
-  
-  $u {
-    $c [$c `is-mute get {'M '} if $c `topic get `id get @@s] push-out
-  } {
-    $c 'User: ' push-out
-  } if-else;
+  $c `state get $c state-prompt;
 
 func: topic-tail(c Client n Int)()
   let: t $c `topic get;
@@ -273,53 +278,63 @@ func: new-post(c Client in Str)()
     $in @@n
   ] #nil join push-post;
 
-func: handle-in(c Client in Str)()
-  $c `user get {
-    $in {
-      let: it $in iter;
-      
-      $it next @: = {
-        let: cmd {$it next % {% @@s = {_ #nil} if} if} iter str sym;
+func: handle-cmd(c Client cmd Sym in Iter)()
+  switch:
+    (($cmd `branch =)
+      let: n $in str;
+      $n {'Missing topic name' throw} else
+      $c $n sym branch-topic
+      $c prompt)
+    (($cmd `join =)
+      $c $in str $root or join-topic
+      $c prompt)
+    (($cmd `list =)
+      $c % `topic get #f list-topics
+      $c prompt)
+    (($cmd `mute =)
+      $c `is-mute #t put
+      $c prompt)
+    (($cmd `tail =)
+      let: n $in str int;
+      $c $n #tail-max or topic-tail)
+    (($cmd `unmute =)
+      $c `is-mute #f put
+      $c prompt)
+    (#t
+      ['Invalid command: ' $cmd] throw);;
 
-        switch:
-	  (($cmd `branch =)
-	    let: n $it str;
-	    $n {'Missing topic name' throw} else
-	    $c $n sym branch-topic
-	    $c prompt)
-          (($cmd `join =)
-	    $c $it str $root or join-topic
-	    $c prompt)
-	  (($cmd `list =)
-	    $c % `topic get #f list-topics
-	    $c prompt)
-	  (($cmd `mute =)
-	    $c `is-mute #t put
-	    $c prompt)
-	  (($cmd `tail =)
-	    let: n $it str int;
-	    $c $n #tail-max or topic-tail)
-	  (($cmd `unmute =)
-	    $c `is-mute #f put
-	    $c prompt)
-          (#t
-            ['Invalid command: ' $cmd] throw);
-      } {
-        $c $in new-post
-	$c prompt
-      } if-else
+func: state-handle-in(`auth-user c Client in Str)()
+  $in {
+    $c `user $in sym new-user put
+    $root `clients get $c #t put
+    $c `state `auth-password put
+    $c prompt
+  } {
+    $c disconnect
+  } if-else;
+
+func: state-handle-in(`auth-password c Client in Str)()
+  $c `user get `password $in put
+  $c `state `ok put
+  $c prompt;
+
+func: state-handle-in(`ok c Client in Str)()
+  $in {
+    let: it $in iter;
+
+    $it next @: = {
+      let: cmd {$it next % {% @@s = {_ #nil} if} if} iter str sym;
+      $c $cmd $it handle-cmd
     } {
+      $c $in new-post
       $c prompt
     } if-else
   } {
-    $in {
-      $c `user $in sym new-user put
-      $root `clients get $c #t put
-      $c prompt
-    } {
-      $c disconnect
-    } if-else
+    $c prompt
   } if-else;
+
+func: handle-in(c Client in Str)()
+  $c `state get $c $in state-handle-in;
 
 func: push-error(c Client e Str)()
   $c ['Error: ' $e @@n] push-out;
@@ -329,12 +344,12 @@ func: push-error(c Client e Stack)()
 
 func: new-client(io TCPClient)(_ Client)
   let: c Client new;
-  let: ils $io lines;
-
+  $c `state `auth-user put
   $c `io $io put
   $c `buf Buf new put
   $c `is-mute #f put
   $c $root join-topic
+  let: ils $io lines;
   
   $poll $io {
     let: l $ils next;
@@ -354,10 +369,12 @@ func: new-client(io TCPClient)(_ Client)
 ['Collabri v0.2' @@n] say
 
 $users len {
-  ['Database Setup' @@n] say
-  'User: ' ask
-  let: n sym;
-  $n new-user `is-op #t put
+  ['Operator Setup' @@n] say
+
+  let: u 'Name: ' ask sym new-user;
+  $u `password 'Password: ' ask put
+  $u `is-op #t put  
+
   [@@n 'Done!' @@n] say
   commit
 } else

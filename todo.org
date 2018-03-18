@@ -1,10 +1,5 @@
 * load tables on startup
-** look up user on login
-* add User.password
-** ask on database setup
-** ask on login
-* add :user command
-** print info about current user
+* lookup user on login
 * change log writing to use non-blocking io
 * ---
 * debug row/col
