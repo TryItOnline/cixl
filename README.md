@@ -206,12 +206,12 @@ Since ```let:``` doesn't introduce its own scope, values already on the stack ma
 The same functionality may be accessed symbolically.
 
 ```
-   | `foo get-var
+   | `foo var
 ...
 [#nil]
 
-   | `foo 42 put-var
-...`foo get-var
+   | `foo 42 let
+...`foo var
 ...
 [42]
 ```

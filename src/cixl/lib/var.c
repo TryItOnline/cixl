@@ -114,7 +114,7 @@ static bool let_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   return false;  
 }
 
-static bool put_imp(struct cx_scope *scope) {
+static bool let_imp(struct cx_scope *scope) {
   struct cx_box v = *cx_test(cx_pop(scope, false));
   struct cx_sym s = cx_test(cx_pop(scope, false))->as_sym;
   struct cx_box *var = cx_put_var(scope, s, false);
@@ -124,7 +124,7 @@ static bool put_imp(struct cx_scope *scope) {
   return true;
 }
 
-static bool get_imp(struct cx_scope *scope) {
+static bool var_imp(struct cx_scope *scope) {
   struct cx_sym s = cx_test(cx_pop(scope, false))->as_sym;
   struct cx_box *v = cx_get_var(scope, s, true);
 
@@ -146,15 +146,15 @@ cx_lib(cx_init_var, "cx/var") {
     
   cx_add_macro(lib, "let:", let_parse);
 
-  cx_add_cfunc(lib, "put-var",
+  cx_add_cfunc(lib, "let",
 	       cx_args(cx_arg("id", cx->sym_type), cx_arg("val", cx->any_type)),
 	       cx_args(),
-	       put_imp);
+	       let_imp);
   
-  cx_add_cfunc(lib, "get-var",
+  cx_add_cfunc(lib, "var",
 	       cx_args(cx_arg("id", cx->sym_type)),
 	       cx_args(cx_arg(NULL, cx->opt_type)),
-	       get_imp);
+	       var_imp);
 
   return true;
 }

@@ -39,7 +39,7 @@ static bool set_imp(struct cx_scope *scope) {
   return true;
 }
 
-static bool do_imp(struct cx_scope *scope) {
+static bool set_call_imp(struct cx_scope *scope) {
   struct cx_box
     a = *cx_test(cx_pop(scope, false)),
     r = *cx_test(cx_pop(scope, false));
@@ -85,10 +85,10 @@ cx_lib(cx_init_ref, "cx/ref") {
 	       cx_args(),
 	       set_imp);
 
-  cx_add_cfunc(lib, "do",
+  cx_add_cfunc(lib, "set-call",
 	       cx_args(cx_arg("ref", cx->ref_type), cx_arg("act", cx->any_type)),
 	       cx_args(),
-	       do_imp);
+	       set_call_imp);
 
   return true;
 }

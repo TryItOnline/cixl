@@ -93,6 +93,13 @@ struct cx_box *cx_get_var(struct cx_scope *scope, struct cx_sym id, bool silent)
 }
 
 struct cx_box *cx_put_var(struct cx_scope *scope, struct cx_sym id, bool force) {
+  if (scope->var_scopes.count) {
+    struct cx_scope *var_scope = *(struct cx_scope **)cx_vec_pop(&scope->var_scopes);
+    struct cx_box *v = cx_put_var(var_scope, id, force);
+    *(struct cx_scope **)cx_vec_push(&scope->var_scopes) = var_scope;
+    return v;
+  }
+
   struct cx_var *v = cx_env_get(&scope->vars, id);
 
   if (v) {

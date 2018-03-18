@@ -180,9 +180,9 @@ static void let_tests() {
   run(&cx, "(let: (x y z) 1 2 3 4 +; $x $y $z + + 10 = check)");
   run(&cx, "(let: (foo Int bar Str) 7 '35'; $foo $bar int + 42 = check)");
 
-  run(&cx, "(`foo get-var !check "
-           " `foo 42 put-var "
-           " `foo get-var 42 = check)");
+  run(&cx, "(`foo var !check "
+           " `foo 42 let "
+           " `foo var 42 = check)");
 
   cx_deinit(&cx);
 }
@@ -318,7 +318,7 @@ static void ref_tests() {
 
   run(&cx, "use: cx/abc cx/cond cx/error cx/math cx/ref cx/stack;");
   run(&cx, "#nil ref % 42 set deref 42 = check");
-  run(&cx, "41 ref % {++ %} do 42 = check");
+  run(&cx, "41 ref % {++ %} set-call 42 = check");
   
   cx_deinit(&cx);
 }

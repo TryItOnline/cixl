@@ -21,7 +21,7 @@ use:
   (cx/net TCPClient TCPServer accept listen)
   (cx/pair x y)
   (cx/rec ? rec: get put)
-  (cx/ref deref do ref)
+  (cx/ref deref ref set-call)
   (cx/str int join reverse split str words)
   (cx/sym sym)
   (cx/sys home-dir make-dir)
@@ -221,7 +221,7 @@ func: topic-tail(c Client n Int)()
     
     $l {
       $c [$l % reverse @@n] push-out
-      $li &++ do
+      $li &++ set-call
     } if
     
     $li deref $n = $it is-done or {

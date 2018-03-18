@@ -121,7 +121,7 @@ rec: Booking()
   quantity  Int;
 
 func: next-booking-id()(_ Int)
-  $next-booking-id {++ %} do;
+  $next-booking-id {++ %} set-call;
 
 func: new-booking(r Resource start end Time q Int)(_ Booking)
   $start $end < {'Invalid booking length' throw} else
