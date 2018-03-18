@@ -46,6 +46,7 @@ let: users 'users.db' get-path [`name] new-db-table;
 let: topics 'topics.db' get-path [`id] new-db-table;
 let: poll Poll new;
 
+define: backlog 3;
 define: tail-max 24;
 
 func: get-option(id Sym)(_ Opt)
@@ -331,7 +332,6 @@ func: state-handle-in(`auth-password c Client in Str)()
   $p is-nil {
     $u `password $in put
     $u save
-    commit
   } {
     $p $in = {
       $c `user #nil put
@@ -405,7 +405,7 @@ $users len {
   [@@n 'Done!' @@n] say
 } else
 
-let: server #nil $port 3 listen;
+let: server #nil $port #backlog listen;
 
 $poll $server {
   let: io $server accept;
