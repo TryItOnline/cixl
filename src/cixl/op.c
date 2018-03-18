@@ -1177,7 +1177,7 @@ cx_op_type(CX_ORETURN, {
 
 static bool stash_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
   struct cx_scope *s = cx_scope(cx, 0);
-  struct cx_stack *out = cx_stack_new();
+  struct cx_stack *out = cx_stack_new(cx);
   out->imp = s->stack;
   cx_vec_init(&s->stack, sizeof(struct cx_box));
   cx_box_init(cx_push(s), s->cx->stack_type)->as_ptr = out;

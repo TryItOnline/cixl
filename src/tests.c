@@ -316,8 +316,9 @@ static void ref_tests() {
   struct cx cx;
   init_cx(&cx);
 
-  run(&cx, "use: cx/abc cx/cond cx/error cx/ref cx/stack;");
-  run(&cx, "#nil ref % 42 put-ref get-ref 42 = check");
+  run(&cx, "use: cx/abc cx/cond cx/error cx/math cx/ref cx/stack;");
+  run(&cx, "#nil ref % 42 set deref 42 = check");
+  run(&cx, "41 ref % {++ %} do 42 = check");
   
   cx_deinit(&cx);
 }
@@ -339,6 +340,7 @@ static void stack_tests() {
   init_cx(&cx);
 
   run(&cx, "use: cx/abc cx/cond cx/error cx/iter cx/math cx/stack;");
+  run(&cx, "Stack new % 1 push % 2 push [1 2] = check");
   run(&cx, "1 2 [3 4 5] len 3 = check");
   run(&cx, "[1 2 3] pop 3 = check");
   run(&cx, "[1 2 3] % 4 push<Stack A> len 4 = check");

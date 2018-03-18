@@ -12,7 +12,7 @@ struct cx_stack {
   unsigned int nrefs;
 };
 
-struct cx_stack *cx_stack_new();
+struct cx_stack *cx_stack_new(struct cx *cx);
 struct cx_stack *cx_stack_ref(struct cx_stack *stack);
 void cx_stack_deref(struct cx_stack *stack);
 void cx_stack_dump(struct cx_vec *imp, FILE *out);

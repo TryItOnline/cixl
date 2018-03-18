@@ -308,12 +308,12 @@ References may be created manually, which enables using reference semantics for 
 ...
 [Ref(#nil)r2]
 
-   42 put-ref
+   42 set
 ...$r
 ...
 [Ref(42)r2]
 
-   get-ref
+   deref
 ...
 [42]
 ```

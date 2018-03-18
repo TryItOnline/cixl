@@ -1,6 +1,5 @@
-* finish :tail command
-** add n-param
-*** done once n lines are accumulated
+* use var scope for put_var as well
+* test emit
 * load tables on startup
 ** look up user on login
 * add User.password
@@ -17,6 +16,10 @@
 ** process in catch loop without breaking
 *** call without error pushed
 ** call in scope deref before deinit
+* investigate using scope.throwing for non-unwinding errors
+** rename to thrown
+** check in OCATCH eval
+** propagate to next scope in cx_pop_scope
 * change CX_TGROUP to dump everything to outer stack on exit
 ** update README
 * add MFile type

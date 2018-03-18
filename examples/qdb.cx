@@ -43,7 +43,7 @@ func: len(t DBTable)(_ Int)
   The transaction contains the current set of changes.
 */
 
-define: db-trans [];
+define: db-trans Stack new;
 
 /*
   Changes are pushed for each performed table operation, and contain the information

@@ -84,6 +84,10 @@ void cx_stack_dump(struct cx_vec *imp, FILE *out) {
   fputc(']', out);
 }
 
+static void new_imp(struct cx_box *out) {
+  out->as_ptr = cx_stack_new(out->type->lib->cx);
+}
+
 static bool equid_imp(struct cx_box *x, struct cx_box *y) {
   return x->as_ptr == y->as_ptr;
 }
@@ -175,6 +179,7 @@ static void deinit_imp(struct cx_box *v) {
 struct cx_type *cx_init_stack_type(struct cx_lib *lib) {
   struct cx *cx = lib->cx;
   struct cx_type *t = cx_add_type(lib, "Stack", cx->cmp_type, cx->seq_type);
+  t->new = new_imp;
   t->eqval = eqval_imp;
   t->equid = equid_imp;
   t->cmp = cmp_imp;

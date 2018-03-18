@@ -7,18 +7,21 @@
 */
 
 use:
-  (cx/abc A Bool Opt Stack Str Sym #nil #t #f is-nil)
+  (cx/abc A Bool Int Opt Stack Str Sym #nil #t #f is-nil)
   (cx/buf Buf push write-bytes)
   (cx/cond = == and else if if-else or switch:)
+  (cx/const define:)
   (cx/error catch: throw dump)
   (cx/func func: recall)
   (cx/io File RFile WFile
          ask close flush fopen include: lines print reverse say unblock)
   (cx/io/poll Poll delete no-write on-read on-write wait)
   (cx/iter Iter for is-done iter next while)
+  (cx/math ++)
   (cx/net TCPClient TCPServer accept listen)
   (cx/pair x y)
   (cx/rec ? rec: get put)
+  (cx/ref deref do ref)
   (cx/str int join reverse split str words)
   (cx/sym sym)
   (cx/sys home-dir make-dir)
@@ -42,6 +45,8 @@ let: options 'options.db' get-path [`id] new-db-table;
 let: users 'users.db' get-path [`name] new-db-table;
 let: topics 'topics.db' get-path [`id] new-db-table;
 let: poll Poll new;
+
+define: tail-max 24;
 
 func: get-option(id Sym)(_ Opt)
   let: rec $options [$id] find-key;
@@ -203,27 +208,29 @@ func: prompt(c Client)()
     $c 'User: ' push-out
   } if-else;
 
-func: topic-tail(c Client)()
+func: topic-tail(c Client n Int)()
   let: t $c `topic get;
   let: in $t `r open-log % unblock;
   let: it $in reverse lines;
   let: was-mute $c `is-mute get;
+  let: li 0 ref;
   $c `is-mute #t put
-
+  
   $poll $in {
     let: l $it next;
     
     $l {
       $c [$l % reverse @@n] push-out
-    } {
-      $it is-done {
-	$c `is-mute $was-mute put
-        $c poll-out
-        $poll $in delete
-	$in close
-	$c prompt
-      } if
-    } if-else
+      $li &++ do
+    } if
+    
+    $li deref $n = $it is-done or {
+      $c `is-mute $was-mute put
+      $c poll-out
+      $poll $in delete
+      $in close
+      $c prompt
+    } if
   } on-read;
 
 func: list-topics(c Client t Topic push-id Bool)()
@@ -258,9 +265,13 @@ func: push-post(u User t Topic in Str)()
 func: new-post(c Client in Str)()
   let: u $c `user get;
   let: t $c `topic get;
-  $u $t
-  [now '%d %H:%M ' fmt @@ $u `name get @@s $t `id get @@s $in @@n] #nil join
-  push-post;
+  
+  $u $t [
+    now '%d %H:%M ' fmt
+    @@ $u `name get @@s
+    $t `id get @@s
+    $in @@n
+  ] #nil join push-post;
 
 func: handle-in(c Client in Str)()
   $c `user get {
@@ -286,7 +297,8 @@ func: handle-in(c Client in Str)()
 	    $c `is-mute #t put
 	    $c prompt)
 	  (($cmd `tail =)
-	    $c topic-tail)
+	    let: n $it str int;
+	    $c $n #tail-max or topic-tail)
 	  (($cmd `unmute =)
 	    $c `is-mute #f put
 	    $c prompt)

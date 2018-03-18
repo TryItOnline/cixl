@@ -21,14 +21,14 @@ static bool ref_imp(struct cx_scope *scope) {
   return true;
 }
 
-static bool get_imp(struct cx_scope *scope) {
+static bool deref_imp(struct cx_scope *scope) {
   struct cx_box r = *cx_test(cx_pop(scope, false));
   cx_copy(cx_push(scope), &r.as_ref->value);
   cx_box_deinit(&r);
   return true;
 }
 
-static bool put_imp(struct cx_scope *scope) {
+static bool set_imp(struct cx_scope *scope) {
   struct cx_box
     v = *cx_test(cx_pop(scope, false)),
     r = *cx_test(cx_pop(scope, false));
@@ -37,6 +37,28 @@ static bool put_imp(struct cx_scope *scope) {
   r.as_ref->value = v;
   cx_box_deinit(&r);
   return true;
+}
+
+static bool do_imp(struct cx_scope *scope) {
+  struct cx_box
+    a = *cx_test(cx_pop(scope, false)),
+    r = *cx_test(cx_pop(scope, false));
+
+  bool ok = false;
+  cx_copy(cx_push(scope), &r.as_ref->value);
+  if (!cx_call(&a, scope)) { goto exit; }
+  struct cx_box *v = cx_pop(scope, false);
+
+  if (v) {
+    cx_box_deinit(&r.as_ref->value);
+    r.as_ref->value = *v;
+  }
+
+  ok = true;
+ exit:
+  cx_box_deinit(&a);
+  cx_box_deinit(&r);
+  return ok;
 }
 
 cx_lib(cx_init_ref, "cx/ref") { 
@@ -53,15 +75,20 @@ cx_lib(cx_init_ref, "cx/ref") {
 	       cx_args(cx_arg(NULL, cx->ref_type)),
 	       ref_imp);
   
-  cx_add_cfunc(lib, "get-ref",
+  cx_add_cfunc(lib, "deref",
 	       cx_args(cx_arg("ref", cx->ref_type)),
 	       cx_args(cx_arg(NULL, cx->opt_type)),
-	       get_imp);
+	       deref_imp);
 
-  cx_add_cfunc(lib, "put-ref",
+  cx_add_cfunc(lib, "set",
 	       cx_args(cx_arg("ref", cx->ref_type), cx_arg("val", cx->opt_type)),
 	       cx_args(),
-	       put_imp);
+	       set_imp);
+
+  cx_add_cfunc(lib, "do",
+	       cx_args(cx_arg("ref", cx->ref_type), cx_arg("act", cx->any_type)),
+	       cx_args(),
+	       do_imp);
 
   return true;
 }

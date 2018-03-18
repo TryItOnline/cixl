@@ -265,7 +265,7 @@ static bool str_int_imp(struct cx_scope *scope) {
   struct cx_str *s = v.as_str;
   int64_t iv = strtoimax(s->data, NULL, 10);
   
-  if (!iv && (!s->data[0] || s->data[0] != '0' || s->data[1])) {
+  if (!iv && s->data[0] != '0') {
     cx_box_init(cx_push(scope), cx->nil_type);
   } else {
     cx_box_init(cx_push(scope), cx->int_type)->as_int = iv;
