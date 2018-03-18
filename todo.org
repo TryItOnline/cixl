@@ -1,5 +1,6 @@
-* load tables on startup
 * lookup user on login
+* break up handle-cmd
+** match fns on cmd sym
 * change log writing to use non-blocking io
 * ---
 * debug row/col

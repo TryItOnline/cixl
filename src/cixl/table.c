@@ -163,7 +163,7 @@ static void write_imp(struct cx_box *v, FILE *out) {
   struct cx_table *t = v->as_table;
   
   cx_do_set(&t->entries, struct cx_table_entry, e) {
-    fputs(" %% ", out);
+    fputs(" % ", out);
     cx_write(&e->key, out);
     fputc(' ', out);
     cx_write(&e->val, out);

@@ -17,27 +17,40 @@ lib: qdb (
 use: cx;
 
 rec: DBTable()
-  file     RWFile
-  key      Stack
-  key-recs Table
-  rec-keys Table;
+  file RWFile
+  key  Stack
+  recs Table;
+
+func: load-rec(t DBTable in A)()
+  let: r $in pop;
+
+  $r {
+    $t `recs get $in $r put
+  } {
+    $t `recs get $in delete
+  } if-else;
+          
+func: load-recs(t DBTable in RFile)()
+  $in read {$t ~ load-rec} for;
 
 func: new-db-table(n Str k Stack)(_ DBTable)
   let: t DBTable new;
-  $t `file     $n `a+ fopen put
-  $t `key      $k           put
-  $t `rec-keys Table new    put
-  $t `key-recs Table new    put
+  let: f $n `a+ fopen;
+  $t `file $f        put
+  $t `key  $k        put
+  $t `recs Table new put
+  $f 0 seek
+  $t $f load-recs
   $t;
 
 func: get-rec-key(t DBTable r A)(_ Stack)
   $t `key get {$r ~ get} map stack;
 
 func: find-key(t DBTable k Stack)(_ Opt)
-  $t `key-recs get $k get;
+  $t `recs get $k get;
 
 func: len(t DBTable)(_ Int)
-  $t `key-recs get len;
+  $t `recs get len;
 
 /*
   The transaction contains the current set of changes.
@@ -51,20 +64,18 @@ define: db-trans Stack new;
 */
 
 rec: DBChange()
-  tstamp Time
   table  DBTable
   key    Stack
   rec    A
   op     Sym;
 
-func: push-change(t DBTable k Stack r A o Sym)()
+func: push-change(t DBTable k Stack r A op Sym)()
   let: c DBChange new;
-  $c `tstamp now put
-  $c `table  $t  put
-  $c `key    $k  put
-  $c `rec    $r  put
-  $c `op     $o  put
-  #db-trans  $c  push;
+  $c `table $t  put
+  $c `key   $k  put
+  $c `rec   $r  put
+  $c `op    $op put
+  #db-trans $c push;
 
 /*
   Records are looked up via the record pointer, which must remain the same;
@@ -72,27 +83,16 @@ func: push-change(t DBTable k Stack r A o Sym)()
 */
 
 func: upsert(t DBTable r A)()
-  let: krs $t `key-recs get;
-  let: rks $t `rec-keys get;  
-  let: tk $rks $r get;
+  let: rs $t `recs get;
   let: k $t $r get-rec-key;
-  let: tr $r %% ~ _;
-  
-  $tk {
-    let: tr $krs $tk get;
-    $t $k $tr `update push-change
-    $krs $tk delete
-    $rks $r delete
+
+  $rs $k {
+    _ $r
+    $t $k $r `update push-change
   } {
     $t $k $r `insert push-change
-  } if-else
-  
-  $krs $k $tr put
-  $rks $r $k put;
-
-/*
-  The current set of changes is flushed to disk on commit.
-*/
+    $r
+  } put-else;
 
 func: commit()()
   let: dirty Table new;
@@ -100,7 +100,9 @@ func: commit()()
   #db-trans {
     let: c;
     let: f $c `table get `file get;
-    $f [$c `tstamp get $c `op get $c `key get $c `rec get] write
+    let: op $c `op get;
+    let: r $op `delete = #nil {$c `rec get} if-else;
+    $f $c `key get % $r push write
     $dirty $f #t put
   } for
 
@@ -114,16 +116,18 @@ func: commit()()
 func: rollback()()
   #db-trans {
     let: c;
+    let: op $c `op get;
     let: t $c `table get;
-    let: krs $t `key-recs get;
-    let: rks $t `rec-keys get;
+    let: k $c `key get;
+    let: recs $t `recs get;
 
-    $c `op get `insert = {
-      $krs ($c `key get) delete
-      $rks ($c `rec get) delete
-    } {
-      $krs $c `key get $c `rec get put
-    } if-else
+    switch:
+      (($op `insert =)
+        $recs $k delete)
+      (($op `update =)
+        $recs $k $c `rec get put)
+      (#t
+        ['Invalid op: ' $op] throw);
   } for
 
   #db-trans clear;

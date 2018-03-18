@@ -339,6 +339,25 @@ static bool flush_imp(struct cx_scope *scope) {
   return ok;
 }
 
+static bool seek_imp(struct cx_scope *scope) {
+  struct cx *cx = scope->cx;
+  bool ok = false;
+  
+  struct cx_box
+    pos = *cx_test(cx_pop(scope, false)),
+    f = *cx_test(cx_pop(scope, false));
+  
+  if (fseek(cx_file_ptr(f.as_file), pos.as_int, SEEK_SET) == -1) {
+    cx_error(cx, cx->row, cx->col, "Failed seeking: %d", errno);
+    goto exit;
+  }
+
+  ok = true;
+ exit:
+  cx_box_deinit(&f);
+  return ok;
+}
+
 static bool close_imp(struct cx_scope *scope) {
   struct cx *cx = scope->cx;
   struct cx_box *f = cx_test(cx_pop(scope, false));
@@ -427,15 +446,20 @@ cx_lib(cx_init_io, "cx/io") {
 	       fopen_imp);  
 
   cx_add_cfunc(lib, "unblock",
-	       cx_args(cx_arg("file", cx->file_type)), cx_args(),
+	       cx_args(cx_arg("f", cx->file_type)), cx_args(),
 	       unblock_imp);
   
   cx_add_cfunc(lib, "flush",
-	       cx_args(cx_arg("file", cx->wfile_type)), cx_args(),
+	       cx_args(cx_arg("f", cx->wfile_type)), cx_args(),
 	       flush_imp);
 
+  cx_add_cfunc(lib, "seek",
+	       cx_args(cx_arg("f", cx->file_type), cx_arg("pos", cx->int_type)),
+	       cx_args(),
+	       seek_imp);
+
   cx_add_cfunc(lib, "close",
-	       cx_args(cx_arg("file", cx->file_type)), cx_args(),
+	       cx_args(cx_arg("f", cx->file_type)), cx_args(),
 	       close_imp);
 
   cx_add_cfunc(lib, "read",
