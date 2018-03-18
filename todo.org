@@ -8,9 +8,6 @@
 ** ask on login
 * add :user command
 ** print info about current user
-* add :mute/unmute commands
-** update Client.is_muted
-** signal with | in prompt
 * change log writing to use non-blocking io
 * ---
 * debug row/col
@@ -63,7 +60,6 @@
 ** iterate chars like Str
 * implement Buf clone
 * more qdb
-** add find-key(Vect) fn
 ** add is-dirty fn
 ** add delete fn
 * replace clone fallback to copy with error

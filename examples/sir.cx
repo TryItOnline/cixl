@@ -132,7 +132,7 @@ rec: Client ()
   topic    Topic
   io       TCPClient
   buf      Buf
-  is-muted Bool;
+  is-mute Bool;
 
 func: join-topic(c Client ns Str)()
   $c `topic get `clients get $c delete
@@ -198,7 +198,7 @@ func: prompt(c Client)()
   let: u $c `user get;
   
   $u {
-    $c [$c `topic get `id get @@s] push-out
+    $c [$c `is-mute get {'| '} if $c `topic get `id get @@s] push-out
   } {
     $c 'User: ' push-out
   } if-else;
@@ -207,7 +207,8 @@ func: topic-tail(c Client)()
   let: t $c `topic get;
   let: in $t `r open-log % unblock;
   let: it $in reverse lines;
-  $c `is-muted #t put
+  let: was-mute $c `is-mute get;
+  $c `is-mute #t put
 
   $poll $in {
     let: l $it next;
@@ -216,7 +217,7 @@ func: topic-tail(c Client)()
       $c [$l % reverse @@n] push-out
     } {
       $it is-done {
-	$c `is-muted #f put
+	$c `is-mute $was-mute put
         $c poll-out
         $poll $in delete
 	$in close
@@ -248,7 +249,7 @@ func: push-post(u User t Topic in Str)()
   
   $t `clients get {
     let: c x;
-    $c `user get $u == {$c `is-muted get} or {$c $in push-out} else
+    $c `user get $u == {$c `is-mute get} or {$c $in push-out} else
   } for
 
   let: pt $t `parent get;
@@ -281,8 +282,14 @@ func: handle-in(c Client in Str)()
 	  (($cmd `list =)
 	    $c % `topic get #f list-topics
 	    $c prompt)
+	  (($cmd `mute =)
+	    $c `is-mute #t put
+	    $c prompt)
 	  (($cmd `tail =)
 	    $c topic-tail)
+	  (($cmd `unmute =)
+	    $c `is-mute #f put
+	    $c prompt)
           (#t
             ['Invalid command: ' $cmd] throw);
       } {
@@ -314,7 +321,7 @@ func: new-client(io TCPClient)(_ Client)
 
   $c `io $io put
   $c `buf Buf new put
-  $c `is-muted #f put
+  $c `is-mute #f put
   $c $root join-topic
   
   $poll $io {
