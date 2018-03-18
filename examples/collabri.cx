@@ -34,7 +34,7 @@ include: 'qdb.cx';
 use: (qdb commit find-key len new-db-table rollback upsert);
 
 func: get-path(n Str)(_ Str)
-  [home-dir '.sircx' $n] @/ join;
+  [home-dir '.collabri' $n] @/ join;
 
 '' get-path make-dir
 
@@ -128,10 +128,10 @@ func: new-user (n Sym)(_ User)
   $u;
 
 rec: Client ()
-  user     User
-  topic    Topic
-  io       TCPClient
-  buf      Buf
+  user    User
+  topic   Topic
+  io      TCPClient
+  buf     Buf
   is-mute Bool;
 
 func: join-topic(c Client ns Str)()
@@ -339,7 +339,7 @@ func: new-client(io TCPClient)(_ Client)
   
   $c;
 
-['Sir.cx v0.2' @@n] say
+['Collabri v0.2' @@n] say
 
 $users len {
   ['Database Setup' @@n] say
