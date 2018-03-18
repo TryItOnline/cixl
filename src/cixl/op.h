@@ -105,6 +105,7 @@ struct cx_putargs_op {
 };
 
 struct cx_putconst_op {
+  struct cx_lib *lib;
   struct cx_sym id;
 };
 

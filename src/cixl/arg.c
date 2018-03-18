@@ -49,7 +49,7 @@ void cx_arg_print(struct cx_arg *a, FILE *out) {
 void cx_arg_emit(struct cx_arg *a, FILE *out) {
     switch (a->arg_type) {
     case CX_ARG:
-      fputs(CX_ITAB "cx_arg(", out);
+      fputs("cx_arg(", out);
 
       if (a->id) {
 	fprintf(out, "\"%s\"", a->id);
@@ -60,7 +60,7 @@ void cx_arg_emit(struct cx_arg *a, FILE *out) {
       fprintf(out, ", cx_get_type(*cx->lib, \"%s\", false))", a->type->id);
       break;
     case CX_NARG:
-      fputs(CX_ITAB "cx_narg(", out);
+      fputs("cx_narg(", out);
 
       if (a->id) {
 	fprintf(out, "\"%s\"", a->id);
@@ -71,15 +71,14 @@ void cx_arg_emit(struct cx_arg *a, FILE *out) {
       fprintf(out, ", %d)", a->narg);
       break;
     case CX_VARG:
-      fputs(CX_ITAB "({\n"
-	    CX_ITAB "  struct cx_box v;\n",
+      fputs("({\n"
+	    "  struct cx_box v;\n",
 	    out);
       
-      fputs(CX_ITAB "  ", out);
       cx_box_emit(&a->value, "&v", out);
       
-      fputs(CX_ITAB "  cx_varg(&v);\n"
-	    CX_ITAB "})",
+      fputs("  cx_varg(&v);\n"
+	    "})",
 	    out);
       break;
     }

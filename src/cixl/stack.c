@@ -171,10 +171,20 @@ static void print_imp(struct cx_box *b, FILE *out) {
   }
 }
 
+static bool emit_imp(struct cx_box *v, const char *exp, FILE *out) {
+  fprintf(out,
+	  "{\n"
+	  "  struct cx_stack *s = cx_stack_new(cx);\n"
+	  "  cx_box_init(%s, cx->stack_type)->as_ptr = s;\n",
+	  exp);
+
+  fputs("}\n", out);
+  return true;
+}
+
 static void deinit_imp(struct cx_box *v) {
   cx_stack_deref(v->as_ptr);
 }
-
 
 struct cx_type *cx_init_stack_type(struct cx_lib *lib) {
   struct cx *cx = lib->cx;
@@ -190,6 +200,7 @@ struct cx_type *cx_init_stack_type(struct cx_lib *lib) {
   t->write = write_imp;
   t->dump = dump_imp;
   t->print = print_imp;
+  t->emit = emit_imp;
   t->deinit = deinit_imp;
   return t;
 }

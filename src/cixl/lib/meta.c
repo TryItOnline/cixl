@@ -24,17 +24,19 @@ static ssize_t lib_eval(struct cx_macro_eval *eval,
   size_t start_pc = bin->ops.count;
   cx_op_init(bin, CX_OPUSHLIB(), tok_idx)->as_pushlib.lib = lib;
   t++;
+
+  cx_push_lib(cx, lib);
+  bool ok = cx_compile(cx, t, cx_vec_end(&eval->toks), bin);
+  cx_pop_lib(cx);
   
-  if (!cx_compile(cx, t, cx_vec_end(&eval->toks), bin)) {
+  if (!ok) {
     cx_error(cx, cx->row, cx->col, "Failed compiling lib");
-    goto exit;
+    return -1;
   }
 
   cx_op_init(bin, CX_OPOPLIB(), tok_idx);
   cx_op_init(bin, CX_OSTOP(), tok_idx);
-  cx_lib_push_init(lib, cx_lib_ops(bin, start_pc, bin->ops.count-start_pc));
-  
- exit:
+  cx_lib_push_init(lib, cx_lib_ops(bin, start_pc, bin->ops.count-start_pc));  
   return tok_idx+1;
 }
 
