@@ -14,11 +14,23 @@ use: cx;
 define: db-trans Stack new;
 
 rec: DBTable()
-  file        RWFile
-  key         Stack
-  recs        Table
-  buf         Buf
-  on-load-rec Stack;
+  file    RWFile
+  key     Stack
+  recs    Table
+  buf     Buf
+  on-load Stack
+  on-save Stack;
+
+func: new-db-table(n Str k Stack)(_ DBTable)
+  let: t DBTable new;
+  let: f $n `a+ fopen;
+
+  $t `file $f        put
+  $t `key  $k        put
+  $t `recs Table new put
+  $t `buf  Buf new   put
+  
+  $t;
 
 func: get-rec-key(t DBTable r A)(_ Stack)
   $t `key get {$r ~ get} map stack;
@@ -29,10 +41,8 @@ func: load-rec(t DBTable in Pair)()
   $op `delete = {
     $t `recs get $arg delete
   } {
-    let: k $t $arg get-rec-key;
-    let: on-load $t `on-load-rec get;
-    let: r $arg $on-load {$on-load &call for} if;
-    
+    let: r $arg $t `on-load get &call for;
+    let: k $t $r get-rec-key;    
     $t `recs get $k $r {_ $r} put-else
   } if-else;
           
@@ -45,22 +55,18 @@ func: load-table(t DBTable)()
   $t $f load-recs;
 
 func: on-load-rec(t DBTable fn A)()
-  $t `on-load-rec get {
+  $t `on-load get {
     let: s Stack new;
-    $t `on-load-rec $s put
+    $t `on-load $s put
     $s
   } or $fn push;
 
-func: new-db-table(n Str k Stack)(_ DBTable)
-  let: t DBTable new;
-  let: f $n `a+ fopen;
-
-  $t `file $f        put
-  $t `key  $k        put
-  $t `recs Table new put
-  $t `buf  Buf new   put
-  
-  $t;
+func: on-save-rec(t DBTable fn A)()
+  $t `on-save get {
+    let: s Stack new;
+    $t `on-save $s put
+    $s
+  } or $fn push;
 
 func: find-key(t DBTable k Stack)(_ Opt)
   $t `recs get $k get;
@@ -104,8 +110,13 @@ func: commit-change(c DBChange poll Poll out MFile)()
   let: b $t `buf get;
   let: op $c `op get;
   let: r $c `rec get;
-  let: arg $op `delete = {$t $r get-rec-key} $r if-else;
 
+  let: arg $op `delete = {
+    $t $r get-rec-key
+  } {
+    $r $t `on-save get &call for
+  } if-else;
+  
   $out $op $arg . write
   $b {$t $poll poll-table} else
   $b $out push

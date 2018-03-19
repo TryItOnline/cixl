@@ -34,7 +34,9 @@ use:
 let: port int;
 
 include: 'qdb.cx';
-use: (qdb commit find-key len load-table new-db-table on-load-rec rollback upsert);
+
+use: (qdb commit find-key len load-table new-db-table on-load-rec on-save-rec
+          rollback upsert);
 
 define: backlog 3;
 define: tail-default 24;
@@ -45,8 +47,8 @@ func: get-path(n Str)(_ Str)
 '' get-path make-dir
 
 let: options 'options.db' get-path [`id] new-db-table;
-let: users 'users.db' get-path [0] new-db-table;
-let: topics 'topics.db' get-path [0] new-db-table;
+let: users 'users.db' get-path [`name] new-db-table;
+let: topics 'topics.db' get-path [`id] new-db-table;
 let: poll Poll new;
 
 func: get-option(id Sym)(_ Opt)
@@ -141,15 +143,14 @@ func: load-topic(in Stack)(_ Topic)
   
 $topics &load-topic on-load-rec
 
-func: save(in Topic)()
-  let: out [
-    $in `id get
-    $in `name get
-    $in `parent get `id get
-    $in `log-path get
-  ];
-  
-  $topics $out upsert;
+func: save-topic(in Topic)(_ Stack) [
+  $in `id get
+  $in `name get
+  $in `parent get `id get
+  $in `log-path get
+];
+
+$topics &save-topic on-save-rec
 
 rec: User ()
   name     Sym
@@ -167,14 +168,13 @@ func: load-user(in Stack)(_ User)
   
 $users &load-user on-load-rec
 
-func: save(in User)()
-  let: out [
-    $in `name get
-    $in `password get
-    $in `is-op get
-  ];
+func: save-user(in User)(_ Stack) [
+  $in `name get
+  $in `password get
+  $in `is-op get
+];
 
-  $users $out upsert;
+$users &save-user on-save-rec
 
 func: find-user(name Sym)(_ Opt)
   $users [$name] find-key;
@@ -235,7 +235,7 @@ func: new-topic(c Client n Sym)()
 
   $t `id [$pt `id get $n @/] #nil join sym put
   $t `log-path [$pt `log-path get $pt `name get] @/ join put
-  $t save
+  $topics $t upsert
 
   $c $t join-topic;
 
@@ -380,7 +380,7 @@ func: state-handle-in(`auth-password c Client in Str)()
 
   $p is-nil {
     $u `password $in put
-    $u save
+    $users $u upsert
   } {
     $p $in = {
       $c `user #nil put
@@ -455,7 +455,7 @@ $users len {
   let: u '@nUser: ' ask sym new-user;
   $u `password 'Password: ' ask put
   $u `is-op #t put
-  $u save
+  $users $u upsert
   $poll commit
   
   [@@n 'Done!' @@n] say

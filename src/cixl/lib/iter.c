@@ -133,20 +133,27 @@ static bool for_imp(struct cx_scope *scope) {
     act = *cx_test(cx_pop(scope, false)),
     in = *cx_test(cx_pop(scope, false));
 
+  bool ok = false;
+
+  if (in.type == scope->cx->nil_type) {
+    ok = true;
+    goto exit1;
+  }
+      
   struct cx_iter *it = cx_iter(&in);
   struct cx_box v;
-  bool ok = false;
   
   while (cx_iter_next(it, &v, scope)) {
     *cx_push(scope) = v; 
-    if (!cx_call(&act, scope)) { goto exit; }
+    if (!cx_call(&act, scope)) { goto exit2; }
   }
 
   ok = true;
- exit:
+ exit2:
+  cx_iter_deref(it);
+ exit1:
   cx_box_deinit(&act);
   cx_box_deinit(&in);
-  cx_iter_deref(it);
   return ok;
 }
 
@@ -268,7 +275,7 @@ cx_lib(cx_init_iter, "cx/iter") {
 	       new_iter_imp);
 
   cx_add_cfunc(lib, "for",
-	       cx_args(cx_arg("seq", cx->seq_type), cx_arg("act", cx->any_type)),
+	       cx_args(cx_arg("seq", cx->opt_type), cx_arg("act", cx->any_type)),
 	       cx_args(),
 	       for_imp);
   

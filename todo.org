@@ -1,10 +1,8 @@
-* add DBTable.on_save_rec like load
-** use to convert topics/users to stacks
-** change table keys back to `id/`name
-* change options to store pairs
-** implement pair get fn (Sym `x/`y)
+* remove :mute command + prompt support
+* add Option rec type
+** change option table to store pairs
 * break up handle-cmd
-** match fns on cmd sym
+** match fns on state & cmd syms
 * ---
 * debug row/col
 * add support for nil catch
