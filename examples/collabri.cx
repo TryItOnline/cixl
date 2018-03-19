@@ -259,7 +259,7 @@ func: state-prompt(`auth-password c Client)()
   $c 'Password: ' push-out;
 
 func: state-prompt(`ok c Client)()
-  $c [$c `is-mute get {'M '} if $c `topic get `id get @@s] push-out;
+  $c [$c `topic get `id get @@s] push-out;
 
 func: prompt(c Client)()
   $c `state get $c state-prompt;
@@ -346,10 +346,6 @@ func: handle-cmd(c Client cmd Sym in Iter)()
       $c prompt)
     (($cmd `list =)
       $c % `topic get #f list-topics
-      $c prompt)
-    (($cmd `mute =)
-      let: m $c `is-mute get;
-      $c `is-mute $m! put
       $c prompt)
     (($cmd `tail =)
       let: n $in str int;

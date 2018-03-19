@@ -1,4 +1,3 @@
-* remove :mute command + prompt support
 * add Option rec type
 ** change option table to store pairs
 * break up handle-cmd
