@@ -1,7 +1,6 @@
 * break up handle-cmd
 ** match fns on cmd sym
 * change qdb to use non blocking io
-* add an option
 * ---
 * debug row/col
 * add support for nil catch

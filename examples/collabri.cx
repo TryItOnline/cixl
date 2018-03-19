@@ -357,6 +357,7 @@ func: state-handle-in(`auth-password c Client in Str)()
   
   $root `clients get $c #t put  
   $c `state `ok put
+  $c @@n push-out
   $c prompt;
 
 func: state-handle-in(`ok c Client in Str)()
@@ -403,15 +404,17 @@ func: new-client(io TCPClient)(_ Client)
 	commit;
     } if-else
   } on-read
-  
+
+  $c [`intro get-option @@n @@n] push-out
   $c;
 
 ['Collabri v0.2' @@n] say
 
 $users len {
   ['Server Setup' @@n] say
-  
-  let: u 'User: ' ask sym new-user;
+
+  `intro 'Intro: ' ask set-option
+  let: u '@nUser: ' ask sym new-user;
   $u `password 'Password: ' ask put
   $u `is-op #t put
   $u save
