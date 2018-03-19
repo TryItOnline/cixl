@@ -105,7 +105,7 @@ struct cx_box *cx_put_const(struct cx_lib *lib, struct cx_sym id, bool force);
 bool cx_lib_vuse(struct cx_lib *lib, unsigned int nids, const char **ids);
 
 bool cx_vuse(struct cx *cx, const char *lib_id,
-	     unsigned int nids, const char **ids);
+	     unsigned int nids, const char *ids[]);
 
 struct cx_type *cx_init_lib_type(struct cx_lib *lib);
 

@@ -14,7 +14,6 @@
 #include "cixl/iter.h"
 #include "cixl/lib.h"
 #include "cixl/lib/io.h"
-#include "cixl/mfile.h"
 #include "cixl/scope.h"
 #include "cixl/str.h"
 

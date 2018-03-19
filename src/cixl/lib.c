@@ -397,7 +397,7 @@ static bool emit_imp(struct cx_box *v, const char *exp, FILE *out) {
 
 bool cx_vuse(struct cx *cx,
 	     const char *lib_id,
-	     unsigned int nids, const char **ids) {
+	     unsigned int nids, const char *ids[]) {
   struct cx_sym lid = cx_sym(cx, lib_id);
   struct cx_lib **ok = cx_set_get(&cx->lib_lookup, &lid);
 

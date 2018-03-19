@@ -26,6 +26,7 @@
 #include "cixl/lib/error.h"
 #include "cixl/lib/func.h"
 #include "cixl/lib/io.h"
+#include "cixl/lib/io_mem.h"
 #include "cixl/lib/iter.h"
 #include "cixl/lib/math.h"
 #include "cixl/lib/meta.h"
@@ -42,6 +43,7 @@
 #include "cixl/lib/time.h"
 #include "cixl/lib/type.h"
 #include "cixl/lib/var.h"
+#include "cixl/mfile.h"
 #include "cixl/nil.h"
 #include "cixl/op.h"
 #include "cixl/pair.h"
@@ -70,6 +72,7 @@ cx_lib(cx_init_world, "cx") {
     cx_use(cx, "cx/error") &&
     cx_use(cx, "cx/func") &&
     cx_use(cx, "cx/io") &&
+    cx_use(cx, "cx/io/mem") &&
     cx_use(cx, "cx/io/poll") &&
     cx_use(cx, "cx/iter") &&
     cx_use(cx, "cx/math") &&
@@ -98,6 +101,7 @@ struct cx *cx_init(struct cx *cx) {
   cx_malloc_init(&cx->buf_alloc, CX_SLAB_SIZE, sizeof(struct cx_buf));
   cx_malloc_init(&cx->file_alloc, CX_SLAB_SIZE, sizeof(struct cx_file));
   cx_malloc_init(&cx->lambda_alloc, CX_SLAB_SIZE, sizeof(struct cx_lambda));
+  cx_malloc_init(&cx->mfile_alloc, CX_SLAB_SIZE, sizeof(struct cx_mfile_ref));
   cx_malloc_init(&cx->pair_alloc, CX_SLAB_SIZE, sizeof(struct cx_pair));
   cx_malloc_init(&cx->rec_alloc, CX_SLAB_SIZE, sizeof(struct cx_rec));
   cx_malloc_init(&cx->ref_alloc, CX_SLAB_SIZE, sizeof(struct cx_ref));
@@ -141,7 +145,7 @@ struct cx *cx_init(struct cx *cx) {
     cx->int_type = cx->iter_type =
     cx->lambda_type = cx->lib_type = 
     cx->nil_type = cx->num_type =
-    cx->meta_type =
+    cx->meta_type = cx->mfile_type =
     cx->opt_type =
     cx->pair_type = cx->poll_type =
     cx->rat_type = cx->rec_type = cx->ref_type = cx->rfile_type = cx->rwfile_type =
@@ -164,6 +168,7 @@ void cx_init_libs(struct cx *cx) {
   cx_init_error(cx);
   cx_init_func(cx);
   cx_init_io(cx);
+  cx_init_io_mem(cx);
   cx_init_iter(cx);
   cx_init_math(cx);
   cx_init_meta(cx);
@@ -227,6 +232,7 @@ struct cx *cx_deinit(struct cx *cx) {
   cx_malloc_deinit(&cx->buf_alloc);
   cx_malloc_deinit(&cx->file_alloc);
   cx_malloc_deinit(&cx->lambda_alloc);
+  cx_malloc_deinit(&cx->mfile_alloc);
   cx_malloc_deinit(&cx->pair_alloc);
   cx_malloc_deinit(&cx->rec_alloc);
   cx_malloc_deinit(&cx->ref_alloc);

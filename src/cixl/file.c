@@ -131,7 +131,8 @@ static enum cx_cmp cmp_imp(const struct cx_box *x, const struct cx_box *y) {
 }
 
 static bool ok_imp(struct cx_box *v) {
-  return v->as_file->fd != -1;
+  struct cx_file *f = v->as_file;
+  return f->_ptr || f->fd != -1;
 }
 
 static void copy_imp(struct cx_box *dst, const struct cx_box *src) {

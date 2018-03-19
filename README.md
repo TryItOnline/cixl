@@ -83,6 +83,7 @@ The entire language is split into libraries to enable building custom languages 
 * cx/error
 * cx/func
 * cx/io
+* cx/io/mem
 * cx/io/poll
 * cx/iter
 * cx/math
@@ -1085,6 +1086,7 @@ Cixl is statically and strongly typed; but since it's approach to typing is grad
 | Int       | Num Seq     | cx/abc      |
 | Iter      | Seq         | cx/abc      |
 | Lambda    | Seq         | cx/abc      |
+| MFile     | RWFile      | cx/io/mem   |
 | Nil       | Opt         | cx/abc      |
 | Num       | Cmp         | cx/abc      |
 | Opt       |             | cx/abc      |

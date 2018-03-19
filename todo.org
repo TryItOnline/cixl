@@ -1,3 +1,6 @@
+* add push (Buf MFile) fn
+* change qdb to use non blocking io
+** write to global mfile in commit
 * convert save(Topic) to use rec type like User
 ** create new without children/client
 ** change parent to parent-id
@@ -7,7 +10,6 @@
 * add Option rec type
 * break up handle-cmd
 ** match fns on cmd sym
-* change qdb to use non blocking io
 * ---
 * debug row/col
 * add support for nil catch
@@ -20,13 +22,6 @@
 * change CX_TGROUP to dump everything to outer stack on exit
 ** update README
 * finish stack type emit
-* add MFile type
-** use struct cx_mfile
-*** add nrefs
-*** embed file
-*** store as box.file
-**** use cx_baseof to get mfile
-** derive RWFile
 * extract cx/math/rat lib
 * switch read-bytes to use fread if _ptr
 * switch file char iter to use read if !_ptr
@@ -64,6 +59,10 @@
 ** add is-dirty fn
 ** add delete fn
 * replace clone fallback to copy with error
+* replace varargs with size/array+macro
+* update embed example in readme
+** add lib
+** add custom struct type
 
 sudo rm -rf /usr/local/include/cixl
 

@@ -242,6 +242,15 @@ static void int_tests() {
   cx_deinit(&cx);
 }
 
+static void io_tests() {
+  struct cx cx;
+  init_cx(&cx);
+
+  run(&cx, "use: cx/cond cx/error cx/io cx/io/mem cx/stack cx/str;");
+  run(&cx, "MFile new % 'foo' print str 'foo' = check");
+  cx_deinit(&cx);
+}
+
 static void char_tests() {
   struct cx cx;
   init_cx(&cx);
@@ -443,6 +452,7 @@ int main() {
   func_tests();
   iter_tests();
   int_tests();
+  io_tests();
   char_tests();
   str_tests();
   sym_tests();
