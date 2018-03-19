@@ -1,5 +1,3 @@
-* add Option rec type
-** change option table to store pairs
 * break up handle-cmd
 ** match fns on state & cmd syms
 * ---

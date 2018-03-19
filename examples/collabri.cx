@@ -51,15 +51,36 @@ let: users 'users.db' get-path [`name] new-db-table;
 let: topics 'topics.db' get-path [`id] new-db-table;
 let: poll Poll new;
 
+rec: Option ()
+  id    Sym
+  value A;
+
+func: load-option(in Stack)(_ Option)
+  let: out Option new;
+  let: (id value) $in {} for;
+
+  $out `id    $id    put
+  $out `value $value put
+  $out;
+  
+$options &load-option on-load-rec
+
+func: save-option(in Option)(_ Stack) [
+  $in `id get
+  $in `value get
+];
+
+$options &save-option on-save-rec
+
 func: get-option(id Sym)(_ Opt)
   let: rec $options [$id] find-key;
   $rec {$rec `value get} and;
 
-func: set-option(id Sym v A)()
-  let: rec Table new;
-  $rec `id $id put
-  $rec `value $v put
-  $options $rec upsert;
+func: set-option(id Sym value A)()
+  let: o Option new;
+  $o `id    $id    put
+  $o `value $value put
+  $options $o upsert;
 
 rec: Topic ()
   id name  Sym
@@ -124,22 +145,22 @@ func: find-topic(id Sym)(_ Opt)
   $topics [$id] find-key;
 
 func: load-topic(in Stack)(_ Topic)
-  let: t Topic new;
+  let: out Topic new;
   let: (id name parent-id log-path) $in {} for;
 
-  $t `id       $id       put
-  $t `name     $name     put
-  $t `clients  Table new put
-  $t `log-path $log-path put
+  $out `id       $id       put
+  $out `name     $name     put
+  $out `clients  Table new put
+  $out `log-path $log-path put
 
   $parent-id {
     let: pt $parent-id `/ = $root {$parent-id find-topic} if-else;
     $pt {['Topic not found: ' $parent-id] throw} else
-    $t `parent $pt put
-    $pt $t add-topic
+    $out `parent $pt put
+    $pt $out add-topic
   } if
 
-  $t;
+  $out;
   
 $topics &load-topic on-load-rec
 
@@ -158,13 +179,13 @@ rec: User ()
   is-op    Bool;
 
 func: load-user(in Stack)(_ User)
-  let: u User new;
+  let: out User new;
   let: (name password is-op) $in {} for;
 
-  $u `name     $name     put
-  $u `password $password put
-  $u `is-op    $is-op    put
-  $u;
+  $out `name     $name     put
+  $out `password $password put
+  $out `is-op    $is-op    put
+  $out;
   
 $users &load-user on-load-rec
 
