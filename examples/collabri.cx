@@ -65,6 +65,7 @@ rec: Topic ()
   children Table
   clients  Table
   log-path Str
+  log-buf  Buf
   log      WFile;
 
 let: root Topic new;
@@ -87,6 +88,24 @@ func: get-log(t Topic)(_ WFile)
     
     $l
   } or;
+
+func: push-log(t Topic in Str)()
+  let: b $t `log-buf get {(
+    let: b Buf new;
+    $t `log-buf $b put
+    $b
+  )} or;
+
+  let: l $t get-log;
+
+  $b {    
+    $poll $l {
+      $l $b write-bytes
+      $b {$poll $l no-write} else
+    } on-write
+  } else
+  
+  $b $in push;
 
 func: save(t Topic)()
   let: rec Table new;
@@ -194,16 +213,16 @@ func: branch-topic(c Client n Sym)()
 
 func: push-out(c Client v A)()
   let: buf $c `buf get;
-  $buf $v push;
-
-func: poll-out(c Client)()
   let: io $c `io get;
 
-  $poll $io {
-    let: buf $c `buf get;
-    $io $buf write-bytes
-    $buf {$poll $io no-write} else
-  } on-write;
+  $buf {
+    $poll $io {
+      $io $buf write-bytes
+      $buf {$poll $io no-write} else
+    } on-write
+  } else
+  
+  $buf $v push;
 
 func: state-prompt(`auth-user c Client)()
   $c 'User: ' push-out;
@@ -235,7 +254,6 @@ func: topic-tail(c Client n Int)()
     
     $li deref $n = $it is-done or {
       $c `is-mute $was-mute put
-      $c poll-out
       $poll $in delete
       $in close
       $c prompt
@@ -261,7 +279,7 @@ func: disconnect(c Client)()
   $c `topic get `clients get $c delete;
 
 func: push-post(u User t Topic in Str)()
-  $t get-log % $in print flush
+  $t $in push-log
   
   $t `clients get {
     let: c x;
@@ -383,7 +401,6 @@ func: new-client(io TCPClient)(_ Client)
       catch: (A $c ~ push-error $c prompt dump rollback)
         $c $l handle-in
 	commit;
-      $c poll-out
     } if-else
   } on-read
   
@@ -407,7 +424,7 @@ let: server #nil $port #backlog listen;
 
 $poll $server {
   let: io $server accept;
-  $io {$io new-client % prompt poll-out} if
+  $io {$io new-client % prompt} if
 } on-read
 
 ['Listening on port ' $port] say
