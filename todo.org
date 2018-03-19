@@ -1,7 +1,3 @@
-* change qdb to use non blocking io
-** add poll param to commit
-** add Table buf
-** create memfile in commit and push to table bufs
 * convert save(Topic) to use rec type like User
 ** create new without children/client
 ** change parent to parent-id

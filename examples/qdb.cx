@@ -19,7 +19,8 @@ use: cx;
 rec: DBTable()
   file RWFile
   key  Stack
-  recs Table;
+  recs Table
+  buf  Buf;
 
 func: load-rec(t DBTable in A)()
   let: r $in pop;
@@ -36,9 +37,12 @@ func: load-recs(t DBTable in RFile)()
 func: new-db-table(n Str k Stack)(_ DBTable)
   let: t DBTable new;
   let: f $n `a+ fopen;
+
   $t `file $f        put
   $t `key  $k        put
   $t `recs Table new put
+  $t `buf  Buf new   put
+  
   $f 0 seek
   $t $f load-recs
   $t;
@@ -95,19 +99,31 @@ func: upsert(t DBTable r A)()
     $r
   } put-else;
 
-func: commit()()
-  let: dirty Table new;
+func: poll-table(t DBTable poll Poll)()
+  let: b $t `buf get;
+  let: f $t `file get;
+      
+  $poll $f {
+    $f $b write-bytes
+    $b {$poll $f no-write} else
+  } on-write;
 
+
+func: commit(poll Poll)()
+  let: out MFile new;
+  
   #db-trans {
     let: c;
-    let: f $c `table get `file get;
+    let: t $c `table get;
+    let: b $t `buf get;
     let: op $c `op get;
     let: r $op `delete = #nil {$c `rec get} if-else;
-    $f $c `key get %% ~ _ % $r push write
-    $dirty $f #t put
+    $out $c `key get %% ~ _ % $r push write
+    $b {$t $poll poll-table} else
+    $b $out push
+    $out 0 seek
   } for
 
-  $dirty &x map &flush for
   #db-trans clear;
 
 /*

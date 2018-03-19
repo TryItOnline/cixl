@@ -388,7 +388,7 @@ func: new-client(io TCPClient)(_ Client)
     } {
       catch: (A $c ~ push-error $c prompt dump rollback)
         $c $l handle-in
-	commit;
+	$poll commit;
     } if-else
   } on-read
 
@@ -405,7 +405,7 @@ $users len {
   $u `password 'Password: ' ask put
   $u `is-op #t put
   $u save
-  commit
+  $poll commit
   
   [@@n 'Done!' @@n] say
 } else
