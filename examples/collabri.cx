@@ -374,7 +374,7 @@ func: handle-cmd(c Client cmd Sym in Iter)()
     (#t
       ['Invalid command: ' $cmd] throw);;
 
-func: state-handle-in(`auth-user c Client in Str)()
+func: handle-in(c Client `auth-user in Str)()
   $in {
     let: name $in sym;
     let: u $name find-user;
@@ -391,7 +391,7 @@ func: state-handle-in(`auth-user c Client in Str)()
     $c disconnect
   } if-else;
 
-func: state-handle-in(`auth-password c Client in Str)()
+func: handle-in(c Client `auth-password in Str)()
   let: u $c `user get;
   let: p $u `password get;
 
@@ -411,7 +411,7 @@ func: state-handle-in(`auth-password c Client in Str)()
   $c @@n push-out
   $c push-prompt;
 
-func: state-handle-in(`ok c Client in Str)()
+func: handle-in(c Client `ok in Str)()
   $in {
     let: it $in iter;
 
@@ -425,9 +425,6 @@ func: state-handle-in(`ok c Client in Str)()
   } {
     $c push-prompt
   } if-else;
-
-func: handle-in(c Client in Str)()
-  $c `state get $c $in state-handle-in;
 
 func: push-error(c Client e Str)()
   $c ['Error: ' $e @@n] push-out;
@@ -445,13 +442,13 @@ func: new-client(io TCPClient)(_ Client)
   let: ils $io lines;
   
   $poll $io {
-    let: l $ils next;
+    let: in $ils next;
 
-    $l is-nil {
+    $in is-nil {
       $ils is-done {$c disconnect} if
     } {
       catch: (A $c ~ push-error $c push-prompt dump rollback)
-        $c $l handle-in
+	$c % `state get $in handle-in
 	$poll commit;
     } if-else
   } on-read
