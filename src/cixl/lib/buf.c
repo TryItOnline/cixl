@@ -13,6 +13,7 @@
 #include "cixl/iter.h"
 #include "cixl/lib.h"
 #include "cixl/lib/buf.h"
+#include "cixl/mfile.h"
 #include "cixl/scope.h"
 #include "cixl/str.h"
 
@@ -32,7 +33,20 @@ static bool push_str_imp(struct cx_scope *scope) {
     v = *cx_test(cx_pop(scope, false)),
     b = *cx_test(cx_pop(scope, false));
 
-  cx_buf_push_str(b.as_buf, v.as_str->data);
+  cx_buf_push_str(b.as_buf, v.as_str->data, v.as_str->len);
+  cx_box_deinit(&v);
+  cx_box_deinit(&b);
+  return true;
+}
+
+static bool push_mfile_imp(struct cx_scope *scope) {
+  struct cx_box
+    v = *cx_test(cx_pop(scope, false)),
+    b = *cx_test(cx_pop(scope, false));
+
+  struct cx_mfile_ref *mf = cx_baseof(v.as_file, struct cx_mfile_ref, file);
+  fflush(mf->file._ptr);
+  cx_buf_push_str(b.as_buf, mf->data, mf->size);
   cx_box_deinit(&v);
   cx_box_deinit(&b);
   return true;
@@ -43,7 +57,7 @@ static bool push_sym_imp(struct cx_scope *scope) {
     v = *cx_test(cx_pop(scope, false)),
     b = *cx_test(cx_pop(scope, false));
 
-  cx_buf_push_str(b.as_buf, v.as_sym.id);
+  cx_buf_push_str(b.as_buf, v.as_sym.id, strlen(v.as_sym.id));
   cx_box_deinit(&b);
   return true;
 }
@@ -128,6 +142,7 @@ cx_lib(cx_init_buf, "cx/buf") {
     
   if (!cx_use(cx, "cx/abc", "A", "Int", "Opt", "Seq", "Str", "Sym") ||
       !cx_use(cx, "cx/io", "RFile", "WFile") ||
+      !cx_use(cx, "cx/io/mem", "MFile") ||
       !cx_use(cx, "cx/iter", "for") ||
       !cx_use(cx, "cx/stack", "~")) {
     return false;
@@ -149,6 +164,11 @@ cx_lib(cx_init_buf, "cx/buf") {
 	       cx_args(cx_arg("b", cx->buf_type), cx_arg("v", cx->sym_type)),
 	       cx_args(),
 	       push_sym_imp);
+
+  cx_add_cfunc(lib, "push",
+	       cx_args(cx_arg("b", cx->buf_type), cx_arg("v", cx->mfile_type)),
+	       cx_args(),
+	       push_mfile_imp);
 
   cx_add_cxfunc(lib, "push",
 		cx_args(cx_arg("b", cx->buf_type), cx_arg("v", cx->seq_type)),

@@ -35,8 +35,7 @@ void cx_buf_push_char(struct cx_buf *b, unsigned char c) {
   *(unsigned char *)cx_vec_push(&b->data) = c;
 }
 
-void cx_buf_push_str(struct cx_buf *b, const char *s) {
-  size_t len = strlen(s);
+void cx_buf_push_str(struct cx_buf *b, const char *s, size_t len) {
   cx_vec_grow(&b->data, b->data.count+len);
   memcpy(b->data.items+b->data.count, s, len);
   b->data.count += len;

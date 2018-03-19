@@ -19,7 +19,7 @@ struct cx_buf *cx_buf_ref(struct cx_buf *b);
 void cx_buf_deref(struct cx_buf *b);
 
 void cx_buf_push_char(struct cx_buf *b, unsigned char c);
-void cx_buf_push_str(struct cx_buf *b, const char *s);
+void cx_buf_push_str(struct cx_buf *b, const char *s, size_t len);
 
 void cx_buf_clear(struct cx_buf *b);
 unsigned char *cx_buf_ptr(struct cx_buf *b);
