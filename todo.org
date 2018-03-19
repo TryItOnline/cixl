@@ -1,9 +1,6 @@
-* convert save(Topic) to use rec type like User
-** create new without children/client
-** change parent to parent-id
-** update post
-* implement topic loading
-** fill children on table rec in load-topic
+* change User to load/save Stack like Topic
+** change key
+** clear db
 * add Option rec type
 * break up handle-cmd
 ** match fns on cmd sym

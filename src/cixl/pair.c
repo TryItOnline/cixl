@@ -60,10 +60,11 @@ static void clone_imp(struct cx_box *dst, struct cx_box *src) {
 }
 
 static void write_imp(struct cx_box *v, FILE *out) {
+  fputc('(', out);
   cx_write(&v->as_pair->x, out);
   fputc(' ', out);
   cx_write(&v->as_pair->y, out);
-  fputs(".", out);
+  fputs(" .)", out);
 }
 
 static void dump_imp(struct cx_box *v, FILE *out) {

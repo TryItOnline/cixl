@@ -299,16 +299,21 @@ static bool fopen_imp(struct cx_scope *scope) {
   }
 
   FILE *f = fopen(p.as_str->data, m.as_sym.id);
-  
-  if (!f) {
-    cx_error(cx, cx->row, cx->col,
-	     "Failed opening file '%s': %d",
-	     p.as_str->data, errno);
-    
-    goto exit;
+
+  if (f) {
+    cx_box_init(cx_push(scope), ft)->as_file = cx_file_new(cx, fileno(f), NULL, f);
+  } else {
+    if (errno != ENOENT) {
+      cx_error(cx, cx->row, cx->col,
+	       "Failed opening file '%s': %d",
+	       p.as_str->data, errno);
+      
+      goto exit;
+    }
+
+    cx_box_init(cx_push(scope), cx->nil_type);
   }
   
-  cx_box_init(cx_push(scope), ft)->as_file = cx_file_new(cx, fileno(f), NULL, f);
   ok = true;
  exit:
   cx_box_deinit(&p);
@@ -441,7 +446,7 @@ cx_lib(cx_init_io, "cx/io") {
 
   cx_add_cfunc(lib, "fopen",
 	       cx_args(cx_arg("path", cx->str_type), cx_arg("mode", cx->sym_type)),
-	       cx_args(cx_arg(NULL, cx->file_type)),
+	       cx_args(cx_arg(NULL, cx->opt_type)),
 	       fopen_imp);  
 
   cx_add_cfunc(lib, "unblock",

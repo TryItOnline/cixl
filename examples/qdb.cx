@@ -7,32 +7,49 @@
   https://github.com/basic-gongfu/cixl#getting-started
 */
 
-/*
-  Records are stored in tables indexed by record pointer and stored keys. Keys may be
-  composite and are implemented as stacks of values.
-*/
-
 lib: qdb (
 
 use: cx;
 
+define: db-trans Stack new;
+
 rec: DBTable()
-  file RWFile
-  key  Stack
-  recs Table
-  buf  Buf;
+  file        RWFile
+  key         Stack
+  recs        Table
+  buf         Buf
+  on-load-rec Stack;
 
-func: load-rec(t DBTable in A)()
-  let: r $in pop;
+func: get-rec-key(t DBTable r A)(_ Stack)
+  $t `key get {$r ~ get} map stack;
 
-  $r {
-    $t `recs get $in $r {_ $r} put-else
+func: load-rec(t DBTable in Pair)()
+  let: (op arg) $in % x ~ y;
+  
+  $op `delete = {
+    $t `recs get $arg delete
   } {
-    $t `recs get $in delete
+    let: k $t $arg get-rec-key;
+    let: on-load $t `on-load-rec get;
+    let: r $arg $on-load {$on-load &call for} if;
+    
+    $t `recs get $k $r {_ $r} put-else
   } if-else;
           
 func: load-recs(t DBTable in RFile)()
   $in read {$t ~ load-rec} for;
+
+func: load-table(t DBTable)()
+  let: f $t `file get;
+  $f 0 seek
+  $t $f load-recs;
+
+func: on-load-rec(t DBTable fn A)()
+  $t `on-load-rec get {
+    let: s Stack new;
+    $t `on-load-rec $s put
+    $s
+  } or $fn push;
 
 func: new-db-table(n Str k Stack)(_ DBTable)
   let: t DBTable new;
@@ -43,12 +60,7 @@ func: new-db-table(n Str k Stack)(_ DBTable)
   $t `recs Table new put
   $t `buf  Buf new   put
   
-  $f 0 seek
-  $t $f load-recs
   $t;
-
-func: get-rec-key(t DBTable r A)(_ Stack)
-  $t `key get {$r ~ get} map stack;
 
 func: find-key(t DBTable k Stack)(_ Opt)
   $t `recs get $k get;
@@ -56,46 +68,25 @@ func: find-key(t DBTable k Stack)(_ Opt)
 func: len(t DBTable)(_ Int)
   $t `recs get len;
 
-/*
-  The transaction contains the current set of changes.
-*/
-
-define: db-trans Stack new;
-
-/*
-  Changes are pushed for each performed table operation, and contain the information
-  needed to log itself to disk or revert the table.
-*/
-
 rec: DBChange()
   table  DBTable
-  key    Stack
   rec    A
   op     Sym;
 
-func: push-change(t DBTable k Stack r A op Sym)()
+func: push-change(t DBTable r A op Sym)()
   let: c DBChange new;
   $c `table $t  put
-  $c `key   $k  put
   $c `rec   $r  put
   $c `op    $op put
   #db-trans $c push;
 
-/*
-  Records are looked up via the record pointer, which must remain the same;
-  and cloned to enable change management.
-*/
-
 func: upsert(t DBTable r A)()
-  let: rs $t `recs get;
-  let: k $t $r get-rec-key;
-
-  $rs $k {
-    $t $k $r `insert push-change
+  $t `recs get $t $r get-rec-key {
+    $t $r `insert push-change
     $r
   } {
     _
-    $t $k $r `update push-change
+    $t $r `update push-change
     $r
   } put-else;
 
@@ -108,44 +99,38 @@ func: poll-table(t DBTable poll Poll)()
     $b {$poll $f no-write} else
   } on-write;
 
+func: commit-change(c DBChange poll Poll out MFile)()
+  let: t $c `table get;
+  let: b $t `buf get;
+  let: op $c `op get;
+  let: r $c `rec get;
+  let: arg $op `delete = {$t $r get-rec-key} $r if-else;
+
+  $out $op $arg . write
+  $b {$t $poll poll-table} else
+  $b $out push
+  $out 0 seek;
 
 func: commit(poll Poll)()
   let: out MFile new;
-  
-  #db-trans {
-    let: c;
-    let: t $c `table get;
-    let: b $t `buf get;
-    let: op $c `op get;
-    let: r $op `delete = #nil {$c `rec get} if-else;
-    $out $c `key get %% ~ _ % $r push write
-    $b {$t $poll poll-table} else
-    $b $out push
-    $out 0 seek
-  } for
-
+  #db-trans {$poll $out commit-change} for
   #db-trans clear;
 
-/*
-  Or reverted on rollback.
-*/
+func: rollback-change(c DBChange)()
+  let: op $c `op get;
+  let: t $c `table get;
+  let: r $c `rec get;
+  let: k $t $r get-rec-key;
+  let: recs $t `recs get;
+
+  $op `insert = {
+    $recs $k delete
+  } {
+    $recs $k $r put
+  } if-else;
 
 func: rollback()()
-  #db-trans {
-    let: c;
-    let: op $c `op get;
-    let: t $c `table get;
-    let: k $c `key get;
-    let: recs $t `recs get;
-
-    switch:
-      (($op `insert =)
-        $recs $k delete)
-      (($op `update =)
-        $recs $k $c `rec get put)
-      (#t
-        ['Invalid op: ' $op] throw);
-  } for
-
+  #db-trans &rollback-change for
   #db-trans clear;
+
 );

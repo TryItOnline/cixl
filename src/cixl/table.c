@@ -159,7 +159,7 @@ static struct cx_iter *iter_imp(struct cx_box *v) {
 }
 
 static void write_imp(struct cx_box *v, FILE *out) {
-  fputs("Table new", out);
+  fputs("(Table new", out);
   struct cx_table *t = v->as_table;
   
   cx_do_set(&t->entries, struct cx_table_entry, e) {
@@ -169,6 +169,8 @@ static void write_imp(struct cx_box *v, FILE *out) {
     cx_write(&e->val, out);
     fputs(" put", out);
   }
+
+  fputc(')', out);
 }
 
 static void dump_imp(struct cx_box *v, FILE *out) {

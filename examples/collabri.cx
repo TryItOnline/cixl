@@ -25,7 +25,7 @@ use:
   (cx/str int join reverse split str words)
   (cx/sym sym)
   (cx/sys home-dir make-dir)
-  (cx/stack _ % %% ~ push)
+  (cx/stack _ % %% ~ get push)
   (cx/table Table put)
   (cx/time fmt now)
   (cx/type new)
@@ -34,7 +34,10 @@ use:
 let: port int;
 
 include: 'qdb.cx';
-use: (qdb commit find-key len new-db-table rollback upsert);
+use: (qdb commit find-key len load-table new-db-table on-load-rec rollback upsert);
+
+define: backlog 3;
+define: tail-default 24;
 
 func: get-path(n Str)(_ Str)
   [home-dir '.collabri' $n] @/ join;
@@ -43,11 +46,8 @@ func: get-path(n Str)(_ Str)
 
 let: options 'options.db' get-path [`id] new-db-table;
 let: users 'users.db' get-path [`name] new-db-table;
-let: topics 'topics.db' get-path [`id] new-db-table;
+let: topics 'topics.db' get-path [0] new-db-table;
 let: poll Poll new;
-
-define: backlog 3;
-define: tail-default 24;
 
 func: get-option(id Sym)(_ Opt)
   let: rec $options [$id] find-key;
@@ -74,7 +74,7 @@ $root `id `/ put
 $root `log-path 'log' get-path put
 $root `clients Table new put
 
-func: open-log(t Topic m Sym)(_ File)
+func: open-log(t Topic m Sym)(_ Opt)
   let: p $t `log-path get;
   [$p @/ $t `name get '.txt'] #nil join $m fopen;
 
@@ -107,15 +107,6 @@ func: push-log(t Topic in Str)()
   
   $b $in push;
 
-func: save(t Topic)()
-  let: rec Table new;
-  $rec `id $t `id get put
-  $rec `name $t `name get put
-  
-  let: pt $t `parent get;
-  $pt {$rec `parent $pt `id get put} if
-  $topics $rec upsert;
-
 func: add-topic(pt t Topic)()
   let: pc $pt `children get;
 
@@ -126,6 +117,39 @@ func: add-topic(pt t Topic)()
     $pt `children $pc put
     $pc $t `name get $t put    
   } if-else;
+
+func: find-topic(id Sym)(_ Opt)
+  $topics [$id] find-key;
+
+func: load-topic(in Stack)(_ Topic)
+  let: t Topic new;
+  let: (id name parent-id log-path) $in {} for;
+
+  $t `id       $id       put
+  $t `name     $name     put
+  $t `clients  Table new put
+  $t `log-path $log-path put
+
+  $parent-id {
+    let: pt $parent-id `/ = $root {$parent-id find-topic} if-else;
+    $pt {['Topic not found: ' $parent-id] throw} else
+    $t `parent $pt put
+    $pt $t add-topic
+  } if
+
+  $t;
+  
+$topics &load-topic on-load-rec
+
+func: save(in Topic)()
+  let: out [
+    $in `id get
+    $in `name get
+    $in `parent get `id get
+    $in `log-path get
+  ];
+  
+  $topics $out upsert;
 
 rec: User ()
   name     Sym
@@ -225,27 +249,33 @@ func: prompt(c Client)()
 
 func: topic-tail(c Client n Int)()
   let: t $c `topic get;
-  let: in $t `r open-log % unblock;
-  let: it $in reverse lines;
-  let: was-mute $c `is-mute get;
-  let: li 0 ref;
-  $c `is-mute #t put
+  let: in $t `r open-log;
+
+  $in {
+    let: it $in reverse lines;
+    let: was-mute $c `is-mute get;
+    let: li 0 ref;
+    $c `is-mute #t put
+    $in unblock
   
-  $poll $in {
-    let: l $it next;
+    $poll $in {
+      let: l $it next;
     
-    $l {
-      $c [$l % reverse @@n] push-out
-      $li &++ set-call
-    } if
+      $l {
+        $c [$l % reverse @@n] push-out
+        $li &++ set-call
+      } if
     
-    $li deref $n = $it is-done or {
-      $c `is-mute $was-mute put
-      $poll $in delete
-      $in close
-      $c prompt
-    } if
-  } on-read;
+      $li deref $n = $it is-done or {
+        $c `is-mute $was-mute put
+        $poll $in delete
+        $in close
+        $c prompt
+      } if
+    } on-read
+  } {
+    $c prompt
+  } if-else;
 
 func: list-topics(c Client t Topic push-id Bool)()
   let: cts $t `children get;
@@ -396,6 +426,10 @@ func: new-client(io TCPClient)(_ Client)
   $c;
 
 ['Collabri v0.2' @@n] say
+
+$users   load-table
+$topics  load-table
+$options load-table
 
 $users len {
   ['Server Setup' @@n] say
