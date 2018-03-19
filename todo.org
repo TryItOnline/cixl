@@ -1,7 +1,8 @@
-* change User to load/save Stack like Topic
-** change key
-** clear db
-* add Option rec type
+* add DBTable.on_save_rec like load
+** use to convert topics/users to stacks
+** change table keys back to `id/`name
+* change options to store pairs
+** implement pair get fn (Sym `x/`y)
 * break up handle-cmd
 ** match fns on cmd sym
 * ---

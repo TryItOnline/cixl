@@ -45,7 +45,7 @@ func: get-path(n Str)(_ Str)
 '' get-path make-dir
 
 let: options 'options.db' get-path [`id] new-db-table;
-let: users 'users.db' get-path [`name] new-db-table;
+let: users 'users.db' get-path [0] new-db-table;
 let: topics 'topics.db' get-path [0] new-db-table;
 let: poll Poll new;
 
@@ -156,8 +156,25 @@ rec: User ()
   password Str
   is-op    Bool;
 
-func: save(u User)()
-  $users $u upsert;
+func: load-user(in Stack)(_ User)
+  let: u User new;
+  let: (name password is-op) $in {} for;
+
+  $u `name     $name     put
+  $u `password $password put
+  $u `is-op    $is-op    put
+  $u;
+  
+$users &load-user on-load-rec
+
+func: save(in User)()
+  let: out [
+    $in `name get
+    $in `password get
+    $in `is-op get
+  ];
+
+  $users $out upsert;
 
 func: find-user(name Sym)(_ Opt)
   $users [$name] find-key;
