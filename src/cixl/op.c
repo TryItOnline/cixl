@@ -301,10 +301,32 @@ static void funcdef_emit_init(struct cx_op *op,
 	  imp->func->id, imp->args.count, imp->rets.count);
 }
 
+static void funcdef_emit_syms(struct cx_op *op, struct cx_set *out, struct cx *cx) {
+  void push(struct cx_sym s) {
+    struct cx_sym *ok = cx_set_insert(out, &s);
+    if (ok) { *ok = s; }
+  }
+
+  struct cx_fimp *imp = op->as_funcdef.imp;
+  
+  cx_do_vec(&imp->args, struct cx_arg, a) {
+    if (a->arg_type == CX_VARG && a->value.type == cx->sym_type) {
+      push(a->value.as_sym);
+    }
+  }
+
+  cx_do_vec(&imp->rets, struct cx_arg, a) {
+    if (a->arg_type == CX_VARG && a->value.type == cx->sym_type) {
+      push(a->value.as_sym);
+    }
+  }
+}
+
 cx_op_type(CX_OFUNCDEF, {
     type.eval = funcdef_eval;
     type.emit = funcdef_emit;
     type.emit_init = funcdef_emit_init;
+    type.emit_syms = funcdef_emit_syms;
   });
 
 static bool funcall_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {

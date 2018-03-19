@@ -46,41 +46,43 @@ func: get-path(n Str)(_ Str)
 
 '' get-path make-dir
 
-let: options 'options.db' get-path [`id] new-db-table;
-let: users 'users.db' get-path [`name] new-db-table;
-let: topics 'topics.db' get-path [`id] new-db-table;
+let: users   'users.db'   get-path [`name] new-db-table;
+let: topics  'topics.db'  get-path [`id]   new-db-table;
+let: options 'options.db' get-path [`id]   new-db-table;
+
 let: poll Poll new;
 
-rec: Option ()
-  id    Sym
-  value A;
+rec: User ()
+  name     Sym
+  password Str
+  is-op    Bool;
 
-func: load-option(in Stack)(_ Option)
-  let: out Option new;
-  let: (id value) $in {} for;
-
-  $out `id    $id    put
-  $out `value $value put
+func: load-user(in Stack)(_ User)
+  let: out User new;
+  let: (name password is-op) $in {} for;
+  $out `name     $name     put
+  $out `password $password put
+  $out `is-op    $is-op    put
   $out;
   
-$options &load-option on-load-rec
+$users &load-user on-load-rec
 
-func: save-option(in Option)(_ Stack) [
-  $in `id get
-  $in `value get
+func: save-user(in User)(_ Stack) [
+  $in `name get
+  $in `password get
+  $in `is-op get
 ];
 
-$options &save-option on-save-rec
+$users &save-user on-save-rec
 
-func: get-option(id Sym)(_ Opt)
-  let: rec $options [$id] find-key;
-  $rec {$rec `value get} and;
+func: find-user(name Sym)(_ Opt)
+  $users [$name] find-key;
 
-func: set-option(id Sym value A)()
-  let: o Option new;
-  $o `id    $id    put
-  $o `value $value put
-  $options $o upsert;
+func: new-user (n Sym)(_ User)
+  let: u User new;
+  $u `name $n put
+  $u `is-op #f put
+  $u;
 
 rec: Topic ()
   id name  Sym
@@ -173,38 +175,36 @@ func: save-topic(in Topic)(_ Stack) [
 
 $topics &save-topic on-save-rec
 
-rec: User ()
-  name     Sym
-  password Str
-  is-op    Bool;
+rec: Option ()
+  id    Sym
+  value A;
 
-func: load-user(in Stack)(_ User)
-  let: out User new;
-  let: (name password is-op) $in {} for;
+func: load-option(in Stack)(_ Option)
+  let: out Option new;
+  let: (id value) $in {} for;
 
-  $out `name     $name     put
-  $out `password $password put
-  $out `is-op    $is-op    put
+  $out `id    $id    put
+  $out `value $value put
   $out;
   
-$users &load-user on-load-rec
+$options &load-option on-load-rec
 
-func: save-user(in User)(_ Stack) [
-  $in `name get
-  $in `password get
-  $in `is-op get
+func: save-option(in Option)(_ Stack) [
+  $in `id get
+  $in `value get
 ];
 
-$users &save-user on-save-rec
+$options &save-option on-save-rec
 
-func: find-user(name Sym)(_ Opt)
-  $users [$name] find-key;
+func: get-option(id Sym)(_ Opt)
+  let: rec $options [$id] find-key;
+  $rec {$rec `value get} and;
 
-func: new-user (n Sym)(_ User)
-  let: u User new;
-  $u `name $n put
-  $u `is-op #f put
-  $u;
+func: set-option(id Sym value A)()
+  let: o Option new;
+  $o `id    $id    put
+  $o `value $value put
+  $options $o upsert;
 
 rec: Client ()
   state   Sym
@@ -376,13 +376,7 @@ func: handle-in(c Client `auth-user in Str)()
   $in {
     let: name $in sym;
     let: u $name find-user;
-
-    $u {
-      $c `user $u put
-    } {
-      $c `user $name new-user put
-    } if-else
-    
+    $c `user $u {$name new-user} or put
     $c `state `auth-password put
     $c push-prompt
   } {
@@ -432,10 +426,12 @@ func: push-error(c Client e Stack)()
 
 func: new-client(io TCPClient)(_ Client)
   let: c Client new;
-  $c `state `auth-user put
-  $c `io $io put
-  $c `buf Buf new put
-  $c `is-mute #f put
+
+  $c `state   `auth-user put
+  $c `io      $io        put
+  $c `buf     Buf new    put
+  $c `is-mute #f         put
+  
   $c $root join-topic
   let: ils $io lines;
   
@@ -454,7 +450,7 @@ func: new-client(io TCPClient)(_ Client)
   $c [`intro get-option @@n @@n] push-out
   $c;
 
-['Collabri v0.2' @@n] say
+['Collabri v0.3' @@n] say
 
 $users   load-table
 $topics  load-table
