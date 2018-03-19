@@ -202,10 +202,10 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
     fprintf(out,
 	    "  struct cx_type *%s() {\n"
 	    "    static struct cx_type *t = NULL;\n"
-	    "    if (!t) { t = cx_test(cx_get_type(%s(), \"%s\", false)); }\n"
+	    "    if (!t) { t = cx_test(cx_get_type(cx, \"%s\", false)); }\n"
 	    "    return t;\n"
 	    "  }\n\n",
-	    (*t)->emit_id, (*t)->lib->emit_id, (*t)->id);
+	    (*t)->emit_id, (*t)->id);
   }
 
   cx_do_set(&funcs, struct cx_func *, f) {

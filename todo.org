@@ -1,3 +1,10 @@
+* convert save(Topic) to use rec type like User
+** create new without children/client
+** change parent to parent-id
+** update post
+* implement topic loading
+** fill children on table rec in load-topic
+* add Option rec type
 * break up handle-cmd
 ** match fns on cmd sym
 * change qdb to use non blocking io
@@ -9,10 +16,7 @@
 ** process in catch loop without breaking
 *** call without error pushed
 ** call in scope deref before deinit
-* investigate using scope.throwing for non-unwinding errors
-** rename to thrown
-** check in OCATCH eval
-** propagate to next scope in cx_pop_scope
+* change lib getters like cx_get_type
 * change CX_TGROUP to dump everything to outer stack on exit
 ** update README
 * finish stack type emit

@@ -44,7 +44,7 @@ static bool parse_args(struct cx *cx, struct cx_vec *toks, struct cx_vec *args) 
 	  *(struct cx_arg *)cx_vec_push(args) = cx_narg(NULL, i);      
 	}	
       } else if (isupper(id[0])) {
-	struct cx_type *type = cx_get_type(*cx->lib, t->as_ptr, false);
+	struct cx_type *type = cx_get_type(cx, t->as_ptr, false);
 	if (!type) { goto exit; }
 
 	if (tmp_ids.count) {

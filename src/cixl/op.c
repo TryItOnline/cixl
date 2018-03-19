@@ -1240,8 +1240,8 @@ static void typedef_emit_init(struct cx_op *op,
       
       fprintf(out,
 	      "  cx_derive_rec(t, "
-	      "cx_test(cx_get_type(%s(), \"%s\", false)));\n",
-	      (*pt)->lib->emit_id, (*pt)->id);
+	      "cx_test(cx_get_type(cx, \"%s\", false)));\n",
+	      (*pt)->id);
     }
     
     struct cx_rec_type *rt = cx_baseof(t, struct cx_rec_type, imp);
@@ -1250,7 +1250,7 @@ static void typedef_emit_init(struct cx_op *op,
       fprintf(out,
 	      "  cx_test(cx_add_field(t,\n"
 	      "          cx_sym(cx, \"%s\"),\n"
-	      "          cx_test(cx_get_type(*cx->lib, \"%s\", false)),\n"
+	      "          cx_test(cx_get_type(cx, \"%s\", false)),\n"
 	      "          false));\n",
 	      f->id.id, f->type->id);
     }
@@ -1260,13 +1260,13 @@ static void typedef_emit_init(struct cx_op *op,
     fprintf(out,
   	    "\n"
 	    "{\n"
-	    "  struct cx_type *t = cx_test(cx_add_type(cx, \"%s\"));\n"
+	    "  struct cx_type *t = cx_test(cx_add_type(*cx->lib, \"%s\"));\n"
 	    "  t->trait = true;\n\n",
 	    t->id);
 
     cx_do_set(&t->children, struct cx_type *, ct) {
       fprintf(out,
-	      "  cx_derive(cx_test(cx_get_type(*cx->lib, \"%s\", false)), t);\n",
+	      "  cx_derive(cx_test(cx_get_type(cx, \"%s\", false)), t);\n",
 	      (*ct)->id);
     }
 

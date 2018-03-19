@@ -112,10 +112,31 @@ static void print_imp(struct cx_box *v, FILE *out) {
   fputs(v->as_str->data, out);
 }
 
+static void encode(struct cx_str *s, FILE *out) {
+  for (char *c = s->data; *c; c++) {
+    switch (*c) {
+    case '\n':
+      fputs("\\n", out);
+      break;
+    case '\r':
+      fputs("\\r", out);
+      break;      
+    case '\t':
+      fputs("\\t", out);
+      break;
+    default:
+      fputc(*c, out);
+    }
+  }
+}
+
 static bool emit_imp(struct cx_box *v, const char *exp, FILE *out) {
   fprintf(out,
-	  "cx_box_init(%s, cx->str_type)->as_str = cx_str_new(\"%s\");\n",
-	  exp, v->as_str->data);
+	  "cx_box_init(%s, cx->str_type)->as_str = cx_str_new(\"",
+	  exp);
+
+  encode(v->as_str, out);
+  fputs("\");\n", out);
   return true;
 }
 

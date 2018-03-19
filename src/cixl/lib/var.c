@@ -59,7 +59,7 @@ static ssize_t let_eval(struct cx_macro_eval *eval,
 	char *id = t->as_ptr;
 
 	if (isupper(id[0])) {
-	  struct cx_type *type = cx_get_type(*cx->lib, id, false);
+	  struct cx_type *type = cx_get_type(cx, id, false);
 	  if (!type || !push_type(type)) { goto exit; }
 	} else {
 	  *(struct cx_tok *)cx_vec_push(&ids) = *t;

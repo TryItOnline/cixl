@@ -24,12 +24,6 @@ bool _eval(struct cx *cx) {
   static struct cx_sym sym_b;
   static struct cx_sym sym_a;
 
-  struct cx_lib *lib_cxEabc() {
-    static struct cx_lib *l = NULL;
-    if (!l) { l = cx_test(cx_get_lib(cx, "cx/abc", false)); }
-    return l;
-  }
-
   struct cx_lib *lib_cxEcond() {
     static struct cx_lib *l = NULL;
     if (!l) { l = cx_test(cx_get_lib(cx, "cx/cond", false)); }
@@ -68,7 +62,7 @@ bool _eval(struct cx *cx) {
 
   struct cx_type *type_Int() {
     static struct cx_type *t = NULL;
-    if (!t) { t = cx_test(cx_get_type(lib_cxEabc(), "Int", false)); }
+    if (!t) { t = cx_test(cx_get_type(cx, "Int", false)); }
     return t;
   }
 

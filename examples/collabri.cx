@@ -25,7 +25,7 @@ use:
   (cx/str int join reverse split str words)
   (cx/sym sym)
   (cx/sys home-dir make-dir)
-  (cx/stack _ % ~ push)
+  (cx/stack _ % %% ~ push)
   (cx/table Table put)
   (cx/time fmt now)
   (cx/type new)
@@ -132,23 +132,11 @@ rec: User ()
   password Str
   is-op    Bool;
 
-func: load-user(rec Table)(_ User)
-  let: u User new;
-  $u `name $rec `name get put
-  $u `password $rec `password get put
-  $u `is-op $rec `is-op get put
-  $u;
-  
 func: save(u User)()
-  let: rec Table new;
-  $rec `name $u `name get put
-  $rec `password $u `password get put
-  $rec `is-op $u `is-op get put
-  $users $rec upsert;
+  $users $u upsert;
 
 func: find-user(name Sym)(_ Opt)
-  let: rec $users [$name] find-key;
-  $rec {$rec load-user} and;
+  $users [$name] find-key;
 
 func: new-user (n Sym)(_ User)
   let: u User new;
@@ -173,7 +161,6 @@ func: join-topic(c Client ns Str)()
     let: t $c `topic get;
 
     $n '..' = {
-      $t {'Topic not found: ..' throw} else
       let: pt $t `parent get;
       $pt {'Topic not found: ..' throw} else
       $c `topic $pt put
@@ -196,7 +183,7 @@ func: join-topic(c Client t Topic)()
   $c `topic $t put
   $c `topic get `clients get $c #t put;
 
-func: branch-topic(c Client n Sym)()
+func: new-topic(c Client n Sym)()
   let: t Topic new;  
   $t `name $n put
   $t `clients Table new put
@@ -305,7 +292,7 @@ func: handle-cmd(c Client cmd Sym in Iter)()
     (($cmd `branch =)
       let: n $in str;
       $n {'Missing topic name' throw} else
-      $c $n sym branch-topic
+      $c $n sym new-topic
       $c prompt)
     (($cmd `join =)
       $c $in str $root or join-topic

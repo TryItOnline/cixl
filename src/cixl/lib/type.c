@@ -40,7 +40,7 @@ static bool trait_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
     goto exit1;
   }
 
-  struct cx_type *type = cx_get_type(*cx->lib, id_tok.as_ptr, true);
+  struct cx_type *type = cx_get_type(cx, id_tok.as_ptr, true);
   
   if (type && !type->trait) {
     cx_error(cx, row, col, "Attempt to redefine %s as trait", type->id);
@@ -68,7 +68,7 @@ static bool trait_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   }
   
   cx_do_vec(&toks, struct cx_tok, t) {
-    struct cx_type *child = cx_get_type(*cx->lib, t->as_ptr, false);
+    struct cx_type *child = cx_get_type(cx, t->as_ptr, false);
     if (!child) { goto exit1; }
     cx_derive(child, type);
   }

@@ -109,7 +109,7 @@ static bool define_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
       if (t->type == CX_TID()) {
 	char *id = t->as_ptr;
 	if (isupper(id[0])) {
-	  struct cx_type *type = cx_get_type(*cx->lib, id, false);
+	  struct cx_type *type = cx_get_type(cx, id, false);
 	  if (!type || !push_type(type)) { goto exit3; }
 	} else {
 	  *(struct cx_tok *)cx_vec_push(&ids) = *t;

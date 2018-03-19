@@ -126,15 +126,22 @@ struct cx_rec_type *cx_add_rec_type(struct cx_lib *lib, const char *id) {
   return t;
 }
 
-struct cx_type *cx_get_type(struct cx_lib *lib, const char *id, bool silent) {
-  struct cx_type **t = cx_set_get(&lib->types, &id);
+static struct cx_type *lib_get_type(struct cx_lib **lib,
+				    const char *id,
+				    bool silent) {
+  struct cx *cx = (*lib)->cx;
+  struct cx_type **t = cx_set_get(&(*lib)->types, &id);
 
-  if (!t && !silent) {
-    struct cx *cx = lib->cx;
-    cx_error(cx, cx->row, cx->col, "Unknown type: '%s'", id);
+  if (!t && lib > (struct cx_lib **)cx->libs.items) {
+    return lib_get_type(lib-1, id, silent);
   }
 
+  if (!t && !silent) { cx_error(cx, cx->row, cx->col, "Unknown type: '%s'", id); }
   return t ? *t : NULL;
+}
+
+struct cx_type *cx_get_type(struct cx *cx, const char *id, bool silent) {
+  return lib_get_type(cx->lib, id, silent);
 }
 
 struct cx_macro *cx_add_macro(struct cx_lib *lib,

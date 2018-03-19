@@ -21,7 +21,7 @@ static bool parse_type(struct cx *cx,
 		       struct cx_vec *out,
 		       bool lookup) {
   if (lookup) {
-    struct cx_type *t = cx_get_type(*cx->lib, id, false);
+    struct cx_type *t = cx_get_type(cx, id, false);
     if (!t) { return false; }
     
     cx_tok_init(cx_vec_push(out),
@@ -104,7 +104,7 @@ char *parse_fimp(struct cx *cx,
       if (strncmp(s, "Arg", 3) == 0 && isdigit(s[3])) {
 	fputs(s, id.stream);
       } else if (isupper(s[0])) {
-	struct cx_type *type = cx_get_type(*cx->lib, s, false);
+	struct cx_type *type = cx_get_type(cx, s, false);
 	if (!type) { return NULL; }
 	fputs(type->id, id.stream);
       } else {

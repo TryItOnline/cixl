@@ -82,18 +82,22 @@ void *cx_type_deinit(struct cx_type *type) {
   return ptr;  
 }
 
-void cx_derive(struct cx_type *child, struct cx_type *parent) {
+static void derive(struct cx_type *child, struct cx_type *parent) {
   *(bool *)cx_vec_put(&child->is, parent->tag) = true;
   child->level = cx_max(child->level, parent->level+1);
   
+  cx_do_set(&parent->parents, struct cx_type *, t) { derive(child, *t); }
+  cx_do_set(&child->children, struct cx_type *, t) { derive(*t, parent); }
+}
+
+void cx_derive(struct cx_type *child, struct cx_type *parent) {
   struct cx_type **tp = cx_set_insert(&child->parents, &parent);
   if (tp) { *tp = parent; }
   
   tp = cx_set_insert(&parent->children, &child);
   if (tp) { *tp = child; }
 
-  cx_do_set(&parent->parents, struct cx_type *, t) { cx_derive(child, *t); }
-  cx_do_set(&child->children, struct cx_type *, t) { cx_derive(*t, parent); }
+  derive(child, parent);
 }
 
 bool cx_is(const struct cx_type *child, const struct cx_type *parent) {

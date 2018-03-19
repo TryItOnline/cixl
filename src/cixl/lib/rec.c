@@ -54,7 +54,7 @@ static bool rec_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
     goto exit2;
   }
 
-  struct cx_type *type = cx_get_type(*cx->lib, s, true);
+  struct cx_type *type = cx_get_type(cx, s, true);
   
   if (type && !cx_is(type, cx->rec_type)) {
       cx_error(cx, id.row, id.col, "Attempt to redefine %s as rec", type->id);
@@ -79,7 +79,7 @@ static bool rec_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
       goto exit3;
     }
 
-    struct cx_type *pt = cx_get_type(*cx->lib, t->as_ptr, false);
+    struct cx_type *pt = cx_get_type(cx, t->as_ptr, false);
     
     if (!pt->trait && !cx_is(pt, cx->rec_type)) {
       cx_error(cx, t->row, t->col, "Invalid rec parent: %s", pt->id);
@@ -120,7 +120,7 @@ static bool rec_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
       char *s = t->as_ptr;
       
       if (isupper(s[0])) {
-	struct cx_type *ft = cx_get_type(*cx->lib, s, false);
+	struct cx_type *ft = cx_get_type(cx, s, false);
 	if (!ft || !push_type(ft, t->row, t->col)) { goto exit4; }
       } else {
 	*(struct cx_tok *)cx_vec_push(&fids) = *t;

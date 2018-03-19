@@ -72,7 +72,7 @@ void cx_lib_push_init(struct cx_lib *lib, struct cx_lib_init init);
 struct cx_type *_cx_add_type(struct cx_lib *lib, const char *id, ...);
 struct cx_type *cx_vadd_type(struct cx_lib *lib, const char *id, va_list parents);
 struct cx_rec_type *cx_add_rec_type(struct cx_lib *lib, const char *id);
-struct cx_type *cx_get_type(struct cx_lib *lib, const char *id, bool silent);
+struct cx_type *cx_get_type(struct cx *cx, const char *id, bool silent);
 
 struct cx_macro *cx_add_macro(struct cx_lib *lib,
 			      const char *id,
