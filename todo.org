@@ -1,6 +1,3 @@
-* break up handle-cmd
-** match fns on state & cmd syms
-* ---
 * debug row/col
 * add support for nil catch
 ** #nil instead of type

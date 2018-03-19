@@ -355,25 +355,23 @@ func: new-post(c Client in Str)()
     $in @@n
   ] #nil join push-post;
 
-func: handle-cmd(c Client cmd Sym in Iter)()
-  switch:
-    (($cmd `branch =)
-      let: n $in str;
-      $n {'Missing topic name' throw} else
-      $c $n sym new-topic
-      $c push-prompt)
-    (($cmd `join =)
-      $c $in str $root or join-topic
-      $c push-prompt)
-    (($cmd `list =)
-      $c % `topic get #f list-topics
-      $c push-prompt)
-    (($cmd `tail =)
-      let: n $in str int;
-      $c $n #tail-default or topic-tail)
-    (#t
-      ['Invalid command: ' $cmd] throw);;
+func: handle-cmd(c Client `branch in Iter)()
+  let: n $in str;
+  $n {'Missing topic name' throw} else
+  $c $n sym new-topic
+  $c push-prompt;
 
+func: handle-cmd(c Client `join in Iter)()
+  $c $in str $root or join-topic
+  $c push-prompt;
+
+func: handle-cmd(c Client `list in Iter)()
+  $c % `topic get #f list-topics
+  $c push-prompt;
+
+func: handle-cmd(c Client `tail in Iter)()
+  $c $in str int #tail-default or topic-tail;
+      
 func: handle-in(c Client `auth-user in Str)()
   $in {
     let: name $in sym;
