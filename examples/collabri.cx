@@ -273,17 +273,17 @@ func: push-out(c Client v A)()
   
   $buf $v push;
 
-func: state-prompt(`auth-user c Client)()
-  $c 'User: ' push-out;
+func: prompt(c Client `auth-user)(_ Str)
+  'User: ';
 
-func: state-prompt(`auth-password c Client)()
-  $c 'Password: ' push-out;
+func: prompt(c Client `auth-password)(_ Str)
+  'Password: ';
 
-func: state-prompt(`ok c Client)()
-  $c [$c `topic get `id get @@s] push-out;
+func: prompt(c Client `ok)(_ Str)
+  [$c `topic get `id get @@s] #nil join;
 
-func: prompt(c Client)()
-  $c `state get $c state-prompt;
+func: push-prompt(c Client)()
+  $c % % `state get prompt push-out;
 
 func: topic-tail(c Client n Int)()
   let: t $c `topic get;
@@ -308,11 +308,11 @@ func: topic-tail(c Client n Int)()
         $c `is-mute $was-mute put
         $poll $in delete
         $in close
-        $c prompt
+        $c push-prompt
       } if
     } on-read
   } {
-    $c prompt
+    $c push-prompt
   } if-else;
 
 func: list-topics(c Client t Topic push-id Bool)()
@@ -361,13 +361,13 @@ func: handle-cmd(c Client cmd Sym in Iter)()
       let: n $in str;
       $n {'Missing topic name' throw} else
       $c $n sym new-topic
-      $c prompt)
+      $c push-prompt)
     (($cmd `join =)
       $c $in str $root or join-topic
-      $c prompt)
+      $c push-prompt)
     (($cmd `list =)
       $c % `topic get #f list-topics
-      $c prompt)
+      $c push-prompt)
     (($cmd `tail =)
       let: n $in str int;
       $c $n #tail-default or topic-tail)
@@ -386,7 +386,7 @@ func: state-handle-in(`auth-user c Client in Str)()
     } if-else
     
     $c `state `auth-password put
-    $c prompt
+    $c push-prompt
   } {
     $c disconnect
   } if-else;
@@ -409,7 +409,7 @@ func: state-handle-in(`auth-password c Client in Str)()
   $root `clients get $c #t put  
   $c `state `ok put
   $c @@n push-out
-  $c prompt;
+  $c push-prompt;
 
 func: state-handle-in(`ok c Client in Str)()
   $in {
@@ -420,10 +420,10 @@ func: state-handle-in(`ok c Client in Str)()
       $c $cmd $it handle-cmd
     } {
       $c $in new-post
-      $c prompt
+      $c push-prompt
     } if-else
   } {
-    $c prompt
+    $c push-prompt
   } if-else;
 
 func: handle-in(c Client in Str)()
@@ -450,7 +450,7 @@ func: new-client(io TCPClient)(_ Client)
     $l is-nil {
       $ils is-done {$c disconnect} if
     } {
-      catch: (A $c ~ push-error $c prompt dump rollback)
+      catch: (A $c ~ push-error $c push-prompt dump rollback)
         $c $l handle-in
 	$poll commit;
     } if-else
@@ -482,7 +482,7 @@ let: server #nil $port #backlog listen;
 
 $poll $server {
   let: io $server accept;
-  $io {$io new-client % prompt} if
+  $io {$io new-client % push-prompt} if
 } on-read
 
 ['Listening on port ' $port] say
