@@ -16,59 +16,47 @@ char *cx_emit_id(const char *prefix, const char *in) {
       break;
     case '+':
       *p++ = 'A';
-      *p++ = 'D';
       break;
+    case '`':
+      *p++ = 'B';
     case '&':
-      *p++ = 'A';
-      *p++ = 'M';
+      *p++ = 'C';
       break;
     case '|':
-      *p++ = 'B';
-      *p++ = 'A';
+      *p++ = 'D';
       break;
     case '/':
-      *p++ = 'D';
-      *p++ = 'I';
+      *p++ = 'E';
       break;
     case '.':
-      *p++ = 'D';
-      *p++ = 'O';
+      *p++ = 'F';
       break;      
     case '=':
-      *p++ = 'E';
-      *p++ = 'Q';
+      *p++ = 'G';
       break;
     case '!':
-      *p++ = 'E';
-      *p++ = 'X';
+      *p++ = 'H';
       break;
     case '<':
-      *p++ = 'L';
-      *p++ = 'T';
+      *p++ = 'I';
       break;
     case '>':
-      *p++ = 'G';
-      *p++ = 'T';
+      *p++ = 'J';
       break;
     case '*':
-      *p++ = 'M';
-      *p++ = 'U';
+      *p++ = 'K';
       break;
     case '%':
-      *p++ = 'P';
-      *p++ = 'E';
+      *p++ = 'L';
       break;
     case '?':
-      *p++ = 'Q';
-      *p++ = 'U';
+      *p++ = 'M';
       break;
     case '-':
-      *p++ = 'S';
-      *p++ = 'U';
+      *p++ = 'N';
       break;
     case '~':
-      *p++ = 'T';
-      *p++ = 'I';
+      *p++ = 'S';
       break;
     default:
       *(p++) = *c;
