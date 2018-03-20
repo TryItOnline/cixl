@@ -308,6 +308,7 @@ func: topic-tail(c Client n Int)()
         $c `is-mute $was-mute put
         $poll $in delete
         $in close
+	$c @@n push-out
         $c push-prompt
       } if
     } on-read
@@ -367,6 +368,7 @@ func: handle-cmd(c Client `join in Iter)()
 
 func: handle-cmd(c Client `list in Iter)()
   $c % `topic get #f list-topics
+  $c @@n push-out
   $c push-prompt;
 
 func: handle-cmd(c Client `tail in Iter)()
