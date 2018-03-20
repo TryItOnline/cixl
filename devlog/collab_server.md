@@ -2,14 +2,14 @@
 #### 2018-03-17
 
 ### Intro
-One of the joys of creating a programming language is coming up with problems of just the right size that are interesting enough to warrant solving; just the right size meaning that viable solutions intersect the current feature set of the language by a large margin, while putting a healthy amount of stress on the design. To help drive implementation of error handling and networking in [Cixl](https://github.com/basic-gongfu/cixl) forward, I decided I might as well scratch the collab server itch that I've developed lately.
+One of the joys of creating a programming language is coming up with problems of just the right size that are interesting enough to warrant solving; just the right size meaning that viable solutions intersect the current feature set of the language by a large margin, while putting a healthy amount of stress on the design. To help drive the design and implementation of error handling and networking in [Cixl](https://github.com/basic-gongfu/cixl) forward, I decided I might as well scratch the collab server itch that I've developed along the way.
 
 ### Collab Who?
 Collab as in collaboration, think Facebook or Slack minus awesome profits. In its current state, [Collabri](https://raw.githubusercontent.com/basic-gongfu/cixl/master/examples/collabri.cx) implements just enough functionality to get networked, persistent, chronological feeds organized in hierarchies. The user interface is text based for now; as well as client agnostic, meaning you may use ```nc``` or any other tool capable of doing line IO over a TCP connection without getting in the way to access the server.
 
 ```
 $ ./collabri 7707
-Collabri v0.2
+Collabri v0.3
 
 Server Setup
 
