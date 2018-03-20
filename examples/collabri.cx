@@ -14,7 +14,7 @@ use:
   (cx/error catch: throw dump)
   (cx/func func: recall)
   (cx/io File RFile WFile
-         ask close flush fopen include: lines print reverse say unblock)
+         ask close flush fopen include: lines print reverse say tell unblock)
   (cx/io/poll Poll delete no-write on-read on-write wait)
   (cx/iter Iter for is-done iter next while)
   (cx/math ++)
@@ -35,8 +35,8 @@ let: port int;
 
 include: 'qdb.cx';
 
-use: (qdb commit find-key len load-table new-db-table on-load-rec on-save-rec
-          rollback upsert);
+use: (qdb commit find-key len load-table new-db-table on-load on-commit rollback
+          upsert);
 
 define: backlog 3;
 define: tail-default 24;
@@ -142,9 +142,9 @@ func: load-topic(in Topic)(_ Topic)
 
   $in;
   
-$topics &load-topic on-load-rec
+$topics &load-topic on-load
 
-func: save-topic(in Topic)(_ Topic)
+func: commit-topic(in Topic pos Int)(_ Topic)
   let: out Topic new;
   $out `id        $in `id       get         put
   $out `name      $in `name     get         put
@@ -152,7 +152,7 @@ func: save-topic(in Topic)(_ Topic)
   $out `log-path  $in `log-path get         put
   $out;
 
-$topics &save-topic on-save-rec
+$topics &commit-topic on-commit
 
 rec: Option ()
   id    Sym

@@ -15,12 +15,12 @@ use: cx;
 define: db-trans Stack new;
 
 rec: DBTable()
-  file    RWFile
-  key     Stack
-  recs    Table
-  buf     Buf
-  on-load Stack
-  on-save Stack;
+  file      RWFile
+  key       Stack
+  recs      Table
+  buf       Buf
+  on-load  
+  on-commit Stack;
 
 func: new-db-table(n Str k Stack)(_ DBTable)
   let: t DBTable new;
@@ -55,17 +55,17 @@ func: load-table(t DBTable)()
   $f 0 seek
   $t $f load-recs;
 
-func: on-load-rec(t DBTable fn A)()
+func: on-load(t DBTable fn A)()
   $t `on-load get {
     let: s Stack new;
     $t `on-load $s put
     $s
   } or $fn push;
 
-func: on-save-rec(t DBTable fn A)()
-  $t `on-save get {
+func: on-commit(t DBTable fn A)()
+  $t `on-commit get {
     let: s Stack new;
-    $t `on-save $s put
+    $t `on-commit $s put
     $s
   } or $fn push;
 
@@ -115,7 +115,8 @@ func: commit-change(c DBChange poll Poll out MFile)()
   let: arg $op `delete = {
     $t $r get-rec-key
   } {
-    $r $t `on-save get &call for
+    let: pos $t `file get tell $b len +;
+    $r $t `on-commit get {$pos ~ call} for
   } if-else;
 
   $out $op $arg . write

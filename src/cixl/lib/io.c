@@ -362,6 +362,25 @@ static bool seek_imp(struct cx_scope *scope) {
   return ok;
 }
 
+static bool tell_imp(struct cx_scope *scope) {
+  struct cx *cx = scope->cx;
+  bool ok = false;
+  
+  struct cx_box f = *cx_test(cx_pop(scope, false));
+  off_t pos = ftell(cx_file_ptr(f.as_file));
+  
+  if (pos == -1) {
+    cx_error(cx, cx->row, cx->col, "Failed telling: %d", errno);
+    goto exit;
+  }
+
+  cx_box_init(cx_push(scope), cx->int_type)->as_int = pos;
+  ok = true;
+ exit:
+  cx_box_deinit(&f);
+  return ok;
+}
+
 static bool close_imp(struct cx_scope *scope) {
   struct cx *cx = scope->cx;
   struct cx_box *f = cx_test(cx_pop(scope, false));
@@ -460,6 +479,11 @@ cx_lib(cx_init_io, "cx/io") {
 	       cx_args(cx_arg("f", cx->file_type), cx_arg("pos", cx->int_type)),
 	       cx_args(),
 	       seek_imp);
+
+  cx_add_cfunc(lib, "tell",
+	       cx_args(cx_arg("f", cx->file_type)),
+	       cx_args(cx_arg(NULL, cx->int_type)),
+	       tell_imp);
 
   cx_add_cfunc(lib, "close",
 	       cx_args(cx_arg("f", cx->file_type)), cx_args(),
