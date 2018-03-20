@@ -1,8 +1,9 @@
 /*
   A simple log-based database.
 
-  See https://github.com/basic-gongfu/cixl/blob/master/examples/bookings.cx for
-  example of usage.
+  See https://github.com/basic-gongfu/cixl/blob/master/examples/bookings.cx and
+  https://github.com/basic-gongfu/cixl/blob/master/examples/collabri.cx for
+  examples of usage.
 
   https://github.com/basic-gongfu/cixl#getting-started
 */
