@@ -7,7 +7,9 @@
 */
 
 use:
-  (cx/abc A Bool Int Opt Stack Str Sym #nil #t #f is-nil)
+  (cx/abc A Bool Int Opt Stack Str Sym
+          #f #nil #t
+	  is-nil)
   (cx/buf Buf push write-bytes)
   (cx/cond ! = == and else if if-else or switch:)
   (cx/const define:)
@@ -18,14 +20,15 @@ use:
   (cx/io/poll Poll delete no-write on-read on-write wait)
   (cx/iter Iter for is-done iter next while)
   (cx/math ++)
-  (cx/net TCPClient TCPServer accept listen)
+  (cx/net TCPClient TCPServer
+          accept listen)
   (cx/pair x y)
   (cx/rec ? rec: get put)
   (cx/ref deref ref set-call)
   (cx/str int join reverse split str words)
   (cx/sym sym)
   (cx/sys home-dir make-dir)
-  (cx/stack _ % %% ~ get push)
+  (cx/stack _ % ~ get push)
   (cx/table Table put)
   (cx/time fmt now)
   (cx/type new)
