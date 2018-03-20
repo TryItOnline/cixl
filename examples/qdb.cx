@@ -24,7 +24,7 @@ rec: DBTable()
 
 func: new-db-table(n Str k Stack)(_ DBTable)
   let: t DBTable new;
-  let: f $n `a+ fopen;
+  let: f $n `a+ fopen % unblock;
 
   $t `file $f        put
   $t `key  $k        put

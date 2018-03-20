@@ -97,7 +97,9 @@ $root `clients Table new put
 
 func: open-log(t Topic m Sym)(_ Opt)
   let: p $t `log-path get;
-  [$p @/ $t `name get '.txt'] #nil join $m fopen;
+  let: l [$p @/ $t `name get '.txt'] #nil join $m fopen;
+  $l {$l unblock} if
+  $l;
 
 func: get-log(t Topic)(_ WFile)
   $t `log get {
@@ -286,7 +288,6 @@ func: topic-tail(c Client n Int)()
   $in {
     let: it $in reverse lines;
     let: li 0 ref;
-    $in unblock
   
     $poll $in {
       let: l $it next;
