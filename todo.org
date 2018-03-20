@@ -1,4 +1,11 @@
 * debug row/col
+* ---
+* add collabri user logs
+* add user mode
+* enter by typing :user a
+** empty name gets current
+* add user cmd tail
+* ---
 * add support for nil catch
 ** #nil instead of type
 ** catch.type is NULL
