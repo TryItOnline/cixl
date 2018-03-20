@@ -1,7 +1,3 @@
-* add DBTable.on-upsert/on-upsert fn
-** call with full rec and offs on commit
-*** calc offs using tell/buf
-** test in collabri
 * debug row/col
 * add support for nil catch
 ** #nil instead of type
@@ -20,13 +16,6 @@
 * add seq zip/unzip fns
 * add and/or tests
 * add filter tests
-* add ^ (pow)
-** also add ²/³
-** add as separators
-** implement for int/rat in math
-* add vect put/get fns
-* add rat sub/div
-** move fns to math lib
 * optimize const emit
 ** add op_type.emit_consts
 *** rewrite getconst emit
@@ -36,9 +25,6 @@
 * replace cx_tok.as_ptr with as_id, as_literal etc.
 ** use cx_sym for CX_TID?
 * replace box.as_ptr with as_func/fimp/etc
-* add seek(file, pos) fn
-* add tell(file) fn
-* add len(file) fn
 * convert type id to sym
 * convert macro id to sym
 * convert func id to sym
@@ -46,9 +32,6 @@
 * add Buf Seq support
 ** iterate chars like Str
 * implement Buf clone
-* more qdb
-** add is-dirty fn
-** add delete fn
 * replace clone fallback to copy with error
 * replace varargs with size/array+macro
 * update embed example in readme
