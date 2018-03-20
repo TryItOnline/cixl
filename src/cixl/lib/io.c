@@ -385,7 +385,6 @@ static bool write_imp(struct cx_scope *scope) {
 
   FILE *f = cx_file_ptr(out.as_file);
   bool ok = cx_write(&v, f);
-  fputc('\n', f);
   cx_box_deinit(&v);
   cx_box_deinit(&out);
   return ok;

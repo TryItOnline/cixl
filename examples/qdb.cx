@@ -117,8 +117,9 @@ func: commit-change(c DBChange poll Poll out MFile)()
   } {
     $r $t `on-save get &call for
   } if-else;
-  
+
   $out $op $arg . write
+  $out @@n print
   $b {$t $poll poll-table} else
   $b $out push
   $out 0 seek;

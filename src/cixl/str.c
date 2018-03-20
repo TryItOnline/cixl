@@ -100,8 +100,28 @@ static struct cx_iter *iter_imp(struct cx_box *v) {
   return char_iter_new(v->as_str);
 }
 
+static void write_encode(struct cx_str *s, FILE *out) {
+  for (char *c = s->data; *c; c++) {
+    switch (*c) {
+    case '\n':
+      fputs("@n", out);
+      break;
+    case '\r':
+      fputs("@r", out);
+      break;      
+    case '\t':
+      fputs("@t", out);
+      break;
+    default:
+      fputc(*c, out);
+    }
+  }
+}
+
 static void write_imp(struct cx_box *v, FILE *out) {
-  fprintf(out, "'%s'", v->as_str->data);
+  fputc('\'', out);
+  write_encode(v->as_str, out);
+  fputc('\'', out);
 }
 
 static void dump_imp(struct cx_box *v, FILE *out) {
@@ -112,7 +132,7 @@ static void print_imp(struct cx_box *v, FILE *out) {
   fputs(v->as_str->data, out);
 }
 
-static void encode(struct cx_str *s, FILE *out) {
+static void emit_encode(struct cx_str *s, FILE *out) {
   for (char *c = s->data; *c; c++) {
     switch (*c) {
     case '\n':
@@ -135,7 +155,7 @@ static bool emit_imp(struct cx_box *v, const char *exp, FILE *out) {
 	  "cx_box_init(%s, cx->str_type)->as_str = cx_str_new(\"",
 	  exp);
 
-  encode(v->as_str, out);
+  emit_encode(v->as_str, out);
   fputs("\");\n", out);
   return true;
 }
