@@ -410,7 +410,7 @@ func: handle-in(c Client `ok in Str)()
     let: it $in iter;
 
     $it next @: = {
-      let: cmd {$it next % {% @@s = {_ #nil} if} if} iter str sym;
+      let: cmd $it words next sym;
       $c $cmd $it handle-cmd
     } {
       $c $in new-post

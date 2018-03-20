@@ -80,7 +80,7 @@ let: options 'options.db' get-path [`id]   new-db-table;
 ```
 
 ### Clients
-Each client is tagged with a user once authenticated. New users are created automagically when logging in with a new name. Output is buffered in ```buf``` until the client is ready to receive it. New clients start their life in the root topic and register a read callback in the event loop.
+Each client is tagged with a user once authenticated. New users are created automagically on login with a new name. Output is buffered in ```buf``` until the client is ready to receive it. New clients start their life in the root topic and register a read callback in the event loop.
 
 ```
 rec: Client ()
@@ -239,7 +239,7 @@ func: handle-in(c Client `ok in Str)()
     let: it $in iter;
 
     $it next @: = {
-      let: cmd {$it next % {% @@s = {_ #nil} if} if} iter str sym;
+      let: cmd $it words next sym;
       $c $cmd $it handle-cmd
     } {
       $c $in new-post
