@@ -299,7 +299,7 @@ func: push-post(u User t Topic in Str)()
   
   $t `clients get {
     let: c x;
-    $c `user get $u == {$c $in push-out} else
+    $c `state get `ok = {$c `user get $u ==!} and {$c $in push-out} if
   } for
 
   let: pt $t `parent get;
