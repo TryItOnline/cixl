@@ -144,18 +144,20 @@ func: add-topic(pt t Topic)()
 func: find-topic(id Sym)(_ Opt)
   $topics [$id] find-key;
 
-func: load-topic(in Stack)(_ Topic)
+func: load-topic(in Table)(_ Topic)
   let: out Topic new;
-  let: (id name parent-id log-path) $in {} for;
 
-  $out `id       $id       put
-  $out `name     $name     put
-  $out `clients  Table new put
-  $out `log-path $log-path put
+  $out `id       $in `id       get put
+  $out `name     $in `name     get put
+  $out `log-path $in `log-path get put
+  
+  $out `clients  Table new         put
 
-  $parent-id {
-    let: pt $parent-id `/ = $root {$parent-id find-topic} if-else;
-    $pt {['Topic not found: ' $parent-id] throw} else
+  let: pid $in `parent-id get;
+  
+  $pid {
+    let: pt $pid `/ = $root {$pid find-topic} if-else;
+    $pt {['Topic not found: ' $pid] throw} else
     $out `parent $pt put
     $pt $out add-topic
   } if
@@ -164,35 +166,19 @@ func: load-topic(in Stack)(_ Topic)
   
 $topics &load-topic on-load-rec
 
-func: save-topic(in Topic)(_ Stack) [
-  $in `id get
-  $in `name get
-  $in `parent get `id get
-  $in `log-path get
-];
+func: save-topic(in Topic)(_ Table)
+  let: out Table new;
+  $out `id        $in `id       get         put
+  $out `name      $in `name     get         put
+  $out `parent-id $in `parent   get `id get put
+  $out `log-path  $in `log-path get         put
+  $out;
 
 $topics &save-topic on-save-rec
 
 rec: Option ()
   id    Sym
   value A;
-
-func: load-option(in Stack)(_ Option)
-  let: out Option new;
-  let: (id value) $in {} for;
-
-  $out `id    $id    put
-  $out `value $value put
-  $out;
-  
-$options &load-option on-load-rec
-
-func: save-option(in Option)(_ Stack) [
-  $in `id get
-  $in `value get
-];
-
-$options &save-option on-save-rec
 
 func: get-option(id Sym)(_ Opt)
   let: rec $options [$id] find-key;

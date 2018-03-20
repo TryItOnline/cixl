@@ -1,3 +1,7 @@
+* convert topics to load/store Topic
+** add parent-id field
+* remove user db callbacks
+* ---
 * add DBTable.on-upsert/on-upsert fn
 ** call with full rec and offs on commit
 *** calc offs using tell/buf

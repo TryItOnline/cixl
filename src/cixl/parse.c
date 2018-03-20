@@ -624,7 +624,6 @@ bool cx_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   cx->col = 0;
   
   while (!feof(in)) { cx_parse_tok(cx, in, out, true); }
-
   return !cx->errors.count;
 }
 

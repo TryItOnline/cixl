@@ -57,9 +57,11 @@ static void write_imp(struct cx_box *v, FILE *out) {
   struct cx_rec *r = v->as_ptr;
   
   cx_do_env(&r->fields, fv) {
-    fprintf(out, " %% `%s ", fv->id.id);
-    cx_write(&fv->value, out);
-    fputs(" put", out);
+    if (fv->value.type != cx->nil_type) {
+      fprintf(out, " %% `%s ", fv->id.id);
+      cx_write(&fv->value, out);
+      fputs(" put", out);
+    }
   }
 
   fputc(')', out);

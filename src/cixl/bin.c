@@ -95,8 +95,11 @@ void cx_init_ops(struct cx_bin *bin) {
     for (struct cx_op *op = cx_vec_get(&bin->ops, bin->init_offs);
 	 op != cx_vec_end(&bin->ops);
 	 op++) {
-      struct cx_tok *tok = cx_vec_get(&bin->toks, op->tok_idx);
-      op->row = tok->row; op->col = tok->col;
+      struct cx_tok *tok = bin->toks.count
+	? cx_vec_get(&bin->toks, op->tok_idx)
+	: NULL;
+      
+      if (tok) { op->row = tok->row; op->col = tok->col; }
       if (op->type->init) { op->type->init(op, tok); }
       bin->init_offs++;
     }

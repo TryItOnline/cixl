@@ -102,20 +102,18 @@ static bool compile(struct cx_fimp *imp, size_t tok_idx, struct cx_bin *out) {
   op->as_begin.child = false;
   op->as_begin.fimp = imp;
 
-  if (imp->toks.count) {
-    if (imp->args.count) {
-      cx_op_init(out, CX_OPUTARGS(), tok_idx)->as_putargs.imp = imp;
-    }
-    
+  if (imp->args.count) {
+    cx_op_init(out, CX_OPUTARGS(), tok_idx)->as_putargs.imp = imp;
+  }
+
+  if (imp->toks.count) {    
     if (!cx_compile(cx, cx_vec_start(&imp->toks), cx_vec_end(&imp->toks), out)) {
       cx_error(cx, cx->row, cx->col, "Failed compiling fimp");
       return false;
     }
   }
   
-  op = cx_op_init(out,
-		  CX_ORETURN(),
-		  out->toks.count-1);
+  op = cx_op_init(out, CX_ORETURN(), tok_idx);
   op->as_return.imp = imp;
   op->as_return.pc = start_pc;  
   return true;

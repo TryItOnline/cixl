@@ -1,4 +1,5 @@
 #include <ctype.h>
+#include <string.h>
 
 #include "cixl/bin.h"
 #include "cixl/cx.h"
@@ -211,7 +212,7 @@ struct cx_fimp *cx_add_cxfunc(struct cx_lib *lib,
 			      int nrets, struct cx_arg *rets,
 			      const char *body) {
   struct cx_fimp *imp = cx_add_func(lib, id, nargs, args, nrets, rets);
-  if (imp) { cx_parse_str(lib->cx, body, &imp->toks); }
+  if (imp && strlen(body)) { cx_parse_str(lib->cx, body, &imp->toks); }
   return imp;
 }
 
