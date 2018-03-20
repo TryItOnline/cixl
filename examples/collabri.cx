@@ -80,7 +80,7 @@ rec: Topic ()
 let: root Topic new;
 $root `name `root put
 $root `id `/ put
-$root `log-path 'log' get-path put
+$root `log-path 'topics' get-path put
 $root `clients Table new put
 
 func: open-log(t Topic m Sym)(_ Opt)
