@@ -271,8 +271,8 @@ func: handle-cmd(c Client `tail in Iter)()
   $c $in str int #tail-default or topic-tail;
 ```
 
-### Logging
-Posts are logged per topic in regular text files that may be processed using external tools or queried through the server. Logging takes hierarchies into account, child topics are included in the parent topic's log. Topic logs are stored in ```~/.collabri/log```. Log files are registered for write polling if the buffer was previously empty, and unregistered once the buffer is consumed.
+### Logs
+Posts are logged per topic in regular text files that may be processed using external tools or queried through the server. Logging takes hierarchies into account, child topics are included in the parent topic's log. Topic logs are stored in ```~/.collabri/topics```. Log files are registered for write polling if the buffer was previously empty, and unregistered once the buffer is consumed.
 
 ```
 func: open-log(t Topic m Sym)(_ File)
