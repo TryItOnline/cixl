@@ -54,15 +54,13 @@ let: poll Poll new;
 
 rec: User ()
   name     Sym
-  password Str
-  is-op    Bool;
+  password Str;
 
 func: load-user(in Stack)(_ User)
   let: out User new;
-  let: (name password is-op) $in {} for;
+  let: (name password) $in {} for;
   $out `name     $name     put
   $out `password $password put
-  $out `is-op    $is-op    put
   $out;
   
 $users &load-user on-load-rec
@@ -70,7 +68,6 @@ $users &load-user on-load-rec
 func: save-user(in User)(_ Stack) [
   $in `name get
   $in `password get
-  $in `is-op get
 ];
 
 $users &save-user on-save-rec
@@ -81,7 +78,6 @@ func: find-user(name Sym)(_ Opt)
 func: new-user (n Sym)(_ User)
   let: u User new;
   $u `name $n put
-  $u `is-op #f put
   $u;
 
 rec: Topic ()
@@ -467,7 +463,6 @@ $users len {
   `intro 'Intro: ' ask set-option
   let: u '@nUser: ' ask sym new-user;
   $u `password 'Password: ' ask put
-  $u `is-op #t put
   $users $u upsert
   $poll commit
   
