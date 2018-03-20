@@ -53,6 +53,7 @@ static void clone_imp(struct cx_box *dst, struct cx_box *src) {
 }
 
 static void write_imp(struct cx_box *v, FILE *out) {
+  struct cx *cx = v->type->lib->cx;
   fprintf(out, "(%s new", v->type->id);
   struct cx_rec *r = v->as_ptr;
   

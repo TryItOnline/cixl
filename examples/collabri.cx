@@ -56,22 +56,6 @@ rec: User ()
   name     Sym
   password Str;
 
-func: load-user(in Stack)(_ User)
-  let: out User new;
-  let: (name password) $in {} for;
-  $out `name     $name     put
-  $out `password $password put
-  $out;
-  
-$users &load-user on-load-rec
-
-func: save-user(in User)(_ Stack) [
-  $in `name get
-  $in `password get
-];
-
-$users &save-user on-save-rec
-
 func: find-user(name Sym)(_ Opt)
   $users [$name] find-key;
 
@@ -81,13 +65,14 @@ func: new-user (n Sym)(_ User)
   $u;
 
 rec: Topic ()
-  id name  Sym
-  parent   Topic
-  children Table
-  clients  Table
-  log-path Str
-  log-buf  Buf
-  log      WFile;
+  id name   Sym
+  parent-id Sym
+  parent    Topic
+  children  Table
+  clients   Table
+  log-path  Str
+  log-buf   Buf
+  log       WFile;
 
 let: root Topic new;
 $root `name `root put
@@ -144,30 +129,23 @@ func: add-topic(pt t Topic)()
 func: find-topic(id Sym)(_ Opt)
   $topics [$id] find-key;
 
-func: load-topic(in Table)(_ Topic)
-  let: out Topic new;
-
-  $out `id       $in `id       get put
-  $out `name     $in `name     get put
-  $out `log-path $in `log-path get put
-  
-  $out `clients  Table new         put
-
+func: load-topic(in Topic)(_ Topic)
+  $in `clients Table new put
   let: pid $in `parent-id get;
   
   $pid {
     let: pt $pid `/ = $root {$pid find-topic} if-else;
     $pt {['Topic not found: ' $pid] throw} else
-    $out `parent $pt put
-    $pt $out add-topic
+    $in `parent $pt put
+    $pt $in add-topic
   } if
 
-  $out;
+  $in;
   
 $topics &load-topic on-load-rec
 
-func: save-topic(in Topic)(_ Table)
-  let: out Table new;
+func: save-topic(in Topic)(_ Topic)
+  let: out Topic new;
   $out `id        $in `id       get         put
   $out `name      $in `name     get         put
   $out `parent-id $in `parent   get `id get put

@@ -132,17 +132,18 @@ func: new-client(io TCPClient)(_ Client)
 ```
 
 ### Topics
-Collabri supports organizing feeds, or topics, into hierarchies. This enables interacting with a tree of topics on different levels depending on current needs, moving back and forth between observing multiple topics and drilling down to have a closer look or engage in a discussion. ```load-topic``` and ```save-topic``` are called by the database engine to de/serialize topics from/to disk.
+Collabri supports organizing feeds, or topics, into hierarchies. This enables interacting with a tree of topics on different levels depending on current needs, moving back and forth between observing multiple topics and drilling down to have a closer look or engage in a discussion.
 
 ```
 rec: Topic ()
-  id name  Sym
-  parent   Topic
-  children Table
-  clients  Table
-  log-path Str
-  log-buf  Buf
-  log      WFile;
+  id name   Sym
+  parent-id Sym
+  parent    Topic
+  children  Table
+  clients   Table
+  log-path  Str
+  log-buf   Buf
+  log       WFile;
 
 func: add-topic(pt t Topic)()
   let: pc $pt `children get;
@@ -154,38 +155,6 @@ func: add-topic(pt t Topic)()
     $pt `children $pc put
     $pc $t `name get $t put    
   } if-else;
-
-func: find-topic(id Sym)(_ Opt)
-  $topics [$id] find-key;
-
-func: load-topic(in Stack)(_ Topic)
-  let: out Topic new;
-  let: (id name parent-id log-path) $in {} for;
-
-  $out `id       $id       put
-  $out `name     $name     put
-  $out `clients  Table new put
-  $out `log-path $log-path put
-
-  $parent-id {
-    let: pt $parent-id `/ = $root {$parent-id find-topic} if-else;
-    $pt {['Topic not found: ' $parent-id] throw} else
-    $out `parent $pt put
-    $pt $out add-topic
-  } if
-
-  $out;
-  
-$topics &load-topic on-load-rec
-
-func: save-topic(in Topic)(_ Stack) [
-  $in `id get
-  $in `name get
-  $in `parent get `id get
-  $in `log-path get
-];
-
-$topics &save-topic on-save-rec
 
 func: join-topic(c Client ns Str)()
   $c `topic get `clients get $c delete
@@ -211,6 +180,21 @@ func: join-topic(c Client ns Str)()
   } for
 
   $c `topic get `clients get $c #t put;
+
+func: new-topic(c Client n Sym)()
+  let: t Topic new;  
+  $t `name $n put
+  $t `clients Table new put
+  
+  let: pt $c `topic get;
+  $t `parent $pt put
+  $pt $t add-topic
+
+  $t `id [$pt `id get $n @/] #nil join sym put
+  $t `log-path [$pt `log-path get $pt `name get] @/ join put
+  $topics $t upsert
+
+  $c $t join-topic;
 ```
 
 ### States
