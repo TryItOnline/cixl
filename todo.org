@@ -1,3 +1,8 @@
+* add DBTable.on-upsert/on-upsert fn
+** call with full rec and offs on commit
+*** calc offs using tell/buf
+** test in collabri
+* ---
 * debug row/col
 * add support for nil catch
 ** #nil instead of type

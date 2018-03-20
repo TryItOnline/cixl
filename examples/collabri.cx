@@ -211,8 +211,7 @@ rec: Client ()
   user    User
   topic   Topic
   io      TCPClient
-  buf     Buf
-  is-mute Bool;
+  buf     Buf;
 
 func: join-topic(c Client ns Str)()
   $c `topic get `clients get $c delete
@@ -261,17 +260,16 @@ func: new-topic(c Client n Sym)()
   $c $t join-topic;
 
 func: push-out(c Client v A)()
+  $c `buf get $v push;
+
+func: poll-out(c Client)()
   let: buf $c `buf get;
   let: io $c `io get;
 
-  $buf {
-    $poll $io {
-      $io $buf write-bytes
-      $buf {$poll $io no-write} else
-    } on-write
-  } else
-  
-  $buf $v push;
+  $poll $io {
+    $io $buf write-bytes
+    $buf {$poll $io no-write} else
+  } on-write;
 
 func: prompt(c Client `auth-user)(_ Str)
   'User: ';
@@ -291,9 +289,7 @@ func: topic-tail(c Client n Int)()
 
   $in {
     let: it $in reverse lines;
-    let: was-mute $c `is-mute get;
     let: li 0 ref;
-    $c `is-mute #t put
     $in unblock
   
     $poll $in {
@@ -305,11 +301,11 @@ func: topic-tail(c Client n Int)()
       } if
     
       $li deref $n = $it is-done or {
-        $c `is-mute $was-mute put
         $poll $in delete
         $in close
 	$c @@n push-out
         $c push-prompt
+	$c poll-out
       } if
     } on-read
   } {
@@ -339,7 +335,7 @@ func: push-post(u User t Topic in Str)()
   
   $t `clients get {
     let: c x;
-    $c `user get $u == {$c `is-mute get} or {$c $in push-out} else
+    $c `user get $u == {$c $in push-out} else
   } for
 
   let: pt $t `parent get;
@@ -421,7 +417,7 @@ func: handle-in(c Client `ok in Str)()
   } if-else;
 
 func: push-error(c Client e Str)()
-  $c ['Error: ' $e @@n] push-out;
+  $c ['Error: ' $e @@n @@n] push-out;
 
 func: push-error(c Client e Stack)()
   $c $e #nil join push-error;
@@ -432,7 +428,6 @@ func: new-client(io TCPClient)(_ Client)
   $c `state   `auth-user put
   $c `io      $io        put
   $c `buf     Buf new    put
-  $c `is-mute #f         put
   
   $c $root join-topic
   let: ils $io lines;
@@ -443,13 +438,21 @@ func: new-client(io TCPClient)(_ Client)
     $in is-nil {
       $ils is-done {$c disconnect} if
     } {
-      catch: (A $c ~ push-error $c push-prompt dump rollback)
+      catch: (A
+          $c ~ push-error
+	  $c % push-prompt poll-out
+	  dump
+	  rollback
+	)
+	
 	$c % `state get $in handle-in
+	$c poll-out
 	$poll commit;
     } if-else
   } on-read
 
   $c [`intro get-option @@n @@n] push-out
+  $c poll-out
   $c;
 
 ['Collabri v0.3' @@n] say

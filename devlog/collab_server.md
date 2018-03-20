@@ -80,7 +80,7 @@ let: options 'options.db' get-path [`id]   new-db-table;
 ```
 
 ### Clients
-Each client is tagged with a user once authenticated. New users are created automagically on login with a new name. Output is buffered in ```buf``` until the client is ready to receive it. New clients start their life in the root topic and register a read callback in the event loop.
+Each client is tagged with a user once authenticated. New users are created automagically on login with a new name. Output is buffered in ```buf``` until the client is ready to receive it. New clients start their life in the root topic and register a read callback in the event loop. ```poll-out``` registers the client for write polling and is called when output is ready to be sent.
 
 ```
 rec: Client ()
@@ -88,8 +88,16 @@ rec: Client ()
   user    User
   topic   Topic
   io      TCPClient
-  buf     Buf
-  is-mute Bool;
+  buf     Buf;
+
+func: poll-out(c Client)()
+  let: buf $c `buf get;
+  let: io $c `io get;
+
+  $poll $io {
+    $io $buf write-bytes
+    $buf {$poll $io no-write} else
+  } on-write;
 
 func: new-client(io TCPClient)(_ Client)
   let: c Client new;
@@ -97,7 +105,6 @@ func: new-client(io TCPClient)(_ Client)
   $c `state   `auth-user put
   $c `io      $io        put
   $c `buf     Buf new    put
-  $c `is-mute #f         put
   
   $c $root join-topic
   let: ils $io lines;
@@ -108,8 +115,15 @@ func: new-client(io TCPClient)(_ Client)
     $in is-nil {
       $ils is-done {$c disconnect} if
     } {
-      catch: (A $c ~ push-error $c push-prompt dump rollback)
+      catch: (A
+          $c ~ push-error
+	  $c % push-prompt poll-out
+	  dump
+	  rollback
+	)
+	
 	$c % `state get $in handle-in
+	poll-out
 	poll commit;
     } if-else
   } on-read
