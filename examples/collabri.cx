@@ -455,7 +455,7 @@ $users len {
   $users $u upsert
   $poll commit
   
-  [@@n 'Done!' @@n] say
+  #out % clear-screen 0 0 move-to
 } else
 
 let: server #nil $port #backlog listen;
