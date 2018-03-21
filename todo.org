@@ -61,3 +61,13 @@ sudo rm -rf /usr/local/include/cixl
 | Bin new % '50 fib' compile emit
 | Bin new % '{10000 {50 fib _} times} clock 1000000 / int say' compile emit
 | Bin new % 'func: fortytwo(Int)(#f) _; func: fortytwo(42)(#t); 21 fortytwo say' compile emit
+
+func: rgb(out WFile r g b Int)() #out [@@27 @[ '38;' $r @; $g @; $b ';m'] print;
+func: move-to(out WFile x y Int)() #out [@@27 @[ $x @; $y @H] print;
+func: move-up(out WFile n Int)() #out [@@27 @[ $n @A] print;
+func: move-down(out WFile n Int)() #out [@@27 @[ $n @B] print;
+func: move-right(out WFile n Int)() #out [@@27 @[ $n @C] print;
+func: move-left(out WFile n Int)() #out [@@27 @[ $n @D] print;
+func: clear-row-end(out WFile)() #out [@@27 @[ @0 @K] print;
+func: clear-row()(out WFile) #out [@@27 @[ @2 @K] print;
+func: clear-screen(out WFile)() #out [@@27 @[ @2 @J] print;
