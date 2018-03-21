@@ -59,6 +59,9 @@ let: options 'options.db' get-path [`id]   new-db-table;
 
 let: poll Poll new;
 
+func: password-style(out WFile)()
+  $out 100 100 100 pick-color;
+
 rec: User ()
   name     Sym
   password Str;
@@ -348,7 +351,7 @@ func: handle-in(c Client `auth-user in Str)()
     $c `user $u {$name new-user} or put
     $c `state `auth-password put
     $c push-prompt
-    $c `buf get 100 100 100 pick-color
+    $c `buf get password-style    
   } {
     $c disconnect
   } if-else;
@@ -445,7 +448,10 @@ $users len {
 
   `intro 'Intro: ' ask set-option
   let: u '@nUser: ' ask sym new-user;
-  $u `password 'Password: ' ask put
+  #out 'Password: ' print
+  #out password-style
+  $u `password '' ask put
+  #out reset-style
   $users $u upsert
   $poll commit
   
