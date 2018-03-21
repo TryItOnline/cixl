@@ -1,4 +1,17 @@
 * debug row/col
+* ---
+* add :status cmd
+** set client.status
+*** display above prompt
+*** send message to clients in topic on change
+* add :users cmd
+** add user.last-post
+** update when posting
+** display username status & last-post
+* add user logs
+** store in /users
+* add private messaging
+* ---
 * add support for nil catch
 ** #nil instead of type
 ** catch.type is NULL
