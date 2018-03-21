@@ -36,6 +36,10 @@ use:
 
 let: port int;
 
+include: 'ansi.cx';
+
+use: (ansi clear-screen move-to pick-color reset-style);
+
 include: 'qdb.cx';
 
 use: (qdb commit find-key len load-table new-db-table on-load on-commit rollback
@@ -344,6 +348,7 @@ func: handle-in(c Client `auth-user in Str)()
     $c `user $u {$name new-user} or put
     $c `state `auth-password put
     $c push-prompt
+    $c `buf get 100 100 100 pick-color
   } {
     $c disconnect
   } if-else;
@@ -352,6 +357,8 @@ func: handle-in(c Client `auth-password in Str)()
   let: u $c `user get;
   let: p $u `password get;
 
+  $c `buf get % clear-screen % reset-style 0 0 move-to
+  
   $p is-nil {
     $u `password $in put
     $users $u upsert
@@ -384,7 +391,10 @@ func: handle-in(c Client `ok in Str)()
   } if-else;
 
 func: push-error(c Client e Str)()
-  $c ['Error: ' $e @@n @@n] push-out;
+  let: b $c `buf get;
+  $b 255 0 0 pick-color
+  $c ['Error: ' $e @@n @@n] push-out
+  $b reset-style;
 
 func: push-error(c Client e Stack)()
   $c $e #nil join push-error;
@@ -418,10 +428,12 @@ func: new-client(io TCPClient)(_ Client)
     } if-else
   } on-read
 
+  $c `buf get % clear-screen 0 0 move-to
   $c [`intro get-option @@n @@n] push-out
   $c poll-out
   $c;
 
+#out % clear-screen 0 0 move-to
 ['Collabri v0.3' @@n] say
 
 $users   load-table
