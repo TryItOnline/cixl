@@ -436,6 +436,30 @@ static bool read_imp(struct cx_scope *scope) {
   return true;
 }
 
+static bool read_char_imp(struct cx_scope *scope) {
+  struct cx *cx = scope->cx;
+  struct cx_box f = *cx_test(cx_pop(scope, false));
+  int c = fgetc(cx_file_ptr(f.as_file));
+  bool ok = false;
+  
+  if (c == EOF) {
+    if (errno == EAGAIN) {
+      cx_box_init(cx_push(scope), cx->nil_type);
+      ok = true;
+    } else {
+      cx_error(cx, cx->row, cx->col, "Failed reading char: %d", errno);
+    }
+    
+    goto exit;
+  }
+      
+  cx_box_init(cx_push(scope), cx->char_type)->as_char = c;
+  ok = true;
+ exit:
+  cx_box_deinit(&f);
+  return ok;
+}
+
 static bool write_imp(struct cx_scope *scope) {
   struct cx_box
     v = *cx_test(cx_pop(scope, false)),
@@ -542,6 +566,11 @@ cx_lib(cx_init_io, "cx/io") {
 	       cx_args(cx_arg("f", cx->rfile_type)),
 	       cx_args(cx_arg(NULL, cx->iter_type)),
 	       read_imp);
+
+  cx_add_cfunc(lib, "read-char",
+	       cx_args(cx_arg("f", cx->rfile_type)),
+	       cx_args(cx_arg(NULL, cx->char_type)),
+	       read_char_imp);
 
   cx_add_cfunc(lib, "write",
 	       cx_args(cx_arg("f", cx->wfile_type), cx_arg("v", cx->opt_type)),
