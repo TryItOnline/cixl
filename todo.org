@@ -39,6 +39,7 @@
 ** add custom struct type
 
 sudo rm -rf /usr/local/include/cixl
+stty -icanon && nc 127.0.0.1 7707
 
 | Bin new % 'trait: IntStr Int Str; let: (x IntStr) 42; $x say' compile emit
 | Bin new % '1 2 +' compile emit

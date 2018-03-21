@@ -1,5 +1,6 @@
 #include <errno.h>
 #include <string.h>
+#include <termios.h>
 #include <unistd.h>
 
 #include "cixl/arg.h"
@@ -271,6 +272,44 @@ static bool ask_imp(struct cx_scope *scope) {
   return true;
 }
 
+static bool raw_mode_imp(struct cx_scope *scope) {
+  struct cx *cx = scope->cx;
+  static struct termios tio;
+
+  if (tcgetattr(STDIN_FILENO, &tio) == -1) {
+    cx_error(cx, cx->row, cx->col, "Failed getting attribute: %d", errno);
+    return false;
+  }
+  
+  tio.c_lflag &= ~(ICANON | ECHO);
+
+  if (tcsetattr(STDIN_FILENO, TCSANOW, &tio) == -1) {
+    cx_error(cx, cx->row, cx->col, "Failed setting attribute: %d", errno);
+    return false;
+  }
+  
+  return true;
+}
+
+static bool normal_mode_imp(struct cx_scope *scope) {
+  struct cx *cx = scope->cx;
+  static struct termios tio;
+
+  if (tcgetattr(STDIN_FILENO, &tio) == -1) {
+    cx_error(cx, cx->row, cx->col, "Failed getting attribute: %d", errno);
+    return false;
+  }
+  
+  tio.c_lflag |= ICANON | ECHO;
+
+  if (tcsetattr(STDIN_FILENO, TCSANOW, &tio) == -1) {
+    cx_error(cx, cx->row, cx->col, "Failed setting attribute: %d", errno);
+    return false;
+  }
+  
+  return true;
+}
+
 static bool load_imp(struct cx_scope *scope) {
   struct cx_box p = *cx_test(cx_pop(scope, false));
   struct cx_bin *bin = cx_bin_new();
@@ -457,7 +496,17 @@ cx_lib(cx_init_io, "cx/io") {
   cx_add_cfunc(lib, "ask",
 	       cx_args(cx_arg("prompt", cx->str_type)), cx_args(),
 	       ask_imp);
-  
+
+  cx_add_cfunc(lib, "raw-mode",
+	       cx_args(),
+	       cx_args(),
+	       raw_mode_imp);
+
+  cx_add_cfunc(lib, "normal-mode",
+	       cx_args(),
+	       cx_args(),
+	       normal_mode_imp);
+
   cx_add_cfunc(lib, "load",
 	       cx_args(cx_arg("path", cx->str_type)), cx_args(),
 	       load_imp);  
