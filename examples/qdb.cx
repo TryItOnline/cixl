@@ -106,7 +106,7 @@ func: poll-table(t DBTable poll Poll)()
     $b {$poll $f no-write} else
   } on-write;
 
-func: commit-change(c DBChange poll Poll out MFile)()
+func: commit-change(c DBChange poll Poll)()
   let: t $c `table get;
   let: b $t `buf get;
   let: op $c `op get;
@@ -119,15 +119,12 @@ func: commit-change(c DBChange poll Poll out MFile)()
     $r $t `on-commit get {$pos ~ call} for
   } if-else;
 
-  $out $op $arg . write
-  $out @@n print
   $b {$t $poll poll-table} else
-  $b $out push
-  $out 0 seek;
+  $b $op $arg . write
+  $b @@n print;
 
 func: commit(poll Poll)()
-  let: out MFile new;
-  #db-trans {$poll $out commit-change} for
+  #db-trans {$poll commit-change} for
   #db-trans clear;
 
 func: rollback-change(c DBChange)()

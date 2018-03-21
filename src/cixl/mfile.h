@@ -13,15 +13,8 @@ struct cx_mfile {
   FILE *stream;
 };
 
+FILE *cx_mopen(char **data, size_t *len);
 struct cx_mfile *cx_mfile_open(struct cx_mfile *f);
 struct cx_mfile *cx_mfile_close(struct cx_mfile *f);
-
-struct cx_mfile_ref {
-  struct cx_file file;
-  char *data;
-  size_t size;  
-};
-
-struct cx_type *cx_init_mfile_type(struct cx_lib *lib);
 
 #endif

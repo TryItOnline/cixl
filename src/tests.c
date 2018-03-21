@@ -246,8 +246,8 @@ static void io_tests() {
   struct cx cx;
   init_cx(&cx);
 
-  run(&cx, "use: cx/cond cx/error cx/io cx/io/mem cx/stack cx/str;");
-  run(&cx, "MFile new % 'foo' print str 'foo' = check");
+  run(&cx, "use: cx/cond cx/error cx/io cx/io/buf cx/stack cx/str;");
+  run(&cx, "Buf new % 'foo' print str 'foo' = check");
   cx_deinit(&cx);
 }
 

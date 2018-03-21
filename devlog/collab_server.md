@@ -90,11 +90,15 @@ rec: Client ()
   io      TCPClient
   buf     Buf;
 
+func: push-out(c Client v A)()
+  $c `buf get $v print;
+
 func: poll-out(c Client)()
   let: buf $c `buf get;
   let: io $c `io get;
 
   $poll $io {
+    $buf flush
     $io $buf write-bytes
     $buf {$poll $io no-write} else
   } on-write;

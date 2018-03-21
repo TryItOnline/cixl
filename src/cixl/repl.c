@@ -66,18 +66,6 @@ bool _eval(struct cx *cx) {
     return t;
   }
 
-  struct cx_func *func_times() {
-    static struct cx_func *f = NULL;
-    if (!f) { f = cx_test(cx_get_func(lib_cxEiter(), "times", false)); }
-    return f;
-  }
-
-  struct cx_func *func__() {
-    static struct cx_func *f = NULL;
-    if (!f) { f = cx_test(cx_get_func(lib_cxEstack(), "_", false)); }
-    return f;
-  }
-
   struct cx_func *func_int() {
     static struct cx_func *f = NULL;
     if (!f) { f = cx_test(cx_get_func(lib_cxEcond(), "int", false)); }
@@ -99,6 +87,18 @@ bool _eval(struct cx *cx) {
   struct cx_func *func_recall() {
     static struct cx_func *f = NULL;
     if (!f) { f = cx_test(cx_get_func(lib_cxEfunc(), "recall", false)); }
+    return f;
+  }
+
+  struct cx_func *func_times() {
+    static struct cx_func *f = NULL;
+    if (!f) { f = cx_test(cx_get_func(lib_cxEiter(), "times", false)); }
+    return f;
+  }
+
+  struct cx_func *func__() {
+    static struct cx_func *f = NULL;
+    if (!f) { f = cx_test(cx_get_func(lib_cxEstack(), "_", false)); }
     return f;
   }
 
@@ -138,18 +138,6 @@ bool _eval(struct cx *cx) {
     return f;
   }
 
-  struct cx_fimp *func_times_IntA() {
-    static struct cx_fimp *f = NULL;
-    if (!f) { f = cx_test(cx_get_fimp(func_times(), "Int A", false)); }
-    return f;
-  }
-
-  struct cx_fimp *func___() {
-    static struct cx_fimp *f = NULL;
-    if (!f) { f = cx_test(cx_get_fimp(func__(), "", false)); }
-    return f;
-  }
-
   struct cx_fimp *func_M_Opt() {
     static struct cx_fimp *f = NULL;
     if (!f) { f = cx_test(cx_get_fimp(func_M(), "Opt", false)); }
@@ -165,6 +153,18 @@ bool _eval(struct cx *cx) {
   struct cx_fimp *func_recall_() {
     static struct cx_fimp *f = NULL;
     if (!f) { f = cx_test(cx_get_fimp(func_recall(), "", false)); }
+    return f;
+  }
+
+  struct cx_fimp *func_times_IntA() {
+    static struct cx_fimp *f = NULL;
+    if (!f) { f = cx_test(cx_get_fimp(func_times(), "Int A", false)); }
+    return f;
+  }
+
+  struct cx_fimp *func___() {
+    static struct cx_fimp *f = NULL;
+    if (!f) { f = cx_test(cx_get_fimp(func__(), "", false)); }
     return f;
   }
 
@@ -546,7 +546,7 @@ if (!imp->ptr && imp->bin == cx->bin) {
  }
 
  op27: { /* CX_TFUNC CX_ORETURN */
-    cx->pc = 27; cx->row = 1; cx->col = 21;
+    cx->pc = 27; cx->row = 1; cx->col = 7;
     if (cx->stop) { return true; }
     if (cx->errors.count) { return false; }
 struct cx_call *call = cx_test(cx_vec_peek(&cx->calls, 0));
@@ -630,7 +630,7 @@ if (!imp->ptr && imp->bin == cx->bin) {
  }
 
  op29: { /* CX_TFUNC CX_ORETURN */
-    cx->pc = 29; cx->row = 1; cx->col = 21;
+    cx->pc = 29; cx->row = 1; cx->col = 18;
     if (cx->stop) { return true; }
     if (cx->errors.count) { return false; }
 struct cx_call *call = cx_test(cx_vec_peek(&cx->calls, 0));

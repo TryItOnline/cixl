@@ -17,62 +17,27 @@
 #include "cixl/scope.h"
 #include "cixl/str.h"
 
-static bool push_char_imp(struct cx_scope *scope) {
-  struct cx_box
-    v = *cx_test(cx_pop(scope, false)),
-    b = *cx_test(cx_pop(scope, false));
-
-  cx_buf_push_char(b.as_buf, v.as_char);
-  cx_box_deinit(&v);
-  cx_box_deinit(&b);
-  return true;
-}
-
-static bool push_str_imp(struct cx_scope *scope) {
-  struct cx_box
-    v = *cx_test(cx_pop(scope, false)),
-    b = *cx_test(cx_pop(scope, false));
-
-  cx_buf_push_str(b.as_buf, v.as_str->data, v.as_str->len);
-  cx_box_deinit(&v);
-  cx_box_deinit(&b);
-  return true;
-}
-
-static bool push_mfile_imp(struct cx_scope *scope) {
-  struct cx_box
-    v = *cx_test(cx_pop(scope, false)),
-    b = *cx_test(cx_pop(scope, false));
-
-  struct cx_mfile_ref *mf = cx_baseof(v.as_file, struct cx_mfile_ref, file);
-  fflush(mf->file._ptr);
-  cx_buf_push_str(b.as_buf, mf->data, mf->size);
-  cx_box_deinit(&v);
-  cx_box_deinit(&b);
-  return true;
-}
-
-static bool push_sym_imp(struct cx_scope *scope) {
-  struct cx_box
-    v = *cx_test(cx_pop(scope, false)),
-    b = *cx_test(cx_pop(scope, false));
-
-  cx_buf_push_str(b.as_buf, v.as_sym.id, strlen(v.as_sym.id));
-  cx_box_deinit(&b);
-  return true;
-}
-
 static bool clear_imp(struct cx_scope *scope) {
-  struct cx_box b = *cx_test(cx_pop(scope, false));
-  cx_buf_clear(b.as_buf);
-  cx_box_deinit(&b);
+  struct cx_box in = *cx_test(cx_pop(scope, false));
+  cx_buf_clear(cx_baseof(in.as_file, struct cx_buf, file));
+  cx_box_deinit(&in);
   return true;
 }
 
 static bool len_imp(struct cx_scope *scope) {
-  struct cx_box b = *cx_test(cx_pop(scope, false));
-  cx_box_init(cx_push(scope), scope->cx->int_type)->as_int = b.as_buf->data.count;
-  cx_box_deinit(&b);
+  struct cx_box in = *cx_test(cx_pop(scope, false));
+  struct cx_buf *b = cx_baseof(in.as_file, struct cx_buf, file);
+  cx_box_init(cx_push(scope), scope->cx->int_type)->as_int = cx_buf_len(b);
+  cx_box_deinit(&in);
+  return true;
+}
+
+static bool str_imp(struct cx_scope *scope) {
+  struct cx *cx = scope->cx;
+  struct cx_box in = *cx_test(cx_pop(scope, false));
+  struct cx_buf *b = cx_baseof(in.as_file, struct cx_buf, file);
+  cx_box_init(cx_push(scope), cx->str_type)->as_str = cx_str_new(b->data);
+  cx_box_deinit(&in);
   return true;
 }
 
@@ -85,12 +50,15 @@ static bool read_bytes_imp(struct cx_scope *scope) {
     out = *cx_test(cx_pop(scope, false)),
     in = *cx_test(cx_pop(scope, false));
 
-  struct cx_buf *o = out.as_buf;
-  cx_vec_grow(&o->data, o->data.count+nbytes.as_int);  
-  int rbytes = read(in.as_file->fd, o->data.items, nbytes.as_int);
+  struct cx_buf *b = cx_baseof(out.as_file, struct cx_buf, file);
+  size_t offs = ftell(b->file._ptr);
+  fseek(b->file._ptr, nbytes.as_int, SEEK_CUR);
+  fflush(b->file._ptr);
+  int rbytes = read(in.as_file->fd, b->data+offs, nbytes.as_int);
 
   if (!rbytes || (rbytes == -1 && errno == ECONNREFUSED)) {
     cx_box_init(cx_push(scope), cx->nil_type);
+    fseek(b->file._ptr, offs, SEEK_SET);
     ok = true;
     goto exit;
   }
@@ -102,7 +70,6 @@ static bool read_bytes_imp(struct cx_scope *scope) {
     goto exit;
   }
 
-  o->data.count += rbytes;
   cx_box_init(cx_push(scope), cx->int_type)->as_int = rbytes;
   ok = true;
  exit:
@@ -116,11 +83,11 @@ static bool write_bytes_imp(struct cx_scope *scope) {
   bool ok = false;
 
   struct cx_box
-    buf = *cx_test(cx_pop(scope, false)),
+    in = *cx_test(cx_pop(scope, false)),
     out = *cx_test(cx_pop(scope, false));
 
-  struct cx_buf *b = buf.as_buf;  
-  int wbytes = write(out.as_file->fd, cx_buf_ptr(b), cx_buf_len(b));
+  struct cx_buf *b = cx_baseof(in.as_file, struct cx_buf, file);  
+  int wbytes = write(out.as_file->fd, b->data+b->pos, b->len-b->pos);
 
   if (wbytes == -1 && errno != EAGAIN) {
     cx_error(cx, cx->row, cx->col, "Failed writing: %d", errno);
@@ -128,52 +95,25 @@ static bool write_bytes_imp(struct cx_scope *scope) {
   }
 
   b->pos += wbytes;
-  if (b->pos == b->data.count) { cx_buf_clear(b); }
+  if (b->pos == b->len) { cx_buf_clear(b); }
   ok = true;
  exit:
-  cx_box_deinit(&buf);
+  cx_box_deinit(&in);
   cx_box_deinit(&out);
   return ok;
 }
 
-
-cx_lib(cx_init_buf, "cx/buf") {    
+cx_lib(cx_init_buf, "cx/io/buf") {    
   struct cx *cx = lib->cx;
     
-  if (!cx_use(cx, "cx/abc", "A", "Int", "Opt", "Seq", "Str", "Sym") ||
+  if (!cx_use(cx, "cx/abc", "Int", "Opt", "Str") ||
       !cx_use(cx, "cx/io", "RFile", "WFile") ||
-      !cx_use(cx, "cx/io/mem", "MFile") ||
       !cx_use(cx, "cx/iter", "for") ||
       !cx_use(cx, "cx/stack", "~")) {
     return false;
   }
 
   cx->buf_type = cx_init_buf_type(lib);
-
-  cx_add_cfunc(lib, "push",
-	       cx_args(cx_arg("b", cx->buf_type), cx_arg("v", cx->char_type)),
-	       cx_args(),
-	       push_char_imp);
-
-  cx_add_cfunc(lib, "push",
-	       cx_args(cx_arg("b", cx->buf_type), cx_arg("v", cx->str_type)),
-	       cx_args(),
-	       push_str_imp);
-
-  cx_add_cfunc(lib, "push",
-	       cx_args(cx_arg("b", cx->buf_type), cx_arg("v", cx->sym_type)),
-	       cx_args(),
-	       push_sym_imp);
-
-  cx_add_cfunc(lib, "push",
-	       cx_args(cx_arg("b", cx->buf_type), cx_arg("v", cx->mfile_type)),
-	       cx_args(),
-	       push_mfile_imp);
-
-  cx_add_cxfunc(lib, "push",
-		cx_args(cx_arg("b", cx->buf_type), cx_arg("v", cx->seq_type)),
-		cx_args(),
-		"$v {$b ~ push} for");
 
   cx_add_cfunc(lib, "clear",
 	       cx_args(cx_arg("b", cx->buf_type)),
@@ -184,6 +124,11 @@ cx_lib(cx_init_buf, "cx/buf") {
 	       cx_args(cx_arg("b", cx->buf_type)),
 	       cx_args(cx_arg(NULL, cx->int_type)),
 	       len_imp);
+
+  cx_add_cfunc(lib, "str",
+	       cx_args(cx_arg("b", cx->buf_type)),
+	       cx_args(cx_arg(NULL, cx->str_type)),
+	       str_imp);
 
   cx_add_cfunc(lib, "read-bytes",
 	       cx_args(cx_arg("in", cx->rfile_type),

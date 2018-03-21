@@ -10,13 +10,13 @@ use:
   (cx/abc A Bool Int Opt Stack Str Sym
           #f #nil #t
 	  is-nil)
-  (cx/buf Buf push write-bytes)
   (cx/cond ! = == and else if if-else or switch:)
   (cx/const define:)
   (cx/error catch: throw dump)
   (cx/func func: recall)
   (cx/io File RFile WFile
          ask close flush fopen include: lines print reverse say tell unblock)
+  (cx/io/buf Buf write-bytes)
   (cx/io/poll Poll delete no-write on-read on-write wait)
   (cx/iter Iter for is-done iter next while)
   (cx/math ++)
@@ -108,7 +108,8 @@ func: push-log(t Topic in Str)()
   )} or;
 
   let: l $t get-log;
-
+  $b flush
+  
   $b {    
     $poll $l {
       $l $b write-bytes
@@ -116,7 +117,7 @@ func: push-log(t Topic in Str)()
     } on-write
   } else
   
-  $b $in push;
+  $b $in print;
 
 func: add-topic(pt t Topic)()
   let: pc $pt `children get;
@@ -225,13 +226,14 @@ func: new-topic(c Client n Sym)()
   $c $t join-topic;
 
 func: push-out(c Client v A)()
-  $c `buf get $v push;
+  $c `buf get $v print;
 
 func: poll-out(c Client)()
   let: buf $c `buf get;
   let: io $c `io get;
 
   $poll $io {
+    $buf flush
     $io $buf write-bytes
     $buf {$poll $io no-write} else
   } on-write;
