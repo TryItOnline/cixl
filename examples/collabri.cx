@@ -112,6 +112,7 @@ func: push-log(t Topic in Str)()
   
   $b {    
     $poll $l {
+      $b flush
       $l $b write-bytes
       $b {$poll $l no-write} else
     } on-write
