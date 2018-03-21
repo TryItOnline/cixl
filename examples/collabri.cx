@@ -113,7 +113,7 @@ func: push-log(t Topic in Str)()
   $b {    
     $poll $l {
       $b flush
-      $l $b write-bytes
+      $b $l write-bytes
       $b {$poll $l no-write} else
     } on-write
   } else
@@ -235,7 +235,7 @@ func: poll-out(c Client)()
 
   $poll $io {
     $buf flush
-    $io $buf write-bytes
+    $buf $io write-bytes
     $buf {$poll $io no-write} else
   } on-write;
 

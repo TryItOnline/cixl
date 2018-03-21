@@ -102,7 +102,8 @@ func: poll-table(t DBTable poll Poll)()
   let: f $t `file get;
       
   $poll $f {
-    $f $b write-bytes
+    $b flush
+    $b $f write-bytes
     $b {$poll $f no-write} else
   } on-write;
 
@@ -111,6 +112,7 @@ func: commit-change(c DBChange poll Poll)()
   let: b $t `buf get;
   let: op $c `op get;
   let: r $c `rec get;
+  $b flush
 
   let: arg $op `delete = {
     $t $r get-rec-key

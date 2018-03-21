@@ -47,10 +47,10 @@ static bool read_bytes_imp(struct cx_scope *scope) {
 
   struct cx_box
     nbytes = *cx_test(cx_pop(scope, false)),
-    out = *cx_test(cx_pop(scope, false)),
-    in = *cx_test(cx_pop(scope, false));
+    in = *cx_test(cx_pop(scope, false)),
+    buf = *cx_test(cx_pop(scope, false));
 
-  struct cx_buf *b = cx_baseof(out.as_file, struct cx_buf, file);
+  struct cx_buf *b = cx_baseof(buf.as_file, struct cx_buf, file);
   size_t offs = ftell(b->file._ptr);
   fseek(b->file._ptr, nbytes.as_int, SEEK_CUR);
   fflush(b->file._ptr);
@@ -73,7 +73,7 @@ static bool read_bytes_imp(struct cx_scope *scope) {
   cx_box_init(cx_push(scope), cx->int_type)->as_int = rbytes;
   ok = true;
  exit:
-  cx_box_deinit(&out);
+  cx_box_deinit(&buf);
   cx_box_deinit(&in);
   return ok;
 }
@@ -83,10 +83,10 @@ static bool write_bytes_imp(struct cx_scope *scope) {
   bool ok = false;
 
   struct cx_box
-    in = *cx_test(cx_pop(scope, false)),
-    out = *cx_test(cx_pop(scope, false));
+    out = *cx_test(cx_pop(scope, false)),
+    buf = *cx_test(cx_pop(scope, false));
 
-  struct cx_buf *b = cx_baseof(in.as_file, struct cx_buf, file);  
+  struct cx_buf *b = cx_baseof(buf.as_file, struct cx_buf, file);  
   int wbytes = write(out.as_file->fd, b->data+b->pos, b->len-b->pos);
 
   if (wbytes == -1 && errno != EAGAIN) {
@@ -98,7 +98,7 @@ static bool write_bytes_imp(struct cx_scope *scope) {
   if (b->pos == b->len) { cx_buf_clear(b); }
   ok = true;
  exit:
-  cx_box_deinit(&in);
+  cx_box_deinit(&buf);
   cx_box_deinit(&out);
   return ok;
 }
@@ -131,15 +131,15 @@ cx_lib(cx_init_buf, "cx/io/buf") {
 	       str_imp);
 
   cx_add_cfunc(lib, "read-bytes",
-	       cx_args(cx_arg("in", cx->rfile_type),
-		       cx_arg("out", cx->buf_type),
+	       cx_args(cx_arg("buf", cx->buf_type),
+		       cx_arg("in", cx->rfile_type),
 		       cx_arg("nbytes", cx->int_type)),
 	       cx_args(cx_arg(NULL, cx->opt_type)),
 	       read_bytes_imp);
       
   cx_add_cfunc(lib, "write-bytes",
-	       cx_args(cx_arg("out", cx->wfile_type),
-		       cx_arg("buf", cx->buf_type)),
+	       cx_args(cx_arg("buf", cx->buf_type),
+		       cx_arg("out", cx->wfile_type)),
 	       cx_args(),
 	       write_bytes_imp);
 
