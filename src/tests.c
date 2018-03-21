@@ -247,7 +247,7 @@ static void io_tests() {
   init_cx(&cx);
 
   run(&cx, "use: cx/cond cx/error cx/io cx/io/buf cx/stack cx/str;");
-  run(&cx, "Buf new % 'foo' print str 'foo' = check");
+  run(&cx, "Buf new % 'foo' print % flush str 'foo' = check");
   cx_deinit(&cx);
 }
 
