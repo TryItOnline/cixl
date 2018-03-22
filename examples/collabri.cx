@@ -39,7 +39,7 @@ let: port int;
 
 include: 'ansi.cx';
 
-use: (ansi #clear-screen move-to pick-color #reset-style);
+use: (ansi #clear-screen fg-color move-to #reset-style);
 
 include: 'qdb.cx';
 
@@ -61,7 +61,7 @@ let: options 'options.db' get-path [`id]   new-db-table;
 let: poll Poll new;
 
 func: password-style(out WFile)()
-  $out 100 100 100 pick-color print;
+  $out 100 100 100 fg-color print;
 
 rec: User ()
   name     Sym
@@ -399,7 +399,7 @@ func: handle-in(c Client `ok in Str)()
 
 func: push-error(c Client e Str)()
   let: b $c `buf get;
-  $b 255 0 0 pick-color print
+  $b 255 0 0 fg-color print
   $c ['Error: ' $e @@n @@n] push-out
   $b #reset-style print;
 

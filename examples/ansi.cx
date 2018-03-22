@@ -17,8 +17,11 @@ define: save-cursor [#csi-esc @s];
 define: restore-cursor [#csi-esc @u];
 define: reset-style [#csi-esc '0m'];
 
-func: pick-color(r g b Int)(_ Stack)
+func: fg-color(r g b Int)(_ Stack)
   [#csi-esc '38;2;' $r @; $g @; $b @m];
+
+func: bg-color(r g b Int)(_ Stack)
+  [#csi-esc '48;2;' $r @; $g @; $b @m];
 
 func: move-to(x y Int)(_ Stack) 
   [#csi-esc $y @; $x @H];
