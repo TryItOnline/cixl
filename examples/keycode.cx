@@ -1,0 +1,28 @@
+/*
+  A simple utility for printing key codes to stdout.
+  Press ESC to exit the loop gracefully and restore the terminal mode.
+
+  https://github.com/basic-gongfu/cixl#getting-started
+*/
+
+include: 'ansi.cx';
+
+use:
+  ansi
+  (cx/cond = !)
+  (cx/io #in #out normal-mode raw-mode read-char)
+  (cx/str int);
+
+raw-mode
+#out #clear-screen print
+#out 0 0 move-to print
+
+{
+  #in read-char %
+  #out 0 0 move-to print
+  #out #clear-row print
+  int #out ~ print
+  @@27 =!
+} while
+
+normal-mode

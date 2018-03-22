@@ -15,6 +15,7 @@ use:
   (cx/error catch: throw dump)
   (cx/func func: recall)
   (cx/io File RFile WFile
+         #out
          ask close flush fopen include: lines print reverse say tell unblock)
   (cx/io/buf Buf write-bytes)
   (cx/io/poll Poll delete no-write on-read on-write wait)
@@ -38,7 +39,7 @@ let: port int;
 
 include: 'ansi.cx';
 
-use: (ansi clear-screen move-to pick-color reset-style);
+use: (ansi #clear-screen move-to pick-color #reset-style);
 
 include: 'qdb.cx';
 
@@ -60,7 +61,7 @@ let: options 'options.db' get-path [`id]   new-db-table;
 let: poll Poll new;
 
 func: password-style(out WFile)()
-  $out 100 100 100 pick-color;
+  $out 100 100 100 pick-color print;
 
 rec: User ()
   name     Sym
@@ -360,7 +361,10 @@ func: handle-in(c Client `auth-password in Str)()
   let: u $c `user get;
   let: p $u `password get;
 
-  $c `buf get % clear-screen % reset-style 0 0 move-to
+  $c `buf get %
+  #clear-screen print %
+  #reset-style print
+  0 0 move-to print
   
   $p is-nil {
     $u `password $in put
@@ -395,9 +399,9 @@ func: handle-in(c Client `ok in Str)()
 
 func: push-error(c Client e Str)()
   let: b $c `buf get;
-  $b 255 0 0 pick-color
+  $b 255 0 0 pick-color print
   $c ['Error: ' $e @@n @@n] push-out
-  $b reset-style;
+  $b #reset-style print;
 
 func: push-error(c Client e Stack)()
   $c $e #nil join push-error;
@@ -431,12 +435,18 @@ func: new-client(io TCPClient)(_ Client)
     } if-else
   } on-read
 
-  $c `buf get % clear-screen 0 0 move-to
+  $c `buf get %
+  #clear-screen print
+  0 0 move-to print
+  
   $c [`intro get-option @@n @@n] push-out
   $c poll-out
   $c;
 
-#out % clear-screen 0 0 move-to
+#out %
+#clear-screen print
+0 0 move-to print
+
 ['Collabri v0.3' @@n] say
 
 $users   load-table
@@ -451,11 +461,13 @@ $users len {
   #out 'Password: ' print
   #out password-style
   $u `password '' ask put
-  #out reset-style
+  #out #reset-style print
   $users $u upsert
   $poll commit
   
-  #out % clear-screen 0 0 move-to
+  #out %
+  #clear-screen print
+  0 0 move-to print
 } else
 
 let: server #nil $port #backlog listen;

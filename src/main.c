@@ -21,6 +21,7 @@ int main(int argc, char *argv[]) {
   cx_init(&cx);
   cx_init_libs(&cx);
   cx_use(&cx, "cx/meta", "lib:", "use:");
+  cx_use(&cx, "cx/io", "include:");
   
   bool emit = false;
   bool compile = false;

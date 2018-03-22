@@ -10,42 +10,29 @@ use: cx;
 
 define: csi-esc '@27[';
 
-func: pick-color(out WFile r g b Int)()
-  $out [#csi-esc '38;2;' $r @; $g @; $b 'm'] print;
+define: clear-row-end [#csi-esc '0K'];
+define: clear-row [#csi-esc '2K'];
+define: clear-screen [#csi-esc '2J'];
+define: save-cursor [#csi-esc @s];
+define: restore-cursor [#csi-esc @u];
+define: reset-style [#csi-esc '0m'];
 
-func: reset-style(out WFile)() 
-  $out [#csi-esc '0m'] print;
+func: pick-color(r g b Int)(_ Stack)
+  [#csi-esc '38;2;' $r @; $g @; $b @m];
 
-func: move-to(out WFile x y Int)() 
-  $out [#csi-esc $x @; $y @H] print;
+func: move-to(x y Int)(_ Stack) 
+  [#csi-esc $y @; $x @H];
 
-func: move-up(out WFile n Int)() 
-  $out [#csi-esc $n @A] print;
+func: move-up(n Int)(_ Stack) 
+  [#csi-esc $n @A];
 
-func: move-down(out WFile n Int)() 
-  $out [#csi-esc $n @B] print;
+func: move-down(n Int)(_ Stack) 
+  [#csi-esc $n @B];
 
-func: move-right(out WFile n Int)() 
-  $out [#csi-esc $n @C] print;
+func: move-right(n Int)(_ Stack) 
+  [#csi-esc $n @C];
 
-func: move-left(out WFile n Int)() 
-  $out [#csi-esc $n @D] print;
+func: move-left(n Int)(_ Stack) 
+  [#csi-esc $n @D];
 
-func: clear-row-end(out WFile)() 
-  $out [#csi-esc @0 @K] print;
-
-func: clear-row()(out WFile) 
-  $out [#csi-esc @2 @K] print;
-
-func: clear-screen(out WFile)() 
-  $out [#csi-esc @2 @J] print;
-  
 );
-
-use: ansi;
-
-#out clear-screen
-#out 255 0 0 pick-color
-'hello' say
-#out reset-style
-'world' say
