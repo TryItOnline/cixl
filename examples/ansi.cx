@@ -14,8 +14,8 @@ define: clear-row-end [#csi-esc '0K'];
 define: clear-row [#csi-esc '2K'];
 define: clear-screen [#csi-esc '2J'];
 define: clear-screen-end [#csi-esc '0J'];
-define: save-cursor [#csi-esc @s];
-define: restore-cursor [#csi-esc @u];
+define: save-pos [#csi-esc @s];
+define: restore-pos [#csi-esc @u];
 define: reset-style [#csi-esc '0m'];
 
 func: pick-fgcolor(r g b Int)(_ Stack)
@@ -33,10 +33,10 @@ func: move-up(n Int)(_ Stack)
 func: move-down(n Int)(_ Stack) 
   [#csi-esc $n @B];
 
-func: move-right(n Int)(_ Stack) 
-  [#csi-esc $n @C];
-
 func: move-left(n Int)(_ Stack) 
   [#csi-esc $n @D];
+
+func: move-right(n Int)(_ Stack) 
+  [#csi-esc $n @C];
 
 );

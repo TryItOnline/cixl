@@ -361,7 +361,7 @@ func: handle-in(c Client `auth-password in Str)()
 
   $c `buf get %
   #clear-screen print
-  0 0 move-to print
+  1 1 move-to print
   
   $p is-nil {
     $u `password $in put
@@ -434,7 +434,7 @@ func: new-client(io TCPClient)(_ Client)
 
   $c `buf get %
   #clear-screen print
-  0 0 move-to print
+  1 1 move-to print
   
   $c [`intro get-option @@n @@n] push-out
   $c poll-out
@@ -442,7 +442,7 @@ func: new-client(io TCPClient)(_ Client)
 
 #out %
 #clear-screen print
-0 0 move-to print
+1 1 move-to print
 
 ['Collabri v0.3' @@n] say
 
@@ -461,7 +461,7 @@ $users len {
   $poll commit
   
   #out %
-  0 3 move-to print
+  1 3 move-to print
   #clear-screen-end print
 } else
 

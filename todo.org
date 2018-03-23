@@ -1,7 +1,6 @@
-* add move-left/move-right to ansi
-** add j/l commands to tlux
-** print x/y in upper left corner
-** use save/restore
+* add edit mode
+** switch using esc
+* figure out why collabri emit can't find pick-fgcolor
 * ---
 * debug row/col
 * add support for nil catch

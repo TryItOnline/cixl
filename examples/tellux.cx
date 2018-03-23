@@ -8,14 +8,16 @@
 include: 'ansi.cx';
 
 use:
-  (cx/abc #t #f Bool Char)
-  (cx/cond = < ! if if-else)
+  (cx/abc #t #f A Bool Char)
+  (cx/cond = < > ! if if-else)
   (cx/const define:)
+  (cx/error catch: dump)
   (cx/func func:)
   (cx/io #in #out print read-char)
   (cx/io/term
-    #clear-screen #key-esc #key-up #key-down
-    move-down move-to move-up normal-mode raw-mode screen-size)
+    #clear-screen #key-esc #restore-pos #save-pos
+    move-down move-left move-right move-to move-up normal-mode raw-mode say
+    screen-size)
   (cx/iter while)
   (cx/math -- ++)
   (cx/ref ref deref set-call)
@@ -23,18 +25,39 @@ use:
   (cx/str int)
   (cx/var let:);
 
+define: key-up    @i;
+define: key-down  @k;
+define: key-left  @j;
+define: key-right @l;
+
+define: key-quit  @Q;
+
 let: (max-x max-y) screen-size -- ~ -- ~;
 let: state `command ref;
-let: x 0 ref;
-let: y 0 ref;
+let: x 1 ref;
+let: y 1 ref;
 
-raw-mode
-#out #clear-screen print
-#out 0 0 move-to print
-
+func: print-header()()
+  #out #save-pos print
+  #out 1 1 move-to print
+  #out @x print
+  #out 7 1 move-to print
+  #out @y print
+  #out #restore-pos print;
+  
+func: print-pos()()
+  #out 3 1 move-to print
+  #out '   ' print
+  #out 3 1 move-to print
+  #out $x deref print
+  #out 9 1 move-to print
+  #out '   ' print
+  #out 9 1 move-to print
+  #out $y deref print;
+  
 func: handle-key(`command #key-up)(_ Bool)
   $y  {
-    % {
+    % 1 > {
       #out 1 move-up print
       --
     } if
@@ -48,16 +71,42 @@ func: handle-key(`command #key-down)(_ Bool)
     } if
   } set-call #t;
 
-func: handle-key(`command @Q)(_ Bool)
+func: handle-key(`command #key-left)(_ Bool)
+  $x  {
+    % 1 > {
+      #out 1 move-left print
+      --
+    } if
+  } set-call #t;
+
+func: handle-key(`command #key-right)(_ Bool)
+  $x {
+    % $max-x < {
+      #out 1 move-right print
+      ++
+    } if
+  } set-call #t;
+
+func: handle-key(`command #key-quit)(_ Bool)
   #f;
 
 func: handle-key(`command k Char)(_ Bool)
   #t;
 
+raw-mode
+#out #clear-screen print
+print-header
+#out 1 2 move-to print
+
 {
+  #out #save-pos print
+  print-pos
+  #out #restore-pos print
+
   $state deref
   #in read-char
   handle-key
 } while
 
+#out #clear-screen print
 normal-mode

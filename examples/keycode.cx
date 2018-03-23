@@ -18,11 +18,11 @@ use:
 
 raw-mode
 #out #clear-screen print
-#out 0 0 move-to print
+#out 1 1 move-to print
 
 {
   #in read-char %
-  #out 0 0 move-to print
+  #out 1 1 move-to print
   #out #clear-row print
   int #out ~ print
   #key-esc =!
