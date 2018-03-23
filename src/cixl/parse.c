@@ -327,13 +327,17 @@ static bool parse_int(struct cx *cx, FILE *in, struct cx_vec *out) {
 }
 
 static bool parse_char(struct cx *cx, FILE *in, struct cx_vec *out) {
-  char c = fgetc(in);
   int row = cx->row, col = cx->col;
+  cx->col++;
+  
+  char c = fgetc(in);
   
   if (c == EOF) {
     cx_error(cx, row, col, "Invalid char literal");
     return false;
   }
+
+  cx->col++;
 
   if (c == '@') {
     c = fgetc(in);
@@ -372,8 +376,6 @@ static bool parse_char(struct cx *cx, FILE *in, struct cx_vec *out) {
 				    CX_TLITERAL(),
 				    cx->row, cx->col)->as_box;
   cx_box_init(box, cx->char_type)->as_char = c;
-  cx->col++;
-  
   return true;
 }
 
@@ -381,6 +383,7 @@ static bool parse_str(struct cx *cx, FILE *in, struct cx_vec *out) {
   struct cx_mfile value;
   cx_mfile_open(&value);
   int row = cx->row, col = cx->col;
+  cx->col++;
   bool ok = false;
   
   while (true) {
@@ -432,6 +435,7 @@ static bool parse_sym(struct cx *cx, FILE *in, struct cx_vec *out) {
   struct cx_mfile id;
   cx_mfile_open(&id);
   int col = cx->col;
+  cx->col++;
   bool ok = true;
   
   while (true) {
@@ -464,6 +468,7 @@ static bool parse_sym(struct cx *cx, FILE *in, struct cx_vec *out) {
 
 
 static bool parse_group(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
+  cx->col++;
   struct cx_vec *body = &cx_tok_init(cx_vec_push(out),
 				     CX_TGROUP(),
 				     cx->row, cx->col)->as_vec;
@@ -486,6 +491,7 @@ static bool parse_group(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup
 }
 
 static bool parse_stack(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
+  cx->col++;
   struct cx_vec *body = &cx_tok_init(cx_vec_push(out),
 				     CX_TSTACK(),
 				     cx->row, cx->col)->as_vec;
@@ -509,7 +515,8 @@ static bool parse_stack(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup
 
 static bool parse_lambda(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
   int row = cx->row, col = cx->col;
-
+  cx->col++;
+  
   struct cx_vec *body = &cx_tok_init(cx_vec_push(out),
 				     CX_TLAMBDA(),
 				     row, col)->as_vec;
@@ -552,6 +559,7 @@ bool cx_parse_tok(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
       break;
     case ';':
       cx_tok_init(cx_vec_push(out), CX_TEND(), row, col);
+      cx->col++;
       return true;
     case '(':
       return parse_group(cx, in, out, lookup);
@@ -576,14 +584,12 @@ bool cx_parse_tok(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
       return parse_sym(cx, in, out);
     case '-': {
       char c1 = fgetc(in);
+      ungetc(c1, in);
+      ungetc(c, in);
       
       if (isdigit(c1)) {
-	ungetc(c1, in);
-	ungetc(c, in);
 	return parse_int(cx, in, out);
       } else {
-	ungetc(c1, in);
-	ungetc(c, in);
 	return parse_id(cx, in, out, lookup);
       }
 	
@@ -622,20 +628,20 @@ bool cx_parse_end(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
   return true;
 }
 
-bool cx_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
-  cx->row = 1;
-  cx->col = 0;
-  
+bool cx_parse(struct cx *cx, FILE *in, struct cx_vec *out) {  
   while (!feof(in)) { cx_parse_tok(cx, in, out, true); }
   return !cx->errors.count;
 }
 
 bool cx_parse_str(struct cx *cx, const char *in, struct cx_vec *out) {
+  int row = cx->row, col = cx->col;
+  cx->row = 1; cx->col = 0;
   FILE *is = fmemopen ((void *)in, strlen(in), "r");
   bool ok = false;
   if (!cx_parse(cx, is, out)) { goto exit; }
   ok = true;
  exit:
+  cx->row = row; cx->col = col;
   fclose(is);
   return ok;
 }

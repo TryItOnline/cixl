@@ -371,6 +371,8 @@ bool cx_load_toks(struct cx *cx, const char *path, struct cx_vec *out) {
     return false;
   }
 
+  cx->row = 1;
+  cx->col = 0;
   char c = fgetc(f);
 
   if (c == '#') {
@@ -378,6 +380,7 @@ bool cx_load_toks(struct cx *cx, const char *path, struct cx_vec *out) {
 
     if (c == '!') {
       while (fgetc(f) != '\n');
+      cx->row++;
     } else {
       ungetc(c, f);
       ungetc('#', f);

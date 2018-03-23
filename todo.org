@@ -1,4 +1,3 @@
-* debug row/col
 * add #args const
 ** set to stack instead of pushing in main/emit
 ** update tcpscan & collabri
