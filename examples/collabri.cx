@@ -441,8 +441,8 @@ func: new-client(io TCPClient)(_ Client)
   $c;
 
 #out %
-#clear-screen print
 1 1 move-to print
+#clear-screen print
 
 ['Collabri v0.3' @@n] say
 

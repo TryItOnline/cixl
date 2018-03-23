@@ -306,10 +306,5 @@ cx_lib(cx_init_iter, "cx/iter") {
 	       cx_args(cx_arg("act", cx->any_type)), cx_args(),
 	       while_imp);
 
-  cx_add_cxfunc(lib, "for",
-	       cx_args(cx_arg("seq", cx->nil_type), cx_arg("act", cx->any_type)),
-	       cx_args(),
-	       "");
-  
   return true;
 }

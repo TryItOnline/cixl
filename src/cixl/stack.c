@@ -178,6 +178,11 @@ static bool emit_imp(struct cx_box *v, const char *exp, FILE *out) {
 	  "  cx_box_init(%s, cx->stack_type)->as_ptr = s;\n",
 	  exp);
 
+  struct cx_stack *s = v->as_ptr;
+  cx_do_vec(&s->imp, struct cx_box, i) {
+    if (!cx_box_emit(i, "cx_vec_push(&s->imp)", out)) { return false; }
+  }
+  
   fputs("}\n", out);
   return true;
 }

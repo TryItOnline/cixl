@@ -42,7 +42,7 @@ func: load-rec(t DBTable in Pair)()
   $op `delete = {
     $t `recs get $arg delete
   } {
-    let: r $arg $t `on-load get &call for;
+    let: r $arg $t `on-load get % {&call for} &_ if-else;
     let: k $t $r get-rec-key;    
     $t `recs get $k $r {_ $r} put-else
   } if-else;
@@ -118,7 +118,7 @@ func: commit-change(c DBChange poll Poll)()
     $t $r get-rec-key
   } {
     let: pos $t `file get tell $b len +;
-    $r $t `on-commit get {$pos ~ call} for
+    $r $t `on-commit get % {{$pos ~ call} for} &_ if-else
   } if-else;
 
   $b {$t $poll poll-table} else

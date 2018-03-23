@@ -1,7 +1,6 @@
-* figure out why collabri emit can't find pick-fgcolor
 * debug row/col
 * add #args const
-** set to stack instead of pushingin main/emit
+** set to stack instead of pushing in main/emit
 ** update tcpscan & collabri
 * add support for nil catch
 ** #nil instead of type
@@ -12,7 +11,6 @@
 * change lib getters like cx_get_type
 * change CX_TGROUP to dump everything to outer stack on exit
 ** update README
-* finish stack type emit
 * extract cx/math/rat lib
 * ---
 * switch read-bytes to use fread if _ptr
@@ -34,9 +32,6 @@
 * convert macro id to sym
 * convert func id to sym
 * convert repl to use getline
-* add Buf Seq support
-** iterate chars like Str
-* implement Buf clone
 * replace clone fallback to copy with error
 * replace varargs with size/array+macro
 * update embed example in readme

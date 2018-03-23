@@ -6,7 +6,11 @@
 
 lib: cx/io/term (
 
-use: cx;
+use:
+  (cx/abc Int)
+  (cx/const define:)
+  (cx/func func:)
+  (cx/stack Stack);
 
 define: csi-esc '@27[';
 
