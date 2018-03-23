@@ -8,9 +8,11 @@
 include: 'ansi.cx';
 
 use:
-  ansi
   (cx/cond = !)
-  (cx/io #in #out normal-mode raw-mode read-char)
+  (cx/io #in #out print read-char)
+  (cx/io/term #clear-row #clear-screen move-to normal-mode raw-mode)
+  (cx/iter while)
+  (cx/stack % ~)
   (cx/str int);
 
 raw-mode

@@ -1,6 +1,4 @@
 #include <errno.h>
-#include <sys/ioctl.h>
-#include <unistd.h>
 
 #include "cixl/arg.h"
 #include "cixl/cx.h"
@@ -27,20 +25,6 @@ static bool make_dir_imp(struct cx_scope *scope) {
   return ok;
 }
 
-static bool screen_size_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  struct winsize w;
-  
-  if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &w) == -1) {
-    cx_error(cx, cx->row, cx->col, "Failed getting screen size: %d", errno);
-    return false;
-  }
-
-  cx_box_init(cx_push(scope), cx->int_type)->as_int = w.ws_col;
-  cx_box_init(cx_push(scope), cx->int_type)->as_int = w.ws_row;
-  return true;
-}
-
 cx_lib(cx_init_sys, "cx/sys") {
   struct cx *cx = lib->cx;
     
@@ -57,11 +41,6 @@ cx_lib(cx_init_sys, "cx/sys") {
 	       cx_args(cx_arg("p", cx->str_type)),
 	       cx_args(),
 	       make_dir_imp);
-
-  cx_add_cfunc(lib, "screen-size",
-	       cx_args(),
-	       cx_args(cx_arg(NULL, cx->int_type), cx_arg(NULL, cx->int_type)),
-	       screen_size_imp);
 
   return true;
 }

@@ -1,10 +1,10 @@
 /*
-  A library for printing ANSI graphics.
+  Extends cx/io/term with support for ANSI graphics.
 
   https://github.com/basic-gongfu/cixl#getting-started
 */
 
-lib: ansi (
+lib: cx/io/term (
 
 use: cx;
 
@@ -13,14 +13,15 @@ define: csi-esc '@27[';
 define: clear-row-end [#csi-esc '0K'];
 define: clear-row [#csi-esc '2K'];
 define: clear-screen [#csi-esc '2J'];
+define: clear-screen-end [#csi-esc '0J'];
 define: save-cursor [#csi-esc @s];
 define: restore-cursor [#csi-esc @u];
 define: reset-style [#csi-esc '0m'];
 
-func: fg-color(r g b Int)(_ Stack)
+func: pick-fgcolor(r g b Int)(_ Stack)
   [#csi-esc '38;2;' $r @; $g @; $b @m];
 
-func: bg-color(r g b Int)(_ Stack)
+func: pick-bgcolor(r g b Int)(_ Stack)
   [#csi-esc '48;2;' $r @; $g @; $b @m];
 
 func: move-to(x y Int)(_ Stack) 

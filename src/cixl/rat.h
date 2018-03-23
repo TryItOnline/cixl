@@ -7,6 +7,7 @@
 #include "cixl/cmp.h"
 
 struct cx;
+struct cx_lib;
 struct cx_type;
 
 struct cx_rat {

@@ -5,7 +5,6 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#include "cixl/guid.h"
 #include "cixl/rat.h"
 #include "cixl/sym.h"
 #include "cixl/time.h"
@@ -31,7 +30,6 @@ struct cx_box {
     bool             as_bool;
     unsigned char    as_char;
     struct cx_file  *as_file;
-    cx_guid_t        as_guid;
     int64_t          as_int;
     struct cx_iter  *as_iter;
     struct cx_lib   *as_lib;

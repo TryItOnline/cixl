@@ -1,3 +1,10 @@
+* switch read-char to return int
+** check keycode.cx
+* add move-left/move-right to ansi
+** add j/l commands to tlux
+** print x/y in upper left corner
+** use save/restore
+* ---
 * debug row/col
 * add support for nil catch
 ** #nil instead of type
@@ -10,6 +17,7 @@
 ** update README
 * finish stack type emit
 * extract cx/math/rat lib
+* ---
 * switch read-bytes to use fread if _ptr
 * switch file char iter to use read if !_ptr
 ** check == 0 instead of feof

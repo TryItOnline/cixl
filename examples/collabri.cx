@@ -6,23 +6,31 @@
   https://github.com/basic-gongfu/cixl#getting-started
 */
 
+include: 'ansi.cx' 'qdb.cx';
+
 use:
-  (cx/abc A Bool Int Opt Stack Str Sym
-          #f #nil #t
-	  is-nil)
+  (cx/abc
+    A Bool Int Opt Stack Str Sym
+    #f #nil #t
+    is-nil)
   (cx/cond ! = == and else if if-else or switch:)
   (cx/const define:)
   (cx/error catch: throw dump)
   (cx/func func: recall)
-  (cx/io File RFile WFile
-         #out
-         ask close flush fopen include: lines print reverse say tell unblock)
+  (cx/io
+    File RFile WFile
+    #out
+    close flush fopen include: lines print reverse tell unblock)
   (cx/io/buf Buf write-bytes)
   (cx/io/poll Poll delete no-write on-read on-write wait)
+  (cx/io/term
+    #clear-screen #clear-screen-end #reset-style
+    ask move-to pick-fgcolor say)
   (cx/iter Iter for is-done iter next while)
   (cx/math ++)
-  (cx/net TCPClient TCPServer
-          accept listen)
+  (cx/net
+    TCPClient TCPServer
+    accept listen)
   (cx/pair x y)
   (cx/rec ? rec: get put)
   (cx/ref deref ref set-call)
@@ -33,18 +41,12 @@ use:
   (cx/table Table put)
   (cx/time fmt now)
   (cx/type new)
-  (cx/var let:);
+  (cx/var let:)
+  (qdb
+    commit find-key len load-table new-db-table on-load on-commit rollback
+    upsert);
 
 let: port int;
-
-include: 'ansi.cx';
-
-use: (ansi #clear-screen fg-color move-to #reset-style);
-
-include: 'qdb.cx';
-
-use: (qdb commit find-key len load-table new-db-table on-load on-commit rollback
-          upsert);
 
 define: backlog 3;
 define: tail-default 24;
@@ -59,9 +61,6 @@ let: topics  'topics.db'  get-path [`id]   new-db-table;
 let: options 'options.db' get-path [`id]   new-db-table;
 
 let: poll Poll new;
-
-func: password-style(out WFile)()
-  $out 100 100 100 fg-color print;
 
 rec: User ()
   name     Sym
@@ -352,7 +351,6 @@ func: handle-in(c Client `auth-user in Str)()
     $c `user $u {$name new-user} or put
     $c `state `auth-password put
     $c push-prompt
-    $c `buf get password-style    
   } {
     $c disconnect
   } if-else;
@@ -362,8 +360,7 @@ func: handle-in(c Client `auth-password in Str)()
   let: p $u `password get;
 
   $c `buf get %
-  #clear-screen print %
-  #reset-style print
+  #clear-screen print
   0 0 move-to print
   
   $p is-nil {
@@ -399,7 +396,7 @@ func: handle-in(c Client `ok in Str)()
 
 func: push-error(c Client e Str)()
   let: b $c `buf get;
-  $b 255 0 0 fg-color print
+  $b 255 0 0 pick-fgcolor print
   $c ['Error: ' $e @@n @@n] push-out
   $b #reset-style print;
 
@@ -459,15 +456,13 @@ $users len {
   `intro 'Intro: ' ask set-option
   let: u '@nUser: ' ask sym new-user;
   #out 'Password: ' print
-  #out password-style
   $u `password '' ask put
-  #out #reset-style print
   $users $u upsert
   $poll commit
   
   #out %
-  #clear-screen print
-  0 0 move-to print
+  0 3 move-to print
+  #clear-screen-end print
 } else
 
 let: server #nil $port #backlog listen;

@@ -1,0 +1,62 @@
+/*
+  A console ANSI graphics editor.
+  Press Q to exit gracefully and restore the terminal mode.
+
+  https://github.com/basic-gongfu/cixl#getting-started
+*/
+
+include: 'ansi.cx';
+
+use:
+  (cx/abc #t #f Bool Char)
+  (cx/cond = < ! if if-else)
+  (cx/func func:)
+  (cx/io #in #out print read-char)
+  (cx/io/term
+    #clear-screen
+    move-down move-to move-up normal-mode raw-mode screen-size)
+  (cx/iter while)
+  (cx/math -- ++)
+  (cx/ref ref deref set-call)
+  (cx/stack % ~ _)
+  (cx/str int)
+  (cx/var let:);
+
+let: (max-x max-y) screen-size -- ~ -- ~;
+let: state `command ref;
+let: x 0 ref;
+let: y 0 ref;
+
+raw-mode
+#out #clear-screen print
+#out 0 0 move-to print
+
+func: handle-key(`command @@105)(_ Bool)
+  $y  {
+    % {
+      #out 1 move-up print
+      --
+    } if
+  } set-call #t;
+
+func: handle-key(`command @@107)(_ Bool)
+  $y {
+    % $max-y < {
+      #out 1 move-down print
+      ++
+    } if
+  } set-call #t;
+
+func: handle-key(`command @Q)(_ Bool)
+  #f;
+
+func: handle-key(`command k Char)(_ Bool)
+  #t;
+
+{
+  $state deref
+  #in read-char
+  handle-key
+} while
+
+normal-mode

@@ -2,7 +2,7 @@
 <a href="https://paypal.me/basicgongfu"><img alt="Donate using PayPal" src="paypal.png?raw=true"></a><a href="https://liberapay.com/basic-gongfu/donate"><img alt="Donate using Liberapay" src="https://liberapay.com/assets/widgets/donate.svg"></a>
 #### Cixl - a Lispy Forth in C
 
-Cixl shares many ideas with C, Forth and Common Lisp; as well as the hacker mindset that unites them. The language is implemented as a straight forward 3-stage (parse/compile/eval) interpreter that is designed to be as fast as possible without compromising on simplicity, transparency and flexibility; combined with a C code generator for compiling native executables. The codebase has no external dependencies and is currently hovering around 10 kloc including tests and standard library.
+Cixl shares many ideas with C, Forth and Common Lisp; as well as the hacker mindset that unites them. The language is implemented as a straight forward 3-stage (parse/compile/eval) interpreter that is designed to be as fast as possible without compromising on simplicity, transparency and flexibility; combined with a C code generator for compiling native executables. The codebase has no external dependencies and is currently hovering around 13 kloc including tests and standard library.
 
 ### Status
 Examples should work in the most recent version and run clean in ```valgrind```, outside of that I can't really promise much at the moment. Current work is focused on profiling and filling obvious gaps in functionality.
@@ -73,7 +73,7 @@ $
 ```
 
 ### Libraries
-The entire language is split into libraries to enable building custom languages on top of sub sets of existing functionality. ```use: cx;``` may be used as a short cut to import everything. The REPL starts with everything imported while the interpreter and compiler starts with nothing but ```lib:``` and ```use:```. The following libraries are available.
+The entire language is split into libraries to enable building custom languages on top of sub sets of existing functionality. ```use: cx;``` may be used as a short cut to import everything. The REPL starts with everything imported while the interpreter and compiler starts with nothing but ```include:```, ```lib:``` and ```use:```. The following standard libraries are available:
 
 * cx/abc
 * cx/bin
@@ -84,6 +84,7 @@ The entire language is split into libraries to enable building custom languages 
 * cx/io
 * cx/io/buf
 * cx/io/poll
+* cx/io/term
 * cx/iter
 * cx/math
 * cx/net
@@ -386,8 +387,8 @@ baz'r1]
 [@@n]
 ```
 
-### Console
-```say``` and ```ask``` may be used to perform basic console IO.
+### Terminal
+```say``` and ```ask``` may be used to perform basic terminal IO.
 
 ```
    | 'Hello' say  
@@ -398,7 +399,7 @@ What's your name? Sifoo
 ['Sifoo'r1]
 ```
 
-Code may be loaded from file using ```load```, it is evaluated in the current scope.
+Code may be loaded from external files using ```load```. The loaded code is evaluated in the current scope by default.
 
 test.cx:
 ```

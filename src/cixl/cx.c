@@ -26,7 +26,6 @@
 #include "cixl/lib/error.h"
 #include "cixl/lib/func.h"
 #include "cixl/lib/io.h"
-#include "cixl/lib/io_mem.h"
 #include "cixl/lib/iter.h"
 #include "cixl/lib/math.h"
 #include "cixl/lib/meta.h"
@@ -40,6 +39,7 @@
 #include "cixl/lib/sym.h"
 #include "cixl/lib/sys.h"
 #include "cixl/lib/table.h"
+#include "cixl/lib/term.h"
 #include "cixl/lib/time.h"
 #include "cixl/lib/type.h"
 #include "cixl/lib/var.h"
@@ -71,6 +71,7 @@ cx_lib(cx_init_world, "cx") {
     cx_use(cx, "cx/func") &&
     cx_use(cx, "cx/io") &&
     cx_use(cx, "cx/io/buf") &&
+    cx_use(cx, "cx/io/term") &&
     cx_use(cx, "cx/io/poll") &&
     cx_use(cx, "cx/iter") &&
     cx_use(cx, "cx/math") &&
@@ -178,6 +179,7 @@ void cx_init_libs(struct cx *cx) {
   cx_init_sym(cx);
   cx_init_sys(cx);
   cx_init_table(cx);
+  cx_init_term(cx);
   cx_init_time(cx);
   cx_init_type(cx);
   cx_init_var(cx);
