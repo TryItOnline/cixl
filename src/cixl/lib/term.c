@@ -6,14 +6,7 @@
 
 #include "cixl/arg.h"
 #include "cixl/cx.h"
-#include "cixl/bin.h"
-#include "cixl/box.h"
-#include "cixl/buf.h"
 #include "cixl/error.h"
-#include "cixl/fimp.h"
-#include "cixl/func.h"
-#include "cixl/file.h"
-#include "cixl/iter.h"
 #include "cixl/lib.h"
 #include "cixl/lib/io.h"
 #include "cixl/scope.h"
@@ -91,6 +84,14 @@ cx_lib(cx_init_term, "cx/io/term") {
       !cx_use(cx, "cx/io", "#in", "#out", "print")) {
     return false;
   }
+
+  cx_box_init(cx_put_const(lib, cx_sym(cx, "key-esc"), false),
+	      cx->char_type)->as_char = 27;
+
+  cx_box_init(cx_put_const(lib, cx_sym(cx, "key-up"), false),
+	      cx->char_type)->as_char = 105;
+  cx_box_init(cx_put_const(lib, cx_sym(cx, "key-down"), false),
+	      cx->char_type)->as_char = 107;
 
   cx_add_cxfunc(lib, "say",
 		cx_args(cx_arg("v", cx->any_type)), cx_args(),

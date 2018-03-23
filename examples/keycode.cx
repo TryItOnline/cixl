@@ -9,8 +9,9 @@ include: 'ansi.cx';
 
 use:
   (cx/cond = !)
+  (cx/const define:)
   (cx/io #in #out print read-char)
-  (cx/io/term #clear-row #clear-screen move-to normal-mode raw-mode)
+  (cx/io/term #clear-row #clear-screen #key-esc move-to normal-mode raw-mode)
   (cx/iter while)
   (cx/stack % ~)
   (cx/str int);
@@ -24,7 +25,7 @@ raw-mode
   #out 0 0 move-to print
   #out #clear-row print
   int #out ~ print
-  @@27 =!
+  #key-esc =!
 } while
 
 normal-mode

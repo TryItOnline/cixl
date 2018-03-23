@@ -10,10 +10,11 @@ include: 'ansi.cx';
 use:
   (cx/abc #t #f Bool Char)
   (cx/cond = < ! if if-else)
+  (cx/const define:)
   (cx/func func:)
   (cx/io #in #out print read-char)
   (cx/io/term
-    #clear-screen
+    #clear-screen #key-esc #key-up #key-down
     move-down move-to move-up normal-mode raw-mode screen-size)
   (cx/iter while)
   (cx/math -- ++)
@@ -31,7 +32,7 @@ raw-mode
 #out #clear-screen print
 #out 0 0 move-to print
 
-func: handle-key(`command @@105)(_ Bool)
+func: handle-key(`command #key-up)(_ Bool)
   $y  {
     % {
       #out 1 move-up print
@@ -39,7 +40,7 @@ func: handle-key(`command @@105)(_ Bool)
     } if
   } set-call #t;
 
-func: handle-key(`command @@107)(_ Bool)
+func: handle-key(`command #key-down)(_ Bool)
   $y {
     % $max-y < {
       #out 1 move-down print
