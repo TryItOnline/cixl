@@ -1,6 +1,6 @@
 /*
-  A simple utility for printing key codes to stdout.
-  Press ESC to exit the loop gracefully and restore the terminal mode.
+  A utility for printing key codes.
+  Press ESC to exit gracefully and restore terminal mode.
 
   https://github.com/basic-gongfu/cixl#getting-started
 */

@@ -37,6 +37,10 @@ static void copy_imp(struct cx_box *dst, const struct cx_box *src) {
   dst->as_ref = cx_ref_inc(src->as_ref);
 }
 
+static void clone_imp(struct cx_box *dst, struct cx_box *src) {
+  dst->as_ref = cx_ref_new(src->type->lib->cx, &src->as_ref->value);
+}
+
 static void write_imp(struct cx_box *v, FILE *out) {
   cx_dump(&v->as_ref->value, out);
   fputs(" ref", out);
@@ -59,6 +63,7 @@ struct cx_type *cx_init_ref_type(struct cx_lib *lib) {
     t->equid = equid_imp;
     t->ok = ok_imp;
     t->copy = copy_imp;
+    t->clone = clone_imp;
     t->write = write_imp;
     t->dump = dump_imp;
     t->deinit = deinit_imp;

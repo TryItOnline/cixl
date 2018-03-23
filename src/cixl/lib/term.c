@@ -87,6 +87,8 @@ cx_lib(cx_init_term, "cx/io/term") {
 
   cx_box_init(cx_put_const(lib, cx_sym(cx, "key-esc"), false),
 	      cx->char_type)->as_char = 27;
+  cx_box_init(cx_put_const(lib, cx_sym(cx, "key-back"), false),
+	      cx->char_type)->as_char = 127;
 
   cx_add_cxfunc(lib, "say",
 		cx_args(cx_arg("v", cx->any_type)), cx_args(),

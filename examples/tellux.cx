@@ -1,6 +1,6 @@
 /*
   A console ANSI graphics editor.
-  Press Q to exit gracefully and restore the terminal mode.
+  Press Q to exit gracefully and restore terminal mode.
 
   https://github.com/basic-gongfu/cixl#getting-started
 */
@@ -8,21 +8,23 @@
 include: 'ansi.cx';
 
 use:
-  (cx/abc #t #f A Bool Char)
+  (cx/abc #nil #t #f A Bool Char Int Sym)
   (cx/cond = < > ! if if-else)
   (cx/const define:)
   (cx/error catch: dump)
   (cx/func func:)
   (cx/io #in #out print read-char)
   (cx/io/term
-    #clear-screen #key-esc #restore-pos #save-pos
+    #clear-screen #key-esc #key-back #reset-style #restore-pos #save-pos
     move-down move-left move-right move-to move-up normal-mode raw-mode say
     screen-size)
   (cx/iter while)
-  (cx/math -- ++)
-  (cx/ref ref deref set-call)
-  (cx/stack % ~ _)
+  (cx/math -- ++ + *)
+  (cx/pair .)
+  (cx/ref ref deref set set-call)
+  (cx/stack % %% ~ _)
   (cx/str int)
+  (cx/table Table new put)
   (cx/var let:);
 
 define: key-up    @i;
@@ -30,31 +32,99 @@ define: key-down  @k;
 define: key-left  @j;
 define: key-right @l;
 
-define: key-quit  @Q;
+define: key-quit   @Q;
+define: key-resize @R;
+define: key-x-home @h;
+define: key-y-home @H;
+define: key-x-end  @e;
+define: key-y-end  @E;
 
-let: (max-x max-y) screen-size -- ~ -- ~;
+let: (max-x max-y) 1 ref %%;
 let: state `command ref;
-let: x 1 ref;
-let: y 1 ref;
+let: (x y) 1 ref %%;
+let: style #nil ref;
+let: buffer Table new;
 
-func: print-header()()
-  #out #save-pos print
+func: resize()()
+  screen-size -- ~ --
+  $max-x ~ set
+  $max-y ~ set;
+
+func: print-mode()()
   #out 1 1 move-to print
+  #out $state deref `command = @C @E if-else print;
+  
+func: print-header()()
+  #out 3 1 move-to print
   #out @x print
-  #out 7 1 move-to print
-  #out @y print
-  #out #restore-pos print;
+  #out 9 1 move-to print
+  #out @y print;
   
 func: print-pos()()
-  #out 3 1 move-to print
+  #out 5 1 move-to print
   #out '   ' print
-  #out 3 1 move-to print
+  #out 5 1 move-to print
   #out $x deref print
-  #out 9 1 move-to print
+  #out 11 1 move-to print
   #out '   ' print
-  #out 9 1 move-to print
+  #out 11 1 move-to print
   #out $y deref print;
+
+func: go-left()(_ Bool)
+  $x {
+    % 1 > {
+      #out 1 move-left print
+      -- #t ~
+    } {
+      $y {
+        let: y;
+	
+        $y 1 > {
+	  _
+	  #out $max-x deref $y move-to print
+	  #t $max-x deref $y --
+	} {#f ~ $y} if-else
+      } set-call
+    } if-else
+  } set-call;
+
+func: go-right()(_ Bool)
+  $x {
+    % $max-x deref < {
+      #out 1 move-right print
+      ++ #t ~
+    } {
+      $y {
+        let: y;
+	
+        $y $max-y deref < {
+	  _
+	  #out 1 $y 2 + move-to print
+	  #t 1 $y ++
+	} {#f ~ $y} if-else
+      } set-call
+    } if-else
+  } set-call;
+
+func: handle-key(`command #key-esc)(_ Bool)
+  $state `edit set
+  #t;
+
+func: handle-key(`command #key-quit)(_ Bool)
+  #f;
+
+func: handle-key(`command #key-resize)(_ Bool)
+  resize #t;
+
+func: handle-key(m Sym #key-back)(_ Bool)
+  go-left {
+    #out #reset-style print
+    #out @@s print
+    #out 1 move-left print
+  } if
   
+  #t;
+
 func: handle-key(`command #key-up)(_ Bool)
   $y  {
     % 1 > {
@@ -65,34 +135,70 @@ func: handle-key(`command #key-up)(_ Bool)
 
 func: handle-key(`command #key-down)(_ Bool)
   $y {
-    % $max-y < {
+    % $max-y deref < {
       #out 1 move-down print
       ++
     } if
   } set-call #t;
 
 func: handle-key(`command #key-left)(_ Bool)
-  $x  {
-    % 1 > {
-      #out 1 move-left print
-      --
-    } if
-  } set-call #t;
+  go-left _ #t;
 
 func: handle-key(`command #key-right)(_ Bool)
-  $x {
-    % $max-x < {
-      #out 1 move-right print
-      ++
-    } if
-  } set-call #t;
+  go-right _ #t;
 
-func: handle-key(`command #key-quit)(_ Bool)
-  #f;
+func: set-pos(new-x new-y Int)()
+  $x $new-x set
+  $y $new-y set
+  #out $new-x $new-y ++ move-to print;
 
-func: handle-key(`command k Char)(_ Bool)
+func: handle-key(`command #key-x-home)(_ Bool)
+  1 $y deref set-pos
   #t;
 
+func: handle-key(`command #key-y-home)(_ Bool)
+  $x deref 1 set-pos
+  #t;
+
+func: handle-key(`command #key-x-end)(_ Bool)
+  $max-x deref $y deref set-pos
+  #t;
+
+func: handle-key(`command #key-y-end)(_ Bool)
+  $x deref $max-y deref set-pos
+  #t;
+
+func: handle-key(`command c Char)(_ Bool)
+  #t;
+
+func: handle-key(`edit #key-esc)(_ Bool)
+  $state `command set
+  #t;
+
+func: get-offs(x y Int)(_ Int)
+  $y -- $max-x deref * $x +;
+
+func: handle-key(`edit c Char)(_ Bool)
+  #out $c print
+  $buffer $x deref $y deref get-offs $c $state deref . put
+  
+  $x {
+    % $max-x deref < {
+      ++
+    } {
+      $y {
+        let: y ++;
+        #out 1 $y ++ move-to print
+	$y
+      } set-call
+      
+      _ 1
+    } if-else
+  } set-call
+  
+  #t;
+
+resize
 raw-mode
 #out #clear-screen print
 print-header
@@ -100,6 +206,7 @@ print-header
 
 {
   #out #save-pos print
+  print-mode
   print-pos
   #out #restore-pos print
 

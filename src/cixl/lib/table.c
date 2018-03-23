@@ -149,7 +149,8 @@ static bool seq_imp(struct cx_scope *scope) {
 cx_lib(cx_init_table, "cx/table") {
   struct cx *cx = lib->cx;
     
-  if (!cx_use(cx, "cx/abc", "A", "Cmp", "Int", "Opt", "Seq")) {
+  if (!cx_use(cx, "cx/abc", "A", "Cmp", "Int", "Opt", "Seq") ||
+      !cx_use(cx, "cx/type", "new")) {
     return false;
   }
 

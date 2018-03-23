@@ -1,8 +1,8 @@
-* add edit mode
-** switch using esc
 * figure out why collabri emit can't find pick-fgcolor
-* ---
 * debug row/col
+* add #args const
+** set to stack instead of pushingin main/emit
+** update tcpscan & collabri
 * add support for nil catch
 ** #nil instead of type
 ** catch.type is NULL
