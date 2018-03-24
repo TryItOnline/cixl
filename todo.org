@@ -1,4 +1,3 @@
-* change lib getters like cx_get_type
 * extract cx/math/rat lib
 * replace e/E and h/H with shifts for arrows
 ** move half way in the specified direction
@@ -10,6 +9,7 @@
 ** add cx_getconst_op.value
 *** set in parse_const
 *** change eval to push value
+* make all lib getters recursive like cx_get_type
 * replace box.as_ptr with as_func/fimp/etc
 * replace cx_tok.as_ptr with as_id, as_literal etc.
 ** use cx_sym for CX_TID?
