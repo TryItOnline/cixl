@@ -32,7 +32,7 @@ $
 ```
 
 ### Scripting
-When launched with arguments, Cixl interprets the first argument as filename to load code from, and pushes remaining on ```#args```.
+When launched with arguments; Cixl interprets the first argument as filename to load code from, and pushes remaining on ```#args```.
 
 test.cx
 ```
@@ -57,7 +57,7 @@ FOO
 ```
 
 ### Compiling
-Executing ```cixl -e``` compiles the specified file to a native, statically linked executable. Flags following the filename are passed straight to ```gcc```. All arguments are pushed on ```#args```.
+Executing ```cixl -e``` compiles the specified file to a native, statically linked executable. Flags following the filename are passed straight to ```gcc```. When running the executable, all arguments are pushed on ```#args```.
 
 ```
 $ cixl -e cixl/examples/guess.cx -o guess
