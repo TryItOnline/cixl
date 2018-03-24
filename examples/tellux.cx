@@ -23,7 +23,7 @@ use:
   (cx/pair .)
   (cx/ref ref deref set set-call)
   (cx/stack % %% ~ _)
-  (cx/str int upper)
+  (cx/str char int upper)
   (cx/table Table new put)
   (cx/var let:);
 
@@ -55,27 +55,35 @@ func: resize()()
   $max-x ~ set;
 
 func: print-mode()()
-  #out 1 $max-y deref move-to print
+  #out 1 1 move-to print
   #out $state deref `command = @C @E if-else print;
   
 func: print-footer()()
-  #out 3 $max-y deref move-to print
+  #out 1 $max-y deref move-to print
   #out @x print
-  #out 9 $max-y deref move-to print
+  #out 7 $max-y deref move-to print
   #out @y print;
   
 func: print-pos()()
-  #out 5 $max-y deref move-to print
+  #out 3 $max-y deref move-to print
   #out '   ' print
   #out 3 move-left print
   #out $x deref print
-  #out 11 $max-y deref move-to print
+  #out 9 $max-y deref move-to print
   #out '   ' print
   #out 3 move-left print
   #out $y deref print;
 
+func: print-palette()()
+  26 {
+    let: i;
+    let: c $i @a int + char;
+    #out 1 $i 3 + move-to print
+    #out $c print
+  } for;
+
 func: print-wheel()()
-  #out 1 1 move-to print
+  #out 3 1 move-to print
   
   5 {
     let: r 63 *;
@@ -197,7 +205,7 @@ func: handle-key(`command #key-right-n)(_ Bool)
 func: set-pos(new-x new-y Int)()
   $x $new-x set
   $y $new-y set
-  #out $new-x $new-y ++ move-to print;
+  #out $new-x ++ $new-y ++ move-to print;
 
 func: handle-key(`command #key-x-home)(_ Bool)
   1 $y deref set-pos
@@ -249,8 +257,9 @@ resize
 raw-mode
 #out #clear-screen print
 print-footer
+print-palette
 print-wheel
-#out 1 2 move-to print
+#out 2 2 move-to print
 
 {
   #out #save-pos print

@@ -1,5 +1,3 @@
-* print palette in left margin
-** abcdefghijklmnopqrstuvwxyz
 * test is-graphic || @@s on edit
 * add p + a-z to pick fg color at cursor
 ** add fgcolor mode
