@@ -7,6 +7,7 @@
 struct cx;
 
 char *cx_emit_id(const char *prefix, const char *in);
+void cx_push_args(struct cx *cx, int argc, char *argv[]);
 bool cx_emit_file(struct cx *cx, const char *fname, FILE *out);
   
 #endif

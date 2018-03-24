@@ -36,8 +36,8 @@ use:
   (cx/ref deref ref set-call)
   (cx/str int join reverse split str words)
   (cx/sym sym)
-  (cx/sys home-dir make-dir)
-  (cx/stack _ % ~ get push)
+  (cx/sys #args home-dir make-dir)
+  (cx/stack _ % ~ get pop push)
   (cx/table Table put)
   (cx/time fmt now)
   (cx/type new)
@@ -46,7 +46,7 @@ use:
     commit find-key len load-table new-db-table on-load on-commit rollback
     upsert);
 
-let: port int;
+let: port #args pop {'Missing port' throw} or int;
 
 define: backlog 3;
 define: tail-default 24;

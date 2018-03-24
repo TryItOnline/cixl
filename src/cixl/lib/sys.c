@@ -10,6 +10,7 @@
 #include "cixl/lib/sys.h"
 #include "cixl/scope.h"
 #include "cixl/str.h"
+#include "cixl/stack.h"
 
 static bool home_dir_imp(struct cx_scope *scope) {
   cx_box_init(cx_push(scope), scope->cx->str_type)->as_str =
@@ -28,9 +29,13 @@ static bool make_dir_imp(struct cx_scope *scope) {
 cx_lib(cx_init_sys, "cx/sys") {
   struct cx *cx = lib->cx;
     
-  if (!cx_use(cx, "cx/abc", "Int", "Str")) {
+  if (!cx_use(cx, "cx/abc", "Int", "Stack", "Str")) {
     return false;
   }
+
+  cx_box_init(cx_put_const(cx_test(cx_get_lib(cx, "cx/sys", false)),
+			   cx_sym(cx, "args"), false),
+	      cx->stack_type)->as_ptr = cx_stack_new(cx);
 
   cx_add_cfunc(lib, "home-dir",
 	       cx_args(),

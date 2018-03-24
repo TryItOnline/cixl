@@ -10,8 +10,6 @@
 #include "cixl/mfile.h"
 #include "cixl/op.h"
 #include "cixl/repl.h"
-#include "cixl/stack.h"
-#include "cixl/str.h"
 #include "cixl/scope.h"
 
 int main(int argc, char *argv[]) {
@@ -20,8 +18,9 @@ int main(int argc, char *argv[]) {
   struct cx cx;
   cx_init(&cx);
   cx_init_libs(&cx);
-  cx_use(&cx, "cx/meta", "lib:", "use:");
   cx_use(&cx, "cx/io", "include:");
+  cx_use(&cx, "cx/meta", "lib:", "use:");
+  cx_use(&cx, "cx/sys", "#args");
   
   bool emit = false;
   bool compile = false;
@@ -95,12 +94,7 @@ int main(int argc, char *argv[]) {
       }
       
       char *fn = argv[argi++];
-      struct cx_scope *s = cx_scope(&cx, 0);
-
-      for (; argi < argc; argi++) {
-	cx_box_init(cx_push(s), cx.str_type)->as_str = cx_str_new(argv[argi]);
-      }
-
+      cx_push_args(&cx, argc-argi, argv+argi);
       struct cx_bin *bin = cx_bin_new();
       
       if (!cx_load(&cx, fn, bin) || !cx_eval(bin, 0, &cx)) {

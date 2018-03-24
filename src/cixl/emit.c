@@ -4,6 +4,9 @@
 #include "cixl/bin.h"
 #include "cixl/cx.h"
 #include "cixl/emit.h"
+#include "cixl/error.h"
+#include "cixl/stack.h"
+#include "cixl/str.h"
 
 char *cx_emit_id(const char *prefix, const char *in) {
   char *out = malloc(strlen(prefix)+strlen(in)*2+2), *p = out;
@@ -67,6 +70,16 @@ char *cx_emit_id(const char *prefix, const char *in) {
   return out;
 }
 
+void cx_push_args(struct cx *cx, int argc, char *argv[]) {
+  struct cx_stack *args =
+    cx_test(cx_get_const(*cx->lib, cx_sym(cx, "args"), false))->as_ptr;
+  
+  for (int i=0; i < argc; i++) {
+    cx_box_init(cx_vec_push(&args->imp), cx->str_type)->as_str =
+      cx_str_new(argv[i]);
+  }
+}
+
 bool cx_emit_file(struct cx *cx, const char *fname, FILE *out) {
   struct cx_bin *bin = cx_bin_new();
   bool ok = false;
@@ -80,6 +93,7 @@ bool cx_emit_file(struct cx *cx, const char *fname, FILE *out) {
 	"#include \"cixl/call.h\"\n"
 	"#include \"cixl/catch.h\"\n"
 	"#include \"cixl/cx.h\"\n"
+	"#include \"cixl/emit.h\"\n"
 	"#include \"cixl/error.h\"\n"
 	"#include \"cixl/func.h\"\n"
 	"#include \"cixl/lambda.h\"\n"
@@ -97,15 +111,22 @@ bool cx_emit_file(struct cx *cx, const char *fname, FILE *out) {
 	"  struct cx cx;\n"
 	"  cx_init(&cx);\n"
 	"  cx_init_libs(&cx);\n"
-	"  cx_use(&cx, \"cx/abc\", \"Str\");\n\n"
+	"  cx_use(&cx, \"cx/abc\", \"Str\");\n"
+        "  cx_use(&cx, \"cx/io\", \"include:\");\n"
+        "  cx_use(&cx, \"cx/meta\", \"lib:\", \"use:\");\n"
+        "  cx_use(&cx, \"cx/sys\", \"#args\");\n"
+        "  cx_push_args(&cx, argc, argv);\n\n"
+
 	"  for (int i=1; i < argc; i++) {\n"
 	"    cx_box_init(cx_push(cx.root_scope), cx.str_type)->as_str = "
 	      "cx_str_new(argv[i]);\n"
 	"  }\n\n"
+
 	"  if (!eval(&cx)) {\n"
 	"    cx_dump_errors(&cx, stderr);\n"
 	"    return -1;\n"
 	"  }\n\n"
+
 	"  cx_deinit(&cx);\n"
 	"  return 0;\n"
 	"}",

@@ -13,8 +13,9 @@
 
 use:
   (cx/abc     Int is-nil)
-  (cx/cond    ? = > if else)
+  (cx/cond    ? = > if else or)
   (cx/const   define:)
+  (cx/error   throw)
   (cx/func    func:)
   (cx/io      close)
   (cx/io/buf  Buf clear len read-bytes str)
@@ -23,17 +24,25 @@ use:
   (cx/iter    for while)
   (cx/net     connect)
   (cx/math    + -)
-  (cx/stack   ~ _)
+  (cx/stack   ~ _ pop)
   (cx/str     int)
+  (cx/sys     #args)
   (cx/type    new)
   (cx/var     let:);
 
 define: min-queue   30;
 define: max-wait-ms  5;
 
-let: max-read int;
-let: (max-port min-port) int ~ int;
-let: host;
+func: print-usage()()
+  ['Usage:@n'
+   'cixl tcpscan.cx host min-port max-port max-read'] say
+  'Invalid argument list' throw;
+
+let: max-read #args pop &print-usage or int;
+let: max-port #args pop &print-usage or int;
+let: min-port #args pop &print-usage or int;
+let: host #args pop &print-usage or;
+
 let: poll Poll new;
 let: in Buf new;
 
