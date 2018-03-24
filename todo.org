@@ -1,8 +1,5 @@
-* extract cx/math/rat lib
 * replace e/E and h/H with shifts for arrows
 ** move half way in the specified direction
-* add and/or tests
-* add filter tests
 * optimize const emit
 ** add op_type.emit_consts
 *** rewrite getconst emit
