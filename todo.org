@@ -1,10 +1,4 @@
-* add fg/bg vars
-** change f to update vars
-* add b + a-z to pick bg color at cursor
-** add pick-bg mode
 * add 'c' + a-z to use palette slot
-* add 'C' to update palette slot with current fg/bg
-* add style on buffer update
 * ---
 * optimize const emit
 ** add op_type.emit_consts

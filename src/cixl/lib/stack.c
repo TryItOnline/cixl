@@ -1,3 +1,5 @@
+#include <string.h>
+
 #include "cixl/arg.h"
 #include "cixl/box.h"
 #include "cixl/cx.h"
@@ -79,6 +81,15 @@ static bool seq_imp(struct cx_scope *scope) {
 
 static bool stash_imp(struct cx_scope *scope) {
   cx_stash(scope);
+  return true;
+}
+
+static bool splat_imp(struct cx_scope *scope) {
+  struct cx_box in = *cx_test(cx_pop(scope, false));
+  struct cx_stack *s = in.as_ptr;
+  cx_vec_grow(&scope->stack, scope->stack.count+s->imp.count);
+  cx_do_vec(&s->imp, struct cx_box, v) { cx_copy(cx_vec_push(&scope->stack), v); }
+  cx_box_deinit(&in);
   return true;
 }
 
@@ -222,6 +233,11 @@ cx_lib(cx_init_stack, "cx/stack") {
 	       cx_args(),
 	       cx_args(cx_arg(NULL, cx->stack_type)),
 	       stash_imp);
+
+  cx_add_cfunc(lib, "splat",
+	       cx_args(cx_arg("in", cx->stack_type)),
+	       cx_args(),
+	       splat_imp);
 
   cx_add_cfunc(lib, "clear",
 	       cx_args(cx_arg("vec", cx->stack_type)), cx_args(),

@@ -22,9 +22,9 @@ use:
   (cx/math ++ -- + - * / int)
   (cx/pair .)
   (cx/ref ref deref set set-call)
-  (cx/stack % %% ~ _)
+  (cx/stack % %% ~ _ splat)
   (cx/str char int is-graph upper)
-  (cx/table Table get new put)
+  (cx/table Table delete get new put)
   (cx/var let:);
 
 define: key-up      @i;
@@ -43,15 +43,17 @@ define: key-y-home @H;
 define: key-x-end  @e;
 define: key-y-end  @E;
 
-define: key-pick-fg @f;
+define: key-pick-bg   @b;
+define: key-pick-fg   @f;
+define: key-put-color @C;
 
 let: (max-x max-y) 1 ref %%;
-let: mode `command ref;
-let: (x y) 1 ref 2 ref;
-let: style #nil ref;
-let: fg-colors Table new;
-let: bg-colors Table new;
-let: buffer Table new;
+let: mode          `command ref;
+let: (x y)         1 ref 2 ref;
+let: (bg fg)       [0 0 0] ref [255 255 255] ref;
+let: bg-colors     Table new;
+let: fg-colors     Table new;
+let: buffer        Table new;
 
 func: set-pos(new-x new-y Int)()
   $x $new-x set
@@ -109,8 +111,9 @@ func: print-wheel()()
 	
 	$o {
 	  let: po;
-	  $fg-colors $po $r $g $b pick-fgcolor put
-	  $bg-colors $po $r $g $b pick-bgcolor put
+	  let: c [$r $g $b];
+	  $bg-colors $po $c put
+	  $fg-colors $po $c put
 	  $po ++
 	} set-call
       } for
@@ -238,26 +241,46 @@ func: handle-key(`command #key-y-end)(_ Bool)
   $x deref $max-y deref 2 - set-pos
   #t;
 
-func: handle-key(`command #key-pick-fg)(_ Bool)
-  $mode `pick-fg set
+func: handle-key(`command #key-pick-bg)(_ Bool)
+  let: o $x deref $y deref get-offs;
+  $bg $bg-colors $o get set
   #t;
 
-func: handle-key(`pick-fg c Char)(_ Bool)
+func: handle-key(`command #key-pick-fg)(_ Bool)
+  let: o $x deref $y deref get-offs;
+  $fg $fg-colors $o get set
+  #t;
+
+func: handle-key(`command #key-put-color)(_ Bool)
+  $mode `put-color set
+  #t;
+
+func: handle-key(`put-color c Char)(_ Bool)
   $c @a >= {$c @z <=} and {
-    let: o $x deref $y deref get-offs;
-    let: fg $fg-colors $o get;
+    let: (px py) 1 $c int @a int - 2 +;
+    let: po $px $py get-offs;
     
+    #out #save-pos print
+    #out $px $py move-to print      
+    #out #reset-style print
+
+    $bg {
+      #out $bg deref splat pick-bgcolor print
+      $bg-colors $po $bg deref put
+    } {
+      $bg-colors $po delete
+    } if-else
+
     $fg {
-      #out #save-pos print
-      let: (px py) 1 $c int @a int - 2 +;
-      #out $px $py move-to print      
-      #out $fg print
-      #out $c print
-      #out #reset-style print
-      #out #restore-pos print
-      let: po $px $py get-offs;
-      $fg-colors $po $c put
-    } if
+      #out $fg deref splat pick-fgcolor print
+      $fg-colors $po $fg deref put
+    } {
+      $fg-colors $po delete
+    } if-else
+        
+    #out $c print
+    #out #reset-style print
+    #out #restore-pos print
   } if
 
   $mode `command set
@@ -272,22 +295,26 @@ func: handle-key(`edit #key-esc)(_ Bool)
 
 func: handle-key(`edit c Char)(_ Bool)
   $c is-graph {$c @@s =} or {
+    let: o $x deref $y deref get-offs;
+
+    $bg {
+      #out $bg deref splat pick-bgcolor print
+      $bg-colors $o $bg deref put
+    } {
+      $bg-colors $o delete
+    } if-else
+    
+    $fg {
+      #out $fg deref splat pick-fgcolor print
+      $fg-colors $o $fg deref put
+    } {
+      $fg-colors $o delete
+    } if-else
+    
     #out $c print
-    $buffer $x deref $y deref get-offs $c $mode deref . put
-  
-    $x {
-      % $max-x deref < {
-        ++
-      } {
-        $y {
-          let: y ++;
-          #out 1 $y ++ move-to print
-	  $y
-        } set-call
-      
-        _ 1
-      } if-else
-    } set-call
+    #out #reset-style print
+    $buffer $o $c put
+    $x {% $max-x deref < &++ if} set-call
   } if #t;
 
 resize
