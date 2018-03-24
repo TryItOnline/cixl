@@ -313,8 +313,15 @@ struct cx_scope *cx_pop_scope(struct cx *cx, bool silent) {
   cx_vec_pop(&cx->scopes);
 
   if (s->stack.count) {
-    struct cx_box *v = cx_vec_pop(&s->stack);
-    *cx_push(cx_scope(cx, 0)) = *v;   
+    struct cx_scope *ns = cx_scope(cx, 0);
+    cx_vec_grow(&ns->stack, ns->stack.count+s->stack.count);
+
+    memcpy(cx_vec_end(&ns->stack),
+	   s->stack.items,
+	   s->stack.count*sizeof(struct cx_box));
+    
+    ns->stack.count += s->stack.count;
+    s->stack.count = 0;
   }
 
   cx_scope_deref(s);

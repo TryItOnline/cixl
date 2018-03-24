@@ -77,6 +77,11 @@ static bool seq_imp(struct cx_scope *scope) {
   return true;
 }
 
+static bool stash_imp(struct cx_scope *scope) {
+  cx_stash(scope);
+  return true;
+}
+
 static bool clear_imp(struct cx_scope *scope) {
   struct cx_box vec = *cx_test(cx_pop(scope, false));
   struct cx_stack *v = vec.as_ptr;
@@ -212,6 +217,11 @@ cx_lib(cx_init_stack, "cx/stack") {
 	       cx_args(cx_arg("in", cx->seq_type)),
 	       cx_args(cx_arg(NULL, cx->stack_type)),
 	       seq_imp);
+
+  cx_add_cfunc(lib, "stash",
+	       cx_args(),
+	       cx_args(cx_arg(NULL, cx->stack_type)),
+	       stash_imp);
 
   cx_add_cfunc(lib, "clear",
 	       cx_args(cx_arg("vec", cx->stack_type)), cx_args(),

@@ -146,16 +146,18 @@ static void type_tests() {
   run(&cx, "Int A is check");
   run(&cx, "A Int is !check");
   run(&cx, "trait: StrInt Str Int; 42 StrInt is check");
+
   cx_deinit(&cx);
 }
 
-static void group_tests() {
+static void scope_tests() {
   struct cx cx;
   init_cx(&cx);
 
-  run(&cx, "use: cx/cond cx/error;");
+  run(&cx, "use: cx/cond cx/error cx/math cx/stack;");
   run(&cx, "(7 14 21) 21 = check");
-
+  run(&cx, "1 (2 3 stash % 4) push [2 3 4] = check");
+  
   cx_deinit(&cx);
 }
 
@@ -168,6 +170,7 @@ static void if_tests() {
   run(&cx, "#f 42 else 42 = check");
   run(&cx, "#t `yes `no if-else `yes = check");
   run(&cx, "#f `yes `no if-else `no = check");
+
   cx_deinit(&cx);
 }
 
@@ -447,7 +450,7 @@ int main() {
   error_tests();
   lib_tests();
   type_tests();
-  group_tests();
+  scope_tests();
   if_tests();
   let_tests();
   func_tests();

@@ -1,7 +1,7 @@
-* change CX_TGROUP to dump everything to outer stack on exit
-** update README
 * change lib getters like cx_get_type
 * extract cx/math/rat lib
+* replace e/E and h/H with shifts for arrows
+** move half way in the specified direction
 * add and/or tests
 * add filter tests
 * optimize const emit
@@ -10,9 +10,9 @@
 ** add cx_getconst_op.value
 *** set in parse_const
 *** change eval to push value
+* replace box.as_ptr with as_func/fimp/etc
 * replace cx_tok.as_ptr with as_id, as_literal etc.
 ** use cx_sym for CX_TID?
-* replace box.as_ptr with as_func/fimp/etc
 * convert type id to sym
 * convert macro id to sym
 * convert func id to sym

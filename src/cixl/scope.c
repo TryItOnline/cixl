@@ -3,6 +3,7 @@
 #include "cixl/cx.h"
 #include "cixl/error.h"
 #include "cixl/scope.h"
+#include "cixl/stack.h"
 #include "cixl/tok.h"
 
 struct cx_scope *cx_scope_new(struct cx *cx, struct cx_scope *parent) {
@@ -118,9 +119,18 @@ struct cx_box *cx_put_var(struct cx_scope *scope, struct cx_sym id, bool force) 
   return cx_env_put(&scope->vars, id);
 }
 
-void cx_reset(struct cx_scope *scope) {
-  cx_do_vec(&scope->stack, struct cx_box, v) { cx_box_deinit(v); }
-  cx_vec_clear(&scope->stack);
+void cx_stash(struct cx_scope *s) {
+  struct cx *cx = s->cx;
+  struct cx_stack *out = cx_stack_new(cx);
+  out->imp = s->stack;
+  cx_vec_init(&s->stack, sizeof(struct cx_box));
+  s->stack.alloc = &cx->stack_items_alloc;
+  cx_box_init(cx_push(s), cx->stack_type)->as_ptr = out;
+}
+
+void cx_reset(struct cx_scope *s) {
+  cx_do_vec(&s->stack, struct cx_box, v) { cx_box_deinit(v); }
+  cx_vec_clear(&s->stack);
 }
 
 bool cx_pop_catch(struct cx_scope *scope, int n) {

@@ -320,12 +320,12 @@ References may be created manually, which enables using reference semantics for 
 ```
 
 ### Scopes
-Code enclosed in parens is evaluated in a separate scope, the last value on the stack is automatically returned on scope exit.
+Code enclosed in parens is evaluated in a separate scope, remaining values on the stack are returned on scope exit.
 
 ```
-   | (1 2 3)
+   | 1 (2 3 stash 4)
 ...
-[3]
+[1 [2 3]r1 4]
 ```
 
 Variables in the parent scope may be referenced from within, but variables defined inside are not visible from the outside.
