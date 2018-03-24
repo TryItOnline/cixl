@@ -9,7 +9,7 @@ include: 'ansi.cx';
 
 use:
   (cx/abc #nil #t #f A Bool Char Int Sym)
-  (cx/cond = < > >= ! if if-else or)
+  (cx/cond = < > >= <= ! and if if-else or)
   (cx/const define:)
   (cx/error catch: dump)
   (cx/func func:)
@@ -24,7 +24,7 @@ use:
   (cx/ref ref deref set set-call)
   (cx/stack % %% ~ _)
   (cx/str char int is-graph upper)
-  (cx/table Table new put)
+  (cx/table Table get new put)
   (cx/var let:);
 
 define: key-up      @i;
@@ -43,11 +43,23 @@ define: key-y-home @H;
 define: key-x-end  @e;
 define: key-y-end  @E;
 
+define: key-pick-fg @f;
+
 let: (max-x max-y) 1 ref %%;
-let: state `command ref;
-let: (x y) 1 ref %%;
+let: mode `command ref;
+let: (x y) 1 ref 2 ref;
 let: style #nil ref;
+let: fg-colors Table new;
+let: bg-colors Table new;
 let: buffer Table new;
+
+func: set-pos(new-x new-y Int)()
+  $x $new-x set
+  $y $new-y set
+  #out $new-x ++ $new-y move-to print;
+
+func: get-offs(x y Int)(_ Int)
+  $y $max-x deref * $x +;
 
 func: resize()()
   screen-size
@@ -56,7 +68,7 @@ func: resize()()
 
 func: print-mode()()
   #out 1 1 move-to print
-  #out $state deref `command = @C @E if-else print;
+  #out $mode deref `edit = @E @C if-else print;
   
 func: print-footer()()
   #out 1 $max-y deref move-to print
@@ -78,12 +90,13 @@ func: print-palette()()
   26 {
     let: i;
     let: c $i @a int + char;
-    #out 1 $i 3 + move-to print
+    #out 1 $i 2 + move-to print
     #out $c print
   } for;
 
 func: print-wheel()()
-  #out 3 1 move-to print
+  #out 2 1 move-to print
+  let: o 2 1 get-offs ref;
   
   5 {
     let: r 63 *;
@@ -93,6 +106,13 @@ func: print-wheel()()
         let: b 63 *;
         #out $r $g $b pick-bgcolor print
         #out @@s print
+	
+	$o {
+	  let: po;
+	  $fg-colors $po $r $g $b pick-fgcolor put
+	  $bg-colors $po $r $g $b pick-bgcolor put
+	  $po ++
+	} set-call
       } for
     } for
   } for
@@ -102,7 +122,7 @@ func: print-wheel()()
 func: go-up(n Int)(_ Bool)
   $y  {
     let: v;
-    let: dv $v $n >= $n {$v --} if-else;
+    let: dv $v $n > $n {$v --} if-else;
 
     $dv {
       #out $n move-up print
@@ -152,7 +172,7 @@ func: go-right(n Int)(_ Bool)
   } set-call;
 
 func: handle-key(`command #key-esc)(_ Bool)
-  $state `edit set
+  $mode `edit set
   #t;
 
 func: handle-key(`command #key-quit)(_ Bool)
@@ -202,11 +222,6 @@ func: handle-key(`command #key-right-n)(_ Bool)
   $n { $n go-right _ } if
   #t;
 
-func: set-pos(new-x new-y Int)()
-  $x $new-x set
-  $y $new-y set
-  #out $new-x ++ $new-y ++ move-to print;
-
 func: handle-key(`command #key-x-home)(_ Bool)
   1 $y deref set-pos
   #t;
@@ -223,20 +238,42 @@ func: handle-key(`command #key-y-end)(_ Bool)
   $x deref $max-y deref 2 - set-pos
   #t;
 
+func: handle-key(`command #key-pick-fg)(_ Bool)
+  $mode `pick-fg set
+  #t;
+
+func: handle-key(`pick-fg c Char)(_ Bool)
+  $c @a >= {$c @z <=} and {
+    let: o $x deref $y deref get-offs;
+    let: fg $fg-colors $o get;
+    
+    $fg {
+      #out #save-pos print
+      let: (px py) 1 $c int @a int - 2 +;
+      #out $px $py move-to print      
+      #out $fg print
+      #out $c print
+      #out #reset-style print
+      #out #restore-pos print
+      let: po $px $py get-offs;
+      $fg-colors $po $c put
+    } if
+  } if
+
+  $mode `command set
+  #t;
+
 func: handle-key(`command c Char)(_ Bool)
   #t;
 
 func: handle-key(`edit #key-esc)(_ Bool)
-  $state `command set
+  $mode `command set
   #t;
-
-func: get-offs(x y Int)(_ Int)
-  $y -- $max-x deref * $x +;
 
 func: handle-key(`edit c Char)(_ Bool)
   $c is-graph {$c @@s =} or {
     #out $c print
-    $buffer $x deref $y deref get-offs $c $state deref . put
+    $buffer $x deref $y deref get-offs $c $mode deref . put
   
     $x {
       % $max-x deref < {
@@ -267,7 +304,7 @@ print-wheel
   print-pos
   #out #restore-pos print
 
-  $state deref
+  $mode deref
   #in read-char
   handle-key
 } while

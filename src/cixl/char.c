@@ -11,6 +11,10 @@ static bool equid_imp(struct cx_box *x, struct cx_box *y) {
   return x->as_char == y->as_char;
 }
 
+static enum cx_cmp cmp_imp(const struct cx_box *x, const struct cx_box *y) {
+  return cx_cmp_char(&x->as_char, &y->as_char);
+}
+
 static bool ok_imp(struct cx_box *v) {
   return v->as_char;
 }
@@ -53,8 +57,9 @@ static bool emit_imp(struct cx_box *v, const char *exp, FILE *out) {
 }
 
 struct cx_type *cx_init_char_type(struct cx_lib *lib) {
-  struct cx_type *t = cx_add_type(lib, "Char", lib->cx->any_type);
+  struct cx_type *t = cx_add_type(lib, "Char", lib->cx->cmp_type);
   t->equid = equid_imp;
+  t->cmp = cmp_imp;
   t->ok = ok_imp;
   t->write = dump_imp;
   t->dump = dump_imp; 

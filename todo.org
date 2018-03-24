@@ -1,9 +1,9 @@
-* add p + a-z to pick fg color at cursor
-** add fgcolor mode
-** put in specified palette slot
-** cancel on esc
-* add 'P' + a-z to pick bg color at cursor
-* add 'c' + a-z to use
+* add fg/bg vars
+** change f to update vars
+* add b + a-z to pick bg color at cursor
+** add pick-bg mode
+* add 'c' + a-z to use palette slot
+* add 'C' to update palette slot with current fg/bg
 * add style on buffer update
 * ---
 * optimize const emit
