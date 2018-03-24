@@ -421,11 +421,7 @@ bool cx_load(struct cx *cx, const char *path, struct cx_bin *bin) {
 
 void cx_dump_errors(struct cx *cx, FILE *out) {
   cx_do_vec(&cx->errors, struct cx_error, e) {
-    fprintf(out, "Error in row %d, col %d:\n", e->row, e->col);
-    cx_print(&e->value, out);
-    fputc('\n', out);
-    cx_stack_dump(&e->stack, out);
-    fputs("\n\n", out);
+    cx_error_dump(e, out);
     cx_error_deinit(e);
   }
 

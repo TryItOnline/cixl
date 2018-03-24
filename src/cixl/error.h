@@ -24,7 +24,7 @@ struct cx;
 
 struct cx_error {
   int row, col;
-  struct cx_vec stack;
+  struct cx_vec stack, calls;
   struct cx_box value;
   unsigned int nrefs;
 };
