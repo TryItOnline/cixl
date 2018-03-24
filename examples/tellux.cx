@@ -9,16 +9,16 @@ include: 'ansi.cx';
 
 use:
   (cx/abc #nil #t #f A Bool Char Int Sym)
-  (cx/cond = < > ! if if-else)
+  (cx/cond = < > >= ! if if-else)
   (cx/const define:)
   (cx/error catch: dump)
   (cx/func func:)
   (cx/io #in #out print read-char)
   (cx/io/term
     #clear-screen #key-esc #key-back #reset-style #restore-pos #save-pos
-    move-down move-left move-right move-to move-up normal-mode raw-mode say
-    screen-size)
-  (cx/iter while)
+    move-down move-left move-right move-to move-up normal-mode pick-bgcolor
+    pick-fgcolor raw-mode say screen-size)
+  (cx/iter for while)
   (cx/math ++ -- + - * / int)
   (cx/pair .)
   (cx/ref ref deref set set-call)
@@ -50,34 +50,51 @@ let: style #nil ref;
 let: buffer Table new;
 
 func: resize()()
-  screen-size -- ~ --
-  $max-x ~ set
-  $max-y ~ set;
+  screen-size
+  $max-y ~ set
+  $max-x ~ set;
 
 func: print-mode()()
-  #out 1 1 move-to print
+  #out 1 $max-y deref move-to print
   #out $state deref `command = @C @E if-else print;
   
-func: print-header()()
-  #out 3 1 move-to print
+func: print-footer()()
+  #out 3 $max-y deref move-to print
   #out @x print
-  #out 9 1 move-to print
+  #out 9 $max-y deref move-to print
   #out @y print;
   
 func: print-pos()()
-  #out 5 1 move-to print
+  #out 5 $max-y deref move-to print
   #out '   ' print
-  #out 5 1 move-to print
+  #out 3 move-left print
   #out $x deref print
-  #out 11 1 move-to print
+  #out 11 $max-y deref move-to print
   #out '   ' print
-  #out 11 1 move-to print
+  #out 3 move-left print
   #out $y deref print;
+
+func: print-wheel()()
+  #out 1 1 move-to print
+  
+  5 {
+    let: r 63 *;
+    5 {
+      let: g 63 *;
+      5 {
+        let: b 63 *;
+        #out $r $g $b pick-bgcolor print
+        #out @@s print
+      } for
+    } for
+  } for
+  
+  #out #reset-style print;
 
 func: go-up(n Int)(_ Bool)
   $y  {
     let: v;
-    let: dv $v $n > $n {$v --} if-else;
+    let: dv $v $n >= $n {$v --} if-else;
 
     $dv {
       #out $n move-up print
@@ -90,7 +107,7 @@ func: go-up(n Int)(_ Bool)
 func: go-down(n Int)(_ Bool)
   $y  {
     let: v;
-    let: dv $max-y deref $v - % $n > {_ $n} if;
+    let: dv $max-y deref 2 - $v - % $n > {_ $n} if;
 
     $dv {
       #out $n move-down print
@@ -157,7 +174,7 @@ func: handle-key(`command #key-down)(_ Bool)
   1 go-down _ #t;
 
 func: handle-key(`command #key-down-n)(_ Bool)
-  let: n $max-y deref $y deref - ++ 2 / int;
+  let: n $max-y deref 2 - $y deref - ++ 2 / int;
   $n { $n go-down _ } if
   #t;
 
@@ -195,7 +212,7 @@ func: handle-key(`command #key-x-end)(_ Bool)
   #t;
 
 func: handle-key(`command #key-y-end)(_ Bool)
-  $x deref $max-y deref set-pos
+  $x deref $max-y deref 2 - set-pos
   #t;
 
 func: handle-key(`command c Char)(_ Bool)
@@ -231,7 +248,8 @@ func: handle-key(`edit c Char)(_ Bool)
 resize
 raw-mode
 #out #clear-screen print
-print-header
+print-footer
+print-wheel
 #out 1 2 move-to print
 
 {

@@ -1,5 +1,14 @@
-* add tellux color selection
-** add style on buffer update
+* print palette in left margin
+** abcdefghijklmnopqrstuvwxyz
+* test is-graphic || @@s on edit
+* add p + a-z to pick fg color at cursor
+** add fgcolor mode
+** put in specified palette slot
+** cancel on esc
+* add 'P' + a-z to pick bg color at cursor
+* add 'c' + a-z to use
+* add style on buffer update
+* ---
 * optimize const emit
 ** add op_type.emit_consts
 *** rewrite getconst emit
