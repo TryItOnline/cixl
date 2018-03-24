@@ -105,10 +105,11 @@ static void error_tests() {
   struct cx cx;
   init_cx(&cx);
   
-  run(&cx, "use: cx/abc cx/cond cx/error cx/pair cx/stack;");
+  run(&cx, "use: cx/abc cx/cond cx/error cx/math cx/pair cx/stack;");
   run(&cx, "catch: (A `error ~.) 42 throw 21; `error 42. = check");
   run(&cx, "catch: (Int `int ~.) (A `a ~.) (42 throw) 21; `int 42. = check");
-
+  run(&cx, "catch: (Nil 7) 49; - 42 = check");
+  
   cx_deinit(&cx);
 }
 

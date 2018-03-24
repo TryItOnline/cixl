@@ -35,7 +35,9 @@ void cx_scope_deref(struct cx_scope *scope) {
     cx_vec_deinit(&scope->stack);
     
     cx_env_deinit(&scope->vars);
-    cx_do_vec(&scope->catches, struct cx_catch, c) { cx_catch_deinit(c); }
+    cx_do_vec(&scope->catches, struct cx_catch, c) {
+      cx_catch_deinit(c);
+    }
     
     cx_vec_deinit(&scope->catches);
     cx_vec_deinit(&scope->var_scopes);
@@ -119,4 +121,24 @@ struct cx_box *cx_put_var(struct cx_scope *scope, struct cx_sym id, bool force) 
 void cx_reset(struct cx_scope *scope) {
   cx_do_vec(&scope->stack, struct cx_box, v) { cx_box_deinit(v); }
   cx_vec_clear(&scope->stack);
+}
+
+bool cx_pop_catch(struct cx_scope *scope, int n) {
+  struct cx *cx = scope->cx;
+  
+  if (!n) { return true; }
+  
+  if (scope->catches.count < n) {
+    cx_error(cx, cx->row, cx->col, "Failed popping catch");
+    return false;
+  }
+  
+  for (struct cx_catch *c = cx_vec_peek(&scope->catches, 0);
+       n > 0;
+       n--, c--, scope->catches.count--) {
+    if (c->type == cx->nil_type) { cx_catch_eval(c); }
+    cx_catch_deinit(c);
+  }
+
+  return true;
 }

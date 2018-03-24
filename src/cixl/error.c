@@ -71,13 +71,17 @@ struct cx_error *new_error(struct cx *cx, int row, int col, struct cx_box *v) {
     if (s->catches.count) {  
       for (struct cx_catch *c = cx_vec_peek(&s->catches, 0);
 	   s->catches.count;
-	   c--, s->catches.count--) {
-	if (cx_is(v->type, c->type)) {
+	   c--, s->catches.count--) {	
+	if (c->type == cx->nil_type) {
+	  cx_catch_eval(c);
+	} else if (cx_is(v->type, c->type)) {
 	  s->catches.count--;
-	  
+
 	  for (struct cx_catch *cc = c-1;
 	       s->catches.count && cc->tok_idx == c->tok_idx;
-	       cx_catch_deinit(cc), s->catches.count--, cc--);
+	       cx_catch_deinit(cc), s->catches.count--, cc--) {
+	    if (cc->type == cx->nil_type) { cx_catch_eval(cc); }
+	  }
 	  
 	  cx_copy(cx_push(s), v);
 	  cx_catch_eval(c);

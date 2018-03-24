@@ -57,7 +57,7 @@ FOO
 ```
 
 ### Compiling
-Executing ```cixl -e``` compiles the specified file to a native, statically linked executable. Flags following the filename are passed straight to ```gcc```. When running the executable, all arguments are pushed on ```#args```.
+Executing ```cixl -e``` compiles the specified file to a statically linked executable. Flags following the filename are passed straight to ```gcc```. When running the executable, all arguments are pushed on ```#args```.
 
 ```
 $ cixl -e cixl/examples/guess.cx -o guess
@@ -535,7 +535,19 @@ Thrown values may be caught using ```catch:```, the first matching clause is eva
 [(`int 42)r1 `bar]
 ```
 
-```dump``` may be used to print information about the current error within a catch clause.
+Catching ```Nil``` executes the specified actions on exit regardless of any errors.
+
+```
+  | catch: (Nil 'Cleaning up...' say)
+...   'Going down!' throw;
+...
+Cleaning up...
+Error in row 2, col 14:
+Going down!
+[]
+```
+
+```dump``` may be used to print information about currently thrown errors within a catch clause.
 
 ```
    | catch: (A _ dump) 42 throw;

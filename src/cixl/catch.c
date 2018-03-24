@@ -22,6 +22,10 @@ struct cx_catch *cx_catch_deinit(struct cx_catch *c) {
   return c;
 }
 
-bool cx_catch_eval(struct cx_catch *c) {  
-  return cx_eval(c->bin, c->start_pc, c->type->lib->cx);
+bool cx_catch_eval(struct cx_catch *c) {
+  struct cx *cx = c->type->lib->cx;
+  return cx_eval(c->bin,
+		 c->start_pc,
+		 (c->type == cx->nil_type) ? c->start_pc+c->nops-1 : -1,
+		 cx);
 }

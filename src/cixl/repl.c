@@ -17,7 +17,7 @@
 #include "cixl/stack.h"
 
 static bool emit_bmips(struct cx *cx) {
-bool _eval(struct cx *cx) {
+  bool _eval(struct cx *cx, ssize_t stop_pc) {
   static bool init = true;
 
   static struct cx_sym sym_n;
@@ -834,7 +834,7 @@ if (!cx_fimp_call(imp, s)) { return false; }
 
   struct cx_bin *bin = cx_bin_new();
   bin->eval = _eval;
-  bool ok = cx_eval(bin, 0, cx);
+  bool ok = cx_eval(bin, 0, -1, cx);
   cx_bin_deref(bin);
   return ok;
 }

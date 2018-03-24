@@ -10,10 +10,12 @@ struct cx_bin *cx_bin_new() {
   return cx_bin_init(malloc(sizeof(struct cx_bin)));
 }
 
-static bool eval(struct cx *cx) {
+static bool eval(struct cx *cx, ssize_t stop_pc) {
   if (!cx->bin->ops.count) { return true; }
   
-  while (cx->pc < cx->bin->ops.count && !cx->stop) {
+  while (cx->pc < cx->bin->ops.count &&
+	 cx->pc != stop_pc &&
+	 !cx->stop) {
     cx_init_ops(cx->bin);
     struct cx_op *op = cx_vec_get(&cx->bin->ops, cx->pc++);
     cx->row = op->row; cx->col = op->col;
@@ -106,12 +108,12 @@ void cx_init_ops(struct cx_bin *bin) {
   }
 }
 
-bool cx_eval(struct cx_bin *bin, size_t start_pc, struct cx *cx) {
+bool cx_eval(struct cx_bin *bin, size_t start_pc, ssize_t stop_pc, struct cx *cx) {
   struct cx_bin *prev_bin = cx->bin;
   size_t prev_pc = cx->pc;
   cx->bin = bin;
   cx->pc = start_pc;
-  bool ok = cx_test(bin->eval)(cx);
+  bool ok = cx_test(bin->eval)(cx, stop_pc);
   cx->bin = prev_bin;
   cx->pc = prev_pc;
   cx->stop = false;
@@ -123,7 +125,7 @@ bool cx_eval_toks(struct cx *cx, struct cx_vec *in) {
   bool ok = false;
   struct cx_bin *bin = cx_bin_new();
   if (!cx_compile(cx, cx_vec_start(in), cx_vec_end(in), bin)) { goto exit; }
-  if (!cx_eval(bin, 0, cx)) { goto exit; }
+  if (!cx_eval(bin, 0, -1, cx)) { goto exit; }
   ok = true;
  exit:
   cx_bin_deref(bin);
@@ -147,7 +149,7 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
   cx_init_ops(bin);
 
   fputs("bool eval(struct cx *cx) {\n"
-	"bool _eval(struct cx *cx) {\n"
+	"bool _eval(struct cx *cx, ssize_t stop_pc) {\n"
         "  static bool init = true;\n\n",
 	out);
   
@@ -281,7 +283,7 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
 	    "    cx->pc = %zd; cx->row = %d; cx->col = %d;\n",
 	    op->pc, cx->row, cx->col);
 
-    fputs("    if (cx->stop) { return true; }\n", out);
+    fputs("    if (cx->stop || cx->pc == stop_pc) { return true; }\n", out);
     fputs("    if (cx->errors.count) { return false; }\n", out);
 
     if (op->type->emit && !cx_test(op->type->emit)(op, bin, out, cx)) {
@@ -297,7 +299,7 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
 	"}\n\n"
 	"  struct cx_bin *bin = cx_bin_new();\n"
 	"  bin->eval = _eval;\n"
-	"  bool ok = cx_eval(bin, 0, cx);\n"
+	"  bool ok = cx_eval(bin, 0, -1, cx);\n"
 	"  cx_bin_deref(bin);\n"
 	"  return ok;\n"
 	"}\n",
@@ -315,7 +317,7 @@ static bool equid_imp(struct cx_box *x, struct cx_box *y) {
 }
 
 static bool call_imp(struct cx_box *value, struct cx_scope *scope) {
-  return cx_eval(value->as_ptr, 0, scope->cx);
+  return cx_eval(value->as_ptr, 0, -1, scope->cx);
 }
 
 static void copy_imp(struct cx_box *dst, const struct cx_box *src) {

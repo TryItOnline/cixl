@@ -16,7 +16,7 @@ struct cx_bin {
   
   size_t init_offs;
   unsigned int nrefs;
-  bool (*eval)(struct cx *);
+  bool (*eval)(struct cx *, ssize_t stop_pc);
 };
 
 struct cx_bin *cx_bin_new();
@@ -35,7 +35,7 @@ bool cx_compile(struct cx *cx,
 		struct cx_tok *end,
 		struct cx_bin *out);
 
-bool cx_eval(struct cx_bin *bin, size_t start_pc, struct cx *cx);
+bool cx_eval(struct cx_bin *bin, size_t start_pc, ssize_t stop_pc, struct cx *cx);
 bool cx_eval_toks(struct cx *cx, struct cx_vec *in);
 bool cx_eval_str(struct cx *cx, const char *in);
 bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx);

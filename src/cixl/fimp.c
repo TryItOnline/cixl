@@ -134,7 +134,7 @@ bool cx_fimp_inline(struct cx_fimp *imp,
 }
 
 bool cx_fimp_eval(struct cx_fimp *imp, struct cx_scope *scope) {
-  return cx_eval(cx_test(imp->bin), imp->start_pc, scope->cx);
+  return cx_eval(cx_test(imp->bin), imp->start_pc, -1, scope->cx);
 }
 
 bool cx_fimp_call(struct cx_fimp *imp, struct cx_scope *scope) {

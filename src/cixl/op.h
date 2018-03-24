@@ -92,6 +92,10 @@ struct cx_libdef_op {
   size_t init;
 };
 
+struct cx_popcatch_op {
+  int n;
+};
+
 struct cx_push_op {
   struct cx_box value;
 };
@@ -140,6 +144,7 @@ struct cx_op {
     struct cx_jump_op as_jump;
     struct cx_lambda_op as_lambda;
     struct cx_libdef_op as_libdef;
+    struct cx_popcatch_op as_popcatch;
     struct cx_push_op as_push;
     struct cx_pushlib_op as_pushlib;
     struct cx_putargs_op as_putargs;
@@ -164,6 +169,7 @@ struct cx_op_type *CX_OGETVAR();
 struct cx_op_type *CX_OJUMP();
 struct cx_op_type *CX_OLAMBDA();
 struct cx_op_type *CX_OLIBDEF();
+struct cx_op_type *CX_OPOPCATCH();
 struct cx_op_type *CX_OPOPLIB();
 struct cx_op_type *CX_OPUSH();
 struct cx_op_type *CX_OPUSHLIB();

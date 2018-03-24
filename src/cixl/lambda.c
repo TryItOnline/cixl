@@ -59,7 +59,7 @@ static bool call_imp(struct cx_box *value, struct cx_scope *scope) {
 
   *(struct cx_scope **)cx_vec_push(&scope->var_scopes) = l->scope;
   
-  bool ok = cx_eval(l->bin, l->start_pc, cx);
+  bool ok = cx_eval(l->bin, l->start_pc, -1, cx);
   cx_vec_pop(&scope->var_scopes);
   if (pop_lib) { cx_pop_lib(cx); }
   cx_lambda_deref(l);

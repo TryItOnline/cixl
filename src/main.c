@@ -97,7 +97,7 @@ int main(int argc, char *argv[]) {
       cx_push_args(&cx, argc-argi, argv+argi);
       struct cx_bin *bin = cx_bin_new();
       
-      if (!cx_load(&cx, fn, bin) || !cx_eval(bin, 0, &cx)) {
+      if (!cx_load(&cx, fn, bin) || !cx_eval(bin, 0, -1, &cx)) {
 	cx_dump_errors(&cx, stderr);
 	cx_bin_deref(bin);
 	cx_deinit(&cx);

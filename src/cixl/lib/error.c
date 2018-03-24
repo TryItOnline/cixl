@@ -20,6 +20,8 @@ static ssize_t catch_eval(struct cx_macro_eval *eval,
     *ts = cx_vec_get(&eval->toks, 0),
     *tt = cx_vec_get(&ts->as_vec, 0);
 
+  unsigned int ncatch = 0;
+  
   bool compile(struct cx_vec *toks) {
     size_t i = bin->ops.count;
     struct cx_op *op = cx_op_init(bin, CX_OCATCH(), tok_idx);
@@ -29,6 +31,7 @@ static ssize_t catch_eval(struct cx_macro_eval *eval,
     cx_op_init(bin, CX_OJUMP(), tok_idx)->as_jump.pc = -1;
     op = cx_vec_get(&bin->ops, i);
     op->as_catch.nops = bin->ops.count-i-1;
+    ncatch++;
     return true;
   } 
     
@@ -45,6 +48,8 @@ static ssize_t catch_eval(struct cx_macro_eval *eval,
   if (!cx_compile(cx, cx_vec_get(&eval->toks, 1), cx_vec_end(&eval->toks), bin)) {
     return -1;
   }
+
+  cx_op_init(bin, CX_OPOPCATCH(), tok_idx)->as_popcatch.n = ncatch;
 
   for (struct cx_op *op = cx_vec_get(&bin->ops, start_pc);
        op != cx_vec_end(&bin->ops);

@@ -1,12 +1,6 @@
-* add support for nil catch
-** #nil instead of type
-** catch.type is NULL
-** process in catch loop without breaking
-*** call without error pushed
-** call in scope deref before deinit
-* change lib getters like cx_get_type
 * change CX_TGROUP to dump everything to outer stack on exit
 ** update README
+* change lib getters like cx_get_type
 * extract cx/math/rat lib
 * ---
 * switch read-bytes to use fread if _ptr

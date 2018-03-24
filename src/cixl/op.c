@@ -577,6 +577,26 @@ cx_op_type(CX_OLIBDEF, {
     type.emit_init = libdef_emit_init;
   });
 
+static bool popcatch_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
+  return cx_pop_catch(cx_scope(cx, 0), op->as_popcatch.n);
+}
+
+static bool popcatch_emit(struct cx_op *op,
+			 struct cx_bin *bin,
+			 FILE *out,
+			 struct cx *cx) {
+  fprintf(out,
+	  "if (!cx_pop_catch(cx_scope(cx, 0), %d)) { return false; }\n",
+	  op->as_popcatch.n);
+  
+  return true;
+}
+
+cx_op_type(CX_OPOPCATCH, {
+    type.eval = popcatch_eval;
+    type.emit = popcatch_emit;
+  });
+
 static bool poplib_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
   cx_pop_lib(cx);
   return true;

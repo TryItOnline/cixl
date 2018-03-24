@@ -213,7 +213,7 @@ static bool read_next(struct cx_iter *iter,
   cx_bin_clear(&it->bin);
   struct cx_tok *t = cx_vec_start(&it->toks);
   if (!cx_compile(cx, t, t+1, &it->bin)) { return false; }
-  if (!cx_eval(&it->bin, 0, cx)) { return false; }
+  if (!cx_eval(&it->bin, 0, -1, cx)) { return false; }
   struct cx_box *v = cx_pop(scope, true);
 
   if (!v) {
@@ -313,7 +313,7 @@ static bool normal_mode_imp(struct cx_scope *scope) {
 static bool load_imp(struct cx_scope *scope) {
   struct cx_box p = *cx_test(cx_pop(scope, false));
   struct cx_bin *bin = cx_bin_new();
-  bool ok = cx_load(scope->cx, p.as_str->data, bin) && cx_eval(bin, 0, scope->cx);
+  bool ok = cx_load(scope->cx, p.as_str->data, bin) && cx_eval(bin, 0, -1, scope->cx);
   cx_bin_deref(bin);
   cx_box_deinit(&p);
   return ok;
