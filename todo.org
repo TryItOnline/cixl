@@ -2,11 +2,6 @@
 ** update README
 * change lib getters like cx_get_type
 * extract cx/math/rat lib
-* ---
-* switch read-bytes to use fread if _ptr
-* switch file char iter to use read if !_ptr
-** check == 0 instead of feof
-* add seq zip/unzip fns
 * add and/or tests
 * add filter tests
 * optimize const emit
