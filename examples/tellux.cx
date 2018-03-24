@@ -9,7 +9,7 @@ include: 'ansi.cx';
 
 use:
   (cx/abc #nil #t #f A Bool Char Int Sym)
-  (cx/cond = < > >= ! if if-else)
+  (cx/cond = < > >= ! if if-else or)
   (cx/const define:)
   (cx/error catch: dump)
   (cx/func func:)
@@ -23,7 +23,7 @@ use:
   (cx/pair .)
   (cx/ref ref deref set set-call)
   (cx/stack % %% ~ _)
-  (cx/str char int upper)
+  (cx/str char int is-graph upper)
   (cx/table Table new put)
   (cx/var let:);
 
@@ -234,24 +234,24 @@ func: get-offs(x y Int)(_ Int)
   $y -- $max-x deref * $x +;
 
 func: handle-key(`edit c Char)(_ Bool)
-  #out $c print
-  $buffer $x deref $y deref get-offs $c $state deref . put
+  $c is-graph {$c @@s =} or {
+    #out $c print
+    $buffer $x deref $y deref get-offs $c $state deref . put
   
-  $x {
-    % $max-x deref < {
-      ++
-    } {
-      $y {
-        let: y ++;
-        #out 1 $y ++ move-to print
-	$y
-      } set-call
+    $x {
+      % $max-x deref < {
+        ++
+      } {
+        $y {
+          let: y ++;
+          #out 1 $y ++ move-to print
+	  $y
+        } set-call
       
-      _ 1
-    } if-else
-  } set-call
-  
-  #t;
+        _ 1
+      } if-else
+    } set-call
+  } if #t;
 
 resize
 raw-mode

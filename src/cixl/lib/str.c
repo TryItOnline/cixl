@@ -145,6 +145,13 @@ static bool split_imp(struct cx_scope *scope) {
   return true;
 }
 
+static bool is_graph_imp(struct cx_scope *scope) {
+  struct cx_box *v = cx_test(cx_peek(scope, false));
+  bool ig = isgraph(v->as_char);
+  cx_box_init(v, scope->cx->bool_type)->as_bool = ig;
+  return true;
+}
+
 static bool char_upper_imp(struct cx_scope *scope) {
   struct cx_box *v = cx_test(cx_peek(scope, false));
   v->as_char = toupper(v->as_char);
@@ -342,7 +349,8 @@ static bool join_imp(struct cx_scope *scope) {
 cx_lib(cx_init_str, "cx/str") {
   struct cx *cx = lib->cx;
     
-  if (!cx_use(cx, "cx/abc", "A", "Char", "Cmp", "Int", "Iter", "Opt", "Seq", "Str")) {
+  if (!cx_use(cx, "cx/abc",
+	      "A", "Bool", "Char", "Cmp", "Int", "Iter", "Opt", "Seq", "Str")) {
     return false;
   }
 
@@ -360,6 +368,11 @@ cx_lib(cx_init_str, "cx/str") {
 	       cx_args(cx_arg("in", cx->seq_type), cx_arg("s", cx->any_type)),
 	       cx_args(cx_arg(NULL, cx->iter_type)),
 	       split_imp);
+
+  cx_add_cfunc(lib, "is-graph",
+	       cx_args(cx_arg("c", cx->char_type)),
+	       cx_args(cx_arg(NULL, cx->bool_type)),
+	       is_graph_imp);
 
   cx_add_cfunc(lib, "upper",
 	       cx_args(cx_arg("c", cx->char_type)),

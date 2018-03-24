@@ -1,4 +1,3 @@
-* test is-graphic || @@s on edit
 * add p + a-z to pick fg color at cursor
 ** add fgcolor mode
 ** put in specified palette slot
