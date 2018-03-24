@@ -1,5 +1,5 @@
-* replace e/E and h/H with shifts for arrows
-** move half way in the specified direction
+* add tellux color selection
+** add style on buffer update
 * optimize const emit
 ** add op_type.emit_consts
 *** rewrite getconst emit

@@ -19,18 +19,22 @@ use:
     move-down move-left move-right move-to move-up normal-mode raw-mode say
     screen-size)
   (cx/iter while)
-  (cx/math -- ++ + *)
+  (cx/math ++ -- + - * / int)
   (cx/pair .)
   (cx/ref ref deref set set-call)
   (cx/stack % %% ~ _)
-  (cx/str int)
+  (cx/str int upper)
   (cx/table Table new put)
   (cx/var let:);
 
-define: key-up    @i;
-define: key-down  @k;
-define: key-left  @j;
-define: key-right @l;
+define: key-up      @i;
+define: key-up-n    #key-up upper;
+define: key-down    @k;
+define: key-down-n  #key-down upper;
+define: key-left    @j;
+define: key-left-n  #key-left upper;
+define: key-right   @l;
+define: key-right-n #key-right upper;
 
 define: key-quit   @Q;
 define: key-resize @R;
@@ -70,39 +74,55 @@ func: print-pos()()
   #out 11 1 move-to print
   #out $y deref print;
 
-func: go-left()(_ Bool)
-  $x {
-    % 1 > {
-      #out 1 move-left print
-      -- #t ~
+func: go-up(n Int)(_ Bool)
+  $y  {
+    let: v;
+    let: dv $v $n > $n {$v --} if-else;
+
+    $dv {
+      #out $n move-up print
+      #t $v $dv -
     } {
-      $y {
-        let: y;
-	
-        $y 1 > {
-	  _
-	  #out $max-x deref $y move-to print
-	  #t $max-x deref $y --
-	} {#f ~ $y} if-else
-      } set-call
+      #f $v
     } if-else
   } set-call;
 
-func: go-right()(_ Bool)
-  $x {
-    % $max-x deref < {
-      #out 1 move-right print
-      ++ #t ~
+func: go-down(n Int)(_ Bool)
+  $y  {
+    let: v;
+    let: dv $max-y deref $v - % $n > {_ $n} if;
+
+    $dv {
+      #out $n move-down print
+      #t $v $dv +
     } {
-      $y {
-        let: y;
-	
-        $y $max-y deref < {
-	  _
-	  #out 1 $y 2 + move-to print
-	  #t 1 $y ++
-	} {#f ~ $y} if-else
-      } set-call
+      #f $v
+    } if-else
+  } set-call;
+
+func: go-left(n Int)(_ Bool)
+  $x  {
+    let: v;
+    let: dv $v $n > $n {$v --} if-else;
+
+    $dv {
+      #out $n move-left print
+      #t $v $dv -
+    } {
+      #f $v
+    } if-else
+  } set-call;
+
+func: go-right(n Int)(_ Bool)
+  $x  {
+    let: v;
+    let: dv $max-x deref $v - % $n > {_ $n} if;
+
+    $dv {
+      #out $n move-right print
+      #t $v $dv +
+    } {
+      #f $v
     } if-else
   } set-call;
 
@@ -117,7 +137,7 @@ func: handle-key(`command #key-resize)(_ Bool)
   resize #t;
 
 func: handle-key(m Sym #key-back)(_ Bool)
-  go-left {
+  1 go-left {
     #out #reset-style print
     #out @@s print
     #out 1 move-left print
@@ -126,26 +146,36 @@ func: handle-key(m Sym #key-back)(_ Bool)
   #t;
 
 func: handle-key(`command #key-up)(_ Bool)
-  $y  {
-    % 1 > {
-      #out 1 move-up print
-      --
-    } if
-  } set-call #t;
+  1 go-up _ #t;
+
+func: handle-key(`command #key-up-n)(_ Bool)
+  let: n $y deref 2 / int;
+  $n { $n go-up _ } if
+  #t;
 
 func: handle-key(`command #key-down)(_ Bool)
-  $y {
-    % $max-y deref < {
-      #out 1 move-down print
-      ++
-    } if
-  } set-call #t;
+  1 go-down _ #t;
+
+func: handle-key(`command #key-down-n)(_ Bool)
+  let: n $max-y deref $y deref - ++ 2 / int;
+  $n { $n go-down _ } if
+  #t;
 
 func: handle-key(`command #key-left)(_ Bool)
-  go-left _ #t;
+  1 go-left _ #t;
+
+func: handle-key(`command #key-left-n)(_ Bool)
+  let: n $x deref 2 / int;
+  $n { $n go-left _ } if
+  #t;
 
 func: handle-key(`command #key-right)(_ Bool)
-  go-right _ #t;
+  1 go-right _ #t;
+
+func: handle-key(`command #key-right-n)(_ Bool)
+  let: n $max-x deref $x deref - ++ 2 / int;
+  $n { $n go-right _ } if
+  #t;
 
 func: set-pos(new-x new-y Int)()
   $x $new-x set
