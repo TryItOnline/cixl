@@ -56,10 +56,13 @@ let: bg-colors     Table new;
 let: fg-colors     Table new;
 let: buffer        Table new;
 
+func: p(_ A)()
+  #out ~ print;
+
 func: set-pos(new-x new-y Int)()
   $x $new-x set
   $y $new-y set
-  #out $new-x ++ $new-y ++ move-to print;
+  $new-x ++ $new-y ++ move-to p;
 
 func: get-offs(x y Int)(_ Int)
   $y $max-x deref * $x +;
@@ -70,35 +73,35 @@ func: resize()()
   $max-x ~ set;
 
 func: print-mode()()
-  #out 1 1 move-to print
-  #out $mode deref `edit = @E @C if-else print;
+  1 1 move-to p
+  $mode deref `edit = @E @C if-else p;
   
 func: print-footer()()
-  #out 1 $max-y deref move-to print
-  #out @x print
-  #out 7 $max-y deref move-to print
-  #out @y print;
+  1 $max-y deref move-to p
+  @x p
+  7 $max-y deref move-to p
+  @y p;
   
 func: print-pos()()
-  #out 3 $max-y deref move-to print
-  #out '   ' print
-  #out 3 move-left print
-  #out $x deref print
-  #out 9 $max-y deref move-to print
-  #out '   ' print
-  #out 3 move-left print
-  #out $y deref print;
+  3 $max-y deref move-to p
+  '   ' p
+  3 move-left p
+  $x deref p
+  9 $max-y deref move-to p
+  '   ' p
+  3 move-left p
+  $y deref p;
 
 func: print-palette()()
   26 {
     let: i;
     let: c $i @a int + char;
-    #out 1 $i 2 + move-to print
-    #out $c print
+    1 $i 2 + move-to p
+    $c p
   } for;
 
 func: print-wheel()()
-  #out 2 1 move-to print
+  2 1 move-to p
   let: o 2 0 get-offs ref;
   
   5 {
@@ -107,8 +110,8 @@ func: print-wheel()()
       let: b 63 *;
       5 {
         let: g 63 *;
-        #out $r $g $b pick-bgcolor print
-        #out @@s print
+        $r $g $b pick-bgcolor p
+        @@s p
 	
 	$o {
 	  let: po;
@@ -121,7 +124,7 @@ func: print-wheel()()
     } for
   } for
   
-  #out #reset-style print;
+  #reset-style p;
 
 func: go-up(n Int)(_ Bool)
   $y  {
@@ -129,7 +132,7 @@ func: go-up(n Int)(_ Bool)
     let: dv $v $n >= $n {$v} if-else;
 
     $dv {
-      #out $n move-up print
+      $n move-up p
       #t $v $dv -
     } {
       #f $v
@@ -142,7 +145,7 @@ func: go-down(n Int)(_ Bool)
     let: dv $max-y deref 2 - $v - % $n > {_ $n} if;
 
     $dv {
-      #out $n move-down print
+      $n move-down p
       #t $v $dv +
     } {
       #f $v
@@ -155,7 +158,7 @@ func: go-left(n Int)(_ Bool)
     let: dv $v $n > $n {$v --} if-else;
 
     $dv {
-      #out $n move-left print
+      $n move-left p
       #t $v $dv -
     } {
       #f $v
@@ -168,7 +171,7 @@ func: go-right(n Int)(_ Bool)
     let: dv $max-x deref $v - % $n > {_ $n} if;
 
     $dv {
-      #out $n move-right print
+      $n move-right p
       #t $v $dv +
     } {
       #f $v
@@ -187,9 +190,9 @@ func: handle-key(`command #key-resize)(_ Bool)
 
 func: handle-key(m Sym #key-back)(_ Bool)
   1 go-left {
-    #out #reset-style print
-    #out @@s print
-    #out 1 move-left print
+    #reset-style p
+    @@s p
+    1 move-left p
   } if
   
   #t;
@@ -276,27 +279,27 @@ func: handle-key(`put-color c Char)(_ Bool)
     let: (px py) 1 $c int @a int - 2 +;
     let: po $px $py get-offs;
     
-    #out #save-pos print
-    #out $px $py move-to print      
-    #out #reset-style print
+    #save-pos p
+    $px $py move-to p      
+    #reset-style p
 
     $bg {
-      #out $bg deref splat pick-bgcolor print
+      $bg deref splat pick-bgcolor p
       $bg-colors $po $bg deref put
     } {
       $bg-colors $po delete
     } if-else
 
     $fg {
-      #out $fg deref splat pick-fgcolor print
+      $fg deref splat pick-fgcolor p
       $fg-colors $po $fg deref put
     } {
       $fg-colors $po delete
     } if-else
         
-    #out $c print
-    #out #reset-style print
-    #out #restore-pos print
+    $c p
+    #reset-style p
+    #restore-pos p
   } if
 
   $mode `command set
@@ -314,44 +317,44 @@ func: handle-key(`edit c Char)(_ Bool)
     let: o $x deref $y deref get-offs;
 
     $bg {
-      #out $bg deref splat pick-bgcolor print
+      $bg deref splat pick-bgcolor p
       $bg-colors $o $bg deref put
     } {
       $bg-colors $o delete
     } if-else
     
     $fg {
-      #out $fg deref splat pick-fgcolor print
+      $fg deref splat pick-fgcolor p
       $fg-colors $o $fg deref put
     } {
       $fg-colors $o delete
     } if-else
     
-    #out $c print
-    #out #reset-style print
+    $c p
+    #reset-style p
     $buffer $o $c put
     $x {% $max-x deref < &++ if} set-call
   } if #t;
 
 resize
 raw-mode
-#out #clear-screen print
+#clear-screen p
 print-wheel
 print-palette
 print-footer
-#out 2 2 move-to print
+2 2 move-to p
 
 {
-  #out #save-pos print
+  #save-pos p
   print-mode
   print-pos
-  #out #restore-pos print
+  #restore-pos p
 
   $mode deref
   #in read-char
   handle-key
 } while
 
-#out #clear-screen print
-#out 1 1 move-to print
+#clear-screen p
+1 1 move-to p
 normal-mode
