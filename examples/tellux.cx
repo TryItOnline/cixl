@@ -39,17 +39,18 @@ define: key-right-n #key-right upper;
 define: key-quit   @Q;
 define: key-resize @R;
 define: key-x-home @h;
-define: key-y-home @H;
+define: key-y-home #key-x-home upper;
 define: key-x-end  @e;
-define: key-y-end  @E;
+define: key-y-end  #key-x-end upper;
 
 define: key-pick-bg   @b;
 define: key-pick-fg   @f;
-define: key-put-color @C;
+define: key-get-color @c;
+define: key-put-color #key-get-color upper;
 
 let: (max-x max-y) 1 ref %%;
 let: mode          `command ref;
-let: (x y)         1 ref 2 ref;
+let: (x y)         1 ref %%;
 let: (bg fg)       [0 0 0] ref [255 255 255] ref;
 let: bg-colors     Table new;
 let: fg-colors     Table new;
@@ -58,7 +59,7 @@ let: buffer        Table new;
 func: set-pos(new-x new-y Int)()
   $x $new-x set
   $y $new-y set
-  #out $new-x ++ $new-y move-to print;
+  #out $new-x ++ $new-y ++ move-to print;
 
 func: get-offs(x y Int)(_ Int)
   $y $max-x deref * $x +;
@@ -98,14 +99,14 @@ func: print-palette()()
 
 func: print-wheel()()
   #out 2 1 move-to print
-  let: o 2 1 get-offs ref;
+  let: o 2 0 get-offs ref;
   
   5 {
     let: r 63 *;
     5 {
-      let: g 63 *;
+      let: b 63 *;
       5 {
-        let: b 63 *;
+        let: g 63 *;
         #out $r $g $b pick-bgcolor print
         #out @@s print
 	
@@ -125,7 +126,7 @@ func: print-wheel()()
 func: go-up(n Int)(_ Bool)
   $y  {
     let: v;
-    let: dv $v $n > $n {$v --} if-else;
+    let: dv $v $n >= $n {$v} if-else;
 
     $dv {
       #out $n move-up print
@@ -251,6 +252,21 @@ func: handle-key(`command #key-pick-fg)(_ Bool)
   $fg $fg-colors $o get set
   #t;
 
+func: handle-key(`command #key-get-color)(_ Bool)
+  $mode `get-color set
+  #t;
+
+func: handle-key(`get-color c Char)(_ Bool)
+  $c @a >= {$c @z <=} and {
+    let: (px py) 1 $c int @a int - 2 +;
+    let: po $px $py get-offs;
+    $fg $fg-colors $po get set
+    $bg $bg-colors $po get set
+  } if
+
+  $mode `command set
+  #t;
+  
 func: handle-key(`command #key-put-color)(_ Bool)
   $mode `put-color set
   #t;
@@ -320,9 +336,9 @@ func: handle-key(`edit c Char)(_ Bool)
 resize
 raw-mode
 #out #clear-screen print
-print-footer
-print-palette
 print-wheel
+print-palette
+print-footer
 #out 2 2 move-to print
 
 {
@@ -337,4 +353,5 @@ print-wheel
 } while
 
 #out #clear-screen print
+#out 1 1 move-to print
 normal-mode
