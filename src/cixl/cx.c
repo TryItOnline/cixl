@@ -1,4 +1,3 @@
-#include <dlfcn.h>
 #include <errno.h>
 #include <stdarg.h>
 #include <stdlib.h>
@@ -44,6 +43,7 @@
 #include "cixl/lib/time.h"
 #include "cixl/lib/type.h"
 #include "cixl/lib/var.h"
+#include "cixl/link.h"
 #include "cixl/nil.h"
 #include "cixl/op.h"
 #include "cixl/pair.h"
@@ -123,7 +123,7 @@ struct cx *cx_init(struct cx *cx) {
   cx_vec_init(&cx->macros, sizeof(struct cx_macro *));
   cx_vec_init(&cx->funcs, sizeof(struct cx_func *));
   cx_vec_init(&cx->fimps, sizeof(struct cx_fimp *));
-  cx_vec_init(&cx->dlibs, sizeof(void *));
+  cx_vec_init(&cx->links, sizeof(struct cx_link));
   
   cx_set_init(&cx->lib_lookup, sizeof(struct cx_lib *), cx_cmp_sym);
   cx->lib_lookup.key = get_lib_id;
@@ -219,8 +219,8 @@ struct cx *cx_deinit(struct cx *cx) {
   cx_do_vec(&cx->fimps, struct cx_fimp *, f) { free(cx_fimp_deinit(*f)); }
   cx_vec_deinit(&cx->fimps);
 
-  cx_do_vec(&cx->dlibs, void *, h) { cx_test(dlclose(*h) == 0); }
-  cx_vec_deinit(&cx->dlibs);
+  cx_do_vec(&cx->links, struct cx_link, l) { cx_link_deinit(l); }
+  cx_vec_deinit(&cx->links);
 
   cx_do_set(&cx->lib_lookup, struct cx_lib *, l) { free(cx_lib_deinit(*l)); }
   cx_set_deinit(&cx->lib_lookup);

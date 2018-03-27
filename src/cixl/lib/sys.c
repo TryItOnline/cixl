@@ -10,22 +10,10 @@
 #include "cixl/func.h"
 #include "cixl/lib.h"
 #include "cixl/lib/sys.h"
+#include "cixl/link.h"
 #include "cixl/scope.h"
 #include "cixl/str.h"
 #include "cixl/stack.h"
-
-static bool home_dir_imp(struct cx_scope *scope) {
-  const char *d = cx_home_dir();
-  cx_box_init(cx_push(scope), scope->cx->str_type)->as_str = cx_str_new(d, strlen(d));
-  return true;
-}
-
-static bool make_dir_imp(struct cx_scope *scope) {
-  struct cx_box p = *cx_test(cx_pop(scope, false));
-  bool ok = cx_make_dir(p.as_str->data);
-  cx_box_deinit(&p);
-  return ok;
-}
 
 static bool link_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   int row = cx->row, col = cx->col;
@@ -51,20 +39,24 @@ static bool link_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
       goto exit;
     }
 
-    char *fn = t->as_box.as_str->data;
+    char *p = t->as_box.as_str->data;
+    int pl = strlen(p);
+    char fp[pl+4];
+    strcpy(fp, p);
+    strcpy(fp+pl, ".so");
     
     dlerror();
-    void *h = dlopen(fn, RTLD_LAZY | RTLD_GLOBAL);
+    void *h = dlopen(fp, RTLD_LAZY | RTLD_GLOBAL);
     
     if (!h) {
       cx_error(cx, t->row, t->col,
 	       "Linked library not found: %s\n%s",
-	       fn, dlerror());
+	       p, dlerror());
       
       goto exit;
     }
 
-    *(void **)cx_vec_push(&cx->dlibs) = h;
+    cx_link_init(cx_vec_push(&cx->links), cx, p, h);
   }
   
   ok = true;
@@ -123,6 +115,19 @@ static bool init_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
     cx_vec_deinit(&fns);
     return ok;
   }
+}
+
+static bool home_dir_imp(struct cx_scope *scope) {
+  const char *d = cx_home_dir();
+  cx_box_init(cx_push(scope), scope->cx->str_type)->as_str = cx_str_new(d, strlen(d));
+  return true;
+}
+
+static bool make_dir_imp(struct cx_scope *scope) {
+  struct cx_box p = *cx_test(cx_pop(scope, false));
+  bool ok = cx_make_dir(p.as_str->data);
+  cx_box_deinit(&p);
+  return ok;
 }
 
 cx_lib(cx_init_sys, "cx/sys") {
