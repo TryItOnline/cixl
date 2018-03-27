@@ -37,4 +37,8 @@ The libsodium APIs used by [cxcrypt](https://github.com/basic-gongfu/cxcrypt) re
 ### Examples
 [encrypt.cx](https://raw.githubusercontent.com/basic-gongfu/cxcrypt/master/examples/encrypt.cx) and [decrypt.cx](https://raw.githubusercontent.com/basic-gongfu/cxcrypt/master/examples/decrypt.cx) both use [cxcrypt](https://github.com/basic-gongfu/cxcrypt) to implement basic tools for encrypting/decrypting arbitrary files from the shell, Linux/64 binaries may be found [here](https://github.com/basic-gongfu/cxbin/tree/master/linux64).
 
+```
+$ cat message.txt | encrypt secret | decrypt secret > decrypted.txt
+```
+
 Give me a yell if something is unclear, wrong or missing. And please consider helping out with a donation via [paypal](https://paypal.me/basicgongfu) or [liberapay](https://liberapay.com/basic-gongfu/donate) if you find this worthwhile, every contribution counts. You may find more posts in the same spirit [here](https://github.com/basic-gongfu/cixl/tree/master/devlog).
