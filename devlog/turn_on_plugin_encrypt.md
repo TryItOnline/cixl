@@ -10,22 +10,20 @@ link:
   'libsodium'
   'libcxcrypt';
 
-/* Initialize cxcrypt */
+/* Initialize cxcrypt plugin */
 init: 'crypt';
 
-/* Plugins are not included in the default cx package and have to be used
-   separately */
-
+/* Plugins are not included in the default cx lib and have to be used separately */
 use: cx cx/crypt;
 
 /* Hash key using random salt */
 let: s 'key' Salt new secret;
 
-/* Equality is overloaded to do the right thing */
+/* Secret equality is overloaded to do the right thing */
 $s 'key' = check
 $s 'wrong' = !check
 
-/* Encryption round trip */
+/* Round trip encryption using hashed key */
 $s 'message' encrypt
 $s decrypt 'message' = check
 ```
