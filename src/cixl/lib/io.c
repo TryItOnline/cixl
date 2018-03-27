@@ -99,7 +99,7 @@ static bool line_next(struct cx_iter *iter,
       return false;
     }
   } else {
-    cx_box_init(out, cx->str_type)->as_str = cx_str_new(it->line);
+    cx_box_init(out, cx->str_type)->as_str = cx_str_new(it->line, it->len);
   }
   
   return true;
@@ -256,57 +256,6 @@ static bool print_imp(struct cx_scope *scope) {
   cx_print(&v, cx_file_ptr(out.as_file));
   cx_box_deinit(&v);
   cx_box_deinit(&out);
-  return true;
-}
-
-static bool ask_imp(struct cx_scope *scope) {
-  struct cx_box p = *cx_test(cx_pop(scope, false));
-  fputs(p.as_str->data, stdout);
-  cx_box_deinit(&p);
-  char *line = NULL;
-  size_t len = 0;
-  
-  if (!cx_get_line(&line, &len, stdin)) { return false; }
-  cx_box_init(cx_push(scope), scope->cx->str_type)->as_str = cx_str_new(line);
-  free(line);
-  return true;
-}
-
-static bool raw_mode_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  static struct termios tio;
-
-  if (tcgetattr(STDIN_FILENO, &tio) == -1) {
-    cx_error(cx, cx->row, cx->col, "Failed getting attribute: %d", errno);
-    return false;
-  }
-  
-  tio.c_lflag &= ~(ICANON | ECHO);
-
-  if (tcsetattr(STDIN_FILENO, TCSANOW, &tio) == -1) {
-    cx_error(cx, cx->row, cx->col, "Failed setting attribute: %d", errno);
-    return false;
-  }
-  
-  return true;
-}
-
-static bool normal_mode_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  static struct termios tio;
-
-  if (tcgetattr(STDIN_FILENO, &tio) == -1) {
-    cx_error(cx, cx->row, cx->col, "Failed getting attribute: %d", errno);
-    return false;
-  }
-  
-  tio.c_lflag |= ICANON | ECHO;
-
-  if (tcsetattr(STDIN_FILENO, TCSANOW, &tio) == -1) {
-    cx_error(cx, cx->row, cx->col, "Failed setting attribute: %d", errno);
-    return false;
-  }
-  
   return true;
 }
 
@@ -517,20 +466,6 @@ cx_lib(cx_init_io, "cx/io") {
 	       cx_args(),
 	       print_imp);
     
-  cx_add_cfunc(lib, "ask",
-	       cx_args(cx_arg("prompt", cx->str_type)), cx_args(),
-	       ask_imp);
-
-  cx_add_cfunc(lib, "raw-mode",
-	       cx_args(),
-	       cx_args(),
-	       raw_mode_imp);
-
-  cx_add_cfunc(lib, "normal-mode",
-	       cx_args(),
-	       cx_args(),
-	       normal_mode_imp);
-
   cx_add_cfunc(lib, "load",
 	       cx_args(cx_arg("path", cx->str_type)), cx_args(),
 	       load_imp);  
@@ -586,11 +521,6 @@ cx_lib(cx_init_io, "cx/io") {
 	       cx_args(cx_arg("f", cx->rfile_type)),
 	       cx_args(cx_arg(NULL, cx->iter_type)),
 	       reverse_imp);
-
-  cx_add_cxfunc(lib, "say",
-		cx_args(cx_arg("v", cx->any_type)), cx_args(),
-		"#out $v print\n"
-		"#out @@n print");
 
   return true;
 }

@@ -73,7 +73,7 @@ bool filter_next(struct cx_iter *iter, struct cx_box *out, struct cx_scope *scop
 
   while (true) {
     if (!cx_iter_next(it->in, &iv, scope)) {
-      iter->done = true;
+      iter->done = it->in->done;
       return false;
     }
     

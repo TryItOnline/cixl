@@ -74,7 +74,7 @@ bool split_next(struct cx_iter *iter, struct cx_box *out, struct cx_scope *scope
     }
   }
 
-  cx_box_init(out, cx->str_type)->as_str = cx_str_new(it->out.data);
+  cx_box_init(out, cx->str_type)->as_str = cx_str_new(it->out.data, it->out.size);
   ok = true;
  exit:
   cx_mfile_close(&it->out);
@@ -108,6 +108,103 @@ struct cx_split_iter *cx_split_iter_new(struct cx_iter *in) {
   cx_mfile_open(&it->out);
   it->split_fn = NULL;
   return it;
+}
+
+struct hex_coder {
+  struct cx_iter iter;
+  struct cx_iter *in;
+  int next;
+};
+
+static bool hex_coder_next(struct cx_iter *iter,
+			   struct cx_box *out,
+			   struct cx_scope *scope) {
+  struct cx *cx = scope->cx;
+  struct hex_coder *it = cx_baseof(iter, struct hex_coder, iter);
+  int c = it->next;
+
+  if (c == -1) {
+    struct cx_box v;
+
+    if (!cx_iter_next(it->in, &v, scope)) {
+      iter->done = it->in->done;
+      return false;
+    }
+
+    c = cx_bin_hex(v.as_char / 16);
+    it->next = cx_bin_hex(v.as_char % 16);
+  } else {
+    it->next = -1;
+  }
+    
+  cx_box_init(out, cx->char_type)->as_char = c;
+  return true;
+}
+
+static void *hex_coder_deinit(struct cx_iter *iter) {
+  struct hex_coder *it = cx_baseof(iter, struct hex_coder, iter);
+  cx_iter_deref(it->in);
+  return it;
+}
+
+static cx_iter_type(hex_coder, {
+    type.next = hex_coder_next;
+    type.deinit = hex_coder_deinit;
+  });
+
+static struct cx_iter *hex_coder_new(struct cx_iter *in) {
+  struct hex_coder *it = malloc(sizeof(struct hex_coder));
+  cx_iter_init(&it->iter, hex_coder());
+  it->in = cx_iter_ref(in);
+  it->next = -1;
+  return &it->iter;
+}
+
+struct hex_decoder {
+  struct cx_iter iter;
+  struct cx_iter *in;
+};
+
+static bool hex_decoder_next(struct cx_iter *iter,
+		      struct cx_box *out,
+		      struct cx_scope *scope) {
+  struct cx *cx = scope->cx;
+  struct hex_decoder *it = cx_baseof(iter, struct hex_decoder, iter);
+  struct cx_box v;
+  
+  if (!cx_iter_next(it->in, &v, scope)) {
+    iter->done = it->in->done;
+    return false;
+  }
+
+  int c = cx_hex_bin(v.as_char) * 16;
+  
+  if (!cx_iter_next(it->in, &v, scope)) {
+    iter->done = it->in->done;
+    return false;
+  }
+
+  c += cx_hex_bin(v.as_char);    
+  cx_box_init(out, cx->char_type)->as_char = c;
+  return true;
+}
+
+static void *hex_decoder_deinit(struct cx_iter *iter) {
+  struct hex_decoder *it = cx_baseof(iter, struct hex_decoder, iter);
+  cx_iter_deref(it->in);
+  return it;
+}
+
+static cx_iter_type(hex_decoder, {
+    type.next = hex_decoder_next;
+    type.deinit = hex_decoder_deinit;
+  });
+
+static struct cx_iter *hex_decoder_new(struct cx_iter *in) {
+  struct hex_decoder *it = malloc(sizeof(struct hex_decoder));
+  cx_iter_init(&it->iter, hex_decoder());
+  it->in = cx_iter_ref(in);
+  return &it->iter;
 }
 
 bool split_lines(unsigned char c) { return c == '\r' || c == '\n'; }
@@ -186,7 +283,7 @@ static bool int_char_imp(struct cx_scope *scope) {
 static bool int_str_imp(struct cx_scope *scope) {
   struct cx_box *v = cx_test(cx_peek(scope, false));
   char *s = cx_fmt("%" PRId64, v->as_int);
-  cx_box_init(v, scope->cx->str_type)->as_str = cx_str_new(s);
+  cx_box_init(v, scope->cx->str_type)->as_str = cx_str_new(s, strlen(s));
   free(s);
   return true;
 }
@@ -252,12 +349,12 @@ static bool seq_imp(struct cx_scope *scope) {
       cx_mfile_close(&out);
       goto exit;
     }
-    
+
     fputc(c.as_char, out.stream);
   }
 
   cx_mfile_close(&out);
-  cx_box_init(cx_push(scope), cx->str_type)->as_str = cx_str_new(out.data);
+  cx_box_init(cx_push(scope), cx->str_type)->as_str = cx_str_new(out.data, out.size);
   ok = true;
  exit:
   free(out.data);
@@ -297,22 +394,24 @@ static bool str_sub_imp(struct cx_scope *scope) {
 }
 
 static bool str_upper_imp(struct cx_scope *scope) {
-  struct cx_box s = *cx_test(cx_pop(scope, false));
-  for (char *c = s.as_str->data; *c; c++) { *c = toupper(*c); }
-  cx_box_deinit(&s);
+  struct cx_box v = *cx_test(cx_pop(scope, false));
+  struct cx_str *s = v.as_str;
+  for (char *c = s->data; c < s->data+s->len; c++) { *c = toupper(*c); }
+  cx_box_deinit(&v);
   return true;
 }
 
 static bool str_lower_imp(struct cx_scope *scope) {
-  struct cx_box s = *cx_test(cx_pop(scope, false));
-  for (char *c = s.as_str->data; *c; c++) { *c = tolower(*c); }
-  cx_box_deinit(&s);
+  struct cx_box v = *cx_test(cx_pop(scope, false));
+  struct cx_str *s = v.as_str;
+  for (char *c = s->data; c < s->data+s->len; c++) { *c = tolower(*c); }
+  cx_box_deinit(&v);
   return true;
 }
 
 static bool str_reverse_imp(struct cx_scope *scope) {
   struct cx_box s = *cx_test(cx_pop(scope, false));
-  cx_reverse(s.as_str->data);
+  cx_reverse(s.as_str->data, s.as_str->len);
   cx_box_deinit(&s);
   return true;
 }
@@ -339,9 +438,25 @@ static bool join_imp(struct cx_scope *scope) {
 
   cx_iter_deref(it);
   cx_mfile_close(&out);
-  cx_box_init(cx_push(scope), cx->str_type)->as_str = cx_str_new(out.data);
+  cx_box_init(cx_push(scope), cx->str_type)->as_str = cx_str_new(out.data, out.size);
   free(out.data);
   cx_box_deinit(&sep);
+  cx_box_deinit(&in);
+  return true;
+}
+
+static bool hex_coder_imp(struct cx_scope *scope) {
+  struct cx_box in = *cx_test(cx_pop(scope, false));
+  struct cx_iter *it = hex_coder_new(cx_iter(&in));
+  cx_box_init(cx_push(scope), scope->cx->iter_type)->as_iter = it;
+  cx_box_deinit(&in);
+  return true;
+}
+
+static bool hex_decoder_imp(struct cx_scope *scope) {
+  struct cx_box in = *cx_test(cx_pop(scope, false));
+  struct cx_iter *it = hex_decoder_new(cx_iter(&in));
+  cx_box_init(cx_push(scope), scope->cx->iter_type)->as_iter = it;
   cx_box_deinit(&in);
   return true;
 }
@@ -446,6 +561,16 @@ cx_lib(cx_init_str, "cx/str") {
 		       cx_arg("sep", cx->opt_type)),
 	       cx_args(cx_arg(NULL, cx->str_type)),
 	      join_imp);
+
+  cx_add_cfunc(lib, "hex-coder",
+	       cx_args(cx_arg("in", cx->seq_type)),
+	       cx_args(cx_arg(NULL, cx->iter_type)),
+	       hex_coder_imp);
+
+  cx_add_cfunc(lib, "hex-decoder",
+	       cx_args(cx_arg("in", cx->seq_type)),
+	       cx_args(cx_arg(NULL, cx->iter_type)),
+	       hex_decoder_imp);
 
   return true;
 }

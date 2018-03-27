@@ -39,7 +39,7 @@ static void dump_imp(struct cx_box *v, FILE *out) {
     if (isgraph(c)) {
       fprintf(out, "@%c", v->as_char);
     } else {
-      fprintf(out, "@@%d", v->as_char);
+      fprintf(out, "@@%03d", v->as_char);
     }
   }
 }

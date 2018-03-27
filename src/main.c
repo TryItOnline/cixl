@@ -20,7 +20,7 @@ int main(int argc, char *argv[]) {
   cx_init_libs(&cx);
   cx_use(&cx, "cx/io", "include:");
   cx_use(&cx, "cx/meta", "lib:", "use:");
-  cx_use(&cx, "cx/sys", "#args");
+  cx_use(&cx, "cx/sys", "#args", "init:", "link:");
   
   bool emit = false;
   bool compile = false;
@@ -62,7 +62,7 @@ int main(int argc, char *argv[]) {
       
 	fputs("gcc -x c -std=gnu1x "
 	      "-Wall -Werror -Wno-unused-function -Wno-unused-but-set-variable "
-	      "-O2 -g - -lcixl",
+	      "-O2 -g - -lcixl -ldl",
 	      cmd.stream);
 	
 	for (; argi < argc; argi++) { fprintf(cmd.stream, " %s", argv[argi]); }

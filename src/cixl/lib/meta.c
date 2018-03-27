@@ -149,7 +149,7 @@ static bool use_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
 }
 
 static bool cx_lib_imp(struct cx_scope *scope) {
-  cx_box_init(cx_push(scope), scope->cx->lib_type)->as_lib = *scope->cx->lib;
+  cx_box_init(cx_push(scope), scope->cx->lib_type)->as_lib = *(scope->cx->lib-1);
   return true;
 }
 

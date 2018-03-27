@@ -1,3 +1,4 @@
+#include <dlfcn.h>
 #include <errno.h>
 #include <stdarg.h>
 #include <stdlib.h>
@@ -122,6 +123,7 @@ struct cx *cx_init(struct cx *cx) {
   cx_vec_init(&cx->macros, sizeof(struct cx_macro *));
   cx_vec_init(&cx->funcs, sizeof(struct cx_func *));
   cx_vec_init(&cx->fimps, sizeof(struct cx_fimp *));
+  cx_vec_init(&cx->dlibs, sizeof(void *));
   
   cx_set_init(&cx->lib_lookup, sizeof(struct cx_lib *), cx_cmp_sym);
   cx->lib_lookup.key = get_lib_id;
@@ -216,6 +218,9 @@ struct cx *cx_deinit(struct cx *cx) {
 
   cx_do_vec(&cx->fimps, struct cx_fimp *, f) { free(cx_fimp_deinit(*f)); }
   cx_vec_deinit(&cx->fimps);
+
+  cx_do_vec(&cx->dlibs, void *, h) { cx_test(dlclose(*h) == 0); }
+  cx_vec_deinit(&cx->dlibs);
 
   cx_do_set(&cx->lib_lookup, struct cx_lib *, l) { free(cx_lib_deinit(*l)); }
   cx_set_deinit(&cx->lib_lookup);
@@ -339,7 +344,7 @@ void cx_end(struct cx *cx) {
 }
 
 bool cx_funcall(struct cx *cx, const char *id) {
-  struct cx_func *func = cx_get_func(*cx->lib, id, false);
+  struct cx_func *func = cx_get_func(cx, id, false);
   if (!func) { return false; }
   struct cx_scope *s = cx_scope(cx, 0);
   struct cx_fimp *imp = cx_func_match(func, s);

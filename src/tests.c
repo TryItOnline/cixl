@@ -261,7 +261,7 @@ static void char_tests() {
   
   run(&cx, "use: cx/cond cx/error cx/iter cx/math cx/str;");
   run(&cx, "@a upper @A = check");
-  run(&cx, "@0 int 7 + char @7 = check");
+  run(&cx, "@@000 int 7 + char @@007 = check");
   
   cx_deinit(&cx);
 }
@@ -283,6 +283,7 @@ static void str_tests() {
   run(&cx, "['foo' 'bar' 'baz'] @/ join 'foo/bar/baz' = check");
   run(&cx, "'foo bar baz' {@@s =} split stack ['foo' 'bar' 'baz'] = check");
   run(&cx, "'foo bar baz' @@s split stack ['foo' 'bar' 'baz'] = check");
+  run(&cx, "'foo@027bar' 3 get @@027 = check");
   
   cx_deinit(&cx);
 }

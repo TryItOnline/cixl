@@ -106,7 +106,10 @@ struct cx_type *cx_vadd_type(struct cx_lib *lib, const char *id, va_list parents
   *(struct cx_type **)cx_vec_push(&cx->types) = *t;
   
   struct cx_type *pt = NULL;
-  while ((pt = va_arg(parents, struct cx_type *))) { cx_derive(*t, pt); }
+  while ((pt = va_arg(parents, struct cx_type *))) {
+    cx_derive(*t, pt);
+  }
+  
   return *t;
 }
 
@@ -216,15 +219,25 @@ struct cx_fimp *cx_add_cxfunc(struct cx_lib *lib,
   return imp;
 }
 
-struct cx_func *cx_get_func(struct cx_lib *lib, const char *id, bool silent) {
-  struct cx_func **f = cx_set_get(&lib->funcs, &id);
+static struct cx_func *lib_get_func(struct cx_lib **lib,
+				    const char *id,
+				    bool silent) {
+  struct cx *cx = (*lib)->cx;
+  struct cx_func **f = cx_set_get(&(*lib)->funcs, &id);
 
+  if (!f && lib > (struct cx_lib **)cx->libs.items) {
+    return lib_get_func(lib-1, id, silent);
+  }
+  
   if (!f && !silent) {
-    struct cx *cx = lib->cx;
     cx_error(cx, cx->row, cx->col, "Unknown func: '%s'", id);
   }
 
   return f ? *f : NULL;
+}
+
+struct cx_func *cx_get_func(struct cx *cx, const char *id, bool silent) {
+  return lib_get_func(cx->lib, id, silent);
 }
 
 struct cx_box *cx_get_const(struct cx_lib *lib, struct cx_sym id, bool silent) {

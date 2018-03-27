@@ -112,7 +112,7 @@ struct cx_error *cx_error(struct cx *cx, int row, int col, const char *spec, ...
   va_end(args);
   
   struct cx_box v;
-  cx_box_init(&v, cx->str_type)->as_str = cx_str_new(msg);
+  cx_box_init(&v, cx->str_type)->as_str = cx_str_new(msg, strlen(msg));
   free(msg);
   
   struct cx_error *e = new_error(cx, row, col, &v);

@@ -75,8 +75,9 @@ void cx_push_args(struct cx *cx, int argc, char *argv[]) {
     cx_test(cx_get_const(*cx->lib, cx_sym(cx, "args"), false))->as_ptr;
   
   for (int i=0; i < argc; i++) {
+    const char *a = argv[i];
     cx_box_init(cx_vec_push(&args->imp), cx->str_type)->as_str =
-      cx_str_new(argv[i]);
+      cx_str_new(a, strlen(a));
   }
 }
 
@@ -87,6 +88,7 @@ bool cx_emit_file(struct cx *cx, const char *fname, FILE *out) {
   if (!cx_load(cx, fname, bin)) { goto exit; }
 
   fputs("#include <stdlib.h>\n"
+	"#include <string.h>\n"
 	"#include <time.h>\n"
 	"#include \"cixl/arg.h\"\n"
 	"#include \"cixl/bin.h\"\n"
@@ -118,8 +120,9 @@ bool cx_emit_file(struct cx *cx, const char *fname, FILE *out) {
         "  cx_push_args(&cx, argc, argv);\n\n"
 
 	"  for (int i=1; i < argc; i++) {\n"
+	"    const char *a = argv[i];\n"
 	"    cx_box_init(cx_push(cx.root_scope), cx.str_type)->as_str = "
-	      "cx_str_new(argv[i]);\n"
+	      "cx_str_new(a, strlen(a));\n"
 	"  }\n\n"
 
 	"  if (!eval(&cx)) {\n"

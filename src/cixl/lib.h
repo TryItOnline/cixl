@@ -97,7 +97,7 @@ struct cx_fimp *cx_add_cxfunc(struct cx_lib *lib,
 			      int nrets, struct cx_arg *rets,
 			      const char *body);
 
-struct cx_func *cx_get_func(struct cx_lib *lib, const char *id, bool silent);
+struct cx_func *cx_get_func(struct cx *cx, const char *id, bool silent);
 
 struct cx_box *cx_get_const(struct cx_lib *lib, struct cx_sym id, bool silent);
 struct cx_box *cx_put_const(struct cx_lib *lib, struct cx_sym id, bool force);

@@ -36,7 +36,8 @@ static bool str_imp(struct cx_scope *scope) {
   struct cx *cx = scope->cx;
   struct cx_box in = *cx_test(cx_pop(scope, false));
   struct cx_buf *b = cx_baseof(in.as_file, struct cx_buf, file);
-  cx_box_init(cx_push(scope), cx->str_type)->as_str = cx_str_new(b->data);
+  cx_box_init(cx_push(scope), cx->str_type)->as_str =
+    cx_str_new(b->data+b->pos, b->len-b->pos);
   cx_box_deinit(&in);
   return true;
 }
@@ -109,7 +110,8 @@ cx_lib(cx_init_buf, "cx/io/buf") {
   if (!cx_use(cx, "cx/abc", "Int", "Opt", "Str") ||
       !cx_use(cx, "cx/io", "RFile", "WFile") ||
       !cx_use(cx, "cx/iter", "for") ||
-      !cx_use(cx, "cx/stack", "~")) {
+      !cx_use(cx, "cx/stack", "~") ||
+      !cx_use(cx, "cx/type", "new")) {
     return false;
   }
 

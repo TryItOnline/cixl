@@ -126,7 +126,7 @@ char *parse_fimp(struct cx *cx,
 static bool parse_func(struct cx *cx, const char *id, FILE *in, struct cx_vec *out) {
   bool ref = id[0] == '&';
   int row = cx->row, col = cx->col;
-  struct cx_func *f = cx_get_func(*cx->lib, ref ? id+1 : id, false);
+  struct cx_func *f = cx_get_func(cx, ref ? id+1 : id, false);
   if (!f) { return false; }
   
   struct cx_fimp *imp = NULL;
@@ -355,17 +355,27 @@ static bool parse_char(struct cx *cx, FILE *in, struct cx_vec *out) {
     case 't':
       c = '\t';
       break;
-    default:
+    default:      
       ungetc(c, in);
       
       if (isdigit(c)) {
-	if (!parse_int(cx, in, out)) {
+	char n[4];
+	
+	if (!fgets(n, 4, in)) {
 	  cx_error(cx, row, col, "Invalid char literal");
 	  return false;
 	}
+
+	c = 0;
 	
-	struct cx_tok *t = cx_vec_pop(out);
-	c = t->as_box.as_int;
+	for (int i=0, m = 100; i<3; i++, m /= 10) {
+	  if (!isdigit(n[i])) {
+	    cx_error(cx, row, col, "Expected digit: %c", n[i]);
+	    return false;
+	  }
+
+	  c += (n[i] - '0') * m;
+	}
       } else {
 	c = '@';
       }
@@ -423,7 +433,7 @@ static bool parse_str(struct cx *cx, FILE *in, struct cx_vec *out) {
 					CX_TLITERAL(),
 					row, col)->as_box;
 
-      cx_box_init(box, cx->str_type)->as_str = cx_str_new(value.data);
+      cx_box_init(box, cx->str_type)->as_str = cx_str_new(value.data, value.size);
     }
 
     free(value.data);

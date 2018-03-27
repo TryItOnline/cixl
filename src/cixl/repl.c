@@ -24,39 +24,9 @@ static bool emit_bmips(struct cx *cx) {
   static struct cx_sym sym_b;
   static struct cx_sym sym_a;
 
-  struct cx_lib *lib_cxEcond() {
-    static struct cx_lib *l = NULL;
-    if (!l) { l = cx_test(cx_get_lib(cx, "cx/cond", false)); }
-    return l;
-  }
-
-  struct cx_lib *lib_cxEfunc() {
-    static struct cx_lib *l = NULL;
-    if (!l) { l = cx_test(cx_get_lib(cx, "cx/func", false)); }
-    return l;
-  }
-
-  struct cx_lib *lib_cxEiter() {
-    static struct cx_lib *l = NULL;
-    if (!l) { l = cx_test(cx_get_lib(cx, "cx/iter", false)); }
-    return l;
-  }
-
   struct cx_lib *lib_cxEmath() {
     static struct cx_lib *l = NULL;
     if (!l) { l = cx_test(cx_get_lib(cx, "cx/math", false)); }
-    return l;
-  }
-
-  struct cx_lib *lib_cxEstack() {
-    static struct cx_lib *l = NULL;
-    if (!l) { l = cx_test(cx_get_lib(cx, "cx/stack", false)); }
-    return l;
-  }
-
-  struct cx_lib *lib_cxEtime() {
-    static struct cx_lib *l = NULL;
-    if (!l) { l = cx_test(cx_get_lib(cx, "cx/time", false)); }
     return l;
   }
 
@@ -68,73 +38,73 @@ static bool emit_bmips(struct cx *cx) {
 
   struct cx_func *func_int() {
     static struct cx_func *f = NULL;
-    if (!f) { f = cx_test(cx_get_func(lib_cxEcond(), "int", false)); }
+    if (!f) { f = cx_test(cx_get_func(cx, "int", false)); }
     return f;
   }
 
   struct cx_func *func_M() {
     static struct cx_func *f = NULL;
-    if (!f) { f = cx_test(cx_get_func(lib_cxEcond(), "?", false)); }
+    if (!f) { f = cx_test(cx_get_func(cx, "?", false)); }
     return f;
   }
 
   struct cx_func *func_ifNelse() {
     static struct cx_func *f = NULL;
-    if (!f) { f = cx_test(cx_get_func(lib_cxEcond(), "if-else", false)); }
+    if (!f) { f = cx_test(cx_get_func(cx, "if-else", false)); }
     return f;
   }
 
   struct cx_func *func_recall() {
     static struct cx_func *f = NULL;
-    if (!f) { f = cx_test(cx_get_func(lib_cxEfunc(), "recall", false)); }
+    if (!f) { f = cx_test(cx_get_func(cx, "recall", false)); }
     return f;
   }
 
   struct cx_func *func_times() {
     static struct cx_func *f = NULL;
-    if (!f) { f = cx_test(cx_get_func(lib_cxEiter(), "times", false)); }
+    if (!f) { f = cx_test(cx_get_func(cx, "times", false)); }
     return f;
   }
 
   struct cx_func *func__() {
     static struct cx_func *f = NULL;
-    if (!f) { f = cx_test(cx_get_func(lib_cxEstack(), "_", false)); }
+    if (!f) { f = cx_test(cx_get_func(cx, "_", false)); }
     return f;
   }
 
   struct cx_func *func_NN() {
     static struct cx_func *f = NULL;
-    if (!f) { f = cx_test(cx_get_func(lib_cxEmath(), "--", false)); }
+    if (!f) { f = cx_test(cx_get_func(cx, "--", false)); }
     return f;
   }
 
   struct cx_func *func_A() {
     static struct cx_func *f = NULL;
-    if (!f) { f = cx_test(cx_get_func(lib_cxEmath(), "+", false)); }
+    if (!f) { f = cx_test(cx_get_func(cx, "+", false)); }
     return f;
   }
 
   struct cx_func *func_E() {
     static struct cx_func *f = NULL;
-    if (!f) { f = cx_test(cx_get_func(lib_cxEmath(), "/", false)); }
+    if (!f) { f = cx_test(cx_get_func(cx, "/", false)); }
     return f;
   }
 
   struct cx_func *func_fibNrec() {
     static struct cx_func *f = NULL;
-    if (!f) { f = cx_test(cx_get_func(lib_cxEmath(), "fib-rec", false)); }
+    if (!f) { f = cx_test(cx_get_func(cx, "fib-rec", false)); }
     return f;
   }
 
   struct cx_func *func_fib() {
     static struct cx_func *f = NULL;
-    if (!f) { f = cx_test(cx_get_func(lib_cxEmath(), "fib", false)); }
+    if (!f) { f = cx_test(cx_get_func(cx, "fib", false)); }
     return f;
   }
 
   struct cx_func *func_clock() {
     static struct cx_func *f = NULL;
-    if (!f) { f = cx_test(cx_get_func(lib_cxEtime(), "clock", false)); }
+    if (!f) { f = cx_test(cx_get_func(cx, "clock", false)); }
     return f;
   }
 

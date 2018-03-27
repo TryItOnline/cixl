@@ -172,21 +172,6 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
     if (op->type->emit_syms) { op->type->emit_syms(op, &syms, cx); }
   }
 
-  cx_do_set(&types, struct cx_type *, t) {
-    struct cx_lib **ok = cx_set_insert(&libs, &(*t)->lib);
-    if (ok) { *ok = (*t)->lib; }
-  }
-
-  cx_do_set(&funcs, struct cx_func *, f) {
-    struct cx_lib **ok = cx_set_insert(&libs, &(*f)->lib);
-    if (ok) { *ok = (*f)->lib; }
-  }
-
-  cx_do_set(&fimps, struct cx_fimp *, f) {
-    struct cx_lib **ok = cx_set_insert(&libs, &(*f)->lib);
-    if (ok) { *ok = (*f)->lib; }
-  }
-
   cx_do_set(&syms, struct cx_sym, s) {
     fprintf(out, "  static struct cx_sym %s;\n", s->emit_id);
   }
@@ -217,10 +202,10 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
     fprintf(out,
 	    "  struct cx_func *%s() {\n"
 	    "    static struct cx_func *f = NULL;\n"
-	    "    if (!f) { f = cx_test(cx_get_func(%s(), \"%s\", false)); }\n"
+	    "    if (!f) { f = cx_test(cx_get_func(cx, \"%s\", false)); }\n"
 	    "    return f;\n"
 	    "  }\n\n",
-	    (*f)->emit_id, (*f)->lib->emit_id, (*f)->id);
+	    (*f)->emit_id, (*f)->id);
   }
 
   cx_do_set(&fimps, struct cx_fimp *, f) {

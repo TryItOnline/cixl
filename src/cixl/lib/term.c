@@ -20,7 +20,9 @@ static bool ask_imp(struct cx_scope *scope) {
   size_t len = 0;
   
   if (!cx_get_line(&line, &len, stdin)) { return false; }
-  cx_box_init(cx_push(scope), scope->cx->str_type)->as_str = cx_str_new(line);
+  cx_box_init(cx_push(scope), scope->cx->str_type)->as_str =
+    cx_str_new(line, strlen(line));
+  
   free(line);
   return true;
 }

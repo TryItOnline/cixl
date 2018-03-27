@@ -1,3 +1,4 @@
+#include <ctype.h>
 #include <inttypes.h>
 #include <string.h>
 
@@ -19,16 +20,17 @@ static bool char_next(struct cx_iter *iter,
 		      struct cx_box *out,
 		      struct cx_scope *scope) {
   struct char_iter *it = cx_baseof(iter, struct char_iter, iter);
+  
+  if (it->ptr == it->str->data+it->str->len) {
+    iter->done = true;
+    return false;
+  }
+  
   unsigned char c = *it->ptr;
   
-  if (c) {
-    cx_box_init(out, scope->cx->char_type)->as_char = c;
-    it->ptr++;
-    return true;
-  }
-
-  iter->done = true;
-  return false;
+  cx_box_init(out, scope->cx->char_type)->as_char = c;
+  it->ptr++;
+  return true;
 }
 
 static void *char_deinit(struct cx_iter *iter) {
@@ -50,10 +52,10 @@ static struct cx_iter *char_iter_new(struct cx_str *str) {
   return &it->iter;
 }
 
-struct cx_str *cx_str_new(const char *data) {
-  size_t len = strlen(data);
+struct cx_str *cx_str_new(const char *data, size_t len) {
   struct cx_str *str = malloc(sizeof(struct cx_str)+len+1);
-  strcpy(str->data, data);
+  if (data) { memcpy(str->data, data, len); }
+  str->data[len] = 0;
   str->len = len;
   str->nrefs = 1;
   return str;
@@ -75,13 +77,17 @@ static bool equid_imp(struct cx_box *x, struct cx_box *y) {
 }
 
 static bool eqval_imp(struct cx_box *x, struct cx_box *y) {
-  if (x->as_str->len != y->as_str->len) { return false; }
-  return strcmp(x->as_str->data, y->as_str->data) == 0;
+  struct cx_str *xs = x->as_str, *ys = y->as_str;
+  if (xs->len != ys->len) { return false; }
+  return strncmp(xs->data, ys->data, xs->len) == 0;
 }
 
 static enum cx_cmp cmp_imp(const struct cx_box *x, const struct cx_box *y) {
-  const char *xs = x->as_str->data, *ys = y->as_str->data;
-  return cx_cmp_cstr(&xs, &ys);
+  struct cx_str *xs = x->as_str, *ys = y->as_str;
+  int cmp = strncmp(xs->data, ys->data, cx_min(xs->len, ys->len));
+  if (!cmp) { cmp = cx_cmp_size(&xs->len, &ys->len); }
+  if (cmp < 0) { return CX_CMP_LT; }
+  return (cmp > 0) ? CX_CMP_GT : CX_CMP_EQ;
 }
 
 static bool ok_imp(struct cx_box *v) {
@@ -93,16 +99,19 @@ static void copy_imp(struct cx_box *dst, const struct cx_box *src) {
 }
 
 static void clone_imp(struct cx_box *dst, struct cx_box *src) {
-  dst->as_str = cx_str_new(src->as_str->data);
+  dst->as_str = cx_str_new(src->as_str->data, src->as_str->len);
 }
 
 static struct cx_iter *iter_imp(struct cx_box *v) {
   return char_iter_new(v->as_str);
 }
 
-static void write_encode(struct cx_str *s, FILE *out) {
-  for (char *c = s->data; *c; c++) {
+void cx_cstr_encode(const char *in, size_t len, FILE *out) {
+  for (const char *c = in; c < in+len; c++) {
     switch (*c) {
+    case ' ':
+      fputc(' ', out);
+      break;
     case '\n':
       fputs("@n", out);
       break;
@@ -113,28 +122,41 @@ static void write_encode(struct cx_str *s, FILE *out) {
       fputs("@t", out);
       break;
     default:
-      fputc(*c, out);
+      if (isgraph(*c)) {
+	fputc(*c, out);
+      } else {
+	fprintf(out, "@%03d", *c);
+      }
     }
   }
 }
 
 static void write_imp(struct cx_box *v, FILE *out) {
   fputc('\'', out);
-  write_encode(v->as_str, out);
+  cx_cstr_encode(v->as_str->data, v->as_str->len, out);
   fputc('\'', out);
 }
 
 static void dump_imp(struct cx_box *v, FILE *out) {
-  fprintf(out, "'%s'r%d", v->as_str->data, v->as_str->nrefs);
+  struct cx_str *s = v->as_str;
+  write_imp(v, out);
+  fprintf(out, "r%d", s->nrefs);
 }
 
 static void print_imp(struct cx_box *v, FILE *out) {
-  fputs(v->as_str->data, out);
+  struct cx_str *s = v->as_str;
+  
+  for (char *c = s->data; c < s->data+s->len; c++) {
+    fputc(*c, out);
+  }
 }
 
-static void emit_encode(struct cx_str *s, FILE *out) {
-  for (char *c = s->data; *c; c++) {
+void cx_cstr_c_encode(const char *in, size_t len, FILE *out) {
+  for (const char *c = in; c < in+len; c++) {
     switch (*c) {
+    case ' ':
+      fputc(' ', out);
+      break;
     case '\n':
       fputs("\\n", out);
       break;
@@ -145,18 +167,28 @@ static void emit_encode(struct cx_str *s, FILE *out) {
       fputs("\\t", out);
       break;
     default:
-      fputc(*c, out);
+      if (isgraph(*c)) {
+	fputc(*c, out);
+      } else {
+	fprintf(out, "\" \"\\x%c%c\" \"", cx_bin_hex(*c / 16), cx_bin_hex(*c % 16));
+      }
     }
   }
 }
 
 static bool emit_imp(struct cx_box *v, const char *exp, FILE *out) {
+  fputs("{\n"
+	"  const char *cs = \"",
+	out);
+
+  cx_cstr_c_encode(v->as_str->data, v->as_str->len, out);
+
   fprintf(out,
-	  "cx_box_init(%s, cx->str_type)->as_str = cx_str_new(\"",
+	  "\";\n"
+	  "  cx_box_init(%s, cx->str_type)->as_str = cx_str_new(cs, strlen(cs));\n"
+	  "}\n",
 	  exp);
 
-  emit_encode(v->as_str, out);
-  fputs("\");\n", out);
   return true;
 }
 

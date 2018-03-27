@@ -17,6 +17,7 @@ $ mkdir build
 $ cd build
 $ cmake ..
 $ sudo make install
+$ sudo ldconfig /usr/local/lib
 $ rlwrap cixl
 
 Cixl v0.9.5, 18571/29582 bmips
@@ -376,7 +377,7 @@ Subtracting strings returns the [edit distance](https://en.wikipedia.org/wiki/Le
 Characters are single bytes, a separate unicode type might be added eventually. Literals are preceded by ```@```, or ```@@``` for non-printable characters outside of strings. 
 
 ```
-   | 'foo@10bar@nbaz'
+   | 'foo@010bar@nbaz'
 ...
 ['foo
 bar
@@ -1194,76 +1195,7 @@ A ```Bin``` represents a block of compiled code. The compiler may be invoked fro
 [3]
 ```
 
-### Embedding & Extending
-Everything about Cixl has been designed from the ground up to support embedding in, and extending from C. The makefile contains a target named ```libcixl``` that builds a static library containing everything you need to get started. Adding a type and associated function goes something like this:
-
-```C
-#include <cixl/box.h>
-#include <cixl/cx.h>
-#include <cixl/error.h>
-#include <cixl/func.h>
-#include <cixl/scope.h>
-
-static bool len_imp(struct cx_scope *scope) {
-  struct cx_box v = *cx_test(cx_pop(scope, false));
-  cx_box_init(cx_push(scope), scope->cx->int_type)->as_int = strlen(v.as_ptr);
-  return true;
-}
-
-static bool equid_imp(struct cx_box *x, struct cx_box *y) {
-  return x->as_ptr == y->as_ptr;
-}
-
-static bool eqval_imp(struct cx_box *x, struct cx_box *y) {
-  return strcmp(x->as_ptr, y->as_ptr) == 0;
-}
-
-static bool ok_imp(struct cx_box *v) {
-  char *s = v->as_ptr;
-  return s[0];
-}
-
-static void copy_imp(struct cx_box *dst, const struct cx_box *src) {
-  dst->as_ptr = strdup(src->as_ptr);
-}
-
-static void dump_imp(struct cx_box *v, FILE *out) {
-  fprintf(out, "'%s'", (char *)v->as_ptr);
-}
-
-static void deinit_imp(struct cx_box *v) {
-  free(v->as_ptr);
-}
-
-int main() {
-  struct cx cx;
-  cx_init(&cx);
-  
-  struct cx_type *t = cx_add_type(&cx, "Str", cx.any_type);
-  t->eqval = eqval_imp;
-  t->equid = equid_imp;
-  t->ok = ok_imp;
-  t->copy = copy_imp;
-  t->write = dump_imp;
-  t->dump = dump_imp;
-  t->deinit = deinit_imp;
-  
-  cx_add_cfunc(&cx, "len",
-               cx_args(cx_arg("s", t)), cx_args(cx_arg(NULL, cx.int_type)),
-	       len_imp);
-
-  cx_add_cxfunc(cx, "upper",
-	   	cx_args(cx_arg("s", t)), cx_args(cx_arg(NULL, t)),
-	        "$s &upper map str");
-
-  ...
-
-  cx_deinit(&cx);
-  return 0;
-}
-```
-
-### Safety
+### Reducing Type Safety
 Type checking may be partly disabled for the current scope by calling ```unsafe```, which allows code to run slightly faster. New scopes inherit their safety level from the parent scope. Calling ```safe``` enables all type checks for the current scope.
 
 ```

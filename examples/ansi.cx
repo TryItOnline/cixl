@@ -12,7 +12,7 @@ use:
   (cx/func func:)
   (cx/stack Stack);
 
-define: csi-esc '@27[';
+define: csi-esc '@027[';
 
 define: clear-row-end [#csi-esc '0K'];
 define: clear-row [#csi-esc '2K'];

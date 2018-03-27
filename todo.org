@@ -1,3 +1,14 @@
+* add operator=(Secret str)
+** hash str using same salt & compare
+* finish Secret write_imp
+** construct salt separately
+* rename cx.dlibs to links
+** add struct cx_link
+*** void *handle & char *name
+**** add .so/.a to name
+*** dlopen all on parse
+*** add static to emit commandline
+* ---
 * add visualization of current fg/bg
 * implement saving
 ** launch with mandatory filename
@@ -5,6 +16,8 @@
 * implement loading
 ** try reading file on startup
 * ---
+* add Pub/PrivKey to cxcrypt
+* extract tests into cx files
 * remove stop op
 ** call eval with stop_pc instead
 * optimize const emit
@@ -13,7 +26,7 @@
 ** add cx_getconst_op.value
 *** set in parse_const
 *** change eval to push value
-* make all lib getters recursive like cx_get_type
+* make cx_get_macro/cx_get_const recursive like cx_get_type
 * replace box.as_ptr with as_func/fimp/etc
 * replace cx_tok.as_ptr with as_id, as_literal etc.
 ** use cx_sym for CX_TID?
@@ -21,6 +34,8 @@
 * convert macro id to sym
 * convert func id to sym
 * convert repl to use getline
+* change cx_str type to use strn fns with len
+** add len param to constructor
 * replace clone fallback to copy with error
 * replace varargs with size/array+macro
 * update embed example in readme

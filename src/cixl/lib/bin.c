@@ -48,7 +48,7 @@ static bool emit_imp(struct cx_scope *scope) {
   bool ok = cx_emit(bin, out.stream, cx);
   if (!ok) { goto exit; }
   fflush(out.stream);
-  cx_box_init(cx_push(scope), cx->str_type)->as_str = cx_str_new(out.data);
+  cx_box_init(cx_push(scope), cx->str_type)->as_str = cx_str_new(out.data, out.size);
   ok = true;
  exit:
   cx_box_deinit(&in);

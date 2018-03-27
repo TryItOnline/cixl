@@ -1,5 +1,6 @@
 #include <errno.h>
 #include <inttypes.h>
+#include <string.h>
 #include <time.h>
 
 #include "cixl/arg.h"
@@ -379,7 +380,7 @@ static bool fmt_imp(struct cx_scope *scope) {
     t = *cx_test(cx_pop(scope, false));
 
   char *s = cx_time_fmt(&t.as_time, f.as_str->data);
-  cx_box_init(cx_push(scope), cx->str_type)->as_str = cx_str_new(s);
+  cx_box_init(cx_push(scope), cx->str_type)->as_str = cx_str_new(s, strlen(s));
   free(s);
   
   cx_box_deinit(&f);

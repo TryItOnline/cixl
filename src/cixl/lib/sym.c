@@ -1,3 +1,5 @@
+#include <string.h>
+
 #include "cixl/arg.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
@@ -19,7 +21,8 @@ static bool sym_imp(struct cx_scope *scope) {
 
 static bool str_imp(struct cx_scope *scope) {
   struct cx_sym s = cx_test(cx_pop(scope, false))->as_sym;
-  cx_box_init(cx_push(scope), scope->cx->str_type)->as_str = cx_str_new(s.id);
+  cx_box_init(cx_push(scope), scope->cx->str_type)->as_str =
+    cx_str_new(s.id, strlen(s.id));
   return true;
 }
 

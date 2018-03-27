@@ -1,0 +1,16 @@
+/*
+  Parses hex data from stdin and writes binary to stdout.
+
+  Execute "cat IN | cixl examples/hexbin.cx > OUT " to convert IN from hex and write
+  the result to OUT.
+
+  https://github.com/basic-gongfu/cixl#getting-started
+*/
+
+use:
+  (cx/io #in #out print)
+  (cx/iter for)
+  (cx/stack ~)
+  (cx/str hex-decoder);
+
+#in hex-decoder {#out ~ print} for
