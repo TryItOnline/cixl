@@ -29,12 +29,12 @@ $s decrypt 'message' = check
 ```
 
 ### Plugins
-A Cixl plugin is any regular C library containing external functions with the signature ```bool cx_init_X(struct cx *)```. ```init:``` looks up the specified functions and calls them with the current context as argument during parsing. Libraries passed to ```link``` are dynamically loaded when interpreting and linked when compiling to C.
+A [Cixl](https://github.com/basic-gongfu/cixl) plugin is any regular C library containing external functions with the signature ```bool cx_init_X(struct cx *)```. ```init:``` looks up the specified functions and calls them with the current context as argument during parsing. Libraries passed to ```link``` are dynamically loaded when interpreting and linked when compiling to C.
 
 ### Algorithms
 The libsodium APIs used by [cxcrypt](https://github.com/basic-gongfu/cxcrypt) rely on Argon2 for hashing keys and XSalsa20 with Poly1305 MAC authentication for symmetric encryption. I'm still working on integrating support for asymmetric encryption.
 
 ### Examples
-[encrypt.cx](https://raw.githubusercontent.com/basic-gongfu/cxcrypt/master/examples/encrypt.cx) and [decrypt.cx](https://raw.githubusercontent.com/basic-gongfu/cxcrypt/master/examples/decrypt.cx) both use [cxcrypt](https://github.com/basic-gongfu/cxcrypt) to implement basic tools for encrypting/decrypting arbitrary files from the shell. Linux/64 binaries may be found [here](https://github.com/basic-gongfu/cxbin/tree/master/linux64).
+[encrypt.cx](https://raw.githubusercontent.com/basic-gongfu/cxcrypt/master/examples/encrypt.cx) and [decrypt.cx](https://raw.githubusercontent.com/basic-gongfu/cxcrypt/master/examples/decrypt.cx) both use [cxcrypt](https://github.com/basic-gongfu/cxcrypt) to implement basic tools for encrypting/decrypting arbitrary files from the shell, Linux/64 binaries may be found [here](https://github.com/basic-gongfu/cxbin/tree/master/linux64).
 
 Give me a yell if something is unclear, wrong or missing. And please consider helping out with a donation via [paypal](https://paypal.me/basicgongfu) or [liberapay](https://liberapay.com/basic-gongfu/donate) if you find this worthwhile, every contribution counts. You may find more posts in the same spirit [here](https://github.com/basic-gongfu/cixl/tree/master/devlog).
