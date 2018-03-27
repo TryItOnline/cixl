@@ -79,6 +79,10 @@ struct cx_getvar_op {
   struct cx_sym id;
 };
 
+struct cx_init_op {
+  struct cx_str *id;
+};
+
 struct cx_jump_op {
   ssize_t pc;
 };
@@ -141,6 +145,7 @@ struct cx_op {
     struct cx_funcall_op as_funcall;
     struct cx_getconst_op as_getconst;
     struct cx_getvar_op as_getvar;
+    struct cx_init_op as_init;
     struct cx_jump_op as_jump;
     struct cx_lambda_op as_lambda;
     struct cx_libdef_op as_libdef;
@@ -166,6 +171,7 @@ struct cx_op_type *CX_OFUNCDEF();
 struct cx_op_type *CX_OFUNCALL();
 struct cx_op_type *CX_OGETCONST();
 struct cx_op_type *CX_OGETVAR();
+struct cx_op_type *CX_OINIT();
 struct cx_op_type *CX_OJUMP();
 struct cx_op_type *CX_OLAMBDA();
 struct cx_op_type *CX_OLIBDEF();

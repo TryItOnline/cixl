@@ -1,3 +1,4 @@
+#include <dlfcn.h>
 #include <errno.h>
 #include <stdarg.h>
 #include <stdlib.h>
@@ -429,6 +430,23 @@ bool cx_load(struct cx *cx, const char *path, struct cx_bin *bin) {
     free(full_path);
     return ok;
   }
+}
+
+bool cx_dlinit(struct cx *cx, const char *id) {
+    char *fid = cx_fmt("cx_init_%s", id);
+
+    dlerror();
+    void *fp = dlsym(NULL, fid);
+    free(fid);
+    
+    if (!fp) {
+      cx_error(cx, cx->row, cx->col, "Init not found: %s\ns%s", id, dlerror());
+      return false;
+    }
+    
+    bool (*f)(struct cx *) = NULL;
+    *(void **)(&f) = fp;
+    return f(cx);
 }
 
 void cx_dump_errors(struct cx *cx, FILE *out) {

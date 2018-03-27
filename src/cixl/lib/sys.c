@@ -11,6 +11,7 @@
 #include "cixl/lib.h"
 #include "cixl/lib/sys.h"
 #include "cixl/link.h"
+#include "cixl/op.h"
 #include "cixl/scope.h"
 #include "cixl/str.h"
 #include "cixl/stack.h"
@@ -67,54 +68,51 @@ static bool link_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   }
 }
 
+static ssize_t init_eval(struct cx_macro_eval *eval,
+			 struct cx_bin *bin,
+			 size_t tok_idx,
+			 struct cx *cx) {
+  cx_do_vec(&eval->toks, struct cx_tok, t) {
+    cx_op_init(bin, CX_OINIT(), tok_idx)->as_init.id = cx_str_ref(t->as_box.as_str);
+  }
+  
+  return tok_idx+1;
+}
+
 static bool init_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   int row = cx->row, col = cx->col;
-  bool ok = false;
-  
-  struct cx_vec fns;
-  cx_vec_init(&fns, sizeof(struct cx_tok));
-  
-  if (!cx_parse_end(cx, in, &fns, false)) {
+  struct cx_macro_eval *eval = cx_macro_eval_new(init_eval);
+
+  if (!cx_parse_end(cx, in, &eval->toks, false)) {
     if (!cx->errors.count) { cx_error(cx, row, col, "Missing init end"); }
-    goto exit;
+    cx_macro_eval_deref(eval);
+    return false;
   }
 
-  cx_do_vec(&fns, struct cx_tok, t) {
+  cx_do_vec(&eval->toks, struct cx_tok, t) {
     if (t->type != CX_TLITERAL()) {
       cx_error(cx, t->row, t->col, "Invalid init token: %s", t->type->id);
-      goto exit;
+      cx_macro_eval_deref(eval);
+      return false;
     }
 
     if (t->as_box.type != cx->str_type) {
       cx_error(cx, t->row, t->col,
 	       "Invalid init id: %s", t->as_box.type->id);
-      goto exit;
+      cx_macro_eval_deref(eval);
+      return false;
     }
 
     char *id = t->as_box.as_str->data;
-    char *fid = cx_fmt("cx_init_%s", id);
-
-    dlerror();
-    void *fp = dlsym(NULL, fid);
     
-    if (!fp) {
-      cx_error(cx, t->row, t->col, "Init not found: %s\ns%s", id, dlerror());
-      free(fid);
-      goto exit;
+    if (!cx_dlinit(cx, id)) {
+      cx_macro_eval_deref(eval);
+      return false;
     }
- 
-    bool (*f)(struct cx *) = NULL;
-    *(void **)(&f) = dlsym(NULL, fid);
-    free(fid);
-    if (!f(cx)) { goto exit; }
   }
-  
-  ok = true;
- exit: {
-    cx_do_vec(&fns, struct cx_tok, t) { cx_tok_deinit(t); }
-    cx_vec_deinit(&fns);
-    return ok;
-  }
+
+  cx_tok_init(cx_vec_push(out), CX_TMACRO(), row, col)->as_ptr = eval;
+  return true;
 }
 
 static bool home_dir_imp(struct cx_scope *scope) {

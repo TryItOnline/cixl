@@ -1,6 +1,3 @@
-* add OINIT
-** create from init macro
-** add emit_init that calls fn
 * add static links to emit commandline
 * finish Secret write_imp
 ** construct salt separately

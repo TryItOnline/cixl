@@ -98,6 +98,7 @@ bool cx_funcall(struct cx *cx, const char *id);
 char *cx_get_path(struct cx *cx, const char *path);
 bool cx_load_toks(struct cx *cx, const char *path, struct cx_vec *out);
 bool cx_load(struct cx *cx, const char *path, struct cx_bin *bin);
+bool cx_dlinit(struct cx *cx, const char *id);
 
 void cx_dump_errors(struct cx *cx, FILE *out);
 
