@@ -7,10 +7,10 @@
 
 struct cx_link *cx_link_init(struct cx_link *l,
 			     struct cx *cx,
-			     const char *path,
+			     const char *id,
 			     void *handle) {
   l->cx = cx;
-  l->path = strdup(path);
+  l->id = strdup(id);
   l->handle = handle;
   return l;
 }

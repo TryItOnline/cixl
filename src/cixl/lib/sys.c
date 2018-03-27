@@ -40,24 +40,24 @@ static bool link_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
       goto exit;
     }
 
-    char *p = t->as_box.as_str->data;
-    int pl = strlen(p);
-    char fp[pl+4];
-    strcpy(fp, p);
-    strcpy(fp+pl, ".so");
+    char *id = t->as_box.as_str->data;
+    int idl = strlen(id);
+    char fid[idl+4];
+    strcpy(fid, id);
+    strcpy(fid+idl, ".so");
     
     dlerror();
-    void *h = dlopen(fp, RTLD_LAZY | RTLD_GLOBAL);
+    void *h = dlopen(fid, RTLD_NOW | RTLD_GLOBAL);
     
     if (!h) {
       cx_error(cx, t->row, t->col,
-	       "Linked library not found: %s\n%s",
-	       p, dlerror());
+	       "Failed linking: %s\n%s",
+	       id, dlerror());
       
       goto exit;
     }
 
-    cx_link_init(cx_vec_push(&cx->links), cx, p, h);
+    cx_link_init(cx_vec_push(&cx->links), cx, id, h);
   }
   
   ok = true;
@@ -68,51 +68,39 @@ static bool link_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   }
 }
 
-static ssize_t init_eval(struct cx_macro_eval *eval,
-			 struct cx_bin *bin,
-			 size_t tok_idx,
-			 struct cx *cx) {
-  cx_do_vec(&eval->toks, struct cx_tok, t) {
-    cx_op_init(bin, CX_OINIT(), tok_idx)->as_init.id = cx_str_ref(t->as_box.as_str);
-  }
-  
-  return tok_idx+1;
-}
-
 static bool init_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   int row = cx->row, col = cx->col;
-  struct cx_macro_eval *eval = cx_macro_eval_new(init_eval);
-
-  if (!cx_parse_end(cx, in, &eval->toks, false)) {
+  struct cx_vec toks;
+  cx_vec_init(&toks, sizeof(struct cx_tok));
+  bool ok = false;
+  
+  if (!cx_parse_end(cx, in, &toks, false)) {
     if (!cx->errors.count) { cx_error(cx, row, col, "Missing init end"); }
-    cx_macro_eval_deref(eval);
-    return false;
+    goto exit;
   }
 
-  cx_do_vec(&eval->toks, struct cx_tok, t) {
+  cx_do_vec(&toks, struct cx_tok, t) {
     if (t->type != CX_TLITERAL()) {
       cx_error(cx, t->row, t->col, "Invalid init token: %s", t->type->id);
-      cx_macro_eval_deref(eval);
-      return false;
+      goto exit;
     }
 
     if (t->as_box.type != cx->str_type) {
-      cx_error(cx, t->row, t->col,
-	       "Invalid init id: %s", t->as_box.type->id);
-      cx_macro_eval_deref(eval);
-      return false;
+      cx_error(cx, t->row, t->col, "Invalid init id: %s", t->as_box.type->id);
+      goto exit;
     }
 
-    char *id = t->as_box.as_str->data;
-    
-    if (!cx_dlinit(cx, id)) {
-      cx_macro_eval_deref(eval);
-      return false;
-    }
+    struct cx_str *id = t->as_box.as_str;
+    if (!cx_dlinit(cx, id->data)) { goto exit; }
+    *(struct cx_str **)cx_vec_push(&cx->inits) = cx_str_ref(id);
   }
 
-  cx_tok_init(cx_vec_push(out), CX_TMACRO(), row, col)->as_ptr = eval;
-  return true;
+  ok = true;
+ exit: {
+    cx_do_vec(&toks, struct cx_tok, t) { cx_tok_deinit(t); }
+    cx_vec_deinit(&toks);
+    return ok;
+  }
 }
 
 static bool home_dir_imp(struct cx_scope *scope) {

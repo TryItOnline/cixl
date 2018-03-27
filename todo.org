@@ -1,6 +1,6 @@
-* add static links to emit commandline
 * finish Secret write_imp
 ** construct salt separately
+* fix hexbin/binhex emit
 * ---
 * add visualization of current fg/bg
 * implement saving

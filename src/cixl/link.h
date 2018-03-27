@@ -5,13 +5,13 @@ struct cx;
 
 struct cx_link {
   struct cx *cx;
-  char *path;
+  char *id;
   void *handle;
 };
 
 struct cx_link *cx_link_init(struct cx_link *l,
 			     struct cx *cx,
-			     const char *path,
+			     const char *id,
 			     void *handle);
 
 struct cx_link *cx_link_deinit(struct cx_link *l);

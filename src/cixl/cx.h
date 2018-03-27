@@ -32,7 +32,7 @@ struct cx {
 
   struct cx_vec types, macros, funcs, fimps;
 
-  struct cx_vec links;
+  struct cx_vec links, inits;
   
   struct cx_set lib_lookup;
   struct cx_vec libs;

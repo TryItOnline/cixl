@@ -4,6 +4,7 @@
 #include "cixl/func.h"
 #include "cixl/op.h"
 #include "cixl/scope.h"
+#include "cixl/str.h"
 #include "cixl/tok.h"
 
 struct cx_bin *cx_bin_new() {
@@ -220,9 +221,17 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
 
   fputs("\n"
 	"  if (init) {\n"
-	"    init = false;\n\n",
+	"    init = false;\n",
 	out);
+
+  cx_do_vec(&cx->inits, struct cx_str *, i) {
+    fprintf(out,
+	    "if (!cx_init_%s(cx)) { return false; }\n",
+	    (*i)->data);
+  }
   
+  fputc('\n', out);
+
   cx_do_set(&syms, struct cx_sym, s) {
     fprintf(out, "    %s = cx_sym(cx, \"%s\");\n", s->emit_id, s->id);
   }

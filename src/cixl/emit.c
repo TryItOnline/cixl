@@ -5,6 +5,7 @@
 #include "cixl/cx.h"
 #include "cixl/emit.h"
 #include "cixl/error.h"
+#include "cixl/link.h"
 #include "cixl/stack.h"
 #include "cixl/str.h"
 
@@ -81,11 +82,8 @@ void cx_push_args(struct cx *cx, int argc, char *argv[]) {
   }
 }
 
-bool cx_emit_file(struct cx *cx, const char *fname, FILE *out) {
-  struct cx_bin *bin = cx_bin_new();
+bool cx_emit_file(struct cx *cx, struct cx_bin *bin, FILE *out) {
   bool ok = false;
-  
-  if (!cx_load(cx, fname, bin)) { goto exit; }
 
   fputs("#include <stdlib.h>\n"
 	"#include <string.h>\n"
@@ -105,6 +103,10 @@ bool cx_emit_file(struct cx *cx, const char *fname, FILE *out) {
 	"#include \"cixl/stack.h\"\n"
 	"#include \"cixl/str.h\"\n\n",
 	out);
+
+  cx_do_vec(&cx->inits, struct cx_str *, i) {
+    fprintf(out, "extern bool cx_init_%s(struct cx *cx);\n\n", (*i)->data);
+  }
   
   if (!cx_emit(bin, out, cx)) { goto exit; }
       
@@ -137,6 +139,5 @@ bool cx_emit_file(struct cx *cx, const char *fname, FILE *out) {
 
   ok = true;
  exit:
-  cx_bin_deref(bin);
   return ok;
 }

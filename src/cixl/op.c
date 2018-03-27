@@ -493,32 +493,6 @@ cx_op_type(CX_OGETVAR, {
     type.emit_syms = getvar_emit_syms;
   });
 
-static void init_deinit(struct cx_op *op) {
-  cx_str_deref(op->as_init.id);
-}
-
-static bool init_emit(struct cx_op *op,
-		      struct cx_bin *bin,
-		      FILE *out,
-		      struct cx *cx) {
-  return true;
-}
-
-static void init_emit_init(struct cx_op *op,
-			   struct cx_bin *bin,
-			   FILE *out,
-			   struct cx *cx) {
-  fprintf(out,
-	  "if (!cx_dlinit(cx, \"%s\")) { return false; }\n",
-	  op->as_init.id->data);
-}
-
-cx_op_type(CX_OINIT, {
-    type.deinit = init_deinit;
-    type.emit = init_emit;
-    type.emit_init = init_emit_init;
-  });
-
 static bool jump_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
   cx->pc = op->as_jump.pc;
   return true;

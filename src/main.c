@@ -7,6 +7,7 @@
 #include "cixl/cx.h"
 #include "cixl/emit.h"
 #include "cixl/error.h"
+#include "cixl/link.h"
 #include "cixl/mfile.h"
 #include "cixl/op.h"
 #include "cixl/repl.h"
@@ -49,41 +50,62 @@ int main(int argc, char *argv[]) {
       }
 
       const char *fname = argv[argi++];
+      struct cx_bin *bin = cx_bin_new();
+	
+      if (!cx_load(&cx, fname, bin)) {
+	cx_dump_errors(&cx, stderr);
+	cx_bin_deref(bin);
+	cx_deinit(&cx);
+	return -1;
+      }
 
-      if (compile) {
-	if (!cx_emit_file(&cx, fname, stdout)) {
+      if (compile) {	
+	if (!cx_emit_file(&cx, bin, stdout)) {
 	  cx_dump_errors(&cx, stderr);
+	  cx_bin_deref(bin);
 	  cx_deinit(&cx);
 	  return -1;
 	}	
-      } else {
+      } else {	
 	struct cx_mfile cmd;
 	cx_mfile_open(&cmd);
       
-	fputs("gcc -x c -std=gnu1x "
+	fputs("gcc -x c -std=gnu1x -O2 -g "
 	      "-Wall -Werror -Wno-unused-function -Wno-unused-but-set-variable "
-	      "-O2 -g - -lcixl -ldl",
+	      "- -lcixl -ldl",
 	      cmd.stream);
+
+	for (struct cx_link *l = cx_vec_peek(&cx.links, 0);
+	     l >= (struct cx_link *)cx.links.items;
+	     l--) {
+	  fprintf(cmd.stream, " -l%s", l->id+3);
+	}
 	
 	for (; argi < argc; argi++) { fprintf(cmd.stream, " %s", argv[argi]); }
 	cx_mfile_close(&cmd);
+
+	printf("%s\n", cmd.data);
+	
 	FILE *out = popen(cmd.data, "w");
 	
 	if (!out) {
 	  fprintf(stderr, "Failed executing compiler: %d\n%s\n", errno, cmd.data);
 	  free(cmd.data);
+	  cx_bin_deref(bin);
 	  cx_deinit(&cx);
 	  return -1;
 	}
 
 	free(cmd.data);
 
-	if (!cx_emit_file(&cx, fname, out)) {
+	if (!cx_emit_file(&cx, bin, out)) {
 	  cx_dump_errors(&cx, stderr);
+	  cx_bin_deref(bin);
 	  cx_deinit(&cx);
 	  return -1;
 	}
 
+	cx_bin_deref(bin);
 	pclose(out);
       }
     } else {

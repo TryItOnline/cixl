@@ -125,6 +125,7 @@ struct cx *cx_init(struct cx *cx) {
   cx_vec_init(&cx->funcs, sizeof(struct cx_func *));
   cx_vec_init(&cx->fimps, sizeof(struct cx_fimp *));
   cx_vec_init(&cx->links, sizeof(struct cx_link));
+  cx_vec_init(&cx->inits, sizeof(struct cx_str *));
   
   cx_set_init(&cx->lib_lookup, sizeof(struct cx_lib *), cx_cmp_sym);
   cx->lib_lookup.key = get_lib_id;
@@ -222,6 +223,9 @@ struct cx *cx_deinit(struct cx *cx) {
 
   cx_do_vec(&cx->links, struct cx_link, l) { cx_link_deinit(l); }
   cx_vec_deinit(&cx->links);
+
+  cx_do_vec(&cx->inits, struct cx_str *, s) { cx_str_deref(*s); }
+  cx_vec_deinit(&cx->inits);
 
   cx_do_set(&cx->lib_lookup, struct cx_lib *, l) { free(cx_lib_deinit(*l)); }
   cx_set_deinit(&cx->lib_lookup);
