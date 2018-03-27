@@ -46,7 +46,7 @@ Password: secret
 ```
 
 ### Running
-A (hope)fully functioning implementation is available [here](https://raw.githubusercontent.com/basic-gongfu/cixl/master/examples/collabri.cx). A statically linked Linux64 binary is [provided](https://github.com/basic-gongfu/cixl/blob/master/bin/collabri); and instructions on how to compile the code yourself may be found [here](https://github.com/basic-gongfu/cixl#getting-started).
+A (hope)fully functioning implementation is available [here](https://raw.githubusercontent.com/basic-gongfu/cixl/master/examples/collabri.cx). A statically linked Linux64 binary is [provided](https://github.com/basic-gongfu/cxbin/blob/master/linux64/collabri); and instructions on how to compile the code yourself may be found [here](https://github.com/basic-gongfu/cixl#getting-started).
 
 ### Async
 [Cixl](https://github.com/basic-gongfu/cixl) encourages using async networking by opening sockets in non blocking mode and providing a convenient poll abstraction with callbacks. Collabri takes the idea one step further and integrates database and logging into the same event loop. Included below is the main loop.

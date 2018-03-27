@@ -8,7 +8,7 @@ Cixl shares many ideas with C, Forth and Common Lisp; as well as the hacker mind
 Examples should work in the most recent version and run clean in ```valgrind```, outside of that I can't really promise much at the moment. Current work is focused on profiling and filling obvious gaps in functionality.
 
 ### Getting Started
-You may try Cixl online [here](https://tio.run/#cixl). To build it yourself, you'll need a reasonably modern GCC and CMake installed. Building on macOS unfortunately doesn't work yet, as it's missing support for POSIX timers. A basic REPL is included, it's highly recommended to run it through ```rlwrap``` for a less nerve wrecking experience.
+You may try Cixl online [here](https://tio.run/#cixl). Linux/64 binaries may be found [here](https://github.com/basic-gongfu/cxbin/tree/master/linux64). To build it yourself, you'll need a reasonably modern GCC and CMake installed. Building on macOS unfortunately doesn't work because of missing POSIX support. A basic REPL is included, it's highly recommended to run it through ```rlwrap``` for a less nerve wrecking experience.
 
 ```
 $ git clone https://github.com/basic-gongfu/cixl.git
