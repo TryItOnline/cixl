@@ -29,7 +29,7 @@ $s decrypt 'message' = check
 ```
 
 ### Plugins
-A [Cixl](https://github.com/basic-gongfu/cixl) plugin is any regular C library containing external functions with the signature ```bool cx_init_X(struct cx *)```. ```init:``` looks up the specified functions and calls them with the current context as argument during parsing. Libraries passed to ```link``` are dynamically loaded when interpreting and linked when compiling to C.
+A [Cixl](https://github.com/basic-gongfu/cixl) plugin is any regular C library containing external functions with the signature ```bool cx_init_X(struct cx *)```. ```init:``` looks up the specified functions and calls them with the current context as argument during parsing. Libraries passed to ```link:``` are dynamically loaded when interpreting and linked when compiling to C.
 
 ### Algorithms
 The libsodium APIs used by [cxcrypt](https://github.com/basic-gongfu/cxcrypt) rely on Argon2 for hashing keys and XSalsa20 with Poly1305 MAC authentication for symmetric encryption. I'm still working on integrating support for asymmetric encryption.
