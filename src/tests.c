@@ -122,7 +122,7 @@ static void lib_tests() {
       "(cx/cond =) "
       "(cx/const define:) "
       "(cx/func call func:) "
-      "(cx/meta lib: cx-lib id use:) "
+      "(cx/meta lib: this-lib id use:) "
       "(cx/error check);");
   
   run(&cx, "lib: foo define: (bar Int) 42;; use: (foo #bar); #bar 42 = check");
@@ -132,7 +132,7 @@ static void lib_tests() {
   run(&cx,
       "lib: foo func: baz(_ Lambda)(_ Sym) call;; "
       "use: (foo baz); "
-      "{cx-lib id} baz `lobby = check");
+      "{this-lib id} baz `lobby = check");
 
   cx_deinit(&cx);
 }

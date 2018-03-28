@@ -280,7 +280,7 @@ static bool recall_imp(struct cx_scope *scope) {
   return true;
 }
 
-static bool cx_fimp_imp(struct cx_scope *scope) {
+static bool this_fimp_imp(struct cx_scope *scope) {
   struct cx *cx = scope->cx;
   
   if (cx->calls.count > 1) {
@@ -327,11 +327,10 @@ cx_lib(cx_init_func, "cx/func") {
 	       cx_args(),
 	       call_imp);
 
-  cx_add_cfunc(lib, "cx-fimp",
+  cx_add_cfunc(lib, "this-fimp",
 	       cx_args(),
 	       cx_args(cx_arg(NULL, cx->opt_type)),
-	       cx_fimp_imp);
-  
+	       this_fimp_imp);
   
   cx_add_cfunc(lib, "recall", cx_args(), cx_args(), recall_imp);
 

@@ -103,7 +103,7 @@ The entire language is split into libraries to enable building custom languages 
 The default library is called the ```lobby```.
 
 ```
-   | cx-lib
+   | this-lib
 ...
 [Lib(lobby)]
 

@@ -148,7 +148,7 @@ static bool use_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   return true;
 }
 
-static bool cx_lib_imp(struct cx_scope *scope) {
+static bool cx_this_lib_imp(struct cx_scope *scope) {
   cx_box_init(cx_push(scope), scope->cx->lib_type)->as_lib = *(scope->cx->lib-1);
   return true;
 }
@@ -183,10 +183,10 @@ cx_lib(cx_init_meta, "cx/meta") {
   cx_add_macro(lib, "lib:", lib_parse);
   cx_add_macro(lib, "use:", use_parse);
 
-  cx_add_cfunc(lib, "cx-lib",
+  cx_add_cfunc(lib, "this-lib",
 	       cx_args(),
 	       cx_args(cx_arg(NULL, cx->lib_type)),
-	       cx_lib_imp);
+	       cx_this_lib_imp);
 
   cx_add_cfunc(lib, "id",
 	       cx_args(cx_arg("lib", cx->lib_type)),
