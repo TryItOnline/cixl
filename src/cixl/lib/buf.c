@@ -36,6 +36,7 @@ static bool str_imp(struct cx_scope *scope) {
   struct cx *cx = scope->cx;
   struct cx_box in = *cx_test(cx_pop(scope, false));
   struct cx_buf *b = cx_baseof(in.as_file, struct cx_buf, file);
+  fflush(b->file._ptr);
   cx_box_init(cx_push(scope), cx->str_type)->as_str =
     cx_str_new(b->data+b->pos, b->len-b->pos);
   cx_box_deinit(&in);

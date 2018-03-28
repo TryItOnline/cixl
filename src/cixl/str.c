@@ -125,7 +125,7 @@ void cx_cstr_encode(const char *in, size_t len, FILE *out) {
       if (isgraph(*c)) {
 	fputc(*c, out);
       } else {
-	fprintf(out, "@%03d", *c);
+	fprintf(out, "@%03d", *(unsigned char *)c);
       }
     }
   }

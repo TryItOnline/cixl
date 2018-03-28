@@ -1,14 +1,6 @@
-* finish Secret write_imp
-** construct salt separately
+* --- cxcrypt
 * add Pub/PrivKey to cxcrypt
-* ---
-* add visualization of current fg/bg
-* implement saving
-** launch with mandatory filename
-** add 's' command to save
-* implement loading
-** try reading file on startup
-* ---
+* --- cixl
 * extract tests into cx files
 * remove stop op
 ** call eval with stop_pc instead
@@ -35,4 +27,10 @@
 *** change eval to push value
 * replace clone fallback to copy with error
 * replace varargs with size/array+macro
-
+* --- tellux
+* add visualization of current fg/bg
+* implement saving
+** launch with mandatory filename
+** add 's' command to save
+* implement loading
+** try reading file on startup
