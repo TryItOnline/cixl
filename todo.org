@@ -1,6 +1,7 @@
 * finish Secret write_imp
 ** construct salt separately
 * fix hexbin/binhex emit
+* add Pub/PrivKey to cxcrypt
 * ---
 * add visualization of current fg/bg
 * implement saving
@@ -9,43 +10,30 @@
 * implement loading
 ** try reading file on startup
 * ---
-* add Pub/PrivKey to cxcrypt
 * extract tests into cx files
 * remove stop op
 ** call eval with stop_pc instead
-* optimize const emit
-** add op_type.emit_consts
-*** rewrite getconst emit
-** add cx_getconst_op.value
-*** set in parse_const
-*** change eval to push value
 * add Bin.labels set
 ** store jump pcs during compile
 ** use to decide if emit case should be printed
 * make cx_get_macro/cx_get_const recursive like cx_get_type
 * replace box.as_ptr with as_func/fimp/etc
+* add cxtls project
+** use gnutls
+** integrate into poll framework
+** https://github.com/abligh/tlsproxy
 * replace cx_tok.as_ptr with as_id, as_literal etc.
 ** use cx_sym for CX_TID?
 * convert type id to sym
 * convert macro id to sym
 * convert func id to sym
 * convert repl to use getline
-* change cx_str type to use strn fns with len
-** add len param to constructor
+* optimize const emit
+** add op_type.emit_consts
+*** rewrite getconst emit
+** add cx_getconst_op.value
+*** set in parse_const
+*** change eval to push value
 * replace clone fallback to copy with error
 * replace varargs with size/array+macro
-* update embed example in readme
-** add lib
-** add custom struct type
 
-sudo rm -rf /usr/local/include/cixl
-stty -icanon -echo && nc 127.0.0.1 7707
-
-| Bin new % 'trait: IntStr Int Str; let: (x IntStr) 42; $x say' compile emit
-| Bin new % '1 2 +' compile emit
-| Bin new % '10000000000 {10 {50 fib _} times} clock / int' compile emit
-| Bin new % '#out 42 print<WFile A>' compile emit
-| Bin new % '42 say' compile emit
-| Bin new % '50 fib' compile emit
-| Bin new % '{10000 {50 fib _} times} clock 1000000 / int say' compile emit
-| Bin new % 'func: fortytwo(Int)(#f) _; func: fortytwo(42)(#t); 21 fortytwo say' compile emit
