@@ -16,6 +16,7 @@ struct cx_link *cx_link_init(struct cx_link *l,
 }
 
 struct cx_link *cx_link_deinit(struct cx_link *l) {
+  free(l->id);
   dlclose(l->handle);
   return l;
 }

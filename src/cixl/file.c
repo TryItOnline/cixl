@@ -12,7 +12,7 @@
 
 struct char_iter {
   struct cx_iter iter;
-  struct cx_file *in;
+  struct cx_box in;
 };
 
 static bool char_next(struct cx_iter *iter,
@@ -20,7 +20,7 @@ static bool char_next(struct cx_iter *iter,
 		      struct cx_scope *scope) {
   struct cx *cx = scope->cx;
   struct char_iter *it = cx_baseof(iter, struct char_iter, iter);
-  FILE *fptr = cx_file_ptr(it->in);
+  FILE *fptr = cx_file_ptr(it->in.as_file);
   int c = fgetc(fptr);
 
   if (c == EOF) {
@@ -42,7 +42,7 @@ static bool char_next(struct cx_iter *iter,
 
 static void *char_deinit(struct cx_iter *iter) {
   struct char_iter *it = cx_baseof(iter, struct char_iter, iter);
-  cx_file_deref(it->in);
+  cx_box_deinit(&it->in);
   return it;
 }
 
@@ -51,10 +51,10 @@ static cx_iter_type(char_iter, {
     type.deinit = char_deinit;
   });
 
-static struct cx_iter *char_iter_new(struct cx_file *in) {
+static struct cx_iter *char_iter_new(struct cx_box *in) {
   struct char_iter *it = malloc(sizeof(struct char_iter));
   cx_iter_init(&it->iter, char_iter());
-  it->in = cx_file_ref(in);
+  cx_copy(&it->in, in);
   return &it->iter;
 }
 
@@ -140,7 +140,7 @@ static void copy_imp(struct cx_box *dst, const struct cx_box *src) {
 }
 
 struct cx_iter *cx_file_iter(struct cx_box *v) {
-  return char_iter_new(v->as_file);
+  return char_iter_new(v);
 }
 
 static void dump_imp(struct cx_box *v, FILE *out) {

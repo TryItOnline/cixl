@@ -122,7 +122,7 @@ void cx_cstr_encode(const char *in, size_t len, FILE *out) {
       fputs("@t", out);
       break;
     default:
-      if (isgraph(*c)) {
+      if (isgraph(*c) && *c != '\'') {
 	fputc(*c, out);
       } else {
 	fprintf(out, "@%03d", *(unsigned char *)c);
@@ -151,11 +151,14 @@ static void print_imp(struct cx_box *v, FILE *out) {
   }
 }
 
-void cx_cstr_c_encode(const char *in, size_t len, FILE *out) {
+void cx_cstr_cencode(const char *in, size_t len, FILE *out) {
   for (const char *c = in; c < in+len; c++) {
     switch (*c) {
     case ' ':
       fputc(' ', out);
+      break;
+    case '"':
+      fputs("\\\"", out);
       break;
     case '\n':
       fputs("\\n", out);
@@ -181,7 +184,7 @@ static bool emit_imp(struct cx_box *v, const char *exp, FILE *out) {
 	"  const char *cs = \"",
 	out);
 
-  cx_cstr_c_encode(v->as_str->data, v->as_str->len, out);
+  cx_cstr_cencode(v->as_str->data, v->as_str->len, out);
 
   fprintf(out,
 	  "\";\n"

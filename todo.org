@@ -1,5 +1,9 @@
 * --- cxcrypt
-* add Pub/PrivKey to cxcrypt
+* add Pub/PrivKey
+** add aserver/aclient examples
+*** use asymmetric encryption to secure a channel
+*** read/write size prefixed blocks
+** add README
 * --- cixl
 * extract tests into cx files
 * remove stop op

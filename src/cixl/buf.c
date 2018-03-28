@@ -42,10 +42,9 @@ static void dump_imp(struct cx_box *v, FILE *out) {
 
 static void deinit_imp(struct cx_box *v) {
   struct cx_file *f = v->as_file;
-
   cx_test(f->nrefs);
   f->nrefs--;
-  
+
   if (!f->nrefs) {
     cx_file_close(f);
     struct cx_buf *b = cx_baseof(f, struct cx_buf, file);

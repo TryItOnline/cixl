@@ -186,7 +186,7 @@ static struct cx_iter *reverse_iter_new(struct cx_file *in) {
 
 struct read_iter {
   struct cx_iter iter;
-  struct cx_file *in;
+  struct cx_box in;
   struct cx_vec toks;
   struct cx_bin bin;
 };
@@ -196,7 +196,7 @@ static bool read_next(struct cx_iter *iter,
 		      struct cx_scope *scope) {
   struct cx *cx = scope->cx;
   struct read_iter *it = cx_baseof(iter, struct read_iter, iter);
-  FILE *fptr = cx_file_ptr(it->in);
+  FILE *fptr = cx_file_ptr(it->in.as_file);
   cx_do_vec(&it->toks, struct cx_tok, t) { cx_tok_deinit(t); }
   cx_vec_clear(&it->toks);
   
@@ -227,7 +227,7 @@ static bool read_next(struct cx_iter *iter,
 
 static void *read_deinit(struct cx_iter *iter) {
   struct read_iter *it = cx_baseof(iter, struct read_iter, iter);
-  cx_file_deref(it->in);
+  cx_box_deinit(&it->in);
   cx_do_vec(&it->toks, struct cx_tok, t) { cx_tok_deinit(t); }
   cx_vec_deinit(&it->toks);
   cx_bin_deinit(&it->bin);
@@ -239,10 +239,10 @@ static cx_iter_type(read_iter, {
     type.deinit = read_deinit;
   });
 
-static struct cx_iter *read_iter_new(struct cx_file *in) {
+static struct cx_iter *read_iter_new(struct cx_box *in) {
   struct read_iter *it = malloc(sizeof(struct read_iter));
   cx_iter_init(&it->iter, read_iter());
-  it->in = cx_file_ref(in);
+  cx_copy(&it->in, in);
   cx_vec_init(&it->toks, sizeof(struct cx_tok));
   cx_bin_init(&it->bin);
   return &it->iter;
@@ -381,7 +381,8 @@ static bool close_imp(struct cx_scope *scope) {
 static bool read_imp(struct cx_scope *scope) {
   struct cx *cx = scope->cx;
   struct cx_box in = *cx_test(cx_pop(scope, false));
-  cx_box_init(cx_push(scope), cx->iter_type)->as_iter = read_iter_new(in.as_file);
+  cx_box_init(cx_push(scope), cx->iter_type)->as_iter = read_iter_new(&in);
+  cx_box_deinit(&in);
   return true;
 }
 
