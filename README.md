@@ -388,7 +388,7 @@ baz'r1]
 [@@n]
 ```
 
-### Terminal
+### Terminal IO
 ```say``` and ```ask``` may be used to perform basic terminal IO.
 
 ```
@@ -1195,7 +1195,7 @@ A ```Bin``` represents a block of compiled code. The compiler may be invoked fro
 [3]
 ```
 
-### Reducing Type Safety
+### Disable Type Checking
 Type checking may be partly disabled for the current scope by calling ```unsafe```, which allows code to run slightly faster. New scopes inherit their safety level from the parent scope. Calling ```safe``` enables all type checks for the current scope.
 
 ```
