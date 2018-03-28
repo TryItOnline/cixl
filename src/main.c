@@ -75,10 +75,12 @@ int main(int argc, char *argv[]) {
 	      "- -lcixl -ldl",
 	      cmd.stream);
 
-	for (struct cx_link *l = cx_vec_peek(&cx.links, 0);
-	     l >= (struct cx_link *)cx.links.items;
-	     l--) {
-	  fprintf(cmd.stream, " -l%s", l->id+3);
+	if (cx.links.count) {
+	  for (struct cx_link *l = cx_vec_peek(&cx.links, 0);
+	       l >= (struct cx_link *)cx.links.items;
+	       l--) {
+	    fprintf(cmd.stream, " -l%s", l->id+3);
+	  }
 	}
 	
 	for (; argi < argc; argi++) { fprintf(cmd.stream, " %s", argv[argi]); }

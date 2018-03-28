@@ -1,6 +1,5 @@
 * finish Secret write_imp
 ** construct salt separately
-* fix hexbin/binhex emit
 * add Pub/PrivKey to cxcrypt
 * ---
 * add visualization of current fg/bg
