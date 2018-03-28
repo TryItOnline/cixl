@@ -73,6 +73,33 @@ Your guess:
 $
 ```
 
+### Loading
+Code may be loaded from external files using ```load```. The loaded code is evaluated in the current scope by default.
+
+test.cx:
+```
+2 +
+```
+
+```
+   | 1 'test.cx' load
+...
+[3]
+```
+
+External files may alternatively be included in the current compilation unit using ```include:```.
+
+test1.cx:
+```
+2 +
+```
+
+test2.cx:
+```
+1
+include: 'test1.cx'
+```
+
 ### Libraries
 The entire language is split into libraries to enable building custom languages on top of sub sets of existing functionality. ```use: cx;``` may be used as a short cut to import everything. The REPL starts with everything imported while the interpreter and compiler starts with nothing but ```include:```, ```lib:``` and ```use:```. The following standard libraries are available:
 
@@ -398,19 +425,6 @@ baz'r1]
 Hello
 What's your name? Sifoo
 ['Sifoo'r1]
-```
-
-Code may be loaded from external files using ```load```. The loaded code is evaluated in the current scope by default.
-
-test.cx:
-```
-+ 2
-```
-
-```
-   | 1 'test.cx' load
-...
-[3]
 ```
 
 ### Serialization
