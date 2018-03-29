@@ -119,14 +119,8 @@ bool cx_emit_file(struct cx *cx, struct cx_bin *bin, FILE *out) {
         "  cx_use(&cx, \"cx/io\", \"include:\");\n"
         "  cx_use(&cx, \"cx/meta\", \"lib:\", \"use:\");\n"
         "  cx_use(&cx, \"cx/sys\", \"#args\");\n"
-        "  cx_push_args(&cx, argc, argv);\n\n"
-
-	"  for (int i=1; i < argc; i++) {\n"
-	"    const char *a = argv[i];\n"
-	"    cx_box_init(cx_push(cx.root_scope), cx.str_type)->as_str = "
-	      "cx_str_new(a, strlen(a));\n"
-	"  }\n\n"
-
+        "  cx_push_args(&cx, argc-1, argv+1);\n\n"
+	
 	"  if (!eval(&cx)) {\n"
 	"    cx_dump_errors(&cx, stderr);\n"
 	"    return -1;\n"
