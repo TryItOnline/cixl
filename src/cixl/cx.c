@@ -302,6 +302,13 @@ struct cx_sym cx_sym(struct cx *cx, const char *id) {
   return s ? *s : *cx_sym_init(cx_set_insert(&cx->syms, &id), id, cx->next_sym_tag++);
 }
 
+struct cx_sym cx_gsym(struct cx *cx, const char *prefix) {
+  char *id = cx_fmt("%s%zd", prefix, cx->next_sym_tag);
+  struct cx_sym s = cx_sym(cx, id);
+  free(id);
+  return s;
+}
+
 struct cx_scope *cx_scope(struct cx *cx, size_t i) {
   cx_test(cx->scopes.count > i);
   return *(cx->scope-i);
