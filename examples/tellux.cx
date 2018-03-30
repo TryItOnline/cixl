@@ -102,7 +102,7 @@ func: print-palette()()
 
 func: print-wheel()()
   2 1 move-to p
-  let: o 2 0 get-offs ref;
+  let: o 1 0 get-offs ref;
   
   5 {
     let: r 63 *;

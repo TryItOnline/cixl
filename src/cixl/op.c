@@ -894,7 +894,10 @@ static bool putargs_emit(struct cx_op *op,
       }
     }
 
-    fputs("}\n\n", out);
+    fprintf(out,
+	    "  ss->stack.count -= %d;\n"
+	    "}\n\n",
+	    nargs);
   }
   
   return true;
@@ -1062,7 +1065,6 @@ static bool return_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
     
     cx->pc = op->as_return.pc+1;
   } else {
-    cx_pop_lib(cx);
     struct cx_scope *ss = cx_scope(cx, 0);
     size_t si = 0;
     
@@ -1133,6 +1135,7 @@ static bool return_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
     if (call->return_pc > -1) { cx->pc = call->return_pc; }
     cx_call_deinit(call);
     cx_end(cx);
+    cx_pop_lib(cx);
   }
   
   return true;
@@ -1157,7 +1160,6 @@ static bool return_emit(struct cx_op *op,
 	  "  call->recalls--;\n"
 	  "  goto op%zd;\n"
 	  "} else {\n"
-	  "  cx_pop_lib(cx);\n"
 	  "  size_t si = 0;\n",
           imp->emit_id, op->as_return.pc+1);
 
@@ -1228,21 +1230,22 @@ static bool return_emit(struct cx_op *op,
     }
   } 
 
-  fputs("  if (si < s->stack.count) {\n"
-	"    cx_error(cx, cx->row, cx->col, \"Stack not empty on return\");\n"
-	"    return false;\n"
-	"  }\n\n"
-	"  cx_vec_clear(&s->stack);\n"
-	"  cx_end(cx);\n"
-	"  struct cx_call *call = cx_vec_pop(&cx->calls);\n\n"
-	"  if (call->return_pc > -1) {\n"
-	"    cx->pc = call->return_pc;\n"
-	"    cx_call_deinit(call);\n"
-	"    goto *op_labels[cx->pc];\n"
-	"  }\n\n"
-	"  cx_call_deinit(call);\n"
-	"}\n",
-	out);
+  fprintf(out,
+	  "  if (si < s->stack.count) {\n"
+	  "    cx_error(cx, cx->row, cx->col, \"Stack not empty on return\");\n"
+	  "    return false;\n"
+	  "  }\n\n"
+	  "  cx_vec_clear(&s->stack);\n"
+	  "  cx_end(cx);\n"
+	  "  cx_pop_lib(cx);\n"
+	  "  struct cx_call *call = cx_vec_pop(&cx->calls);\n\n"
+	  "  if (call->return_pc > -1) {\n"
+	  "    cx->pc = call->return_pc;\n"
+	  "    cx_call_deinit(call);\n"
+	  "    goto *op_labels[cx->pc];\n"
+	  "  }\n\n"
+	  "  cx_call_deinit(call);\n"
+	  "}\n");
   
   return true;  
 }

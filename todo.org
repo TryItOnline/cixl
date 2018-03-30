@@ -1,6 +1,3 @@
-* fix tellux emit
-** fails on type_Stack
-* --- cxcrypt
 * add Pub/PrivKey
 ** add aserver/aclient examples
 *** use asymmetric encryption to secure a channel
