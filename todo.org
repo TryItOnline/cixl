@@ -1,5 +1,7 @@
 * remove stop op
 ** call eval with stop_pc instead
+** cx->stop needed?
+** emit new bmips
 * fix fib-rec in bench1 emit
 * fix bookings emit
 * fix tellux emit

@@ -256,7 +256,7 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
   
   fprintf(out, "  static void *op_labels[%zd] = {\n    ", bin->ops.count+1);
   
-  for (size_t i = 0; i < bin->ops.count+1; i++) {
+  for (size_t i = 0; i < bin->ops.count; i++) {
     if (i == 0 || cx_set_get(&labels, &i)) {      
       fprintf(out, "&&op%zd", i);
     } else {
@@ -297,7 +297,6 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
     fputs("}\n\n", out);
   }
 
-  fprintf(out, " op%zd:\n",  bin->ops.count);
   fputs("  cx->stop = false;\n"
 	"  return true;\n"
 	"}\n\n"
