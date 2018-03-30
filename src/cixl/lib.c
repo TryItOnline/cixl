@@ -365,7 +365,7 @@ bool cx_lib_vuse(struct cx_lib *lib, unsigned int nids, const char **ids) {
       if (i->ptr) {
 	ok = i->ptr(lib) && ok;
       } else {
-	ok = cx_eval(i->bin, i->start_pc, -1, cx) && ok;
+	ok = cx_eval(i->bin, i->start_pc, i->start_pc+i->nops, cx) && ok;
       }
       
       i->done = true;

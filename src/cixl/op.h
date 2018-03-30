@@ -179,7 +179,6 @@ struct cx_op_type *CX_OPUTCONST();
 struct cx_op_type *CX_OPUTVAR();
 struct cx_op_type *CX_ORETURN();
 struct cx_op_type *CX_OSTASH();
-struct cx_op_type *CX_OSTOP();
 struct cx_op_type *CX_OTYPEDEF();
 struct cx_op_type *CX_OUSE();
 #endif

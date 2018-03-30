@@ -35,7 +35,6 @@ static ssize_t lib_eval(struct cx_macro_eval *eval,
   }
 
   cx_op_init(bin, CX_OPOPLIB(), tok_idx);
-  cx_op_init(bin, CX_OSTOP(), tok_idx);
   cx_lib_push_init(lib, cx_lib_ops(bin, start_pc, bin->ops.count-start_pc));  
   return tok_idx+1;
 }

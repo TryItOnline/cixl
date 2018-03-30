@@ -14,9 +14,7 @@ struct cx_bin *cx_bin_new() {
 static bool eval(struct cx *cx, ssize_t stop_pc) {
   if (!cx->bin->ops.count) { return true; }
   
-  while (cx->pc < cx->bin->ops.count &&
-	 cx->pc != stop_pc &&
-	 !cx->stop) {
+  while (cx->pc < cx->bin->ops.count && cx->pc != stop_pc) {
     cx_init_ops(cx->bin);
     struct cx_op *op = cx_vec_get(&cx->bin->ops, cx->pc++);
     cx->row = op->row; cx->col = op->col;
@@ -117,7 +115,6 @@ bool cx_eval(struct cx_bin *bin, size_t start_pc, ssize_t stop_pc, struct cx *cx
   bool ok = cx_test(bin->eval)(cx, stop_pc);
   cx->bin = prev_bin;
   cx->pc = prev_pc;
-  cx->stop = false;
   return ok;
 }
 
@@ -173,6 +170,21 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
     if (op->type->emit_funcs) { op->type->emit_funcs(op, &funcs, cx); }
     if (op->type->emit_fimps) { op->type->emit_fimps(op, &fimps, cx); }
     if (op->type->emit_syms) { op->type->emit_syms(op, &syms, cx); }
+  }
+
+  cx_do_set(&types, struct cx_type *, t) {
+    struct cx_lib **ok = cx_set_insert(&libs, &(*t)->lib);
+    if (ok) { *ok = (*t)->lib; }
+  }
+
+  cx_do_set(&funcs, struct cx_func *, f) {
+    struct cx_lib **ok = cx_set_insert(&libs, &(*f)->lib);
+    if (ok) { *ok = (*f)->lib; }
+  }
+
+  cx_do_set(&fimps, struct cx_fimp *, f) {
+    struct cx_lib **ok = cx_set_insert(&libs, &(*f)->lib);
+    if (ok) { *ok = (*f)->lib; }
   }
 
   cx_do_set(&syms, struct cx_sym, s) {
@@ -286,7 +298,7 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
 	    "cx->pc = %zd; cx->row = %d; cx->col = %d;\n",
 	    op->pc, cx->row, cx->col);
 
-    fputs("if (cx->stop || cx->pc == stop_pc) { return true; }\n"
+    fputs("if (cx->pc == stop_pc) { return true; }\n"
 	  "if (cx->errors.count) { return false; }\n",
 	  out);
 
@@ -297,8 +309,7 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
     fputs("}\n\n", out);
   }
 
-  fputs("  cx->stop = false;\n"
-	"  return true;\n"
+  fputs("return true;\n"
 	"}\n\n"
 	"  struct cx_bin *bin = cx_bin_new();\n"
 	"  bin->eval = _eval;\n"

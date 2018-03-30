@@ -17,7 +17,7 @@
 #include "cixl/stack.h"
 
 static bool emit_bmips(struct cx *cx) {
-  bool _eval(struct cx *cx, ssize_t stop_pc) {
+bool _eval(struct cx *cx, ssize_t stop_pc) {
   static bool init = true;
 
   static struct cx_sym sym_n;
@@ -182,145 +182,134 @@ static bool emit_bmips(struct cx *cx) {
     sym_b = cx_sym(cx, "b");
     sym_a = cx_sym(cx, "a");
 
-
-{
-  struct cx_fimp *imp = func_fib_Int();
-  imp->bin = cx_bin_ref(cx->bin);
-  imp->start_pc = 6;
-  imp->nops = 24;
-}
-
-
-{
-  struct cx_fimp *imp = func_fibNrec_IntIntInt();
-  imp->bin = cx_bin_ref(cx->bin);
-  imp->start_pc = 12;
-  imp->nops = 16;
-}
-
+struct cx_fimp *imp81 = func_fib_Int();
+imp81->bin = cx_bin_ref(cx->bin);
+imp81->start_pc = 6;
+imp81->nops = 23;
+struct cx_fimp *imp82 = func_fibNrec_IntIntInt();
+imp82->bin = cx_bin_ref(cx->bin);
+imp82->start_pc = 12;
+imp82->nops = 15;
   }
 
-  static void *op_labels[39] = {
-    &&op0, &&op1, &&op2, &&op3, &&op4, &&op5, &&op6, &&op7, &&op8, &&op9, &&op10, 
-    &&op11, &&op12, &&op13, &&op14, &&op15, &&op16, &&op17, &&op18, &&op19, &&op20, 
-    &&op21, &&op22, &&op23, &&op24, &&op25, &&op26, &&op27, &&op28, &&op29, &&op30, 
-    &&op31, &&op32, &&op33, &&op34, &&op35, &&op36, &&op37, &&op38};
+  static void *op_labels[36] = {
+    &&op0, NULL, &&op2, NULL, &&op4, NULL, &&op6, &&op7, NULL, NULL, NULL, NULL, &&op12, &&op13, NULL, NULL, &&op16, &&op17, NULL, NULL, NULL, &&op21, NULL, &&op23, &&op24, NULL, &&op26, &&op27, &&op28, &&op29, &&op30, &&op31, &&op32, &&op33, &&op34, };
 
   goto *op_labels[cx->pc];
 
- op0: { /* CX_TLITERAL CX_OPUSH */
-    cx->pc = 0; cx->row = 1; cx->col = 11;
-    if (cx->stop) { return true; }
-    if (cx->errors.count) { return false; }
+op0: { /* CX_TLITERAL CX_OPUSH */
+cx->pc = 0; cx->row = 1; cx->col = 11;
+if (cx->pc == stop_pc) { return true; }
+if (cx->errors.count) { return false; }
 cx_box_init(cx_push(cx_scope(cx, 0)), cx->int_type)->as_int = 10000000000;
- }
+}
 
- op1: { /* CX_TLAMBDA CX_OLAMBDA */
-    cx->pc = 1; cx->row = 1; cx->col = 12;
-    if (cx->stop) { return true; }
-    if (cx->errors.count) { return false; }
+{ /* CX_TLAMBDA CX_OLAMBDA */
+cx->pc = 1; cx->row = 1; cx->col = 12;
+if (cx->pc == stop_pc) { return true; }
+if (cx->errors.count) { return false; }
 struct cx_scope *s = cx_scope(cx, 0);
-struct cx_lambda *l = cx_lambda_new(s, 2, 33);
+struct cx_lambda *l = cx_lambda_new(s, 2, 30);
 cx_box_init(cx_push(s), cx->lambda_type)->as_ptr = l;
-goto op35;
- }
+goto op32;
+}
 
- op2: { /* CX_TLITERAL CX_OPUSH */
-    cx->pc = 2; cx->row = 1; cx->col = 14;
-    if (cx->stop) { return true; }
-    if (cx->errors.count) { return false; }
+op2: { /* CX_TLITERAL CX_OPUSH */
+cx->pc = 2; cx->row = 1; cx->col = 15;
+if (cx->pc == stop_pc) { return true; }
+if (cx->errors.count) { return false; }
 cx_box_init(cx_push(cx_scope(cx, 0)), cx->int_type)->as_int = 10;
- }
+}
 
- op3: { /* CX_TLAMBDA CX_OLAMBDA */
-    cx->pc = 3; cx->row = 1; cx->col = 15;
-    if (cx->stop) { return true; }
-    if (cx->errors.count) { return false; }
+{ /* CX_TLAMBDA CX_OLAMBDA */
+cx->pc = 3; cx->row = 1; cx->col = 16;
+if (cx->pc == stop_pc) { return true; }
+if (cx->errors.count) { return false; }
 struct cx_scope *s = cx_scope(cx, 0);
-struct cx_lambda *l = cx_lambda_new(s, 4, 29);
+struct cx_lambda *l = cx_lambda_new(s, 4, 27);
 cx_box_init(cx_push(s), cx->lambda_type)->as_ptr = l;
-goto op33;
- }
+goto op31;
+}
 
- op4: { /* CX_TLITERAL CX_OPUSH */
-    cx->pc = 4; cx->row = 1; cx->col = 17;
-    if (cx->stop) { return true; }
-    if (cx->errors.count) { return false; }
+op4: { /* CX_TLITERAL CX_OPUSH */
+cx->pc = 4; cx->row = 1; cx->col = 19;
+if (cx->pc == stop_pc) { return true; }
+if (cx->errors.count) { return false; }
 cx_box_init(cx_push(cx_scope(cx, 0)), cx->int_type)->as_int = 50;
- }
+}
 
- op5: { /* CX_TFUNC CX_OFIMP */
-    cx->pc = 5; cx->row = 1; cx->col = 18;
-    if (cx->stop) { return true; }
-    if (cx->errors.count) { return false; }
-goto op30;
- }
+{ /* CX_TFUNC CX_OFIMP */
+cx->pc = 5; cx->row = 1; cx->col = 20;
+if (cx->pc == stop_pc) { return true; }
+if (cx->errors.count) { return false; }
+goto op29;
+}
 
- op6: { /* CX_TFUNC CX_OBEGIN */
-    cx->pc = 6; cx->row = 1; cx->col = 18;
-    if (cx->stop) { return true; }
-    if (cx->errors.count) { return false; }
+op6: { /* CX_TFUNC CX_OBEGIN */
+cx->pc = 6; cx->row = 1; cx->col = 20;
+if (cx->pc == stop_pc) { return true; }
+if (cx->errors.count) { return false; }
 struct cx_scope *parent = func_fib_Int()->scope;
 cx_push_lib(cx, lib_cxEmath());
 cx_begin(cx, parent);
- }
+}
 
- op7: { /* CX_TFUNC CX_OPUTARGS */
-    cx->pc = 7; cx->row = 1; cx->col = 18;
-    if (cx->stop) { return true; }
-    if (cx->errors.count) { return false; }
+op7: { /* CX_TFUNC CX_OPUTARGS */
+cx->pc = 7; cx->row = 1; cx->col = 20;
+if (cx->pc == stop_pc) { return true; }
+if (cx->errors.count) { return false; }
 struct cx_scope
   *ds = cx_scope(cx, 0),
   *ss = ds->stack.count ? ds : cx_scope(cx, 1);
 
 *cx_put_var(ds, sym_n, true) = *(struct cx_box *)cx_vec_peek(&ss->stack, 0);
 cx_vec_delete(&ss->stack, ss->stack.count-1);
- }
+}
 
- op8: { /* CX_TLITERAL CX_OPUSH */
-    cx->pc = 8; cx->row = 1; cx->col = 1;
-    if (cx->stop) { return true; }
-    if (cx->errors.count) { return false; }
+{ /* CX_TLITERAL CX_OPUSH */
+cx->pc = 8; cx->row = 1; cx->col = 1;
+if (cx->pc == stop_pc) { return true; }
+if (cx->errors.count) { return false; }
 cx_box_init(cx_push(cx_scope(cx, 0)), cx->int_type)->as_int = 0;
- }
+}
 
- op9: { /* CX_TLITERAL CX_OPUSH */
-    cx->pc = 9; cx->row = 1; cx->col = 3;
-    if (cx->stop) { return true; }
-    if (cx->errors.count) { return false; }
+{ /* CX_TLITERAL CX_OPUSH */
+cx->pc = 9; cx->row = 1; cx->col = 3;
+if (cx->pc == stop_pc) { return true; }
+if (cx->errors.count) { return false; }
 cx_box_init(cx_push(cx_scope(cx, 0)), cx->int_type)->as_int = 1;
- }
+}
 
- op10: { /* CX_TID CX_OGETVAR */
-    cx->pc = 10; cx->row = 1; cx->col = 4;
-    if (cx->stop) { return true; }
-    if (cx->errors.count) { return false; }
+{ /* CX_TID CX_OGETVAR */
+cx->pc = 10; cx->row = 1; cx->col = 4;
+if (cx->pc == stop_pc) { return true; }
+if (cx->errors.count) { return false; }
 struct cx_scope *s = cx_scope(cx, 0);
 struct cx_box *v = cx_get_var(s, sym_n, false);
 if (!v) { return false; }
 cx_copy(cx_push(s), v);
- }
+}
 
- op11: { /* CX_TFUNC CX_OFIMP */
-    cx->pc = 11; cx->row = 1; cx->col = 7;
-    if (cx->stop) { return true; }
-    if (cx->errors.count) { return false; }
-goto op28;
- }
+{ /* CX_TFUNC CX_OFIMP */
+cx->pc = 11; cx->row = 1; cx->col = 7;
+if (cx->pc == stop_pc) { return true; }
+if (cx->errors.count) { return false; }
+goto op27;
+}
 
- op12: { /* CX_TFUNC CX_OBEGIN */
-    cx->pc = 12; cx->row = 1; cx->col = 7;
-    if (cx->stop) { return true; }
-    if (cx->errors.count) { return false; }
+op12: { /* CX_TFUNC CX_OBEGIN */
+cx->pc = 12; cx->row = 1; cx->col = 7;
+if (cx->pc == stop_pc) { return true; }
+if (cx->errors.count) { return false; }
 struct cx_scope *parent = func_fibNrec_IntIntInt()->scope;
 cx_push_lib(cx, lib_cxEmath());
 cx_begin(cx, parent);
- }
+}
 
- op13: { /* CX_TFUNC CX_OPUTARGS */
-    cx->pc = 13; cx->row = 1; cx->col = 7;
-    if (cx->stop) { return true; }
-    if (cx->errors.count) { return false; }
+op13: { /* CX_TFUNC CX_OPUTARGS */
+cx->pc = 13; cx->row = 1; cx->col = 7;
+if (cx->pc == stop_pc) { return true; }
+if (cx->errors.count) { return false; }
 struct cx_scope
   *ds = cx_scope(cx, 0),
   *ss = ds->stack.count ? ds : cx_scope(cx, 1);
@@ -331,22 +320,22 @@ cx_vec_delete(&ss->stack, ss->stack.count-1);
 cx_vec_delete(&ss->stack, ss->stack.count-1);
 *cx_put_var(ds, sym_a, true) = *(struct cx_box *)cx_vec_peek(&ss->stack, 0);
 cx_vec_delete(&ss->stack, ss->stack.count-1);
- }
+}
 
- op14: { /* CX_TID CX_OGETVAR */
-    cx->pc = 14; cx->row = 1; cx->col = 0;
-    if (cx->stop) { return true; }
-    if (cx->errors.count) { return false; }
+{ /* CX_TID CX_OGETVAR */
+cx->pc = 14; cx->row = 1; cx->col = 0;
+if (cx->pc == stop_pc) { return true; }
+if (cx->errors.count) { return false; }
 struct cx_scope *s = cx_scope(cx, 0);
 struct cx_box *v = cx_get_var(s, sym_n, false);
 if (!v) { return false; }
 cx_copy(cx_push(s), v);
- }
+}
 
- op15: { /* CX_TFIMP CX_OFUNCALL */
-    cx->pc = 15; cx->row = 1; cx->col = 2;
-    if (cx->stop) { return true; }
-    if (cx->errors.count) { return false; }
+{ /* CX_TFIMP CX_OFUNCALL */
+cx->pc = 15; cx->row = 1; cx->col = 2;
+if (cx->pc == stop_pc) { return true; }
+if (cx->errors.count) { return false; }
 struct cx_scope *s = cx_scope(cx, 0);
 struct cx_func *func = func_M();
 struct cx_fimp *imp = func_M_Opt();
@@ -362,52 +351,52 @@ if (!imp->ptr && imp->bin == cx->bin) {
   cx_call_init(cx_vec_push(&cx->calls), cx->row, cx->col, imp, 16);
   goto op0;
 } else if (!cx_fimp_call(imp, s)) { return false; }
- }
+}
 
- op16: { /* CX_TLAMBDA CX_OLAMBDA */
-    cx->pc = 16; cx->row = 1; cx->col = 4;
-    if (cx->stop) { return true; }
-    if (cx->errors.count) { return false; }
+op16: { /* CX_TLAMBDA CX_OLAMBDA */
+cx->pc = 16; cx->row = 1; cx->col = 4;
+if (cx->pc == stop_pc) { return true; }
+if (cx->errors.count) { return false; }
 struct cx_scope *s = cx_scope(cx, 0);
-struct cx_lambda *l = cx_lambda_new(s, 17, 8);
+struct cx_lambda *l = cx_lambda_new(s, 17, 7);
 cx_box_init(cx_push(s), cx->lambda_type)->as_ptr = l;
-goto op25;
- }
+goto op24;
+}
 
- op17: { /* CX_TID CX_OGETVAR */
-    cx->pc = 17; cx->row = 1; cx->col = 4;
-    if (cx->stop) { return true; }
-    if (cx->errors.count) { return false; }
+op17: { /* CX_TID CX_OGETVAR */
+cx->pc = 17; cx->row = 1; cx->col = 5;
+if (cx->pc == stop_pc) { return true; }
+if (cx->errors.count) { return false; }
 struct cx_scope *s = cx_scope(cx, 0);
 struct cx_box *v = cx_get_var(s, sym_b, false);
 if (!v) { return false; }
 cx_copy(cx_push(s), v);
- }
+}
 
- op18: { /* CX_TID CX_OGETVAR */
-    cx->pc = 18; cx->row = 1; cx->col = 7;
-    if (cx->stop) { return true; }
-    if (cx->errors.count) { return false; }
+{ /* CX_TID CX_OGETVAR */
+cx->pc = 18; cx->row = 1; cx->col = 8;
+if (cx->pc == stop_pc) { return true; }
+if (cx->errors.count) { return false; }
 struct cx_scope *s = cx_scope(cx, 0);
 struct cx_box *v = cx_get_var(s, sym_a, false);
 if (!v) { return false; }
 cx_copy(cx_push(s), v);
- }
+}
 
- op19: { /* CX_TID CX_OGETVAR */
-    cx->pc = 19; cx->row = 1; cx->col = 10;
-    if (cx->stop) { return true; }
-    if (cx->errors.count) { return false; }
+{ /* CX_TID CX_OGETVAR */
+cx->pc = 19; cx->row = 1; cx->col = 11;
+if (cx->pc == stop_pc) { return true; }
+if (cx->errors.count) { return false; }
 struct cx_scope *s = cx_scope(cx, 0);
 struct cx_box *v = cx_get_var(s, sym_b, false);
 if (!v) { return false; }
 cx_copy(cx_push(s), v);
- }
+}
 
- op20: { /* CX_TFIMP CX_OFUNCALL */
-    cx->pc = 20; cx->row = 1; cx->col = 13;
-    if (cx->stop) { return true; }
-    if (cx->errors.count) { return false; }
+{ /* CX_TFIMP CX_OFUNCALL */
+cx->pc = 20; cx->row = 1; cx->col = 14;
+if (cx->pc == stop_pc) { return true; }
+if (cx->errors.count) { return false; }
 struct cx_scope *s = cx_scope(cx, 0);
 struct cx_func *func = func_A();
 struct cx_fimp *imp = func_A_IntInt();
@@ -423,22 +412,22 @@ if (!imp->ptr && imp->bin == cx->bin) {
   cx_call_init(cx_vec_push(&cx->calls), cx->row, cx->col, imp, 21);
   goto op0;
 } else if (!cx_fimp_call(imp, s)) { return false; }
- }
+}
 
- op21: { /* CX_TID CX_OGETVAR */
-    cx->pc = 21; cx->row = 1; cx->col = 15;
-    if (cx->stop) { return true; }
-    if (cx->errors.count) { return false; }
+op21: { /* CX_TID CX_OGETVAR */
+cx->pc = 21; cx->row = 1; cx->col = 16;
+if (cx->pc == stop_pc) { return true; }
+if (cx->errors.count) { return false; }
 struct cx_scope *s = cx_scope(cx, 0);
 struct cx_box *v = cx_get_var(s, sym_n, false);
 if (!v) { return false; }
 cx_copy(cx_push(s), v);
- }
+}
 
- op22: { /* CX_TFUNC CX_OFUNCALL */
-    cx->pc = 22; cx->row = 1; cx->col = 18;
-    if (cx->stop) { return true; }
-    if (cx->errors.count) { return false; }
+{ /* CX_TFUNC CX_OFUNCALL */
+cx->pc = 22; cx->row = 1; cx->col = 19;
+if (cx->pc == stop_pc) { return true; }
+if (cx->errors.count) { return false; }
 struct cx_scope *s = cx_scope(cx, 0);
 struct cx_func *func = func_NN();
 struct cx_fimp *imp = func_NN_Int();
@@ -454,12 +443,12 @@ if (!imp->ptr && imp->bin == cx->bin) {
   cx_call_init(cx_vec_push(&cx->calls), cx->row, cx->col, imp, 23);
   goto op0;
 } else if (!cx_fimp_call(imp, s)) { return false; }
- }
+}
 
- op23: { /* CX_TFUNC CX_OFUNCALL */
-    cx->pc = 23; cx->row = 1; cx->col = 21;
-    if (cx->stop) { return true; }
-    if (cx->errors.count) { return false; }
+op23: { /* CX_TFUNC CX_OFUNCALL */
+cx->pc = 23; cx->row = 1; cx->col = 22;
+if (cx->pc == stop_pc) { return true; }
+if (cx->errors.count) { return false; }
 struct cx_scope *s = cx_scope(cx, 0);
 struct cx_func *func = func_recall();
 struct cx_fimp *imp = func_recall_();
@@ -475,29 +464,22 @@ if (!imp->ptr && imp->bin == cx->bin) {
   cx_call_init(cx_vec_push(&cx->calls), cx->row, cx->col, imp, 24);
   goto op0;
 } else if (!cx_fimp_call(imp, s)) { return false; }
- }
+}
 
- op24: { /* CX_TLAMBDA CX_OSTOP */
-    cx->pc = 24; cx->row = 1; cx->col = 4;
-    if (cx->stop) { return true; }
-    if (cx->errors.count) { return false; }
-cx->stop = true;
- }
-
- op25: { /* CX_TID CX_OGETVAR */
-    cx->pc = 25; cx->row = 1; cx->col = 28;
-    if (cx->stop) { return true; }
-    if (cx->errors.count) { return false; }
+op24: { /* CX_TID CX_OGETVAR */
+cx->pc = 24; cx->row = 1; cx->col = 29;
+if (cx->pc == stop_pc) { return true; }
+if (cx->errors.count) { return false; }
 struct cx_scope *s = cx_scope(cx, 0);
 struct cx_box *v = cx_get_var(s, sym_a, false);
 if (!v) { return false; }
 cx_copy(cx_push(s), v);
- }
+}
 
- op26: { /* CX_TFUNC CX_OFUNCALL */
-    cx->pc = 26; cx->row = 1; cx->col = 31;
-    if (cx->stop) { return true; }
-    if (cx->errors.count) { return false; }
+{ /* CX_TFUNC CX_OFUNCALL */
+cx->pc = 25; cx->row = 1; cx->col = 32;
+if (cx->pc == stop_pc) { return true; }
+if (cx->errors.count) { return false; }
 struct cx_scope *s = cx_scope(cx, 0);
 struct cx_func *func = func_ifNelse();
 struct cx_fimp *imp = func_ifNelse_OptOptOpt();
@@ -510,15 +492,15 @@ if (!imp) {
 }
 
 if (!imp->ptr && imp->bin == cx->bin) {
-  cx_call_init(cx_vec_push(&cx->calls), cx->row, cx->col, imp, 27);
+  cx_call_init(cx_vec_push(&cx->calls), cx->row, cx->col, imp, 26);
   goto op0;
 } else if (!cx_fimp_call(imp, s)) { return false; }
- }
+}
 
- op27: { /* CX_TFUNC CX_ORETURN */
-    cx->pc = 27; cx->row = 1; cx->col = 7;
-    if (cx->stop) { return true; }
-    if (cx->errors.count) { return false; }
+op26: { /* CX_TFUNC CX_ORETURN */
+cx->pc = 26; cx->row = 1; cx->col = 7;
+if (cx->pc == stop_pc) { return true; }
+if (cx->errors.count) { return false; }
 struct cx_call *call = cx_test(cx_vec_peek(&cx->calls, 0));
 struct cx_scope *s = cx_scope(cx, 0);
 
@@ -574,14 +556,13 @@ if (call->recalls) {
   }
 
   cx_call_deinit(call);
-  cx->stop = true;
 }
- }
+}
 
- op28: { /* CX_TFUNC CX_OFUNCALL */
-    cx->pc = 28; cx->row = 1; cx->col = 7;
-    if (cx->stop) { return true; }
-    if (cx->errors.count) { return false; }
+op27: { /* CX_TFUNC CX_OFUNCALL */
+cx->pc = 27; cx->row = 1; cx->col = 7;
+if (cx->pc == stop_pc) { return true; }
+if (cx->errors.count) { return false; }
 struct cx_scope *s = cx_scope(cx, 0);
 struct cx_func *func = func_fibNrec();
 struct cx_fimp *imp = func_fibNrec_IntIntInt();
@@ -594,15 +575,15 @@ if (!imp) {
 }
 
 if (!imp->ptr && imp->bin == cx->bin) {
-  cx_call_init(cx_vec_push(&cx->calls), cx->row, cx->col, imp, 29);
+  cx_call_init(cx_vec_push(&cx->calls), cx->row, cx->col, imp, 28);
   goto op12;
 } else if (!cx_fimp_call(imp, s)) { return false; }
- }
+}
 
- op29: { /* CX_TFUNC CX_ORETURN */
-    cx->pc = 29; cx->row = 1; cx->col = 18;
-    if (cx->stop) { return true; }
-    if (cx->errors.count) { return false; }
+op28: { /* CX_TFUNC CX_ORETURN */
+cx->pc = 28; cx->row = 1; cx->col = 20;
+if (cx->pc == stop_pc) { return true; }
+if (cx->errors.count) { return false; }
 struct cx_call *call = cx_test(cx_vec_peek(&cx->calls, 0));
 struct cx_scope *s = cx_scope(cx, 0);
 
@@ -658,14 +639,13 @@ if (call->recalls) {
   }
 
   cx_call_deinit(call);
-  cx->stop = true;
 }
- }
+}
 
- op30: { /* CX_TFUNC CX_OFUNCALL */
-    cx->pc = 30; cx->row = 1; cx->col = 18;
-    if (cx->stop) { return true; }
-    if (cx->errors.count) { return false; }
+op29: { /* CX_TFUNC CX_OFUNCALL */
+cx->pc = 29; cx->row = 1; cx->col = 20;
+if (cx->pc == stop_pc) { return true; }
+if (cx->errors.count) { return false; }
 struct cx_scope *s = cx_scope(cx, 0);
 struct cx_func *func = func_fib();
 struct cx_fimp *imp = func_fib_Int();
@@ -678,15 +658,15 @@ if (!imp) {
 }
 
 if (!imp->ptr && imp->bin == cx->bin) {
-  cx_call_init(cx_vec_push(&cx->calls), cx->row, cx->col, imp, 31);
+  cx_call_init(cx_vec_push(&cx->calls), cx->row, cx->col, imp, 30);
   goto op6;
 } else if (!cx_fimp_call(imp, s)) { return false; }
- }
+}
 
- op31: { /* CX_TFUNC CX_OFUNCALL */
-    cx->pc = 31; cx->row = 1; cx->col = 22;
-    if (cx->stop) { return true; }
-    if (cx->errors.count) { return false; }
+op30: { /* CX_TFUNC CX_OFUNCALL */
+cx->pc = 30; cx->row = 1; cx->col = 24;
+if (cx->pc == stop_pc) { return true; }
+if (cx->errors.count) { return false; }
 struct cx_scope *s = cx_scope(cx, 0);
 struct cx_func *func = func__();
 struct cx_fimp *imp = func___();
@@ -699,22 +679,15 @@ if (!imp) {
 }
 
 if (!imp->ptr && imp->bin == cx->bin) {
-  cx_call_init(cx_vec_push(&cx->calls), cx->row, cx->col, imp, 32);
+  cx_call_init(cx_vec_push(&cx->calls), cx->row, cx->col, imp, 31);
   goto op0;
 } else if (!cx_fimp_call(imp, s)) { return false; }
- }
+}
 
- op32: { /* CX_TLAMBDA CX_OSTOP */
-    cx->pc = 32; cx->row = 1; cx->col = 15;
-    if (cx->stop) { return true; }
-    if (cx->errors.count) { return false; }
-cx->stop = true;
- }
-
- op33: { /* CX_TFUNC CX_OFUNCALL */
-    cx->pc = 33; cx->row = 1; cx->col = 24;
-    if (cx->stop) { return true; }
-    if (cx->errors.count) { return false; }
+op31: { /* CX_TFUNC CX_OFUNCALL */
+cx->pc = 31; cx->row = 1; cx->col = 26;
+if (cx->pc == stop_pc) { return true; }
+if (cx->errors.count) { return false; }
 struct cx_scope *s = cx_scope(cx, 0);
 struct cx_func *func = func_times();
 struct cx_fimp *imp = func_times_IntA();
@@ -727,22 +700,15 @@ if (!imp) {
 }
 
 if (!imp->ptr && imp->bin == cx->bin) {
-  cx_call_init(cx_vec_push(&cx->calls), cx->row, cx->col, imp, 34);
+  cx_call_init(cx_vec_push(&cx->calls), cx->row, cx->col, imp, 32);
   goto op0;
 } else if (!cx_fimp_call(imp, s)) { return false; }
- }
+}
 
- op34: { /* CX_TLAMBDA CX_OSTOP */
-    cx->pc = 34; cx->row = 1; cx->col = 12;
-    if (cx->stop) { return true; }
-    if (cx->errors.count) { return false; }
-cx->stop = true;
- }
-
- op35: { /* CX_TFUNC CX_OFUNCALL */
-    cx->pc = 35; cx->row = 1; cx->col = 30;
-    if (cx->stop) { return true; }
-    if (cx->errors.count) { return false; }
+op32: { /* CX_TFUNC CX_OFUNCALL */
+cx->pc = 32; cx->row = 1; cx->col = 32;
+if (cx->pc == stop_pc) { return true; }
+if (cx->errors.count) { return false; }
 struct cx_scope *s = cx_scope(cx, 0);
 struct cx_func *func = func_clock();
 struct cx_fimp *imp = func_clock_A();
@@ -755,15 +721,15 @@ if (!imp) {
 }
 
 if (!imp->ptr && imp->bin == cx->bin) {
-  cx_call_init(cx_vec_push(&cx->calls), cx->row, cx->col, imp, 36);
+  cx_call_init(cx_vec_push(&cx->calls), cx->row, cx->col, imp, 33);
   goto op0;
 } else if (!cx_fimp_call(imp, s)) { return false; }
- }
+}
 
- op36: { /* CX_TFUNC CX_OFUNCALL */
-    cx->pc = 36; cx->row = 1; cx->col = 36;
-    if (cx->stop) { return true; }
-    if (cx->errors.count) { return false; }
+op33: { /* CX_TFUNC CX_OFUNCALL */
+cx->pc = 33; cx->row = 1; cx->col = 38;
+if (cx->pc == stop_pc) { return true; }
+if (cx->errors.count) { return false; }
 struct cx_scope *s = cx_scope(cx, 0);
 struct cx_func *func = func_E();
 struct cx_fimp *imp = func_E_IntInt();
@@ -776,15 +742,15 @@ if (!imp) {
 }
 
 if (!imp->ptr && imp->bin == cx->bin) {
-  cx_call_init(cx_vec_push(&cx->calls), cx->row, cx->col, imp, 37);
+  cx_call_init(cx_vec_push(&cx->calls), cx->row, cx->col, imp, 34);
   goto op0;
 } else if (!cx_fimp_call(imp, s)) { return false; }
- }
+}
 
- op37: { /* CX_TFUNC CX_OFUNCALL */
-    cx->pc = 37; cx->row = 1; cx->col = 38;
-    if (cx->stop) { return true; }
-    if (cx->errors.count) { return false; }
+op34: { /* CX_TFUNC CX_OFUNCALL */
+cx->pc = 34; cx->row = 1; cx->col = 40;
+if (cx->pc == stop_pc) { return true; }
+if (cx->errors.count) { return false; }
 struct cx_scope *s = cx_scope(cx, 0);
 struct cx_func *func = func_int();
 struct cx_fimp *imp = cx_func_match(func, s);
@@ -795,11 +761,9 @@ if (!imp) {
 }
 
 if (!cx_fimp_call(imp, s)) { return false; }
- }
+}
 
- op38:
-  cx->stop = false;
-  return true;
+return true;
 }
 
   struct cx_bin *bin = cx_bin_new();

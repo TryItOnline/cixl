@@ -65,7 +65,6 @@ struct cx {
 
   struct cx_bin *bin;
   size_t pc;
-  bool stop;
   
   int row, col;
   struct cx_vec throwing, errors;

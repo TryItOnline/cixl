@@ -1127,13 +1127,7 @@ static bool return_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
 
     cx_vec_clear(&ss->stack);
     struct cx_call *call = cx_vec_pop(&cx->calls);
-    
-    if (call->return_pc > -1) {
-      cx->pc = call->return_pc;
-    } else {
-      cx->stop = true;
-    }
-    
+    if (call->return_pc > -1) { cx->pc = call->return_pc; }
     cx_call_deinit(call);
     cx_end(cx);
   }
@@ -1244,7 +1238,6 @@ static bool return_emit(struct cx_op *op,
 	"    goto *op_labels[cx->pc];\n"
 	"  }\n\n"
 	"  cx_call_deinit(call);\n"
-	"  cx->stop = true;\n"
 	"}\n",
 	out);
   
@@ -1313,24 +1306,6 @@ static bool stash_emit(struct cx_op *op,
 cx_op_type(CX_OSTASH, {
     type.eval = stash_eval;
     type.emit = stash_emit;
-  });
-
-static bool stop_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
-  cx->stop = true;
-  return true;
-}
-
-static bool stop_emit(struct cx_op *op,
-		      struct cx_bin *bin,
-		      FILE *out,
-		      struct cx *cx) {
-  fputs("cx->stop = true;\n", out);
-  return true;
-}
-
-cx_op_type(CX_OSTOP, {
-    type.eval = stop_eval;
-    type.emit = stop_emit;
   });
 
 static bool typedef_emit(struct cx_op *op,
