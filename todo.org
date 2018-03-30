@@ -1,6 +1,3 @@
-* add Bin.labels set
-** store jump pcs during compile
-** use to decide if emit case should be printed
 * remove stop op
 ** call eval with stop_pc instead
 * fix fib-rec in bench1 emit
