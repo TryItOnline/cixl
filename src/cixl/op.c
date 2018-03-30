@@ -206,16 +206,17 @@ static void fimp_emit_init(struct cx_op *op,
 			   FILE *out,
 			   struct cx *cx) {
   struct cx_fimp *imp = op->as_fimp.imp;
-
+  struct cx_sym imp_var = cx_gsym(cx, "imp");
+  
   fprintf(out,
-	  "\n"
-	  "{\n"
-	  "  struct cx_fimp *imp = %s();\n"
-	  "  imp->bin = cx_bin_ref(cx->bin);\n"
-	  "  imp->start_pc = %zd;\n"
-	  "  imp->nops = %zd;\n"
-	  "}\n\n",
-	  imp->emit_id, imp->start_pc, imp->nops);
+	  "struct cx_fimp *%s = %s();\n"
+	  "%s->bin = cx_bin_ref(cx->bin);\n"
+	  "%s->start_pc = %zd;\n"
+	  "%s->nops = %zd;\n",
+	  imp_var.id, imp->emit_id,
+	  imp_var.id,
+	  imp_var.id, imp->start_pc,
+	  imp_var.id, imp->nops);
 }
 
 static void fimp_emit_funcs(struct cx_op *op, struct cx_set *out, struct cx *cx) {
@@ -265,12 +266,11 @@ static void funcdef_emit_init(struct cx_op *op,
 			      FILE *out,
 			      struct cx *cx) {
   struct cx_fimp *imp = op->as_funcdef.imp;
+  struct cx_sym args_var = cx_gsym(cx, "args");
   
   fprintf(out,
-	  "\n"
-	  "{\n"
-	  "  struct cx_arg args[%zd] = {\n",
-	  imp->args.count);
+	  "struct cx_arg %s[%zd] = {\n",
+	  args_var.id, imp->args.count);
 
   char *sep = NULL;
   
@@ -281,10 +281,11 @@ static void funcdef_emit_init(struct cx_op *op,
   }
 					     
   fputs("};\n\n", out);
-
+  struct cx_sym rets_var = cx_gsym(cx, "rets");
+  
   fprintf(out,
-	  "  struct cx_arg rets[%zd] = {\n",
-	  imp->rets.count);
+	  "struct cx_arg %s[%zd] = {\n",
+	  rets_var.id, imp->rets.count);
 
   sep = NULL;
   
@@ -297,9 +298,8 @@ static void funcdef_emit_init(struct cx_op *op,
   fputs("};\n\n", out);
   
   fprintf(out,
-	  "  cx_add_func(*cx->lib, \"%s\", %zd, args, %zd, rets);\n"
-	  "}\n\n",
-	  imp->func->id, imp->args.count, imp->rets.count);
+	  "cx_add_func(*cx->lib, \"%s\", %zd, %s, %zd, %s);\n",
+	  imp->func->id, imp->args.count, args_var.id, imp->rets.count, rets_var.id);
 }
 
 static void funcdef_emit_syms(struct cx_op *op, struct cx_set *out, struct cx *cx) {
@@ -563,13 +563,12 @@ static void libdef_emit_init(struct cx_op *op,
   struct cx_lib_init *i = cx_vec_get(&lib->inits, op->as_libdef.init);
   cx_test(!i->ptr);
   
+  struct cx_sym lib_var = cx_gsym(cx, "lib");
+  
   fprintf(out,
-	  "\n"
-	  "{\n"
-	  "  struct cx_lib *lib = cx_add_lib(cx, \"%s\");\n"
-	  "  cx_lib_push_init(lib, cx_lib_ops(cx->bin, %zd, %zd));\n"
-	  "}\n\n",
-	  lib->id.id, i->start_pc, i->nops);
+	  "struct cx_lib *%s = cx_add_lib(cx, \"%s\");\n"
+	  "cx_lib_push_init(%s, cx_lib_ops(cx->bin, %zd, %zd));\n",
+	  lib_var.id, lib->id.id, lib_var.id, i->start_pc, i->nops);
 }
 
 cx_op_type(CX_OLIBDEF, {
@@ -1259,51 +1258,42 @@ static void typedef_emit_init(struct cx_op *op,
 			      FILE *out,
 			      struct cx *cx) {
   struct cx_type *t = op->as_typedef.type;
+  struct cx_sym type_var = cx_gsym(cx, "type");
   
   if (cx_is(t, cx->rec_type)) {
     fprintf(out,
-	    "\n"
-	    "{\n"
-	    "  struct cx_rec_type *t = "
-	    "cx_test(cx_add_rec_type(*cx->lib, \"%s\"));\n",
-	    t->id);
+	    "struct cx_rec_type *%s = cx_test(cx_add_rec_type(*cx->lib, \"%s\"));\n",
+	    type_var.id, t->id);
 
     cx_do_set(&t->parents, struct cx_type *, pt) {
       if (*pt == cx->rec_type) { continue; }
       
       fprintf(out,
-	      "  cx_derive_rec(t, "
-	      "cx_test(cx_get_type(cx, \"%s\", false)));\n",
-	      (*pt)->id);
+	      "cx_derive_rec(%s, cx_test(cx_get_type(cx, \"%s\", false)));\n",
+	      type_var.id, (*pt)->id);
     }
     
     struct cx_rec_type *rt = cx_baseof(t, struct cx_rec_type, imp);
 
     cx_do_set(&rt->fields, struct cx_field, f) {
       fprintf(out,
-	      "  cx_test(cx_add_field(t,\n"
-	      "          cx_sym(cx, \"%s\"),\n"
-	      "          cx_test(cx_get_type(cx, \"%s\", false)),\n"
-	      "          false));\n",
-	      f->id.id, f->type->id);
+	      "cx_test(cx_add_field(%s,\n"
+	      "        cx_sym(cx, \"%s\"),\n"
+	      "        cx_test(cx_get_type(cx, \"%s\", false)),\n"
+	      "        false));\n",
+	      type_var.id, f->id.id, f->type->id);
     }
-
-    fputs("}\n\n", out);
   } else if (t->trait) {
     fprintf(out,
-  	    "\n"
-	    "{\n"
-	    "  struct cx_type *t = cx_test(cx_add_type(*cx->lib, \"%s\"));\n"
-	    "  t->trait = true;\n\n",
-	    t->id);
+	    "struct cx_type *%s = cx_test(cx_add_type(*cx->lib, \"%s\"));\n"
+	    "%s->trait = true;\n",
+	    type_var.id, t->id, type_var.id);
 
     cx_do_set(&t->children, struct cx_type *, ct) {
       fprintf(out,
-	      "  cx_derive(cx_test(cx_get_type(cx, \"%s\", false)), t);\n",
-	      (*ct)->id);
+	      "cx_derive(cx_test(cx_get_type(cx, \"%s\", false)), %s);\n",
+	      (*ct)->id, type_var.id);
     }
-
-    fputs("}\n\n", out);
   }
 }
 
