@@ -154,7 +154,8 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
         "  static bool init = true;\n\n",
 	out);
   
-  struct cx_set libs, types, funcs, fimps, syms;
+  struct cx_set labels, libs, types, funcs, fimps, syms;
+  cx_set_init(&labels, sizeof(size_t), cx_cmp_size);  
   cx_set_init(&libs, sizeof(struct cx_lib *), cx_cmp_ptr);
   cx_set_init(&types, sizeof(struct cx_type *), cx_cmp_ptr);
   cx_set_init(&funcs, sizeof(struct cx_func *), cx_cmp_ptr);
@@ -166,6 +167,7 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
   for (struct cx_op *op = cx_vec_start(&bin->ops);
        op != cx_vec_end(&bin->ops);
        op++) {
+    if (op->type->emit_labels) {op->type->emit_labels(op, &labels, cx); }
     if (op->type->emit_libs) {op->type->emit_libs(op, bin, &libs, cx); }
     if (op->type->emit_types) {op->type->emit_types(op, &types, cx); }
     if (op->type->emit_funcs) { op->type->emit_funcs(op, &funcs, cx); }
@@ -250,14 +252,18 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
   cx_set_deinit(&fimps);
   cx_set_deinit(&syms);
 		
-  fputs("  }\n\n", out);
-
+  fputs("  }\n\n", out);  
+  
   fprintf(out, "  static void *op_labels[%zd] = {\n    ", bin->ops.count+1);
   
   for (size_t i = 0; i < bin->ops.count+1; i++) {
-    fprintf(out, "&&op%zd", i);
+    if (i == 0 || cx_set_get(&labels, &i)) {      
+      fprintf(out, "&&op%zd", i);
+    } else {
+      fputs("NULL", out);
+    }
+    
     if (i < bin->ops.count) { fputs(", ", out); }
-    if (i >= 10 && i % 10 == 0) { fputs("\n    ", out); }
   }
   
   fputs("};\n\n"
@@ -269,22 +275,26 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
        op++) {
     cx->row = op->row; cx->col = op->col;
     struct cx_tok *tok = cx_vec_get(&bin->toks, op->tok_idx);
+
+    if (op->pc == 0 || cx_set_get(&labels, &op->pc)) {
+      fprintf(out, "op%zd: ", op->pc);
+    }
     
-    fprintf(out, " op%zd: { /* %s %s */\n",
-	    op->pc, tok->type->id, op->type->id);
+    fprintf(out, "{ /* %s %s */\n", tok->type->id, op->type->id);
     
     fprintf(out,
-	    "    cx->pc = %zd; cx->row = %d; cx->col = %d;\n",
+	    "cx->pc = %zd; cx->row = %d; cx->col = %d;\n",
 	    op->pc, cx->row, cx->col);
 
-    fputs("    if (cx->stop || cx->pc == stop_pc) { return true; }\n", out);
-    fputs("    if (cx->errors.count) { return false; }\n", out);
+    fputs("if (cx->stop || cx->pc == stop_pc) { return true; }\n"
+	  "if (cx->errors.count) { return false; }\n",
+	  out);
 
     if (op->type->emit && !cx_test(op->type->emit)(op, bin, out, cx)) {
       return false;
     }
     
-    fputs(" }\n\n", out);
+    fputs("}\n\n", out);
   }
 
   fprintf(out, " op%zd:\n",  bin->ops.count);
@@ -299,6 +309,7 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
 	"}\n",
 	out);
   
+  cx_set_deinit(&labels);
   return true;
 }
 

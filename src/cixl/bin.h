@@ -4,7 +4,6 @@
 #include <stdio.h>
 
 #include "cixl/set.h"
-#include "cixl/vec.h"
 
 struct cx;
 struct cx_fimp;

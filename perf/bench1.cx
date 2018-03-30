@@ -1,11 +1,11 @@
 use:
-  (cx/abc   Int)
-  (cx/io    say)
-  (cx/iter  times)
-  (cx/math  / fib int)
-  (cx/stack _)
-  (cx/time  clock)
-  (cx/type  unsafe);
+  (cx/abc     Int)
+  (cx/io/term say)
+  (cx/iter    times)
+  (cx/math    / fib int)
+  (cx/stack   _)
+  (cx/time    clock)
+  (cx/type    unsafe);
 
 unsafe
 {10000 {50 fib _} times} clock 1000000 / int say

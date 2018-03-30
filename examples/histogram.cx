@@ -12,7 +12,7 @@
 use:
   (cx/cond <=>)
   (cx/iter for)
-  (cx/io #in say)
+  (cx/io #in)
   (cx/io/term say)
   (cx/math ++)
   (cx/pair x y)

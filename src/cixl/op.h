@@ -35,6 +35,7 @@ struct cx_op_type {
   bool (*emit)(struct cx_op *, struct cx_bin *, FILE *, struct cx *);
 
   void (*emit_init)(struct cx_op *, struct cx_bin *, FILE *, struct cx *);
+  void (*emit_labels)(struct cx_op *, struct cx_set *, struct cx *);
   void (*emit_funcs)(struct cx_op *, struct cx_set *, struct cx *);
   void (*emit_fimps)(struct cx_op *, struct cx_set *, struct cx *);
   void (*emit_syms)(struct cx_op *, struct cx_set *, struct cx *);

@@ -27,6 +27,7 @@ struct cx_op_type *cx_op_type_init(struct cx_op_type *type, const char *id) {
   type->eval = NULL;
   type->emit = emit;
   type->emit_init = NULL;
+  type->emit_labels = NULL;
   type->emit_funcs = NULL;
   type->emit_fimps = NULL;
   type->emit_syms = NULL;
@@ -126,6 +127,17 @@ static bool catch_emit(struct cx_op *op,
   return true;
 }
 
+static void catch_emit_labels(struct cx_op *op, struct cx_set *out, struct cx *cx) {
+  size_t
+    pc = op->pc+1,
+    *ok = cx_set_insert(out, &pc);
+  
+  if (ok) { *ok = pc; }
+  pc = op->pc+op->as_catch.nops+1;  
+  ok = cx_set_insert(out, &pc);
+  if (ok) { *ok = pc; }
+}
+
 static void catch_emit_types(struct cx_op *op, struct cx_set *out, struct cx *cx) {
   struct cx_type
     *t = op->as_catch.type,
@@ -137,6 +149,7 @@ static void catch_emit_types(struct cx_op *op, struct cx_set *out, struct cx *cx
 cx_op_type(CX_OCATCH, {
     type.eval = catch_eval;
     type.emit = catch_emit;
+    type.emit_labels = catch_emit_labels;
     type.emit_types = catch_emit_types;
   });
 
@@ -168,9 +181,18 @@ static bool else_emit(struct cx_op *op,
   return true;
 }
 
+static void else_emit_labels(struct cx_op *op, struct cx_set *out, struct cx *cx) {
+  size_t
+    pc = op->pc+op->as_else.nops+1,
+    *ok = cx_set_insert(out, &pc);
+  
+  if (ok) { *ok = pc; }
+}
+
 cx_op_type(CX_OELSE, {
     type.eval = else_eval;
     type.emit = else_emit;
+    type.emit_labels = else_emit_labels;
   });
 
 static bool end_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
@@ -199,6 +221,17 @@ static bool fimp_emit(struct cx_op *op,
 		      struct cx *cx) {
   fprintf(out, "goto op%zd;\n", op->pc+op->as_fimp.imp->nops+1);
   return true;
+}
+
+static void fimp_emit_labels(struct cx_op *op, struct cx_set *out, struct cx *cx) {
+  size_t
+    pc = op->as_fimp.imp->start_pc,
+    *ok = cx_set_insert(out, &pc);
+  
+  if (ok) { *ok = pc; }
+  pc = op->pc+op->as_fimp.imp->nops+1;
+  ok = cx_set_insert(out, &pc);
+  if (ok) { *ok = pc; }
 }
 
 static void fimp_emit_init(struct cx_op *op,
@@ -239,6 +272,7 @@ cx_op_type(CX_OFIMP, {
     type.eval = fimp_eval;
     type.emit = fimp_emit;
     type.emit_init = fimp_emit_init;
+    type.emit_labels = fimp_emit_labels;
     type.emit_funcs = fimp_emit_funcs;
     type.emit_fimps = fimp_emit_fimps;
   });
@@ -396,6 +430,14 @@ static bool funcall_emit(struct cx_op *op,
   return true;
 }
 
+static void funcall_emit_labels(struct cx_op *op, struct cx_set *out, struct cx *cx) {
+  size_t
+    pc = op->pc+1,
+    *ok = cx_set_insert(out, &pc);
+  
+  if (ok) { *ok = pc; }
+}
+
 static void funcall_emit_funcs(struct cx_op *op, struct cx_set *out, struct cx *cx) {
   struct cx_func
     *func = op->as_funcall.func,
@@ -416,6 +458,7 @@ static void funcall_emit_fimps(struct cx_op *op, struct cx_set *out, struct cx *
 cx_op_type(CX_OFUNCALL, {
     type.eval = funcall_eval;
     type.emit = funcall_emit;
+    type.emit_labels = funcall_emit_labels;
     type.emit_funcs = funcall_emit_funcs;
     type.emit_fimps = funcall_emit_fimps;
   });
@@ -506,9 +549,18 @@ static bool jump_emit(struct cx_op *op,
   return true;
 }
 
+static void jump_emit_labels(struct cx_op *op, struct cx_set *out, struct cx *cx) {
+  size_t
+    pc = op->as_jump.pc,
+    *ok = cx_set_insert(out, &pc);
+  
+  if (ok) { *ok = pc; }
+}
+
 cx_op_type(CX_OJUMP, {
     type.eval = jump_eval;
     type.emit = jump_emit;
+    type.emit_labels = jump_emit_labels;
   });
 
 static bool lambda_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
@@ -534,9 +586,21 @@ static bool lambda_emit(struct cx_op *op,
   return true;
 }
 
+static void lambda_emit_labels(struct cx_op *op, struct cx_set *out, struct cx *cx) {
+  size_t
+    pc = op->as_lambda.start_op,
+    *ok = cx_set_insert(out, &pc);
+  
+  if (ok) { *ok = pc; }
+  pc = op->pc+op->as_lambda.nops+1;
+  ok = cx_set_insert(out, &pc);
+  if (ok) { *ok = pc; }  
+}
+
 cx_op_type(CX_OLAMBDA, {
     type.eval = lambda_eval;
     type.emit = lambda_emit;
+    type.emit_labels = lambda_emit_labels;
   });
 
 static bool libdef_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
@@ -571,10 +635,24 @@ static void libdef_emit_init(struct cx_op *op,
 	  lib_var.id, lib->id.id, lib_var.id, i->start_pc, i->nops);
 }
 
+static void libdef_emit_labels(struct cx_op *op, struct cx_set *out, struct cx *cx) {
+  size_t
+    pc = op->pc+1,
+    *ok = cx_set_insert(out, &pc);
+  
+  if (ok) { *ok = pc; }
+
+  struct cx_lib_init *i = cx_vec_get(&op->as_libdef.lib->inits, op->as_libdef.init);
+  pc = op->pc+i->nops+1;
+  ok = cx_set_insert(out, &pc);
+  if (ok) { *ok = pc; }
+}
+
 cx_op_type(CX_OLIBDEF, {
     type.eval = libdef_eval;
     type.emit = libdef_emit;
     type.emit_init = libdef_emit_init;
+    type.emit_labels = libdef_emit_labels;
   });
 
 static bool popcatch_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
@@ -1173,6 +1251,14 @@ static bool return_emit(struct cx_op *op,
   return true;  
 }
 
+static void return_emit_labels(struct cx_op *op, struct cx_set *out, struct cx *cx) {
+  size_t
+    pc = op->as_return.pc+1,
+    *ok = cx_set_insert(out, &pc);
+  
+  if (ok) { *ok = pc; }
+}
+
 static void return_emit_funcs(struct cx_op *op, struct cx_set *out, struct cx *cx) {
   struct cx_func
     *f = op->as_return.imp->func,
@@ -1205,6 +1291,7 @@ static void return_emit_types(struct cx_op *op, struct cx_set *out, struct cx *c
 cx_op_type(CX_ORETURN, {
     type.eval = return_eval;
     type.emit = return_emit;
+    type.emit_labels = return_emit_labels;
     type.emit_funcs = return_emit_funcs;
     type.emit_fimps = return_emit_fimps;
     type.emit_types = return_emit_types;

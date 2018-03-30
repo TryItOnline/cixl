@@ -1,14 +1,14 @@
 use:
-  (cx/abc   A Int Str Sym)
-  (cx/math  / int)
-  (cx/io    say)
-  (cx/iter  times)
-  (cx/rec   Rec put rec:)
-  (cx/stack %)
-  (cx/time  clock)
-  (cx/type  new unsafe);
+  (cx/abc     Int Opt Str Sym)
+  (cx/math    / int)
+  (cx/io/term say)
+  (cx/iter    times)
+  (cx/rec     Rec put rec:)
+  (cx/stack   %)
+  (cx/time    clock)
+  (cx/type    new unsafe);
 
 unsafe
 rec: Foo() x Int y Str;
-{10000000 {Foo new % `x 42 put<Rec Sym A> `y 'bar' put<Rec Sym A>} times}
+{10000000 {Foo new % `x 42 put<Rec Sym Opt> `y 'bar' put<Rec Sym Opt>} times}
 clock 1000000 / int say
