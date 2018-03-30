@@ -242,10 +242,13 @@ static void fimp_emit_init(struct cx_op *op,
   struct cx_sym imp_var = cx_gsym(cx, "imp");
   
   fprintf(out,
+	  "cx_push_lib(cx, %s());\n"
 	  "struct cx_fimp *%s = %s();\n"
+	  "cx_pop_lib(cx);\n"
 	  "%s->bin = cx_bin_ref(cx->bin);\n"
 	  "%s->start_pc = %zd;\n"
 	  "%s->nops = %zd;\n",
+	  imp->lib->emit_id,
 	  imp_var.id, imp->emit_id,
 	  imp_var.id,
 	  imp_var.id, imp->start_pc,

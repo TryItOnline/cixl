@@ -71,7 +71,8 @@ int main(int argc, char *argv[]) {
 	cx_mfile_open(&cmd);
       
 	fputs("gcc -x c -std=gnu1x -O2 -g "
-	      "-Wall -Werror -Wno-unused-function -Wno-unused-but-set-variable "
+	      "-Wall -Werror "
+	      "-Wno-unused-label -Wno-unused-function -Wno-unused-but-set-variable "
 	      "- -Bstatic -lcixl",
 	      cmd.stream);
 

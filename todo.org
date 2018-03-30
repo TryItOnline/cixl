@@ -1,7 +1,5 @@
-* fix fib-rec in bench1 emit
-* fix bookings emit
 * fix tellux emit
-* fix guess emit
+** fails on type_Stack
 * --- cxcrypt
 * add Pub/PrivKey
 ** add aserver/aclient examples
