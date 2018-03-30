@@ -17,7 +17,7 @@ init: 'crypt';
 use: cx cx/crypt;
 
 /* Hash key using random salt */
-let: s 'key' Salt new secret;
+let: s 'key' Salt new hash-secret;
 
 /* Secret equality is overloaded to do the right thing */
 $s 'key' = check
