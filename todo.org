@@ -5,6 +5,9 @@
 ** add left/right 
 *** move piece horizontally
 ** add backend repr with edge detection
+*** fixed size stack
+*** add support for putting #nil
+*** store opt color
 ** add down 
 *** drop piece immediately
 ** add missing shapes
