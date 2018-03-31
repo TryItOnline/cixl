@@ -1,10 +1,9 @@
 #define htonll(x) ((1==htonl(1)) ? (x) : ((uint64_t)htonl((x) & 0xFFFFFFFF) << 32) | htonl((x) >> 32))
 #define ntohll(x) ((1==ntohl(1)) ? (x) : ((uint64_t)ntohl((x) & 0xFFFFFFFF) << 32) | ntohl((x) >> 32))
 
+* fix collabri emit
+** fix Rec/Color emit
 * --- cixtris
-* add Color rec to ansi.cx
-** change pick-fgcolor / bgcolor to take Color
-** update collabri, tellux & cixtris
 ** add block-width / block-height fns
 *** use for detecting max-x/y
 *** check when dropping new pieces

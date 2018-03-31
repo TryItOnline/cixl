@@ -168,7 +168,7 @@ static bool else_emit(struct cx_op *op,
 		      struct cx *cx) {
   
   fputs("struct cx_box *v = cx_pop(cx_scope(cx, 0), false);\n"
-	"if (!v) { return false; }\n",
+	"if (!v) { goto exit; }\n",
 	out);
 
   fprintf(out,
@@ -415,7 +415,7 @@ static bool funcall_emit(struct cx_op *op,
   
   fputs("if (!imp) {\n"
 	"  cx_error(cx, cx->row, cx->col, \"Func not applicable: %s\", func->id);\n"
-	"  return false;\n"
+	"  goto exit;\n"
 	"}\n\n",
 	out);
 
@@ -428,7 +428,7 @@ static bool funcall_emit(struct cx_op *op,
 	    op->pc+1, imp->start_pc);
   }
   
-  fputs("if (!cx_fimp_call(imp, s)) { return false; }\n",
+  fputs("if (!cx_fimp_call(imp, s)) { goto exit; }\n",
 	out);
 
   return true;
@@ -481,7 +481,7 @@ static bool getconst_emit(struct cx_op *op,
   fprintf(out, "struct cx_box *v = cx_get_const(*cx->lib, %s, false);\n",
 	  op->as_getconst.id.emit_id);
 
-  fputs("if (!v) { return false; }\n"
+  fputs("if (!v) { goto exit; }\n"
 	"cx_copy(cx_push(cx_scope(cx, 0)), v);\n",
 	out);
   
@@ -518,7 +518,7 @@ static bool getvar_emit(struct cx_op *op,
   fprintf(out,
 	  "struct cx_scope *s = cx_scope(cx, 0);\n"
 	  "struct cx_box *v = cx_get_var(s, %s, false);\n"
-	  "if (!v) { return false; }\n"
+	  "if (!v) { goto exit; }\n"
 	  "cx_copy(cx_push(s), v);\n",
 	  op->as_getvar.id.emit_id);
 
@@ -668,7 +668,7 @@ static bool popcatch_emit(struct cx_op *op,
 			 FILE *out,
 			 struct cx *cx) {
   fprintf(out,
-	  "if (!cx_pop_catch(cx_scope(cx, 0), %d)) { return false; }\n",
+	  "if (!cx_pop_catch(cx_scope(cx, 0), %d)) { goto exit; }\n",
 	  op->as_popcatch.n);
   
   return true;
@@ -1002,7 +1002,7 @@ static bool putvar_emit(struct cx_op *op,
 			struct cx *cx) {
   fputs("struct cx_scope *s = cx_scope(cx, 0);\n"
 	"struct cx_box *src = cx_pop(s, false);\n"
-	"if (!src) { return false; }\n\n",
+	"if (!src) { goto exit; }\n\n",
 	out);
 
   if (op->as_putvar.type) {
@@ -1011,7 +1011,7 @@ static bool putvar_emit(struct cx_op *op,
 	    "  cx_error(cx, cx->row, cx->col,\n"
 	    "           \"Expected type %s, actual: %%s\",\n"
 	    "           src->type->id);\n\n"
-	    "  return false;\n"
+	    "  goto exit;\n"
             "}\n\n",
 	    op->as_putvar.type->emit_id, op->as_putvar.type->id);
   }
@@ -1020,7 +1020,7 @@ static bool putvar_emit(struct cx_op *op,
 	  "struct cx_box *dst = cx_put_var(s, %s, true);\n",
 	  op->as_putvar.id.emit_id);
 
-  fputs("if (!dst) { return false; }\n"
+  fputs("if (!dst) { goto exit; }\n"
 	"*dst = *src;\n",
 	out);
 
@@ -1156,7 +1156,7 @@ static bool return_emit(struct cx_op *op,
   fprintf(out,
 	  "  if (s->safe && !cx_fimp_match(%s(), s)) {\n"
 	  "    cx_error(cx, cx->row, cx->col, \"Recall not applicable\");\n"
-	  "    return false;\n"
+	  "    goto exit;\n"
 	  "  }\n\n"
 	  "  call->recalls--;\n"
 	  "  goto op%zd;\n"
@@ -1183,13 +1183,13 @@ static bool return_emit(struct cx_op *op,
       if (r->id) {
 	fprintf(out,
 		"    struct cx_box *v = cx_get_var(s, %s, false);\n"
-		"    if (!v) { return false; }\n",
+		"    if (!v) { goto exit; }\n",
 		r->sym_id.emit_id);
       } else {
 	fputs("    if (si == s->stack.count) {\n"
 	      "      cx_error(cx, cx->row, cx->col, "
 	      "\"Not enough return values on stack\");\n"
-	      "      return false;\n"
+	      "      goto exit;\n"
 	      "    }\n\n"
 	      "    struct cx_box *v = cx_vec_get(&s->stack, si++);\n",
 	      out);
@@ -1222,7 +1222,7 @@ static bool return_emit(struct cx_op *op,
 	    "                 \"Invalid return type.\\n\"\n"
             "                 \"Expected %s, actual: %s\",\n"
 	    "                 t->id, v->type->id);\n"
-	    "        return false;\n"
+	    "        goto exit;\n"
 	    "      }\n"
 	    "    }\n\n"
 	    "    *(struct cx_box *)cx_vec_push(&ds->stack) = *v;\n"
@@ -1234,7 +1234,7 @@ static bool return_emit(struct cx_op *op,
   fprintf(out,
 	  "  if (si < s->stack.count) {\n"
 	  "    cx_error(cx, cx->row, cx->col, \"Stack not empty on return\");\n"
-	  "    return false;\n"
+	  "    goto exit;\n"
 	  "  }\n\n"
 	  "  cx_vec_clear(&s->stack);\n"
 	  "  cx_end(cx);\n"
@@ -1388,7 +1388,7 @@ static void use_emit_init(struct cx_op *op,
   cx_do_vec(&e->toks, struct cx_tok, t) {
     if (t->type == CX_TID()) {
       fprintf(out,
-	      "if (!cx_use(cx, \"%s\")) { return false; }\n",
+	      "if (!cx_use(cx, \"%s\")) { goto exit; }\n",
 	      (char *)t->as_ptr);
     } else {
       struct cx_tok *tt = cx_vec_get(&t->as_vec, 0);
@@ -1399,7 +1399,7 @@ static void use_emit_init(struct cx_op *op,
 	fprintf(out, ", \"%s\"", (char *)tt->as_ptr);
       }
       
-      fputs(")) { return false; }\n", out);
+      fputs(")) { goto exit; }\n", out);
     }
   }
 }

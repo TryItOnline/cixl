@@ -82,6 +82,33 @@ static void print_imp(struct cx_box *v, FILE *out) {
   cx_funcall(cx, "print");
 }
 
+static bool emit_imp(struct cx_box *v, const char *exp, FILE *out) {
+  struct cx *cx = v->type->lib->cx;
+  struct cx_rec *r = v->as_ptr;
+  struct cx_sym t_var = cx_gsym(cx, "t");
+  struct cx_sym r_var = cx_gsym(cx, "r");
+  
+  fprintf(out,
+	  "struct cx_type *%s = %s();\n"
+	  "struct cx_rec *%s = cx_rec_new(cx_baseof(%s, struct cx_rec_type, imp));\n"
+	  "cx_box_init(%s, %s)->as_ptr = %s;\n",
+	  t_var.id, r->type->imp.emit_id,
+	  r_var.id, t_var.id,
+	  exp, t_var.id, r_var.id);
+
+  cx_do_env(&r->fields, v) {
+    struct cx_sym v_var = cx_gsym(cx, "v");
+
+    fprintf(out,
+	    "struct cx_box *%s = cx_rec_put(%s, %s);\n",
+	    v_var.id, r_var.id, v->id.emit_id);
+    
+    if (!cx_box_emit(&v->value, v_var.id, out)) { return false; }
+  }
+  
+  return true;
+}
+
 static void deinit_imp(struct cx_box *v) {
   cx_rec_deref(v->as_ptr);
 }
@@ -108,6 +135,7 @@ struct cx_rec_type *cx_rec_type_init(struct cx_rec_type *type,
   type->imp.write = write_imp;
   type->imp.dump = dump_imp;
   type->imp.print = print_imp;
+  type->imp.emit = emit_imp;
   type->imp.deinit = deinit_imp;
 
   type->imp.type_deinit = type_deinit_imp;

@@ -155,7 +155,10 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
 
   fputs("bool eval(struct cx *cx) {\n"
 	"bool _eval(struct cx *cx, ssize_t stop_pc) {\n"
-        "  static bool init = true;\n\n",
+        "  static bool init = true;\n"
+	"  ssize_t prev_stop_pc = cx->stop_pc;\n"
+	"  cx->stop_pc = stop_pc;\n"
+	"  bool ok = false;\n\n",
 	out);
   
   struct cx_set labels, libs, types, funcs, fimps, syms;
@@ -247,7 +250,7 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
 
   cx_do_vec(&cx->inits, struct cx_str *, i) {
     fprintf(out,
-	    "if (!cx_init_%s(cx)) { return false; }\n",
+	    "if (!cx_init_%s(cx)) { goto exit; }\n",
 	    (*i)->data);
   }
   
@@ -305,8 +308,11 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
 	    "cx->pc = %zd; cx->row = %d; cx->col = %d;\n",
 	    op->pc, cx->row, cx->col);
 
-    fputs("if (cx->errors.count) { return false; }\n"
-	  "if (cx->pc == stop_pc) { return true; }\n",
+    fputs("if (cx->errors.count) { goto exit; }\n"
+	  "if (cx->pc == stop_pc) {\n"
+	  "  ok = true;\n"
+	  "  goto exit;\n"
+	  "}\n",
 	  out);
 
     if (op->type->emit && !cx_test(op->type->emit)(op, bin, out, cx)) {
@@ -318,7 +324,10 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
 
   fprintf(out, " op%zd:\n", bin->ops.count);
 
-  fputs("return true;\n"
+  fputs("ok = true;\n"
+	"exit:\n"
+	"  cx->stop_pc = prev_stop_pc;\n"
+	"  return ok;\n"
 	"}\n\n"
 	"  struct cx_bin *bin = cx_bin_new();\n"
 	"  bin->eval = _eval;\n"

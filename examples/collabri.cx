@@ -24,6 +24,7 @@ use:
   (cx/io/buf Buf write-bytes)
   (cx/io/poll Poll delete no-write on-read on-write wait)
   (cx/io/term
+    Color
     #clear-screen #clear-screen-end #reset-style
     ask move-to new-color set-fg say)
   (cx/iter Iter for is-done iter next while)
