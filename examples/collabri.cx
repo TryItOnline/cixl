@@ -375,7 +375,7 @@ func: handle-in(c Client `auth-password in Str)()
       'Authentication failed' throw
     } else
   } if-else
-  
+
   $root `clients get $c #t put  
   $c `state `ok put
   $c @@n push-out
@@ -433,7 +433,7 @@ func: new-client(io TCPClient)(_ Client)
 	$poll commit;
     } if-else
   } on-read
-
+  
   $c `buf get %
   #clear-screen print
   1 1 move-to print

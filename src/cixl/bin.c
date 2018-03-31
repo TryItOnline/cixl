@@ -13,6 +13,10 @@ struct cx_bin *cx_bin_new() {
 
 static bool eval(struct cx *cx, ssize_t stop_pc) {
   if (!cx->bin->ops.count) { return true; }
+
+  ssize_t prev_stop_pc = cx->stop_pc;
+  cx->stop_pc = stop_pc;
+  bool ok = false;
   
   while (cx->pc < cx->bin->ops.count && cx->pc != stop_pc) {
     cx_init_ops(cx->bin);
@@ -20,11 +24,14 @@ static bool eval(struct cx *cx, ssize_t stop_pc) {
     cx->row = op->row; cx->col = op->col;
     
     if (op->type->eval) {
-      if (!op->type->eval(op, cx->bin, cx) || cx->errors.count) { return false; }
+      if (!op->type->eval(op, cx->bin, cx) || cx->errors.count) { goto exit; }
     }
   }
-  
-  return true;
+  ok = true;
+
+ exit:
+  cx->stop_pc = prev_stop_pc;
+  return ok;
 }
 
 struct cx_bin *cx_bin_init(struct cx_bin *bin) {

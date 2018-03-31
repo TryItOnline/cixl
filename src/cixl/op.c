@@ -108,7 +108,8 @@ static bool catch_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
 		op->as_catch.type,
 		bin,
 		op->tok_idx,
-		op->pc+1, op->as_catch.nops);
+		op->pc+1, op->as_catch.nops,
+		cx->stop_pc);
 
   cx->pc += op->as_catch.nops;
   return true;
@@ -120,7 +121,7 @@ static bool catch_emit(struct cx_op *op,
 			struct cx *cx) {
   fprintf(out,
 	  "cx_catch_init(cx_vec_push(&cx_scope(cx, 0)->catches),\n"
-	  "              %s(), cx->bin, %zd, %zd, %zd);\n",
+	  "              %s(), cx->bin, %zd, %zd, %zd, cx->stop_pc);\n",
 	  op->as_catch.type->emit_id, op->tok_idx, op->pc+1, op->as_catch.nops);
 
   fprintf(out, "goto op%zd;\n", op->pc+op->as_catch.nops+1);
