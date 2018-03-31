@@ -2,15 +2,24 @@
 #define ntohll(x) ((1==ntohl(1)) ? (x) : ((uint64_t)ntohl((x) & 0xFFFFFFFF) << 32) | ntohl((x) >> 32))
 
 * --- cixtris
-** add left/right 
-*** move piece horizontally
+* add Color rec to ansi.cx
+** change pick-fgcolor / bgcolor to take Color
+** update collabri, tellux & cixtris
+** add block-width / block-height fns
+*** use for detecting max-x/y
 ** add backend repr with edge detection
 *** fixed size stack
 *** add support for putting #nil
 *** store opt color
 ** add down 
-*** drop piece immediately
+*** drop block immediately
+** add support for clearing rows
+*** add speed increase with for cleared row
+** add 'z'ap
+*** start new block from top
+*** increase remaining zaps on row clear
 ** add missing shapes
+** add (p)ause support
 * --- cxcrypt
 * add Pub/PrivKey
 ** add asource/asink examples
@@ -19,9 +28,6 @@
 *** read/write size prefixed blocks
 ** add README
 * --- cixl
-* add Color rec to ansi.cx
-** change pick-fgcolor / bgcolor to take Color
-** update collabri, tellux & cixtris
 * extract tests into cx files
 * make cx_get_macro/cx_get_const recursive like cx_get_type
 * replace box.as_ptr with as_func/fimp/etc

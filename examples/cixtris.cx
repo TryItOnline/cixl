@@ -11,14 +11,15 @@ include: 'ansi.cx';
 
 use:
   (cx/abc #t #f #nil A Int Opt)
-  (cx/cond ! = < if if-else switch:)
+  (cx/cond ! = < > if if-else or switch:)
+  (cx/const define:)
   (cx/func func:)
   (cx/io #in #out flush read-char print unblock)
   (cx/io/term
-    #clear-screen #hide-cursor #key-esc #key-space #reset-style #restore-pos #save-pos
-    #show-cursor
+    #clear-screen #hide-cursor #key-esc #reset-style #restore-pos #reverse-colors
+    #save-pos #show-cursor
     move-down move-left move-right move-to normal-mode pick-bgcolor raw-mode
-    screen-size)
+    screen-size vline)
   (cx/io/poll Poll new on-read wait)
   (cx/io/term say)
   (cx/iter for while)
@@ -29,7 +30,7 @@ use:
   (cx/str len)
   (cx/var let:);
 
-let: shapes [
+define: shapes [
   [['**'
     '**']]
 
@@ -87,36 +88,40 @@ let: shapes [
     ' * ']]
 ];
 
-let: colors [
+define: colors [
   [255 0 0]
   [0 255 0]
   [0 0 255]
   [255 255 0]
   [0 255 255]
+  [255 0 255]
 ];
 
+define: speed-delays [125 100 75 50 25];
+define: max-speed #speed-delays len --;
+
 let: max-x 40;
-let: max-y screen-size ~ _ --;
+let: max-y screen-size ~ _;
 let: block Ref new;
+let: speed 0 ref;
+let: key-delay 0 ref;
 
 rec: Block()
   shape Stack
   color Stack
   x y   
-  alt   
-  spin  Int;
+  alt   Int;
 
 func: new-block()(_ Block)
   let: b Block new;
-  let: s $shapes get-rand;
-  let: c $colors get-rand;
+  let: s #shapes get-rand;
+  let: c #colors get-rand;
   
   $b `shape $s          put
   $b `color $c          put
   $b `x     $max-x rand put
   $b `y     1           put
   $b `alt   $s len rand put
-  $b `spin  2 rand --   put
   
   $b;
 
@@ -155,6 +160,13 @@ func: rotate-block(b Block)()
   let: na $b `shape get len; 
   $b `alt {++ $b `shape get len mod} put-call;
 
+func: refresh-speed()()
+  #save-pos p
+  $max-x 2 + 2 move-to p
+  #reset-style p
+  #out $speed deref ++ print  
+  #restore-pos p;
+
 let: poll Poll new;
 let: done #f ref;
 
@@ -166,43 +178,93 @@ $poll #in {
   switch:
     (($c @i =)
      let: b $block deref;
-     $b `x get $b `y get move-to p
      $b erase-block
      $b rotate-block)
+    (($c @j =)
+      $block deref `x {
+        let: x;
+	
+        $x 1 > {
+	  let: nx $x --;
+	  $b erase-block
+	  $nx
+	} $x if-else
+      } put-call)
+    (($c @l =)
+      $block deref `x {
+        let: x;
+	
+        $x $max-x < {
+	  let: nx $x ++;
+	  $b erase-block
+	  $nx
+	} $x if-else
+      } put-call)
+    (($c @+ =)
+      $speed {
+        let: s;
+        $s #max-speed < {$s ++} $s if-else
+      } set-call
+
+      refresh-speed)
+    (($c @- =)
+      $speed {
+        let: s;
+        $s {$s --} $s if-else
+      } set-call
+
+      refresh-speed)
     (($c #key-esc =)
       $done #t set);
+
+  $speed deref ++ $key-delay &+ set-call
 } on-read
 
 raw-mode
 #hide-cursor p
 #clear-screen p
+$max-x 1 move-to p
+#reverse-colors p
+@@s $max-y vline p
+#reset-style p
+$max-x 2 + 1 move-to p
+'Speed:' p
+refresh-speed
 
 $block new-block set
 
 {
   let: b $block deref;
 
-  $b `y get $max-y = {
-    let: bb new-block;
-    $block $bb set
-    $bb `x get $bb `y get move-to p
-    $bb print-block
-  } {
+  $key-delay deref {
+    $key-delay &-- set-call
     $b `x get $b `y get move-to p
-    $b erase-block
-    $b `y &++ put-call
-    1 move-down p
     $b print-block
+  } {
+    $b `y get $max-y = {
+      let: bb new-block;
+      $block $bb set
+      $bb `x get $bb `y get move-to p
+      $bb print-block
+    } {
+      $b `x get $b `y get move-to p
+      $b erase-block
+      $b `y &++ put-call
+      1 move-down p
+      $b print-block
+    } if-else
+    
+    #out flush
   } if-else
 
-  #out flush
-
-  $poll 25 wait _
+  let: sd #speed-delays $speed deref get;
+  $poll $sd wait _
   $done deref !
 } while
 
 #reset-style p
 #clear-screen p
+1 1 move-to p
 #out flush
 #show-cursor p
 normal-mode

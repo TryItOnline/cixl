@@ -7,9 +7,10 @@
 lib: cx/io/term (
 
 use:
-  (cx/abc Int)
+  (cx/abc Char Int)
   (cx/const define:)
   (cx/func func:)
+  (cx/iter for times)
   (cx/stack Stack);
 
 define: csi-esc '@027[';
@@ -18,9 +19,12 @@ define: clear-row-end [#csi-esc '0K'];
 define: clear-row [#csi-esc '2K'];
 define: clear-screen [#csi-esc '2J'];
 define: clear-screen-end [#csi-esc '0J'];
+define: reverse-colors [#csi-esc '7m'];
+define: reset-style [#csi-esc '0m'];
+
 define: save-pos [#csi-esc @s];
 define: restore-pos [#csi-esc @u];
-define: reset-style [#csi-esc '0m'];
+
 define: hide-cursor [#csi-esc '?25l'];
 define: show-cursor [#csi-esc '?25h'];
 
@@ -45,4 +49,7 @@ func: move-left(n Int)(_ Stack)
 func: move-right(n Int)(_ Stack) 
   [#csi-esc $n @C];
 
+func: vline(c Char n Int)(_ Stack)
+  [$n {$c 1 move-down {} for 1 move-left {} for} times];
+  
 );
