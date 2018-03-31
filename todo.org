@@ -7,6 +7,7 @@
 ** update collabri, tellux & cixtris
 ** add block-width / block-height fns
 *** use for detecting max-x/y
+*** check when dropping new pieces
 ** add backend repr with edge detection
 *** fixed size stack
 *** add support for putting #nil
@@ -20,6 +21,7 @@
 *** increase remaining zaps on row clear
 ** add missing shapes
 ** add (p)ause support
+*** change main if to switch:
 * --- cxcrypt
 * add Pub/PrivKey
 ** add asource/asink examples

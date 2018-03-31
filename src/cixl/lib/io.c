@@ -99,7 +99,7 @@ static bool line_next(struct cx_iter *iter,
       return false;
     }
   } else {
-    cx_box_init(out, cx->str_type)->as_str = cx_str_new(it->line, it->len);
+    cx_box_init(out, cx->str_type)->as_str = cx_str_new(it->line, strlen(it->line));
   }
   
   return true;

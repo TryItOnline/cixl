@@ -11,7 +11,9 @@ use:
   (cx/const define:)
   (cx/func func:)
   (cx/iter for times)
-  (cx/stack Stack);
+  (cx/rec get new put rec:)
+  (cx/stack Stack)
+  (cx/var let:);
 
 define: csi-esc '@027[';
 
@@ -28,11 +30,21 @@ define: restore-pos [#csi-esc @u];
 define: hide-cursor [#csi-esc '?25l'];
 define: show-cursor [#csi-esc '?25h'];
 
-func: pick-fgcolor(r g b Int)(_ Stack)
-  [#csi-esc '38;2;' $r @; $g @; $b @m];
+rec: Color()
+  r g b Int;
 
-func: pick-bgcolor(r g b Int)(_ Stack)
-  [#csi-esc '48;2;' $r @; $g @; $b @m];
+func: new-color(r g b Int) (_ Color)
+  let: c Color new;
+  $c `r $r put
+  $c `g $g put
+  $c `b $b put
+  $c;
+  
+func: set-fg(c Color)(_ Stack)
+  [#csi-esc '38;2;' $c `r get @; $c `g get @; $c `b get @m];
+
+func: set-bg(c Color)(_ Stack)
+  [#csi-esc '48;2;' $c `r get @; $c `g get @; $c `b get @m];
 
 func: move-to(x y Int)(_ Stack) 
   [#csi-esc $y @; $x @H];

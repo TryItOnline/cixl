@@ -305,7 +305,8 @@ cx_lib(cx_init_rec, "cx/rec") {
   struct cx *cx = lib->cx;
     
   if (!cx_use(cx, "cx/abc", "A", "Bool", "Cmp", "Opt", "Sym") ||
-      !cx_use(cx, "cx/io", "WFile")) {
+      !cx_use(cx, "cx/io", "WFile") ||
+      !cx_use(cx, "cx/type", "new")) {
     return false;
   }
 

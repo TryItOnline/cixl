@@ -16,8 +16,8 @@ use:
   (cx/io #in #out print read-char)
   (cx/io/term
     #clear-screen #key-esc #key-back #reset-style #restore-pos #save-pos
-    move-down move-left move-right move-to move-up normal-mode pick-bgcolor
-    pick-fgcolor raw-mode say screen-size)
+    move-down move-left move-right move-to move-up new-color normal-mode set-bg
+    set-fg raw-mode say screen-size)
   (cx/iter for while)
   (cx/math ++ -- + - * / int)
   (cx/pair .)
@@ -43,8 +43,8 @@ define: key-y-home #key-x-home upper;
 define: key-x-end  @e;
 define: key-y-end  #key-x-end upper;
 
-define: key-pick-bg   @b;
-define: key-pick-fg   @f;
+define: key-set-bg    @b;
+define: key-set-fg    @f;
 define: key-get-color @c;
 define: key-put-color #key-get-color upper;
 
@@ -110,12 +110,12 @@ func: print-wheel()()
       let: b 63 *;
       5 {
         let: g 63 *;
-        $r $g $b pick-bgcolor p
+	let: c $r $g $b new-color;
+        $c set-bg p
         @@s p
 	
 	$o {
 	  let: po;
-	  let: c [$r $g $b];
 	  $bg-colors $po $c put
 	  $fg-colors $po $c put
 	  $po ++
@@ -245,12 +245,12 @@ func: handle-key(`command #key-y-end)(_ Bool)
   $x deref $max-y deref 2 - set-pos
   #t;
 
-func: handle-key(`command #key-pick-bg)(_ Bool)
+func: handle-key(`command #key-set-bg)(_ Bool)
   let: o $x deref $y deref get-offs;
   $bg $bg-colors $o get set
   #t;
 
-func: handle-key(`command #key-pick-fg)(_ Bool)
+func: handle-key(`command #key-set-fg)(_ Bool)
   let: o $x deref $y deref get-offs;
   $fg $fg-colors $o get set
   #t;
@@ -284,14 +284,14 @@ func: handle-key(`put-color c Char)(_ Bool)
     #reset-style p
 
     $bg {
-      $bg deref splat pick-bgcolor p
+      $bg deref set-bg p
       $bg-colors $po $bg deref put
     } {
       $bg-colors $po delete
     } if-else
 
     $fg {
-      $fg deref splat pick-fgcolor p
+      $fg deref set-fg p
       $fg-colors $po $fg deref put
     } {
       $fg-colors $po delete
@@ -317,14 +317,14 @@ func: handle-key(`edit c Char)(_ Bool)
     let: o $x deref $y deref get-offs;
 
     $bg {
-      $bg deref splat pick-bgcolor p
+      $bg deref set-bg p
       $bg-colors $o $bg deref put
     } {
       $bg-colors $o delete
     } if-else
     
     $fg {
-      $fg deref splat pick-fgcolor p
+      $fg deref set-fg p
       $fg-colors $o $fg deref put
     } {
       $fg-colors $o delete

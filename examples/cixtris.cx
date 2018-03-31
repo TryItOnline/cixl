@@ -11,22 +11,23 @@ include: 'ansi.cx';
 
 use:
   (cx/abc #t #f #nil A Int Opt)
-  (cx/cond ! = < > if if-else or switch:)
+  (cx/cond ! ? = < > if if-else or switch:)
   (cx/const define:)
   (cx/func func:)
   (cx/io #in #out flush read-char print unblock)
   (cx/io/term
+    Color
     #clear-screen #hide-cursor #key-esc #reset-style #restore-pos #reverse-colors
     #save-pos #show-cursor
-    move-down move-left move-right move-to normal-mode pick-bgcolor raw-mode
-    screen-size vline)
+    move-down move-left move-right move-to new-color normal-mode raw-mode screen-size
+    set-bg vline)
   (cx/io/poll Poll new on-read wait)
   (cx/io/term say)
-  (cx/iter for while)
+  (cx/iter for map while)
   (cx/math + - ++ -- mod rand)
-  (cx/rec rec: get put put-call)
+  (cx/rec ? rec: get put put-call)
   (cx/ref Ref deref ref set set-call)
-  (cx/stack Stack _ ~ % %% get get-rand len splat)
+  (cx/stack Stack _ ~ % %% get get-rand len splat stack)
   (cx/str len)
   (cx/var let:);
 
@@ -95,7 +96,7 @@ define: colors [
   [255 255 0]
   [0 255 255]
   [255 0 255]
-];
+] {splat new-color} map stack;
 
 define: speed-delays [125 100 75 50 25];
 define: max-speed #speed-delays len --;
@@ -108,7 +109,7 @@ let: key-delay 0 ref;
 
 rec: Block()
   shape Stack
-  color Stack
+  color Color
   x y   
   alt   Int;
 
@@ -130,7 +131,7 @@ func: p(_ A)()
 
 func: print-shape(s Stack c Opt)()
   #save-pos p
-  $c {$c splat pick-bgcolor p} {#reset-style p} if-else
+  $c {$c set-bg p} {#reset-style p} if-else
   
   $s {
     let: l;
