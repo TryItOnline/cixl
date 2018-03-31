@@ -9,3 +9,5 @@ stty -icanon -echo && nc 127.0.0.1 7707
 | Bin new % '50 fib' compile emit
 | Bin new % '{10000 {50 fib _} times} clock 1000000 / int say' compile emit
 | Bin new % 'func: fortytwo(Int)(#f) _; func: fortytwo(42)(#t); 21 fortytwo say' compile emit
+
+

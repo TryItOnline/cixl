@@ -21,6 +21,8 @@ define: clear-screen-end [#csi-esc '0J'];
 define: save-pos [#csi-esc @s];
 define: restore-pos [#csi-esc @u];
 define: reset-style [#csi-esc '0m'];
+define: hide-cursor [#csi-esc '?25l'];
+define: show-cursor [#csi-esc '?25h'];
 
 func: pick-fgcolor(r g b Int)(_ Stack)
   [#csi-esc '38;2;' $r @; $g @; $b @m];

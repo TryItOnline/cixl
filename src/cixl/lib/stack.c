@@ -63,6 +63,21 @@ static bool get_imp(struct cx_scope *scope) {
   return true;
 }
 
+static bool get_rand_imp(struct cx_scope *scope) {
+  struct cx_box sv = *cx_test(cx_pop(scope, false));
+  struct cx_stack *s = sv.as_ptr;
+  
+  if (s->imp.count) {
+    int64_t i = cx_rand(s->imp.count);
+    cx_copy(cx_push(scope), (struct cx_box *)cx_vec_get(&s->imp, i));
+  } else {
+    cx_box_init(cx_push(scope), scope->cx->nil_type);
+  }
+  
+  cx_box_deinit(&sv);
+  return true;
+}
+
 static bool seq_imp(struct cx_scope *scope) {
   struct cx_box in = *cx_test(cx_pop(scope, false));
   struct cx_iter *it = cx_iter(&in);
@@ -223,6 +238,11 @@ cx_lib(cx_init_stack, "cx/stack") {
 	       cx_args(cx_arg("vec", cx->stack_type), cx_arg("i", cx->int_type)),
 	       cx_args(cx_arg(NULL, cx->opt_type)),
 	       get_imp);
+
+  cx_add_cfunc(lib, "get-rand",
+	       cx_args(cx_arg("vec", cx->stack_type)),
+	       cx_args(cx_arg(NULL, cx->opt_type)),
+	       get_rand_imp);
 
   cx_add_cfunc(lib, "stack",
 	       cx_args(cx_arg("in", cx->seq_type)),

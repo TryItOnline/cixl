@@ -143,3 +143,11 @@ int cx_hex_bin(char in) {
 
   return -1;
 }
+
+int64_t cx_rand(int64_t max) {
+  int64_t out = 0;
+  int32_t *p = (int *)&out;
+  *p++ = rand();
+  *p = rand();
+  return out % max;
+}

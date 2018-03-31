@@ -1,6 +1,6 @@
 /*
   A utility for printing key codes.
-  Press ESC to exit gracefully and restore terminal mode.
+  Press ESC to exit gracefully and restore terminal.
 
   https://github.com/basic-gongfu/cixl#getting-started
 */

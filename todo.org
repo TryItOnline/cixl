@@ -1,20 +1,24 @@
 #define htonll(x) ((1==htonl(1)) ? (x) : ((uint64_t)htonl((x) & 0xFFFFFFFF) << 32) | htonl((x) >> 32))
 #define ntohll(x) ((1==ntohl(1)) ? (x) : ((uint64_t)ntohl((x) & 0xFFFFFFFF) << 32) | ntohl((x) >> 32))
 
+* --- cixtris
+** add left/right 
+*** move piece horizontally
+** add backend repr with edge detection
+** add down 
+*** drop piece immediately
+** add missing shapes
+* --- cxcrypt
 * add Pub/PrivKey
 ** add asource/asink examples
 *** use asymmetric encryption to secure a network channel
 *** shuffle stdin-stdout
 *** read/write size prefixed blocks
 ** add README
-* --- cixtris
-** random drop x pos
-** random rotation x/y
-** left/right moves piece
-** down drops immediately
-** fill screen with tracks
-*** 0-9 switches track
 * --- cixl
+* add Color rec to ansi.cx
+** change pick-fgcolor / bgcolor to take Color
+** update collabri, tellux & cixtris
 * extract tests into cx files
 * make cx_get_macro/cx_get_const recursive like cx_get_type
 * replace box.as_ptr with as_func/fimp/etc

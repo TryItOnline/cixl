@@ -69,6 +69,15 @@ static bool int_div_imp(struct cx_scope *scope) {
   return true;
 }
 
+static bool int_mod_imp(struct cx_scope *scope) {
+  struct cx_box
+    y = *cx_test(cx_pop(scope, false)),
+    *x = cx_test(cx_peek(scope, false));
+
+  x->as_int = x->as_int % y.as_int;
+  return true;
+}
+
 static bool int_abs_imp(struct cx_scope *scope) {
   struct cx_box *n = cx_test(cx_peek(scope, false));
   if (n->as_int < 0) { n->as_int = -n->as_int; }
@@ -77,11 +86,7 @@ static bool int_abs_imp(struct cx_scope *scope) {
 
 static bool rand_imp(struct cx_scope *scope) {
   struct cx_box max = *cx_test(cx_pop(scope, false));
-  int64_t out = 0;
-  int32_t *p = (int *)&out;
-  *p++ = rand();
-  *p = rand();
-  cx_box_init(cx_push(scope), scope->cx->int_type)->as_int = out % max.as_int;
+  cx_box_init(cx_push(scope), scope->cx->int_type)->as_int = cx_rand(max.as_int);
   return true;
 }
 
@@ -159,6 +164,11 @@ cx_lib(cx_init_math, "cx/math") {
 	       cx_args(cx_arg("x", cx->int_type), cx_arg("y", cx->int_type)),
 	       cx_args(cx_arg(NULL, cx->rat_type)),
 	       int_div_imp);
+
+  cx_add_cfunc(lib, "mod",
+	       cx_args(cx_arg("x", cx->int_type), cx_arg("y", cx->int_type)),
+	       cx_args(cx_arg(NULL, cx->rat_type)),
+	       int_mod_imp);
 
   cx_add_cfunc(lib, "abs",
 	       cx_args(cx_arg("n", cx->int_type)),

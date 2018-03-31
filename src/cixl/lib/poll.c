@@ -116,7 +116,8 @@ cx_lib(cx_init_poll, "cx/io/poll") {
   struct cx *cx = lib->cx;
     
   if (!cx_use(cx, "cx/abc", "A", "Int", "Opt") ||
-      !cx_use(cx, "cx/io", "File", "RFile")) {
+      !cx_use(cx, "cx/io", "File", "RFile") ||
+      !cx_use(cx, "cx/type", "new")) {
     return false;
   }
 

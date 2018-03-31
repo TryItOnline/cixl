@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
+#include <stdint.h>
 
 #define _cx_cid(x, y)				\
   x ## y					\
@@ -47,5 +48,6 @@ const char *cx_home_dir();
 bool cx_make_dir(const char *path);
 char cx_bin_hex(unsigned char in);
 int cx_hex_bin(char in);
+int64_t cx_rand(int64_t max);
 
 #endif

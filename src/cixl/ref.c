@@ -21,6 +21,12 @@ void cx_ref_dec(struct cx_ref *ref) {
   if (!ref->nrefs) { cx_free(&ref->value.type->lib->cx->ref_alloc, ref); }
 }
 
+static void new_imp(struct cx_box *out) {
+  struct cx *cx = out->type->lib->cx;
+  out->as_ref = cx_ref_new(cx, NULL);
+  cx_box_init(&out->as_ref->value, cx->nil_type);
+}
+
 static bool equid_imp(struct cx_box *x, struct cx_box *y) {
   return x->as_ref == y->as_ref;
 }
@@ -59,6 +65,7 @@ static void deinit_imp(struct cx_box *v) {
 
 struct cx_type *cx_init_ref_type(struct cx_lib *lib) {
     struct cx_type *t = cx_add_type(lib, "Ref", lib->cx->any_type);
+    t->new = new_imp;
     t->eqval = eqval_imp;
     t->equid = equid_imp;
     t->ok = ok_imp;

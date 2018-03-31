@@ -218,6 +218,46 @@ static bool put_imp(struct cx_scope *scope) {
   return ok;
 }
 
+static bool put_call_imp(struct cx_scope *scope) {
+  struct cx *cx = scope->cx;
+  struct cx_box act = *cx_test(cx_pop(scope, false));
+  struct cx_sym fid = cx_test(cx_pop(scope, false))->as_sym;
+  struct cx_box r = *cx_test(cx_pop(scope, false));
+  struct cx_rec_type *rt = cx_baseof(r.type, struct cx_rec_type, imp);
+  struct cx_field *f = cx_set_get(&rt->fields, &fid);
+  bool ok = false;
+    
+  if (!f) {
+    cx_error(cx, cx->row, cx->col, "Invalid %s field: %s", rt->imp.id, fid.id);
+    goto exit;
+  }
+
+  struct cx_box *v = cx_rec_get(r.as_ptr, fid);
+
+  if (v) {
+    cx_copy(cx_push(scope), v);
+  } else {
+    cx_box_init(cx_push(scope), cx->nil_type);
+  }
+      
+  if (!cx_call(&act, scope)) { goto exit; }
+  v = cx_pop(scope, false);
+  if (!v) { goto exit; }
+  
+  if (v->type != cx->nil_type && !cx_is(v->type, f->type)) {
+    cx_error(cx, cx->row, cx->col, "Expected %s, was %s", f->type->id, v->type->id);
+    cx_box_deinit(v);
+    goto exit;
+  }
+
+  *cx_rec_put(r.as_ptr, fid) = *v;
+  ok = true;
+ exit:
+  cx_box_deinit(&act);
+  cx_box_deinit(&r);
+  return ok;
+}
+
 static bool eqval_imp(struct cx_scope *scope) {
   struct cx *cx = scope->cx;
   
@@ -295,6 +335,13 @@ cx_lib(cx_init_rec, "cx/rec") {
 		       cx_arg("val", cx->opt_type)),
 	       cx_args(),
 	       put_imp);
+
+  cx_add_cfunc(lib, "put-call",
+	       cx_args(cx_arg("rec", cx->rec_type),
+		       cx_arg("fld", cx->sym_type),
+		       cx_arg("act", cx->any_type)),
+	       cx_args(),
+	       put_call_imp);
 
   cx_add_cfunc(lib, "print",
 	       cx_args(cx_arg("out", cx->wfile_type), cx_arg("rec", cx->rec_type)),

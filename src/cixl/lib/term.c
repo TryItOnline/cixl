@@ -89,6 +89,8 @@ cx_lib(cx_init_term, "cx/io/term") {
 
   cx_box_init(cx_put_const(lib, cx_sym(cx, "key-esc"), false),
 	      cx->char_type)->as_char = 27;
+  cx_box_init(cx_put_const(lib, cx_sym(cx, "key-space"), false),
+	      cx->char_type)->as_char = 32;
   cx_box_init(cx_put_const(lib, cx_sym(cx, "key-back"), false),
 	      cx->char_type)->as_char = 127;
 

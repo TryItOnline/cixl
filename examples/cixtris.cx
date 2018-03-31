@@ -1,0 +1,203 @@
+/*
+  Console Tetris
+
+  The game may be started by executing "load 'cixl/examples/cixtris.cx'" from the
+  REPL. Press ESC to exit gracefully and restore terminal.
+
+  https://github.com/basic-gongfu/cixl#getting-started
+*/
+
+include: 'ansi.cx';
+
+use:
+  (cx/abc #t #f #nil A Int Opt)
+  (cx/cond ! = < if if-else switch:)
+  (cx/func func:)
+  (cx/io #in #out flush read-char print unblock)
+  (cx/io/term
+    #clear-screen #hide-cursor #key-esc #key-space #reset-style #restore-pos #save-pos
+    #show-cursor
+    move-down move-left move-right move-to normal-mode pick-bgcolor raw-mode
+    screen-size)
+  (cx/io/poll Poll new on-read wait)
+  (cx/io/term say)
+  (cx/iter for while)
+  (cx/math + - ++ -- mod rand)
+  (cx/rec rec: get put put-call)
+  (cx/ref Ref deref ref set set-call)
+  (cx/stack Stack _ ~ % %% get get-rand len splat)
+  (cx/str len)
+  (cx/var let:);
+
+let: shapes [
+  [['**'
+    '**']]
+
+  [['****']
+   ['*'
+    '*'
+    '*'
+    '*']]
+
+  [['   *'
+    '****']
+   ['*'
+    '*'
+    '*'
+    '**']
+   ['****'
+    '*']
+   ['**'
+    ' *'
+    ' *'
+    ' *']]
+
+  [['*   '
+    '****']
+   ['**'
+    '*'
+    '*'
+    '*']
+   ['****'
+    '   *']
+   [' *'
+    ' *'
+    ' *'
+    '**']]
+
+  [[' * '
+    '***'
+    '   ']
+    
+   ['*  '
+    '** '
+    '*  ']
+    
+   ['***'
+    ' * '
+    '   ']
+    
+   [' * '
+    '** '
+    ' * ']]
+];
+
+let: colors [
+  [255 0 0]
+  [0 255 0]
+  [0 0 255]
+  [255 255 0]
+  [0 255 255]
+];
+
+let: max-x 40;
+let: max-y screen-size ~ _ --;
+let: block Ref new;
+
+rec: Block()
+  shape Stack
+  color Stack
+  x y   
+  alt   
+  spin  Int;
+
+func: new-block()(_ Block)
+  let: b Block new;
+  let: s $shapes get-rand;
+  let: c $colors get-rand;
+  
+  $b `shape $s          put
+  $b `color $c          put
+  $b `x     $max-x rand put
+  $b `y     1           put
+  $b `alt   $s len rand put
+  $b `spin  2 rand --   put
+  
+  $b;
+
+func: p(_ A)()
+  #out ~ print;
+
+func: print-shape(s Stack c Opt)()
+  #save-pos p
+  $c {$c splat pick-bgcolor p} {#reset-style p} if-else
+  
+  $s {
+    let: l;
+    
+    $l {
+      @* = {
+        @@s p
+      } {
+        1 move-right p
+      } if-else
+     } for
+
+    1 move-down p
+    $l len move-left p
+  } for
+
+  $c {#reset-style p} if
+  #restore-pos p;
+
+func: print-block(b Block)()
+  $b % % `shape get ~ `alt get get ~ `color get print-shape;
+
+func: erase-block(b Block)()
+  $b % `shape get ~ `alt get get #nil print-shape;
+
+func: rotate-block(b Block)()
+  let: na $b `shape get len; 
+  $b `alt {++ $b `shape get len mod} put-call;
+
+let: poll Poll new;
+let: done #f ref;
+
+#in unblock
+
+$poll #in {
+  let: c #in read-char;
+  
+  switch:
+    (($c @i =)
+     let: b $block deref;
+     $b `x get $b `y get move-to p
+     $b erase-block
+     $b rotate-block)
+    (($c #key-esc =)
+      $done #t set);
+} on-read
+
+raw-mode
+#hide-cursor p
+#clear-screen p
+
+$block new-block set
+
+{
+  let: b $block deref;
+
+  $b `y get $max-y = {
+    let: bb new-block;
+    $block $bb set
+    $bb `x get $bb `y get move-to p
+    $bb print-block
+  } {
+    $b `x get $b `y get move-to p
+    $b erase-block
+    $b `y &++ put-call
+    1 move-down p
+    $b print-block
+  } if-else
+
+  #out flush
+
+  $poll 25 wait _
+  $done deref !
+} while
+
+#reset-style p
+#clear-screen p
+#out flush
+#show-cursor p
+normal-mode
