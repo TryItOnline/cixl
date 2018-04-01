@@ -1,3 +1,4 @@
+#include <inttypes.h>
 #include <string.h>
 
 #include "cixl/arg.h"
@@ -29,6 +30,29 @@ static bool push_imp(struct cx_scope *scope) {
   *(struct cx_box *)cx_vec_push(&v->imp) = val;
   cx_box_deinit(&vec);
   return true;
+}
+
+static bool put_imp(struct cx_scope *scope) {
+  struct cx_box
+    val = *cx_test(cx_pop(scope, false)),
+    i = *cx_test(cx_pop(scope, false)),
+    sv = *cx_test(cx_pop(scope, false));
+  
+  struct cx_stack *s = sv.as_ptr;
+  struct cx *cx = scope->cx;
+  bool ok = false;
+  
+  if (i.as_int >= s->imp.count) {
+    cx_error(cx, cx->row, cx->col, "Index out of bounds: %" PRId64, i.as_int);
+    goto exit;
+  }
+  
+  *(struct cx_box *)cx_vec_get(&s->imp, i.as_int) = val;
+  ok = true;
+ exit:
+  cx_box_deinit(&val);
+  cx_box_deinit(&sv);
+  return ok;
 }
 
 static bool pop_imp(struct cx_scope *scope) {
@@ -178,6 +202,30 @@ static bool sort_imp(struct cx_scope *scope) {
   return ok;
 }
 
+static bool fill_imp(struct cx_scope *scope) {
+  struct cx_box
+    act = *cx_test(cx_pop(scope, false)),
+    n = *cx_test(cx_pop(scope, false)),
+    in = *cx_test(cx_pop(scope, false));
+    
+  struct cx_stack *s = in.as_ptr;
+  cx_vec_grow(&s->imp, s->imp.count+n.as_int);
+  bool ok = false;
+  
+  for (int64_t i=0; i<n.as_int; i++) {
+    if (!cx_call(&act, scope)) { goto exit; }
+    struct cx_box *v = cx_pop(scope, false);
+    if (!v) { goto exit; }
+    *(struct cx_box *)cx_vec_push(&s->imp) = *v;
+  }
+
+  ok = true;
+ exit:
+  cx_box_deinit(&act);
+  cx_box_deinit(&in);
+  return ok;
+}
+
 static bool reset_imp(struct cx_scope *scope) {
   cx_reset(scope);
   return true;
@@ -220,27 +268,34 @@ cx_lib(cx_init_stack, "cx/stack") {
   }
 
   cx_add_cfunc(lib, "len",
-	       cx_args(cx_arg("vec", cx->stack_type)),
+	       cx_args(cx_arg("s", cx->stack_type)),
 	       cx_args(cx_arg(NULL, cx->int_type)),
 	       len_imp);
   
   cx_add_cfunc(lib, "push",
-	       cx_args(cx_arg("vec", cx->stack_type), cx_arg("val", cx->any_type)),
+	       cx_args(cx_arg("s", cx->stack_type), cx_arg("val", cx->opt_type)),
 	       cx_args(),
 	       push_imp);
 
   cx_add_cfunc(lib, "pop",
-	       cx_args(cx_arg("vec", cx->stack_type)),
+	       cx_args(cx_arg("s", cx->stack_type)),
 	       cx_args(cx_arg(NULL, cx->opt_type)),
 	       pop_imp);
 
   cx_add_cfunc(lib, "get",
-	       cx_args(cx_arg("vec", cx->stack_type), cx_arg("i", cx->int_type)),
+	       cx_args(cx_arg("s", cx->stack_type), cx_arg("i", cx->int_type)),
 	       cx_args(cx_arg(NULL, cx->opt_type)),
 	       get_imp);
 
+  cx_add_cfunc(lib, "put",
+	       cx_args(cx_arg("s", cx->stack_type),
+		       cx_arg("i", cx->int_type),
+		       cx_arg("val", cx->opt_type)),
+	       cx_args(),
+	       put_imp);
+
   cx_add_cfunc(lib, "get-rand",
-	       cx_args(cx_arg("vec", cx->stack_type)),
+	       cx_args(cx_arg("s", cx->stack_type)),
 	       cx_args(cx_arg(NULL, cx->opt_type)),
 	       get_rand_imp);
 
@@ -260,13 +315,20 @@ cx_lib(cx_init_stack, "cx/stack") {
 	       splat_imp);
 
   cx_add_cfunc(lib, "clear",
-	       cx_args(cx_arg("vec", cx->stack_type)), cx_args(),
+	       cx_args(cx_arg("s", cx->stack_type)), cx_args(),
 	       clear_imp);
 
   cx_add_cfunc(lib, "sort",
-	       cx_args(cx_arg("vec", cx->stack_type), cx_arg("cmp", cx->opt_type)),
+	       cx_args(cx_arg("s", cx->stack_type), cx_arg("cmp", cx->opt_type)),
 	       cx_args(),
 	       sort_imp);
+
+  cx_add_cfunc(lib, "fill",
+	       cx_args(cx_arg("s", cx->stack_type),
+		       cx_arg("n", cx->int_type),
+		       cx_arg("act", cx->opt_type)),
+	       cx_args(),
+	       fill_imp);
 
   cx_add_cfunc(lib, "|", cx_args(), cx_args(), reset_imp);
     

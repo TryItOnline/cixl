@@ -1,17 +1,11 @@
 #define htonll(x) ((1==htonl(1)) ? (x) : ((uint64_t)htonl((x) & 0xFFFFFFFF) << 32) | htonl((x) >> 32))
 #define ntohll(x) ((1==ntohl(1)) ? (x) : ((uint64_t)ntohl((x) & 0xFFFFFFFF) << 32) | ntohl((x) >> 32))
 
-* fix collabri emit
-** fix Rec/Color emit
 * --- cixtris
 ** add block-width / block-height fns
 *** use for detecting max-x/y
 *** check when dropping new pieces
-** add backend repr with edge detection
-*** fixed size stack
-*** add support for putting #nil
-*** store opt color
-** add down 
+** add down key
 *** drop block immediately
 ** add support for clearing rows
 *** add speed increase with for cleared row
@@ -30,6 +24,8 @@
 ** add README
 * --- cixl
 * extract tests into cx files
+* add Table emit support
+** copy Rec
 * make cx_get_macro/cx_get_const recursive like cx_get_type
 * replace box.as_ptr with as_func/fimp/etc
 * add cxtls project

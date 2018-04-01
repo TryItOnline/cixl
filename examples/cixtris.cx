@@ -24,10 +24,10 @@ use:
   (cx/io/poll Poll new on-read wait)
   (cx/io/term say)
   (cx/iter for map while)
-  (cx/math + - ++ -- mod rand)
+  (cx/math + - * ++ -- mod rand)
   (cx/rec ? rec: get put put-call)
   (cx/ref Ref deref ref set set-call)
-  (cx/stack Stack _ ~ % %% get get-rand len splat stack)
+  (cx/stack Stack _ ~ % %% fill get get-rand len new put splat stack)
   (cx/str len)
   (cx/var let:);
 
@@ -106,6 +106,7 @@ let: max-y screen-size ~ _;
 let: block Ref new;
 let: speed 0 ref;
 let: key-delay 0 ref;
+let: buffer Stack new % $max-x $max-y * #nil fill;
 
 rec: Block()
   shape Stack
@@ -129,9 +130,10 @@ func: new-block()(_ Block)
 func: p(_ A)()
   #out ~ print;
 
-func: print-shape(s Stack c Opt)()
+func: print-shape(s Stack start Int c Opt)()
   #save-pos p
   $c {$c set-bg p} {#reset-style p} if-else
+  let: o $start ref;
   
   $s {
     let: l;
@@ -142,20 +144,32 @@ func: print-shape(s Stack c Opt)()
       } {
         1 move-right p
       } if-else
+
+      $buffer $o deref $c put
+      $o &++ set-call
      } for
 
     1 move-down p
-    $l len move-left p
+    let: ll $l len;
+    $ll move-left p
+    $max-x $ll - $o &+ set-call
   } for
 
   $c {#reset-style p} if
   #restore-pos p;
 
+func: get-offs(x y Int)(_ Int)
+  $y $max-x * $x +;
+
 func: print-block(b Block)()
-  $b % % `shape get ~ `alt get get ~ `color get print-shape;
+  let: s $b % `shape get ~ `alt get get;
+  let: o $b % `x get ~ `y get get-offs;
+  $s $o $b `color get print-shape;
 
 func: erase-block(b Block)()
-  $b % `shape get ~ `alt get get #nil print-shape;
+  let: s $b % `shape get ~ `alt get get;
+  let: o $b % `x get ~ `y get get-offs;  
+  $s $o #nil print-shape;
 
 func: rotate-block(b Block)()
   let: na $b `shape get len; 
@@ -163,7 +177,7 @@ func: rotate-block(b Block)()
 
 func: refresh-speed()()
   #save-pos p
-  $max-x 2 + 2 move-to p
+  $max-x 2 + 3 move-to p
   #reset-style p
   #out $speed deref ++ print  
   #restore-pos p;
@@ -218,7 +232,7 @@ $poll #in {
     (($c #key-esc =)
       $done #t set);
 
-  $speed deref ++ $key-delay &+ set-call
+  1 $key-delay &+ set-call
 } on-read
 
 raw-mode
@@ -228,7 +242,7 @@ $max-x 1 move-to p
 #reverse-colors p
 @@s $max-y vline p
 #reset-style p
-$max-x 2 + 1 move-to p
+$max-x 2 + 2 move-to p
 'Speed:' p
 refresh-speed
 
