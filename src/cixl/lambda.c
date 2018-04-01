@@ -57,11 +57,27 @@ static bool call_imp(struct cx_box *value, struct cx_scope *scope) {
     pop_lib = true;
   }
 
-  *(struct cx_scope **)cx_vec_push(&scope->var_scopes) = l->scope;
+  bool pop_scope = false;
   
+  if (scope != l->scope) {
+    cx_push_scope(cx, l->scope);
+    *(struct cx_scope **)cx_vec_push(&l->scope->parents) = cx_scope_ref(scope);
+    pop_scope = true;
+  }
+
   bool ok = cx_eval(l->bin, l->start_pc, l->start_pc+l->nops, cx);
-  cx_vec_pop(&scope->var_scopes);
-  if (pop_lib) { cx_pop_lib(cx); }
+
+  if (pop_scope) {
+    cx_test(cx_pop_scope(cx, false));
+    
+    if (*(struct cx_scope **)cx_vec_peek(&l->scope->parents, 0) == scope) {
+      cx_vec_pop(&l->scope->parents);
+    }
+    
+    cx_scope_deref(scope);
+  }
+  
+  if (pop_lib && *cx->lib == l->lib) { cx_pop_lib(cx); }
   cx_lambda_deref(l);
   return ok;
 }
