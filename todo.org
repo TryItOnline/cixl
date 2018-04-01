@@ -1,11 +1,6 @@
 #define htonll(x) ((1==htonl(1)) ? (x) : ((uint64_t)htonl((x) & 0xFFFFFFFF) << 32) | htonl((x) >> 32))
 #define ntohll(x) ((1==ntohl(1)) ? (x) : ((uint64_t)ntohl((x) & 0xFFFFFFFF) << 32) | ntohl((x) >> 32))
 
-* fix func tests
-** replace scope->parent with var_scopes
-** rename to parents
-** use as backup in get_var
-** commit test reorg
 * investigate missing let: dup check in lambdas
 * debug anonymous func result emit
 * --- cixtris

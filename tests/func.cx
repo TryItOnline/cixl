@@ -11,7 +11,16 @@ func: fortytwo(42)(#t);
 21 fortytwo !check
 42 fortytwo check
 
-(let: x 42; func: closure()(_ Int) $x;) &closure call 42 = check
+(
+  let: x 21;
+
+  (
+    let: x 42;
+    func: closure()(_ Int) $x;
+  )
+
+  &closure call 42 = check
+)
 
 func: foo1(x A)(_ Int) $x 35 +; 7 foo1<A> 42 = check
 
