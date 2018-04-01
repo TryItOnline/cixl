@@ -1,3 +1,5 @@
+'Testing cx/table...' say
+
 (let: t Table new;
  $t 1 'foo' put
  $t 2 'bar' put

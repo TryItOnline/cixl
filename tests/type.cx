@@ -1,3 +1,5 @@
+'Testing cx/type...' say
+
 42 type Int = check
 
 Int A is check

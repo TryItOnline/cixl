@@ -49,31 +49,26 @@ static bool equid_imp(struct cx_box *x, struct cx_box *y) {
 static bool call_imp(struct cx_box *value, struct cx_scope *scope) {
   struct cx *cx = scope->cx;
   struct cx_lambda *l = cx_lambda_ref(value->as_ptr);
-  
-  bool pop_lib = false;
-  
-  if (*cx->lib != l->lib) {
-    cx_push_lib(cx, l->lib);
-    pop_lib = true;
-  }
+  size_t lib_count = cx->libs.count;
+  if (*cx->lib != l->lib) { cx_push_lib(cx, l->lib); }
 
-  bool pop_scope = false;
+  size_t
+    scope_count = cx->scopes.count,
+    parent_count = l->scope->parents.count;
   
   if (scope != l->scope) {
     cx_push_scope(cx, l->scope);
     *(struct cx_scope **)cx_vec_push(&l->scope->parents) = cx_scope_ref(scope);
-    pop_scope = true;
   }
 
   bool ok = cx_eval(l->bin, l->start_pc, l->start_pc+l->nops, cx);
-
-  if (pop_scope) {
-    while (cx->scopes.count > 1 && cx_pop_scope(cx, false) != l->scope);    
-    while (*(struct cx_scope **)cx_vec_pop(&l->scope->parents) != scope);
-    cx_scope_deref(scope);
+  
+  while (l->scope->parents.count > parent_count) {
+    cx_scope_deref(*(struct cx_scope **)cx_vec_pop(&l->scope->parents));
   }
   
-  if (pop_lib) { while (cx->libs.count > 1 && cx_pop_lib(cx) != l->lib); }
+  while (cx->scopes.count > scope_count) { cx_pop_scope(cx, false); }
+  while (cx->libs.count > lib_count) { cx_pop_lib(cx); }
   cx_lambda_deref(l);
   return ok;
 }

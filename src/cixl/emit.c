@@ -76,7 +76,7 @@ char *cx_emit_id(const char *prefix, const char *in) {
 
 void cx_push_args(struct cx *cx, int argc, char *argv[]) {
   struct cx_stack *args =
-    cx_test(cx_get_const(*cx->lib, cx_sym(cx, "args"), false))->as_ptr;
+    cx_test(cx_get_const(cx, cx_sym(cx, "args"), false))->as_ptr;
   
   for (int i=0; i < argc; i++) {
     const char *a = argv[i];

@@ -1,3 +1,5 @@
+'Testing cx/math...' say
+
 42 check
 
 0! check

@@ -240,13 +240,38 @@ struct cx_func *cx_get_func(struct cx *cx, const char *id, bool silent) {
   return lib_get_func(cx->lib, id, silent);
 }
 
-struct cx_box *cx_get_const(struct cx_lib *lib, struct cx_sym id, bool silent) {
+static struct cx_box *lib_get_const(struct cx_lib **lib,
+				    struct cx_sym id,
+				    bool silent) {
+  struct cx *cx = (*lib)->cx;
+  struct cx_var *v = cx_env_get(&(*lib)->consts, id);
+
+  if (!v) {
+    if (lib > (struct cx_lib **)cx->libs.items) {
+      return lib_get_const(lib-1, id, silent);
+    }
+
+    if (!silent) {
+      cx_error(cx, cx->row, cx->col, "Unknown const: %s/%s", (*lib)->id.id, id.id);
+    }
+    
+    return NULL;
+  }
+
+  return &v->value;
+}
+
+struct cx_box *cx_get_const(struct cx *cx, struct cx_sym id, bool silent) {
+  return lib_get_const(cx->lib, id, silent);
+}
+
+struct cx_box *cx_lib_get_const(struct cx_lib *lib, struct cx_sym id, bool silent) {
+  struct cx *cx = lib->cx;
   struct cx_var *v = cx_env_get(&lib->consts, id);
 
   if (!v) {
     if (!silent) {
-      struct cx *cx = lib->cx;
-      cx_error(cx, cx->row, cx->col, "Unknown const: '%s'", id.id);
+      cx_error(cx, cx->row, cx->col, "Unknown const: %s/%s", lib->id.id, id.id);
     }
     
     return NULL;

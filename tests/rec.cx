@@ -1,3 +1,5 @@
+'Testing cx/rec...' say
+
 rec: Foo()
   x Int y Str;
 

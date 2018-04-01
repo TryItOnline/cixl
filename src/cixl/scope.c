@@ -40,13 +40,12 @@ void cx_scope_deref(struct cx_scope *scope) {
     cx_do_vec(&scope->stack, struct cx_box, b) { cx_box_deinit(b); }
     cx_vec_deinit(&scope->stack);
     
-    cx_do_vec(&scope->catches, struct cx_catch, c) {
-      cx_catch_deinit(c);
-    }
-    
+    cx_do_vec(&scope->catches, struct cx_catch, c) { cx_catch_deinit(c); }
     cx_vec_deinit(&scope->catches);
+    
     cx_do_vec(&scope->parents, struct cx_scope *, ps) { cx_scope_deref(*ps); }
     cx_vec_deinit(&scope->parents);
+
     cx_free(&scope->cx->scope_alloc, scope);
   }
 }
@@ -88,7 +87,6 @@ struct cx_box *cx_get_var(struct cx_scope *scope, struct cx_sym id, bool silent)
     if (!silent) {
       struct cx *cx = scope->cx;
       cx_error(cx, cx->row, cx->col, "Unknown var: %s", id.id);
-      cx_test(false);
     }
     
     return NULL;

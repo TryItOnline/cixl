@@ -39,9 +39,6 @@ static bool parse_type(struct cx *cx,
 static bool parse_const(struct cx *cx,
 		       const char *id,
 		       struct cx_vec *out) {
-  struct cx_box *v = cx_get_const(*cx->lib, cx_sym(cx, id+1), false);
-  if (!v) { return false; }
-
   cx_tok_init(cx_vec_push(out),
 	      CX_TID(),
 	      cx->row, cx->col)->as_ptr = strdup(id);

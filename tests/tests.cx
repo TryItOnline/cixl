@@ -1,8 +1,10 @@
 use: cx;
 
 include:
-  'bin.cx'
   'comment.cx'
+  'scope.cx'
+
+  'bin.cx'
   'cond.cx'
   'error.cx'
   'func.cx'
@@ -13,7 +15,6 @@ include:
   'pair.cx'
   'rec.cx'
   'ref.cx'
-  'scope.cx'
   'stack.cx'
   'str.cx'
   'sym.cx'

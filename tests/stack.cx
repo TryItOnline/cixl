@@ -1,3 +1,5 @@
+'Testing cx/stack...' say
+
 Stack new % 1 push % 2 push [1 2] = check
 
 1 2 [3 4 5] len 3 = check

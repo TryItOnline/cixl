@@ -468,7 +468,7 @@ cx_op_type(CX_OFUNCALL, {
   });
 
 static bool getconst_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
-  struct cx_box *v = cx_get_const(*cx->lib, op->as_getconst.id, false);
+  struct cx_box *v = cx_get_const(cx, op->as_getconst.id, false);
   if (!v) { return false; }
   cx_copy(cx_push(cx_scope(cx, 0)), v);
   return true;
@@ -478,7 +478,7 @@ static bool getconst_emit(struct cx_op *op,
 			  struct cx_bin *bin,
 			  FILE *out,
 			  struct cx *cx) {
-  fprintf(out, "struct cx_box *v = cx_get_const(*cx->lib, %s, false);\n",
+  fprintf(out, "struct cx_box *v = cx_get_const(cx, %s, false);\n",
 	  op->as_getconst.id.emit_id);
 
   fputs("if (!v) { goto exit; }\n"
@@ -953,8 +953,7 @@ static bool putconst_emit(struct cx_op *op,
 			FILE *out,
 			struct cx *cx) {
   struct cx_sym id = op->as_putconst.id;
-  struct cx_lib *lib = op->as_putconst.lib;
-  struct cx_box *v = cx_get_const(lib, id, false);
+  struct cx_box *v = cx_lib_get_const(op->as_putconst.lib, id, false);
   if (!v) { return false; }
   
   fprintf(out,

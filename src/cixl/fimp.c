@@ -144,16 +144,11 @@ bool cx_fimp_call(struct cx_fimp *imp, struct cx_scope *scope) {
   struct cx *cx = scope->cx;
   cx_call_init(cx_vec_push(&cx->calls), cx->row, cx->col, imp, -1);
 
-  if (imp->ptr) {
-    bool pop_lib = false;
-    
-    if (*cx->lib != imp->lib) {
-      cx_push_lib(cx, imp->lib);
-      pop_lib = true;
-    }
-
+  if (imp->ptr) {    
+    size_t lib_count = cx->libs.count;
+    if (*cx->lib != imp->lib) { cx_push_lib(cx, imp->lib); }
     bool ok = imp->ptr(scope);
-    if (pop_lib && *cx->lib == imp->lib) { cx_pop_lib(cx); }
+    while (cx->libs.count > lib_count) { cx_pop_lib(cx); }
     cx_call_deinit(cx_vec_pop(&cx->calls));
     return ok;
   }

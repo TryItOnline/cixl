@@ -65,7 +65,10 @@ static bool lib_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   cx_lib_use(prev);
   
   if (!cx_parse_end(cx, in, &eval->toks, true)) {
-    if (!cx->errors.count) { cx_test(false); cx_error(cx, row, col, "Missing lib: end"); }
+    if (!cx->errors.count) {
+      cx_test(false); cx_error(cx, row, col, "Missing lib: end");
+    }
+    
     cx_pop_lib(cx);
     cx_macro_eval_deref(eval);
     return false;

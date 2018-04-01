@@ -1,8 +1,11 @@
+'Testing cx/func...' say
+
 func: foo0()(_ Int) 42; foo0 42 = check
 
 func: foo2(x y)(_ Int) $x $y +; 1 2 foo2 3 = check
 
-func: foo3(op Func _ _ Int)(_ Int) $op call; &- 49 7 foo3 42 = check
+func: foo3(op Func _ _ Int)(_ Int) $op call;
+&- 49 7 foo3 42 = check
 
 func: foo1(x Int)(result Int) let: result $x 2 *;; 21 foo1 42 = check
 

@@ -1,3 +1,5 @@
+'Testing cx/error...' say
+
 catch: (A `error ~.)
   42 throw 21;
 `error 42. = check

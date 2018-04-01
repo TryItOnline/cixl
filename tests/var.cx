@@ -1,3 +1,5 @@
+'Testing cx/var...' say
+
 (let: foo 42;
  $foo 42 = check)
 

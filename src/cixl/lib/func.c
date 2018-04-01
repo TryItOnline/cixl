@@ -27,7 +27,7 @@ static bool parse_args(struct cx *cx, struct cx_vec *toks, struct cx_vec *args) 
       char *id = t->as_ptr;
 
       if (id[0] == '#') {
-	struct cx_box *v = cx_get_const(*cx->lib, cx_sym(cx, id+1), false);
+	struct cx_box *v = cx_get_const(cx, cx_sym(cx, id+1), false);
 	if (!v) { goto exit; }
 	*(struct cx_arg *)cx_vec_push(args) = cx_varg(v);
       } else if (strncmp(id, "Arg", 3) == 0 && isdigit(id[3])) {

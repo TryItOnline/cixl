@@ -1,3 +1,5 @@
+'Testing cx/meta...' say
+
 lib: foo
   define: (bar Int) 42;;
 use: (foo #bar);

@@ -1,3 +1,5 @@
+'Testing cx/cond...' say
+
 #t 42 if 42 = check
 
 #f 42 else 42 = check

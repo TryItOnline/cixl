@@ -1,3 +1,5 @@
+'Testing cx/time...' say
+
 now now <= check
 
 [1 0 0 24] time days 367 = check

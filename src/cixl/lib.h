@@ -99,7 +99,8 @@ struct cx_fimp *cx_add_cxfunc(struct cx_lib *lib,
 
 struct cx_func *cx_get_func(struct cx *cx, const char *id, bool silent);
 
-struct cx_box *cx_get_const(struct cx_lib *lib, struct cx_sym id, bool silent);
+struct cx_box *cx_get_const(struct cx *cx, struct cx_sym id, bool silent);
+struct cx_box *cx_lib_get_const(struct cx_lib *lib, struct cx_sym id, bool silent);
 struct cx_box *cx_put_const(struct cx_lib *lib, struct cx_sym id, bool force);
 
 bool cx_lib_vuse(struct cx_lib *lib, unsigned int nids, const char **ids);

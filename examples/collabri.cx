@@ -423,6 +423,7 @@ func: new-client(io TCPClient)(_ Client)
       $ils is-done {$c disconnect} if
     } {
       catch: (A
+          'catch' say
           $c ~ push-error
 	  $c % push-prompt poll-out
 	  dump
@@ -434,7 +435,7 @@ func: new-client(io TCPClient)(_ Client)
 	$poll commit;
     } if-else
   } on-read
-  
+
   $c `buf get %
   #clear-screen print
   1 1 move-to print

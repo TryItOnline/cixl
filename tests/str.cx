@@ -1,3 +1,5 @@
+'Testing cx/str...' say
+
 @a upper @A = check
 
 @@000 int 7 + char @@007 = check
