@@ -1,0 +1,11 @@
+catch: (A `error ~.)
+  42 throw 21;
+`error 42. = check
+
+catch: ((Int `int ~.) (A `a ~.))
+  (42 throw) 21;
+`int 42. = check
+
+catch: (Nil 7)
+  49;
+- 42 = check

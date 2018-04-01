@@ -1,0 +1,12 @@
+(let: foo 42;
+ $foo 42 = check)
+
+(let: (x y z) 1 2 3 4 +;
+ $x $y $z + + 10 = check)
+
+(let: (foo Int bar Str) 7 '35';
+ $foo $bar int + 42 = check)
+
+ (`foo var !check
+  `foo 42 let
+  `foo var 42 = check)

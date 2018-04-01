@@ -1,0 +1,9 @@
+`foo `foo == check
+
+`foo `bar == !check
+
+'foo' sym `foo = check
+
+`foo str 'foo' = check
+
+Sym % new ~ new = !check

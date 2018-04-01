@@ -16,6 +16,7 @@ struct cx_catch *cx_catch_init(struct cx_catch *c,
   c->start_pc = start_pc;
   c->nops = nops;
   c->stop_pc = stop_pc;
+  c->lib_offs = type->lib->cx->libs.count;
   return c;
 }
 
@@ -26,6 +27,7 @@ struct cx_catch *cx_catch_deinit(struct cx_catch *c) {
 
 bool cx_catch_eval(struct cx_catch *c) {
   struct cx *cx = c->type->lib->cx;
+  while (cx->libs.count > c->lib_offs) { cx_pop_lib(cx); }
   return cx_eval(c->bin,
 		 c->start_pc,
 		 (c->type == cx->nil_type) ? c->start_pc+c->nops-1 : c->stop_pc,

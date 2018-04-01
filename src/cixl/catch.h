@@ -10,6 +10,7 @@ struct cx_catch {
   size_t tok_idx;
   size_t start_pc, nops;
   ssize_t stop_pc;
+  size_t lib_offs;
 };
 
 struct cx_catch *cx_catch_init(struct cx_catch *c,

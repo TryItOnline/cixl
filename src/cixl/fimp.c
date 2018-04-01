@@ -153,7 +153,7 @@ bool cx_fimp_call(struct cx_fimp *imp, struct cx_scope *scope) {
     }
 
     bool ok = imp->ptr(scope);
-    if (pop_lib) { cx_pop_lib(cx); }
+    if (pop_lib && *cx->lib == imp->lib) { cx_pop_lib(cx); }
     cx_call_deinit(cx_vec_pop(&cx->calls));
     return ok;
   }

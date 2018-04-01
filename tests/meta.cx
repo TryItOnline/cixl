@@ -1,0 +1,12 @@
+lib: foo
+  define: (bar Int) 42;;
+use: (foo #bar);
+#bar 42 = check
+
+lib: foo func: bar()(_ Int) 42;;
+use: (foo bar);
+bar 42 = check
+
+lib: foo func: baz(_ Lambda)(_ Sym) call;;
+use: (foo baz);
+{this-lib id} baz `lobby = check

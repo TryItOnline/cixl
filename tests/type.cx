@@ -1,0 +1,8 @@
+42 type Int = check
+
+Int A is check
+
+A Int is !check
+
+trait: StrInt Str Int;
+42 StrInt is check

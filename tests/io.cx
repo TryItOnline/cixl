@@ -1,0 +1,1 @@
+Buf new % 'foo' print % flush str 'foo' = check

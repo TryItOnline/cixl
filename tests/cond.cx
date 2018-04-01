@@ -1,0 +1,7 @@
+#t 42 if 42 = check
+
+#f 42 else 42 = check
+
+#t `yes `no if-else `yes = check
+
+#f `yes `no if-else `no = check

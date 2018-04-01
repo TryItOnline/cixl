@@ -1,6 +1,9 @@
 #define htonll(x) ((1==htonl(1)) ? (x) : ((uint64_t)htonl((x) & 0xFFFFFFFF) << 32) | htonl((x) >> 32))
 #define ntohll(x) ((1==ntohl(1)) ? (x) : ((uint64_t)ntohl((x) & 0xFFFFFFFF) << 32) | ntohl((x) >> 32))
 
+* fix tests emit
+* convert remaining tests
+** remove tests.c/target
 * --- cixtris
 ** add block-width / block-height fns
 *** use for detecting max-x/y
@@ -8,10 +11,6 @@
 ** add down key
 *** drop block immediately
 ** add support for clearing rows
-*** add speed increase with for cleared row
-** add 'z'ap
-*** start new block from top
-*** increase remaining zaps on row clear
 ** add missing shapes
 ** add (p)ause support
 *** change main if to switch:
@@ -47,6 +46,7 @@
 * replace clone fallback to copy with error
 * replace varargs with size/array+macro
 * --- tellux
+* switch buffers to fixed sized stacks like cixtrix
 * add visualization of current fg/bg
 * implement saving
 ** launch with mandatory filename

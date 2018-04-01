@@ -1,0 +1,29 @@
+@a upper @A = check
+
+@@000 int 7 + char @@007 = check
+
+'foo' check
+
+''! check
+
+'foo' 'foo' = check
+
+'foo' 'bar' = !check
+
+'foo' 'foo' == !check
+
+'foo' % upper 'FOO' = check
+
+'foobar' 3 get @b = check
+
+'42' int 42 = check
+
+'@n' 0 get @@n = check
+
+['foo' 'bar' 'baz'] @/ join 'foo/bar/baz' = check
+
+'foo bar baz' {@@s =} split stack ['foo' 'bar' 'baz'] = check
+
+'foo bar baz' @@s split stack ['foo' 'bar' 'baz'] = check
+
+'foo@027bar' 3 get @@027 = check
