@@ -82,7 +82,7 @@ static void begin_emit_funcs(struct cx_op *op, struct cx_set *out, struct cx *cx
   struct cx_fimp *imp = op->as_begin.fimp;
 
   if (imp) {
-    struct cx_func **ok = cx_set_insert(out, &imp->func);
+    struct cx_func **ok = cx_set_insert(out, &imp->func->id);
     if (ok) { *ok = imp->func; }
   }
 }
@@ -259,7 +259,7 @@ static void fimp_emit_init(struct cx_op *op,
 static void fimp_emit_funcs(struct cx_op *op, struct cx_set *out, struct cx *cx) {
   struct cx_func
     *func = op->as_fimp.imp->func,
-    **ok = cx_set_insert(out, &func);
+    **ok = cx_set_insert(out, &func->id);
 
   if (ok) { *ok = func; }
 }
@@ -445,7 +445,7 @@ static void funcall_emit_labels(struct cx_op *op, struct cx_set *out, struct cx 
 static void funcall_emit_funcs(struct cx_op *op, struct cx_set *out, struct cx *cx) {
   struct cx_func
     *func = op->as_funcall.func,
-    **ok = cx_set_insert(out, &func);
+    **ok = cx_set_insert(out, &func->id);
 
   if (ok) { *ok = func; }
 }
@@ -725,7 +725,10 @@ static void push_emit_funcs(struct cx_op *op, struct cx_set *out, struct cx *cx)
   struct cx_box *v = &op->as_push.value;
 
   if (v->type == cx->func_type) {
-    struct cx_func **ok = cx_set_insert(out, &v->as_ptr);
+    
+    struct cx_func
+      *f = v->as_ptr,
+      **ok = cx_set_insert(out, &f->id);
     if (ok) { *ok = v->as_ptr; }
   }
 }
@@ -907,7 +910,7 @@ static bool putargs_emit(struct cx_op *op,
 static void putargs_emit_funcs(struct cx_op *op, struct cx_set *out, struct cx *cx) {
   struct cx_func
     *func = op->as_putargs.imp->func,
-    **ok = cx_set_insert(out, &func);
+    **ok = cx_set_insert(out, &func->id);
 
   if (ok) { *ok = func; }
 }
@@ -1262,7 +1265,7 @@ static void return_emit_labels(struct cx_op *op, struct cx_set *out, struct cx *
 static void return_emit_funcs(struct cx_op *op, struct cx_set *out, struct cx *cx) {
   struct cx_func
     *f = op->as_return.imp->func,
-    **ok = cx_set_insert(out, &f);
+    **ok = cx_set_insert(out, &f->id);
 
   if (ok) { *ok = f; }
 }

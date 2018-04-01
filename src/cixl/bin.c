@@ -150,6 +150,11 @@ bool cx_eval_str(struct cx *cx, const char *in) {
   }
 }
 
+static const void *get_func_id(const void *v) {
+  struct cx_func *const *f = v;
+  return &(*f)->id;
+}
+
 bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
   cx_init_ops(bin);
 
@@ -165,7 +170,8 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
   cx_set_init(&labels, sizeof(size_t), cx_cmp_size);  
   cx_set_init(&libs, sizeof(struct cx_lib *), cx_cmp_ptr);
   cx_set_init(&types, sizeof(struct cx_type *), cx_cmp_ptr);
-  cx_set_init(&funcs, sizeof(struct cx_func *), cx_cmp_ptr);
+  cx_set_init(&funcs, sizeof(struct cx_func *), cx_cmp_cstr);
+  funcs.key = get_func_id;
   cx_set_init(&fimps, sizeof(struct cx_fimp *), cx_cmp_ptr);
   cx_set_init(&syms, sizeof(struct cx_sym), cx_cmp_sym);
 
