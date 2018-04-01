@@ -122,15 +122,18 @@ bool cx_emit_file(struct cx *cx, struct cx_bin *bin, FILE *out) {
         "  cx_use(&cx, \"cx/io\", \"include:\");\n"
         "  cx_use(&cx, \"cx/meta\", \"lib:\", \"use:\");\n"
         "  cx_use(&cx, \"cx/sys\", \"#args\");\n"
-        "  cx_push_args(&cx, argc-1, argv+1);\n\n"
+        "  cx_push_args(&cx, argc-1, argv+1);\n"
+	"  int result = -1;\n\n"
 	
 	"  if (!eval(&cx)) {\n"
 	"    cx_dump_errors(&cx, stderr);\n"
-	"    return -1;\n"
+	"    goto exit;\n"
 	"  }\n\n"
-
+	
+	"  result = 0;\n"
+	"exit:\n"
 	"  cx_deinit(&cx);\n"
-	"  return 0;\n"
+	"  return result;\n"
 	"}",
 	out);
 

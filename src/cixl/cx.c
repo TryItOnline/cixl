@@ -291,10 +291,12 @@ void cx_push_lib(struct cx *cx, struct cx_lib *lib) {
   *cx->lib = lib;
 }
 
-void cx_pop_lib(struct cx *cx) {
+struct cx_lib *cx_pop_lib(struct cx *cx) {
   cx_test(cx->libs.count > 1);
   cx_vec_pop(&cx->libs);
+  struct cx_lib *prev = *cx->lib;
   cx->lib--;
+  return prev;
 }
 
 struct cx_sym cx_sym(struct cx *cx, const char *id) {

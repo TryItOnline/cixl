@@ -83,7 +83,7 @@ struct cx_lib *cx_add_lib(struct cx *cx, const char *id);
 struct cx_lib *cx_get_lib(struct cx *cx, const char *id, bool silent);
 
 void cx_push_lib(struct cx *cx, struct cx_lib *lib);
-void cx_pop_lib(struct cx *cx);
+struct cx_lib *cx_pop_lib(struct cx *cx);
 
 struct cx_sym cx_sym(struct cx *cx, const char *id);
 struct cx_sym cx_gsym(struct cx *cx, const char *prefix);

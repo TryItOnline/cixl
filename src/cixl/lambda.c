@@ -68,16 +68,12 @@ static bool call_imp(struct cx_box *value, struct cx_scope *scope) {
   bool ok = cx_eval(l->bin, l->start_pc, l->start_pc+l->nops, cx);
 
   if (pop_scope) {
-    cx_test(cx_pop_scope(cx, false));
-    
-    if (*(struct cx_scope **)cx_vec_peek(&l->scope->parents, 0) == scope) {
-      cx_vec_pop(&l->scope->parents);
-    }
-    
+    while (cx->scopes.count > 1 && cx_pop_scope(cx, false) != l->scope);    
+    while (*(struct cx_scope **)cx_vec_pop(&l->scope->parents) != scope);
     cx_scope_deref(scope);
   }
   
-  if (pop_lib && *cx->lib == l->lib) { cx_pop_lib(cx); }
+  if (pop_lib) { while (cx->libs.count > 1 && cx_pop_lib(cx) != l->lib); }
   cx_lambda_deref(l);
   return ok;
 }
