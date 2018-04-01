@@ -1,0 +1,25 @@
+func: foo0()(_ Int) 42; foo0 42 = check
+
+func: foo2(x y)(_ Int) $x $y +; 1 2 foo2 3 = check
+
+func: foo3(op Func _ _ Int)(_ Int) $op call; &- 49 7 foo3 42 = check
+
+func: foo1(x Int)(result Int) let: result $x 2 *;; 21 foo1 42 = check
+
+func: fortytwo(_ Int)(#f) _;
+func: fortytwo(42)(#t);
+21 fortytwo !check
+42 fortytwo check
+						       
+(let: x 42; func: foo0()(_ Int) $x;) &foo0 call 42 = check
+
+func: foo1(x A)(_ Int) $x 35 +; 7 foo1<A> 42 = check
+
+func: foo3(x y Int z Arg0)(_ Int) $x $y $z + +; 1 3 5 foo3 9 = check
+
+func: answer(0)(_ Int) 0;
+func: answer(x Int)(_ Int) $x;
+func: answer(42)(_ Sym) `correct;
+0 answer 0 = check
+1 answer 1 = check
+42 answer `correct = check

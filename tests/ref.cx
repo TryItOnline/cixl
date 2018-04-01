@@ -1,0 +1,3 @@
+#nil ref % 42 set deref 42 = check
+
+41 ref % {++ %} set-call 42 = check

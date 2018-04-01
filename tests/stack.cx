@@ -1,0 +1,21 @@
+Stack new % 1 push % 2 push [1 2] = check
+
+1 2 [3 4 5] len 3 = check
+
+[1 2 3] pop 3 = check
+
+[1 2 3] % 4 push<Stack Opt> len 4 = check
+
+[1 2] {2 *} for + 6 = check
+
+[1 2] [3 4] < check
+
+[1 2 3] [1 2] > check
+
+[3 2 1] % #nil sort {} for + - -4 = check
+
+[1 2 3] % {~ <=>} sort {} for + - 0 = check
+
+7 14 % + 28 = check
+
+7 14 % _ + 21 = check

@@ -16,10 +16,6 @@ add_executable(cixl ${sources} src/main.c)
 target_include_directories(cixl PUBLIC src/)
 target_link_libraries(cixl dl)
 
-add_executable(tests EXCLUDE_FROM_ALL ${sources} src/tests.c)
-target_include_directories(tests PUBLIC src/)
-target_link_libraries(tests dl)
-
 file(GLOB headers src/cixl/*.h)
 install(FILES ${headers} DESTINATION include/cixl)
 

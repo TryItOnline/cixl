@@ -1,0 +1,23 @@
+rec: Foo()
+  x Int y Str;
+
+(let: foo Foo new;
+ $foo !check
+ $foo `x 42 put
+ $foo check
+ $foo `x get 42 = check
+ $foo `y get #nil = check)
+
+func: =(a b Foo)(_ Bool) 
+  $a `x get $b `x get =;
+
+(let: (bar baz) Foo new %%;
+ $bar `x 1 put
+ $baz `x 2 put
+ $bar $baz = !check
+
+ $baz `x 1 put
+ $bar $baz = check
+ 
+ $bar `y 'abc' put
+ $bar $baz = check)

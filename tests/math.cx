@@ -11,3 +11,8 @@
 1 2 / 5 2 / * 5 4 / = check
 
 1 2 / 5 2 / + 3 1 / = check
+
+21 21 +<Int Int> 42 = check
+
+50 fib 12586269025 = check
+

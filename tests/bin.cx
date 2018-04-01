@@ -1,0 +1,1 @@
+Bin new % '1 2 +' compile call 3 = check

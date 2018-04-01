@@ -1,8 +1,9 @@
 #define htonll(x) ((1==htonl(1)) ? (x) : ((uint64_t)htonl((x) & 0xFFFFFFFF) << 32) | htonl((x) >> 32))
 #define ntohll(x) ((1==ntohl(1)) ? (x) : ((uint64_t)ntohl((x) & 0xFFFFFFFF) << 32) | ntohl((x) >> 32))
 
-* convert remaining tests
-** remove tests.c/target
+* fix func tests
+** commit test reorg
+* debug anonymous func result emit
 * --- cixtris
 ** add block-width / block-height fns
 *** use for detecting max-x/y
