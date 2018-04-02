@@ -1,13 +1,16 @@
 'Testing cx/func...' say
 
-func: foo0()(_ Int) 42; foo0 42 = check
+func: anon0()(_ Int) 42;
+anon0 42 = check
 
-func: foo2(x y)(_ Int) $x $y +; 1 2 foo2 3 = check
+func: untyped2(x y)(_ Int) $x $y +;
+1 2 untyped2 3 = check
 
-func: foo3(op Func _ _ Int)(_ Int) $op call;
-&- 49 7 foo3 42 = check
+func: mixed3(op Func _ _ Int)(_ Int) $op call;
+&- 49 7 mixed3 42 = check
 
-func: foo1(x Int)(result Int) let: result $x 2 *;; 21 foo1 42 = check
+func: named-result()(out Str) let: out 'foo';;
+named-result 'foo' = check
 
 func: fortytwo(_ Int)(#f) _;
 func: fortytwo(42)(#t);
@@ -25,9 +28,9 @@ func: fortytwo(42)(#t);
   &closure call 42 = check
 )
 
-func: foo1(x A)(_ Int) $x 35 +; 7 foo1<A> 42 = check
+func: fimp1(x A)(_ Int) $x 35 +; 7 fimp1<A> 42 = check
 
-func: foo3(x y Int z Arg0)(_ Int) $x $y $z + +; 1 3 5 foo3 9 = check
+func: ref3(x y Int z Arg0)(_ Int) $x $y $z + +; 1 3 5 ref3 9 = check
 
 func: answer(0)(_ Int) 0;
 func: answer(x Int)(_ Int) $x;

@@ -26,8 +26,8 @@ use:
   (cx/iter for map while)
   (cx/math + - * ++ -- mod rand)
   (cx/rec ? rec: get put put-call)
-  (cx/ref Ref deref ref set set-call)
-  (cx/stack Stack _ ~ % %% fill get get-rand len new put splat stack)
+  (cx/ref Ref deref new ref set set-call)
+  (cx/stack Stack _ ~ % %% fill get get-rand len put splat stack)
   (cx/str len)
   (cx/var let:);
 
@@ -58,7 +58,7 @@ define: shapes [
     ' *'
     ' *']]
 
-  [['*   '
+  [['*'
     '****']
 
    ['**'
@@ -74,19 +74,19 @@ define: shapes [
     ' *'
     '**']]
 
-  [[' * '
+  [[' *'
     '***']
     
-   ['*  '
-    '** '
-    '*  ']
+   ['*'
+    '**'
+    '*']
     
    ['***'
-    ' * ']
+    ' *']
 
-   [' * '
-    '** '
-    ' * ']]
+   [' *'
+    '**'
+    ' *']]
 ];
 
 define: colors [
@@ -106,7 +106,7 @@ let: max-y screen-size ~ _;
 let: block Ref new;
 let: speed 0 ref;
 let: key-delay 0 ref;
-let: buffer Stack new % $max-x $max-y * #nil fill;
+let: buffer [] % $max-x $max-y * #nil fill;
 
 rec: Block()
   shape Stack
@@ -114,7 +114,7 @@ rec: Block()
   x y   
   alt   Int;
 
-func: new-block()(_ Block)
+func: new-block()(b Block)
   let: b Block new;
   let: s #shapes get-rand;
   let: c #colors get-rand;
@@ -123,9 +123,7 @@ func: new-block()(_ Block)
   $b `color $c          put
   $b `x     $max-x rand put
   $b `y     1           put
-  $b `alt   $s len rand put
-  
-  $b;
+  $b `alt   $s len rand put;
 
 func: p(_ A)()
   #out ~ print;

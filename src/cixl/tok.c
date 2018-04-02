@@ -8,6 +8,7 @@
 #include "cixl/func.h"
 #include "cixl/macro.h"
 #include "cixl/op.h"
+#include "cixl/stack.h"
 #include "cixl/tok.h"
 #include "cixl/vec.h"
 
@@ -251,21 +252,25 @@ cx_tok_type(CX_TMACRO, {
 static ssize_t stack_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) {
   struct cx_tok *tok = cx_vec_get(&bin->toks, tok_idx);    
   struct cx_vec *toks = &tok->as_vec;
-  
-  struct cx_op *op = cx_op_init(bin, CX_OBEGIN(), tok_idx);
-  op->as_begin.child = true;
-  op->as_begin.fimp = NULL;
-  
-  if (!cx_compile(cx, cx_vec_start(toks), cx_vec_end(toks), bin)) {
-    tok = cx_vec_get(&bin->toks, tok_idx);  
-    cx_error(cx, tok->row, tok->col, "Failed compiling group");
-    goto exit;
-  }
 
-  cx_op_init(bin, CX_OSTASH(), tok_idx);
-  cx_op_init(bin, CX_OEND(), tok_idx);
+  if (toks->count) {
+    struct cx_op *op = cx_op_init(bin, CX_OBEGIN(), tok_idx);
+    op->as_begin.child = true;
+    op->as_begin.fimp = NULL;
+    
+    if (!cx_compile(cx, cx_vec_start(toks), cx_vec_end(toks), bin)) {
+      tok = cx_vec_get(&bin->toks, tok_idx);  
+      cx_error(cx, tok->row, tok->col, "Failed compiling stack");
+      return -1;
+    }
+
+    cx_op_init(bin, CX_OSTASH(), tok_idx);
+    cx_op_init(bin, CX_OEND(), tok_idx);
+  } else {
+    struct cx_box *v = &cx_op_init(bin, CX_OPUSH(), tok_idx)->as_push.value;
+    cx_box_init(v, cx->stack_type)->as_ptr = cx_stack_new(cx);
+  }
   
- exit:
   return tok_idx+1;
 }
 

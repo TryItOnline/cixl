@@ -64,7 +64,8 @@ static bool set_call_imp(struct cx_scope *scope) {
 cx_lib(cx_init_ref, "cx/ref") { 
   struct cx *cx = lib->cx;
     
-  if (!cx_use(cx, "cx/abc", "A", "Opt")) {
+  if (!cx_use(cx, "cx/abc", "A", "Opt") ||
+      !cx_use(cx, "cx/type", "new")) {
     return false;
   }
 

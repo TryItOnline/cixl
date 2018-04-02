@@ -12,7 +12,7 @@ lib: qdb (
 
 use: cx;
 
-define: db-trans Stack new;
+define: db-trans [];
 
 rec: DBTable()
   file      RWFile
@@ -22,16 +22,14 @@ rec: DBTable()
   on-load  
   on-commit Stack;
 
-func: new-db-table(n Str k Stack)(_ DBTable)
+func: new-db-table(n Str k Stack)(t DBTable)
   let: t DBTable new;
   let: f $n `a+ fopen % unblock;
 
   $t `file $f        put
   $t `key  $k        put
   $t `recs Table new put
-  $t `buf  Buf new   put
-  
-  $t;
+  $t `buf  Buf new   put;
 
 func: get-rec-key(t DBTable r A)(_ Stack)
   $t `key get {$r ~ get} map stack;
@@ -57,14 +55,14 @@ func: load-table(t DBTable)()
 
 func: on-load(t DBTable fn A)()
   $t `on-load get {
-    let: s Stack new;
+    let: s [];
     $t `on-load $s put
     $s
   } or $fn push;
 
 func: on-commit(t DBTable fn A)()
   $t `on-commit get {
-    let: s Stack new;
+    let: s [];
     $t `on-commit $s put
     $s
   } or $fn push;

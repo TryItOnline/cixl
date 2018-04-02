@@ -55,6 +55,7 @@ let: (bg fg)       [0 0 0] ref [255 255 255] ref;
 let: bg-colors     Table new;
 let: fg-colors     Table new;
 let: buffer        Table new;
+let: done          #f ref;
 
 func: p(_ A)()
   #out ~ print;
@@ -178,88 +179,74 @@ func: go-right(n Int)(_ Bool)
     } if-else
   } set-call;
 
-func: handle-key(`command #key-esc)(_ Bool)
-  $mode `edit set
-  #t;
+func: handle-key(`command #key-esc)()
+  $mode `edit set;
 
-func: handle-key(`command #key-quit)(_ Bool)
-  #f;
+func: handle-key(`command #key-quit)()
+  $done #t set;
 
-func: handle-key(`command #key-resize)(_ Bool)
-  resize #t;
+func: handle-key(`command #key-resize)()
+  resize;
 
-func: handle-key(m Sym #key-back)(_ Bool)
+func: handle-key(m Sym #key-back)()
   1 go-left {
     #reset-style p
     @@s p
     1 move-left p
-  } if
-  
-  #t;
+  } if;
 
-func: handle-key(`command #key-up)(_ Bool)
-  1 go-up _ #t;
+func: handle-key(`command #key-up)()
+  1 go-up _;
 
-func: handle-key(`command #key-up-n)(_ Bool)
+func: handle-key(`command #key-up-n)()
   let: n $y deref 2 / int;
-  $n { $n go-up _ } if
-  #t;
+  $n { $n go-up _ } if;
 
-func: handle-key(`command #key-down)(_ Bool)
-  1 go-down _ #t;
+func: handle-key(`command #key-down)()
+  1 go-down _;
 
-func: handle-key(`command #key-down-n)(_ Bool)
+func: handle-key(`command #key-down-n)()
   let: n $max-y deref 2 - $y deref - ++ 2 / int;
-  $n { $n go-down _ } if
-  #t;
+  $n { $n go-down _ } if;
 
-func: handle-key(`command #key-left)(_ Bool)
-  1 go-left _ #t;
+func: handle-key(`command #key-left)()
+  1 go-left _;
 
-func: handle-key(`command #key-left-n)(_ Bool)
+func: handle-key(`command #key-left-n)()
   let: n $x deref 2 / int;
-  $n { $n go-left _ } if
-  #t;
+  $n { $n go-left _ } if;
 
-func: handle-key(`command #key-right)(_ Bool)
-  1 go-right _ #t;
+func: handle-key(`command #key-right)()
+  1 go-right _;
 
-func: handle-key(`command #key-right-n)(_ Bool)
+func: handle-key(`command #key-right-n)()
   let: n $max-x deref $x deref - ++ 2 / int;
-  $n { $n go-right _ } if
-  #t;
+  $n { $n go-right _ } if;
 
-func: handle-key(`command #key-x-home)(_ Bool)
-  1 $y deref set-pos
-  #t;
+func: handle-key(`command #key-x-home)()
+  1 $y deref set-pos;
 
-func: handle-key(`command #key-y-home)(_ Bool)
-  $x deref 1 set-pos
-  #t;
+func: handle-key(`command #key-y-home)()
+  $x deref 1 set-pos;
 
-func: handle-key(`command #key-x-end)(_ Bool)
-  $max-x deref $y deref set-pos
-  #t;
+func: handle-key(`command #key-x-end)()
+  $max-x deref $y deref set-pos;
 
-func: handle-key(`command #key-y-end)(_ Bool)
-  $x deref $max-y deref 2 - set-pos
-  #t;
+func: handle-key(`command #key-y-end)()
+  $x deref $max-y deref 2 - set-pos;
 
-func: handle-key(`command #key-set-bg)(_ Bool)
+func: handle-key(`command #key-set-bg)()
   let: o $x deref $y deref get-offs;
-  $bg $bg-colors $o get set
-  #t;
+  $bg $bg-colors $o get set;
 
-func: handle-key(`command #key-set-fg)(_ Bool)
+func: handle-key(`command #key-set-fg)()
   let: o $x deref $y deref get-offs;
-  $fg $fg-colors $o get set
-  #t;
+  $fg $fg-colors $o get set;
 
-func: handle-key(`command #key-get-color)(_ Bool)
-  $mode `get-color set
-  #t;
+func: handle-key(`command #key-get-color)()
+  $mode `get-color set;
 
-func: handle-key(`get-color c Char)(_ Bool)
+func: handle-key(`get-color c Char)()
   $c @a >= {$c @z <=} and {
     let: (px py) 1 $c int @a int - 2 +;
     let: po $px $py get-offs;
@@ -267,14 +254,12 @@ func: handle-key(`get-color c Char)(_ Bool)
     $bg $bg-colors $po get set
   } if
 
-  $mode `command set
-  #t;
+  $mode `command set;
   
-func: handle-key(`command #key-put-color)(_ Bool)
-  $mode `put-color set
-  #t;
+func: handle-key(`command #key-put-color)()
+  $mode `put-color set;
 
-func: handle-key(`put-color c Char)(_ Bool)
+func: handle-key(`put-color c Char)()
   $c @a >= {$c @z <=} and {
     let: (px py) 1 $c int @a int - 2 +;
     let: po $px $py get-offs;
@@ -302,17 +287,14 @@ func: handle-key(`put-color c Char)(_ Bool)
     #restore-pos p
   } if
 
-  $mode `command set
-  #t;
+  $mode `command set;
 
-func: handle-key(`command c Char)(_ Bool)
-  #t;
+func: handle-key(`command c Char)();
 
-func: handle-key(`edit #key-esc)(_ Bool)
-  $mode `command set
-  #t;
+func: handle-key(`edit #key-esc)()
+  $mode `command set;
 
-func: handle-key(`edit c Char)(_ Bool)
+func: handle-key(`edit c Char)()
   $c is-graph {$c @@s =} or {
     let: o $x deref $y deref get-offs;
 
@@ -334,7 +316,7 @@ func: handle-key(`edit c Char)(_ Bool)
     #reset-style p
     $buffer $o $c put
     $x {% $max-x deref < &++ if} set-call
-  } if #t;
+  } if;
 
 resize
 raw-mode
@@ -353,6 +335,8 @@ print-footer
   $mode deref
   #in read-char
   handle-key
+
+  $done deref !
 } while
 
 #clear-screen p

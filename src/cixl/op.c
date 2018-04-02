@@ -1016,7 +1016,7 @@ static bool putvar_emit(struct cx_op *op,
   }
   
   fprintf(out,
-	  "*cx_put_var(s, %s, true) = *src;\n",
+	  "*cx_put_var(s, %s) = *src;\n",
 	  op->as_putvar.id.emit_id);
 
   return true;
@@ -1076,18 +1076,19 @@ static bool return_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
 	  continue;
 	}
 
-	struct cx_box *v = NULL;
+	struct cx_box v;
 	
 	if (r->id) {
-	  v = cx_get_var(ss, r->sym_id, false);
-	  if (!v) { return false; }
+	  struct cx_box *vv = cx_get_var(ss, r->sym_id, false);
+	  if (!vv) { return false; }
+	  cx_copy(&v, vv);
 	} else {
 	  if (si == ss->stack.count) {
 	    cx_error(cx, cx->row, cx->col, "Not enough return values on stack");
 	    return false;
 	  }
 
-	  v = sv++;
+	  v = *sv++;
 	  si++;
 	}
 	
@@ -1108,16 +1109,16 @@ static bool return_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
 	    break;
 	  }
 	  
-	  if (!cx_is(v->type, cx_test(t))) {
+	  if (!cx_is(v.type, cx_test(t))) {
 	    cx_error(cx, cx->row, cx->col,
 		     "Invalid return type.\nExpected %s, actual: %s",
-		     t->id, v->type->id);
+		     t->id, v.type->id);
 	    
 	    return false;
 	  }
 	}
 	
-	*(struct cx_box *)cx_vec_push(&ds->stack) = *v;
+	*(struct cx_box *)cx_vec_push(&ds->stack) = v;
       }
     }
 
@@ -1145,6 +1146,7 @@ static bool return_emit(struct cx_op *op,
 
   fputs("struct cx_call *call = cx_test(cx_vec_peek(&cx->calls, 0));\n"
 	"struct cx_scope *s = cx_scope(cx, 0);\n\n"
+	
 	"if (call->recalls) {\n",
 	out);
 
@@ -1153,6 +1155,7 @@ static bool return_emit(struct cx_op *op,
 	  "    cx_error(cx, cx->row, cx->col, \"Recall not applicable\");\n"
 	  "    goto exit;\n"
 	  "  }\n\n"
+	  
 	  "  call->recalls--;\n"
 	  "  goto op%zd;\n"
 	  "} else {\n"
@@ -1173,12 +1176,15 @@ static bool return_emit(struct cx_op *op,
 	continue;
       }
 
-      fputs("  {\n", out);
+      fputs("  {\n"
+	    "    struct cx_box v;\n",
+	    out);
       
       if (r->id) {
 	fprintf(out,
-		"    struct cx_box *v = cx_get_var(s, %s, false);\n"
-		"    if (!v) { goto exit; }\n",
+		"    struct cx_box *vv = cx_get_var(s, %s, false);\n"
+		"    if (!vv) { goto exit; }\n"
+		"    cx_copy(&v, vv);\n",
 		r->sym_id.emit_id);
       } else {
 	fputs("    if (si == s->stack.count) {\n"
@@ -1186,7 +1192,7 @@ static bool return_emit(struct cx_op *op,
 	      "\"Not enough return values on stack\");\n"
 	      "      goto exit;\n"
 	      "    }\n\n"
-	      "    struct cx_box *v = cx_vec_get(&s->stack, si++);\n",
+	      "    v = *(struct cx_box *)cx_vec_get(&s->stack, si++);\n",
 	      out);
       }
       
@@ -1212,15 +1218,15 @@ static bool return_emit(struct cx_op *op,
 	break;
       }
 
-      fputs("      if (!cx_is(v->type, t)) {\n"
+      fputs("      if (!cx_is(v.type, t)) {\n"
 	    "        cx_error(cx, cx->row, cx->col,\n"
 	    "                 \"Invalid return type.\\n\"\n"
             "                 \"Expected %s, actual: %s\",\n"
-	    "                 t->id, v->type->id);\n"
+	    "                 t->id, v.type->id);\n"
 	    "        goto exit;\n"
 	    "      }\n"
 	    "    }\n\n"
-	    "    *(struct cx_box *)cx_vec_push(&ds->stack) = *v;\n"
+	    "    *(struct cx_box *)cx_vec_push(&ds->stack) = v;\n"
 	    "  }\n\n",
 	    out);
     }
@@ -1231,15 +1237,18 @@ static bool return_emit(struct cx_op *op,
 	  "    cx_error(cx, cx->row, cx->col, \"Stack not empty on return\");\n"
 	  "    goto exit;\n"
 	  "  }\n\n"
+	  
 	  "  cx_vec_clear(&s->stack);\n"
 	  "  cx_end(cx);\n"
 	  "  cx_pop_lib(cx);\n"
 	  "  struct cx_call *call = cx_vec_pop(&cx->calls);\n\n"
+	  
 	  "  if (call->return_pc > -1) {\n"
 	  "    cx->pc = call->return_pc;\n"
 	  "    cx_call_deinit(call);\n"
 	  "    goto *op_labels[cx->pc];\n"
 	  "  }\n\n"
+
 	  "  cx_call_deinit(call);\n"
 	  "}\n");
   
