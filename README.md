@@ -189,7 +189,7 @@ Cixl expects arguments before operations and provides direct access to the stack
 ```
 
 ### Variables
-Variables may be bound once per scope using the ```let:``` macro.
+Variables may be bound in the current scope using the ```let:``` macro.
 
 ```
    | let: foo 'bar';

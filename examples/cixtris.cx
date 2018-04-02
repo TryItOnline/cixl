@@ -236,8 +236,8 @@ $poll #in {
 } on-read
 
 raw-mode
-#hide-cursor p
 #clear-screen p
+#hide-cursor p
 $max-x 1 move-to p
 #reverse-colors p
 @@s $max-y vline p
@@ -281,5 +281,5 @@ $block new-block set
 #clear-screen p
 1 1 move-to p
 #out flush
-#show-cursor p
 normal-mode
+#show-cursor p

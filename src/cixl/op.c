@@ -824,7 +824,7 @@ static bool putargs_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
        a >= (struct cx_arg *)cx_vec_start(&imp->args);
        a--, v--, i--) {
     if (a->id || a->arg_type == CX_VARG) {
-      if (a->id) { *cx_put_var(ds, a->sym_id, true) = *v; }
+      if (a->id) { *cx_put_var(ds, a->sym_id) = *v; }
       cx_vec_delete(&ss->stack, i);
       nargs--;
     }
@@ -865,7 +865,7 @@ static bool putargs_emit(struct cx_op *op,
     if (a->id || a->arg_type == CX_VARG) {
       if (a->id) {
 	fprintf(out,
-		"*cx_put_var(ds, %s, true) = "
+		"*cx_put_var(ds, %s) = "
 		"*(struct cx_box *)cx_vec_peek(&ss->stack, %zd);\n",
 		a->sym_id.emit_id, i);
       }
@@ -991,10 +991,7 @@ static bool putvar_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
     return false;
   }
   
-  struct cx_box *dst = cx_put_var(s, op->as_putvar.id, true);
-
-  if (!dst) { return false; }
-  *dst = *src;
+  *cx_put_var(s, op->as_putvar.id) = *src;
   return true;
 }
 
@@ -1019,12 +1016,8 @@ static bool putvar_emit(struct cx_op *op,
   }
   
   fprintf(out,
-	  "struct cx_box *dst = cx_put_var(s, %s, true);\n",
+	  "*cx_put_var(s, %s, true) = *src;\n",
 	  op->as_putvar.id.emit_id);
-
-  fputs("if (!dst) { goto exit; }\n"
-	"*dst = *src;\n",
-	out);
 
   return true;
 }

@@ -110,12 +110,13 @@ func: get-log(t Topic)(_ WFile)
     $l
   } or;
 
+func: init-log-buf(t Topic)(_ Buf)
+  let: b Buf new;
+  $t `log-buf $b put
+  $b;
+
 func: push-log(t Topic in Str)()
-  let: b $t `log-buf get {(
-    let: b Buf new;
-    $t `log-buf $b put
-    $b
-  )} or;
+  let: b $t `log-buf get {$t init-log-buf} or;
 
   let: l $t get-log;
   $b flush

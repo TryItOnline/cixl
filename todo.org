@@ -1,8 +1,8 @@
 #define htonll(x) ((1==htonl(1)) ? (x) : ((uint64_t)htonl((x) & 0xFFFFFFFF) << 32) | htonl((x) >> 32))
 #define ntohll(x) ((1==ntohl(1)) ? (x) : ((uint64_t)ntohl((x) & 0xFFFFFFFF) << 32) | ntohl((x) >> 32))
 
-* debug missing let: dup check in lambdas
-* debug named func result emit
+* test named func result
+* test literal result
 * --- cixtris
 ** add block-width / block-height fns
 *** use for detecting max-x/y
@@ -21,10 +21,8 @@
 *** read/write size prefixed blocks
 ** add README
 * --- cixl
-* extract tests into cx files
 * add Table emit support
 ** copy Rec
-* make cx_get_macro/cx_get_const recursive like cx_get_type
 * replace box.as_ptr with as_func/fimp/etc
 * add cxtls project
 ** use gnutls

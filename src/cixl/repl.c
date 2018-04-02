@@ -262,7 +262,7 @@ struct cx_scope
   *ds = cx_scope(cx, 0),
   *ss = ds->stack.count ? ds : cx_scope(cx, 1);
 
-*cx_put_var(ds, sym_n, true) = *(struct cx_box *)cx_vec_peek(&ss->stack, 0);
+*cx_put_var(ds, sym_n) = *(struct cx_box *)cx_vec_peek(&ss->stack, 0);
 cx_vec_delete(&ss->stack, ss->stack.count-1);
 }
 
@@ -314,11 +314,11 @@ struct cx_scope
   *ds = cx_scope(cx, 0),
   *ss = ds->stack.count ? ds : cx_scope(cx, 1);
 
-*cx_put_var(ds, sym_n, true) = *(struct cx_box *)cx_vec_peek(&ss->stack, 0);
+*cx_put_var(ds, sym_n) = *(struct cx_box *)cx_vec_peek(&ss->stack, 0);
 cx_vec_delete(&ss->stack, ss->stack.count-1);
-*cx_put_var(ds, sym_b, true) = *(struct cx_box *)cx_vec_peek(&ss->stack, 0);
+*cx_put_var(ds, sym_b) = *(struct cx_box *)cx_vec_peek(&ss->stack, 0);
 cx_vec_delete(&ss->stack, ss->stack.count-1);
-*cx_put_var(ds, sym_a, true) = *(struct cx_box *)cx_vec_peek(&ss->stack, 0);
+*cx_put_var(ds, sym_a) = *(struct cx_box *)cx_vec_peek(&ss->stack, 0);
 cx_vec_delete(&ss->stack, ss->stack.count-1);
 }
 

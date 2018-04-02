@@ -28,7 +28,7 @@ struct cx_box *cx_pop(struct cx_scope *scope, bool silent);
 struct cx_box *cx_peek(struct cx_scope *scope, bool silent);
 
 struct cx_box *cx_get_var(struct cx_scope *scope, struct cx_sym id, bool silent);
-struct cx_box *cx_put_var(struct cx_scope *scope, struct cx_sym id, bool force);
+struct cx_box *cx_put_var(struct cx_scope *scope, struct cx_sym id);
 
 void cx_stash(struct cx_scope *s);
 void cx_reset(struct cx_scope *s);

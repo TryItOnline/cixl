@@ -95,16 +95,10 @@ struct cx_box *cx_get_var(struct cx_scope *scope, struct cx_sym id, bool silent)
   return &v->value;
 }
 
-struct cx_box *cx_put_var(struct cx_scope *scope, struct cx_sym id, bool force) {
+struct cx_box *cx_put_var(struct cx_scope *scope, struct cx_sym id) {
   struct cx_var *v = cx_env_get(&scope->vars, id);
 
   if (v) {
-    if (!force) {
-      struct cx *cx = scope->cx;
-      cx_error(cx, cx->row, cx->col, "Attempt to rebind var: %s", id.id);
-      return NULL;
-    }
-      
     cx_box_deinit(&v->value);
     return &v->value;
   }

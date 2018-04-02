@@ -117,8 +117,7 @@ static bool let_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
 static bool let_imp(struct cx_scope *scope) {
   struct cx_box v = *cx_test(cx_pop(scope, false));
   struct cx_sym s = cx_test(cx_pop(scope, false))->as_sym;
-  struct cx_box *var = cx_put_var(scope, s, false);
-  if (!var) { return false; }
+  struct cx_box *var = cx_put_var(scope, s);
   cx_copy(var, &v);
   cx_box_deinit(&v);
   return true;
