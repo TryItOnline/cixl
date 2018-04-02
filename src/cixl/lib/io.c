@@ -260,9 +260,12 @@ static bool print_imp(struct cx_scope *scope) {
 }
 
 static bool load_imp(struct cx_scope *scope) {
+  struct cx *cx = scope->cx;
   struct cx_box p = *cx_test(cx_pop(scope, false));
   struct cx_bin *bin = cx_bin_new();
-  bool ok = cx_load(scope->cx, p.as_str->data, bin) && cx_eval(bin, 0, -1, scope->cx);
+  struct cx_lib *lib = cx_pop_lib(cx);
+  bool ok = cx_load(cx, p.as_str->data, bin) && cx_eval(bin, 0, -1, cx);
+  cx_push_lib(cx, lib);
   cx_bin_deref(bin);
   cx_box_deinit(&p);
   return ok;
