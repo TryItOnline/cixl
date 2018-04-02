@@ -258,7 +258,7 @@ static bool parse_id(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
 	ok = parse_block_comment(cx, in);
       } else {
 	if (lookup) {
-	  struct cx_macro *m = cx_get_macro(*cx->lib, s, true);
+	  struct cx_macro *m = cx_get_macro(cx, s, true);
 	  
 	  if (m) {
 	    cx->col = col;

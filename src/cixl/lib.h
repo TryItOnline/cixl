@@ -78,7 +78,7 @@ struct cx_macro *cx_add_macro(struct cx_lib *lib,
 			      const char *id,
 			      cx_macro_parse_t imp);
 
-struct cx_macro *cx_get_macro(struct cx_lib *lib, const char *id, bool silent);
+struct cx_macro *cx_get_macro(struct cx *cx, const char *id, bool silent);
 
 struct cx_fimp *cx_add_func(struct cx_lib *lib,
 			    const char *id,

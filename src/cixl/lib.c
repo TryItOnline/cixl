@@ -164,15 +164,22 @@ struct cx_macro *cx_add_macro(struct cx_lib *lib,
   return *m;
 }
 
-struct cx_macro *cx_get_macro(struct cx_lib *lib, const char *id, bool silent) {
-  struct cx_macro **m = cx_set_get(&lib->macros, &id);
+static struct cx_macro *lib_get_macro(struct cx_lib **lib,
+				      const char *id,
+				      bool silent) {
+  struct cx *cx = (*lib)->cx;
+  struct cx_macro **m = cx_set_get(&(*lib)->macros, &id);
 
-  if (!m && !silent) {
-    struct cx *cx = lib->cx;
-    cx_error(cx, cx->row, cx->col, "Unknown macro: '%s'", id);
+  if (!m && lib > (struct cx_lib **)cx->libs.items) {
+    return lib_get_macro(lib-1, id, silent);
   }
-  
+
+  if (!m && !silent) { cx_error(cx, cx->row, cx->col, "Unknown macro: '%s'", id); }
   return m ? *m : NULL;
+}
+
+struct cx_macro *cx_get_macro(struct cx *cx, const char *id, bool silent) {
+  return lib_get_macro(cx->lib, id, silent);
 }
 
 struct cx_fimp *cx_add_func(struct cx_lib *lib,
