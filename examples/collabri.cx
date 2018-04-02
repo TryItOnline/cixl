@@ -247,11 +247,9 @@ func: poll-out(c Client)()
     $buf {$poll $io no-write} else
   } on-write;
 
-func: prompt(c Client `auth-user)(_ Str)
-  'User: ';
+func: prompt(c Client `auth-user)('User: ');
 
-func: prompt(c Client `auth-password)(_ Str)
-  'Password: ';
+func: prompt(c Client `auth-password)('Password: ');
 
 func: prompt(c Client `ok)(_ Str)
   [$c `topic get `id get @@s] #nil join;
