@@ -2,11 +2,10 @@
 #define ntohll(x) ((1==ntohl(1)) ? (x) : ((uint64_t)ntohl((x) & 0xFFFFFFFF) << 32) | ntohl((x) >> 32))
 
 * --- cixtris
-** add block-width / block-height fns
-*** use for detecting max-x/y
-*** check when dropping new pieces
 ** add down key
-*** drop block immediately
+*** add drop-block fn
+*** animate all the way down and start new block
+** add edge detection when moving blocks
 ** add support for clearing rows
 ** add missing shapes
 ** add (p)ause support

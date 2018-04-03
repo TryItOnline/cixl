@@ -350,6 +350,42 @@ static bool if_else_imp(struct cx_scope *scope) {
   return ok;
 }
 
+static bool min_imp(struct cx_scope *scope) {
+  struct cx_box
+    x = *cx_test(cx_pop(scope, false)),
+    y = *cx_test(cx_pop(scope, false));
+
+  enum cx_cmp cmp = cx_cmp(&x, &y);
+  
+  if (cmp == CX_CMP_GT) {
+    *cx_push(scope) = y;
+    cx_box_deinit(&x);
+  } else {
+    *cx_push(scope) = x;
+    cx_box_deinit(&y);
+  }
+
+  return true;
+}
+
+static bool max_imp(struct cx_scope *scope) {
+  struct cx_box
+    x = *cx_test(cx_pop(scope, false)),
+    y = *cx_test(cx_pop(scope, false));
+
+  enum cx_cmp cmp = cx_cmp(&x, &y);
+  
+  if (cmp == CX_CMP_LT) {
+    *cx_push(scope) = y;
+    cx_box_deinit(&x);
+  } else {
+    *cx_push(scope) = x;
+    cx_box_deinit(&y);
+  }
+
+  return true;
+}
+
 cx_lib(cx_init_cond, "cx/cond") {
   struct cx *cx = lib->cx;
     
@@ -434,6 +470,16 @@ cx_lib(cx_init_cond, "cx/cond") {
 		       cx_arg("tact", cx->opt_type), cx_arg("fact", cx->opt_type)),
 	       cx_args(),
 	       if_else_imp);
+
+  cx_add_cfunc(lib, "min",
+	       cx_args(cx_arg("x", cx->any_type), cx_narg("y", 0)),
+	       cx_args(cx_narg(NULL, 0)),
+	       min_imp);
+
+  cx_add_cfunc(lib, "max",
+	       cx_args(cx_arg("x", cx->any_type), cx_narg("y", 0)),
+	       cx_args(cx_narg(NULL, 0)),
+	       max_imp);
 
   return true;
 }

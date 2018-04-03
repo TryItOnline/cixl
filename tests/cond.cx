@@ -7,3 +7,7 @@
 #t `yes `no if-else `yes = check
 
 #f `yes `no if-else `no = check
+
+7 42 min 7 = check
+
+7 42 max 42 = check
