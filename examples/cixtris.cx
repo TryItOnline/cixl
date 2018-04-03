@@ -11,7 +11,7 @@ include: 'ansi.cx';
 
 use:
   (cx/abc #t #f #nil A Char Int Opt)
-  (cx/cond ! ? = < > if if-else min max or)
+  (cx/cond ! ? = < > <= if if-else min max or)
   (cx/const define:)
   (cx/func func:)
   (cx/io #in #out flush read-char print unblock)
@@ -188,6 +188,10 @@ func: erase-block(b Block)()
   let: o $b % `x get ~ `y get get-offs;  
   $s $o #nil print-shape;
 
+func: next-shape(b Block)(_ Stack)
+  let: ss $b `shapes get;
+  $ss $b `i get ++ $ss len mod get;
+
 func: rotate-block(b Block)()
   $b `i {++ $b `shapes get len mod} put-call;
 
@@ -200,9 +204,12 @@ func: refresh-speed()()
 
 func: handle-key(#key-rotate)()
    let: b $block deref;
-   $b erase-block
-   $b rotate-block;  
+   let: ns $b next-shape;
 
+   $b `x get $ns shape-width + $max-x <= {
+     $b % erase-block rotate-block
+   } if;
+   
 func: handle-key(#key-left)()
   $block deref `x {
     let: x;
