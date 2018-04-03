@@ -109,21 +109,24 @@ let: key-delay 0 ref;
 let: buffer [] % $max-x $max-y * #nil fill;
 
 rec: Block()
-  shape Stack
-  color Color
-  x y   
-  alt   Int;
+  shapes Stack
+  i      Int
+  color  Color
+  x y    Int;
 
 func: new-block()(b Block)
   let: b Block new;
   let: s #shapes get-rand;
   let: c #colors get-rand;
   
-  $b `shape $s          put
-  $b `color $c          put
-  $b `x     $max-x rand put
-  $b `y     1           put
-  $b `alt   $s len rand put;
+  $b `shapes $s          put
+  $b `i      $s len rand put
+  $b `color  $c          put
+  $b `x      $max-x rand put
+  $b `y      1           put;
+
+func: get-shape(b Block)(_ Stack)
+  $b % `shapes get ~ `i get get;
 
 func: p(_ A)()
   #out ~ print;
@@ -158,20 +161,19 @@ func: print-shape(s Stack start Int c Opt)()
 
 func: get-offs(x y Int)(_ Int)
   $y $max-x * $x +;
-
+  
 func: print-block(b Block)()
-  let: s $b % `shape get ~ `alt get get;
+  let: s $b get-shape;
   let: o $b % `x get ~ `y get get-offs;
   $s $o $b `color get print-shape;
 
 func: erase-block(b Block)()
-  let: s $b % `shape get ~ `alt get get;
+  let: s $b get-shape;
   let: o $b % `x get ~ `y get get-offs;  
   $s $o #nil print-shape;
 
 func: rotate-block(b Block)()
-  let: na $b `shape get len; 
-  $b `alt {++ $b `shape get len mod} put-call;
+  $b `i {++ $b `shapes get len mod} put-call;
 
 func: refresh-speed()()
   #save-pos p
