@@ -2,7 +2,6 @@
 #define ntohll(x) ((1==ntohl(1)) ? (x) : ((uint64_t)ntohl((x) & 0xFFFFFFFF) << 32) | ntohl((x) >> 32))
 
 * --- cixtris
-** extract handle-key methods like tellux
 ** add block-width / block-height fns
 *** use for detecting max-x/y
 *** check when dropping new pieces

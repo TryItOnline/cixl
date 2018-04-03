@@ -10,7 +10,7 @@
 include: 'ansi.cx';
 
 use:
-  (cx/abc #t #f #nil A Int Opt)
+  (cx/abc #t #f #nil A Char Int Opt)
   (cx/cond ! ? = < > if if-else or switch:)
   (cx/const define:)
   (cx/func func:)
@@ -101,6 +101,13 @@ define: colors [
 define: speed-delays [125 100 75 50 25];
 define: max-speed #speed-delays len --;
 
+define: key-rotate @i;
+define: key-left   @j;
+define: key-right  @l;
+define: key-fast   @+;
+define: key-slow   @-;
+define: key-quit   #key-esc;
+
 let: max-x 40;
 let: max-y screen-size ~ _;
 let: block Ref new;
@@ -182,56 +189,62 @@ func: refresh-speed()()
   #out $speed deref ++ print  
   #restore-pos p;
 
+func: handle-key(#key-rotate)()
+   let: b $block deref;
+   $b erase-block
+   $b rotate-block;  
+
+func: handle-key(#key-left)()
+  $block deref `x {
+    let: x;
+	
+    $x 1 > {
+      let: nx $x --;
+      $b erase-block
+      $nx
+    } $x if-else
+  } put-call;
+
+func: handle-key(#key-right)()
+  $block deref `x {
+    let: x;
+	
+    $x $max-x < {
+      let: nx $x ++;
+      $b erase-block
+      $nx
+    } $x if-else
+  } put-call;
+
+func: handle-key(#key-fast)()
+  $speed {
+    let: s;
+    $s #max-speed < {$s ++} $s if-else
+  } set-call
+
+  refresh-speed;
+
+func: handle-key(#key-slow)()
+  $speed {
+    let: s;
+    $s {$s --} $s if-else
+  } set-call
+
+  refresh-speed;
+
+func: handle-key(#key-quit)()
+  $done #t set;
+
+func: handle-key(_ Char)()
+  _;
+
 let: poll Poll new;
 let: done #f ref;
 
 #in unblock
 
 $poll #in {
-  let: c #in read-char;
-  
-  switch:
-    (($c @i =)
-     let: b $block deref;
-     $b erase-block
-     $b rotate-block)
-    (($c @j =)
-      $block deref `x {
-        let: x;
-	
-        $x 1 > {
-	  let: nx $x --;
-	  $b erase-block
-	  $nx
-	} $x if-else
-      } put-call)
-    (($c @l =)
-      $block deref `x {
-        let: x;
-	
-        $x $max-x < {
-	  let: nx $x ++;
-	  $b erase-block
-	  $nx
-	} $x if-else
-      } put-call)
-    (($c @+ =)
-      $speed {
-        let: s;
-        $s #max-speed < {$s ++} $s if-else
-      } set-call
-
-      refresh-speed)
-    (($c @- =)
-      $speed {
-        let: s;
-        $s {$s --} $s if-else
-      } set-call
-
-      refresh-speed)
-    (($c #key-esc =)
-      $done #t set);
-
+  #in read-char handle-key
   1 $key-delay &+ set-call
 } on-read
 
