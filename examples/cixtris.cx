@@ -221,10 +221,8 @@ func: print-shape(b Block c Opt)()
 
 func: print-marker(b Block)()
   #save-pos p
-  $b `color get set-bg p
   $b `x get $max-y move-to p
   @@s $s shape-width hline p
-  #reset-style p
   #restore-pos p;
 
 /*
