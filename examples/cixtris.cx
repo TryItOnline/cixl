@@ -411,17 +411,17 @@ $max-x 2 + 5 move-to p
 $block new-block set
 new-block refresh-next-block
 
+func: k(k Char)(_ Stack)
+  [#reverse-colors $k #reset-style];
+
 $max-x 2 + $max-y 3 - move-to p
-['Use ' #reverse-colors #key-left #reset-style ' and '
- #reverse-colors #key-right #reset-style ' to move block horizontally,'] p
+['Use ' #key-left k ' and ' #key-right k ' to move block horizontally,'] p
 
 $max-x 2 + $max-y 2 - move-to p
-[#reverse-colors #key-rotate #reset-style ' rotates and '
- #reverse-colors #key-drop #reset-style ' drops.'] p
+[#key-rotate k ' rotates and ' #key-drop k ' drops.'] p
 
 $max-x 2 + $max-y move-to p
-[#reverse-colors #key-fast #reset-style ' and '
- #reverse-colors #key-slow #reset-style ' may be used to change speed.'] p
+[#key-fast k ' and ' #key-slow k ' may be used to change speed.'] p
 
 /*
    Main loop
