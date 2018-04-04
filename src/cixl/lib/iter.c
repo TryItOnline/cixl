@@ -267,17 +267,20 @@ static bool find_if_imp(struct cx_scope *scope) {
   struct cx_box iv;
   
   while (cx_iter_next(it, &iv, scope)) {
-    *cx_push(scope) = iv;
+    cx_copy(cx_push(scope), &iv);
     if (!cx_call(&pred, scope)) { goto exit; }
-    struct cx_box *ov = cx_peek(scope, false);
-    if (!ov) { goto exit; }
+    struct cx_box *ovp = cx_pop(scope, false);
+    if (!ovp) { goto exit; }
+    struct cx_box ov = *ovp;
+    bool found = cx_ok(&ov);
+    cx_box_deinit(&ov);
 
-    if (ov->type == cx->nil_type) {
-      cx_pop(scope, false);
-      cx_box_deinit(ov);
-    } else {
+    if (found) {
+      *cx_push(scope) = iv;
       goto found;
     }
+
+    cx_box_deinit(&iv);
   }
   
   cx_box_init(cx_push(scope), cx->nil_type);

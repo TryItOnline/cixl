@@ -205,8 +205,8 @@ func: check-shape(b Block s Stack x y Int)(_ Bool)
     $l {
       @* = {
         let: bb $buffer $o deref get;
-	$bb {$bb $b == #nil #t if-else} and
-      } #nil if-else
+	$bb {$bb $b == !} and
+      } #f if-else
 
       $o &++ set-call
     } find-if
