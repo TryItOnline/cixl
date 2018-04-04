@@ -1,6 +1,5 @@
 /*
   A console Tetris clone.
-  Press ESC to exit gracefully.
   
   https://github.com/basic-gongfu/cixl#getting-started
 */
@@ -409,17 +408,20 @@ $max-x 2 + 5 move-to p
 $block new-block set
 new-block refresh-next-block
 
-func: k(k Char)(_ Stack)
+func: k(k A)(_ Stack)
   [#reverse-colors $k #reset-style];
 
-$max-x 2 + $max-y 3 - move-to p
+$max-x 2 + $max-y 5 - move-to p
 ['Use ' #key-left k ' and ' #key-right k ' to move block horizontally,'] p
 
-$max-x 2 + $max-y 2 - move-to p
+$max-x 2 + $max-y 4 - move-to p
 [#key-rotate k ' rotates and ' #key-drop k ' drops.'] p
 
-$max-x 2 + $max-y move-to p
+$max-x 2 + $max-y 2 - move-to p
 [#key-fast k ' and ' #key-slow k ' may be used to change speed.'] p
+
+$max-x 2 + $max-y move-to p
+['Press ' 'Esc' k ' to exit and restore console.'] p
 
 /*
    Main loop
