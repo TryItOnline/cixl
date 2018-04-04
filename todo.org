@@ -2,9 +2,6 @@
 #define ntohll(x) ((1==ntohl(1)) ? (x) : ((uint64_t)ntohl((x) & 0xFFFFFFFF) << 32) | ntohl((x) >> 32))
 
 * --- cixtris
-** add down key
-*** add drop-block fn
-*** animate all the way down and start new block
 ** add edge detection when moving blocks
 ** add support for clearing rows
 ** add missing shapes

@@ -90,12 +90,14 @@ define: shapes [
 ];
 
 define: colors [
-  [255 0 0]
-  [0 255 0]
-  [0 0 255]
   [255 255 0]
   [0 255 255]
+  [255 128 0]
+  [0 0 255]
   [255 0 255]
+
+  [0 255 0]
+  [255 0 0]
 ] {splat new-color} map stack;
 
 define: speed-delays [125 100 75 50 25];
@@ -104,6 +106,7 @@ define: max-speed #speed-delays len --;
 define: key-rotate @i;
 define: key-left   @j;
 define: key-right  @l;
+define: key-drop   @k;
 define: key-fast   @+;
 define: key-slow   @-;
 define: key-quit   #key-esc;
@@ -114,6 +117,8 @@ let: block Ref new;
 let: speed 0 ref;
 let: key-delay 0 ref;
 let: buffer [] % $max-x $max-y * #nil fill;
+let: is-done #f ref;
+let: is-dropping #f ref;
 
 rec: Block()
   shapes Stack
@@ -129,10 +134,11 @@ func: shape-height(s Stack)(_ Int)
 
 func: new-block()(b Block)
   let: b Block new;
-  let: ss #shapes get-rand;
+  let: si #shapes len rand;
+  let: ss #shapes $si get;
   let: i $ss len rand;
   let: s $ss $i get;
-  let: c #colors get-rand;
+  let: c #colors $si get;
   let: x $max-x rand $max-x $s shape-width - min;
   
   $b `shapes $ss put
@@ -235,6 +241,9 @@ func: handle-key(#key-right)()
     } $x if-else
   } put-call;
 
+func: handle-key(#key-drop)()
+  $is-dropping #t set;
+
 func: handle-key(#key-fast)()
   $speed {
     let: s;
@@ -252,13 +261,12 @@ func: handle-key(#key-slow)()
   refresh-speed;
 
 func: handle-key(#key-quit)()
-  $done #t set;
+  $is-done #t set;
 
 func: handle-key(_ Char)()
   _;
 
 let: poll Poll new;
-let: done #f ref;
 
 #in unblock
 
@@ -277,7 +285,6 @@ $max-x 1 move-to p
 $max-x 2 + 2 move-to p
 'Speed:' p
 refresh-speed
-
 $block new-block set
 
 {
@@ -295,6 +302,7 @@ $block new-block set
       $block $bb set
       $bb `x get $bb `y get move-to p
       $bb print-block
+      $is-dropping #f set
     } {
       $b `x get $b `y get move-to p
       $b erase-block
@@ -306,9 +314,9 @@ $block new-block set
     #out flush
   } if-else
 
-  let: sd #speed-delays $speed deref get;
+  let: sd $is-dropping deref 1 {#speed-delays $speed deref get} if-else;
   $poll $sd wait _
-  $done deref !
+  $is-done deref !
 } while
 
 #reset-style p
