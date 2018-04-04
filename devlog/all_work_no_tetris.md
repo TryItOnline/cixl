@@ -1,4 +1,4 @@
-## All work & no Tetris makes Jack a dull boy
+## All work & no Tetris
 #### 2018-04-04
 
 ### Intro

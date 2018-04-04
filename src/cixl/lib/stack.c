@@ -228,6 +228,64 @@ static bool fill_imp(struct cx_scope *scope) {
   return ok;
 }
 
+static bool move_imp(struct cx_scope *scope) {
+  struct cx_box
+    delta = *cx_test(cx_pop(scope, false)),
+    len = *cx_test(cx_pop(scope, false)),
+    start = *cx_test(cx_pop(scope, false)),
+    in = *cx_test(cx_pop(scope, false));
+    
+  struct cx_stack *s = in.as_ptr;
+  struct cx *cx = scope->cx;
+  bool ok = false;
+
+  if (start.as_int+delta.as_int < 0 || start.as_int+len.as_int > s->imp.count) {
+    cx_error(cx, cx->row, cx->col, "Move out of bounds");
+    goto exit;
+  }
+
+  size_t prev_count = s->imp.count;
+  
+  if (delta.as_int > 0) {
+    size_t n = start.as_int+len.as_int+delta.as_int;
+    cx_vec_grow(&s->imp, n);
+    s->imp.count = cx_max(s->imp.count, n);
+
+    for (size_t i = start.as_int+len.as_int;
+	 i < cx_min(prev_count, start.as_int+len.as_int+delta.as_int);
+	 i++) {
+      cx_box_deinit(cx_vec_get(&s->imp, i));
+    }
+  } else {
+    for (size_t i = start.as_int+delta.as_int;
+	 i < start.as_int;
+	 i++) {
+      cx_box_deinit(cx_vec_get(&s->imp, i));
+    }
+  }
+
+  memmove(cx_vec_get(&s->imp, start.as_int+delta.as_int),
+	  cx_vec_get(&s->imp, start.as_int),
+	  len.as_int*sizeof(struct cx_box));
+
+  if (delta.as_int > 0) {
+    for (size_t i = start.as_int; i < start.as_int+delta.as_int; i++) {
+      cx_box_init(cx_vec_get(&s->imp, i), cx->nil_type);
+    }
+  } else {
+    for (size_t i = start.as_int+len.as_int+delta.as_int;
+	 i < start.as_int+len.as_int;
+	 i++) {
+      cx_box_init(cx_vec_get(&s->imp, i), cx->nil_type);
+    }
+  }
+  
+  ok = true;
+ exit:
+  cx_box_deinit(&in);
+  return ok;
+}
+
 static bool reset_imp(struct cx_scope *scope) {
   cx_reset(scope);
   return true;
@@ -331,6 +389,14 @@ cx_lib(cx_init_stack, "cx/stack") {
 		       cx_arg("act", cx->opt_type)),
 	       cx_args(),
 	       fill_imp);
+
+  cx_add_cfunc(lib, "move",
+	       cx_args(cx_arg("s", cx->stack_type),
+		       cx_arg("start", cx->int_type),
+		       cx_arg("len", cx->int_type),
+		       cx_arg("delta", cx->opt_type)),
+	       cx_args(),
+	       move_imp);
 
   cx_add_cfunc(lib, "|", cx_args(), cx_args(), reset_imp);
     

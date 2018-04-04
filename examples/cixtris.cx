@@ -24,7 +24,7 @@ use:
   (cx/math + - * ++ -- mod rand)
   (cx/rec ? print rec: get put put-call)
   (cx/ref Ref deref new ref set set-call)
-  (cx/stack Stack _ ~ % %% fill get len put splat stack)
+  (cx/stack Stack _ ~ % %% fill get len move put splat stack)
   (cx/str len)
   (cx/var let:);
 
@@ -187,6 +187,9 @@ func: get-shape(b Block)(_ Stack)
 func: p(_ A)()
   #out ~ print;
 
+func: get-offs(x y Int)(_ Int)
+  $y -- $max-x * $x -- +;
+
 /*
    Prints or erases current shape of block at current position depending on specified
    color.
@@ -215,16 +218,6 @@ func: print-shape(b Block c Opt)()
   #restore-pos p;
 
 /*
-   Prints bottom marker for block.
-*/
-
-func: print-marker(b Block)()
-  #save-pos p
-  $b `x get $max-y move-to p
-  @@s $s shape-width hline p
-  #restore-pos p;
-
-/*
    Updates tiles for block starting at specified offset.
 */
 
@@ -243,9 +236,16 @@ func: update-tiles(b Block offs Int v Opt)()
     $max-x $l len - $o &+ set-call
   } for;
 
-func: get-offs(x y Int)(_ Int)
-  $y -- $max-x * $x -- +;
-  
+/*
+   Prints bottom marker for block.
+*/
+
+func: print-marker(b Block)()
+  #save-pos p
+  $b `x get $max-y move-to p
+  @@s $s shape-width hline p
+  #restore-pos p;
+
 func: print-block(b Block)()
   $b $b `color get print-shape
   $b print-marker
@@ -255,6 +255,55 @@ func: erase-block(b Block)()
   $b #nil print-shape
   $b % % `x get ~ `y get get-offs #nil update-tiles;
 
+/*
+   Redraws all tiles.
+*/
+
+func: refresh-tiles()()
+  #save-pos p
+  
+  $max-y -- {
+    let: y ++;
+    1 $y move-to p
+    
+    $max-x -- {
+      let: x ++;
+      let: b $tiles $x $y get-offs get;
+      
+      $b {$b `color get set-bg} #reset-style if-else p
+      @@s p
+    } for
+  } for
+
+  #reset-style p
+  #restore-pos p;
+  
+/*
+   Clears full rows intersecting current shape of block.
+*/
+
+func: clear-rows(b Block)()
+  let: nrows $b get-shape shape-height;
+  let: y $b `y get ref;
+
+  $nrows {
+    $y {
+      let: yy;
+
+      let: is-full $max-x -- {
+        let: o ++ $yy get-offs;
+	$tiles $o get is-nil
+      } find-if is-nil;
+
+      $is-full {
+        $tiles 0 1 $yy get-offs $max-x move
+	refresh-tiles
+      } if
+      
+      $yy ++
+    } set-call
+  } times;
+  
 /*
    Returns #t if all tiles intersecting block starting from specified position are
    free.
@@ -446,6 +495,7 @@ $max-x 2 + $max-y move-to p
       1 move-down p
       $b print-block
     } {
+      $b clear-rows
       let: bb $next-block deref;
       new-block refresh-next-block
       $block $bb set

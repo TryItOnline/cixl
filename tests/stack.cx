@@ -21,3 +21,11 @@ Stack new % 1 push % 2 push [1 2] = check
 7 14 % + 28 = check
 
 7 14 % _ + 21 = check
+
+(let: s [1 2 3];
+ 3 $s 6 {++ %} fill
+ $s [1 2 3 4 5 6 7 8 9] =)
+
+[1 'two' 3 4 'five'] % 1 2 3 move [1 #nil #nil 4 'two' 3] = check
+
+[1 'two' 3 'four' 5] % 2 2 -1 move [1 3 'four' #nil 5] = check
