@@ -3,7 +3,6 @@
 
 * --- cixtris
 ** add support for clearing rows
-** add preview of next block
 * --- cxcrypt
 * add Pub/PrivKey
 ** add asource/asink examples

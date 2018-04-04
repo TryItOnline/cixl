@@ -1,8 +1,6 @@
 /*
-  Console Tetris
-
-  The game may be started by executing "load 'cixl/examples/cixtris.cx'" from the
-  REPL. Press ESC to exit gracefully and restore terminal.
+  A console Tetris clone.
+  Press ESC to exit gracefully.
   
   https://github.com/basic-gongfu/cixl#getting-started
 */
@@ -23,14 +21,17 @@ use:
     hline move-down move-left move-right move-to new-color normal-mode raw-mode
     screen-size set-bg vline)
   (cx/io/poll Poll new on-read wait)
-  (cx/io/term say)
   (cx/iter find-if for map times while)
   (cx/math + - * ++ -- mod rand)
   (cx/rec ? print rec: get put put-call)
   (cx/ref Ref deref new ref set set-call)
-  (cx/stack Stack _ ~ % %% fill get get-rand len put splat stack)
+  (cx/stack Stack _ ~ % %% fill get len put splat stack)
   (cx/str len)
   (cx/var let:);
+
+/*
+   These are the shapes we'll be using to represent blocks visually.
+*/ 
 
 define: shapes [
   [['**'
@@ -100,6 +101,11 @@ define: shapes [
     '*']]
 ];
 
+/*
+   And these are their respective colors, the same color is always used for a
+   specific shape.
+*/
+
 define: colors [
   [255 255 0]
   [0 255 255]
@@ -110,9 +116,6 @@ define: colors [
   [255 0 0]
 ] {splat new-color} map stack;
 
-define: speed-delays [125 100 75 50 25];
-define: max-speed #speed-delays len --;
-
 define: key-rotate @i;
 define: key-left   @j;
 define: key-right  @l;
@@ -121,14 +124,24 @@ define: key-fast   @+;
 define: key-slow   @-;
 define: key-quit   #key-esc;
 
+define: speed-delays [125 100 75 50 25];
+define: max-speed #speed-delays len --;
+let: speed 0 ref;
+
 let: max-x 30;
 let: max-y screen-size ~ _;
-let: block Ref new;
-let: speed 0 ref;
-let: key-delay 0 ref;
+
 let: tiles [] % $max-x $max-y * #nil fill;
+let: block Ref new;
+let: next-block Ref new;
+
+let: key-delay 0 ref;
 let: is-done #f ref;
 let: is-dropping #f ref;
+
+/*
+   Each block keeps track of its shapes, shape index, color and position.
+*/
 
 rec: Block()
   shapes Stack
@@ -141,6 +154,10 @@ func: shape-width(s Stack)(_ Int)
 
 func: shape-height(s Stack)(_ Int)
   $s len;
+
+/*
+   New blocks get random shapes, shape indexes and x positions.
+*/
 
 func: new-block()(b Block)
   let: b Block new;
@@ -157,59 +174,96 @@ func: new-block()(b Block)
   $b `x      $x  put
   $b `y      1   put;
 
+/*
+   Returns the current shape for the specified block.
+*/
+
 func: get-shape(b Block)(_ Stack)
   $b % `shapes get ~ `i get get;
+
+/*
+   Since we'll be printing a lot, we reserve the letter 'p' for that purpose.
+*/
 
 func: p(_ A)()
   #out ~ print;
 
-func: print-shape(b Block start Int c Opt)()
-  let: s $b get-shape;
+/*
+   Prints or erases current shape of block at current position depending on specified
+   color.
+*/
 
+func: print-shape(b Block c Opt)()
   #save-pos p
   $c {$c set-bg p} {#reset-style p} if-else
-  let: o $start ref;
   
-  $s {
+  $b get-shape {
     let: l;
     
     $l {
       @* = {
         @@s p
-        $tiles $o deref $c $b #nil if-else put
       } {
         1 move-right p
       } if-else
-
-      $o &++ set-call
     } for
 
     1 move-down p
-    let: ll $l len;
-    $ll move-left p
-    $max-x $ll - $o &+ set-call
+    $l len move-left p
   } for
   
-  $c {
-    $b `x get $max-y move-to p
-    $s shape-width {@@s p} times
-    #reset-style p
-  } if
-  
+  $c {#reset-style p} if
   #restore-pos p;
+
+/*
+   Prints bottom marker for block.
+*/
+
+func: print-marker(b Block)()
+  #save-pos p
+  $b `color get set-bg p
+  $b `x get $max-y move-to p
+  @@s $s shape-width hline p
+  #reset-style p
+  #restore-pos p;
+
+/*
+   Updates tiles for block starting at specified offset.
+*/
+
+func: update-tiles(b Block offs Int v Opt)()
+  let: s $b get-shape;
+  let: o $offs ref;
+  
+  $s {
+    let: l;
+    
+    $l {
+      @* = {$tiles $o deref $v put} if
+      $o &++ set-call
+    } for
+
+    $max-x $l len - $o &+ set-call
+  } for;
 
 func: get-offs(x y Int)(_ Int)
   $y -- $max-x * $x -- +;
   
 func: print-block(b Block)()
-  let: o $b % `x get ~ `y get get-offs;
-  $b $o $b `color get print-shape;
+  $b $b `color get print-shape
+  $b print-marker
+  $b % % `x get ~ `y get get-offs $b update-tiles;
 
 func: erase-block(b Block)()
-  let: o $b % `x get ~ `y get get-offs;  
-  $b $o #nil print-shape;
+  $b #nil print-shape
+  $b % % `x get ~ `y get get-offs #nil update-tiles;
 
-func: check-shape(b Block s Stack x y Int)(_ Bool)
+/*
+   Returns #t if all tiles intersecting block starting from specified position are
+   free.
+*/
+
+func: check-tiles(b Block s Stack x y Int)(_ Bool)
   let: o $x $y get-offs ref;
 
   $s {
@@ -242,10 +296,23 @@ func: refresh-speed()()
   #out $speed deref ++ print  
   #restore-pos p;
 
+func: refresh-next-block(b Block)()
+  #save-pos p
+  $max-x 2 + 6 move-to p
+  #reset-style p
+
+  $next-block {
+    % {#nil print-shape} &_ if-else
+    $b % `color get print-shape
+    $b
+  } set-call
+  
+  #restore-pos p;
+
 func: handle-key(#key-rotate)()
    let: b $block deref;
    let: ns $b next-shape;
-   let: ok $b $ns $b % `x get ~ `y get check-shape;
+   let: ok $b $ns $b % `x get ~ `y get check-tiles;
 
    $ok {$b `x get $ns shape-width + $max-x <=} and {
      $b % erase-block rotate-block
@@ -260,7 +327,7 @@ func: handle-key(#key-left)()
     $x 1 > {
       let: nx $x --;
       
-      $b $b get-shape $nx $b `y get check-shape {
+      $b $b get-shape $nx $b `y get check-tiles {
         $b erase-block
         $nx
       } $x if-else
@@ -277,7 +344,7 @@ func: handle-key(#key-right)()
     $x $max-x $s shape-width - < {
       let: nx $x ++;
       
-      $b $b get-shape $nx $b `y get check-shape {
+      $b $b get-shape $nx $b `y get check-tiles {
         $b erase-block
         $nx
       } $x if-else
@@ -309,6 +376,10 @@ func: handle-key(#key-quit)()
 func: handle-key(_ Char)()
   _;
 
+/*
+   Initialize event loop and input callback.
+*/
+
 let: poll Poll new;
 
 #in unblock
@@ -318,17 +389,43 @@ $poll #in {
   1 $key-delay &+ set-call
 } on-read
 
+/*
+   Initialize screen.
+*/
+
 raw-mode
 #clear-screen p
 #hide-cursor p
+
 $max-x 1 move-to p
 #reverse-colors p
 @@s $max-y vline p
 #reset-style p
+
 $max-x 2 + 2 move-to p
 'Speed:' p
 refresh-speed
+
+$max-x 2 + 5 move-to p
+'Next:' p
 $block new-block set
+new-block refresh-next-block
+
+$max-x 2 + $max-y 3 - move-to p
+['Use ' #reverse-colors #key-left #reset-style ' and '
+ #reverse-colors #key-right #reset-style ' to move block horizontally,'] p
+
+$max-x 2 + $max-y 2 - move-to p
+[#reverse-colors #key-rotate #reset-style ' rotates and '
+ #reverse-colors #key-drop #reset-style ' drops.'] p
+
+$max-x 2 + $max-y move-to p
+[#reverse-colors #key-fast #reset-style ' and '
+ #reverse-colors #key-slow #reset-style ' may be used to change speed.'] p
+
+/*
+   Main loop
+*/
 
 {
   let: b $block deref;
@@ -339,7 +436,7 @@ $block new-block set
     $b print-block
   } {
     let: s $b get-shape;
-    let: ok $b $s $b % `x get ~ `y get ++ check-shape;
+    let: ok $b $s $b % `x get ~ `y get ++ check-tiles;
     $ok ! {$b `y get 1 =} and {$is-done #t set} if
     
     $ok {$b `y get $s shape-height + $max-y <} and {
@@ -349,7 +446,8 @@ $block new-block set
       1 move-down p
       $b print-block
     } {
-      let: bb new-block;
+      let: bb $next-block deref;
+      new-block refresh-next-block
       $block $bb set
       $bb `x get $bb `y get move-to p
       $bb print-block
@@ -369,6 +467,10 @@ $block new-block set
 
   $is-done deref !
 } while
+
+/*
+   Restore console
+*/
 
 #reset-style p
 #clear-screen p

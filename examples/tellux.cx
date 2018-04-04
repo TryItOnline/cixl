@@ -1,6 +1,6 @@
 /*
   A console ANSI graphics editor.
-  Press Q to exit gracefully and restore terminal.
+  Press Q to exit gracefully.
 
   https://github.com/basic-gongfu/cixl#getting-started
 */
