@@ -2,8 +2,8 @@
 #define ntohll(x) ((1==ntohl(1)) ? (x) : ((uint64_t)ntohl((x) & 0xFFFFFFFF) << 32) | ntohl((x) >> 32))
 
 * --- cixtris
-** add missing shapes
 ** add support for clearing rows
+** add preview of next block
 * --- cxcrypt
 * add Pub/PrivKey
 ** add asource/asink examples

@@ -3,7 +3,7 @@
 
   The game may be started by executing "load 'cixl/examples/cixtris.cx'" from the
   REPL. Press ESC to exit gracefully and restore terminal.
-
+  
   https://github.com/basic-gongfu/cixl#getting-started
 */
 
@@ -43,35 +43,31 @@ define: shapes [
     '*'
     '*']]
 
-  [['   *'
-    '****']
+  [['  *'
+    '***']
 
    ['*'
     '*'
-    '*'
     '**']
 
-   ['****'
+   ['***'
     '*']
 
    ['**'
-    ' *'
     ' *'
     ' *']]
 
   [['*'
-    '****']
+    '***']
 
    ['**'
     '*'
-    '*'
     '*']
 
-   ['****'
-    '   *']
+   ['***'
+    '  *']
 
    [' *'
-    ' *'
     ' *'
     '**']]
 
@@ -88,6 +84,20 @@ define: shapes [
    [' *'
     '**'
     ' *']]
+
+  [[' **'
+    '**']
+
+   ['*'
+    '**'
+    ' *']]
+
+  [['**'
+    ' **']
+
+   [' *'
+    '**'
+    '*']]
 ];
 
 define: colors [
@@ -96,7 +106,6 @@ define: colors [
   [255 128 0]
   [0 0 255]
   [255 0 255]
-
   [0 255 0]
   [255 0 0]
 ] {splat new-color} map stack;
@@ -112,12 +121,12 @@ define: key-fast   @+;
 define: key-slow   @-;
 define: key-quit   #key-esc;
 
-let: max-x 40;
+let: max-x 30;
 let: max-y screen-size ~ _;
 let: block Ref new;
 let: speed 0 ref;
 let: key-delay 0 ref;
-let: buffer [] % $max-x $max-y * #nil fill;
+let: tiles [] % $max-x $max-y * #nil fill;
 let: is-done #f ref;
 let: is-dropping #f ref;
 
@@ -167,7 +176,7 @@ func: print-shape(b Block start Int c Opt)()
     $l {
       @* = {
         @@s p
-        $buffer $o deref $c $b #nil if-else put
+        $tiles $o deref $c $b #nil if-else put
       } {
         1 move-right p
       } if-else
@@ -209,7 +218,7 @@ func: check-shape(b Block s Stack x y Int)(_ Bool)
     
     $l {
       @* = {
-        let: bb $buffer $o deref get;
+        let: bb $tiles $o deref get;
 	$bb {$bb $b == !} and
       } #f if-else
 
@@ -238,7 +247,7 @@ func: handle-key(#key-rotate)()
    let: ns $b next-shape;
    let: ok $b $ns $b % `x get ~ `y get check-shape;
 
-   $ok $b `x get $ns shape-width + $max-x <= and {
+   $ok {$b `x get $ns shape-width + $max-x <=} and {
      $b % erase-block rotate-block
    } if;
    
@@ -331,7 +340,7 @@ $block new-block set
   } {
     let: s $b get-shape;
     let: ok $b $s $b % `x get ~ `y get ++ check-shape;
-    $ok ! $b `y get 1 = and {$is-done #t set} if
+    $ok ! {$b `y get 1 =} and {$is-done #t set} if
     
     $ok {$b `y get $s shape-height + $max-y <} and {
       $b `x get $b `y get move-to p
