@@ -236,19 +236,25 @@ func: refresh-speed()()
 func: handle-key(#key-rotate)()
    let: b $block deref;
    let: ns $b next-shape;
+   let: ok $b $ns $b % `x get ~ `y get check-shape;
 
-   $b `x get $ns shape-width + $max-x <= {
+   $ok $b `x get $ns shape-width + $max-x <= and {
      $b % erase-block rotate-block
    } if;
    
 func: handle-key(#key-left)()
-  $block deref `x {
+  let: b $block deref;
+  
+  $b `x {
     let: x;
 	
     $x 1 > {
       let: nx $x --;
-      $b erase-block
-      $nx
+      
+      $b $b get-shape $nx $b `y get check-shape {
+        $b erase-block
+        $nx
+      } $x if-else
     } $x if-else
   } put-call;
 
@@ -261,8 +267,11 @@ func: handle-key(#key-right)()
 	
     $x $max-x $s shape-width - < {
       let: nx $x ++;
-      $b erase-block
-      $nx
+      
+      $b $b get-shape $nx $b `y get check-shape {
+        $b erase-block
+        $nx
+      } $x if-else
     } $x if-else
   } put-call;
 
@@ -322,6 +331,7 @@ $block new-block set
   } {
     let: s $b get-shape;
     let: ok $b $s $b % `x get ~ `y get ++ check-shape;
+    $ok ! $b `y get 1 = and {$is-done #t set} if
     
     $ok {$b `y get $s shape-height + $max-y <} and {
       $b `x get $b `y get move-to p
