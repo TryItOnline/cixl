@@ -1,8 +1,8 @@
-## All work & no Tetris
+## All work and no Tetris
 #### 2018-04-04
 
 ### Intro
-Tetris will always have a place in my heart, it was one of the first puzzle games I got hooked on. The game owes much of its charm to simplicity, which makes it an excellent candidate for gently bending [Cixl](https://github.com/basic-gongfu/cixl) in new directions; excercising the [ANSI graphics library](https://github.com/basic-gongfu/cixl/blob/master/examples/ansi.cx), and blowing off some steam after the recent deep dive into [cryptography](https://github.com/basic-gongfu/cixl/blob/master/devlog/turn_on_plugin_encrypt.md). The code may be found [here](https://github.com/basic-gongfu/cixl/blob/master/examples/cixtris.cx) and a Linux/64 binary [over there](https://github.com/basic-gongfu/cxbin/tree/master/linux64).
+Tetris will always have a place in my heart, it was one of the first puzzle games I got hooked on. The game owes much of its charm to simplicity, which makes it an excellent candidate for gently bending [Cixl](https://github.com/basic-gongfu/cixl) in new directions; excercising the [ANSI graphics library](https://github.com/basic-gongfu/cixl/blob/master/examples/ansi.cx), and blowing off some steam after the recent deep dive into [cryptography](https://github.com/basic-gongfu/cixl/blob/master/devlog/turn_on_plugin_encrypt.md). The code may be found [here](https://github.com/basic-gongfu/cixl/blob/master/examples/cixtris.cx) and a Linux/64 binary [over there](https://github.com/basic-gongfu/cxbin/blob/master/linux64/cixtris).
 
 ![Screenshot](https://raw.github.com/basic-gongfu/cixl/master/devlog/cixtris.png)
 
