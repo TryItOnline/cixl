@@ -18,13 +18,13 @@ use:
   (cx/io #in #out flush read-char print unblock)
   (cx/io/term
     Color
-    #clear-screen #hide-cursor #key-esc #reset-style #restore-pos #reverse-colors
-    #save-pos #show-cursor
-    move-down move-left move-right move-to new-color normal-mode raw-mode screen-size
-    set-bg vline)
+    #clear-row #clear-screen #hide-cursor #key-esc #reset-style #restore-pos
+    #reverse-colors #save-pos #show-cursor
+    hline move-down move-left move-right move-to new-color normal-mode raw-mode
+    screen-size set-bg vline)
   (cx/io/poll Poll new on-read wait)
   (cx/io/term say)
-  (cx/iter find-if for map while)
+  (cx/iter find-if for map times while)
   (cx/math + - * ++ -- mod rand)
   (cx/rec ? print rec: get put put-call)
   (cx/ref Ref deref new ref set set-call)
@@ -113,7 +113,7 @@ define: key-slow   @-;
 define: key-quit   #key-esc;
 
 let: max-x 40;
-let: max-y screen-size ~ _ ++;
+let: max-y screen-size ~ _;
 let: block Ref new;
 let: speed 0 ref;
 let: key-delay 0 ref;
@@ -180,8 +180,13 @@ func: print-shape(b Block start Int c Opt)()
     $ll move-left p
     $max-x $ll - $o &+ set-call
   } for
-
-  $c {#reset-style p} if
+  
+  $c {
+    $b `x get $max-y move-to p
+    $s shape-width {@@s p} times
+    #reset-style p
+  } if
+  
   #restore-pos p;
 
 func: get-offs(x y Int)(_ Int)
@@ -337,6 +342,12 @@ $block new-block set
 
   let: sd $is-dropping deref 1 {#speed-delays $speed deref get} if-else;
   $poll $sd wait _
+  
+  1 $max-y move-to p
+  #reverse-colors p
+  @@s $max-x hline p
+  #reset-style p
+
   $is-done deref !
 } while
 

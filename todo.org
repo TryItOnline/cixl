@@ -3,7 +3,7 @@
 
 * --- cixtris
 ** call check-shape when moving blocks
-** end game when check fails with y=0
+** end game when check fails with y=1
 ** add support for clearing rows
 ** add missing shapes
 * --- cxcrypt
