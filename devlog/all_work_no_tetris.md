@@ -1,0 +1,9 @@
+## All work & no Tetris makes Jack a dull boy
+#### 2018-04-04
+
+### Intro
+Tetris will always have a place in my heart, it was one of the first puzzle games I got hooked on. The game owes much of its charm to simplicity, which makes it an excellent candidate for bending Cixl in new directions; excercising the ANSI graphics library, and blowing off some steam after the recent deep dive into cryptography. The code may be found [here](https://github.com/basic-gongfu/cixl/blob/master/examples/cixtris.cx) and binaries [over there](https://github.com/basic-gongfu/cxbin/tree/master/linux64).
+
+![Screenshot](https://raw.github.com/basic-gongfu/cixl/devlog/cixtris.png)
+
+Give me a yell if something is unclear, wrong or missing. And please consider helping out with a donation via [paypal](https://paypal.me/basicgongfu) or [liberapay](https://liberapay.com/basic-gongfu/donate) if you find this worthwhile, every contribution counts. You may find more posts in the same spirit [here](https://github.com/basic-gongfu/cixl/tree/master/devlog).
