@@ -42,13 +42,15 @@ static bool put_imp(struct cx_scope *scope) {
   struct cx *cx = scope->cx;
   bool ok = false;
   
-  if (i.as_int >= s->imp.count) {
+  if (i.as_int < 0 || i.as_int >= s->imp.count) {
     cx_error(cx, cx->row, cx->col, "Index out of bounds: %" PRId64, i.as_int);
     cx_box_deinit(&val);
     goto exit;
   }
-  
-  *(struct cx_box *)cx_vec_get(&s->imp, i.as_int) = val;
+
+  struct cx_box *p = cx_vec_get(&s->imp, i.as_int);
+  cx_box_deinit(p);
+  *p = val;
   ok = true;
  exit:
   cx_box_deinit(&sv);

@@ -196,17 +196,17 @@ static bool ok_imp(struct cx_scope *scope) {
 
 static bool not_imp(struct cx_scope *scope) {
   struct cx *cx = scope->cx;
-  struct cx_box *v = cx_test(cx_peek(scope, false));
+  struct cx_box v = *cx_test(cx_pop(scope, false));
+  bool ok = false;
 
-  if (v->type == cx->bool_type) {
-    v->as_bool = !v->as_bool;
-    return true;
+  if (v.type == cx->bool_type) {
+    ok = v.as_bool;
+  } else if (v.type != cx->nil_type) {
+    ok = cx_ok(&v);
   }
   
-  bool ok = cx_ok(v);
-  cx_box_deinit(v);  
-  cx_pop(scope, false);
   cx_box_init(cx_push(scope), cx->bool_type)->as_bool = !ok;
+  cx_box_deinit(&v);
   return true;
 }
 

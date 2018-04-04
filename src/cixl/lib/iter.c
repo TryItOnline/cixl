@@ -255,6 +255,43 @@ static bool while_imp(struct cx_scope *scope) {
   return ok;
 }
 
+static bool find_if_imp(struct cx_scope *scope) {
+  struct cx *cx = scope->cx;
+  
+  struct cx_box
+    pred = *cx_test(cx_pop(scope, false)),
+    in = *cx_test(cx_pop(scope, false));
+  
+  struct cx_iter *it = cx_iter(&in);
+  bool ok = false;
+  struct cx_box iv;
+  
+  while (cx_iter_next(it, &iv, scope)) {
+    *cx_push(scope) = iv;
+    if (!cx_call(&pred, scope)) { goto exit; }
+    struct cx_box *ov = cx_peek(scope, false);
+    if (!ov) { goto exit; }
+
+    if (ov->type == cx->nil_type) {
+      cx_pop(scope, false);
+      cx_box_deinit(ov);
+    } else {
+      goto found;
+    }
+  }
+  
+  cx_box_init(cx_push(scope), cx->nil_type);
+  
+ found:
+  ok = true;
+  
+ exit:
+  cx_box_deinit(&pred);
+  cx_box_deinit(&in);
+  cx_iter_deref(it);
+  return ok;
+}
+
 cx_lib(cx_init_iter, "cx/iter") {
   struct cx *cx = lib->cx;
     
@@ -306,5 +343,11 @@ cx_lib(cx_init_iter, "cx/iter") {
 	       cx_args(cx_arg("act", cx->any_type)), cx_args(),
 	       while_imp);
 
+  cx_add_cfunc(lib, "find-if",
+	       cx_args(cx_arg("in", cx->seq_type),
+		       cx_arg("pred", cx->any_type)),
+	       cx_args(cx_arg(NULL, cx->opt_type)),
+	       find_if_imp);
+  
   return true;
 }

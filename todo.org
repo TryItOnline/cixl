@@ -2,11 +2,10 @@
 #define ntohll(x) ((1==ntohl(1)) ? (x) : ((uint64_t)ntohl((x) & 0xFFFFFFFF) << 32) | ntohl((x) >> 32))
 
 * --- cixtris
-** add edge detection when moving blocks
+** call check-shape when moving blocks
+** end game when check fails with y=0
 ** add support for clearing rows
 ** add missing shapes
-** add (p)ause support
-*** change main if to switch:
 * --- cxcrypt
 * add Pub/PrivKey
 ** add asource/asink examples

@@ -10,9 +10,10 @@
 include: 'ansi.cx';
 
 use:
-  (cx/abc #t #f #nil A Char Int Opt)
-  (cx/cond ! ? = < > <= if if-else min max or)
+  (cx/abc #t #f #nil A Bool Char Int Opt is-nil)
+  (cx/cond ! ? = == < > <= and else if if-else min max or)
   (cx/const define:)
+  (cx/error throw)
   (cx/func func:)
   (cx/io #in #out flush read-char print unblock)
   (cx/io/term
@@ -23,9 +24,9 @@ use:
     set-bg vline)
   (cx/io/poll Poll new on-read wait)
   (cx/io/term say)
-  (cx/iter for map while)
+  (cx/iter find-if for map while)
   (cx/math + - * ++ -- mod rand)
-  (cx/rec ? rec: get put put-call)
+  (cx/rec ? print rec: get put put-call)
   (cx/ref Ref deref new ref set set-call)
   (cx/stack Stack _ ~ % %% fill get get-rand len put splat stack)
   (cx/str len)
@@ -139,7 +140,7 @@ func: new-block()(b Block)
   let: i $ss len rand;
   let: s $ss $i get;
   let: c #colors $si get;
-  let: x $max-x rand $max-x $s shape-width - min;
+  let: x $max-x rand ++ $max-x $s shape-width - min;
   
   $b `shapes $ss put
   $b `i      $i  put
@@ -153,7 +154,9 @@ func: get-shape(b Block)(_ Stack)
 func: p(_ A)()
   #out ~ print;
 
-func: print-shape(s Stack start Int c Opt)()
+func: print-shape(b Block start Int c Opt)()
+  let: s $b get-shape;
+
   #save-pos p
   $c {$c set-bg p} {#reset-style p} if-else
   let: o $start ref;
@@ -164,13 +167,13 @@ func: print-shape(s Stack start Int c Opt)()
     $l {
       @* = {
         @@s p
+        $buffer $o deref $c $b #nil if-else put
       } {
         1 move-right p
       } if-else
 
-      $buffer $o deref $c put
       $o &++ set-call
-     } for
+    } for
 
     1 move-down p
     let: ll $l len;
@@ -182,17 +185,34 @@ func: print-shape(s Stack start Int c Opt)()
   #restore-pos p;
 
 func: get-offs(x y Int)(_ Int)
-  $y $max-x * $x +;
+  $y -- $max-x * $x -- +;
   
 func: print-block(b Block)()
-  let: s $b get-shape;
   let: o $b % `x get ~ `y get get-offs;
-  $s $o $b `color get print-shape;
+  $b $o $b `color get print-shape;
 
 func: erase-block(b Block)()
-  let: s $b get-shape;
   let: o $b % `x get ~ `y get get-offs;  
-  $s $o #nil print-shape;
+  $b $o #nil print-shape;
+
+func: check-shape(b Block s Stack x y Int)(_ Bool)
+  let: o $x $y get-offs ref;
+
+  $s {
+    let: l;
+    let: so $o deref;
+    
+    $l {
+      @* = {
+        let: bb $buffer $o deref get;
+	$bb {$bb $b == #nil #t if-else} and
+      } #nil if-else
+
+      $o &++ set-call
+    } find-if
+    
+    $o $so $max-x + set
+  } find-if !;
 
 func: next-shape(b Block)(_ Stack)
   let: ss $b `shapes get;
@@ -296,19 +316,20 @@ $block new-block set
     $b print-block
   } {
     let: s $b get-shape;
+    let: ok $b $s $b % `x get ~ `y get ++ check-shape;
     
-    $b `y get $max-y $s shape-height - = {
-      let: bb new-block;
-      $block $bb set
-      $bb `x get $bb `y get move-to p
-      $bb print-block
-      $is-dropping #f set
-    } {
+    $ok {$b `y get $s shape-height + $max-y <} and {
       $b `x get $b `y get move-to p
       $b erase-block
       $b `y &++ put-call
       1 move-down p
       $b print-block
+    } {
+      let: bb new-block;
+      $block $bb set
+      $bb `x get $bb `y get move-to p
+      $bb print-block
+      $is-dropping #f set
     } if-else
     
     #out flush
