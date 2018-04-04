@@ -172,18 +172,23 @@ static void print_imp(struct cx_box *b, FILE *out) {
 }
 
 static bool emit_imp(struct cx_box *v, const char *exp, FILE *out) {
+  struct cx *cx = v->type->lib->cx;
+  struct cx_sym s_var = cx_gsym(cx, "s");
+  
   fprintf(out,
-	  "{\n"
-	  "  struct cx_stack *s = cx_stack_new(cx);\n"
-	  "  cx_box_init(%s, cx->stack_type)->as_ptr = s;\n",
-	  exp);
+	  "struct cx_stack *%s = cx_stack_new(cx);\n"
+	  "cx_box_init(%s, cx->stack_type)->as_ptr = %s;\n",
+	  s_var.id, exp, s_var.id);
 
+  struct cx_sym v_var = cx_gsym(cx, "v");
+  fprintf(out, "struct cx_box *%s = NULL;\n", v_var.id);
+  
   struct cx_stack *s = v->as_ptr;
   cx_do_vec(&s->imp, struct cx_box, i) {
-    if (!cx_box_emit(i, "cx_vec_push(&s->imp)", out)) { return false; }
+    fprintf(out, "%s = cx_vec_push(&%s->imp);\n", v_var.id, s_var.id);
+    if (!cx_box_emit(i, v_var.id, out)) { return false; }
   }
   
-  fputs("}\n", out);
   return true;
 }
 

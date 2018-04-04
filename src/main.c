@@ -72,7 +72,8 @@ int main(int argc, char *argv[]) {
       
 	fputs("gcc -x c -std=gnu1x -O2 -g "
 	      "-Wall -Werror "
-	      "-Wno-unused-label -Wno-unused-function -Wno-unused-but-set-variable "
+	      "-Wno-unused-label -Wno-unused-function -Wno-unused-variable "
+	      "-Wno-unused-but-set-variable "
 	      "- -Bstatic -lcixl",
 	      cmd.stream);
 

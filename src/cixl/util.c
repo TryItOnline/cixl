@@ -145,6 +145,7 @@ int cx_hex_bin(char in) {
 }
 
 int64_t cx_rand(int64_t max) {
+  if (max <= 0) { return 0; }
   int64_t out = 0;
   int32_t *p = (int *)&out;
   *p++ = rand();
