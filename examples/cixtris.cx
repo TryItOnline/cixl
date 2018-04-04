@@ -24,7 +24,7 @@ use:
   (cx/math + - * ++ -- mod rand)
   (cx/rec ? print rec: get put put-call)
   (cx/ref Ref deref new ref set set-call)
-  (cx/stack Stack _ ~ % %% fill get len move put splat stack)
+  (cx/stack Stack _ ~ % %% fill get last len move put splat stack)
   (cx/str len)
   (cx/var let:);
 
@@ -123,7 +123,7 @@ define: key-fast   @+;
 define: key-slow   @-;
 define: key-quit   #key-esc;
 
-define: speed-delays [125 100 75 50 25];
+define: speed-delays [200 175 150 125 100];
 define: max-speed #speed-delays len --;
 let: speed 0 ref;
 
@@ -243,7 +243,11 @@ func: update-tiles(b Block offs Int v Opt)()
 func: print-marker(b Block)()
   #save-pos p
   $b `x get $max-y move-to p
-  @@s $s shape-width hline p
+
+  $b get-shape last {
+    @* = @@s {1 move-right} if-else p
+  } for
+  
   #restore-pos p;
 
 func: print-block(b Block)()
@@ -525,6 +529,5 @@ $max-x 2 + $max-y move-to p
 #reset-style p
 #clear-screen p
 1 1 move-to p
-#out flush
 normal-mode
 #show-cursor p

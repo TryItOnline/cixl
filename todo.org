@@ -11,6 +11,7 @@
 *** shuffle stdin-stdout
 *** read/write size prefixed blocks
 ** add README
+*** add LICENSE
 * --- cixl
 * add Table emit support
 ** copy Rec
