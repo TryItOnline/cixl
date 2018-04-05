@@ -10,6 +10,11 @@
 ** add README
 *** add LICENSE
 * --- cixl
+* switch scope.stack to Stack
+** add this-stack fn to fetch
+* add Env type
+** add cx_env.nrefs
+** add this-env to fetch
 * add Table emit support
 ** copy Rec
 * replace box.as_ptr with as_func/fimp/etc
