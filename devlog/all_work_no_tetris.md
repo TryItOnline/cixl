@@ -7,7 +7,7 @@ Tetris will always have a place in my heart; it was one of the first puzzle game
 ![Screenshot](https://raw.github.com/basic-gongfu/cixl/master/devlog/cixtris.png)
 
 ### Changes
-One of the more important features added along the way is support for block moves within stacks, the first feature to really take advantage of the fact that Cixl's stacks are represented as continous blocks of memory. ```move``` takes a stack, a start offset, length and delta; and moves the specified items by the delta in one operation. ```find-if``` is another nice addition which allows searching for items within any iterable sequence, the code below searches the range ```0..max-x - 1``` for free tiles on the current row.
+One feature worth mentioning is support for block moves within stacks, the first to really take advantage of the fact that Cixl's stacks are represented as continous blocks of memory. ```move``` takes a stack, a start index, length and delta; and moves the specified items in one operation. ```find-if```, supports searching for items within any iterable sequence, the code below searches the range ```0..max-x - 1``` for free tiles on the current row.
 
 ```
 /*
