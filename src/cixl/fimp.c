@@ -24,8 +24,8 @@ struct cx_fimp *cx_fimp_init(struct cx_fimp *imp,
   imp->emit_id = cx_emit_id(func->emit_id, id);
   imp->ptr = NULL;
   imp->bin = NULL;
-  imp->start_pc = imp->nops = 0;
   imp->scope = NULL;
+  imp->init = true;
   
   cx_vec_init(&imp->args, sizeof(struct cx_arg));
   cx_vec_init(&imp->rets, sizeof(struct cx_arg));
@@ -123,30 +123,31 @@ static bool compile(struct cx_fimp *imp, size_t tok_idx, struct cx_bin *out) {
   return true;
 }
 
-bool cx_fimp_inline(struct cx_fimp *imp,
-		    size_t tok_idx,
-		    struct cx_bin *out,
-		    struct cx *cx) {
-  if (imp->bin == out) { return true; }
-  if (imp->bin) { cx_bin_deref(imp->bin); }
-  imp->bin = cx_bin_ref(out);
-  imp->start_pc = out->ops.count+1;
-  cx_op_init(out, CX_OFIMP(), tok_idx)->as_fimp.imp = imp;
-  if (!compile(imp, tok_idx, out)) { return false; }
-  imp->nops = out->ops.count - imp->start_pc;
-  return true;
-}
+struct cx_bin_fimp *cx_fimp_inline(struct cx_fimp *imp,
+				   size_t tok_idx,
+				   struct cx_bin *out,
+				   struct cx *cx) {
+  struct cx_bin_fimp *bf = cx_set_get(&out->fimps, &imp);
 
-bool cx_fimp_eval(struct cx_fimp *imp, struct cx_scope *scope) {
-  return cx_eval(cx_test(imp->bin),
-		 imp->start_pc,
-		 imp->start_pc+imp->nops,
-		 scope->cx);
+  if (!bf) {
+    bf = cx_test(cx_set_insert(&out->fimps, &imp));
+    bf->imp = imp;
+    bf->start_pc = out->ops.count+1;
+    bf->nops = -1;
+    struct cx_op *op = cx_op_init(out, CX_OFIMP(), tok_idx);
+    op->as_fimp.imp = imp;
+    op->as_fimp.init = imp->init;
+    if (!compile(imp, tok_idx, out)) { return NULL; }
+    bf = cx_test(cx_set_get(&out->fimps, &imp));
+    bf->nops = out->ops.count - bf->start_pc;
+  }
+  
+  return bf;
 }
 
 bool cx_fimp_call(struct cx_fimp *imp, struct cx_scope *scope) {
   struct cx *cx = scope->cx;
-  cx_call_init(cx_vec_push(&cx->calls), cx->row, cx->col, imp, -1);
+  cx_call_init(cx_vec_push(&cx->calls), cx->row, cx->col, imp);
 
   if (imp->ptr) {    
     size_t lib_count = cx->libs.count;
@@ -157,13 +158,19 @@ bool cx_fimp_call(struct cx_fimp *imp, struct cx_scope *scope) {
     return ok;
   }
 
-  if (!imp->bin) {
-    struct cx_bin *bin = cx_bin_new();
-    if (!cx_fimp_inline(imp, 0, bin, scope->cx)) { return false; }
-    cx_bin_deref(bin);
+  struct cx_bin *bin = imp->bin ? imp->bin : cx->bin;
+  struct cx_bin_fimp *bimp = cx_set_get(&bin->fimps, &imp);
+
+  if (!bimp) {
+    cx_test(!imp->bin);
+    bin = imp->bin = cx_bin_new();
+    bimp = cx_fimp_inline(imp, 0, bin, cx);
   }
-  
-  return cx_fimp_eval(imp, scope);
+
+  return cx_eval(bin,
+		 bimp->start_pc,
+		 bimp->start_pc+bimp->nops,
+		 cx);
 }
 
 static bool equid_imp(struct cx_box *x, struct cx_box *y) {

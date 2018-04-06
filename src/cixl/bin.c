@@ -37,6 +37,8 @@ static bool eval(struct cx *cx, ssize_t stop_pc) {
 struct cx_bin *cx_bin_init(struct cx_bin *bin) {
   cx_vec_init(&bin->toks, sizeof(struct cx_tok));
   cx_vec_init(&bin->ops, sizeof(struct cx_op));
+  cx_set_init(&bin->fimps, sizeof(struct cx_bin_fimp), cx_cmp_ptr);
+  bin->fimps.key_offs = offsetof(struct cx_bin_fimp, imp);
   bin->init_offs = 0;
   bin->nrefs = 1;
   bin->eval = eval;
@@ -47,6 +49,7 @@ struct cx_bin *cx_bin_deinit(struct cx_bin *bin) {
   cx_bin_clear(bin);
   cx_vec_deinit(&bin->toks);  
   cx_vec_deinit(&bin->ops);
+  cx_set_deinit(&bin->fimps);
   return bin;
 }
 
@@ -180,7 +183,7 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
   for (struct cx_op *op = cx_vec_start(&bin->ops);
        op != cx_vec_end(&bin->ops);
        op++) {
-    if (op->type->emit_labels) {op->type->emit_labels(op, &labels, cx); }
+    if (op->type->emit_labels) {op->type->emit_labels(op, bin, &labels, cx); }
     if (op->type->emit_libs) {op->type->emit_libs(op, bin, &libs, cx); }
     if (op->type->emit_types) {op->type->emit_types(op, &types, cx); }
     if (op->type->emit_funcs) { op->type->emit_funcs(op, &funcs, cx); }
@@ -311,15 +314,16 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
     fprintf(out, "{ /* %s %s */\n", tok->type->id, op->type->id);
     
     fprintf(out,
-	    "cx->pc = %zd; cx->row = %d; cx->col = %d;\n",
-	    op->pc, cx->row, cx->col);
-
-    fputs("if (cx->errors.count) { goto exit; }\n\n"
-	  "if (cx->pc == stop_pc) {\n"
-          "  ok = true;\n"
-          "  goto exit;\n"
-          "}\n\n",
-	  out);
+	    "if (cx->errors.count) { goto exit; }\n"
+	    "cx->pc = %zd;\n\n"
+	    
+  	    "if (stop_pc == %zd) {\n"
+            "  ok = true;\n"
+            "  goto exit;\n"
+            "}\n\n"
+	    
+	    "cx->row = %d; cx->col = %d;\n",
+	    op->pc, op->pc, cx->row, cx->col);
 
     if (op->type->emit && !cx_test(op->type->emit)(op, bin, out, cx)) {
       return false;

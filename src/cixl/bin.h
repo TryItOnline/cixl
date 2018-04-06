@@ -10,8 +10,14 @@ struct cx_fimp;
 struct cx_lib;
 struct cx_tok;
 
+struct cx_bin_fimp {
+  struct cx_fimp *imp;
+  ssize_t start_pc, nops;
+};
+
 struct cx_bin {
   struct cx_vec toks, ops;
+  struct cx_set fimps;
   
   size_t init_offs;
   unsigned int nrefs;

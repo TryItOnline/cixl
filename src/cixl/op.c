@@ -128,7 +128,10 @@ static bool catch_emit(struct cx_op *op,
   return true;
 }
 
-static void catch_emit_labels(struct cx_op *op, struct cx_set *out, struct cx *cx) {
+static void catch_emit_labels(struct cx_op *op,
+			      struct cx_bin *bin,
+			      struct cx_set *out,
+			      struct cx *cx) {
   size_t
     pc = op->pc+1,
     *ok = cx_set_insert(out, &pc);
@@ -182,7 +185,10 @@ static bool else_emit(struct cx_op *op,
   return true;
 }
 
-static void else_emit_labels(struct cx_op *op, struct cx_set *out, struct cx *cx) {
+static void else_emit_labels(struct cx_op *op,
+			     struct cx_bin *bin,
+			     struct cx_set *out,
+			     struct cx *cx) {
   size_t
     pc = op->pc+op->as_else.nops+1,
     *ok = cx_set_insert(out, &pc);
@@ -212,7 +218,8 @@ cx_op_type(CX_OEND, {
   });
 
 static bool fimp_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
-  cx->pc += op->as_fimp.imp->nops;
+  struct cx_bin_fimp *bimp = cx_test(cx_set_get(&bin->fimps, &op->as_fimp.imp));
+  cx->pc += bimp->nops;
   return true;
 }
 
@@ -220,17 +227,23 @@ static bool fimp_emit(struct cx_op *op,
 		      struct cx_bin *bin,
 		      FILE *out,
 		      struct cx *cx) {
-  fprintf(out, "goto op%zd;\n", op->pc+op->as_fimp.imp->nops+1);
+  struct cx_bin_fimp *bimp = cx_test(cx_set_get(&bin->fimps, &op->as_fimp.imp));
+  fprintf(out, "goto op%zd;\n", op->pc+bimp->nops+1);
   return true;
 }
 
-static void fimp_emit_labels(struct cx_op *op, struct cx_set *out, struct cx *cx) {
+static void fimp_emit_labels(struct cx_op *op,
+			     struct cx_bin *bin,
+			     struct cx_set *out,
+			     struct cx *cx) {
+  struct cx_bin_fimp *bimp = cx_test(cx_set_get(&bin->fimps, &op->as_fimp.imp));
+  
   size_t
-    pc = op->as_fimp.imp->start_pc,
+    pc = bimp->start_pc,
     *ok = cx_set_insert(out, &pc);
   
   if (ok) { *ok = pc; }
-  pc = op->pc+op->as_fimp.imp->nops+1;
+  pc = op->pc+bimp->nops+1;
   ok = cx_set_insert(out, &pc);
   if (ok) { *ok = pc; }
 }
@@ -239,21 +252,26 @@ static void fimp_emit_init(struct cx_op *op,
 			   struct cx_bin *bin,
 			   FILE *out,
 			   struct cx *cx) {
-  struct cx_fimp *imp = op->as_fimp.imp;
-  struct cx_sym imp_var = cx_gsym(cx, "imp");
-  
-  fprintf(out,
-	  "cx_push_lib(cx, %s());\n"
-	  "struct cx_fimp *%s = %s();\n"
-	  "cx_pop_lib(cx);\n"
-	  "%s->bin = cx_bin_ref(cx->bin);\n"
-	  "%s->start_pc = %zd;\n"
-	  "%s->nops = %zd;\n",
-	  imp->lib->emit_id,
-	  imp_var.id, imp->emit_id,
-	  imp_var.id,
-	  imp_var.id, imp->start_pc,
-	  imp_var.id, imp->nops);
+  if (op->as_fimp.init) {
+    struct cx_fimp *imp = op->as_fimp.imp;
+    struct cx_sym imp_var = cx_gsym(cx, "imp"), bimp_var = cx_gsym(cx, "bimp");
+    struct cx_bin_fimp *bimp = cx_test(cx_set_get(&bin->fimps, &imp));
+    
+    fprintf(out,
+	    "cx_push_lib(cx, %s());\n"
+	    "struct cx_fimp *%s = %s();\n"
+	    "cx_pop_lib(cx);\n"
+	    "struct cx_bin_fimp *%s = cx_test(cx_set_insert(&cx->bin->fimps, &%s));\n"
+	    "%s->imp = %s;\n"
+	    "%s->start_pc = %zd;\n"
+	    "%s->nops = %zd;\n",
+	    imp->lib->emit_id,
+	    imp_var.id, imp->emit_id,
+	    bimp_var.id, imp_var.id,
+	    bimp_var.id, imp_var.id,
+	    bimp_var.id, bimp->start_pc,
+	    bimp_var.id, bimp->nops);
+  }
 }
 
 static void fimp_emit_funcs(struct cx_op *op, struct cx_set *out, struct cx *cx) {
@@ -315,7 +333,7 @@ static void funcdef_emit_init(struct cx_op *op,
   cx_do_vec(&imp->args, struct cx_arg, a) {
     if (sep) { fputs(sep, out); }
     sep = ",\n";
-    cx_arg_emit(a, out);
+    cx_arg_emit(a, out, cx);
   }
 					     
   fputs("};\n\n", out);
@@ -330,14 +348,32 @@ static void funcdef_emit_init(struct cx_op *op,
   cx_do_vec(&imp->rets, struct cx_arg, r) {
     if (sep) { fputs(sep, out); }
     sep = ",\n";
-    cx_arg_emit(r, out);
+    cx_arg_emit(r, out, cx);
   }
   
   fputs("};\n\n", out);
+
+  struct cx_sym imp_var = cx_gsym(cx, "imp");
   
   fprintf(out,
-	  "cx_add_func(*cx->lib, \"%s\", %zd, %s, %zd, %s);\n",
-	  imp->func->id, imp->args.count, args_var.id, imp->rets.count, rets_var.id);
+	  "struct cx_fimp *%s = cx_add_func(*cx->lib, \"%s\", %zd, %s, %zd, %s);\n",
+	  imp_var.id, imp->func->id, imp->args.count, args_var.id, imp->rets.count,
+	  rets_var.id);
+
+  struct cx_bin_fimp *bimp = cx_test(cx_set_get(&bin->fimps, &imp));
+  struct cx_sym bimp_var = cx_gsym(cx, "bimp");
+  
+  fprintf(out,
+	  "struct cx_bin_fimp *%s = cx_test(cx_set_insert(&cx->bin->fimps, &%s));\n"
+	  "%s->bin = cx_bin_ref(cx->bin);\n"
+	  "%s->imp = %s;\n"
+	  "%s->start_pc = %zd;\n"
+	  "%s->nops = %zd;\n",
+	  bimp_var.id, imp_var.id,
+	  imp_var.id,
+	  bimp_var.id, imp_var.id,
+	  bimp_var.id, bimp->start_pc,
+	  bimp_var.id, bimp->nops);
 }
 
 static void funcdef_emit_syms(struct cx_op *op, struct cx_set *out, struct cx *cx) {
@@ -384,12 +420,6 @@ static bool funcall_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
     return false;
   }
   
-  if (!imp->ptr && imp->bin == cx->bin) {
-    cx_call_init(cx_vec_push(&cx->calls), cx->row, cx->col, imp, cx->pc);
-    cx->pc = imp->start_pc;
-    return true;
-  }
-  
   return cx_fimp_call(imp, s);
 }
 
@@ -402,39 +432,32 @@ static bool funcall_emit(struct cx_op *op,
 
   fputs("struct cx_scope *s = cx_scope(cx, 0);\n", out);
   fprintf(out, "struct cx_func *func = %s();\n", func->emit_id);
-  fputs("struct cx_fimp *imp = ", out);
+  fputs("struct cx_fimp *imp = NULL;\n", out);
   
   if (imp) {
     fprintf(out,
-	    "%s();\n\n"
-	    "if (s->safe && !cx_fimp_match(imp, s)) { imp = NULL; }\n\n",
+	    "imp = %s();\n"
+	    "if (s->safe && !cx_fimp_match(imp, s)) { imp = NULL; }\n",
 	    imp->emit_id);
   } else {
-    fputs("cx_func_match(func, s);\n\n", out);
+    fputs("imp = cx_func_match(func, s);\n", out);
   }
   
   fputs("if (!imp) {\n"
 	"  cx_error(cx, cx->row, cx->col, \"Func not applicable: %s\", func->id);\n"
 	"  goto exit;\n"
-	"}\n\n",
+	"}\n\n"
+	
+	"if (!cx_fimp_call(imp, s)) { goto exit; }\n",
 	out);
-
-  if (imp) {
-    fprintf(out,
-	    "if (!imp->ptr && imp->bin == cx->bin) {\n"
-	    "  cx_call_init(cx_vec_push(&cx->calls), cx->row, cx->col, imp, %zd);\n"
-	    "  goto op%zd;\n"
-	    "} else ",
-	    op->pc+1, imp->start_pc);
-  }
   
-  fputs("if (!cx_fimp_call(imp, s)) { goto exit; }\n",
-	out);
-
   return true;
 }
 
-static void funcall_emit_labels(struct cx_op *op, struct cx_set *out, struct cx *cx) {
+static void funcall_emit_labels(struct cx_op *op,
+				struct cx_bin *bin,
+				struct cx_set *out,
+				struct cx *cx) {
   size_t
     pc = op->pc+1,
     *ok = cx_set_insert(out, &pc);
@@ -553,7 +576,10 @@ static bool jump_emit(struct cx_op *op,
   return true;
 }
 
-static void jump_emit_labels(struct cx_op *op, struct cx_set *out, struct cx *cx) {
+static void jump_emit_labels(struct cx_op *op,
+			     struct cx_bin *bin,
+			     struct cx_set *out,
+			     struct cx *cx) {
   size_t
     pc = op->as_jump.pc,
     *ok = cx_set_insert(out, &pc);
@@ -590,7 +616,10 @@ static bool lambda_emit(struct cx_op *op,
   return true;
 }
 
-static void lambda_emit_labels(struct cx_op *op, struct cx_set *out, struct cx *cx) {
+static void lambda_emit_labels(struct cx_op *op,
+			       struct cx_bin *bin,
+			       struct cx_set *out,
+			       struct cx *cx) {
   size_t
     pc = op->as_lambda.start_op,
     *ok = cx_set_insert(out, &pc);
@@ -639,7 +668,10 @@ static void libdef_emit_init(struct cx_op *op,
 	  lib_var.id, lib->id.id, lib_var.id, i->start_pc, i->nops);
 }
 
-static void libdef_emit_labels(struct cx_op *op, struct cx_set *out, struct cx *cx) {
+static void libdef_emit_labels(struct cx_op *op,
+			       struct cx_bin *bin,
+			       struct cx_set *out,
+			       struct cx *cx) {
   size_t
     pc = op->pc+1,
     *ok = cx_set_insert(out, &pc);
@@ -1128,11 +1160,9 @@ static bool return_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
     }
 
     cx_vec_clear(&ss->stack);
-    struct cx_call *call = cx_vec_pop(&cx->calls);
-    if (call->return_pc > -1) { cx->pc = call->return_pc; }
-    cx_call_deinit(call);
     cx_end(cx);
     cx_pop_lib(cx);
+    cx_call_deinit(cx_vec_pop(&cx->calls));
   }
   
   return true;
@@ -1241,21 +1271,16 @@ static bool return_emit(struct cx_op *op,
 	  "  cx_vec_clear(&s->stack);\n"
 	  "  cx_end(cx);\n"
 	  "  cx_pop_lib(cx);\n"
-	  "  struct cx_call *call = cx_vec_pop(&cx->calls);\n\n"
-	  
-	  "  if (call->return_pc > -1) {\n"
-	  "    cx->pc = call->return_pc;\n"
-	  "    cx_call_deinit(call);\n"
-	  "    goto *op_labels[cx->pc];\n"
-	  "  }\n\n"
-
-	  "  cx_call_deinit(call);\n"
+	  "  cx_call_deinit(cx_vec_pop(&cx->calls));\n"
 	  "}\n");
   
   return true;  
 }
 
-static void return_emit_labels(struct cx_op *op, struct cx_set *out, struct cx *cx) {
+static void return_emit_labels(struct cx_op *op,
+			       struct cx_bin *bin,
+			       struct cx_set *out,
+			       struct cx *cx) {
   size_t
     pc = op->as_return.pc+1,
     *ok = cx_set_insert(out, &pc);

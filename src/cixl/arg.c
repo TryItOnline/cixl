@@ -2,6 +2,7 @@
 #include <string.h>
 
 #include "cixl/arg.h"
+#include "cixl/cx.h"
 #include "cixl/emit.h"
 #include "cixl/error.h"
 #include "cixl/type.h"
@@ -46,7 +47,7 @@ void cx_arg_print(struct cx_arg *a, FILE *out) {
   }
 }
 
-void cx_arg_emit(struct cx_arg *a, FILE *out) {
+void cx_arg_emit(struct cx_arg *a, FILE *out, struct cx *cx) {
     switch (a->arg_type) {
     case CX_ARG:
       fputs("cx_arg(", out);
@@ -70,16 +71,25 @@ void cx_arg_emit(struct cx_arg *a, FILE *out) {
 
       fprintf(out, ", %d)", a->narg);
       break;
-    case CX_VARG:
-      fputs("({\n"
-	    "  struct cx_box v;\n",
-	    out);
+    case CX_VARG: {
+      struct
+	cx_sym v_var = cx_gsym(cx, "v"),
+	vp_var = cx_gsym(cx, "vp"),
+	a_var = cx_gsym(cx, "a");
       
-      cx_box_emit(&a->value, "&v", out);
+      fprintf(out,
+	      "({\n"
+	      "  struct cx_box %s, *%s=&%s;\n",
+	      v_var.id, vp_var.id, v_var.id);
       
-      fputs("  cx_varg(&v);\n"
-	    "})",
-	    out);
+      cx_box_emit(&a->value, vp_var.id, out);
+      
+      fprintf(out,
+	      "  struct cx_arg %s = cx_varg(%s);\n"
+	      "  cx_box_deinit(%s);\n"
+	      "  %s;\n"
+	      "})\n",
+	      a_var.id, vp_var.id, vp_var.id, a_var.id);
       break;
-    }
+    }}
 }

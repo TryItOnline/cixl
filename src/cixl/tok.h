@@ -54,7 +54,6 @@ void cx_tok_copy(struct cx_tok *dst, struct cx_tok *src);
 
 struct cx_tok_type *CX_TEND();
 struct cx_tok_type *CX_TFIMP();
-struct cx_tok_type *CX_TFUNC();
 struct cx_tok_type *CX_TGROUP();
 struct cx_tok_type *CX_TID();
 struct cx_tok_type *CX_TLIB();

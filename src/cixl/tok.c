@@ -40,47 +40,7 @@ void cx_tok_copy(struct cx_tok *dst, struct cx_tok *src) {
 }
 
 cx_tok_type(CX_TEND);
-
-static ssize_t fimp_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) {  
-  struct cx_tok *tok = cx_vec_get(&bin->toks, tok_idx);  
-  struct cx_fimp *imp = tok->as_ptr;
-
-  if (!imp->ptr && !cx_fimp_inline(imp, tok_idx, bin, cx)) { goto exit; }
-
-  struct cx_funcall_op *op = &cx_op_init(bin,
-					 CX_OFUNCALL(),
-					 tok_idx)->as_funcall;
-  op->func = imp->func;
-  op->imp = imp;
- exit:
-  return tok_idx+1;
-}
-
-cx_tok_type(CX_TFIMP, {
-    type.compile = fimp_compile;
-  });
-
-static ssize_t func_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) {  
-  struct cx_tok *tok = cx_vec_get(&bin->toks, tok_idx);  
-  struct cx_func *func = tok->as_ptr;
-  struct cx_fimp *imp = (func->imps.members.count == 1)
-    ? *(struct cx_fimp **)cx_vec_start(&func->imps.members)
-    : NULL;
-
-  if (imp && !imp->ptr && !cx_fimp_inline(imp, tok_idx, bin, cx)) { goto exit; }
-
-  struct cx_funcall_op *op = &cx_op_init(bin,
-					 CX_OFUNCALL(),
-					 tok_idx)->as_funcall;
-  op->func = func;
-  op->imp = imp;
- exit:
-  return tok_idx+1;
-}
-
-cx_tok_type(CX_TFUNC, {
-    type.compile = func_compile;
-  });
+cx_tok_type(CX_TFIMP);
 
 static ssize_t group_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) {
   struct cx_tok *tok = cx_vec_get(&bin->toks, tok_idx);
@@ -190,30 +150,25 @@ static ssize_t id_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) {
       }
     } else {
       if (imp) {
-	if (!imp->ptr && !cx_fimp_inline(imp, tok_idx, bin, cx)) { goto exit; }
-
-	struct cx_funcall_op *op = &cx_op_init(bin,
-					       CX_OFUNCALL(),
-					       tok_idx)->as_funcall;
-	op->func = f;
-	op->imp = imp;
+	if (!imp->ptr && !cx_fimp_inline(imp, tok_idx, bin, cx)) { return -1; }
       } else {
 	struct cx_fimp *imp = (f->imps.members.count == 1)
 	  ? *(struct cx_fimp **)cx_vec_start(&f->imps.members)
 	  : NULL;
 	
-	if (imp && !imp->ptr && !cx_fimp_inline(imp, tok_idx, bin, cx)) { goto exit; }
-	
-	struct cx_funcall_op *op = &cx_op_init(bin,
-					       CX_OFUNCALL(),
-					       tok_idx)->as_funcall;
-	op->func = f;
-	op->imp = imp;
+	if (imp && !imp->ptr && !cx_fimp_inline(imp, tok_idx, bin, cx)) {
+	  return -1;
+	}
       }
+
+      struct cx_funcall_op *op = &cx_op_init(bin,
+					     CX_OFUNCALL(),
+					     tok_idx)->as_funcall;
+      op->func = f;
+      op->imp = imp;
     }
   }
 
- exit:
   return tok_idx+1;
 }
 

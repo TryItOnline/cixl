@@ -91,7 +91,7 @@ static ssize_t func_eval(struct cx_macro_eval *eval,
 	     CX_OFUNCDEF(),
 	     tok_idx)->as_funcdef.imp = f->as_ptr;
 
-  cx_fimp_inline(f->as_ptr, tok_idx, bin, cx);
+  if (!cx_fimp_inline(f->as_ptr, tok_idx, bin, cx)) { return -1; }
   return tok_idx+1;
 }
 
@@ -189,7 +189,8 @@ static bool func_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
 				    (void *)func_args.items,
 				    func_rets.count,
 				    (void *)func_rets.items);
-  
+
+  imp->init = false;
   cx_tok_deinit(&id);
   cx_vec_deinit(&func_args);
   cx_vec_deinit(&func_rets);

@@ -1,25 +1,20 @@
 #define htonll(x) ((1==htonl(1)) ? (x) : ((uint64_t)htonl((x) & 0xFFFFFFFF) << 32) | htonl((x) >> 32))
 #define ntohll(x) ((1==ntohl(1)) ? (x) : ((uint64_t)ntohl((x) & 0xFFFFFFFF) << 32) | ntohl((x) >> 32))
 
-* fix fimp str parsing
-** remove tfimp/tfunc?
-** commit
-* change emit_bmips to declare emit-bmips cixl fn
-** rename emit_bmips to init_emit_bmips
 * add popen fn
 ** add Proc type
 *** in/out/error fns
 *** keep files
 *** https://www.linuxquestions.org/questions/programming-9/where-do-i-get-a-bidirectional-popen-pipe-320699/
+* add bipi tool
+** $ bipi 'foo 1 2' 'bar 3 4'
+*** route stderrs to bipi's stdout
+** run two popens with poll and bufs
 * remove cx_buf.pos
 ** add buf tests
 ** seek 0 from end before reading into buffer
 *** remember prev pos and restore
 *** advance pos on write-bytes
-* add bipi tool
-** $ bipi 'foo 1 2' 'bar 3 4'
-*** route stderrs to bipi's stdout
-** run two popens with poll and bufs
 * --- cxcrypt
 * add automatic chunking to encrypt/decrypt
 ** add #max-chunk
@@ -31,6 +26,12 @@
 ** add LICENSE
 * --- cixl
 * convert size_t to ssize_t and remove unsigned
+* extract cx_hash from cx_env
+** item_size
+** eq fn ptr
+** add Hash type
+** add resizing if chain gets to long
+*** switch slots to cx_vec
 * add Table emit support
 ** copy Rec
 * replace box.as_ptr with as_func/fimp/etc
@@ -52,11 +53,4 @@
 *** change eval to push value
 * replace clone fallback to copy with error
 * replace varargs with size/array+macro
-* --- tellux
-* switch buffers to fixed sized stacks like cixtris
-* add visualization of current fg/bg
-* implement saving
-** launch with mandatory filename
-** add 's' command to save
-* implement loading
-** try reading file on startup
+
