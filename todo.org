@@ -2,20 +2,12 @@
 #define ntohll(x) ((1==ntohl(1)) ? (x) : ((uint64_t)ntohl((x) & 0xFFFFFFFF) << 32) | ntohl((x) >> 32))
 
 * --- cxcrypt
-* add stdin support in aclient/aserver
-** unblock and register on-read
-** disconnect when closed
-** read into out-buf
-* add stdout support
-** unblock and register on-write
-** write from in-buf
 * add Pub/PrivKey
-** add asource/asink examples
-*** use asymmetric encryption to secure a network channel
-*** shuffle stdin-stdout
-*** read/write size prefixed blocks
-** add README
-*** add LICENSE
+* copy aserver/aclient examples
+** use asymmetric encryption to secure network channel
+** read/write size prefixed blocks
+* add README
+** add LICENSE
 * --- cixl
 * add Table emit support
 ** copy Rec
