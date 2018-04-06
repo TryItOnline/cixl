@@ -156,8 +156,59 @@ static ssize_t id_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) {
   } else if (id[0] == '$') {
     cx_op_init(bin, CX_OGETVAR(), tok_idx)->as_getvar.id = cx_sym(cx, id+1);
   } else {
-    cx_error(cx, tok->row, tok->col, "Unknown id: '%s'", id);
-    goto exit;
+    bool ref = id[0] == '&';
+    int row = cx->row, col = cx->col;
+    struct cx_func *f = cx_get_func(cx, ref ? id+1 : id, false);
+    if (!f) { return -1; }
+    
+    struct cx_fimp *imp = NULL;
+    char *imp_id = parse_fimp(cx, f, in, out);
+    
+    if (imp_id) {
+      struct cx_fimp **found = cx_set_get(&f->imps, &imp_id);
+      free(imp_id);
+      
+      if (!found) {
+	cx_error(cx, row, col, "Fimp not found");
+	return -1;
+      }
+      
+      imp = *found;
+    }
+    
+    if (ref) {
+      struct cx_box *v = &cx_op_init(bin, CX_OPUSH(), tok_idx)->as_push.value;
+
+      if (imp) {
+	cx_box_init(v, cx->fimp_type)->as_ptr = imp;
+      } else {
+	cx_box_init(v, cx->func_type)->as_ptr = f;
+      }
+    } else {
+      if (imp) {
+	struct cx_fimp *imp = tok->as_ptr;
+	if (!imp->ptr && !cx_fimp_inline(imp, tok_idx, bin, cx)) { goto exit; }
+
+	struct cx_funcall_op *op = &cx_op_init(bin,
+					       CX_OFUNCALL(),
+					       tok_idx)->as_funcall;
+	op->func = imp->func;
+	op->imp = imp;
+      } else {
+	struct cx_func *func = tok->as_ptr;
+	struct cx_fimp *imp = (func->imps.members.count == 1)
+	  ? *(struct cx_fimp **)cx_vec_start(&func->imps.members)
+	  : NULL;
+	
+	if (imp && !imp->ptr && !cx_fimp_inline(imp, tok_idx, bin, cx)) { goto exit; }
+	
+	struct cx_funcall_op *op = &cx_op_init(bin,
+					       CX_OFUNCALL(),
+					       tok_idx)->as_funcall;
+	op->func = func;
+	op->imp = imp;
+      }
+    }
   }
 
  exit:

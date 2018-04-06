@@ -47,23 +47,7 @@ func: poll-client-write()()
     $state deref `connect = {
       'Connect' yelp
       $state `ok set
-
-      $poll #in {
-        $out #in #max-io read-bytes {
-          'Finished reading' yelp
-	  $poll #in delete
-          $state `drain-client set
-        } else
-
-        $out len {
-	  poll-client-write
-	} {
-      	  'Finished sending' yelp
-	  $poll $c delete
-          $c close
-	  $state `done set
-	} if-else
-      } on-read
+      poll-in
     } if
 
     $out $c write-bytes {
@@ -77,6 +61,24 @@ func: poll-client-write()()
     } if
   } on-write;
 
+func: poll-in()()
+  $poll #in {
+    $out #in #max-io read-bytes {
+      'Finished reading' yelp
+      $poll #in delete
+      $state `drain-client set
+    } else
+
+    $out len {
+      poll-client-write
+    } {
+      'Finished sending' yelp
+      $poll $c delete
+      $c close
+      $state `done set
+    } if-else
+  } on-read;
+
 func: poll-out()()
   $poll #out {
     $in #out write-bytes {
@@ -89,22 +91,24 @@ func: poll-out()()
     } if
   } on-write;
 
+func: poll-client-read()()
+  $poll $c {  
+    let: in-len $in len;
+
+    $in $c #max-io read-bytes {
+      $in len $in-len! and {poll-out} if
+    } {
+      'Disconnect' yelp
+      $poll $c delete
+      $c close
+      $state $out {poll-out `drain-out} `done if-else set
+    } if-else
+  } on-read;
+
 #in unblock
 #out unblock
+poll-client-read
 poll-client-write
-
-$poll $c {  
-  let: in-len $in len;
-
-  $in $c #max-io read-bytes {
-    $in len $in-len! and {poll-out} if
-  } {
-    'Disconnect' yelp
-    $poll $c delete
-    $c close
-    $state $out {poll-out `drain-out} `done if-else set
-  } if-else
-} on-read
 
 {
   $poll -1 wait

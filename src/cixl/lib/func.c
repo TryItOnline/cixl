@@ -124,7 +124,7 @@ static bool func_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
     cx_vec_deinit(&toks);
     return false;
   }
-
+  
   struct cx_tok args = *(struct cx_tok *)cx_vec_pop(&toks);
 
   if (args.type != CX_TGROUP()) {
@@ -138,7 +138,7 @@ static bool func_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   
   struct cx_vec func_args;
   cx_vec_init(&func_args, sizeof(struct cx_arg));
-
+  
   if (!parse_args(cx, &args.as_vec, &func_args)) {
     cx_tok_deinit(&id);
     cx_tok_deinit(&args);
@@ -147,9 +147,9 @@ static bool func_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
     cx_vec_deinit(&func_args);
     return false;  
   }
-
+  
   cx_tok_deinit(&args);
-
+  
   if (!cx_parse_tok(cx, in, &toks, false)) {
     cx_error(cx, row, col, "Missing func rets");
     cx_tok_deinit(&id);
@@ -157,9 +157,9 @@ static bool func_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
     cx_vec_deinit(&toks);
     return false;
   }
-
+  
   struct cx_tok rets = *(struct cx_tok *)cx_vec_pop(&toks);
-
+  
   if (rets.type != CX_TGROUP()) {
     cx_error(cx, row, col, "Invalid func rets: %s", rets.type->id);
     cx_tok_deinit(&id);
@@ -171,7 +171,7 @@ static bool func_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   
   struct cx_vec func_rets;
   cx_vec_init(&func_rets, sizeof(struct cx_arg));
-
+  
   if (!parse_args(cx, &rets.as_vec, &func_rets)) {
     cx_tok_deinit(&id);
     cx_tok_deinit(&rets);
@@ -180,7 +180,7 @@ static bool func_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
     cx_vec_deinit(&func_rets);
     return false;
   }
-
+  
   cx_tok_deinit(&rets);
   
   struct cx_fimp *imp = cx_add_func(*cx->lib,
@@ -189,7 +189,7 @@ static bool func_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
 				    (void *)func_args.items,
 				    func_rets.count,
 				    (void *)func_rets.items);
-
+  
   cx_tok_deinit(&id);
   cx_vec_deinit(&func_args);
   cx_vec_deinit(&func_rets);

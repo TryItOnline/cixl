@@ -67,13 +67,7 @@ func: poll-out()()
     } if
   } on-write;
 
-#in unblock
-#out unblock
-
-$poll $s {
-  let: c $s accept;
-  'Connect' yelp
-
+func: poll-client-read(c TCPClient)()
   $poll $c {
     $in $c #max-io read-bytes {
       $in len {poll-out} if
@@ -83,8 +77,9 @@ $poll $s {
       $c close
       $state $out {poll-out `drain-out} `done if-else set
     } if-else
-  } on-read
+  } on-read;
 
+func: poll-in()()
   $poll #in {
     $out #in #max-io read-bytes {
       'Finished reading' yelp
@@ -100,8 +95,16 @@ $poll $s {
       $c close
       $state `done set
     } if-else
-  } on-read
+  } on-read;
 
+#in unblock
+#out unblock
+
+$poll $s {
+  let: c $s accept;
+  'Connect' yelp
+  $c poll-client-read
+  poll-in
   $poll $s delete
   $s close
 } on-read
