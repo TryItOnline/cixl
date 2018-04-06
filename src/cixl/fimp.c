@@ -106,8 +106,12 @@ static bool compile(struct cx_fimp *imp, size_t tok_idx, struct cx_bin *out) {
     cx_op_init(out, CX_OPUTARGS(), tok_idx)->as_putargs.imp = imp;
   }
 
-  if (imp->toks.count) {    
-    if (!cx_compile(cx, cx_vec_start(&imp->toks), cx_vec_end(&imp->toks), out)) {
+  if (imp->toks.count) {
+    cx_push_lib(cx, imp->lib);
+    bool ok = cx_compile(cx, cx_vec_start(&imp->toks), cx_vec_end(&imp->toks), out);
+    cx_pop_lib(cx);
+    
+    if (!ok) {
       cx_error(cx, cx->row, cx->col, "Failed compiling fimp");
       return false;
     }

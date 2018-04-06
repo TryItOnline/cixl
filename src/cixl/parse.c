@@ -36,9 +36,7 @@ static bool parse_type(struct cx *cx,
   return true;
 }
 
-static bool parse_const(struct cx *cx,
-		       const char *id,
-		       struct cx_vec *out) {
+static bool parse_const(struct cx *cx, const char *id, struct cx_vec *out) {
   if (!cx_get_const(cx, cx_sym(cx, id+1), false)) { return false; }
 
   cx_tok_init(cx_vec_push(out),
@@ -48,15 +46,12 @@ static bool parse_const(struct cx *cx,
   return true;
 }
 
-char *parse_fimp(struct cx *cx,
-		 struct cx_func *func,
-		 FILE *in,
-		 struct cx_vec *out) {
+char *parse_fimp(struct cx *cx, FILE *in, struct cx_vec *out) {
   char c = fgetc(in);
 
   if (c != '<') {
     ungetc(c, in);
-    return 0;
+    return NULL;
   }
   
   int row = cx->row, col = cx->col;
@@ -123,47 +118,14 @@ char *parse_fimp(struct cx *cx,
 }
 
 static bool parse_func(struct cx *cx, const char *id, FILE *in, struct cx_vec *out) {
-  bool ref = id[0] == '&';
   int row = cx->row, col = cx->col;
-  struct cx_func *f = cx_get_func(cx, ref ? id+1 : id, false);
-  if (!f) { return false; }
-  
-  struct cx_fimp *imp = NULL;
-  char *imp_id = parse_fimp(cx, f, in, out);
-	  
-  if (imp_id) {
-    struct cx_fimp **found = cx_set_get(&f->imps, &imp_id);
-    free(imp_id);
-    
-    if (!found) {
-      cx_error(cx, row, col, "Fimp not found");
-      return false;
-    }
+  char *imp_id = parse_fimp(cx, in, out);
 
-    imp = *found;
-  }
+  cx_tok_init(cx_vec_push(out), CX_TID(), row, col)->as_ptr = imp_id
+    ? cx_fmt("%s %s", id, imp_id)
+    : strdup(id);
   
-  if (ref) {
-    struct cx_box *box = &cx_tok_init(cx_vec_push(out),
-				      CX_TLITERAL(),
-				      row, col)->as_box;
-    if (imp) {
-      cx_box_init(box, cx->fimp_type)->as_ptr = imp;
-    } else {
-      cx_box_init(box, cx->func_type)->as_ptr = f;
-    }
-  } else {
-    if (imp) {
-      cx_tok_init(cx_vec_push(out),
-		  CX_TFIMP(),
-		  row, col)->as_ptr = imp;
-    } else {
-      cx_tok_init(cx_vec_push(out),
-		  CX_TFUNC(),
-		  row, col)->as_ptr = f;
-    }
-  }
-
+  if (imp_id) { free(imp_id); }
   return true;
 }
 

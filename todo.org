@@ -1,14 +1,36 @@
 #define htonll(x) ((1==htonl(1)) ? (x) : ((uint64_t)htonl((x) & 0xFFFFFFFF) << 32) | htonl((x) >> 32))
 #define ntohll(x) ((1==ntohl(1)) ? (x) : ((uint64_t)ntohl((x) & 0xFFFFFFFF) << 32) | ntohl((x) >> 32))
 
+* fix fimp str parsing
+** remove tfimp/tfunc?
+** commit
+* change emit_bmips to declare emit-bmips cixl fn
+** rename emit_bmips to init_emit_bmips
+* add popen fn
+** add Proc type
+*** in/out/error fns
+*** keep files
+*** https://www.linuxquestions.org/questions/programming-9/where-do-i-get-a-bidirectional-popen-pipe-320699/
+* remove cx_buf.pos
+** add buf tests
+** seek 0 from end before reading into buffer
+*** remember prev pos and restore
+*** advance pos on write-bytes
+* add bipi tool
+** $ bipi 'foo 1 2' 'bar 3 4'
+*** route stderrs to bipi's stdout
+** run two popens with poll and bufs
 * --- cxcrypt
+* add automatic chunking to encrypt/decrypt
+** add #max-chunk
+** add int net/host
+** read/write size prefixed chunks
+* combine aserver/client with encrypt/decrypt using bipi
 * add Pub/PrivKey
-* copy aserver/aclient examples
-** use asymmetric encryption to secure network channel
-** read/write size prefixed blocks
 * add README
 ** add LICENSE
 * --- cixl
+* convert size_t to ssize_t and remove unsigned
 * add Table emit support
 ** copy Rec
 * replace box.as_ptr with as_func/fimp/etc

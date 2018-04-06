@@ -157,16 +157,20 @@ static ssize_t id_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) {
     cx_op_init(bin, CX_OGETVAR(), tok_idx)->as_getvar.id = cx_sym(cx, id+1);
   } else {
     bool ref = id[0] == '&';
+    char *imp_id = strchr(id, ' ');
+
+    if (imp_id) {
+      *imp_id = 0;
+      imp_id++;
+    }
+    
     int row = cx->row, col = cx->col;
     struct cx_func *f = cx_get_func(cx, ref ? id+1 : id, false);
     if (!f) { return -1; }
-    
     struct cx_fimp *imp = NULL;
-    char *imp_id = parse_fimp(cx, f, in, out);
     
     if (imp_id) {
       struct cx_fimp **found = cx_set_get(&f->imps, &imp_id);
-      free(imp_id);
       
       if (!found) {
 	cx_error(cx, row, col, "Fimp not found");
@@ -186,18 +190,16 @@ static ssize_t id_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) {
       }
     } else {
       if (imp) {
-	struct cx_fimp *imp = tok->as_ptr;
 	if (!imp->ptr && !cx_fimp_inline(imp, tok_idx, bin, cx)) { goto exit; }
 
 	struct cx_funcall_op *op = &cx_op_init(bin,
 					       CX_OFUNCALL(),
 					       tok_idx)->as_funcall;
-	op->func = imp->func;
+	op->func = f;
 	op->imp = imp;
       } else {
-	struct cx_func *func = tok->as_ptr;
-	struct cx_fimp *imp = (func->imps.members.count == 1)
-	  ? *(struct cx_fimp **)cx_vec_start(&func->imps.members)
+	struct cx_fimp *imp = (f->imps.members.count == 1)
+	  ? *(struct cx_fimp **)cx_vec_start(&f->imps.members)
 	  : NULL;
 	
 	if (imp && !imp->ptr && !cx_fimp_inline(imp, tok_idx, bin, cx)) { goto exit; }
@@ -205,7 +207,7 @@ static ssize_t id_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) {
 	struct cx_funcall_op *op = &cx_op_init(bin,
 					       CX_OFUNCALL(),
 					       tok_idx)->as_funcall;
-	op->func = func;
+	op->func = f;
 	op->imp = imp;
       }
     }
