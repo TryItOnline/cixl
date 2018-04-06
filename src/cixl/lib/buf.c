@@ -65,9 +65,7 @@ static bool read_bytes_imp(struct cx_scope *scope) {
     goto exit;
   }
 
-  if (rbytes == -1 && errno == EAGAIN) { rbytes = 0; }
-
-  if (rbytes == -1) {
+  if (rbytes == -1 && errno != EAGAIN) {
     cx_error(cx, cx->row, cx->col, "Failed reading: %d", errno);
     goto exit;
   }
@@ -97,6 +95,7 @@ static bool write_bytes_imp(struct cx_scope *scope) {
   }
 
   b->pos += wbytes;
+  cx_box_init(cx_push(scope), cx->bool_type)->as_bool = b->pos == b->len;
   if (b->pos == b->len) { cx_buf_clear(b); }
   ok = true;
  exit:
@@ -143,7 +142,7 @@ cx_lib(cx_init_buf, "cx/io/buf") {
   cx_add_cfunc(lib, "write-bytes",
 	       cx_args(cx_arg("buf", cx->buf_type),
 		       cx_arg("out", cx->wfile_type)),
-	       cx_args(),
+	       cx_args(cx_arg(NULL, cx->int_type)),
 	       write_bytes_imp);
 
   return true;

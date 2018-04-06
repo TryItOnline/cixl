@@ -101,8 +101,7 @@ func: poll-table(t DBTable poll Poll)()
       
   $poll $f {
     $b flush
-    $b $f write-bytes
-    $b {$poll $f no-write} else
+    $b $f write-bytes {$poll $f no-write} if
   } on-write;
 
 func: commit-change(c DBChange poll Poll)()

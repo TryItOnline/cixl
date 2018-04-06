@@ -69,7 +69,8 @@ static bool accept_imp(struct cx_scope *scope) {
   bool ok = false;
   
   if (fd == -1) {
-    cx_box_init(cx_push(scope), cx->nil_type);
+    cx_error(cx, cx->row, cx->col, "Failed accepting: %d", errno);
+    goto exit;
   } else {
     struct cx_file *f = cx_file_new(cx, fd, "r+", NULL);
     if (!cx_file_unblock(f)) { goto exit; }
@@ -105,12 +106,12 @@ static bool connect_imp(struct cx_scope *scope) {
 
   if (connect(fd, (struct sockaddr*)&addr, sizeof(addr)) == -1 &&
       errno != EINPROGRESS) {
-    cx_box_init(cx_push(scope), scope->cx->nil_type);
-  } else {
-    struct cx_file *f = cx_file_new(cx, fd, "r+", NULL);
-    cx_box_init(cx_push(scope), scope->cx->tcp_client_type)->as_file = f;
+    cx_error(cx, cx->row, cx->col, "Failed connecting: %d", errno);
+    goto exit;
   }
 
+  struct cx_file *f = cx_file_new(cx, fd, "r+", NULL);
+  cx_box_init(cx_push(scope), scope->cx->tcp_client_type)->as_file = f;
   ok = true;
  exit:
   if (!ok) { close(fd); }
@@ -138,12 +139,12 @@ cx_lib(cx_init_net, "cx/net") {
 
   cx_add_cfunc(lib, "accept",
 	       cx_args(cx_arg("server", cx->tcp_server_type)),
-	       cx_args(cx_arg(NULL, cx->opt_type)),
+	       cx_args(cx_arg(NULL, cx->tcp_client_type)),
 	       accept_imp);
 
   cx_add_cfunc(lib, "connect",
 	       cx_args(cx_arg("host", cx->str_type), cx_arg("port", cx->int_type)),
-	       cx_args(cx_arg(NULL, cx->opt_type)),
+	       cx_args(cx_arg(NULL, cx->tcp_client_type)),
 	       connect_imp);
 
   return true;

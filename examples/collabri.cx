@@ -122,8 +122,7 @@ func: push-log(t Topic in Str)()
   $b {    
     $poll $l {
       $b flush
-      $b $l write-bytes
-      $b {$poll $l no-write} else
+      $b $l write-bytes {$poll $l no-write} if
     } on-write
   } else
   
@@ -243,8 +242,7 @@ func: poll-out(c Client)()
 
   $poll $io {
     $buf flush
-    $buf $io write-bytes
-    $buf {$poll $io no-write} else
+    $buf $io write-bytes {$poll $io no-write} if
   } on-write;
 
 func: prompt(c Client `auth-user)('User: ');
@@ -467,8 +465,7 @@ $users len {
 let: server #nil $port #backlog listen;
 
 $poll $server {
-  let: io $server accept;
-  $io {$io new-client % push-prompt} if
+  $server accept new-client % push-prompt
 } on-read
 
 ['Listening on port ' $port] say

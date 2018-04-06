@@ -372,6 +372,14 @@ static bool tell_imp(struct cx_scope *scope) {
   return ok;
 }
 
+static bool eof_imp(struct cx_scope *scope) {
+  struct cx *cx = scope->cx;
+  struct cx_box f = *cx_test(cx_pop(scope, false));
+  cx_box_init(cx_push(scope), cx->bool_type)->as_bool = feof(cx_file_ptr(f.as_file));
+  cx_box_deinit(&f);
+  return true;
+}
+
 static bool close_imp(struct cx_scope *scope) {
   struct cx *cx = scope->cx;
   struct cx_box *f = cx_test(cx_pop(scope, false));
@@ -462,7 +470,11 @@ cx_lib(cx_init_io, "cx/io") {
     
   cx_box_init(cx_put_const(lib, cx_sym(cx, "out"), false), cx->wfile_type)->as_file =
     cx_file_new(cx, fileno(stdout), NULL, stdout);
-    
+
+  cx_box_init(cx_put_const(lib, cx_sym(cx, "error"), false),
+	      cx->wfile_type)->as_file =
+    cx_file_new(cx, fileno(stderr), NULL, stderr);
+
   cx_add_macro(lib, "include:", include_parse);
 
   cx_add_cfunc(lib, "print",
@@ -496,6 +508,11 @@ cx_lib(cx_init_io, "cx/io") {
 	       cx_args(cx_arg("f", cx->file_type)),
 	       cx_args(cx_arg(NULL, cx->int_type)),
 	       tell_imp);
+
+  cx_add_cfunc(lib, "eof",
+	       cx_args(cx_arg("f", cx->file_type)),
+	       cx_args(cx_arg(NULL, cx->bool_type)),
+	       eof_imp);
 
   cx_add_cfunc(lib, "close",
 	       cx_args(cx_arg("f", cx->file_type)), cx_args(),

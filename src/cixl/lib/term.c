@@ -83,7 +83,7 @@ cx_lib(cx_init_term, "cx/io/term") {
   struct cx *cx = lib->cx;
     
   if (!cx_use(cx, "cx/abc", "A", "Str") ||
-      !cx_use(cx, "cx/io", "#in", "#out", "print")) {
+      !cx_use(cx, "cx/io", "#error", "#in", "#out", "print")) {
     return false;
   }
 
@@ -98,6 +98,11 @@ cx_lib(cx_init_term, "cx/io/term") {
 		cx_args(cx_arg("v", cx->any_type)), cx_args(),
 		"#out $v print\n"
 		"#out @@n print");
+
+  cx_add_cxfunc(lib, "yelp",
+		cx_args(cx_arg("v", cx->any_type)), cx_args(),
+		"#error $v print\n"
+		"#error @@n print");
 
   cx_add_cfunc(lib, "ask",
 	       cx_args(cx_arg("prompt", cx->str_type)), cx_args(),

@@ -183,16 +183,6 @@ static bool func_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
 
   cx_tok_deinit(&rets);
   
-  if (!cx_parse_end(cx, in, &toks, true)) {
-    if (!cx->errors.count) { cx_error(cx, cx->row, cx->col, "Missing func end"); }
-
-    cx_tok_deinit(&id);
-    cx_do_vec(&toks, struct cx_tok, t) { cx_tok_deinit(t); }
-    cx_vec_deinit(&toks);
-    cx_vec_deinit(&func_args);
-    return false;
-  }
-
   struct cx_fimp *imp = cx_add_func(*cx->lib,
 				    id.as_ptr,
 				    func_args.count,
@@ -206,6 +196,14 @@ static bool func_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
 
   if (!imp) {
     cx_do_vec(&toks, struct cx_tok, t) { cx_tok_deinit(t); }    
+    cx_vec_deinit(&toks);
+    return false;
+  }
+
+  if (!cx_parse_end(cx, in, &toks, true)) {
+    if (!cx->errors.count) { cx_error(cx, cx->row, cx->col, "Missing func end"); }
+
+    cx_do_vec(&toks, struct cx_tok, t) { cx_tok_deinit(t); }
     cx_vec_deinit(&toks);
     return false;
   }

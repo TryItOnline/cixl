@@ -1,0 +1,112 @@
+#!/usr/local/bin/cixl
+
+/*
+  A generic, non-blocking TCP client that either sends from stdin until EOF or
+  receives to stdout until disconnected.
+
+  Execute ```cixl examples/aclient.cx 127.0.0.1 7707 < in``` to connect to local
+  host on port 7707 and send data from ```in```.
+
+  https://github.com/basic-gongfu/cixl#getting-started
+*/
+
+use:
+  (cx/abc     #f #t)
+  (cx/cond    ? ! = > and else if if-else or)
+  (cx/const   define:)
+  (cx/error   throw)
+  (cx/func    func:)
+  (cx/io      #in #out #error close unblock)
+  (cx/io/buf  Buf len new read-bytes write-bytes)
+  (cx/io/poll Poll delete len new no-write on-read on-write wait)
+  (cx/io/term say yelp)
+  (cx/iter    while)
+  (cx/net     connect)
+  (cx/ref     deref ref set)
+  (cx/stack   pop)
+  (cx/str     int)
+  (cx/sys     #args)
+  (cx/var     let:);
+
+define: max-io 1024;
+
+func: print-usage()()
+  ['Usage:@naclient host port'] say
+  'Invalid argument list' throw;
+
+let: port  #args pop &print-usage or int;
+let: host  #args pop &print-usage or;
+let: poll  Poll new;
+let: in    Buf new;
+let: out   Buf new;
+let: state `connect ref;
+let: c     $host $port connect;
+
+func: poll-client-write()()
+  $poll $c {
+    $state deref `connect = {
+      'Connect' yelp
+      $state `ok set
+
+      $poll #in {
+        $out #in #max-io read-bytes {
+          'Finished reading' yelp
+	  $poll #in delete
+          $state `drain-client set
+        } else
+
+        $out len {
+	  poll-client-write
+	} {
+      	  'Finished sending' yelp
+	  $poll $c delete
+          $c close
+	  $state `done set
+	} if-else
+      } on-read
+    } if
+
+    $out $c write-bytes {
+      $poll $c no-write
+
+      $state deref `drain-client = {
+        'Finished sending' yelp
+        $state `done set
+	$c close
+      } if
+    } if
+  } on-write;
+
+func: poll-out()()
+  $poll #out {
+    $in #out write-bytes {
+      $poll #out no-write
+
+      $state deref `drain-out = {
+        'Finished writing' yelp
+	$state `done set
+      }
+    } if
+  } on-write;
+
+#in unblock
+#out unblock
+poll-client-write
+
+$poll $c {  
+  let: in-len $in len;
+
+  $in $c #max-io read-bytes {
+    $in len $in-len! and {poll-out} if
+  } {
+    'Disconnect' yelp
+    $poll $c delete
+    $c close
+    $state $out {poll-out `drain-out} `done if-else set
+  } if-else
+} on-read
+
+{
+  $poll -1 wait
+  $state deref `done =!
+} while

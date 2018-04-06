@@ -56,15 +56,13 @@ let: in Buf new;
 func: scan-port(port Int)()
   let: c $host $port connect;
 
-  $c? {
-    $poll $c {
-      $in $c $max-read read-bytes
-      is-nil {[$port @@n $in str @@n] say} else
-      $in clear
-      $poll $c delete
-      $c close      
-    } on-read
-  } if;
+  $poll $c {
+    $in $c $max-read read-bytes
+    is-nil {[$port @@n $in str @@n] say} else
+    $in clear
+    $poll $c delete
+    $c close      
+  } on-read;
 
 /*
   Scan ports in range and dispatch events.
