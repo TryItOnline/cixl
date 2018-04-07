@@ -473,16 +473,15 @@ if (stop_pc == 18) {
 
 cx->row = 1; cx->col = 2;
 struct cx_scope *s = cx_scope(cx, 0);
-struct cx_func *func = func_M();
-struct cx_fimp *imp = NULL;
-imp = func_M_Opt();
-if (s->safe && !cx_fimp_match(imp, s)) { imp = NULL; }
-if (!imp) {
-  cx_error(cx, cx->row, cx->col, "Func not applicable: %s", func->id);
+static struct cx_fimp *imp94 = NULL;if (!imp94) { imp94 = func_M_Opt(); }
+if (imp94 && s->safe && !cx_fimp_match(imp94, s)) { imp94 = NULL; }
+if (!imp94) { imp94 = cx_func_match(func_M(), s); }
+if (!imp94) {
+  cx_error(cx, cx->row, cx->col, "Func not applicable: ?");
   goto exit;
 }
 
-if (!cx_fimp_call(imp, s)) { goto exit; }
+if (!cx_fimp_call(imp94, s)) { goto exit; }
 }
 
 op19: { /* CX_TLAMBDA CX_OLAMBDA */
@@ -560,16 +559,15 @@ if (stop_pc == 23) {
 
 cx->row = 1; cx->col = 14;
 struct cx_scope *s = cx_scope(cx, 0);
-struct cx_func *func = func_A();
-struct cx_fimp *imp = NULL;
-imp = func_A_IntInt();
-if (s->safe && !cx_fimp_match(imp, s)) { imp = NULL; }
-if (!imp) {
-  cx_error(cx, cx->row, cx->col, "Func not applicable: %s", func->id);
+static struct cx_fimp *imp95 = NULL;if (!imp95) { imp95 = func_A_IntInt(); }
+if (imp95 && s->safe && !cx_fimp_match(imp95, s)) { imp95 = NULL; }
+if (!imp95) { imp95 = cx_func_match(func_A(), s); }
+if (!imp95) {
+  cx_error(cx, cx->row, cx->col, "Func not applicable: +");
   goto exit;
 }
 
-if (!cx_fimp_call(imp, s)) { goto exit; }
+if (!cx_fimp_call(imp95, s)) { goto exit; }
 }
 
 op24: { /* CX_TID CX_OGETVAR */
@@ -599,15 +597,14 @@ if (stop_pc == 25) {
 
 cx->row = 1; cx->col = 19;
 struct cx_scope *s = cx_scope(cx, 0);
-struct cx_func *func = func_NN();
-struct cx_fimp *imp = NULL;
-imp = cx_func_match(func, s);
-if (!imp) {
-  cx_error(cx, cx->row, cx->col, "Func not applicable: %s", func->id);
+static struct cx_fimp *imp96 = NULL;if (imp96 && s->safe && !cx_fimp_match(imp96, s)) { imp96 = NULL; }
+if (!imp96) { imp96 = cx_func_match(func_NN(), s); }
+if (!imp96) {
+  cx_error(cx, cx->row, cx->col, "Func not applicable: --");
   goto exit;
 }
 
-if (!cx_fimp_call(imp, s)) { goto exit; }
+if (!cx_fimp_call(imp96, s)) { goto exit; }
 }
 
 op26: { /* CX_TID CX_OFUNCALL */
@@ -621,15 +618,14 @@ if (stop_pc == 26) {
 
 cx->row = 1; cx->col = 22;
 struct cx_scope *s = cx_scope(cx, 0);
-struct cx_func *func = func_recall();
-struct cx_fimp *imp = NULL;
-imp = cx_func_match(func, s);
-if (!imp) {
-  cx_error(cx, cx->row, cx->col, "Func not applicable: %s", func->id);
+static struct cx_fimp *imp97 = NULL;if (imp97 && s->safe && !cx_fimp_match(imp97, s)) { imp97 = NULL; }
+if (!imp97) { imp97 = cx_func_match(func_recall(), s); }
+if (!imp97) {
+  cx_error(cx, cx->row, cx->col, "Func not applicable: recall");
   goto exit;
 }
 
-if (!cx_fimp_call(imp, s)) { goto exit; }
+if (!cx_fimp_call(imp97, s)) { goto exit; }
 }
 
 op27: { /* CX_TID CX_OGETVAR */
@@ -659,15 +655,14 @@ if (stop_pc == 28) {
 
 cx->row = 1; cx->col = 32;
 struct cx_scope *s = cx_scope(cx, 0);
-struct cx_func *func = func_ifNelse();
-struct cx_fimp *imp = NULL;
-imp = cx_func_match(func, s);
-if (!imp) {
-  cx_error(cx, cx->row, cx->col, "Func not applicable: %s", func->id);
+static struct cx_fimp *imp98 = NULL;if (imp98 && s->safe && !cx_fimp_match(imp98, s)) { imp98 = NULL; }
+if (!imp98) { imp98 = cx_func_match(func_ifNelse(), s); }
+if (!imp98) {
+  cx_error(cx, cx->row, cx->col, "Func not applicable: if-else");
   goto exit;
 }
 
-if (!cx_fimp_call(imp, s)) { goto exit; }
+if (!cx_fimp_call(imp98, s)) { goto exit; }
 }
 
 op29: { /* CX_TID CX_ORETURN */
@@ -742,15 +737,14 @@ if (stop_pc == 30) {
 
 cx->row = 1; cx->col = 7;
 struct cx_scope *s = cx_scope(cx, 0);
-struct cx_func *func = func_fibNrec();
-struct cx_fimp *imp = NULL;
-imp = cx_func_match(func, s);
-if (!imp) {
-  cx_error(cx, cx->row, cx->col, "Func not applicable: %s", func->id);
+static struct cx_fimp *imp99 = NULL;if (imp99 && s->safe && !cx_fimp_match(imp99, s)) { imp99 = NULL; }
+if (!imp99) { imp99 = cx_func_match(func_fibNrec(), s); }
+if (!imp99) {
+  cx_error(cx, cx->row, cx->col, "Func not applicable: fib-rec");
   goto exit;
 }
 
-if (!cx_fimp_call(imp, s)) { goto exit; }
+if (!cx_fimp_call(imp99, s)) { goto exit; }
 }
 
 op31: { /* CX_TID CX_ORETURN */
@@ -825,15 +819,14 @@ if (stop_pc == 32) {
 
 cx->row = 1; cx->col = 44;
 struct cx_scope *s = cx_scope(cx, 0);
-struct cx_func *func = func_fib();
-struct cx_fimp *imp = NULL;
-imp = cx_func_match(func, s);
-if (!imp) {
-  cx_error(cx, cx->row, cx->col, "Func not applicable: %s", func->id);
+static struct cx_fimp *imp100 = NULL;if (imp100 && s->safe && !cx_fimp_match(imp100, s)) { imp100 = NULL; }
+if (!imp100) { imp100 = cx_func_match(func_fib(), s); }
+if (!imp100) {
+  cx_error(cx, cx->row, cx->col, "Func not applicable: fib");
   goto exit;
 }
 
-if (!cx_fimp_call(imp, s)) { goto exit; }
+if (!cx_fimp_call(imp100, s)) { goto exit; }
 }
 
 op33: { /* CX_TID CX_OFUNCALL */
@@ -847,15 +840,14 @@ if (stop_pc == 33) {
 
 cx->row = 1; cx->col = 48;
 struct cx_scope *s = cx_scope(cx, 0);
-struct cx_func *func = func__();
-struct cx_fimp *imp = NULL;
-imp = cx_func_match(func, s);
-if (!imp) {
-  cx_error(cx, cx->row, cx->col, "Func not applicable: %s", func->id);
+static struct cx_fimp *imp101 = NULL;if (imp101 && s->safe && !cx_fimp_match(imp101, s)) { imp101 = NULL; }
+if (!imp101) { imp101 = cx_func_match(func__(), s); }
+if (!imp101) {
+  cx_error(cx, cx->row, cx->col, "Func not applicable: _");
   goto exit;
 }
 
-if (!cx_fimp_call(imp, s)) { goto exit; }
+if (!cx_fimp_call(imp101, s)) { goto exit; }
 }
 
 op34: { /* CX_TID CX_OFUNCALL */
@@ -869,15 +861,14 @@ if (stop_pc == 34) {
 
 cx->row = 1; cx->col = 50;
 struct cx_scope *s = cx_scope(cx, 0);
-struct cx_func *func = func_times();
-struct cx_fimp *imp = NULL;
-imp = cx_func_match(func, s);
-if (!imp) {
-  cx_error(cx, cx->row, cx->col, "Func not applicable: %s", func->id);
+static struct cx_fimp *imp102 = NULL;if (imp102 && s->safe && !cx_fimp_match(imp102, s)) { imp102 = NULL; }
+if (!imp102) { imp102 = cx_func_match(func_times(), s); }
+if (!imp102) {
+  cx_error(cx, cx->row, cx->col, "Func not applicable: times");
   goto exit;
 }
 
-if (!cx_fimp_call(imp, s)) { goto exit; }
+if (!cx_fimp_call(imp102, s)) { goto exit; }
 }
 
 op35: { /* CX_TID CX_OFUNCALL */
@@ -891,15 +882,14 @@ if (stop_pc == 35) {
 
 cx->row = 1; cx->col = 56;
 struct cx_scope *s = cx_scope(cx, 0);
-struct cx_func *func = func_clock();
-struct cx_fimp *imp = NULL;
-imp = cx_func_match(func, s);
-if (!imp) {
-  cx_error(cx, cx->row, cx->col, "Func not applicable: %s", func->id);
+static struct cx_fimp *imp103 = NULL;if (imp103 && s->safe && !cx_fimp_match(imp103, s)) { imp103 = NULL; }
+if (!imp103) { imp103 = cx_func_match(func_clock(), s); }
+if (!imp103) {
+  cx_error(cx, cx->row, cx->col, "Func not applicable: clock");
   goto exit;
 }
 
-if (!cx_fimp_call(imp, s)) { goto exit; }
+if (!cx_fimp_call(imp103, s)) { goto exit; }
 }
 
 op36: { /* CX_TID CX_OFUNCALL */
@@ -913,15 +903,14 @@ if (stop_pc == 36) {
 
 cx->row = 1; cx->col = 62;
 struct cx_scope *s = cx_scope(cx, 0);
-struct cx_func *func = func_E();
-struct cx_fimp *imp = NULL;
-imp = cx_func_match(func, s);
-if (!imp) {
-  cx_error(cx, cx->row, cx->col, "Func not applicable: %s", func->id);
+static struct cx_fimp *imp104 = NULL;if (imp104 && s->safe && !cx_fimp_match(imp104, s)) { imp104 = NULL; }
+if (!imp104) { imp104 = cx_func_match(func_E(), s); }
+if (!imp104) {
+  cx_error(cx, cx->row, cx->col, "Func not applicable: /");
   goto exit;
 }
 
-if (!cx_fimp_call(imp, s)) { goto exit; }
+if (!cx_fimp_call(imp104, s)) { goto exit; }
 }
 
 op37: { /* CX_TID CX_OFUNCALL */
@@ -935,15 +924,14 @@ if (stop_pc == 37) {
 
 cx->row = 1; cx->col = 64;
 struct cx_scope *s = cx_scope(cx, 0);
-struct cx_func *func = func_int();
-struct cx_fimp *imp = NULL;
-imp = cx_func_match(func, s);
-if (!imp) {
-  cx_error(cx, cx->row, cx->col, "Func not applicable: %s", func->id);
+static struct cx_fimp *imp105 = NULL;if (imp105 && s->safe && !cx_fimp_match(imp105, s)) { imp105 = NULL; }
+if (!imp105) { imp105 = cx_func_match(func_int(), s); }
+if (!imp105) {
+  cx_error(cx, cx->row, cx->col, "Func not applicable: int");
   goto exit;
 }
 
-if (!cx_fimp_call(imp, s)) { goto exit; }
+if (!cx_fimp_call(imp105, s)) { goto exit; }
 }
 
 op38: { /* CX_TMACRO CX_ORETURN */

@@ -409,11 +409,8 @@ static bool funcall_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
   struct cx_fimp *imp = op->as_funcall.imp;
   struct cx_scope *s = cx_scope(cx, 0);
   
-  if (imp) {
-    if (s->safe && !cx_fimp_match(imp, s)) { imp = NULL; }
-  } else {
-    imp = cx_func_match(func, s);
-  }
+  if (imp && s->safe && !cx_fimp_match(imp, s)) { imp = NULL; }
+  if (!imp) { imp = op->as_funcall.imp = cx_func_match(func, s); }
   
   if (!imp) {
     cx_error(cx, cx->row, cx->col, "Func not applicable: %s", func->id);
@@ -429,28 +426,30 @@ static bool funcall_emit(struct cx_op *op,
 			 struct cx *cx) {
   struct cx_func *func = op->as_funcall.func;
   struct cx_fimp *imp = op->as_funcall.imp;
+  struct cx_sym imp_var = cx_gsym(cx, "imp");
+  
+  fprintf(out,
+	  "struct cx_scope *s = cx_scope(cx, 0);\n"
+	  "static struct cx_fimp *%s = NULL;",
+	  imp_var.id);
 
-  fputs("struct cx_scope *s = cx_scope(cx, 0);\n", out);
-  fprintf(out, "struct cx_func *func = %s();\n", func->emit_id);
-  fputs("struct cx_fimp *imp = NULL;\n", out);
-  
   if (imp) {
-    fprintf(out,
-	    "imp = %s();\n"
-	    "if (s->safe && !cx_fimp_match(imp, s)) { imp = NULL; }\n",
-	    imp->emit_id);
-  } else {
-    fputs("imp = cx_func_match(func, s);\n", out);
+    fprintf(out, "if (!%s) { %s = %s(); }\n", imp_var.id, imp_var.id, imp->emit_id);
   }
+
+  fprintf(out,
+	  "if (%s && s->safe && !cx_fimp_match(%s, s)) { %s = NULL; }\n"
+	  "if (!%s) { %s = cx_func_match(%s(), s); }\n",
+	  imp_var.id, imp_var.id, imp_var.id, imp_var.id, imp_var.id, func->emit_id);
   
-  fputs("if (!imp) {\n"
-	"  cx_error(cx, cx->row, cx->col, \"Func not applicable: %s\", func->id);\n"
-	"  goto exit;\n"
-	"}\n\n"
-	
-	"if (!cx_fimp_call(imp, s)) { goto exit; }\n",
-	out);
+  fprintf(out,
+	  "if (!%s) {\n"
+	  "  cx_error(cx, cx->row, cx->col, \"Func not applicable: %s\");\n"
+	  "  goto exit;\n"
+	  "}\n\n",
+	  imp_var.id, func->id);
   
+  fprintf(out, "if (!cx_fimp_call(%s, s)) { goto exit; }\n", imp_var.id);
   return true;
 }
 
