@@ -4,7 +4,7 @@
   Scans a range of TCP/IP ports for a host using non-blocking IO and prints status
   to stdout.
   
-  Execute ```cixl cixl/examples/tcpscan.cx 127.0.0.1 1 1000 10``` to scan
+  Execute ```cixl examples/tcpscan.cx 127.0.0.1 1 1000 10``` to scan
   ports 1-1000 on localhost and attempt to read 10 bytes from established
   connections.
   

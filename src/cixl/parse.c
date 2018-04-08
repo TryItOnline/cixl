@@ -356,6 +356,7 @@ static bool parse_str(struct cx *cx, FILE *in, struct cx_vec *out) {
   int row = cx->row, col = cx->col;
   cx->col++;
   bool ok = false;
+  char pc = 0;
   
   while (true) {
     char c = fgetc(in);
@@ -365,7 +366,7 @@ static bool parse_str(struct cx *cx, FILE *in, struct cx_vec *out) {
       goto exit;
     }
 
-    if (c == '\'') {
+    if (c == '\'' && pc != '\\') {
       cx->col++;
       break;
     }
@@ -383,6 +384,7 @@ static bool parse_str(struct cx *cx, FILE *in, struct cx_vec *out) {
     }
 
     fputc(c, value.stream);
+    pc = c;
   }
 
   ok = true;

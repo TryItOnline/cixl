@@ -1,0 +1,36 @@
+#!/usr/local/bin/cixl
+
+/*
+  Executes command with standard streams connected to input and output processes.
+  The input process inherits main input and the output process is connected to
+  main output.
+
+  https://github.com/basic-gongfu/cixl#getting-started
+*/
+
+use:
+  (cx/abc     )
+  (cx/cond    = else or)
+  (cx/const   define:)
+  (cx/func    func:)
+  (cx/io      close)
+  (cx/io/term say)
+  (cx/iter    map next)
+  (cx/proc    exec exit popen)
+  (cx/stack   % ~ len pop splat stack)
+  (cx/str     split)
+  (cx/sys     #args)
+  (cx/var     let:);
+
+func: print-usage()()
+  ['Usage:@n'
+   'procwrap \'in command\' \'out command\' \'child command\''] say
+  -1 exit;
+
+#args len 3 = &print-usage else
+let: (in-cmd out-cmd child-cmd)
+  #args {@@s split} map splat;
+
+let: child: $child-cmd % next ~ stack popen;
+let: out: $out-cmd % next ~ stack popen;
+$in-cmd % next ~ stack exec

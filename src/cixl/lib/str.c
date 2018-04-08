@@ -354,9 +354,11 @@ static bool seq_imp(struct cx_scope *scope) {
 
     fputc(c.as_char, out.stream);
   }
-
+  
+  fflush(out.stream);
+  cx_box_init(cx_push(scope), cx->str_type)->as_str =
+    cx_str_new(out.data, ftell(out.stream));
   cx_mfile_close(&out);
-  cx_box_init(cx_push(scope), cx->str_type)->as_str = cx_str_new(out.data, out.size);
   ok = true;
  exit:
   free(out.data);

@@ -138,12 +138,15 @@ static bool stash_imp(struct cx_scope *scope) {
   return true;
 }
 
-static bool splat_imp(struct cx_scope *scope) {
-  struct cx_box in = *cx_test(cx_pop(scope, false));
-  struct cx_stack *s = in.as_ptr;
-  cx_vec_grow(&scope->stack, scope->stack.count+s->imp.count);
-  cx_do_vec(&s->imp, struct cx_box, v) { cx_copy(cx_vec_push(&scope->stack), v); }
+static bool splat_imp(struct cx_scope *s) {
+  struct cx_box in = *cx_test(cx_pop(s, false));
+  struct cx_iter *it = cx_iter(&in);
+  struct cx_box v;
+  
+  while (cx_iter_next(it, &v, s)) { *cx_push(s) = v; }
+
   cx_box_deinit(&in);
+  cx_iter_deref(it);
   return true;
 }
 
@@ -388,7 +391,7 @@ cx_lib(cx_init_stack, "cx/stack") {
 	       stash_imp);
 
   cx_add_cfunc(lib, "splat",
-	       cx_args(cx_arg("in", cx->stack_type)),
+	       cx_args(cx_arg("in", cx->seq_type)),
 	       cx_args(),
 	       splat_imp);
 
