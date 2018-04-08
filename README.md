@@ -32,6 +32,12 @@ Press Return twice to evaluate.
 $
 ```
 
+### Unix Native
+Rather than stacking abstractions in the name of portability, Cixl embraces the chosen requirement and limitation of running on top of a reasonably POSIX compliant Unix derivative. By integrating deep into the C tool chain, and by providing abstractions optimized for Unix feature set.
+
+### No GC
+Cixl doesn't use a garbage collector, which leads to more predictable performance and resource usage. Values are either automatically copied or reference counted, references are decremented instantly as values are popped from the stack and variables go out of scope.
+
 ### Scripting
 When launched with arguments; Cixl interprets the first argument as filename to load code from, and pushes remaining on ```#args```.
 
@@ -117,6 +123,7 @@ The entire language is split into libraries to enable building custom languages 
 * cx/math
 * cx/net
 * cx/pair
+* cx/proc
 * cx/rec
 * cx/ref
 * cx/stack
@@ -1118,6 +1125,7 @@ Cixl is statically and strongly typed; but since it's approach to typing is grad
 | Opt       |             | cx/abc      |
 | Pair      | Cmp         | cx/pair     |
 | Poll      | A           | cx/io/poll  |
+| Proc      | Cmp         | cx/proc     |
 | Rat       | Num         | cx/math     |
 | Rec       | Cmp         | cx/rec      |
 | Ref       | A           | cx/ref      |

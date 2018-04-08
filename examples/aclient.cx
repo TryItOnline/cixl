@@ -22,6 +22,7 @@ use:
   (cx/io/term say yelp)
   (cx/iter    while)
   (cx/net     connect)
+  (cx/proc    exit)
   (cx/ref     deref ref set)
   (cx/stack   pop)
   (cx/str     int)
@@ -32,7 +33,7 @@ define: max-io 1024;
 
 func: print-usage()()
   ['Usage:@naclient host port'] say
-  'Invalid argument list' throw;
+  -1 exit;
 
 let: port  #args pop &print-usage or int;
 let: host  #args pop &print-usage or;

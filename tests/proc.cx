@@ -1,0 +1,13 @@
+'Testing cx/proc...' say
+
+fork %
+{_ 42 exit} else
+-1 wait 42 = check
+
+'wc' [] popen %
+in 'foo bar baz' print
+out {is-graph!} split &int map
+stack [0 3 11] = check
+
+'whoami' [] popen -1 wait 0 = check
+'wc' [] popen 0 kill is-nil check

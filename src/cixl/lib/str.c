@@ -344,6 +344,8 @@ static bool seq_imp(struct cx_scope *scope) {
   struct cx_box c;
   
   while (cx_iter_next(it, &c, scope)) {
+    if (c.type == cx->nil_type) { continue; }
+    
     if (c.type != cx->char_type) {
       cx_error(cx, cx->row, cx->col, "Expected type Char, actual: %s", c.type->id);
       cx_mfile_close(&out);

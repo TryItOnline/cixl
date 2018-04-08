@@ -13,6 +13,7 @@ include:
   'math.cx'
   'meta.cx'
   'pair.cx'
+  'proc.cx'
   'rec.cx'
   'ref.cx'
   'stack.cx'

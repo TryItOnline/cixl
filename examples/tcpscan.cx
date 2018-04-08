@@ -24,6 +24,7 @@ use:
   (cx/iter    for while)
   (cx/net     connect)
   (cx/math    + -)
+  (cx/proc    exit)
   (cx/stack   ~ _ pop)
   (cx/str     int)
   (cx/sys     #args)
@@ -36,7 +37,7 @@ define: max-wait-ms  5;
 func: print-usage()()
   ['Usage:@n'
    'cixl tcpscan.cx host min-port max-port max-read'] say
-  'Invalid argument list' throw;
+  -1 exit;
 
 let: max-read #args pop &print-usage or int;
 let: max-port #args pop &print-usage or int;

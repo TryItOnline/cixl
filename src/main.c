@@ -13,11 +13,18 @@
 #include "cixl/repl.h"
 #include "cixl/scope.h"
 
+struct cx cx;
+static void deinit_cx() { cx_deinit(&cx); }
+
+struct cx_bin *bin;
+static void deinit_bin() { cx_bin_deref(bin); }
+
 int main(int argc, char *argv[]) {
   srand((ptrdiff_t)argv + clock());
 
-  struct cx cx;
   cx_init(&cx);
+  cx_test(atexit(deinit_cx) == 0);
+  
   cx_init_libs(&cx);
   cx_use(&cx, "cx/io", "include:");
   cx_use(&cx, "cx/meta", "lib:", "use:");
@@ -34,7 +41,6 @@ int main(int argc, char *argv[]) {
       compile = true;
     } else {
       fprintf(stderr, "Invalid option %s\n", argv[argi]);
-      cx_deinit(&cx);
       return -1;
     }
   }
@@ -45,25 +51,21 @@ int main(int argc, char *argv[]) {
     if (emit) {
       if (argi == argc) {
 	fputs("Missing filename\n", stderr);
-	cx_deinit(&cx);
 	return -1;
       }
 
       const char *fname = argv[argi++];
-      struct cx_bin *bin = cx_bin_new();
-	
+      bin = cx_bin_new();
+      cx_test(atexit(deinit_bin) == 0);
+      
       if (!cx_load(&cx, fname, bin)) {
 	cx_dump_errors(&cx, stderr);
-	cx_bin_deref(bin);
-	cx_deinit(&cx);
 	return -1;
       }
 
       if (compile) {	
 	if (!cx_emit_file(&cx, bin, stdout)) {
 	  cx_dump_errors(&cx, stderr);
-	  cx_bin_deref(bin);
-	  cx_deinit(&cx);
 	  return -1;
 	}	
       } else {	
@@ -96,8 +98,6 @@ int main(int argc, char *argv[]) {
 	if (!out) {
 	  fprintf(stderr, "Failed executing compiler: %d\n%s\n", errno, cmd.data);
 	  free(cmd.data);
-	  cx_bin_deref(bin);
-	  cx_deinit(&cx);
 	  return -1;
 	}
 
@@ -105,36 +105,28 @@ int main(int argc, char *argv[]) {
 
 	if (!cx_emit_file(&cx, bin, out)) {
 	  cx_dump_errors(&cx, stderr);
-	  cx_bin_deref(bin);
-	  cx_deinit(&cx);
 	  return -1;
 	}
 
-	cx_bin_deref(bin);
 	pclose(out);
       }
     } else {
       if (argi == argc) {
 	fputs("Error: Missing file\n", stderr);
-	cx_deinit(&cx);
 	return -1;
       }
       
       char *fn = argv[argi++];
       cx_push_args(&cx, argc-argi, argv+argi);
-      struct cx_bin *bin = cx_bin_new();
+      bin = cx_bin_new();
+      cx_test(atexit(deinit_bin) == 0);
       
       if (!cx_load(&cx, fn, bin) || !cx_eval(bin, 0, -1, &cx)) {
 	cx_dump_errors(&cx, stderr);
-	cx_bin_deref(bin);
-	cx_deinit(&cx);
 	return -1;
       }
-
-      cx_bin_deref(bin);
     }
   }
 
-  cx_deinit(&cx);
   return 0;
 }

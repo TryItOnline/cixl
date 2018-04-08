@@ -113,28 +113,28 @@ bool cx_emit_file(struct cx *cx, struct cx_bin *bin, FILE *out) {
   
   if (!cx_emit(bin, out, cx)) { goto exit; }
       
-  fputs("int main(int argc, char *argv[]) {\n"
-	"  srand((ptrdiff_t)argv + clock());\n"
-	"  struct cx cx;\n"
+  fputs("struct cx cx;\n"
+	"static void deinit_cx() { cx_deinit(&cx); }\n\n"
+
+	"int main(int argc, char *argv[]) {\n"
+	"  srand((ptrdiff_t)argv + clock());\n\n"
+	
 	"  cx_init(&cx);\n"
+	"  cx_test(atexit(deinit_cx) == 0);\n\n"
 	"  cx_init_libs(&cx);\n"
 	"  cx_use(&cx, \"cx/abc\", \"Str\");\n"
         "  cx_use(&cx, \"cx/io\", \"include:\");\n"
         "  cx_use(&cx, \"cx/meta\", \"lib:\", \"use:\");\n"
         "  cx_use(&cx, \"cx/sys\", \"#args\");\n"
-        "  cx_push_args(&cx, argc-1, argv+1);\n"
-	"  int result = -1;\n\n"
+        "  cx_push_args(&cx, argc-1, argv+1);\n\n"
 	
 	"  if (!eval(&cx)) {\n"
 	"    cx_dump_errors(&cx, stderr);\n"
-	"    goto exit;\n"
+	"    return -1;\n"
 	"  }\n\n"
 	
-	"  result = 0;\n"
-	"exit:\n"
-	"  cx_deinit(&cx);\n"
-	"  return result;\n"
-	"}",
+	"  return 0;\n"
+	"}\n",
 	out);
 
   ok = true;

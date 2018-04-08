@@ -1,26 +1,33 @@
+'wc' [] popen -1 kill
+'ls' [] popen -1 wait
+'wc' [] popen % in 'foo bar baz' print out {is-graph!} split stack
+fork % {_ 'wc' [] exec} {% in 'foo bar baz' print out {is-graph!} split stack} if-else
+
 #define htonll(x) ((1==htonl(1)) ? (x) : ((uint64_t)htonl((x) & 0xFFFFFFFF) << 32) | htonl((x) >> 32))
 #define ntohll(x) ((1==ntohl(1)) ? (x) : ((uint64_t)ntohl((x) & 0xFFFFFFFF) << 32) | ntohl((x) >> 32))
+host64 & net64 fns
 
-* add popen fn
-** add Proc type
-*** in/out/error fns
-*** keep files
-*** https://www.linuxquestions.org/questions/programming-9/where-do-i-get-a-bidirectional-popen-pipe-320699/
 * add bipi tool
 ** $ bipi 'foo 1 2' 'bar 3 4'
 *** route stderrs to bipi's stdout
 ** run two popens with poll and bufs
 * remove cx_buf.pos
-** add buf tests
-** seek 0 from end before reading into buffer
-*** remember prev pos and restore
-*** advance pos on write-bytes
-* --- cxcrypt
 * add automatic chunking to encrypt/decrypt
 ** add #max-chunk
 ** add int net/host
 ** read/write size prefixed chunks
 * combine aserver/client with encrypt/decrypt using bipi
+* ---
+** add buf tests
+** seek 0 from end before reading into buffer
+*** remember prev pos and restore
+*** advance pos on write-bytes
+* replace cx_fimp.init with enum cx_fimp_type
+** CX_FHOST_C, CX_FHOST_CX, CX_FGUEST
+* remove Rec =/?/print overloads
+** handle in type methods
+*** check if user defined func exists
+* --- cxcrypt
 * add Pub/PrivKey
 * add README
 ** add LICENSE
@@ -51,6 +58,7 @@
 ** add cx_getconst_op.value
 *** set in parse_const
 *** change eval to push value
+* add cx/proc pid(Proc)/this-pid/parent-pid fns
 * replace clone fallback to copy with error
 * replace varargs with size/array+macro
 

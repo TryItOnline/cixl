@@ -32,6 +32,7 @@
 #include "cixl/lib/meta.h"
 #include "cixl/lib/net.h"
 #include "cixl/lib/pair.h"
+#include "cixl/lib/proc.h"
 #include "cixl/lib/poll.h"
 #include "cixl/lib/rec.h"
 #include "cixl/lib/ref.h"
@@ -80,6 +81,7 @@ cx_lib(cx_init_world, "cx") {
     cx_use(cx, "cx/meta") &&
     cx_use(cx, "cx/net") &&
     cx_use(cx, "cx/pair") &&
+    cx_use(cx, "cx/proc") &&
     cx_use(cx, "cx/rec") &&
     cx_use(cx, "cx/ref") &&
     cx_use(cx, "cx/stack") &&
@@ -149,7 +151,7 @@ struct cx *cx_init(struct cx *cx) {
     cx->nil_type = cx->num_type =
     cx->meta_type =
     cx->opt_type =
-    cx->pair_type = cx->poll_type =
+    cx->pair_type = cx->poll_type = cx->proc_type = 
     cx->rat_type = cx->rec_type = cx->ref_type = cx->rfile_type = cx->rwfile_type =
     cx->seq_type = cx->stack_type = cx->str_type = cx->sym_type =
     cx->table_type = cx->tcp_client_type = cx->tcp_server_type = cx->time_type =
@@ -176,6 +178,7 @@ void cx_init_libs(struct cx *cx) {
   cx_init_net(cx);
   cx_init_pair(cx);
   cx_init_poll(cx);
+  cx_init_proc(cx);
   cx_init_rec(cx);
   cx_init_ref(cx);
   cx_init_stack(cx);

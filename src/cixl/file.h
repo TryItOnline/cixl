@@ -1,6 +1,7 @@
 #ifndef CX_FILE_H
 #define CX_FILE_H
 
+#include <stdbool.h>
 #include <stdio.h>
 
 #define cx_init_file_type(cx, name, ...)		\

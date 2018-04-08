@@ -430,7 +430,7 @@ static bool funcall_emit(struct cx_op *op,
   
   fprintf(out,
 	  "struct cx_scope *s = cx_scope(cx, 0);\n"
-	  "static struct cx_fimp *%s = NULL;",
+	  "static struct cx_fimp *%s = NULL;\n",
 	  imp_var.id);
 
   if (imp) {
@@ -439,7 +439,7 @@ static bool funcall_emit(struct cx_op *op,
 
   fprintf(out,
 	  "if (%s && s->safe && !cx_fimp_match(%s, s)) { %s = NULL; }\n"
-	  "if (!%s) { %s = cx_func_match(%s(), s); }\n",
+	  "if (!%s) { %s = cx_func_match(%s(), s); }\n\n",
 	  imp_var.id, imp_var.id, imp_var.id, imp_var.id, imp_var.id, func->emit_id);
   
   fprintf(out,
