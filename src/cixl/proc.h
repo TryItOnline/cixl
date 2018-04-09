@@ -21,7 +21,9 @@ struct cx_proc *cx_proc_deinit(struct cx_proc *p);
 struct cx_proc *cx_proc_ref(struct cx_proc *p);
 void cx_proc_deref(struct cx_proc *p);
 
-int cx_proc_fork(struct cx_proc *p);
+int cx_proc_fork(struct cx_proc *p,
+		 struct cx_file *in, struct cx_file *out, struct cx_file *error);
+
 bool cx_proc_wait(struct cx_proc *p, int ms, struct cx_box *status);
 bool cx_proc_kill(struct cx_proc *p, int ms, struct cx_box *status);
 

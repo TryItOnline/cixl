@@ -1,4 +1,5 @@
 #include <errno.h>
+#include <fcntl.h>
 #include <pwd.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -7,6 +8,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include "cixl/cx.h"
 #include "cixl/error.h"
 #include "cixl/util.h"
 
@@ -40,6 +42,15 @@ char *cx_get_dir(const char *in, char *out, size_t len) {
   strncpy(out, in, cx_min(pos-in+1, len));
   out[pos-in+1] = 0;
   return out;
+}
+
+bool cx_unblock_fd(struct cx *cx, int fd) {
+  if (fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) | O_NONBLOCK) == -1) {
+    cx_error(cx, cx->row, cx->col, "Failed unblocking file: %d", errno);
+    return false;
+  }
+
+  return true;
 }
 
 size_t cx_str_dist(const char *x, const char *y) {

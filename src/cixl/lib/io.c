@@ -318,6 +318,23 @@ static bool unblock_imp(struct cx_scope *scope) {
   return ok;
 }
 
+static bool attach_imp(struct cx_scope *s) {
+  struct cx_box
+    dst = *cx_test(cx_pop(s, false)),
+    src = *cx_test(cx_pop(s, false));
+
+  bool ok = true;
+  
+  if (dup2(dst.as_file->fd, src.as_file->fd) == -1) {
+    cx_error(s->cx, s->cx->row, s->cx->col, "Failed attaching file: %d", errno);
+    ok = false;
+  }
+
+  cx_box_deinit(&dst);
+  cx_box_deinit(&src);
+  return ok;
+}
+
 static bool flush_imp(struct cx_scope *scope) {
   struct cx_box *f = cx_test(cx_pop(scope, false));
   bool ok = false;
@@ -494,7 +511,12 @@ cx_lib(cx_init_io, "cx/io") {
   cx_add_cfunc(lib, "unblock",
 	       cx_args(cx_arg("f", cx->file_type)), cx_args(),
 	       unblock_imp);
-  
+
+  cx_add_cfunc(lib, "attach",
+	       cx_args(cx_arg("src", cx->file_type), cx_arg("dst", cx->file_type)),
+	       cx_args(),
+	       attach_imp);
+
   cx_add_cfunc(lib, "flush",
 	       cx_args(cx_arg("f", cx->wfile_type)), cx_args(),
 	       flush_imp);

@@ -38,9 +38,12 @@
       (typ *)((char *)fp - offsetof(typ, fld));		\
     })							\
 
+struct cx;
+
 char *cx_vfmt(const char *spec, va_list args);
 char *cx_fmt(const char *spec, ...);
 char *cx_get_dir(const char *in, char *out, size_t len);
+bool cx_unblock_fd(struct cx *cx, int fd);
 size_t cx_str_dist(const char *x, const char *y);
 void cx_reverse(char *s, size_t len);
 bool cx_get_line(char **out, size_t *len, FILE *in);

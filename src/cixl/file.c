@@ -67,10 +67,16 @@ struct cx_file *cx_file_ref(struct cx_file *file) {
   return file;
 }
 
-void cx_file_deref(struct cx_file *f) {
+bool cx_file_deref(struct cx_file *f) {
   cx_test(f->nrefs);
   f->nrefs--;
-  if (!f->nrefs) { cx_free(&f->cx->file_alloc, cx_file_deinit(f)); }
+
+  if (!f->nrefs) {
+    cx_free(&f->cx->file_alloc, cx_file_deinit(f));
+    return false;
+  }
+
+  return true;
 }
 
 struct cx_file *cx_file_init(struct cx_file *f,
@@ -97,13 +103,7 @@ FILE *cx_file_ptr(struct cx_file *file) {
 }
 
 bool cx_file_unblock(struct cx_file *file) {
-  if (fcntl(file->fd, F_SETFL, fcntl(file->fd, F_GETFL, 0) | O_NONBLOCK) == -1) {
-    struct cx *cx = file->cx;
-    cx_error(cx, cx->row, cx->col, "Failed unblocking file: %d", errno);
-    return false;
-  }
-
-  return true;
+  return cx_unblock_fd(file->cx, file->fd);
 }
 
 bool cx_file_close(struct cx_file *file) {

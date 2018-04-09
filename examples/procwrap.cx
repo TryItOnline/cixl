@@ -2,21 +2,20 @@
 
 /*
   Executes command with standard streams connected to input and output processes.
-  The input process inherits main input and the output process is connected to
-  main output.
+  The input process inherits parent input and the output process parent output,
+  all errors are forwarded to parent.
 
   https://github.com/basic-gongfu/cixl#getting-started
 */
 
 use:
-  (cx/abc     )
-  (cx/cond    = else or)
-  (cx/const   define:)
+  (cx/abc     #nil)
+  (cx/cond    = else)
   (cx/func    func:)
-  (cx/io      close)
+  (cx/io      #error #in #out close unblock)
   (cx/io/term say)
   (cx/iter    map next)
-  (cx/proc    exec exit popen)
+  (cx/proc    error exec exit fork in out wait)
   (cx/stack   % ~ len pop splat stack)
   (cx/str     split)
   (cx/sys     #args)
@@ -28,9 +27,20 @@ func: print-usage()()
   -1 exit;
 
 #args len 3 = &print-usage else
-let: (in-cmd out-cmd child-cmd)
-  #args {@@s split} map splat;
+let: (in-cmd out-cmd child-cmd) #args splat;
 
-let: child: $child-cmd % next ~ stack popen;
-let: out: $out-cmd % next ~ stack popen;
-$in-cmd % next ~ stack exec
+let: child #nil #nil #error fork;
+$child {$child-cmd @@s split % next ~ stack exec} else
+
+#in unblock
+#out unblock
+
+#in $child in #error fork {
+  $in-cmd @@s split % next ~ stack exec
+} else
+
+$child out #out #error fork {
+  $out-cmd @@s split % next ~ stack exec
+} else
+
+$child -1 wait

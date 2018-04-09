@@ -10,16 +10,19 @@ fork % {_ 'wc' [] exec} {% in 'foo bar baz' print out {is-graph!} split stack} i
 host64 & net64 fns
 
 * add procwrap
-** rebind standard streams
+** add in-buf to aserver
 ** test aserver/aclient
+** extract exec-cmd fn
 * ---
 * add implicit lambda scope
 ** one scope per lambda
 ** set parent
 ** install on call
+** shuffle all values on stack back and forth
 ** replace scope.parents with plain parent ptr
 * ---
 * add type args
+** nail proc/fork file types as use case
 ** add cx_type.nargs
 ** add cx_type.args vec
 *** add cx_type_get_arg(type, i)

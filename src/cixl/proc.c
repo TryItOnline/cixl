@@ -53,70 +53,99 @@ void cx_proc_deref(struct cx_proc *p) {
   if (!p->nrefs) { free(cx_proc_deinit(p)); }
 }
 
-int cx_proc_fork(struct cx_proc *p) {
+int cx_proc_fork(struct cx_proc *p,
+		 struct cx_file *in, struct cx_file *out, struct cx_file *error) {
   int in_fds[2], out_fds[2], error_fds[2];
+
+  if (!in) {
+    if (pipe(in_fds) == -1) {
+      cx_error(p->cx, p->cx->row, p->cx->col, "Failed creating pipe: %d", errno);
+      return -1;
+    }
+    
+    p->in_fd = in_fds[1];
+  }
+
+  if (!out) {
+    if (pipe(out_fds) == -1) {
+      cx_error(p->cx, p->cx->row, p->cx->col, "Failed creating pipe: %d", errno);
+      close(in_fds[0]);
+      return -1;
+    }
+
+    p->out_fd = out_fds[0];
+  }
+
+  if (!error) {
+    if (pipe(error_fds) == -1) {
+      cx_error(p->cx, p->cx->row, p->cx->col, "Failed creating pipe: %d", errno);
+      close(in_fds[0]);
+      close(out_fds[1]);
+      return -1;
+    }
+
+    p->error_fd = error_fds[0];
+  }
   
-  if (pipe(in_fds) == -1) {
-    cx_error(p->cx, p->cx->row, p->cx->col, "Failed creating pipe: %d", errno);
-    return -1;
-  }
-
-  p->in_fd = in_fds[1];
-
-  if (pipe(out_fds) == -1) {
-    cx_error(p->cx, p->cx->row, p->cx->col, "Failed creating pipe: %d", errno);
-    close(in_fds[0]);
-    return -1;
-  }
-
-  p->out_fd = out_fds[0];
-
-  if (pipe(error_fds) == -1) {
-    cx_error(p->cx, p->cx->row, p->cx->col, "Failed creating pipe: %d", errno);
-    close(in_fds[0]);
-    close(out_fds[1]);
-    return -1;
-  }
-
-  p->error_fd = error_fds[0];
   p->pid = fork();
   
   if (p->pid == -1) {
     cx_error(p->cx, p->cx->row, p->cx->col, "Failed forking: %d", errno);
-    close(in_fds[0]);
-    close(out_fds[1]);
-    close(error_fds[1]);
+    if (!in) { close(in_fds[0]); }
+    if (!out) { close(out_fds[1]); }
+    if (!error) { close(error_fds[1]); }
     return -1;
   }
 
   if (p->pid) {
-    close(in_fds[0]);
-    close(out_fds[1]);
-    close(error_fds[1]);
+    if (!in) { close(in_fds[0]); }
+    if (!out) { close(out_fds[1]); }
+    if (!error) { close(error_fds[1]); }
     return p->pid;
   }
 
-  if (dup2(in_fds[0], STDIN_FILENO) == -1) {
-    cx_error(p->cx, p->cx->row, p->cx->col, "Failed setting stdin: %d", errno);
-    return -1;
+  if (!in || in->fd != STDIN_FILENO) {
+    if (dup2(in ? in->fd : in_fds[0], STDIN_FILENO) == -1) {
+      cx_error(p->cx, p->cx->row, p->cx->col, "Failed setting stdin: %d", errno);
+      return -1;
+    }
+
+    if (in) {
+      cx_file_close(in);
+    } else {
+      close(in_fds[0]);
+      close(in_fds[1]);
+    }
+  }
+
+  if (!out || out->fd != STDOUT_FILENO) {
+    if (dup2(out ? out->fd : out_fds[1], STDOUT_FILENO) == -1) {
+      cx_error(p->cx, p->cx->row, p->cx->col, "Failed setting stdout: %d", errno);
+      return -1;
+    }
+
+    if (out) {
+      cx_file_close(out);
+    } else {
+      close(out_fds[0]);
+      close(out_fds[1]);
+    }
+  }
+
+  if (!error || error->fd != STDERR_FILENO) {
+    if (dup2(error ? error->fd : error_fds[1], STDERR_FILENO) == -1) {
+      cx_error(p->cx, p->cx->row, p->cx->col, "Failed setting stderr: %d", errno);
+      return -1;
+    }
+
+    if (error) {
+      cx_file_close(error);
+    } else {
+      close(error_fds[0]);
+      close(error_fds[1]);
+    }
   }
   
-  if (dup2(out_fds[1], STDOUT_FILENO) == -1) {
-    cx_error(p->cx, p->cx->row, p->cx->col, "Failed setting stdout: %d", errno);
-    return -1;
-  }
-  
-  if (dup2(error_fds[1], STDERR_FILENO) == -1) {
-    cx_error(p->cx, p->cx->row, p->cx->col, "Failed setting stderr: %d", errno);
-    return -1;
-  }
-  
-  close(in_fds[0]);
-  close(in_fds[1]);
-  close(out_fds[0]);
-  close(out_fds[1]);
-  close(error_fds[0]);
-  close(error_fds[1]);
   return 0;
 }
 
@@ -131,10 +160,10 @@ bool cx_proc_wait(struct cx_proc *p, int ms, struct cx_box *status) {
   
   while (ms == -1 || (cx_timer_ns(&t) / 1000) < ms) {
     int s = -1;
-    int ok = waitpid(p->pid, &s, WNOHANG);    
+    pid_t ok = waitpid(p->pid, &s, WNOHANG);    
     if (ok == -1 && errno != EINTR) { break; }
 
-    if (ok) {
+    if (ok > 0) {
       if (WIFEXITED(s)) {
 	cx_box_init(status, p->cx->int_type)->as_int = WEXITSTATUS(s);
       } else {
