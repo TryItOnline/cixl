@@ -33,10 +33,12 @@ let: child #nil #nil #error fork;
 $child {$child-cmd @@s split % next ~ stack exec} else
 
 #in $child in #error fork {
+  $child out close
   $in-cmd @@s split % next ~ stack exec
 } else
 
 $child out #out #error fork {
+  $child in close
   $out-cmd @@s split % next ~ stack exec
 } else
 

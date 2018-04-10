@@ -76,6 +76,15 @@ static bool exec_imp(struct cx_scope *s) {
   return false;
 }
 
+static bool no_exec_imp(struct cx_scope *s) {
+  bool ok = false;
+  struct cx_box f = *cx_test(cx_pop(s, false));
+  if (!cx_noexec(s->cx, f.as_file->fd)) { goto exit; }
+  ok = true;
+ exit:
+  cx_box_deinit(&f);
+  return ok;
+}
 
 static bool in_imp(struct cx_scope *s) {
   struct cx_box pv = *cx_test(cx_pop(s, false));
@@ -135,12 +144,7 @@ static bool wait_imp(struct cx_scope *s) {
 
   bool ok = false;
   struct cx_box status;
-  
-  if (!cx_proc_wait(p.as_proc, ms.as_int, &status)) {
-    cx_box_init(cx_push(s), s->cx->nil_type);
-    goto exit;
-  }
-  
+  if (!cx_proc_wait(p.as_proc, ms.as_int, &status)) { goto exit; }
   *cx_push(s) = status;
   ok = true;
  exit:
@@ -180,7 +184,7 @@ cx_lib(cx_init_proc, "cx/proc") {
     
   if (!cx_use(cx, "cx/abc", "#nil", "Cmp", "Opt") ||
       !cx_use(cx, "cx/cond", "else") ||
-      !cx_use(cx, "cx/io", "RFile", "WFile") ||
+      !cx_use(cx, "cx/io", "File", "RFile", "WFile") ||
       !cx_use(cx, "cx/stack", "%", "Stack")) {
     return false;
   }
@@ -198,6 +202,11 @@ cx_lib(cx_init_proc, "cx/proc") {
 	       cx_args(cx_arg("cmd", cx->str_type), cx_arg("args", cx->stack_type)),
 	       cx_args(),
 	       exec_imp);
+
+  cx_add_cfunc(lib, "no-exec",
+	       cx_args(cx_arg("f", cx->file_type)),
+	       cx_args(),
+	       no_exec_imp);
 
   cx_add_cfunc(lib, "in",
 	       cx_args(cx_arg("p", cx->proc_type)),

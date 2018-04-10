@@ -103,22 +103,24 @@ FILE *cx_file_ptr(struct cx_file *file) {
 }
 
 bool cx_file_unblock(struct cx_file *file) {
-  return cx_unblock_fd(file->cx, file->fd);
+  return cx_unblock(file->cx, file->fd);
 }
 
-bool cx_file_close(struct cx_file *file) {
-  if (file->_ptr == stdin || file->_ptr == stdout) { return true; }
+bool cx_file_close(struct cx_file *f) {
+  if (f->fd == STDIN_FILENO || f->fd == STDOUT_FILENO || f->fd == STDERR_FILENO) {
+    return true;
+  }
   
-  if (file->_ptr) {
-    fclose(file->_ptr);
-    file->_ptr = NULL;
-  } else if (file->fd != -1) {
-    close(file->fd);
+  if (f->_ptr) {
+    fclose(f->_ptr);
+    f->_ptr = NULL;
+  } else if (f->fd != -1) {
+    close(f->fd);
   } else {
     return false;
   }
 
-  file->fd = -1;
+  f->fd = -1;
   return true;
 }
 

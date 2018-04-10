@@ -10,7 +10,7 @@ fork % {_ 'wc' [] exec} {% in 'foo bar baz' print out {is-graph!} split stack} i
 host64 & net64 fns
 
 * add procwrap
-** add in-buf to aserver
+** set FD_CLOEXEC on pipe after dup2
 ** test aserver/aclient
 ** extract exec-cmd fn
 * ---

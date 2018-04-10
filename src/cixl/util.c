@@ -44,9 +44,18 @@ char *cx_get_dir(const char *in, char *out, size_t len) {
   return out;
 }
 
-bool cx_unblock_fd(struct cx *cx, int fd) {
+bool cx_unblock(struct cx *cx, int fd) {
   if (fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) | O_NONBLOCK) == -1) {
-    cx_error(cx, cx->row, cx->col, "Failed unblocking file: %d", errno);
+    cx_error(cx, cx->row, cx->col, "Failed unblocking: %d", errno);
+    return false;
+  }
+
+  return true;
+}
+
+bool cx_noexec(struct cx *cx, int fd) {
+  if (fcntl(fd, F_SETFD, FD_CLOEXEC) == -1) {
+    cx_error(cx, cx->row, cx->col, "Failed noexec: %d", errno);
     return false;
   }
 
