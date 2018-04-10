@@ -12,7 +12,7 @@ use:
   (cx/abc     #nil)
   (cx/cond    = else)
   (cx/func    func:)
-  (cx/io      #error #in #out close unblock)
+  (cx/io      #error #in #out close)
   (cx/io/term say)
   (cx/iter    map next)
   (cx/proc    error exec exit fork in out wait)
@@ -31,9 +31,6 @@ let: (in-cmd out-cmd child-cmd) #args splat;
 
 let: child #nil #nil #error fork;
 $child {$child-cmd @@s split % next ~ stack exec} else
-
-#in unblock
-#out unblock
 
 #in $child in #error fork {
   $in-cmd @@s split % next ~ stack exec

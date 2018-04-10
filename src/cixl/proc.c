@@ -88,62 +88,47 @@ int cx_proc_fork(struct cx_proc *p,
   }
   
   p->pid = fork();
-  
-  if (p->pid == -1) {
-    cx_error(p->cx, p->cx->row, p->cx->col, "Failed forking: %d", errno);
-    if (!in) { close(in_fds[0]); }
-    if (!out) { close(out_fds[1]); }
-    if (!error) { close(error_fds[1]); }
-    return -1;
-  }
-
+        
   if (p->pid) {
+    if (p->pid == -1) {
+      cx_error(p->cx, p->cx->row, p->cx->col, "Failed forking: %d", errno);
+    }
+    
     if (!in) { close(in_fds[0]); }
     if (!out) { close(out_fds[1]); }
     if (!error) { close(error_fds[1]); }
+
     return p->pid;
   }
 
-  if (!in || in->fd != STDIN_FILENO) {
-    if (dup2(in ? in->fd : in_fds[0], STDIN_FILENO) == -1) {
-      cx_error(p->cx, p->cx->row, p->cx->col, "Failed setting stdin: %d", errno);
-      return -1;
-    }
-
-    if (in) {
-      cx_file_close(in);
-    } else {
-      close(in_fds[0]);
-      close(in_fds[1]);
-    }
+  if (dup2(in ? in->fd : in_fds[0], STDIN_FILENO) == -1) {
+    cx_error(p->cx, p->cx->row, p->cx->col, "Failed setting stdin: %d", errno);
+    return -1;
+  }
+  
+  if (!in) {
+    close(in_fds[0]);
+    close(in_fds[1]);
   }
 
-  if (!out || out->fd != STDOUT_FILENO) {
-    if (dup2(out ? out->fd : out_fds[1], STDOUT_FILENO) == -1) {
-      cx_error(p->cx, p->cx->row, p->cx->col, "Failed setting stdout: %d", errno);
-      return -1;
-    }
-
-    if (out) {
-      cx_file_close(out);
-    } else {
-      close(out_fds[0]);
-      close(out_fds[1]);
-    }
+  if (dup2(out ? out->fd : out_fds[1], STDOUT_FILENO) == -1) {
+    cx_error(p->cx, p->cx->row, p->cx->col, "Failed setting stdout: %d", errno);
+    return -1;
+  }
+  
+  if (!out) {
+    close(out_fds[0]);
+    close(out_fds[1]);
   }
 
-  if (!error || error->fd != STDERR_FILENO) {
-    if (dup2(error ? error->fd : error_fds[1], STDERR_FILENO) == -1) {
-      cx_error(p->cx, p->cx->row, p->cx->col, "Failed setting stderr: %d", errno);
-      return -1;
-    }
-
-    if (error) {
-      cx_file_close(error);
-    } else {
-      close(error_fds[0]);
-      close(error_fds[1]);
-    }
+  if (dup2(error ? error->fd : error_fds[1], STDERR_FILENO) == -1) {
+    cx_error(p->cx, p->cx->row, p->cx->col, "Failed setting stderr: %d", errno);
+    return -1;
+  }
+  
+  if (!error) {
+    close(error_fds[0]);
+    close(error_fds[1]);
   }
   
   return 0;
