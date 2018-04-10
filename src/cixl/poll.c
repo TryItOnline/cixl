@@ -144,43 +144,53 @@ int cx_poll_wait(struct cx_poll *p, int ms, struct cx_scope *s) {
     num = poll((struct pollfd *)fds->items, fds->count, ms),
     rem = num;
   
-  struct cx_poll_file
-    *f = cx_vec_start(&p->files.members);
-  
-  struct pollfd *fd = cx_vec_start(&p->fds.members);
+  if (num == -1) { cx_test(false); }
   
   while (rem) {
+    int hits = 0;
+    
+    struct cx_poll_file
+      *f = cx_vec_start(&p->files.members);
+    
+    struct pollfd *fd = cx_vec_start(&p->fds.members);
+    
     for (; f < (struct cx_poll_file *)cx_vec_end(&p->files.members) && rem;) {
       if (fd->revents) {
-	int revents = fd->revents;
-	fd->revents = 0;
-	
-	if (revents & POLLIN) {
+	if (fd->revents & POLLIN || fd->revents & POLLHUP) {
+	  fd->revents ^= POLLIN;
+	  fd->revents ^= POLLHUP;
+	  if (!fd->revents) { rem--; }
+
 	  if (f->read_fn) {
 	    if (!f->read_fn(f->read_data)) { return -1; }
 	  } else if (!cx_call(&f->read_value, s)) {
 	    return -1;
 	  }
 	  
-	  rem--;
-	  continue;
+	  hits++;
+	  break;
 	}
-	
-	if (revents & POLLOUT) {
+
+	if (fd->revents & POLLOUT) {
+	  fd->revents ^= POLLOUT;
+	  if (!fd->revents) { rem--; }
+
 	  if (f->write_fn) {
 	    if (!f->write_fn(f->write_data)) { return -1; }
 	  } else if (!cx_call(&f->write_value, s)) {
 	    return -1;
 	  }
 	  
-	  rem--;
-	  continue;
-	}      
+	  hits++;
+	  break;
+	}
       }
       
       f++;
       fd++;
     }
+
+    if (!hits) { break; }
   }
   
   return num;

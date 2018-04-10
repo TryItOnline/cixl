@@ -80,7 +80,6 @@ host64 & net64 fns
 * add Pub/PrivKey
 * add README
 ** add LICENSE
-
 * --- procwrap
-* debug aserver/aclient
+* debug with aclient
 * extract exec-cmd fn

@@ -37,8 +37,9 @@ $child {$child-cmd @@s split % next ~ stack exec} else
   $in-cmd @@s split % next ~ stack exec
 } else
 
+$child in close
+
 $child out #out #error fork {
-  $child in close
   $out-cmd @@s split % next ~ stack exec
 } else
 
