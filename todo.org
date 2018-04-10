@@ -9,11 +9,6 @@ fork % {_ 'wc' [] exec} {% in 'foo bar baz' print out {is-graph!} split stack} i
 #define ntohll(x) ((1==ntohl(1)) ? (x) : ((uint64_t)ntohl((x) & 0xFFFFFFFF) << 32) | ntohl((x) >> 32))
 host64 & net64 fns
 
-* add procwrap
-** set FD_CLOEXEC on pipe after dup2
-** test aserver/aclient
-** extract exec-cmd fn
-* ---
 * add implicit lambda scope
 ** one scope per lambda
 ** set parent
@@ -50,11 +45,7 @@ host64 & net64 fns
 * remove Rec =/?/print overloads
 ** handle in type methods
 *** check if user defined func exists
-* --- cxcrypt
-* add Pub/PrivKey
-* add README
-** add LICENSE
-* --- cixl
+* ---
 * convert size_t to ssize_t and remove unsigned
 * extract cx_hash from cx_env
 ** item_size
@@ -85,4 +76,11 @@ host64 & net64 fns
 ** use getpid()
 * replace clone fallback to copy with error
 * replace varargs with size/array+macro
+* --- cxcrypt
+* add Pub/PrivKey
+* add README
+** add LICENSE
 
+* --- procwrap
+* debug aserver/aclient
+* extract exec-cmd fn

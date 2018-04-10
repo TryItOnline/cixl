@@ -142,7 +142,7 @@ int cx_proc_fork(struct cx_proc *p,
       close(error_fds[1]);
     }
   }
-  
+
   return 0;
 }
 
