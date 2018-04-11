@@ -58,7 +58,8 @@ static bool read_bytes_imp(struct cx_scope *scope) {
   fflush(b->file._ptr);
   int rbytes = read(in.as_file->fd, b->data+offs, nbytes.as_int);
 
-  if (!rbytes || (rbytes == -1 && errno == ECONNREFUSED)) {
+  if (!rbytes ||
+      (rbytes == -1 && (errno == ECONNREFUSED || errno == ECONNRESET))) {
     cx_box_init(cx_push(scope), cx->nil_type);
     fseek(b->file._ptr, offs, SEEK_SET);
     ok = true;

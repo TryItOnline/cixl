@@ -24,7 +24,7 @@ use:
   (cx/net     connect)
   (cx/proc    exit)
   (cx/ref     deref ref set)
-  (cx/stack   pop)
+  (cx/stack   _ pop)
   (cx/str     int)
   (cx/sys     #args)
   (cx/var     let:);
@@ -112,6 +112,6 @@ poll-client-read
 poll-client-write
 
 {
-  $poll -1 wait
+  $poll -1 wait _
   $state deref `done =!
 } while

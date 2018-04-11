@@ -2,6 +2,7 @@
 'ls' [] popen -1 wait
 'wc' [] popen % in 'foo bar baz' print out {is-graph!} split stack
 fork % {_ 'wc' [] exec} {% in 'foo bar baz' print out {is-graph!} split stack} if-else
+#define CX_CTRL 0x1f
 
  ./cixl ../examples/procwrap.cx 'encrypt secret' 'decrypt secret' 'aserver 7707'
 
@@ -80,6 +81,3 @@ host64 & net64 fns
 * add Pub/PrivKey
 * add README
 ** add LICENSE
-* --- procwrap
-* debug with aclient
-* extract exec-cmd fn

@@ -24,7 +24,7 @@ use:
   (cx/net     TCPClient listen accept)
   (cx/proc    exit)
   (cx/ref     deref ref set)
-  (cx/stack   pop)
+  (cx/stack   _ pop)
   (cx/str     int)
   (cx/sys     #args)
   (cx/var     let:);
@@ -111,6 +111,6 @@ $poll $s {
 } on-read
 
 {
-  $poll -1 wait
+  $poll -1 wait _
   $state deref `done =!
 } while

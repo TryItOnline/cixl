@@ -465,9 +465,10 @@ $users len {
 let: server #nil $port #backlog listen;
 
 $poll $server {
-  $server accept new-client % push-prompt
+  let: c $server accept;
+  $c {$c new-client % push-prompt} if
 } on-read
 
 ['Listening on port ' $port] say
 
-{$poll -1 wait} while
+{$poll -1 wait _ #t} while

@@ -67,8 +67,10 @@ static bool accept_imp(struct cx_scope *scope) {
   struct cx_box server = *cx_test(cx_pop(scope, false));
   int fd = accept(server.as_file->fd, NULL, NULL);
   bool ok = false;
-  
-  if (fd == -1) {
+
+  if (fd == -1 && errno == EAGAIN) {
+    cx_box_init(cx_push(scope), cx->nil_type);
+  } else if (fd == -1) {
     cx_error(cx, cx->row, cx->col, "Failed accepting: %d", errno);
     goto exit;
   } else {
@@ -82,7 +84,6 @@ static bool accept_imp(struct cx_scope *scope) {
   cx_box_deinit(&server);
   return ok;
 }
-
 
 static bool connect_imp(struct cx_scope *scope) {
   struct cx *cx = scope->cx;
@@ -139,7 +140,7 @@ cx_lib(cx_init_net, "cx/net") {
 
   cx_add_cfunc(lib, "accept",
 	       cx_args(cx_arg("server", cx->tcp_server_type)),
-	       cx_args(cx_arg(NULL, cx->tcp_client_type)),
+	       cx_args(cx_arg(NULL, cx->opt_type)),
 	       accept_imp);
 
   cx_add_cfunc(lib, "connect",
