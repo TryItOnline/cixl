@@ -148,7 +148,7 @@ char *parse_fimp(struct cx *cx, FILE *in, struct cx_vec *out) {
     } else if (tok->type == CX_TID()) {
       char *s = tok->as_ptr;
       size_t len = strlen(s);
-
+      
       if (s[len-1] == '>') {
 	s[len-1] = 0;
 	done = true;
@@ -273,7 +273,7 @@ static bool parse_id(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
 
     if (ok) {
       char *s = id.data;
-
+      
       if (isupper(s[0])) {
 	ok = parse_type(cx, s, in, out, lookup);
       } else if (lookup && s[0] == '#') {

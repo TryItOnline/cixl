@@ -137,8 +137,7 @@ struct cx_rec_type *cx_add_rec_type(struct cx_lib *lib, const char *id) {
   return t;
 }
 
-static struct cx_type *lib_get_type(struct cx_lib **lib,
-				    const char *id) {
+static struct cx_type *lib_get_type(struct cx_lib **lib, const char *id) {
   struct cx *cx = (*lib)->cx;
   struct cx_type **t = cx_set_get(&(*lib)->types, &id);
 
@@ -157,6 +156,8 @@ struct cx_type *cx_lib_get_type(struct cx_lib *lib, const char *id, bool silent)
 }
 
 struct cx_type *parse_type_arg(struct cx *cx, char **in) {
+  if (!**in) { return NULL; }
+
   char *i = *in;
   while (*i == ' ') { i++; }
   char *j = i+1;
@@ -176,22 +177,22 @@ struct cx_type *parse_type_arg(struct cx *cx, char **in) {
 }
 
 struct cx_type *cx_get_type(struct cx *cx, const char *id, bool silent) {
-  struct cx_type *t = lib_get_type(cx->lib, id);
-  if (t) { return t; }
-  char *i = strchr(id, '<');
+  struct cx_type *t = NULL;
+  const char *i = strchr(id, '<');
 
   if (i) {
-    char *j = i;
-    
+    const char *j = i;
     i++;
+    
     char args[strlen(i)+1];
     strcpy(args, i);
-  
+    char *k = args;
+
     struct cx_vec types;
     cx_vec_init(&types, sizeof(struct cx_type *));
 
     while(true) {
-      struct cx_type *tt = parse_type_arg(cx, &i);
+      struct cx_type *tt = parse_type_arg(cx, &k);
       if (!tt) { break; }
       *(struct cx_type **)cx_vec_push(&types) = tt;
     }
@@ -199,14 +200,15 @@ struct cx_type *cx_get_type(struct cx *cx, const char *id, bool silent) {
     char tid[j-id+1];
     strncpy(tid, id, j-id);
     tid[j-id] = 0;
-    struct cx_type *t = cx_get_type(cx, tid, false);
+    t = cx_get_type(cx, tid, false);
     if (t) { t = cx_type_vget(t, types.count, (struct cx_type **)types.items); }
     cx_vec_deinit(&types);
-    return t;
+  } else {
+    t = lib_get_type(cx->lib, id);
   }
-
+  
   if (!t && !silent) { cx_error(cx, cx->row, cx->col, "Unknown type: '%s'", id); }
-  return NULL;
+  return t;
 }
 
 struct cx_macro *cx_add_macro(struct cx_lib *lib,
