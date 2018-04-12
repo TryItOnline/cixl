@@ -5,11 +5,10 @@ host64 & net64 fns
 * add type arg support to cx_get_type
 ** parse '<' in type id
 ** call cx_type_vget if args
-* implement type_copy for rec type
-* commit type args
-* convert all opt_type refs in /lib
-* convert all seq_type refs in /lib
-** update seq types to use cx_type_get with elem type
+* convert seq_type refs in /lib
+** update seq types to derive cx_type_get with elem type
+* implement type_get method for rec type
+* convert opt_type refs in /lib
 * ---
 * add implicit lambda scope
 ** one scope per lambda

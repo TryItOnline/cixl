@@ -47,7 +47,7 @@ struct cx_type *cx_type_init(struct cx_type *type,
   type->emit = NULL;
   type->deinit = NULL;
 
-  type->type_clone = NULL;
+  type->type_get = NULL;
   type->type_deinit = NULL;
   return type;
 }
@@ -100,37 +100,6 @@ void cx_type_vpush_args(struct cx_type *t, int nargs, struct cx_type *args[]) {
   }
 }
 
-struct cx_type *cx_type_vclone(struct cx_type *t,
-			       const char *id,
-			       int nargs, struct cx_type *args[]) {  
-  struct cx_type *tt = t->type_clone
-    ? t->type_clone(t, id)
-    : cx_type_new(t->lib, id);
-  
-  tt->root = t->root;
-  tt->new = t->new;
-  tt->eqval = t->eqval;
-  tt->equid = t->equid;
-  tt->cmp = t->cmp;
-  tt->ok = t->ok;
-  tt->call = t->call;
-  tt->copy = t->copy;
-  tt->clone = t->clone;
-  tt->iter = t->iter;
-  tt->write = t->write;
-  tt->dump = t->dump;
-  tt->print = t->print;
-  tt->emit = t->emit;
-  tt->deinit = t->deinit;
-  tt->type_clone = t->type_clone;
-  tt->type_deinit = t->type_deinit;
-
-  cx_derive(tt, t);
-  cx_type_vpush_args(tt, nargs, args);
-  cx_lib_push_type(t->lib, tt);
-  return tt;
-}
-
 struct cx_type *cx_type_vget(struct cx_type *t, int nargs, struct cx_type *args[]) {
   struct cx *cx = t->lib->cx;
 
@@ -176,8 +145,31 @@ struct cx_type *cx_type_vget(struct cx_type *t, int nargs, struct cx_type *args[
     return tt;
   }
     
-  tt = cx_type_vclone(t, id.data, nargs, args);
+  tt = t->type_get
+    ? t->type_get(t, id.data, nargs, args)
+    : cx_type_new(t->lib, id.data);
+
   free(id.data);
+  tt->root = t->root;
+  tt->new = t->new;
+  tt->eqval = t->eqval;
+  tt->equid = t->equid;
+  tt->cmp = t->cmp;
+  tt->ok = t->ok;
+  tt->call = t->call;
+  tt->copy = t->copy;
+  tt->clone = t->clone;
+  tt->iter = t->iter;
+  tt->write = t->write;
+  tt->dump = t->dump;
+  tt->print = t->print;
+  tt->emit = t->emit;
+  tt->deinit = t->deinit;
+  tt->type_get = t->type_get;
+  tt->type_deinit = t->type_deinit;
+  cx_derive(tt, t);
+  cx_type_vpush_args(tt, nargs, args);
+  cx_lib_push_type(t->lib, tt);
   return tt;
 }
 

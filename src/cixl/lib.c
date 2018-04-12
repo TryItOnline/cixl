@@ -114,16 +114,7 @@ struct cx_type *cx_vadd_type(struct cx_lib *l, const char *id, va_list parents) 
     free(t);
     return NULL;
   }
-  
-  if (l->cx->opt_type && strcmp(id, "Nil") != 0) {
-    char *oid = cx_fmt("Opt<%s>", id);
-    struct cx_type *ot = cx_type_vclone(cx_test(l->cx->opt_type), oid, 1, &t);
-    free(oid);
 
-    cx_derive(t, ot);
-    cx_derive(l->cx->nil_type, ot);
-  }
-  
   struct cx_type *pt = NULL;
   while ((pt = va_arg(parents, struct cx_type *))) { cx_derive(t, pt); }
   return t;

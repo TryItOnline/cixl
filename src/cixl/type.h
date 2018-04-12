@@ -46,7 +46,10 @@ struct cx_type {
   bool (*emit)(struct cx_box *, const char *, FILE *);
   void (*deinit)(struct cx_box *);
 
-  struct cx_type *(*type_clone)(struct cx_type *, const char *id);
+  struct cx_type *(*type_get)(struct cx_type *,
+			      const char *id,
+			      int nargs, struct cx_type *args[]);
+  
   void *(*type_deinit)(struct cx_type *);
 };
 
@@ -59,9 +62,6 @@ struct cx_type *cx_type_reinit(struct cx_type *type);
 void *cx_type_deinit(struct cx_type *type);
 
 void cx_type_vpush_args(struct cx_type *t, int nargs, struct cx_type *args[]);
-struct cx_type *cx_type_vclone(struct cx_type *t,
-			       const char *id,
-			       int nargs, struct cx_type *args[]);
 struct cx_type *cx_type_vget(struct cx_type *t, int nargs, struct cx_type *args[]);
 
 void cx_derive(struct cx_type *child, struct cx_type *parent);
