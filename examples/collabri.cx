@@ -10,7 +10,7 @@ include: 'ansi.cx' 'qdb.cx';
 
 use:
   (cx/abc
-    A Bool Int Opt Stack Str Sym
+    A Bool Char Int Opt Stack Str Sym
     #f #nil #t
     is-nil)
   (cx/cond ! = == and else if if-else or switch:)
@@ -69,7 +69,7 @@ rec: User ()
   name     Sym
   password Str;
 
-func: find-user(name Sym)(_ Opt)
+func: find-user(name Sym)(_ Opt<User>)
   $users [$name] find-key;
 
 func: new-user (n Sym)(_ User)
@@ -93,7 +93,7 @@ $root `id `/ put
 $root `log-path 'topics' get-path put
 $root `clients Table new put
 
-func: open-log(t Topic m Sym)(l Opt)
+func: open-log(t Topic m Sym)(l Opt<File>)
   let: p $t `log-path get;
   let: l [$p @/ $t `name get '.txt'] #nil join $m fopen;
   $l {$l unblock} if;
@@ -139,7 +139,7 @@ func: add-topic(pt t Topic)()
     $pc $t `name get $t put    
   } if-else;
 
-func: find-topic(id Sym)(_ Opt)
+func: find-topic(id Sym)(_ Opt<Topic>)
   $topics [$id] find-key;
 
 func: load-topic(in Topic)(_ Topic)
@@ -323,22 +323,22 @@ func: new-post(c Client in Str)()
     $in @@n
   ] #nil join push-post;
 
-func: handle-cmd(c Client `branch in Iter)()
+func: handle-cmd(c Client `branch in Iter<Char>)()
   let: n $in str;
   $n {'Missing topic name' throw} else
   $c $n sym new-topic
   $c push-prompt;
 
-func: handle-cmd(c Client `join in Iter)()
+func: handle-cmd(c Client `join in Iter<Char>)()
   $c $in str $root or join-topic
   $c push-prompt;
 
-func: handle-cmd(c Client `list in Iter)()
+func: handle-cmd(c Client `list in Iter<Char>)()
   $c % `topic get #f list-topics
   $c @@n push-out
   $c push-prompt;
 
-func: handle-cmd(c Client `tail in Iter)()
+func: handle-cmd(c Client `tail in Iter<Char>)()
   $c $in str int #tail-default or topic-tail;
       
 func: handle-in(c Client `auth-user in Str)()

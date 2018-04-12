@@ -195,7 +195,7 @@ func: get-offs(x y Int)(_ Int)
    color.
 */
 
-func: print-shape(b Block c Opt)()
+func: print-shape(b Block c Opt<Color>)()
   #save-pos p
   $c {$c set-bg p} {#reset-style p} if-else
   
@@ -221,7 +221,7 @@ func: print-shape(b Block c Opt)()
    Updates tiles for block starting at specified offset.
 */
 
-func: update-tiles(b Block offs Int v Opt)()
+func: update-tiles(b Block offs Int v Opt<Block>)()
   let: s $b get-shape;
   let: o $offs ref;
   
