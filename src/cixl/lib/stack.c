@@ -415,7 +415,7 @@ cx_lib(cx_init_stack, "cx/stack") {
 	       cx_args(cx_arg("s", cx->stack_type),
 		       cx_arg("start", cx->int_type),
 		       cx_arg("len", cx->int_type),
-		       cx_arg("delta", cx->opt_type)),
+		       cx_arg("delta", cx->int_type)),
 	       cx_args(),
 	       move_imp);
 

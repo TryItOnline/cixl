@@ -507,7 +507,7 @@ cx_lib(cx_init_io, "cx/io") {
 
   cx_add_cfunc(lib, "fopen",
 	       cx_args(cx_arg("path", cx->str_type), cx_arg("mode", cx->sym_type)),
-	       cx_args(cx_arg(NULL, cx->opt_type)),
+	       cx_args(cx_arg(NULL, cx_type_get(cx->opt_type, cx->file_type))),
 	       fopen_imp);  
 
   cx_add_cfunc(lib, "unblock",

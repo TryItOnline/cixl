@@ -197,7 +197,7 @@ cx_lib(cx_init_meta, "cx/meta") {
 
   cx_add_cfunc(lib, "get-lib",
 	       cx_args(cx_arg("id", cx->sym_type)),
-	       cx_args(cx_arg(NULL, cx->opt_type)),
+	       cx_args(cx_arg(NULL, cx_type_get(cx->opt_type, cx->lib_type))),
 	       get_lib_imp);
 
   return true;

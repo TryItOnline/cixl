@@ -328,7 +328,7 @@ cx_lib(cx_init_func, "cx/func") {
 
   cx_add_cfunc(lib, "this-fimp",
 	       cx_args(),
-	       cx_args(cx_arg(NULL, cx->opt_type)),
+	       cx_args(cx_arg(NULL, cx_type_get(cx->opt_type, cx->fimp_type))),
 	       this_fimp_imp);
   
   cx_add_cfunc(lib, "recall", cx_args(), cx_args(), recall_imp);

@@ -135,11 +135,6 @@ static bool stack_time_imp(struct cx_scope *scope) {
   for (int i = 0; i < cx_min(vs->imp.count, 7); i++) {
     struct cx_box *v = cx_vec_get(&vs->imp, i);
 
-    if (v->type != cx->int_type) {
-      cx_box_init(cx_push(scope), cx->nil_type);
-      goto exit;
-    }
-    
     switch (i) {
     case 0:
       t.months += v->as_int*12;
@@ -166,7 +161,6 @@ static bool stack_time_imp(struct cx_scope *scope) {
   }
 
   cx_box_init(cx_push(scope), cx->time_type)->as_time = t;
- exit:
   cx_box_deinit(&in);  
   return true;
 }
@@ -451,7 +445,7 @@ cx_lib(cx_init_time, "cx/time") {
 
   cx_add_cfunc(lib, "time",
 	       cx_args(cx_arg("in", cx->stack_type)),
-	       cx_args(cx_arg(NULL, cx->opt_type)),
+	       cx_args(cx_arg(NULL, cx->time_type)),
 	       stack_time_imp);
   
   cx_add_cfunc(lib, "now",

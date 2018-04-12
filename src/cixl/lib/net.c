@@ -132,7 +132,7 @@ cx_lib(cx_init_net, "cx/net") {
   cx->tcp_client_type = cx_init_file_type(lib, "TCPClient", cx->rwfile_type);
 
   cx_add_cfunc(lib, "listen",
-	       cx_args(cx_arg("host", cx->opt_type),
+	       cx_args(cx_arg("host", cx_type_get(cx->opt_type, cx->str_type)),
 		       cx_arg("port", cx->int_type),
 		       cx_arg("backlog", cx->int_type)),
 	       cx_args(cx_arg(NULL, cx->tcp_server_type)),
@@ -140,7 +140,7 @@ cx_lib(cx_init_net, "cx/net") {
 
   cx_add_cfunc(lib, "accept",
 	       cx_args(cx_arg("server", cx->tcp_server_type)),
-	       cx_args(cx_arg(NULL, cx->opt_type)),
+	       cx_args(cx_arg(NULL, cx_type_get(cx->opt_type, cx->tcp_client_type))),
 	       accept_imp);
 
   cx_add_cfunc(lib, "connect",

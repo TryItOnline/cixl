@@ -516,7 +516,7 @@ cx_lib(cx_init_str, "cx/str") {
 
   cx_add_cfunc(lib, "pop",
 	       cx_args(cx_arg("s", cx->str_type)),
-	       cx_args(cx_arg(NULL, cx->opt_type)),
+	       cx_args(cx_arg(NULL, cx_type_get(cx->opt_type, cx->char_type))),
 	       pop_imp);
 
   cx_add_cfunc(lib, "str",
@@ -526,7 +526,7 @@ cx_lib(cx_init_str, "cx/str") {
 
   cx_add_cfunc(lib, "int",
 	       cx_args(cx_arg("s", cx->str_type)),
-	       cx_args(cx_arg(NULL, cx->opt_type)),
+	       cx_args(cx_arg(NULL, cx_type_get(cx->opt_type, cx->int_type))),
 	       str_int_imp);
 
   cx_add_cfunc(lib, "-",

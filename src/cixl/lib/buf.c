@@ -137,7 +137,7 @@ cx_lib(cx_init_buf, "cx/io/buf") {
 	       cx_args(cx_arg("buf", cx->buf_type),
 		       cx_arg("in", cx->rfile_type),
 		       cx_arg("nbytes", cx->int_type)),
-	       cx_args(cx_arg(NULL, cx->opt_type)),
+	       cx_args(cx_arg(NULL, cx_type_get(cx->opt_type, cx->int_type))),
 	       read_bytes_imp);
       
   cx_add_cfunc(lib, "write-bytes",

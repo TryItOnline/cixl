@@ -151,7 +151,8 @@ cx_lib(cx_init_poll, "cx/io/poll") {
 	       delete_imp);
 
   cx_add_cfunc(lib, "wait",
-	       cx_args(cx_arg("p", cx->poll_type), cx_arg("ms", cx->opt_type)),
+	       cx_args(cx_arg("p", cx->poll_type),
+		       cx_arg("ms", cx_type_get(cx->opt_type, cx->int_type))),
 	       cx_args(cx_arg(NULL, cx->int_type)),
 	       wait_imp);
 
