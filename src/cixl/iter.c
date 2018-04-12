@@ -52,7 +52,7 @@ static void iter_imp(struct cx_box *in, struct cx_box *out) {
 }
 
 static void dump_imp(struct cx_box *v, FILE *out) {
-  fprintf(out, "Iter(%p)r%d", v->as_iter, v->as_iter->nrefs);
+  fprintf(out, "%s(%p)r%d", v->type->id, v->as_iter, v->as_iter->nrefs);
 }
 
 static void deinit_imp(struct cx_box *v) {
