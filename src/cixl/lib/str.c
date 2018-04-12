@@ -205,8 +205,9 @@ static struct cx_iter *hex_decoder_new(struct cx_iter *in) {
 bool split_lines(unsigned char c) { return c == '\r' || c == '\n'; }
 
 static bool lines_imp(struct cx_scope *scope) {
-  struct cx_box in = *cx_test(cx_pop(scope, false));
-  struct cx_split_iter *it = cx_split_iter_new(cx_iter(&in));
+  struct cx_box in = *cx_test(cx_pop(scope, false)), in_it;
+  cx_iter(&in, &in_it);
+  struct cx_split_iter *it = cx_split_iter_new(in_it.as_iter);
   it->split_fn = split_lines;
   cx_box_init(cx_push(scope), scope->cx->iter_type)->as_iter = &it->iter;
   cx_box_deinit(&in);
@@ -218,8 +219,9 @@ bool split_words(unsigned char c) {
 }
 
 static bool words_imp(struct cx_scope *scope) {
-  struct cx_box in = *cx_test(cx_pop(scope, false));
-  struct cx_split_iter *it = cx_split_iter_new(cx_iter(&in));
+  struct cx_box in = *cx_test(cx_pop(scope, false)), in_it;
+  cx_iter(&in, &in_it);
+  struct cx_split_iter *it = cx_split_iter_new(in_it.as_iter);
   it->split_fn = split_words;
   cx_box_init(cx_push(scope), scope->cx->iter_type)->as_iter = &it->iter;
   cx_box_deinit(&in);
@@ -229,8 +231,11 @@ static bool words_imp(struct cx_scope *scope) {
 static bool split_imp(struct cx_scope *scope) {
   struct cx_box
     s = *cx_test(cx_pop(scope, false)),
-    in = *cx_test(cx_pop(scope, false));
-  struct cx_split_iter *it = cx_split_iter_new(cx_iter(&in));
+    in = *cx_test(cx_pop(scope, false)),
+    in_it;
+
+  cx_iter(&in, &in_it);
+  struct cx_split_iter *it = cx_split_iter_new(in_it.as_iter);
   it->split = s;
   cx_box_init(cx_push(scope), scope->cx->iter_type)->as_iter = &it->iter;
   cx_box_deinit(&in);
@@ -331,13 +336,13 @@ static bool pop_imp(struct cx_scope *scope) {
 
 static bool seq_imp(struct cx_scope *scope) {
   struct cx *cx = scope->cx;
-  struct cx_box in = *cx_test(cx_pop(scope, false));
-  struct cx_iter *it = cx_iter(&in);
+  struct cx_box in = *cx_test(cx_pop(scope, false)), it;
+  cx_iter(&in, &it);
   struct cx_mfile out;
   cx_mfile_open(&out);
   struct cx_box c;
   
-  while (cx_iter_next(it, &c, scope)) {
+  while (cx_iter_next(it.as_iter, &c, scope)) {
     if (c.type == cx->nil_type) { continue; }
     fputc(c.as_char, out.stream);
   }
@@ -348,7 +353,7 @@ static bool seq_imp(struct cx_scope *scope) {
   cx_mfile_close(&out);
   free(out.data);
   cx_box_deinit(&in);
-  cx_iter_deref(it);
+  cx_box_deinit(&it);
   return true;
 }
 
@@ -410,22 +415,23 @@ static bool join_imp(struct cx_scope *scope) {
   
   struct cx_box
     sep = *cx_test(cx_pop(scope, false)),
-    in = *cx_test(cx_pop(scope, false));
+    in = *cx_test(cx_pop(scope, false)),
+    it;
 
-  struct cx_iter *it = cx_iter(&in);
+  cx_iter(&in, &it);
   struct cx_mfile out;
   cx_mfile_open(&out);
   struct cx_box v;
   bool print_sep = false;
   
-  while (cx_iter_next(it, &v, scope)) {
+  while (cx_iter_next(it.as_iter, &v, scope)) {
     if (print_sep) { cx_print(&sep, out.stream); }
     cx_print(&v, out.stream);
     cx_box_deinit(&v);
     print_sep = sep.type != cx->nil_type;
   }
 
-  cx_iter_deref(it);
+  cx_box_deinit(&it);
   cx_mfile_close(&out);
   cx_box_init(cx_push(scope), cx->str_type)->as_str = cx_str_new(out.data, out.size);
   free(out.data);
@@ -434,18 +440,24 @@ static bool join_imp(struct cx_scope *scope) {
   return true;
 }
 
-static bool hex_coder_imp(struct cx_scope *scope) {
-  struct cx_box in = *cx_test(cx_pop(scope, false));
-  struct cx_iter *it = hex_coder_new(cx_iter(&in));
-  cx_box_init(cx_push(scope), scope->cx->iter_type)->as_iter = it;
+static bool hex_coder_imp(struct cx_scope *s) {
+  struct cx_box in = *cx_test(cx_pop(s, false)), it;
+  cx_iter(&in, &it);
+
+  cx_box_init(cx_push(s), cx_type_get(s->cx->iter_type, s->cx->char_type))->as_iter =
+    hex_coder_new(it.as_iter);
+  
   cx_box_deinit(&in);
   return true;
 }
 
-static bool hex_decoder_imp(struct cx_scope *scope) {
-  struct cx_box in = *cx_test(cx_pop(scope, false));
-  struct cx_iter *it = hex_decoder_new(cx_iter(&in));
-  cx_box_init(cx_push(scope), scope->cx->iter_type)->as_iter = it;
+static bool hex_decoder_imp(struct cx_scope *s) {
+  struct cx_box in = *cx_test(cx_pop(s, false)), it;
+  cx_iter(&in, &it);
+  
+  cx_box_init(cx_push(s), cx_type_get(s->cx->iter_type, s->cx->char_type))->as_iter =
+    hex_decoder_new(it.as_iter);
+
   cx_box_deinit(&in);
   return true;
 }

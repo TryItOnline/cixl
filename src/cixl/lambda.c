@@ -77,8 +77,9 @@ static void copy_imp(struct cx_box *dst, const struct cx_box *src) {
   dst->as_ptr = cx_lambda_ref(src->as_ptr);
 }
 
-static struct cx_iter *iter_imp(struct cx_box *v) {
-  return cx_call_iter_new(v);
+static void iter_imp(struct cx_box *in, struct cx_box *out) {
+  struct cx *cx = in->type->lib->cx;
+  cx_box_init(out, cx->iter_type)->as_iter = cx_call_iter_new(in);
 }
 
 static void dump_imp(struct cx_box *value, FILE *out) {

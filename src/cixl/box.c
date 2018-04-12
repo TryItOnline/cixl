@@ -71,8 +71,8 @@ struct cx_box *cx_clone(struct cx_box *dst, struct cx_box *src) {
   return dst;
 }
 
-struct cx_iter *cx_iter(struct cx_box *box) {
-  return cx_test(box->type->iter)(box);
+void cx_iter(struct cx_box *in, struct cx_box *out) {
+  cx_test(in->type->iter)(in, out);
 }
 
 bool cx_write(struct cx_box *box, FILE *out) {

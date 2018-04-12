@@ -67,7 +67,9 @@ cx_lib(cx_init_abc, "cx/abc") {
   cx->func_type = cx_init_func_type(lib);
   cx->fimp_type = cx_init_fimp_type(lib);
   cx->lambda_type = cx_init_lambda_type(lib);
+  
   cx->iter_type = cx_init_iter_type(lib);
+
   cx->stack_type = cx_init_stack_type(lib);
 
   cx_add_cfunc(lib, "is-nil",

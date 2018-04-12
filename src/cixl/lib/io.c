@@ -450,18 +450,20 @@ static bool write_imp(struct cx_scope *scope) {
   return ok;
 }
 
-static bool lines_imp(struct cx_scope *scope) {
-  struct cx_box in = *cx_test(cx_pop(scope, false));
+static bool lines_imp(struct cx_scope *s) {
+  struct cx_box in = *cx_test(cx_pop(s, false));
   struct cx_iter *it = line_iter_new(in.as_file);
-  cx_box_init(cx_push(scope), scope->cx->iter_type)->as_iter = it;
+  cx_box_init(cx_push(s),
+	      cx_type_get(s->cx->iter_type, s->cx->str_type))->as_iter = it;
   cx_box_deinit(&in);
   return true;
 }
 
-static bool reverse_imp(struct cx_scope *scope) {
-  struct cx_box in = *cx_test(cx_pop(scope, false));
+static bool reverse_imp(struct cx_scope *s) {
+  struct cx_box in = *cx_test(cx_pop(s, false));
   struct cx_iter *it = reverse_iter_new(in.as_file);
-  cx_box_init(cx_push(scope), scope->cx->iter_type)->as_iter = it;
+  cx_box_init(cx_push(s),
+	      cx_type_get(s->cx->iter_type, s->cx->char_type))->as_iter = it;
   cx_box_deinit(&in);
   return true;
 }
@@ -559,12 +561,12 @@ cx_lib(cx_init_io, "cx/io") {
 
   cx_add_cfunc(lib, "lines",
 	       cx_args(cx_arg("f", cx->rfile_type)),
-	       cx_args(cx_arg(NULL, cx->iter_type)),
+	       cx_args(cx_arg(NULL, cx_type_get(cx->iter_type, cx->str_type))),
 	       lines_imp);
 
   cx_add_cfunc(lib, "reverse",
 	       cx_args(cx_arg("f", cx->rfile_type)),
-	       cx_args(cx_arg(NULL, cx->iter_type)),
+	       cx_args(cx_arg(NULL, cx_type_get(cx->iter_type, cx->char_type))),
 	       reverse_imp);
 
   return true;

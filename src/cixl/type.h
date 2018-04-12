@@ -26,7 +26,7 @@ struct cx_type {
   struct cx_lib *lib;
   char *id, *emit_id;
   size_t tag, level;
-  struct cx_type *root;
+  struct cx_type *raw;
   struct cx_set parents, children;
   struct cx_vec is, args;
   bool trait;
@@ -39,17 +39,18 @@ struct cx_type {
   bool (*ok)(struct cx_box *);
   void (*copy)(struct cx_box *dst, const struct cx_box *src);
   void (*clone)(struct cx_box *dst, struct cx_box *src);
-  struct cx_iter *(*iter)(struct cx_box *);
+  void (*iter)(struct cx_box *, struct cx_box *);
   void (*write)(struct cx_box *, FILE *);
   void (*dump)(struct cx_box *, FILE *);
   void (*print)(struct cx_box *, FILE *);
   bool (*emit)(struct cx_box *, const char *, FILE *);
   void (*deinit)(struct cx_box *);
 
-  struct cx_type *(*type_get)(struct cx_type *,
+  struct cx_type *(*type_new)(struct cx_type *,
 			      const char *id,
 			      int nargs, struct cx_type *args[]);
-  
+
+  void (*type_init)(struct cx_type *, int nargs, struct cx_type *args[]);
   void *(*type_deinit)(struct cx_type *);
 };
 

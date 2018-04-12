@@ -154,8 +154,9 @@ static void clone_imp(struct cx_box *dst, struct cx_box *src) {
   }
 }
 
-static struct cx_iter *iter_imp(struct cx_box *v) {
-  return &cx_table_iter_new(v->as_table)->iter;
+static void iter_imp(struct cx_box *in, struct cx_box *out) {
+  struct cx *cx = in->type->lib->cx;
+  cx_box_init(out, cx->iter_type)->as_iter = &cx_table_iter_new(in->as_table)->iter;
 }
 
 static void write_imp(struct cx_box *v, FILE *out) {

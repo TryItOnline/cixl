@@ -139,8 +139,9 @@ static void clone_imp(struct cx_box *dst, struct cx_box *src) {
   }
 }
 
-static struct cx_iter *iter_imp(struct cx_box *v) {
-  return &cx_stack_iter_new(v->as_ptr)->iter;
+static void iter_imp(struct cx_box *in, struct cx_box *out) {
+  struct cx *cx = in->type->lib->cx;
+  cx_box_init(out, cx->iter_type)->as_iter = &cx_stack_iter_new(in->as_ptr)->iter;
 }
 
 static void write_imp(struct cx_box *b, FILE *out) {

@@ -122,13 +122,13 @@ static bool len_imp(struct cx_scope *scope) {
 
 static bool seq_imp(struct cx_scope *scope) {
   struct cx *cx = scope->cx;
-  struct cx_box in = *cx_test(cx_pop(scope, false));
-  struct cx_iter *it = cx_iter(&in);
+  struct cx_box in = *cx_test(cx_pop(scope, false)), it;
+  cx_iter(&in, &it);
   struct cx_table *out = cx_table_new(cx);
   bool ok = false;
   struct cx_box p;
   
-  while (cx_iter_next(it, &p, scope)) {
+  while (cx_iter_next(it.as_iter, &p, scope)) {
     if (!check_key_type(out, p.as_pair->x.type)) {
       cx_table_deref(out);
       goto exit;
@@ -142,7 +142,7 @@ static bool seq_imp(struct cx_scope *scope) {
   ok = true;
  exit:
   cx_box_deinit(&in);
-  cx_iter_deref(it);
+  cx_box_deinit(&it);
   return ok;
 }
 

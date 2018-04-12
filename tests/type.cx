@@ -7,8 +7,13 @@ Int A is check
 A Int is !check
 
 42 Opt is check
+
 42 Opt<Int> is check
+
+Int Opt<Num> is check
+
 42 Opt<Str> is !check
+
 #nil Opt<Int> is check
 
 trait: StrInt Str Int;

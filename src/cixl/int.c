@@ -58,8 +58,11 @@ static bool ok_imp(struct cx_box *v) {
   return v->as_int != 0;
 }
 
-static struct cx_iter *iter_imp(struct cx_box *v) {
-  return &cx_int_iter_new(v->as_int)->iter;
+static void iter_imp(struct cx_box *in, struct cx_box *out) {
+  struct cx *cx = in->type->lib->cx;
+  
+  cx_box_init(out, cx_type_get(cx->iter_type, cx->int_type))->as_iter =
+    &cx_int_iter_new(in->as_int)->iter;
 }
 
 static void dump_imp(struct cx_box *v, FILE *out) {

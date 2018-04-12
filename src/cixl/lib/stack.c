@@ -118,18 +118,18 @@ static bool get_rand_imp(struct cx_scope *scope) {
 }
 
 static bool seq_imp(struct cx_scope *scope) {
-  struct cx_box in = *cx_test(cx_pop(scope, false));
-  struct cx_iter *it = cx_iter(&in);
+  struct cx_box in = *cx_test(cx_pop(scope, false)), it;
+  cx_iter(&in, &it);
   struct cx_stack *out = cx_stack_new(scope->cx);
   struct cx_box v;
   
-  while (cx_iter_next(it, &v, scope)) {
+  while (cx_iter_next(it.as_iter, &v, scope)) {
     *(struct cx_box *)cx_vec_push(&out->imp) = v;
   }
 
   cx_box_init(cx_push(scope), scope->cx->stack_type)->as_ptr = out;
   cx_box_deinit(&in);
-  cx_iter_deref(it);
+  cx_box_deinit(&it);
   return true;
 }
 
@@ -139,14 +139,14 @@ static bool stash_imp(struct cx_scope *scope) {
 }
 
 static bool splat_imp(struct cx_scope *s) {
-  struct cx_box in = *cx_test(cx_pop(s, false));
-  struct cx_iter *it = cx_iter(&in);
+  struct cx_box in = *cx_test(cx_pop(s, false)), it;
+  cx_iter(&in, &it);
   struct cx_box v;
   
-  while (cx_iter_next(it, &v, s)) { *cx_push(s) = v; }
+  while (cx_iter_next(it.as_iter, &v, s)) { *cx_push(s) = v; }
 
   cx_box_deinit(&in);
-  cx_iter_deref(it);
+  cx_box_deinit(&it);
   return true;
 }
 

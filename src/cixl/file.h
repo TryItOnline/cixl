@@ -33,7 +33,7 @@ struct cx_file *cx_file_init(struct cx_file *f,
 struct cx_file *cx_file_deinit(struct cx_file *f);
 
 FILE *cx_file_ptr(struct cx_file *file);
-struct cx_iter *cx_file_iter(struct cx_box *v);
+void cx_file_iter(struct cx_box *in, struct cx_box *out);
 bool cx_file_unblock(struct cx_file *file);
 bool cx_file_close(struct cx_file *file);
 

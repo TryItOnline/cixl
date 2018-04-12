@@ -2,12 +2,11 @@
 #define ntohll(x) ((1==ntohl(1)) ? (x) : ((uint64_t)ntohl((x) & 0xFFFFFFFF) << 32) | ntohl((x) >> 32))
 host64 & net64 fns
 
-* convert iter_type refs in /lib
-** convert str/file iters to <char>
-* implement type_get method for rec type
 * add ref type arg
 * add pair type args
+* implement type_new method for rec type
 * ---
+* convert read-char & ctrl-char back to char
 * add implicit lambda scope
 ** one scope per lambda
 ** set parent

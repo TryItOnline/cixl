@@ -102,8 +102,10 @@ static void clone_imp(struct cx_box *dst, struct cx_box *src) {
   dst->as_str = cx_str_new(src->as_str->data, src->as_str->len);
 }
 
-static struct cx_iter *iter_imp(struct cx_box *v) {
-  return char_iter_new(v->as_str);
+static void iter_imp(struct cx_box *in, struct cx_box *out) {
+  struct cx *cx = in->type->lib->cx;
+  cx_box_init(out, cx_type_get(cx->iter_type, cx->char_type))->as_iter =
+    char_iter_new(in->as_str);
 }
 
 void cx_cstr_encode(const char *in, size_t len, FILE *out) {

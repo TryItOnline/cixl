@@ -47,8 +47,8 @@ static void copy_imp(struct cx_box *dst, const struct cx_box *src) {
   dst->as_iter = cx_iter_ref(src->as_iter);
 }
 
-static struct cx_iter *iter_imp(struct cx_box *v) {
-  return cx_iter_ref(v->as_iter);
+static void iter_imp(struct cx_box *in, struct cx_box *out) {
+  cx_copy(out, in);
 }
 
 static void dump_imp(struct cx_box *v, FILE *out) {
@@ -59,13 +59,20 @@ static void deinit_imp(struct cx_box *v) {
   cx_iter_deref(v->as_iter);
 }
 
+static void type_init_imp(struct cx_type *t, int nargs, struct cx_type *args[]) {
+  struct cx *cx = t->lib->cx;
+  cx_derive(t, cx_type_vget(cx->seq_type, nargs, args));
+}
+
 struct cx_type *cx_init_iter_type(struct cx_lib *lib) {
   struct cx_type *t = cx_add_type(lib, "Iter", lib->cx->seq_type);
+  cx_type_push_args(t, lib->cx->any_type);
   t->equid = equid_imp;
   t->ok = ok_imp;
   t->copy = copy_imp;
   t->iter = iter_imp;
   t->dump = dump_imp;
   t->deinit = deinit_imp;
+  t->type_init = type_init_imp;
   return t;
 }

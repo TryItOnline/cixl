@@ -22,7 +22,7 @@ struct cx_type *cx_type_init(struct cx_type *type,
   type->tag = lib->cx->next_type_tag++;
   type->level = 0;
   type->trait = false;
-  type->root = type;
+  type->raw = type;
 
   cx_set_init(&type->parents, sizeof(struct cx_type *), cx_cmp_ptr);
   cx_set_init(&type->children, sizeof(struct cx_type *), cx_cmp_ptr);
@@ -47,7 +47,8 @@ struct cx_type *cx_type_init(struct cx_type *type,
   type->emit = NULL;
   type->deinit = NULL;
 
-  type->type_get = NULL;
+  type->type_new = NULL;
+  type->type_init = NULL;
   type->type_deinit = NULL;
   return type;
 }
@@ -109,7 +110,7 @@ struct cx_type *cx_type_vget(struct cx_type *t, int nargs, struct cx_type *args[
     
     return NULL;
   }
-  
+
   for (struct cx_type
 	 **i = cx_vec_start(&t->args),
 	 **j = args;
@@ -125,7 +126,7 @@ struct cx_type *cx_type_vget(struct cx_type *t, int nargs, struct cx_type *args[
 
   struct cx_mfile id;
   cx_mfile_open(&id);
-  fputs(t->root->id, id.stream);
+  fputs(t->raw->id, id.stream);
   fputc('<', id.stream);
   char sep = 0;
   
@@ -145,12 +146,12 @@ struct cx_type *cx_type_vget(struct cx_type *t, int nargs, struct cx_type *args[
     return tt;
   }
     
-  tt = t->type_get
-    ? t->type_get(t, id.data, nargs, args)
+  tt = t->type_new
+    ? t->type_new(t, id.data, nargs, args)
     : cx_type_new(t->lib, id.data);
 
   free(id.data);
-  tt->root = t->root;
+  tt->raw = t->raw;
   tt->new = t->new;
   tt->eqval = t->eqval;
   tt->equid = t->equid;
@@ -165,11 +166,13 @@ struct cx_type *cx_type_vget(struct cx_type *t, int nargs, struct cx_type *args[
   tt->print = t->print;
   tt->emit = t->emit;
   tt->deinit = t->deinit;
-  tt->type_get = t->type_get;
+  tt->type_new = t->type_new;
+  tt->type_init = t->type_init;
   tt->type_deinit = t->type_deinit;
   cx_derive(tt, t);
   cx_type_vpush_args(tt, nargs, args);
   cx_lib_push_type(t->lib, tt);
+  if (t->type_init) { t->type_init(tt, nargs, args); }
   return tt;
 }
 
@@ -192,7 +195,7 @@ void cx_derive(struct cx_type *child, struct cx_type *parent) {
 }
 
 bool cx_is(struct cx_type *child, struct cx_type *parent) {
-  if (child->root == parent->root) {
+  if (child->raw == parent->raw) {
     cx_test(child->args.count == parent->args.count);
     struct cx_type **ie = cx_vec_end(&child->args);
     

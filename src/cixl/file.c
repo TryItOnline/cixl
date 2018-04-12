@@ -141,8 +141,11 @@ static void copy_imp(struct cx_box *dst, const struct cx_box *src) {
   dst->as_file = cx_file_ref(src->as_file);
 }
 
-struct cx_iter *cx_file_iter(struct cx_box *v) {
-  return char_iter_new(v);
+void cx_file_iter(struct cx_box *in, struct cx_box *out) {
+  struct cx *cx = in->type->lib->cx;
+  
+  cx_box_init(out, cx_type_get(cx->iter_type, cx->char_type))->as_iter =
+    char_iter_new(in);
 }
 
 static void dump_imp(struct cx_box *v, FILE *out) {

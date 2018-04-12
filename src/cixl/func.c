@@ -195,8 +195,9 @@ static bool call_imp(struct cx_box *value, struct cx_scope *scope) {
   return cx_fimp_call(imp, scope);
 }
 
-static struct cx_iter *iter_imp(struct cx_box *v) {
-  return cx_call_iter_new(v);
+static void iter_imp(struct cx_box *in, struct cx_box *out) {
+  struct cx *cx = in->type->lib->cx;
+  cx_box_init(out, cx->iter_type)->as_iter = cx_call_iter_new(in);
 }
 
 static void write_imp(struct cx_box *value, FILE *out) {
