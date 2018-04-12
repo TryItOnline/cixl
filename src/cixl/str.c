@@ -179,17 +179,15 @@ void cx_cstr_cencode(const char *in, size_t len, FILE *out) {
 }
 
 static bool emit_imp(struct cx_box *v, const char *exp, FILE *out) {
-  fputs("{\n"
-	"  const char *cs = \"",
-	out);
-
+  fprintf(out,
+	  "cx_box_init(%s, cx->str_type)->as_str = cx_str_new(\"",
+	  exp);
+  
   cx_cstr_cencode(v->as_str->data, v->as_str->len, out);
 
   fprintf(out,
-	  "\";\n"
-	  "  cx_box_init(%s, cx->str_type)->as_str = cx_str_new(cs, strlen(cs));\n"
-	  "}\n",
-	  exp);
+	  "\", %zd);\n",
+	  v->as_str->len);
 
   return true;
 }

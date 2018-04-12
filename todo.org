@@ -3,6 +3,9 @@
 host64 & net64 fns
 
 * convert str seq/iter types to <char>
+** add arg to base seq type
+** use type_get in str constructor
+** update lib
 * implement type_get method for rec type
 * convert seq_type refs in /lib
 * convert opt_type refs in /lib
@@ -14,6 +17,9 @@ host64 & net64 fns
 ** shuffle all values on stack back and forth
 ** replace scope.parents with plain parent ptr
 * ---
+* move type lookup to id tok compilation
+** always forward id
+** remove lookup flag
 * add automatic chunking to encrypt/decrypt
 ** add #max-chunk
 ** add int net/host
