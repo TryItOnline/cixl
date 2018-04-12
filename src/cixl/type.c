@@ -191,23 +191,25 @@ void cx_derive(struct cx_type *child, struct cx_type *parent) {
   derive(child, parent);
 }
 
-bool cx_is(struct cx_type *child, struct cx_type *parent) {  
-  bool ok = (parent->tag < child->is.count)
+bool cx_is(struct cx_type *child, struct cx_type *parent) {
+  if (child->root == parent->root) {
+    cx_test(child->args.count == parent->args.count);
+    struct cx_type **ie = cx_vec_end(&child->args);
+    
+    for (struct cx_type
+	   **i = cx_vec_start(&child->args),
+	   **j = cx_vec_start(&parent->args);
+	 i != ie;
+	 i++, j++) {
+      if (!cx_is(*i, *j)) { return false; }
+    }
+
+    return true;
+  }
+  
+  return (parent->tag < child->is.count)
     ? *(bool *)cx_vec_get(&child->is, parent->tag)
     : false;
-
-  if (!ok) { return false; }
-  
-  for (struct cx_type
-	 **i = cx_vec_start(&child->args),
-	 **j = cx_vec_start(&parent->args);
-       i != cx_vec_end(&child->args) &&
-	 j != cx_vec_end(&parent->args);
-       i++, j++) {
-    if (!cx_is(*i, *j)) { return false; }
-  }
-
-  return true;
 }
 
 static bool equid_imp(struct cx_box *x, struct cx_box *y) {
