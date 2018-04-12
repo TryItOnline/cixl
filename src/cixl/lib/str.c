@@ -40,11 +40,6 @@ bool split_next(struct cx_iter *iter, struct cx_box *out, struct cx_scope *scope
       goto exit;
     }
 
-    if (c.type != cx->char_type) {
-      cx_error(cx, cx->row, cx->col, "Expected type Char, actual: %s", c.type->id);
-      goto exit;
-    }
-
     bool split = false;
     
     if (it->split_fn) {
@@ -338,20 +333,12 @@ static bool seq_imp(struct cx_scope *scope) {
   struct cx *cx = scope->cx;
   struct cx_box in = *cx_test(cx_pop(scope, false));
   struct cx_iter *it = cx_iter(&in);
-  bool ok = false;
   struct cx_mfile out;
   cx_mfile_open(&out);
   struct cx_box c;
   
   while (cx_iter_next(it, &c, scope)) {
     if (c.type == cx->nil_type) { continue; }
-    
-    if (c.type != cx->char_type) {
-      cx_error(cx, cx->row, cx->col, "Expected type Char, actual: %s", c.type->id);
-      cx_mfile_close(&out);
-      goto exit;
-    }
-
     fputc(c.as_char, out.stream);
   }
   
@@ -359,12 +346,10 @@ static bool seq_imp(struct cx_scope *scope) {
   cx_box_init(cx_push(scope), cx->str_type)->as_str =
     cx_str_new(out.data, ftell(out.stream));
   cx_mfile_close(&out);
-  ok = true;
- exit:
   free(out.data);
   cx_box_deinit(&in);
   cx_iter_deref(it);
-  return ok;
+  return true;
 }
 
 static bool str_int_imp(struct cx_scope *scope) {
@@ -474,17 +459,18 @@ cx_lib(cx_init_str, "cx/str") {
   }
 
   cx_add_cfunc(lib, "lines",
-	       cx_args(cx_arg("in", cx->seq_type)),
+	       cx_args(cx_arg("in", cx_type_get(cx->seq_type, cx->char_type))),
 	       cx_args(cx_arg(NULL, cx->iter_type)),
 	       lines_imp);
 
   cx_add_cfunc(lib, "words",
-	       cx_args(cx_arg("in", cx->seq_type)),
+	       cx_args(cx_arg("in", cx_type_get(cx->seq_type, cx->char_type))),
 	       cx_args(cx_arg(NULL, cx->iter_type)),
 	       words_imp);
 
   cx_add_cfunc(lib, "split",
-	       cx_args(cx_arg("in", cx->seq_type), cx_arg("s", cx->any_type)),
+	       cx_args(cx_arg("in", cx_type_get(cx->seq_type, cx->char_type)),
+		       cx_arg("s", cx->any_type)),
 	       cx_args(cx_arg(NULL, cx->iter_type)),
 	       split_imp);
 
@@ -534,7 +520,7 @@ cx_lib(cx_init_str, "cx/str") {
 	       pop_imp);
 
   cx_add_cfunc(lib, "str",
-	       cx_args(cx_arg("s", cx->seq_type)),
+	       cx_args(cx_arg("s", cx_type_get(cx->seq_type, cx->char_type))),
 	       cx_args(cx_arg(NULL, cx->str_type)),
 	       seq_imp);
 
@@ -567,12 +553,12 @@ cx_lib(cx_init_str, "cx/str") {
 	      join_imp);
 
   cx_add_cfunc(lib, "hex-coder",
-	       cx_args(cx_arg("in", cx->seq_type)),
+	       cx_args(cx_arg("in", cx_type_get(cx->seq_type, cx->char_type))),
 	       cx_args(cx_arg(NULL, cx->iter_type)),
 	       hex_coder_imp);
 
   cx_add_cfunc(lib, "hex-decoder",
-	       cx_args(cx_arg("in", cx->seq_type)),
+	       cx_args(cx_arg("in", cx_type_get(cx->seq_type, cx->char_type))),
 	       cx_args(cx_arg(NULL, cx->iter_type)),
 	       hex_decoder_imp);
 

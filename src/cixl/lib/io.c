@@ -474,7 +474,9 @@ cx_lib(cx_init_io, "cx/io") {
   }
 
   cx->file_type = cx_init_file_type(lib, "File");
-  cx->rfile_type = cx_init_file_type(lib, "RFile", cx->file_type, cx->seq_type);
+  cx->rfile_type = cx_init_file_type(lib, "RFile",
+				     cx->file_type,
+				     cx_type_get(cx->seq_type, cx->char_type));
   cx->rfile_type->iter = cx_file_iter;
     
   cx->wfile_type = cx_init_file_type(lib, "WFile", cx->file_type);
