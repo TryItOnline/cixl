@@ -192,9 +192,9 @@ cx_lib(cx_init_proc, "cx/proc") {
   cx->proc_type = cx_init_proc_type(lib);
   
   cx_add_cfunc(lib, "fork",
-	       cx_args(cx_arg("in", cx->opt_type),
-		       cx_arg("out", cx->opt_type),
-		       cx_arg("error", cx->opt_type)),
+	       cx_args(cx_arg("in", cx_type_get(cx->opt_type, cx->rfile_type)),
+		       cx_arg("out", cx_type_get(cx->opt_type, cx->wfile_type)),
+		       cx_arg("error", cx_type_get(cx->opt_type, cx->wfile_type))),
 	       cx_args(cx_arg(NULL, cx->proc_type)),
 	       fork_imp);
 
@@ -210,17 +210,17 @@ cx_lib(cx_init_proc, "cx/proc") {
 
   cx_add_cfunc(lib, "in",
 	       cx_args(cx_arg("p", cx->proc_type)),
-	       cx_args(cx_arg(NULL, cx->opt_type)),
+	       cx_args(cx_arg(NULL, cx_type_get(cx->opt_type, cx->wfile_type))),
 	       in_imp);
 
   cx_add_cfunc(lib, "out",
 	       cx_args(cx_arg("p", cx->proc_type)),
-	       cx_args(cx_arg(NULL, cx->opt_type)),
+	       cx_args(cx_arg(NULL, cx_type_get(cx->opt_type, cx->rfile_type))),
 	       out_imp);
 
   cx_add_cfunc(lib, "error",
 	       cx_args(cx_arg("p", cx->proc_type)),
-	       cx_args(cx_arg(NULL, cx->opt_type)),
+	       cx_args(cx_arg(NULL, cx_type_get(cx->opt_type, cx->rfile_type))),
 	       error_imp);
 
   cx_add_cfunc(lib, "wait",

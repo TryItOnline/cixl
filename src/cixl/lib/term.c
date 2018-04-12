@@ -79,6 +79,19 @@ static bool normal_mode_imp(struct cx_scope *scope) {
   return true;
 }
 
+static bool ctrl_char_imp(struct cx_scope *scope) {
+  struct cx_box c = *cx_test(cx_pop(scope, false));
+  int cc = cx_ctrl_char(c.as_int);
+
+  if (cc) {
+    cx_box_init(cx_push(scope), scope->cx->int_type)->as_int = cc;
+  } else {
+    cx_box_init(cx_push(scope), scope->cx->nil_type);
+  }
+  
+  return true;
+}
+
 cx_lib(cx_init_term, "cx/io/term") {    
   struct cx *cx = lib->cx;
     
@@ -88,11 +101,11 @@ cx_lib(cx_init_term, "cx/io/term") {
   }
 
   cx_box_init(cx_put_const(lib, cx_sym(cx, "key-esc"), false),
-	      cx->char_type)->as_char = 27;
+	      cx->int_type)->as_int = 27;
   cx_box_init(cx_put_const(lib, cx_sym(cx, "key-space"), false),
-	      cx->char_type)->as_char = 32;
+	      cx->int_type)->as_int = 32;
   cx_box_init(cx_put_const(lib, cx_sym(cx, "key-back"), false),
-	      cx->char_type)->as_char = 127;
+	      cx->int_type)->as_int = 127;
 
   cx_add_cxfunc(lib, "say",
 		cx_args(cx_arg("v", cx->any_type)), cx_args(),
@@ -123,5 +136,10 @@ cx_lib(cx_init_term, "cx/io/term") {
 	       cx_args(),
 	       normal_mode_imp);
 
+  cx_add_cfunc(lib, "ctrl-char",
+	       cx_args(cx_arg("c", cx->int_type)),
+	       cx_args(cx_arg(NULL, cx_type_get(cx->opt_type, cx->int_type))),
+	       ctrl_char_imp);
+  
   return true;
 }

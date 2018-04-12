@@ -16,21 +16,87 @@
 #include "cixl/str.h"
 #include "cixl/vec.h"
 
+char *parse_type_args(struct cx *cx, const char *id, FILE *in, struct cx_vec *out) {
+  char c = fgetc(in);
+
+  if (c != '<') {
+    ungetc(c, in);
+    return NULL;
+  }
+  
+  int row = cx->row, col = cx->col;
+  struct cx_mfile aid;
+  cx_mfile_open(&aid);
+  fputs(id, aid.stream);
+  fputc('<', aid.stream);
+  char sep = 0;
+  bool done = false;
+  
+  while (!done) {
+    if (!cx_parse_tok(cx, in, out, false)) {
+      cx_error(cx, row, col, "Invalid type args");
+      cx_mfile_close(&aid);
+      free(aid.data);
+      return NULL;
+    }
+    
+    struct cx_tok *tok = cx_vec_pop(out);
+
+    if (tok->type != CX_TID()) {
+      cx_error(cx, tok->row, tok->col, "Invalid type arg");
+      cx_mfile_close(&aid);
+      free(aid.data);
+      return NULL;
+    }
+
+    if (strcmp(tok->as_ptr, ">") == 0) {
+      cx_tok_deinit(tok);
+      break;
+    }
+
+    if (sep) { fputc(sep, aid.stream); }
+    
+    char *s = tok->as_ptr;
+    size_t len = strlen(s);
+
+    if (s[len-1] == '>') {
+      s[len-1] = 0;
+      done = true;
+    }
+
+    struct cx_type *type = cx_get_type(cx, s, false);
+    if (!type) { return NULL; }
+    fputs(type->id, aid.stream);
+
+    cx_tok_deinit(tok);
+    sep = ' ';
+  }
+
+  fputc('>', aid.stream);
+  cx_mfile_close(&aid);
+  return aid.data;
+}
+
 static bool parse_type(struct cx *cx,
 		       const char *id,
+		       FILE *in,
 		       struct cx_vec *out,
 		       bool lookup) {
   if (lookup) {
-    struct cx_type *t = cx_get_type(cx, id, false);
+    char *aid = parse_type_args(cx, id, in, out);
+    struct cx_type *t = cx_get_type(cx, aid ? aid : id, false);
+    if (aid) { free(aid); }
     if (!t) { return false; }
     
     cx_tok_init(cx_vec_push(out),
 		CX_TTYPE(),
 		cx->row, cx->col)->as_ptr = t;
   } else {
+    char *aid = parse_type_args(cx, id, in, out);
+      
     cx_tok_init(cx_vec_push(out),
 		CX_TID(),
-		cx->row, cx->col)->as_ptr = strdup(id);
+		cx->row, cx->col)->as_ptr = aid ? aid : strdup(id);
   }
 
   return true;
@@ -209,7 +275,7 @@ static bool parse_id(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
       char *s = id.data;
 
       if (isupper(s[0])) {
-	ok = parse_type(cx, s, out, lookup);
+	ok = parse_type(cx, s, in, out, lookup);
       } else if (lookup && s[0] == '#') {
 	ok = parse_const(cx, s, out);
       } else if (!lookup || s[0] == '$') {

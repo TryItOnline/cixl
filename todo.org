@@ -1,15 +1,16 @@
-'wc' [] popen -1 kill
-'ls' [] popen -1 wait
-'wc' [] popen % in 'foo bar baz' print out {is-graph!} split stack
-fork % {_ 'wc' [] exec} {% in 'foo bar baz' print out {is-graph!} split stack} if-else
-#define CX_CTRL 0x1f
-
- ./cixl ../examples/procwrap.cx 'encrypt secret' 'decrypt secret' 'aserver 7707'
-
 #define htonll(x) ((1==htonl(1)) ? (x) : ((uint64_t)htonl((x) & 0xFFFFFFFF) << 32) | htonl((x) >> 32))
 #define ntohll(x) ((1==ntohl(1)) ? (x) : ((uint64_t)ntohl((x) & 0xFFFFFFFF) << 32) | ntohl((x) >> 32))
 host64 & net64 fns
 
+* add type arg support to cx_get_type
+** parse '<' in type id
+** call cx_type_vget if args
+* implement type_copy for rec type
+* commit type args
+* convert all opt_type refs in /lib
+* convert all seq_type refs in /lib
+** update seq types to use cx_type_get with elem type
+* ---
 * add implicit lambda scope
 ** one scope per lambda
 ** set parent
@@ -47,13 +48,9 @@ host64 & net64 fns
 ** handle in type methods
 *** check if user defined func exists
 * ---
-* convert size_t to ssize_t and remove unsigned
-* extract cx_hash from cx_env
-** item_size
-** eq fn ptr
-** add Hash type
-** add resizing if chain gets to long
-*** switch slots to cx_vec
+* fix throw recovery
+** add separate op eval/emit to run if errrors.count
+** replaces new_error magic and catch jump
 * add Table emit support
 ** copy Rec
 * replace box.as_ptr with as_func/fimp/etc
@@ -77,6 +74,7 @@ host64 & net64 fns
 ** use getpid()
 * replace clone fallback to copy with error
 * replace varargs with size/array+macro
+* convert size_t to ssize_t and remove unsigned
 * --- cxcrypt
 * add Pub/PrivKey
 * add README

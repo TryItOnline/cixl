@@ -38,6 +38,11 @@
       (typ *)((char *)fp - offsetof(typ, fld));		\
     })							\
 
+#define cx_ctrl_char(c) ({			\
+      int _c = c;				\
+      (_c == (_c & 0x1f)) ? c+96 : 0;		\
+    })						\
+	
 struct cx;
 
 char *cx_vfmt(const char *spec, va_list args);

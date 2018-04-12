@@ -25,7 +25,7 @@ use:
   (cx/rec ? print rec: get put put-call)
   (cx/ref Ref deref new ref set set-call)
   (cx/stack Stack _ ~ % %% fill get last len move put splat stack)
-  (cx/str len)
+  (cx/str char len)
   (cx/var let:);
 
 /*
@@ -121,7 +121,7 @@ define: key-right  @l;
 define: key-drop   @k;
 define: key-fast   @+;
 define: key-slow   @-;
-define: key-quit   #key-esc;
+define: key-quit   #key-esc char;
 
 define: speed-delays [200 175 150 125 100];
 define: max-speed #speed-delays len --;
@@ -435,7 +435,7 @@ let: poll Poll new;
 #in unblock
 
 $poll #in {
-  #in read-char handle-key
+  #in read-char char handle-key
   1 $key-delay &+ set-call
 } on-read
 

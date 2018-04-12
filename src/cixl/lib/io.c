@@ -430,8 +430,8 @@ static bool read_char_imp(struct cx_scope *scope) {
     
     goto exit;
   }
-      
-  cx_box_init(cx_push(scope), cx->char_type)->as_char = c;
+
+  cx_box_init(cx_push(scope), cx->int_type)->as_int = c;
   ok = true;
  exit:
   cx_box_deinit(&f);
@@ -469,7 +469,7 @@ static bool reverse_imp(struct cx_scope *scope) {
 cx_lib(cx_init_io, "cx/io") {    
   struct cx *cx = lib->cx;
     
-  if (!cx_use(cx, "cx/abc", "A", "Cmp", "Char", "Iter", "Opt", "Str", "Sym")) {
+  if (!cx_use(cx, "cx/abc", "A", "Cmp", "Char", "Int", "Iter", "Opt", "Str", "Sym")) {
     return false;
   }
 
@@ -547,7 +547,7 @@ cx_lib(cx_init_io, "cx/io") {
 
   cx_add_cfunc(lib, "read-char",
 	       cx_args(cx_arg("f", cx->rfile_type)),
-	       cx_args(cx_arg(NULL, cx->char_type)),
+	       cx_args(cx_arg(NULL, cx->int_type)),
 	       read_char_imp);
 
   cx_add_cfunc(lib, "write",

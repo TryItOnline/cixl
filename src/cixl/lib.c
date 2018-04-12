@@ -92,25 +92,41 @@ struct cx_type *_cx_add_type(struct cx_lib *lib, const char *id, ...) {
   va_end(parents);					
   return t;
 }
- 
-struct cx_type *cx_vadd_type(struct cx_lib *lib, const char *id, va_list parents) {
-  struct cx *cx = lib->cx;
-  struct cx_type **t = cx_test(cx_set_insert(&lib->types, &id));
 
-  if (!t) {
-    cx_error(cx, cx->row, cx->col, "Duplicate type: '%s'", id);
+bool cx_lib_push_type(struct cx_lib *l, struct cx_type *t) {
+  struct cx_type **p = cx_test(cx_set_insert(&l->types, &t->id));
+
+  if (!p) {
+    cx_error(l->cx, l->cx->row, l->cx->col, "Duplicate type: '%s'", t->id);
+    return false;
+  }
+
+  *p = t;
+
+  *(struct cx_type **)cx_vec_push(&l->cx->types) = t;
+  return true;
+}
+
+struct cx_type *cx_vadd_type(struct cx_lib *l, const char *id, va_list parents) {
+  struct cx_type *t = cx_type_new(l, id);
+
+  if (!cx_lib_push_type(l, t)) {
+    free(t);
     return NULL;
   }
   
-  *t = cx_type_init(malloc(sizeof(struct cx_type)), lib, id);
-  *(struct cx_type **)cx_vec_push(&cx->types) = *t;
-  
-  struct cx_type *pt = NULL;
-  while ((pt = va_arg(parents, struct cx_type *))) {
-    cx_derive(*t, pt);
+  if (l->cx->opt_type && strcmp(id, "Nil") != 0) {
+    char *oid = cx_fmt("Opt<%s>", id);
+    struct cx_type *ot = cx_type_vclone(cx_test(l->cx->opt_type), oid, 1, &t);
+    free(oid);
+
+    cx_derive(t, ot);
+    cx_derive(l->cx->nil_type, ot);
   }
   
-  return *t;
+  struct cx_type *pt = NULL;
+  while ((pt = va_arg(parents, struct cx_type *))) { cx_derive(t, pt); }
+  return t;
 }
 
 struct cx_rec_type *cx_add_rec_type(struct cx_lib *lib, const char *id) {
@@ -140,6 +156,13 @@ static struct cx_type *lib_get_type(struct cx_lib **lib,
     return lib_get_type(lib-1, id, silent);
   }
 
+  if (!t && !silent) { cx_error(cx, cx->row, cx->col, "Unknown type: '%s'", id); }
+  return t ? *t : NULL;
+}
+
+struct cx_type *cx_lib_get_type(struct cx_lib *lib, const char *id, bool silent) {
+  struct cx *cx = lib->cx;
+  struct cx_type **t = cx_set_get(&lib->types, &id);
   if (!t && !silent) { cx_error(cx, cx->row, cx->col, "Unknown type: '%s'", id); }
   return t ? *t : NULL;
 }

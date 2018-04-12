@@ -1,6 +1,6 @@
 'Testing cx/proc...' say
 
-fork %
+#nil #nil #error fork %
 {_ 42 exit} else
 -1 wait 42 = check
 

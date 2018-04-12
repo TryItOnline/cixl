@@ -28,9 +28,13 @@ cx_lib(cx_init_abc, "cx/abc") {
   struct cx *cx = lib->cx;
 
   cx->opt_type = cx_add_type(lib, "Opt");
+  cx_type_push_args(cx->opt_type, cx->opt_type);
   cx->opt_type->trait = true;
 
-  cx->any_type = cx_add_type(lib, "A", cx->opt_type);
+  cx->nil_type = cx_init_nil_type(lib);
+  cx_box_init(cx_put_const(lib, cx_sym(cx, "nil"), false), cx->nil_type);
+
+  cx->any_type = cx_add_type(lib, "A");
   cx->any_type->trait = true;
 
   cx->cmp_type = cx_add_type(lib, "Cmp", cx->any_type);
@@ -50,9 +54,6 @@ cx_lib(cx_init_abc, "cx/abc") {
 	      cx->bool_type)->as_bool = true;
   cx_box_init(cx_put_const(lib, cx_sym(cx, "f"), false),
 	      cx->bool_type)->as_bool = false;
-
-  cx->nil_type = cx_init_nil_type(lib);
-  cx_box_init(cx_put_const(lib, cx_sym(cx, "nil"), false), cx->nil_type);
 
   cx->int_type = cx_init_int_type(lib);
   cx_box_init(cx_put_const(lib, cx_sym(cx, "min-int"), false),

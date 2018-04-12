@@ -1,6 +1,6 @@
 /*
   A utility for printing key codes.
-  Press ESC to exit gracefully.
+  Press SPACE to exit gracefully.
 
   https://github.com/basic-gongfu/cixl#getting-started
 */
@@ -8,24 +8,29 @@
 include: 'ansi.cx';
 
 use:
-  (cx/cond = !)
+  (cx/cond = ! if or)
   (cx/const define:)
   (cx/io #in #out print read-char)
-  (cx/io/term #clear-row #clear-screen #key-esc move-to normal-mode raw-mode)
+  (cx/io/term
+    #clear-row #clear-screen #key-space
+    ctrl-char move-to normal-mode raw-mode)
   (cx/iter while)
   (cx/stack % ~)
-  (cx/str int);
+  (cx/str int)
+  (cx/var let:);
 
 raw-mode
 #out #clear-screen print
 #out 1 1 move-to print
 
 {
-  #in read-char %
+  let: c #in read-char;
+  let: cc $c ctrl-char;
   #out 1 1 move-to print
   #out #clear-row print
-  int #out ~ print
-  #key-esc =!
+  $cc {#out 'C ' print} if
+  #out $cc $c or print
+  $c #key-space =!
 } while
 
 normal-mode
