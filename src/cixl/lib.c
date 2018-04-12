@@ -138,16 +138,14 @@ struct cx_rec_type *cx_add_rec_type(struct cx_lib *lib, const char *id) {
 }
 
 static struct cx_type *lib_get_type(struct cx_lib **lib,
-				    const char *id,
-				    bool silent) {
+				    const char *id) {
   struct cx *cx = (*lib)->cx;
   struct cx_type **t = cx_set_get(&(*lib)->types, &id);
 
   if (!t && lib > (struct cx_lib **)cx->libs.items) {
-    return lib_get_type(lib-1, id, silent);
+    return lib_get_type(lib-1, id);
   }
 
-  if (!t && !silent) { cx_error(cx, cx->row, cx->col, "Unknown type: '%s'", id); }
   return t ? *t : NULL;
 }
 
@@ -158,8 +156,57 @@ struct cx_type *cx_lib_get_type(struct cx_lib *lib, const char *id, bool silent)
   return t ? *t : NULL;
 }
 
+struct cx_type *parse_type_arg(struct cx *cx, char **in) {
+  char *i = *in;
+  while (*i == ' ') { i++; }
+  char *j = i+1;
+  while (*j && *j != ' ' && *j != '>') { j++; }
+
+  if (j > i+1) {
+    char tmp = *j;
+    *j = 0;
+    struct cx_type *t = cx_get_type(cx, i, false);
+    *j = tmp;
+    if (*j == '>') { j++; }
+    *in = j;
+    return t;
+  }
+
+  return NULL;
+}
+
 struct cx_type *cx_get_type(struct cx *cx, const char *id, bool silent) {
-  return lib_get_type(cx->lib, id, silent);
+  struct cx_type *t = lib_get_type(cx->lib, id);
+  if (t) { return t; }
+  char *i = strchr(id, '<');
+
+  if (i) {
+    char *j = i;
+    
+    i++;
+    char args[strlen(i)+1];
+    strcpy(args, i);
+  
+    struct cx_vec types;
+    cx_vec_init(&types, sizeof(struct cx_type *));
+
+    while(true) {
+      struct cx_type *tt = parse_type_arg(cx, &i);
+      if (!tt) { break; }
+      *(struct cx_type **)cx_vec_push(&types) = tt;
+    }
+
+    char tid[j-id+1];
+    strncpy(tid, id, j-id);
+    tid[j-id] = 0;
+    struct cx_type *t = cx_get_type(cx, tid, false);
+    if (t) { t = cx_type_vget(t, types.count, (struct cx_type **)types.items); }
+    cx_vec_deinit(&types);
+    return t;
+  }
+
+  if (!t && !silent) { cx_error(cx, cx->row, cx->col, "Unknown type: '%s'", id); }
+  return NULL;
 }
 
 struct cx_macro *cx_add_macro(struct cx_lib *lib,
