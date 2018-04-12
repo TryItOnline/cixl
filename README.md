@@ -982,9 +982,9 @@ Sequences support mapping actions over their values, ```map``` returns an iterat
 Sequences may be filtered, which also results in a new iterator.
 
 ```
-   | 10 {, $ > 5} filter
+   | 10 {5 >} filter
 ...
-[Iter(0x54dfd80)r1]
+[Iter<Int>(0x54dfd80)r1]
 
    {} for
 ...
