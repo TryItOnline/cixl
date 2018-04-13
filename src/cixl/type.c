@@ -210,16 +210,21 @@ bool cx_is(struct cx_type *child, struct cx_type *parent) {
       struct cx_type
 	**ie = cx_vec_end(&(*c)->args),
 	**je = cx_vec_end(&parent->args);
+
+      bool ok = true;
       
       for (struct cx_type
 	     **i = cx_vec_start(&(*c)->args),
 	     **j = cx_vec_start(&parent->args);
 	   i != ie && j != je;
 	   i++, j++) {
-	if (!cx_is(*i, *j)) { return false; }
+	if (!cx_is(*i, *j)) {
+	  ok = false;
+	  break;
+	}
       }
 
-      return true;
+      if (ok) { return true; }
     }
   }
 

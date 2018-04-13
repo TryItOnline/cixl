@@ -22,8 +22,12 @@ static bool zip_imp(struct cx_scope *scope) {
   struct cx_pair *p = cx_pair_new(cx, NULL, NULL);
   p->x = x;
   p->y = y;
-  
-  cx_box_init(cx_push(scope), cx->pair_type)->as_pair = p;
+
+  struct cx_type
+    *xt = (x.type == cx->nil_type) ? cx->opt_type : x.type,
+    *yt = (y.type == cx->nil_type) ? cx->opt_type : y.type;
+    
+  cx_box_init(cx_push(scope), cx_type_get(cx->pair_type, xt, yt))->as_pair = p;
   return true;
 }
 
@@ -76,17 +80,17 @@ cx_lib(cx_init_pair, "cx/pair") {
 
   cx_add_cfunc(lib, "unzip", 
 	       cx_args(cx_arg("p", cx->pair_type)),
-	       cx_args(cx_arg(NULL, cx->opt_type), cx_arg(NULL, cx->opt_type)),
+	       cx_args(cx_narg(NULL, 0, 0), cx_narg(NULL, 0, 1)),
 	       unzip_imp);
 
   cx_add_cfunc(lib, "x",
 	       cx_args(cx_arg("p", cx->pair_type)),
-	       cx_args(cx_arg(NULL, cx->any_type)),
+	       cx_args(cx_narg(NULL, 0, 0)),
 	       x_imp);
 
   cx_add_cfunc(lib, "y",
 	       cx_args(cx_arg("p", cx->pair_type)),
-	       cx_args(cx_arg(NULL, cx->any_type)),
+	       cx_args(cx_narg(NULL, 0, 1)),
 	       y_imp);
 
   cx_add_cfunc(lib, "rezip", 
