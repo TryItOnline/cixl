@@ -2,7 +2,7 @@
 #### 2018-04-12
 
 ### Intro
-One of the games I played growing up is called Plockepinn in Swedish, which literally means picking sticks; both the name and the game are as Swedish as they get. The setting is a pile of matches or sticks with a group of people seated around it, and the only rule that you may pick as many sticks as you can as long as no other stick moves; the winner has the most sticks once the pile is gone. Recently, finally in posession of enough round tuits to tackle bolting generics onto [Cixl](https://github.com/basic-gongfu/cixl); it occured to me that the way I write code these days has a lot in common with the game. I mostly optimize for maximum momentum and minimal disruption, and prefer adding features gradually to big bang integrations. I've found that the pain of repeatedly rewriting and refactoring in small steps is a fair price to pay for avoiding epic failure modes. And as an added bonus; it enables pausing at any local maximum to gather more experience before deciding where to go from there.
+One of the games I played growing up is called Plockepinn in Swedish, which literally means picking sticks; both the name and the game are as Swedish as they get. The setting is a pile of matches or sticks with a group of people seated around it, and the only rule that you may pick as many sticks as you can as long as no other stick moves; the winner has the most sticks once the pile is gone. Recently, finally in posession of enough round tuits to tackle bolting generics onto [Cixl](https://github.com/basic-gongfu/cixl); it occured to me that the way I write code these days has a lot in common with the game; I'll mostly optimize for maximum momentum and minimal disruption, preferring to add features gradually and backing off as soon as it starts to look hairy. I've found that the pain of repeatedly rewriting and refactoring in small steps is a fair price to pay for avoiding epic failure modes. And as an added bonus; it enables pausing at any local maximum to gather more experience before deciding where to go from there.
 
 ### Generics
 I have plenty of scars to show from a previous implementation of generic types in a precursor to [Cixl](https://github.com/basic-gongfu/cixl), which is why I decided to wait longer before diving in this time around. The first time around, I designed the entire language around generic types from the start; which ended up complicating the design and slowing me down to the point where it didn't make any sense to push it further. With Cixl I'm doing the opposite, adding as much support as needed to provide one feature at a time. One notable difference from other generic type systems I've run into is that Cixl doesn't treat type arguments as an orthogonal dimension to raw types; ```Iter<Int>``` is considered to be compatible with ```Seq<Num>```, for example. I would love to get some more details on why this approach is so unpopular, especially given that it seems to be what most people expect when they first encounter generic types.
@@ -49,7 +49,7 @@ struct cx_type {
 };
 ```
 
-```cx_type_get(struct cx_type *, ...)``` may now be used to parameterize the specified type with provided arguments. This means that functions such as ```fork```:
+```cx_type_get(struct cx_type *, ...)``` may now be used to parameterize the specified type with provided arguments. This means that functions such as this:
 
 ```
 cx_add_cfunc(lib, "fork",

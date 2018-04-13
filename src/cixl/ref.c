@@ -64,7 +64,7 @@ static void deinit_imp(struct cx_box *v) {
 
 struct cx_type *cx_init_ref_type(struct cx_lib *lib) {
     struct cx_type *t = cx_add_type(lib, "Ref", lib->cx->any_type);
-    cx_type_push_args(t, lib->cx->any_type);
+    cx_type_push_args(t, lib->cx->opt_type);
     
     t->new = new_imp;
     t->eqval = eqval_imp;

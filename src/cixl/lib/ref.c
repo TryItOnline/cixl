@@ -17,7 +17,12 @@ static bool ref_imp(struct cx_scope *scope) {
   struct cx_box v = *cx_test(cx_pop(scope, false));
   struct cx_ref *r = cx_ref_new(cx, NULL);
   r->value = v;
-  cx_box_init(cx_push(scope), cx_type_get(cx->ref_type, v.type))->as_ref = r;
+  
+  cx_box_init(cx_push(scope),
+	      (v.type == cx->nil_type)
+	      ? cx->ref_type
+	      : cx_type_get(cx->ref_type, v.type))->as_ref = r;
+  
   return true;
 }
 
