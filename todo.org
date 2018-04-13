@@ -2,8 +2,6 @@
 #define ntohll(x) ((1==ntohl(1)) ? (x) : ((uint64_t)ntohl((x) & 0xFFFFFFFF) << 32) | ntohl((x) >> 32))
 host64 & net64 fns
 
-* add cx_type_get_arg(child, parent, i)
-** extract loop to find least specific from cx_is  
 * add Stack type args
 * add Table type args
 * implement type_new method for rec type

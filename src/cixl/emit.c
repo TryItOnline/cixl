@@ -62,6 +62,9 @@ char *cx_emit_id(const char *prefix, const char *in) {
     case '@':
       *p++ = 'O';
       break;
+    case ':':
+      *p++ = 'P';
+      break;
     case '~':
       *p++ = 'S';
       break;

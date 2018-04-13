@@ -68,6 +68,10 @@ struct cx_type *cx_type_vget(struct cx_type *t, int nargs, struct cx_type *args[
 void cx_derive(struct cx_type *child, struct cx_type *parent);
 bool cx_is(struct cx_type *child, struct cx_type *parent);
 
+struct cx_type *cx_type_arg(struct cx_type *child,
+			    struct cx_type *parent,
+			    int i);
+
 struct cx_type *cx_init_meta_type(struct cx_lib *lib);
 
 #endif

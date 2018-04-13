@@ -234,6 +234,32 @@ bool cx_is(struct cx_type *child, struct cx_type *parent) {
   return false;
 }
 
+struct cx_type *cx_type_arg(struct cx_type *child,
+			    struct cx_type *parent,
+			    int i) {
+  struct cx *cx = child->lib->cx;
+  
+  if (parent->raw->tag >= child->is.count) {
+    cx_error(cx, cx->row, cx->col, "%s is not compatible with type: %s",
+	     child->id, parent->id);
+    
+    return NULL;
+  }
+  
+  struct cx_type **ce = cx_vec_end(&child->is);
+
+  for (struct cx_type **c = cx_vec_get(&child->is, parent->raw->tag);
+       c != ce;
+       c++) {
+    if (*c && (*c)->raw == parent->raw && (*c)->args.count > i) {
+      return *(struct cx_type **)cx_vec_get(&(*c)->args, i);
+    }
+  }
+
+  cx_error(cx, cx->row, cx->col, "Arg not found for type %s: %d", child->id, i);
+  return NULL;
+}
+
 static bool equid_imp(struct cx_box *x, struct cx_box *y) {
   return x->as_ptr == y->as_ptr;
 }

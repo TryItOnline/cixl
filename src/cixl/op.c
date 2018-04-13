@@ -1136,7 +1136,8 @@ static bool return_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
 	    t = av->type;
 
 	    if (r->as_narg.j != -1) {
-	      t = *(struct cx_type **)cx_vec_get(&t->args, r->as_narg.j);
+	      struct cx_arg *a = cx_vec_get(&imp->args, r->as_narg.i);
+	      t = cx_type_arg(t, a->type, r->as_narg.j);
 	    }
 	    
 	    break;
@@ -1178,14 +1179,18 @@ static bool return_emit(struct cx_op *op,
 			struct cx *cx) {
   struct cx_fimp *imp = op->as_return.imp;
 
+  fprintf(out,
+	  "struct cx_fimp *imp = %s();\n",
+	  imp->emit_id);
+
   fputs("struct cx_call *call = cx_test(cx_vec_peek(&cx->calls, 0));\n"
 	"struct cx_scope *s = cx_scope(cx, 0);\n\n"
-	
+	  
 	"if (call->recalls) {\n",
 	out);
-
+  
   fprintf(out,
-	  "  if (s->safe && !cx_fimp_match(%s(), s)) {\n"
+	  "  if (s->safe && !cx_fimp_match(imp, s)) {\n"
 	  "    cx_error(cx, cx->row, cx->col, \"Recall not applicable\");\n"
 	  "    goto exit;\n"
 	  "  }\n\n"
@@ -1194,7 +1199,7 @@ static bool return_emit(struct cx_op *op,
 	  "  goto op%zd;\n"
 	  "} else {\n"
 	  "  size_t si = 0;\n",
-          imp->emit_id, op->as_return.pc+1);
+          op->as_return.pc+1);
 
   if (imp->rets.count) {
     fprintf(out,
@@ -1248,8 +1253,9 @@ static bool return_emit(struct cx_op *op,
 
 	if (a->as_narg.j != -1) {
 	  fprintf(out,
-		  "    t = *(struct cx_type **)cx_vec_get(&t->args, %d);\n",
-		  a->as_narg.j);
+		  "    struct cx_arg *a = cx_vec_get(&imp->args, %d);\n"
+		  "    t = cx_type_arg(t, a->type, %d);\n",
+		  r->as_narg.i, a->as_narg.j);
 	}
 	
 	break;
