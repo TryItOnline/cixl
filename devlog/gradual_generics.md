@@ -46,7 +46,7 @@ Functions gained support for referring to type arguments by extending the existi
 
 ```
    /*
-     Takes and returns a start value compatible with $in's item type
+     Takes and a start value and returns a result compatible with $in's item type.
    */
    
    func: my-sum(start Arg1:0 in Seq<Num>)(_ Arg1:0)
