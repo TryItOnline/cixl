@@ -1138,6 +1138,7 @@ static bool return_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
 	    if (r->as_narg.j != -1) {
 	      struct cx_arg *a = cx_vec_get(&imp->args, r->as_narg.i);
 	      t = cx_type_arg(t, a->type, r->as_narg.j);
+	      if (!t) { return false; }
 	    }
 	    
 	    break;
@@ -1254,7 +1255,8 @@ static bool return_emit(struct cx_op *op,
 	if (a->as_narg.j != -1) {
 	  fprintf(out,
 		  "    struct cx_arg *a = cx_vec_get(&imp->args, %d);\n"
-		  "    t = cx_type_arg(t, a->type, %d);\n",
+		  "    t = cx_type_arg(t, a->type, %d);\n"
+		  "    if (!t) { goto exit; }\n",
 		  r->as_narg.i, a->as_narg.j);
 	}
 	

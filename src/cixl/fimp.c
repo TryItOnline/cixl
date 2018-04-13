@@ -83,6 +83,7 @@ ssize_t cx_fimp_score(struct cx_fimp *imp, struct cx_scope *scope, ssize_t max) 
       if (i->as_narg.j != -1) {
 	struct cx_arg *a = cx_vec_get(&imp->args, i->as_narg.i);
 	t = cx_type_arg(t, a->type, i->as_narg.j);
+	if (!t) { return -1; }
       }
       
       break;

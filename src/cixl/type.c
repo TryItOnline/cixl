@@ -111,6 +111,7 @@ struct cx_type *cx_type_vget(struct cx_type *t, int nargs, struct cx_type *args[
     return NULL;
   }
 
+  /*
   for (struct cx_type
 	 **i = cx_vec_start(&t->args),
 	 **j = args;
@@ -122,7 +123,7 @@ struct cx_type *cx_type_vget(struct cx_type *t, int nargs, struct cx_type *args[
       
       return NULL;
     }
-  }
+    }*/
 
   struct cx_mfile id;
   cx_mfile_open(&id);
@@ -195,6 +196,8 @@ void cx_derive(struct cx_type *child, struct cx_type *parent) {
 }
 
 bool cx_is(struct cx_type *child, struct cx_type *parent) {
+  if (child == parent) { return true; }
+
   if (!parent->args.count) {
     return (parent->tag < child->is.count)
       ? *(struct cx_type **)cx_vec_get(&child->is, parent->tag)
@@ -238,8 +241,16 @@ struct cx_type *cx_type_arg(struct cx_type *child,
 			    struct cx_type *parent,
 			    int i) {
   struct cx *cx = child->lib->cx;
+  if (child == parent) {
+    if (i >= child->args.count) {
+      cx_error(cx, cx->row, cx->col, "Not enough arguments for type: %s",
+	       child->id);
+    }
+      
+    return *(struct cx_type **)cx_vec_get(&child->args, i);
+  }
   
-  if (parent->raw->tag >= child->is.count) {
+  if (parent->raw->tag+1 >= child->is.count) {
     cx_error(cx, cx->row, cx->col, "%s is not compatible with type: %s",
 	     child->id, parent->id);
     
@@ -248,7 +259,7 @@ struct cx_type *cx_type_arg(struct cx_type *child,
   
   struct cx_type **ce = cx_vec_end(&child->is);
 
-  for (struct cx_type **c = cx_vec_get(&child->is, parent->raw->tag);
+  for (struct cx_type **c = cx_vec_get(&child->is, parent->raw->tag+1);
        c != ce;
        c++) {
     if (*c && (*c)->raw == parent->raw && (*c)->args.count > i) {

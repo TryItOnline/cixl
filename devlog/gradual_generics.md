@@ -93,6 +93,8 @@ Most of the magic happens inside ```cx_is```, the implementation is still somewh
 
 ```C
 bool cx_is(struct cx_type *child, struct cx_type *parent) {
+  if (child == parent) { return true; }
+
   if (!parent->args.count) {
     return (parent->tag < child->is.count)
       ? *(struct cx_type **)cx_vec_get(&child->is, parent->tag)
