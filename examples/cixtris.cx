@@ -131,8 +131,6 @@ let: max-x 30;
 let: max-y screen-size ~ _;
 
 let: tiles [] % $max-x $max-y * #nil fill;
-let: block Ref new;
-let: next-block Ref new;
 
 let: key-delay 0 ref;
 let: is-done #f ref;
@@ -147,6 +145,9 @@ rec: Block()
   i      Int
   color  Color
   x y    Int;
+
+let: block Ref<Block> new;
+let: next-block Ref<Block> new;
 
 func: shape-width(s Stack)(_ Int)
   0 $s {len max} for;
