@@ -45,7 +45,7 @@ Func not applicable: set
 ### Implementation
 The type struct has grown a reference to its raw type, which defaults to the type itself; and a dynamic array of type arguments.
 
-```
+```C
 struct cx_type {
   ...
   struct cx_type *raw;
@@ -55,7 +55,7 @@ struct cx_type {
 
 ```cx_type_get``` may be used to parameterize the specified type with provided arguments, which means that functions such as this:
 
-```
+```C
 cx_add_cfunc(lib, "fork",
 	     cx_args(cx_arg("in",    cx->opt_type),
 		     cx_arg("out",   cx->opt_type),
@@ -66,7 +66,7 @@ cx_add_cfunc(lib, "fork",
 
 now have the means to express their intent more clearly:
 
-```
+```C
 cx_add_cfunc(lib, "fork",
 	     cx_args(cx_arg("in",    cx_type_get(cx->opt_type, cx->rfile_type)),
 		     cx_arg("out",   cx_type_get(cx->opt_type, cx->wfile_type)),
@@ -77,7 +77,7 @@ cx_add_cfunc(lib, "fork",
 
 Most of the magic happens inside ```cx_is```, the implementation is still somewhat in flux but handles all cases supported so far without slowing things down to a crawl. The new part is the bottom loop, which runs when the parent type takes arguments; it's purpose is to find the least specific subtype of ```parent``` among ```child```'s supertypes and then compare its arguments to ```parent```'s. Deriving the same type several times with different arguments is supported.
 
-```
+```C
 bool cx_is(struct cx_type *child, struct cx_type *parent) {
   if (parent->tag >= child->is.count) { return false; }
 
