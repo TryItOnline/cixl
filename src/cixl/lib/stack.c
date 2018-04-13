@@ -424,16 +424,16 @@ cx_lib(cx_init_stack, "cx/stack") {
   cx_add_cfunc(lib, "_", cx_args(), cx_args(), zap_imp);
     
   cx_add_cfunc(lib, "%",
-	       cx_args(cx_arg("v", cx->opt_type)), cx_args(cx_narg(NULL, 0)),
+	       cx_args(cx_arg("v", cx->opt_type)), cx_args(cx_narg(NULL, 0, -1)),
 	       copy_imp);
     
   cx_add_cfunc(lib, "%%",
-	       cx_args(cx_arg("v", cx->opt_type)), cx_args(cx_narg(NULL, 0)),
+	       cx_args(cx_arg("v", cx->opt_type)), cx_args(cx_narg(NULL, 0, -1)),
 	       clone_imp);
     
   cx_add_cfunc(lib, "~",
 	       cx_args(cx_arg("x", cx->opt_type), cx_arg("y", cx->opt_type)),
-	       cx_args(cx_narg(NULL, 1), cx_narg(NULL, 0)),
+	       cx_args(cx_narg(NULL, 1, -1), cx_narg(NULL, 0, -1)),
 	       flip_imp);
 
   return true;

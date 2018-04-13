@@ -2,7 +2,6 @@
 #define ntohll(x) ((1==ntohl(1)) ? (x) : ((uint64_t)ntohl((x) & 0xFFFFFFFF) << 32) | ntohl((x) >> 32))
 host64 & net64 fns
 
-* add ref type arg
 * add pair type args
 * implement type_new method for rec type
 * ---
@@ -34,6 +33,9 @@ host64 & net64 fns
 * add Table emit support
 ** copy Rec
 * replace box.as_ptr with as_func/fimp/etc
+* change cx_type to use ref counting
+** add nrefs
+** replace reinit with deref & new
 * add cxtls project
 ** use gnutls
 ** integrate into poll framework

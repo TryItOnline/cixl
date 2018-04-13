@@ -401,37 +401,37 @@ cx_lib(cx_init_cond, "cx/cond") {
 	       int_imp);
 
   cx_add_cfunc(lib, "=",
-	       cx_args(cx_arg("x", cx->opt_type), cx_narg("y", 0)),
+	       cx_args(cx_arg("x", cx->opt_type), cx_narg("y", 0, -1)),
 	       cx_args(cx_arg(NULL, cx->bool_type)),
 	       eqval_imp);
   
   cx_add_cfunc(lib, "==",
-	       cx_args(cx_arg("x", cx->opt_type), cx_narg("y", 0)),
+	       cx_args(cx_arg("x", cx->opt_type), cx_narg("y", 0, -1)),
 	       cx_args(cx_arg(NULL, cx->bool_type)),
 	       equid_imp);
 
   cx_add_cfunc(lib, "<=>",
-	       cx_args(cx_arg("x", cx->cmp_type), cx_narg("y", 0)),
+	       cx_args(cx_arg("x", cx->cmp_type), cx_narg("y", 0, -1)),
 	       cx_args(cx_arg(NULL, cx->sym_type)),
 	       cmp_imp);
   
   cx_add_cfunc(lib, "<",
-	       cx_args(cx_arg("x", cx->cmp_type), cx_narg("y", 0)),
+	       cx_args(cx_arg("x", cx->cmp_type), cx_narg("y", 0, -1)),
 	       cx_args(cx_arg(NULL, cx->bool_type)),
 	       lt_imp);
   
   cx_add_cfunc(lib, ">",
-	       cx_args(cx_arg("x", cx->cmp_type), cx_narg("y", 0)),
+	       cx_args(cx_arg("x", cx->cmp_type), cx_narg("y", 0, -1)),
 	       cx_args(cx_arg(NULL, cx->bool_type)),
 	       gt_imp);
   
   cx_add_cfunc(lib, "<=",
-	       cx_args(cx_arg("x", cx->cmp_type), cx_narg("y", 0)),
+	       cx_args(cx_arg("x", cx->cmp_type), cx_narg("y", 0, -1)),
 	       cx_args(cx_arg(NULL, cx->bool_type)),
 	       lte_imp);
   
   cx_add_cfunc(lib, ">=",
-	       cx_args(cx_arg("x", cx->cmp_type), cx_narg("y", 0)),
+	       cx_args(cx_arg("x", cx->cmp_type), cx_narg("y", 0, -1)),
 	       cx_args(cx_arg(NULL, cx->bool_type)),
 	       gte_imp);
   
@@ -472,13 +472,13 @@ cx_lib(cx_init_cond, "cx/cond") {
 	       if_else_imp);
 
   cx_add_cfunc(lib, "min",
-	       cx_args(cx_arg("x", cx->any_type), cx_narg("y", 0)),
-	       cx_args(cx_narg(NULL, 0)),
+	       cx_args(cx_arg("x", cx->any_type), cx_narg("y", 0, -1)),
+	       cx_args(cx_narg(NULL, 0, -1)),
 	       min_imp);
 
   cx_add_cfunc(lib, "max",
-	       cx_args(cx_arg("x", cx->any_type), cx_narg("y", 0)),
-	       cx_args(cx_narg(NULL, 0)),
+	       cx_args(cx_arg("x", cx->any_type), cx_narg("y", 0, -1)),
+	       cx_args(cx_narg(NULL, 0, -1)),
 	       max_imp);
 
   return true;

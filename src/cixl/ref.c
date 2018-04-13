@@ -53,9 +53,8 @@ static void write_imp(struct cx_box *v, FILE *out) {
 }
 
 static void dump_imp(struct cx_box *v, FILE *out) {
-  fputs("Ref(", out);
+  fprintf(out, "%s(", v->type->id);
   cx_dump(&v->as_ref->value, out);
-  
   fprintf(out, ")r%d", v->as_ref->nrefs);
 }
 
@@ -65,6 +64,8 @@ static void deinit_imp(struct cx_box *v) {
 
 struct cx_type *cx_init_ref_type(struct cx_lib *lib) {
     struct cx_type *t = cx_add_type(lib, "Ref", lib->cx->any_type);
+    cx_type_push_args(t, lib->cx->any_type);
+    
     t->new = new_imp;
     t->eqval = eqval_imp;
     t->equid = equid_imp;

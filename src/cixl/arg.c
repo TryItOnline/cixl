@@ -16,8 +16,9 @@ struct cx_arg *cx_arg_deinit(struct cx_arg *a) {
 struct cx_arg cx_arg(const char *id, struct cx_type *type) {
   return (struct cx_arg) {
     .arg_type = CX_ARG,
-      .id = id ? strdup(id) : NULL,
-      .type = type };
+    .id = id ? strdup(id) : NULL,
+    .type = type
+  };
 }
 
 struct cx_arg cx_varg(struct cx_box *value) {
@@ -26,11 +27,12 @@ struct cx_arg cx_varg(struct cx_box *value) {
   return arg;
 }
 
-struct cx_arg cx_narg(const char *id, int n) {
+struct cx_arg cx_narg(const char *id, int i, int j) {
   return (struct cx_arg) {
     .arg_type = CX_NARG,
-      .id = id ? strdup(id) : NULL,
-      .narg = n };
+    .id = id ? strdup(id) : NULL,
+    .as_narg = (struct cx_narg) {.i=i, .j=j}
+  };
 }
 
 void cx_arg_print(struct cx_arg *a, FILE *out) {
@@ -39,7 +41,7 @@ void cx_arg_print(struct cx_arg *a, FILE *out) {
     fputs(a->type->id, out);
     break;
   case CX_NARG:
-    fprintf(out, "Arg%d", a->narg);
+    fprintf(out, "Arg%d-%d", a->as_narg.i, a->as_narg.j);
     break;
   case CX_VARG:
     cx_dump(&a->value, out);
@@ -69,7 +71,7 @@ void cx_arg_emit(struct cx_arg *a, FILE *out, struct cx *cx) {
 	fputs("NULL", out);
       }
 
-      fprintf(out, ", %d)", a->narg);
+      fprintf(out, ", %d, %d)", a->as_narg.i, a->as_narg.j);
       break;
     case CX_VARG: {
       struct

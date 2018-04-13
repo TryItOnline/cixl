@@ -36,12 +36,12 @@ static bool parse_args(struct cx *cx, struct cx_vec *toks, struct cx_vec *args) 
 	if (tmp_ids.count) {
 	  cx_do_vec(&tmp_ids, struct cx_tok, id) {
 	    const char *n = strcmp(id->as_ptr, "_") ? id->as_ptr : NULL;
-	    *(struct cx_arg *)cx_vec_push(args) = cx_narg(n, i);
+	    *(struct cx_arg *)cx_vec_push(args) = cx_narg(n, i, -1);
 	  }
 	  
 	  cx_vec_clear(&tmp_ids);
 	} else {
-	  *(struct cx_arg *)cx_vec_push(args) = cx_narg(NULL, i);      
+	  *(struct cx_arg *)cx_vec_push(args) = cx_narg(NULL, i, -1);      
 	}	
       } else if (isupper(id[0])) {
 	struct cx_type *type = cx_get_type(cx, t->as_ptr, false);

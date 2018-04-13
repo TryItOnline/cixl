@@ -195,7 +195,7 @@ cx_lib(cx_init_proc, "cx/proc") {
 	       cx_args(cx_arg("in", cx_type_get(cx->opt_type, cx->rfile_type)),
 		       cx_arg("out", cx_type_get(cx->opt_type, cx->wfile_type)),
 		       cx_arg("error", cx_type_get(cx->opt_type, cx->wfile_type))),
-	       cx_args(cx_arg(NULL, cx->proc_type)),
+	       cx_args(cx_arg(NULL, cx_type_get(cx->opt_type, cx->proc_type))),
 	       fork_imp);
 
   cx_add_cfunc(lib, "exec",

@@ -1131,9 +1131,14 @@ static bool return_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
 	    t = r->type;
 	    break;
 	  case CX_NARG: {
-	    struct cx_arg *a = cx_vec_get(&imp->args, r->narg);
+	    struct cx_arg *a = cx_vec_get(&imp->args, r->as_narg.i);
 	    struct cx_box *av = cx_test(cx_get_var(ss, a->sym_id, false));
 	    t = av->type;
+
+	    if (r->as_narg.j != -1) {
+	      t = *(struct cx_type **)cx_vec_get(&t->args, r->as_narg.j);
+	    }
+	    
 	    break;
 	  }
 	  default:
@@ -1234,13 +1239,19 @@ static bool return_emit(struct cx_op *op,
 	fprintf(out, "     struct cx_type *t = %s();\n", r->type->emit_id);
 	break;
       case CX_NARG: {
-	struct cx_arg *a = cx_vec_get(&imp->args, r->narg);
+	struct cx_arg *a = cx_vec_get(&imp->args, r->as_narg.i);
 	
 	fprintf(out,
 		"      struct cx_type *t = "
 		"cx_test(cx_get_var(s, %s, false))->type;\n",
 		a->sym_id.emit_id);
 
+	if (a->as_narg.j != -1) {
+	  fprintf(out,
+		  "    t = *(struct cx_type **)cx_vec_get(&t->args, %d);\n",
+		  a->as_narg.j);
+	}
+	
 	break;
       }	
       default:

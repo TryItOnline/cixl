@@ -67,16 +67,16 @@ struct cx_fimp *cx_add_fimp(struct cx_func *func,
       }
       
       if (a->arg_type == CX_NARG) {
-	if (a->narg >= nargs) {
-	  cx_error(cx, cx->row, cx->col, "Arg index out of bounds: %d", a->narg);
+	if (a->as_narg.i >= nargs) {
+	  cx_error(cx, cx->row, cx->col, "Arg index out of bounds: %d", a->as_narg.i);
 	  return NULL;
 	}
 	
-	struct cx_arg *aa = args+a->narg;
+	struct cx_arg *aa = args+a->as_narg.i;
 
 	if (aa->arg_type == CX_VARG) {
 	  cx_error(cx, cx->row, cx->col, "Value arg ref by index: %d",
-		   a->narg);
+		   a->as_narg.i);
 	  return NULL;
 	}
       }
@@ -119,16 +119,16 @@ struct cx_fimp *cx_add_fimp(struct cx_func *func,
       }
 
       if (r->arg_type == CX_NARG) {
-	if (r->narg >= nargs) {
-	  cx_error(cx, cx->row, cx->col, "Arg index out of bounds: %d", r->narg);
+	if (r->as_narg.i >= nargs) {
+	  cx_error(cx, cx->row, cx->col, "Arg index out of bounds: %d", r->as_narg.i);
 	  return NULL;
 	}
 	
-	struct cx_arg *a = args+r->narg;
+	struct cx_arg *a = args+r->as_narg.i;
 
 	if (!a->id) {
 	  cx_error(cx, cx->row, cx->col, "Anonymous arg ref by index: %d",
-		   r->narg);
+		   r->as_narg.i);
 	  return NULL;
 	}
       }

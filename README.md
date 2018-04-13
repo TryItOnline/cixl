@@ -8,7 +8,7 @@ Cixl shares many ideas with C, Forth and Common Lisp; as well as the hacker mind
 Examples should work in the most recent version and run clean in ```valgrind```. Current work is focused on profiling and filling obvious gaps in functionality.
 
 ### Getting Started
-You may try Cixl online [here](https://tio.run/#cixl). A Linux/64 binary may be found [here](https://github.com/basic-gongfu/cxbin/tree/master/linux64/cixl). To build Cixl yourself, you'll need a reasonably modern GCC and CMake installed. Building on macOS unfortunately doesn't work because of missing POSIX support. A basic REPL is included, it's highly recommended to run it through ```rlwrap``` for a less nerve wrecking experience.
+You may try Cixl online [here](https://tio.run/#cixl). A Linux/64 binary may be found [here](https://github.com/basic-gongfu/cxbin/tree/master/linux64/cixl). To build Cixl yourself, you'll need a reasonably modern GCC and CMake installed. Building on macOS unfortunately doesn't work because of lacking POSIX support. A basic REPL is included, it's highly recommended to run it through ```rlwrap``` for a less nerve wrecking experience.
 
 ```
 $ git clone https://github.com/basic-gongfu/cixl.git
@@ -33,10 +33,10 @@ $
 ```
 
 ### Unix Native
-Rather than stacking abstractions in the name of portability, Cixl embraces the chosen requirement and limitation of running on top of a reasonably POSIX compliant Unix derivative. By integrating deep into the C tool chain, and by providing abstractions optimized for Unix feature set.
+Rather than stacking abstractions in the name of portability, Cixl embraces the chosen requirement and limitation of running on top of a reasonably POSIX compliant Unix derivative; by integrating deep into the C tool chain, and by providing abstractions optimized for Unix feature set.
 
 ### No GC
-Cixl doesn't use a garbage collector, which leads to more predictable performance and resource usage. Values are either automatically copied or reference counted, references are decremented instantly as values are popped from the stack and variables go out of scope.
+Cixl doesn't use a garbage collector, which leads to more predictable performance and resource usage. Values are either automatically copied or reference counted, and references are decremented instantly as values are popped from the stack and variables go out of scope.
 
 ### Scripting
 When launched with arguments; Cixl interprets the first argument as filename to load code from, and pushes remaining on ```#args```.
@@ -824,7 +824,7 @@ Where conversions to other types make sense, a function named after the target t
 ...
 [42]
 
-   str<Int>
+   str
 ...
 ['42'r1]
 
@@ -953,7 +953,7 @@ The ```times``` function may be used to repeat an action N times.
 [42]
 ```
 
-While ```for``` loop repeats an action once for each value in any sequence.
+While ```for``` repeats an action once for each value in any sequence.
 
 ```
    | 10 {+ 42,} for
@@ -979,7 +979,7 @@ Sequences support mapping actions over their values, ```map``` returns an iterat
 ['gpp'r1]
 ```
 
-Sequences may be filtered, which also results in a new iterator.
+Sequences may alternatively be filtered, which also results in a new iterator.
 
 ```
    | 10 {5 >} filter
@@ -1217,7 +1217,7 @@ A ```Bin``` represents a block of compiled code. The compiler may be invoked fro
 [3]
 ```
 
-### Disable Type Checking
+### Type Checking
 Type checking may be partly disabled for the current scope by calling ```unsafe```, which allows code to run slightly faster. New scopes inherit their safety level from the parent scope. Calling ```safe``` enables all type checks for the current scope.
 
 ```
@@ -1232,9 +1232,9 @@ Type checking may be partly disabled for the current scope by calling ```unsafe`
 ```
 
 ### Performance
-There is still plenty of work remaining in the profiling and benchmarking departments, but preliminary indications puts compiled Cixl at slightly faster to twice as slow as Python3. Measured time is displayed in milliseconds.
+There is still plenty of work remaining in the profiling and benchmarking department, but preliminary indications puts compiled Cixl at slightly faster to twice as slow as Python3. Measured time is displayed in milliseconds.
 
-Let's start with a tail-recursive fibonacci to exercise the interpreter loop, it's worth mentioning that Cixl uses 64-bit integers while Python settles for 32-bit.
+We'll start with a tail-recursive fibonacci to exercise the interpreter loop, it's worth mentioning that Cixl uses 64-bit integers while Python settles for 32-bit.
 
 ```
 use: cx;

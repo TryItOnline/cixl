@@ -27,8 +27,8 @@ struct cx_type *cx_type_init(struct cx_type *type,
   cx_set_init(&type->parents, sizeof(struct cx_type *), cx_cmp_ptr);
   cx_set_init(&type->children, sizeof(struct cx_type *), cx_cmp_ptr);
 
-  cx_vec_init(&type->is, sizeof(bool));
-  *(bool *)cx_vec_put(&type->is, type->tag) = true;
+  cx_vec_init(&type->is, sizeof(struct cx_type *));
+  *(struct cx_type **)cx_vec_put(&type->is, type->tag) = type;
 
   cx_vec_init(&type->args, sizeof(struct cx_type *));
   
@@ -57,7 +57,7 @@ struct cx_type *cx_type_reinit(struct cx_type *type) {
   type->level = 0;
   
   for (size_t i=0; i < type->is.count; i++) {
-    if (i != type->tag) { *(bool *)cx_vec_get(&type->is, i) = false; }
+    if (i != type->tag) { *(struct cx_type **)cx_vec_get(&type->is, i) = NULL; }
   }
 
   cx_vec_clear(&type->args);
@@ -76,7 +76,7 @@ struct cx_type *cx_type_reinit(struct cx_type *type) {
       (*t)->level = cx_max((*t)->level, (*pt)->level+1);
     }
     
-    *(bool *)cx_vec_put(&(*t)->is, type->tag) = false;
+    *(struct cx_type **)cx_vec_put(&(*t)->is, type->tag) = NULL;
   }
   
   cx_set_clear(&type->children);
@@ -177,7 +177,7 @@ struct cx_type *cx_type_vget(struct cx_type *t, int nargs, struct cx_type *args[
 }
 
 static void derive(struct cx_type *child, struct cx_type *parent) {
-  *(bool *)cx_vec_put(&child->is, parent->tag) = true;
+  *(struct cx_type **)cx_vec_put(&child->is, parent->tag) = parent;
   child->level = cx_max(child->level, parent->level+1);
   
   cx_do_set(&parent->parents, struct cx_type *, t) { derive(child, *t); }
@@ -195,24 +195,35 @@ void cx_derive(struct cx_type *child, struct cx_type *parent) {
 }
 
 bool cx_is(struct cx_type *child, struct cx_type *parent) {
-  if (child->raw == parent->raw) {
-    cx_test(child->args.count == parent->args.count);
-    struct cx_type **ie = cx_vec_end(&child->args);
-    
-    for (struct cx_type
-	   **i = cx_vec_start(&child->args),
-	   **j = cx_vec_start(&parent->args);
-	 i != ie;
-	 i++, j++) {
-      if (!cx_is(*i, *j)) { return false; }
-    }
+  if (parent->tag >= child->is.count) { return false; }
 
-    return true;
+  if (!parent->args.count) {
+    return *(struct cx_type **)cx_vec_get(&child->is, parent->tag);
   }
   
-  return (parent->tag < child->is.count)
-    ? *(bool *)cx_vec_get(&child->is, parent->tag)
-    : false;
+  struct cx_type **ce = cx_vec_end(&child->is);
+  
+  for (struct cx_type **c = cx_vec_get(&child->is, parent->tag); c != ce; c++) {    
+    if (*c && (*c)->raw == parent->raw) {
+      if (*c == parent) { return true; }
+
+      struct cx_type
+	**ie = cx_vec_end(&(*c)->args),
+	**je = cx_vec_end(&parent->args);
+      
+      for (struct cx_type
+	     **i = cx_vec_start(&(*c)->args),
+	     **j = cx_vec_start(&parent->args);
+	   i != ie && j != je;
+	   i++, j++) {
+	if (!cx_is(*i, *j)) { return false; }
+      }
+
+      return true;
+    }
+  }
+
+  return false;
 }
 
 static bool equid_imp(struct cx_box *x, struct cx_box *y) {

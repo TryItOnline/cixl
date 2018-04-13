@@ -74,10 +74,17 @@ ssize_t cx_fimp_score(struct cx_fimp *imp, struct cx_scope *scope, ssize_t max) 
     case CX_ARG:
       t = i->type;
       break;
-    case CX_NARG:
-      t = ((struct cx_box *)cx_vec_get(stack,
-				       stack->count-imp->args.count+i->narg))->type;
+    case CX_NARG: {
+      struct cx_box *v = cx_vec_get(stack,
+				    stack->count-imp->args.count+i->as_narg.i);
+      t = v->type;
+
+      if (i->as_narg.j != -1) {
+	t = *(struct cx_type **)cx_vec_get(&t->args, i->as_narg.j);
+      }
+      
       break;
+    }
     default:
       break;
     }
