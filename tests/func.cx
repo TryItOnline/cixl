@@ -41,3 +41,8 @@ func: answer(42)(_ Sym) `correct;
 0 answer 0 = check
 1 answer 1 = check
 42 answer `correct = check
+
+func: my-sum(start Arg1:0 in Seq<Num>)(_ Arg1:0)
+  $start $in &+ for;
+
+0 10 iter my-sum 45 = check

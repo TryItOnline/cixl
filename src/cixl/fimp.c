@@ -53,6 +53,7 @@ struct cx_fimp *cx_fimp_deinit(struct cx_fimp *imp) {
 
 ssize_t cx_fimp_score(struct cx_fimp *imp, struct cx_scope *scope, ssize_t max) {
   struct cx_vec *stack = &scope->stack;
+  
   if (stack->count < imp->args.count) { return -1; }
   if (!imp->args.count) { return 0; }
   

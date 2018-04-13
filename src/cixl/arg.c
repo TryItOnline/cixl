@@ -41,7 +41,7 @@ void cx_arg_print(struct cx_arg *a, FILE *out) {
     fputs(a->type->id, out);
     break;
   case CX_NARG:
-    fprintf(out, "Arg%d-%d", a->as_narg.i, a->as_narg.j);
+    fprintf(out, "Arg%d:%d", a->as_narg.i, a->as_narg.j);
     break;
   case CX_VARG:
     cx_dump(&a->value, out);

@@ -195,15 +195,18 @@ void cx_derive(struct cx_type *child, struct cx_type *parent) {
 }
 
 bool cx_is(struct cx_type *child, struct cx_type *parent) {
-  if (parent->tag >= child->is.count) { return false; }
-
   if (!parent->args.count) {
-    return *(struct cx_type **)cx_vec_get(&child->is, parent->tag);
+    return (parent->tag < child->is.count)
+      ? *(struct cx_type **)cx_vec_get(&child->is, parent->tag)
+      : false;
   }
   
+  if (parent->raw->tag >= child->is.count) { return false; }
   struct cx_type **ce = cx_vec_end(&child->is);
-  
-  for (struct cx_type **c = cx_vec_get(&child->is, parent->tag); c != ce; c++) {    
+
+  for (struct cx_type **c = cx_vec_get(&child->is, parent->raw->tag);
+       c != ce;
+       c++) {
     if (*c && (*c)->raw == parent->raw) {
       if (*c == parent) { return true; }
 
@@ -212,7 +215,7 @@ bool cx_is(struct cx_type *child, struct cx_type *parent) {
 	**je = cx_vec_end(&parent->args);
 
       bool ok = true;
-      
+
       for (struct cx_type
 	     **i = cx_vec_start(&(*c)->args),
 	     **j = cx_vec_start(&parent->args);

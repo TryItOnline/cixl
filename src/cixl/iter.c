@@ -59,6 +59,11 @@ static void deinit_imp(struct cx_box *v) {
   cx_iter_deref(v->as_iter);
 }
 
+static void type_init_imp(struct cx_type *t, int nargs, struct cx_type *args[]) {
+  struct cx *cx = t->lib->cx;
+  cx_derive(t, cx_type_get(cx->seq_type, args[0]));
+}
+
 struct cx_type *cx_init_iter_type(struct cx_lib *lib) {
   struct cx_type *t = cx_add_type(lib, "Iter", lib->cx->seq_type);
   cx_type_push_args(t, lib->cx->any_type);
@@ -68,5 +73,6 @@ struct cx_type *cx_init_iter_type(struct cx_lib *lib) {
   t->iter = iter_imp;
   t->dump = dump_imp;
   t->deinit = deinit_imp;
+  t->type_init = type_init_imp;
   return t;
 }

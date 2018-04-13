@@ -42,6 +42,20 @@ Func not applicable: set
 [#f]
 ```
 
+Functions gained support for referring to type arguments by extending the existing syntax for referring to raw types.
+
+```
+   /*
+     Takes and returns a start value compatible with $in's item type
+   */
+   
+   func: my-sum(start Arg1:0 in Seq<Num>)(_ Arg1:0)
+     $start $in &+ for;
+   | 0 10 iter my-sum
+...
+[45]
+```
+
 ### Implementation
 The type struct has grown a reference to its raw type, which defaults to the type itself; and a dynamic array of type arguments.
 
@@ -79,15 +93,18 @@ Most of the magic happens inside ```cx_is```, the implementation is still somewh
 
 ```C
 bool cx_is(struct cx_type *child, struct cx_type *parent) {
-  if (parent->tag >= child->is.count) { return false; }
-
   if (!parent->args.count) {
-    return *(struct cx_type **)cx_vec_get(&child->is, parent->tag);
+    return (parent->tag < child->is.count)
+      ? *(struct cx_type **)cx_vec_get(&child->is, parent->tag)
+      : false;
   }
   
+  if (parent->raw->tag >= child->is.count) { return false; }
   struct cx_type **ce = cx_vec_end(&child->is);
-  
-  for (struct cx_type **c = cx_vec_get(&child->is, parent->tag); c != ce; c++) {    
+
+  for (struct cx_type **c = cx_vec_get(&child->is, parent->raw->tag);
+       c != ce;
+       c++) {
     if (*c && (*c)->raw == parent->raw) {
       if (*c == parent) { return true; }
 
@@ -96,7 +113,7 @@ bool cx_is(struct cx_type *child, struct cx_type *parent) {
 	**je = cx_vec_end(&parent->args);
 
       bool ok = true;
-      
+
       for (struct cx_type
 	     **i = cx_vec_start(&(*c)->args),
 	     **j = cx_vec_start(&parent->args);
