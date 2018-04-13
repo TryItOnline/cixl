@@ -2,9 +2,8 @@
 #define ntohll(x) ((1==ntohl(1)) ? (x) : ((uint64_t)ntohl((x) & 0xFFFFFFFF) << 32) | ntohl((x) >> 32))
 host64 & net64 fns
 
-* add pair type args
 * implement type_new method for rec type
-* ---
+* update cxcrypt
 * add implicit lambda scope
 ** one scope per lambda
 ** set parent
