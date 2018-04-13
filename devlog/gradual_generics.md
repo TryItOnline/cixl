@@ -51,7 +51,7 @@ Functions gained support for referring to type arguments by extending the existi
    
    func: my-sum(start Arg1:0 in Seq<Num>)(_ Arg1:0)
      $start $in &+ for;
-   | 0 10 iter my-sum
+   | 0 10 my-sum
 ...
 [45]
 ```

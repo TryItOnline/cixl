@@ -78,7 +78,9 @@ static bool emit_imp(struct cx_box *v, const char *exp, FILE *out) {
 
 struct cx_type *cx_init_int_type(struct cx_lib *lib) {
   struct cx *cx = lib->cx;
-  struct cx_type *t = cx_add_type(lib, "Int", cx->num_type, cx->seq_type);
+  struct cx_type *t = cx_add_type(lib, "Int", cx->num_type);
+  cx_derive(t, cx_type_get(cx->seq_type, t));
+  
   t->equid = equid_imp;
   t->cmp = cmp_imp;
   t->ok = ok_imp;
