@@ -2,10 +2,12 @@
 #define ntohll(x) ((1==ntohl(1)) ? (x) : ((uint64_t)ntohl((x) & 0xFFFFFFFF) << 32) | ntohl((x) >> 32))
 host64 & net64 fns
 
+* add cx_type.meta CX_TYPE_TRAIT/ARG/TYPE/REC
+** add cx_type_init arg
+** replaces cx_type.trait
 * add Stack type args
 ** infer type of literals
 * add Table type args
-* implement type_new method for rec type
 * update cxcrypt
 * --
 * add implicit lambda scope
@@ -17,6 +19,13 @@ host64 & net64 fns
 * move type lookup to id tok compilation
 ** always forward id
 ** remove lookup flag
+* add support for rec type args
+** implement type_new method for rec type
+** add cx_arg_ref with vec indices
+** generate on demand in *lobby from cx_get_type if not found
+*** with type args if provided
+*** search *lobby directly if name starts with 'ArgN'
+** replace field types in type_init method if CX_TYPE_ARG
 * add automatic chunking to encrypt/decrypt
 ** add #max-chunk
 ** add int net/host
