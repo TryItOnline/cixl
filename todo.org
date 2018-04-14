@@ -18,14 +18,16 @@ host64 & net64 fns
 ** always forward id
 ** remove lookup flag
 * add proper Arg types
-** add struct cx_arg_type with i & j
+** add struct cx_arg_type with vec indices
 *** replaces special handling in parse_fimp/parse_args
 *** create on demand
-**** add cx_get_arg_type(cx, i, j)
+**** add cx_get_arg_type(cx, i, j, k...)
+***** generate ArgI:J:K name
 *** embed cx_type imp
 *** add enum cx_type CX_TARG, CX_TTRAIT, CX_TTYPE
 **** replaces trait bool
 *** change cx_fimp_score & return op to cast to cx_arg_type if CX_TARG
+**** keep on indexing as long as indices goes
 *** intern in func lib
 * add automatic chunking to encrypt/decrypt
 ** add #max-chunk
