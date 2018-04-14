@@ -16,7 +16,7 @@
 #include "cixl/str.h"
 #include "cixl/vec.h"
 
-void update_pos(struct cx *cx, char c) {
+static void update_pos(struct cx *cx, char c) {
   if (c == '\n') {
     cx->row++;
     cx->col = 0;
@@ -218,10 +218,10 @@ static bool parse_id(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
   }
  done: {
     cx_mfile_close(&id);
-
+    
     if (ok) {
       char *s = id.data;
-      
+
       if (isupper(s[0])) {
 	ok = parse_type(cx, s, in, out, lookup);
       } else if (lookup && s[0] == '#') {
@@ -230,10 +230,6 @@ static bool parse_id(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
 	cx_tok_init(cx_vec_push(out),
 		    CX_TID(),
 		    cx->row, cx->col)->as_ptr = strdup(s);
-      } else if (s[0] == '/' && s[1] == '/') {
-	ok = parse_line_comment(cx, in);
-      } else if (s[0] == '/' && s[1] == '*') {
-	ok = parse_block_comment(cx, in);
       } else {
 	if (lookup) {
 	  struct cx_macro *m = cx_get_macro(cx, s, true);
@@ -580,14 +576,28 @@ bool cx_parse_tok(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
       break;
     }
     default:
-      cx->col--;
-
       if (isdigit(c)) {
 	ungetc(c, in);
+	cx->col--;
 	return parse_int(cx, in, out);
       }
+
+      if (c == '/') {
+	char cc = fgetc(in);
+	cx->col++;
 	
+	if (cc == '/') {
+	  return parse_line_comment(cx, in);
+	} else if (cc == '*') {
+	  return parse_block_comment(cx, in);
+	}
+
+	ungetc(cc, in);
+	cx->col--;
+      }
+      
       ungetc(c, in);
+      cx->col--;
       return parse_id(cx, in, out, lookup);
     }
   }
