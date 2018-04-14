@@ -16,7 +16,17 @@
 #include "cixl/str.h"
 #include "cixl/vec.h"
 
-char *parse_type_args(struct cx *cx, const char *id, FILE *in, struct cx_vec *out) {
+void update_pos(struct cx *cx, char c) {
+  if (c == '\n') {
+    cx->row++;
+    cx->col = 0;
+  } else if (c != EOF) {
+    cx->col++;
+  }
+}
+
+static char *parse_type_args(struct cx *cx, const char *id, FILE *in) {
+  int row = cx->row, col = cx->col;
   char c = fgetc(in);
 
   if (c != '<') {
@@ -24,6 +34,7 @@ char *parse_type_args(struct cx *cx, const char *id, FILE *in, struct cx_vec *ou
     return NULL;
   }
 
+  cx->col++;
   struct cx_mfile aid;
   cx_mfile_open(&aid);
   fputs(id, aid.stream);
@@ -32,7 +43,12 @@ char *parse_type_args(struct cx *cx, const char *id, FILE *in, struct cx_vec *ou
 
   while (depth) {
     c = fgetc(in);
+    update_pos(cx, c);
+    
     switch (c) {
+    case EOF:
+      cx_error(cx, row, col, "Open type arg list");
+      return NULL;
     case '<':
       depth++;
       break;
@@ -57,7 +73,7 @@ static bool parse_type(struct cx *cx,
 		       struct cx_vec *out,
 		       bool lookup) {
   if (lookup) {
-    char *aid = parse_type_args(cx, id, in, out);
+    char *aid = parse_type_args(cx, id, in);
     struct cx_type *t = cx_get_type(cx, aid ? aid : id, false);
     if (aid) { free(aid); }
     if (!t) { return false; }
@@ -66,7 +82,7 @@ static bool parse_type(struct cx *cx,
 		CX_TTYPE(),
 		cx->row, cx->col)->as_ptr = t;
   } else {
-    char *aid = parse_type_args(cx, id, in, out);
+    char *aid = parse_type_args(cx, id, in);
 
     cx_tok_init(cx_vec_push(out),
 		CX_TID(),
@@ -86,80 +102,48 @@ static bool parse_const(struct cx *cx, const char *id, struct cx_vec *out) {
   return true;
 }
 
-char *parse_fimp(struct cx *cx, FILE *in, struct cx_vec *out) {
+static char *parse_fimp(struct cx *cx, FILE *in) {
+  int row = cx->row, col = cx->col;
   char c = fgetc(in);
 
   if (c != '<') {
     ungetc(c, in);
     return NULL;
   }
-  
-  int row = cx->row, col = cx->col;
-  struct cx_mfile id;
-  cx_mfile_open(&id);
-  char sep = 0;
-  bool done = false;
-  
-  while (!done) {
-    if (!cx_parse_tok(cx, in, out, false)) {
-      cx_error(cx, row, col, "Invalid func type");
-      cx_mfile_close(&id);
-      free(id.data);
-      return NULL;
-    }
-    
-    struct cx_tok *tok = cx_vec_pop(out);
 
-    if (tok->type == CX_TID() && strcmp(tok->as_ptr, ">") == 0) {
-      cx_tok_deinit(tok);
+  cx->col++;
+  struct cx_mfile aid;
+  cx_mfile_open(&aid);
+  int depth = 1;
+
+  while (depth) {
+    c = fgetc(in);
+    update_pos(cx, c);
+    
+    switch (c) {
+    case EOF:
+      cx_error(cx, row, col, "Open fimp arg list");
+      return NULL;
+    case '<':
+      depth++;
+      break;
+    case '>':
+      depth--;
+      break;
+    default:
       break;
     }
 
-    if (sep) { fputc(sep, id.stream); }
-    
-    if (tok->type == CX_TLITERAL()) {
-      cx_dump(&tok->as_box, id.stream);
-    } else if (tok->type == CX_TID()) {
-      char *s = tok->as_ptr;
-      size_t len = strlen(s);
-      
-      if (s[len-1] == '>') {
-	s[len-1] = 0;
-	done = true;
-      }
-
-      if (strncmp(s, "Arg", 3) == 0 && isdigit(s[3])) {
-	fputs(s, id.stream);
-      } else if (isupper(s[0])) {
-	struct cx_type *type = cx_get_type(cx, s, false);
-	if (!type) { return NULL; }
-	fputs(type->id, id.stream);
-      } else {
-	cx_error(cx, row, col, "Invalid func type: %s", s);
-	cx_tok_deinit(tok);
-	cx_mfile_close(&id);
-	free(id.data);
-	return NULL;
-      }
-    } else {
-      cx_error(cx, row, col, "Invalid func type: %s", tok->type->id);
-      cx_tok_deinit(tok);
-      cx_mfile_close(&id);
-      free(id.data);
-      return NULL;
-    }
-
-    cx_tok_deinit(tok);
-    sep = ' ';
+    if (depth) { fputc(c, aid.stream); }
   }
 
-  cx_mfile_close(&id);
-  return id.data;
+  cx_mfile_close(&aid);
+  return aid.data;
 }
 
 static bool parse_func(struct cx *cx, const char *id, FILE *in, struct cx_vec *out) {
   int row = cx->row, col = cx->col;
-  char *imp_id = parse_fimp(cx, in, out);
+  char *imp_id = parse_fimp(cx, in);
 
   cx_tok_init(cx_vec_push(out), CX_TID(), row, col)->as_ptr = imp_id
     ? cx_fmt("%s %s", id, imp_id)
@@ -177,15 +161,12 @@ static bool parse_line_comment(struct cx *cx, FILE *in) {
 
     switch(c) {
     case '\n':
-      cx->row++;
-      cx->col = 0;
     case EOF:
       done = true;
       break;
-    default:
-      cx->col++;
-      break;
     }
+
+    update_pos(cx, c);
   }
 
   return true;
@@ -198,19 +179,12 @@ static bool parse_block_comment(struct cx *cx, FILE *in) {
   while (true) {
     char c = fgetc(in);
 
-    switch(c) {
-    case EOF:
+    if (c == EOF) {
       cx_error(cx, row, col, "Unterminated comment");
       return false;
-    case '\n':
-      cx->row++;
-      cx->col = 0;
-      break;
-    default:
-      cx->col++;
-      break;
     }
-    
+
+    update_pos(cx, c);
     if (c == '/' && pc == '*') { break; }
     pc = c;
   }
@@ -342,6 +316,7 @@ static bool parse_char(struct cx *cx, FILE *in, struct cx_vec *out) {
 
   if (c == '@') {
     c = fgetc(in);
+    cx->col++;
     
     switch(c) {
     case 'n':
@@ -367,6 +342,7 @@ static bool parse_char(struct cx *cx, FILE *in, struct cx_vec *out) {
 	  return false;
 	}
 
+	cx->col += 3;
 	c = 0;
 	
 	for (int i=0, m = 100; i<3; i++, m /= 10) {
@@ -378,6 +354,7 @@ static bool parse_char(struct cx *cx, FILE *in, struct cx_vec *out) {
 	  c += (n[i] - '0') * m;
 	}
       } else {
+	cx->col--;
 	c = '@';
       }
     }
@@ -411,16 +388,13 @@ static bool parse_str(struct cx *cx, FILE *in, struct cx_vec *out) {
       break;
     }
 
-    if (c == '\n') {
-      cx->row++;
-      cx->col = 0;
-    } else if (c == '@') {
+    if (c == '@') {
       ungetc(c, in);
       if (!parse_char(cx, in, out)) { goto exit; }
       struct cx_tok *t = cx_vec_pop(out);
       c = t->as_box.as_char;
     } else {
-      cx->col++;
+      update_pos(cx, c);
     }
 
     fputc(c, value.stream);
@@ -557,22 +531,18 @@ bool cx_parse_tok(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
 
   while (!done) {
     char c = fgetc(in);
-      
+    update_pos(cx, c);
+    
     switch (c) {
+    case ' ':
+    case '\t':
+    case '\n':
+      break;
     case EOF:
       done = true;
       break;
-    case ' ':
-    case '\t':
-      cx->col++;
-      break;
-    case '\n':
-      cx->row++;
-      cx->col = 0;
-      break;
     case ';':
       cx_tok_init(cx_vec_push(out), CX_TEND(), row, col);
-      cx->col++;
       return true;
     case '(':
       return parse_group(cx, in, out, lookup);
@@ -596,6 +566,7 @@ bool cx_parse_tok(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
     case '`':
       return parse_sym(cx, in, out);
     case '-': {
+      cx->col--;
       char c1 = fgetc(in);
       ungetc(c1, in);
       ungetc(c, in);
@@ -609,6 +580,8 @@ bool cx_parse_tok(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
       break;
     }
     default:
+      cx->col--;
+
       if (isdigit(c)) {
 	ungetc(c, in);
 	return parse_int(cx, in, out);

@@ -3,12 +3,11 @@
 host64 & net64 fns
 
 * add support for rec type args
-** switch parse_type_args to read chars and count </>
-** implement type_new method for rec type
 ** add cx_arg_ref with vec indices
 ** generate on demand in *lobby from cx_get_type if not found
 *** with type args if provided
 *** search *lobby directly if name starts with 'ArgN'
+** implement type_new method for rec type
 ** replace field types in type_init method if CX_TYPE_ARG
 * add Stack type args
 ** infer type of literals
