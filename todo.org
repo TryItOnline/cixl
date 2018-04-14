@@ -3,6 +3,7 @@
 host64 & net64 fns
 
 * add Stack type args
+** infer type of literals
 * add Table type args
 * implement type_new method for rec type
 * update cxcrypt
@@ -16,6 +17,16 @@ host64 & net64 fns
 * move type lookup to id tok compilation
 ** always forward id
 ** remove lookup flag
+* add proper Arg types
+** add struct cx_arg_type with i & j
+*** replaces special handling in parse_fimp/parse_args
+*** create on demand
+**** add cx_get_arg_type(cx, i, j)
+*** embed cx_type imp
+*** add enum cx_type CX_TARG, CX_TTRAIT, CX_TTYPE
+**** replaces trait bool
+*** change cx_fimp_score & return op to cast to cx_arg_type if CX_TARG
+*** intern in func lib
 * add automatic chunking to encrypt/decrypt
 ** add #max-chunk
 ** add int net/host
@@ -54,8 +65,6 @@ host64 & net64 fns
 ** add cx_getconst_op.value
 *** set in parse_const
 *** change eval to push value
-* add cx/proc pid(Proc)/this-pid/parent-pid fns
-** use getpid()
 * replace clone fallback to copy with error
 * replace varargs with size/array+macro
 * convert size_t to ssize_t and remove unsigned
