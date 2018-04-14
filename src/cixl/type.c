@@ -104,18 +104,14 @@ void cx_type_vpush_args(struct cx_type *t, int nargs, struct cx_type *args[]) {
 struct cx_type *cx_type_vget(struct cx_type *t, int nargs, struct cx_type *args[]) {
   struct cx *cx = t->lib->cx;
 
-  if (nargs != t->args.count) {
-    cx_error(cx, cx->row, cx->col,
-	     "Wrong number of args for type %s: %d", t->id, nargs);
-    
-    return NULL;
-  }
-
-  /*
+  struct cx_type
+    **ie = cx_vec_end(&t->args),
+    **je = args+nargs;
+  
   for (struct cx_type
 	 **i = cx_vec_start(&t->args),
 	 **j = args;
-       i != cx_vec_end(&t->args);
+       i != ie && j != je;
        i++, j++) {
     if (!cx_is(*j, *i)) {
       cx_error(cx, cx->row, cx->col,
@@ -123,7 +119,7 @@ struct cx_type *cx_type_vget(struct cx_type *t, int nargs, struct cx_type *args[
       
       return NULL;
     }
-    }*/
+  }
 
   struct cx_mfile id;
   cx_mfile_open(&id);
