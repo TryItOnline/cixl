@@ -1376,7 +1376,7 @@ static void typedef_emit_init(struct cx_op *op,
   struct cx_type *t = op->as_typedef.type;
   struct cx_sym type_var = cx_gsym(cx, "type");
   
-  if (cx_is(t, cx->rec_type)) {
+  if (t->meta == CX_TYPE_REC) {
     fprintf(out,
 	    "struct cx_rec_type *%s = cx_test(cx_add_rec_type(*cx->lib, \"%s\"));\n",
 	    type_var.id, t->id);
@@ -1399,7 +1399,7 @@ static void typedef_emit_init(struct cx_op *op,
 	      "        false));\n",
 	      type_var.id, f->id.id, f->type->id);
     }
-  } else if (t->trait) {
+  } else if (t->meta == CX_TYPE_TRAIT) {
     fprintf(out,
 	    "struct cx_type *%s = cx_test(cx_add_type(*cx->lib, \"%s\"));\n"
 	    "%s->trait = true;\n",

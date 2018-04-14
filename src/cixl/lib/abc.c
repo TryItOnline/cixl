@@ -34,17 +34,17 @@ cx_lib(cx_init_abc, "cx/abc") {
   cx_box_init(cx_put_const(lib, cx_sym(cx, "nil"), false), cx->nil_type);
 
   cx->any_type = cx_add_type(lib, "A", cx->opt_type);
-  cx->any_type->trait = true;
+  cx->any_type->meta = CX_TYPE_TRAIT;
 
   cx->cmp_type = cx_add_type(lib, "Cmp", cx->any_type);
-  cx->cmp_type->trait = true;  
+  cx->cmp_type->meta = CX_TYPE_TRAIT;
 
   cx->seq_type = cx_add_type(lib, "Seq", cx->any_type);
   cx_type_push_args(cx->seq_type, cx->any_type);
-  cx->seq_type->trait = true;
+  cx->seq_type->meta = CX_TYPE_TRAIT;
 
   cx->num_type = cx_add_type(lib, "Num", cx->cmp_type);
-  cx->num_type->trait = true;
+  cx->num_type->meta = CX_TYPE_TRAIT;
 
   cx->lib_type = cx_init_lib_type(lib);
   cx->meta_type = cx_init_meta_type(lib);

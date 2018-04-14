@@ -16,7 +16,7 @@ struct cx_type *cx_init_opt_type(struct cx_lib *lib) {
   struct cx *cx = lib->cx;
   struct cx_type *t = cx_add_type(lib, "Opt", cx->opt_type);
   cx_type_push_args(t, t);
-  t->trait = true;
+  t->meta = CX_TYPE_TRAIT;
   t->type_init = type_init_imp;
   return t;
 }

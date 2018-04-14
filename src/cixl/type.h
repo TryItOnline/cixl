@@ -22,14 +22,16 @@ struct cx_box;
 struct cx_iter;
 struct cx_scope;
 
+enum cx_meta_type {CX_TYPE_ARG, CX_TYPE_IMP, CX_TYPE_REC, CX_TYPE_TRAIT};
+
 struct cx_type {
   struct cx_lib *lib;
+  enum cx_meta_type meta;
   char *id, *emit_id;
   size_t tag, level;
   struct cx_type *raw;
   struct cx_set parents, children;
   struct cx_vec is, args;
-  bool trait;
   
   void (*new)(struct cx_box *);
   bool (*eqval)(struct cx_box *, struct cx_box *);

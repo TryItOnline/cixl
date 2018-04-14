@@ -2,9 +2,6 @@
 #define ntohll(x) ((1==ntohl(1)) ? (x) : ((uint64_t)ntohl((x) & 0xFFFFFFFF) << 32) | ntohl((x) >> 32))
 host64 & net64 fns
 
-* add cx_type.meta CX_TYPE_TRAIT/ARG/TYPE/REC
-** add cx_type_init arg
-** replaces cx_type.trait
 * add Stack type args
 ** infer type of literals
 * add Table type args
