@@ -200,7 +200,7 @@ struct cx_type *cx_get_type(struct cx *cx, const char *id, bool silent) {
     char tid[j-id+1];
     strncpy(tid, id, j-id);
     tid[j-id] = 0;
-    t = cx_get_type(cx, tid, false);
+    t = cx_get_type(cx, tid, silent);
     if (t) { t = cx_type_vget(t, types.count, (struct cx_type **)types.items); }
     cx_vec_deinit(&types);
   } else {

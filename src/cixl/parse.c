@@ -23,56 +23,30 @@ char *parse_type_args(struct cx *cx, const char *id, FILE *in, struct cx_vec *ou
     ungetc(c, in);
     return NULL;
   }
-  
-  int row = cx->row, col = cx->col;
+
   struct cx_mfile aid;
   cx_mfile_open(&aid);
   fputs(id, aid.stream);
   fputc('<', aid.stream);
-  char sep = 0;
-  bool done = false;
-  
-  while (!done) {
-    if (!cx_parse_tok(cx, in, out, false)) {
-      cx_error(cx, row, col, "Invalid type args");
-      cx_mfile_close(&aid);
-      free(aid.data);
-      return NULL;
-    }
-    
-    struct cx_tok *tok = cx_vec_pop(out);
+  int depth = 1;
 
-    if (tok->type != CX_TID()) {
-      cx_error(cx, tok->row, tok->col, "Invalid type arg");
-      cx_mfile_close(&aid);
-      free(aid.data);
-      return NULL;
-    }
-
-    if (strcmp(tok->as_ptr, ">") == 0) {
-      cx_tok_deinit(tok);
+  while (depth) {
+    c = fgetc(in);
+    switch (c) {
+    case '<':
+      depth++;
+      break;
+    case '>':
+      depth--;
+      break;
+    default:
       break;
     }
 
-    if (sep) { fputc(sep, aid.stream); }
-    
-    char *s = tok->as_ptr;
-    size_t len = strlen(s);
-
-    if (s[len-1] == '>') {
-      s[len-1] = 0;
-      done = true;
-    }
-
-    struct cx_type *type = cx_get_type(cx, s, false);
-    if (!type) { return NULL; }
-    fputs(type->id, aid.stream);
-
-    cx_tok_deinit(tok);
-    sep = ' ';
+    fputc(c, aid.stream);
   }
 
-  fputc('>', aid.stream);
+  fputc('>', aid.stream);  
   cx_mfile_close(&aid);
   return aid.data;
 }
@@ -93,7 +67,7 @@ static bool parse_type(struct cx *cx,
 		cx->row, cx->col)->as_ptr = t;
   } else {
     char *aid = parse_type_args(cx, id, in, out);
-      
+
     cx_tok_init(cx_vec_push(out),
 		CX_TID(),
 		cx->row, cx->col)->as_ptr = aid ? aid : strdup(id);

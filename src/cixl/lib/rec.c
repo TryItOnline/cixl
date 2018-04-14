@@ -48,7 +48,7 @@ static bool rec_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   }
 
   char *s = id.as_ptr;
-  
+
   if (!isupper(s[0])) {
     cx_error(cx, id.row, id.col, "Invalid rec id: %s", s);
     goto exit2;
