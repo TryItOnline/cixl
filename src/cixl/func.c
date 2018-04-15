@@ -61,27 +61,11 @@ struct cx_fimp *cx_add_fimp(struct cx_func *func,
     for (int i=0; i < nargs; i++) {
       struct cx_arg *a = args+i;
 
-      if (a->arg_type == CX_ARG && a->type == NULL) {
+      if (a->arg_type == CX_ARG && !a->type) {
 	cx_error(cx, cx->row, cx->col, "Unknown type for arg: %d", i);
 	return NULL;
       }
       
-      if (a->arg_type == CX_NARG) {
-	if (a->as_narg.i >= nargs) {
-	  cx_error(cx, cx->row, cx->col, "Arg index out of bounds: %d", a->as_narg.i);
-	  return NULL;
-	}
-	
-	struct cx_arg *aa = args+a->as_narg.i;
-
-	if (aa->arg_type == CX_VARG) {
-	  cx_error(cx, cx->row, cx->col, "Value arg ref by index: %d",
-		   a->as_narg.i);
-	  return NULL;
-	}
-      }
-
-
       if (a->id) { a->sym_id = cx_sym(cx, a->id); }
       *(struct cx_arg *)cx_vec_push(&imp_args) = *a;
       if (i) { fputc(' ', id.stream); }
@@ -113,26 +97,11 @@ struct cx_fimp *cx_add_fimp(struct cx_func *func,
     for (int i=0; i < nrets; i++) {
       struct cx_arg *r = rets+i;
       
-      if (r->arg_type == CX_ARG && r->type == NULL) {
+      if (r->arg_type == CX_ARG && !r->type) {
 	cx_error(cx, cx->row, cx->col, "Unknown type for result: %d", i);
 	return NULL;
       }
 
-      if (r->arg_type == CX_NARG) {
-	if (r->as_narg.i >= nargs) {
-	  cx_error(cx, cx->row, cx->col, "Arg index out of bounds: %d", r->as_narg.i);
-	  return NULL;
-	}
-	
-	struct cx_arg *a = args+r->as_narg.i;
-
-	if (!a->id) {
-	  cx_error(cx, cx->row, cx->col, "Anonymous arg ref by index: %d",
-		   r->as_narg.i);
-	  return NULL;
-	}
-      }
-      
       if (r->id) { r->sym_id = cx_sym(cx, r->id); }
       *(struct cx_arg *)cx_vec_push(&imp->rets) = *r;
     }

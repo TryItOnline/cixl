@@ -30,23 +30,6 @@ static bool parse_args(struct cx *cx, struct cx_vec *toks, struct cx_vec *args) 
 	struct cx_box *v = cx_get_const(cx, cx_sym(cx, id+1), false);
 	if (!v) { goto exit; }
 	*(struct cx_arg *)cx_vec_push(args) = cx_varg(v);
-      } else if (strncmp(id, "Arg", 3) == 0 && isdigit(id[3])) {
-	char *p;
-	int i = strtoimax(id+3, &p, 10);
-	int j = -1;
-	
-	if (p[0] == ':') { j = strtoimax(p+1, NULL, 10); }  
-	
-	if (tmp_ids.count) {
-	  cx_do_vec(&tmp_ids, struct cx_tok, id) {
-	    const char *n = strcmp(id->as_ptr, "_") ? id->as_ptr : NULL;
-	    *(struct cx_arg *)cx_vec_push(args) = cx_narg(n, i, j);
-	  }
-	  
-	  cx_vec_clear(&tmp_ids);
-	} else {
-	  *(struct cx_arg *)cx_vec_push(args) = cx_narg(NULL, i, j);      
-	}	
       } else if (isupper(id[0])) {
 	struct cx_type *type = cx_get_type(cx, t->as_ptr, false);
 	if (!type) { goto exit; }

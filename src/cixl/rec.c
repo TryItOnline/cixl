@@ -131,12 +131,18 @@ static struct cx_type *type_new_imp(struct cx_type *t,
 static void type_init_imp(struct cx_type *t, int nargs, struct cx_type *args[]) {
   struct cx_rec_type *rt = cx_baseof(t, struct cx_rec_type, imp);
   
-  struct cx_type *on_resolve(int i) {
+  struct cx_type *get_raw(int i) {
+    return (i < t->raw->args.count)
+      ? *(struct cx_type **)cx_vec_get(&t->raw->args, i)
+      : NULL;
+  }
+
+  struct cx_type *get_arg(int i) {
     return (i < nargs) ? args[i] : NULL;
   }
   
   cx_do_set(&rt->fields, struct cx_field, f) {
-    f->type = cx_resolve_arg_refs(t->raw, f->type, on_resolve);
+    f->type = cx_resolve_arg_refs(f->type, get_raw, get_arg);
   }
 }
 
@@ -150,6 +156,7 @@ struct cx_rec_type *cx_rec_type_init(struct cx_rec_type *type,
 				     struct cx_lib *lib,
 				     const char *id) {
   cx_type_init(&type->imp, lib, id);
+  type->imp.meta = CX_TYPE_REC;
   cx_derive(&type->imp, lib->cx->rec_type);
 
   type->imp.new = new_imp;

@@ -80,17 +80,17 @@ cx_lib(cx_init_pair, "cx/pair") {
 
   cx_add_cfunc(lib, "unzip", 
 	       cx_args(cx_arg("p", cx->pair_type)),
-	       cx_args(cx_narg(NULL, 0, 0), cx_narg(NULL, 0, 1)),
+	       cx_args(cx_narg(cx, NULL, 0, 0), cx_narg(cx, NULL, 0, 1)),
 	       unzip_imp);
 
   cx_add_cfunc(lib, "x",
 	       cx_args(cx_arg("p", cx->pair_type)),
-	       cx_args(cx_narg(NULL, 0, 0)),
+	       cx_args(cx_narg(cx, NULL, 0, 0)),
 	       x_imp);
 
   cx_add_cfunc(lib, "y",
 	       cx_args(cx_arg("p", cx->pair_type)),
-	       cx_args(cx_narg(NULL, 0, 1)),
+	       cx_args(cx_narg(cx, NULL, 0, 1)),
 	       y_imp);
 
   cx_add_cfunc(lib, "rezip", 

@@ -5,17 +5,17 @@
 #include <stdio.h>
 #include "cixl/set.h"
 
-#define cx_type_push_args(t, ...) ({					\
-      struct cx_type *_args[] = {__VA_ARGS__};				\
-      unsigned int _nargs = sizeof(_args) / sizeof(struct cx_type *);	\
-      cx_type_vpush_args(t, _nargs, _args);				\
-    })									\
+#define cx_type_push_args(t, ...) ({				\
+      struct cx_type *_args[] = {__VA_ARGS__};			\
+      int _nargs = sizeof(_args) / sizeof(struct cx_type *);	\
+      cx_type_vpush_args(t, _nargs, _args);			\
+    })								\
 
-#define cx_type_get(t, ...) ({						\
-      struct cx_type *_args[] = {__VA_ARGS__};				\
-      unsigned int _nargs = sizeof(_args) / sizeof(struct cx_type *);	\
-      cx_type_vget(t, _nargs, _args);					\
-    })									\
+#define cx_type_get(t, ...) ({					\
+      struct cx_type *_args[] = {__VA_ARGS__};			\
+      int _nargs = sizeof(_args) / sizeof(struct cx_type *);	\
+      cx_type_vget(t, _nargs, _args);				\
+    })								\
 
 struct cx;
 struct cx_box;

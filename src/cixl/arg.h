@@ -13,14 +13,22 @@
   sizeof(struct cx_arg),			\
     (struct cx_arg[]){__VA_ARGS__}		\
 
+#define cx_arg_ref(cx, ...) ({				\
+      int _indices[] = {__VA_ARGS__};			\
+      int _nindices = sizeof(_indices) / sizeof(int);	\
+      _cx_arg_ref(cx, _nindices, _indices);		\
+    })							\
+
+#define cx_narg(cx, id, ...) ({				\
+      int _indices[] = {__VA_ARGS__};			\
+      int _nindices = sizeof(_indices) / sizeof(int);	\
+      _cx_narg(cx, id, _nindices, _indices);		\
+    })							\
+
 struct cx_type;
 struct cx_vec;
 
-enum cx_arg_type { CX_ARG, CX_NARG, CX_VARG };
-
-struct cx_narg {
-  int i, j;
-};
+enum cx_arg_type { CX_ARG, CX_VARG };
 
 struct cx_arg {
   char *id;
@@ -28,7 +36,6 @@ struct cx_arg {
   enum cx_arg_type arg_type;
   
   union {
-    struct cx_narg as_narg;
     struct cx_type *type;
     struct cx_box value;
   };
@@ -37,7 +44,7 @@ struct cx_arg {
 struct cx_arg *cx_arg_deinit(struct cx_arg *arg);
 struct cx_arg cx_arg(const char *id, struct cx_type *type);
 struct cx_arg cx_varg(struct cx_box *value);
-struct cx_arg cx_narg(const char *id, int i, int j);
+struct cx_arg _cx_narg(struct cx *cx, const char *id, int nindices, int indices[]);
 void cx_arg_print(struct cx_arg *a, FILE *out);
 void cx_arg_emit(struct cx_arg *a, FILE *out, struct cx *cx);
 
@@ -58,8 +65,10 @@ struct cx_arg_ref *cx_arg_ref_deinit(struct cx_arg_ref *r);
 
 struct cx_arg_ref *cx_add_arg_ref(struct cx *cx, const char *id);
 
-struct cx_type *cx_resolve_arg_refs(struct cx_type *pt,
-				    struct cx_type *t,
-				    struct cx_type *(*get)(int));
+struct cx_type *cx_resolve_arg_refs(struct cx_type *t,
+				    struct cx_type *(*get_parent)(int),
+				    struct cx_type *(*get_child)(int));
+
+struct cx_type *_cx_arg_ref(struct cx *cx, int nindices, int indices[]);
 
 #endif

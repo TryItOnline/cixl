@@ -60,7 +60,19 @@ ssize_t cx_fimp_score(struct cx_fimp *imp, struct cx_scope *scope, ssize_t max) 
   struct cx_arg *i = (struct cx_arg *)cx_vec_peek(&imp->args, 0);
   struct cx_box *j = (struct cx_box *)cx_vec_peek(stack, 0);
   size_t score = 0;
-  
+
+  struct cx_type *get_imp_arg(int i) {
+    return (i < imp->func->nargs)
+      ? ((struct cx_arg *)cx_vec_get(&imp->args, i))->type
+      : NULL;
+  }
+
+  struct cx_type *get_stack(int i) {
+    return (i < imp->func->nargs)
+      ? ((struct cx_box *)cx_vec_get(stack, stack->count-imp->func->nargs+i))->type
+      : NULL;
+  }
+
   for (; i >= (struct cx_arg *)imp->args.items &&
 	 j >= (struct cx_box *)stack->items;
        i--, j--) {
@@ -69,29 +81,7 @@ ssize_t cx_fimp_score(struct cx_fimp *imp, struct cx_scope *scope, ssize_t max) 
       continue;
     }
     
-    struct cx_type *t = NULL;
-
-    switch (i->arg_type) {
-    case CX_ARG:
-      t = i->type;
-      break;
-    case CX_NARG: {
-      struct cx_box *v = cx_vec_get(stack,
-				    stack->count-imp->args.count+i->as_narg.i);
-      t = v->type;
-
-      if (i->as_narg.j != -1) {
-	struct cx_arg *a = cx_vec_get(&imp->args, i->as_narg.i);
-	t = cx_type_arg(t, a->type, i->as_narg.j);
-	if (!t) { return -1; }
-      }
-      
-      break;
-    }
-    default:
-      break;
-    }
-
+    struct cx_type *t = cx_resolve_arg_refs(i->type, get_imp_arg, get_stack);
     score += cx_abs((ssize_t)j->type->level - t->level);
     if (max > -1 && score >= max) { return -1; }
     if (!cx_is(j->type, cx_test(t))) { return -1; }

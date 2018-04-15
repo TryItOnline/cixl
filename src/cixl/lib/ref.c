@@ -83,12 +83,12 @@ cx_lib(cx_init_ref, "cx/ref") {
   
   cx_add_cfunc(lib, "deref",
 	       cx_args(cx_arg("ref", cx->ref_type)),
-	       cx_args(cx_narg(NULL, 0, 0)),
+	       cx_args(cx_narg(cx, NULL, 0, 0)),
 	       deref_imp);
 
   cx_add_cfunc(lib, "set",
 	       cx_args(cx_arg("ref", cx->ref_type),
-		       cx_narg("val", 0, 0)),
+		       cx_narg(cx, "val", 0, 0)),
 	       cx_args(),
 	       set_imp);
 

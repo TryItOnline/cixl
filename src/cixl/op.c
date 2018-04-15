@@ -356,7 +356,8 @@ static void funcdef_emit_init(struct cx_op *op,
   struct cx_sym imp_var = cx_gsym(cx, "imp");
   
   fprintf(out,
-	  "struct cx_fimp *%s = cx_add_func(*cx->lib, \"%s\", %zd, %s, %zd, %s);\n",
+	  "struct cx_fimp *%s = "
+	  "cx_test(cx_add_func(*cx->lib, \"%s\", %zd, %s, %zd, %s));\n",
 	  imp_var.id, imp->func->id, imp->args.count, args_var.id, imp->rets.count,
 	  rets_var.id);
 
@@ -1096,6 +1097,21 @@ static bool return_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
     size_t si = 0;
     
     if (imp->rets.count) {
+      struct cx_type *get_imp_arg(int i) {
+	return (i < imp->args.count)
+	  ? ((struct cx_arg *)cx_vec_get(&imp->args, i))->type
+	  : NULL;
+      }
+      
+      struct cx_type *get_arg(int i) {
+	if (i >= imp->args.count) { return NULL; }
+	struct cx_arg *a = cx_vec_get(&imp->args, i);
+	if (!a->id) { return NULL; }
+	struct cx_box *v = cx_get_var(ss, a->sym_id, false);
+	if (!v) { return NULL; }
+	return v->type;
+      }
+      
       struct cx_scope *ds = cx_scope(cx, 1);
       cx_vec_grow(&ds->stack, ds->stack.count+imp->rets.count);
       struct cx_arg *r = cx_vec_start(&imp->rets);
@@ -1124,29 +1140,8 @@ static bool return_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
 	}
 	
 	if (ss->safe) {
-	  struct cx_type *t = NULL;
+	  struct cx_type *t = cx_resolve_arg_refs(r->type, get_imp_arg, get_arg);
 
-	  switch (r->arg_type) {
-	  case CX_ARG:
-	    t = r->type;
-	    break;
-	  case CX_NARG: {
-	    struct cx_arg *a = cx_vec_get(&imp->args, r->as_narg.i);
-	    struct cx_box *av = cx_test(cx_get_var(ss, a->sym_id, false));
-	    t = av->type;
-
-	    if (r->as_narg.j != -1) {
-	      struct cx_arg *a = cx_vec_get(&imp->args, r->as_narg.i);
-	      t = cx_type_arg(t, a->type, r->as_narg.j);
-	      if (!t) { return false; }
-	    }
-	    
-	    break;
-	  }
-	  default:
-	    break;
-	  }
-	  
 	  if (!cx_is(v.type, cx_test(t))) {
 	    cx_error(cx, cx->row, cx->col,
 		     "Invalid return type.\nExpected %s, actual: %s",
@@ -1203,6 +1198,23 @@ static bool return_emit(struct cx_op *op,
           op->as_return.pc+1);
 
   if (imp->rets.count) {
+    fputs(
+      "struct cx_type *get_imp_arg(int i) {\n"
+      "  return (i < imp->args.count)\n"
+      "    ? ((struct cx_arg *)cx_vec_get(&imp->args, i))->type\n"
+      "    : NULL;\n"
+      "}\n\n"
+      
+      "struct cx_type *get_arg(int i) {\n"
+      "  if (i >= imp->args.count) { return NULL; }\n"
+      "  struct cx_arg *a = cx_vec_get(&imp->args, i);\n"
+      "  if (!a->id) { return NULL; }\n"
+      "  struct cx_box *v = cx_get_var(s, a->sym_id, false);\n"
+      "  if (!v) { return NULL; }\n"
+      "  return v->type;\n"
+      "}\n\n",
+      out);
+    
     fprintf(out,
 	    "  struct cx_scope *ds = cx_scope(cx, 1);\n"
 	    "  cx_vec_grow(&ds->stack, ds->stack.count+%zd);\n\n",
@@ -1240,31 +1252,10 @@ static bool return_emit(struct cx_op *op,
 	    "    if (s->safe) {\n",
 	    out);
 
-      switch (r->arg_type) {
-      case CX_ARG:
-	fprintf(out, "     struct cx_type *t = %s();\n", r->type->emit_id);
-	break;
-      case CX_NARG: {
-	struct cx_arg *a = cx_vec_get(&imp->args, r->as_narg.i);
-	
-	fprintf(out,
-		"      struct cx_type *t = "
-		"cx_test(cx_get_var(s, %s, false))->type;\n",
-		a->sym_id.emit_id);
-
-	if (a->as_narg.j != -1) {
-	  fprintf(out,
-		  "    struct cx_arg *a = cx_vec_get(&imp->args, %d);\n"
-		  "    t = cx_type_arg(t, a->type, %d);\n"
-		  "    if (!t) { goto exit; }\n",
-		  r->as_narg.i, a->as_narg.j);
-	}
-	
-	break;
-      }	
-      default:
-	break;
-      }
+      fprintf(out,
+	      "     struct cx_type *t = "
+	      "cx_resolve_arg_refs(%s(), get_imp_arg, get_arg);\n",
+	      r->type->emit_id);
 
       fputs("      if (!cx_is(v.type, t)) {\n"
 	    "        cx_error(cx, cx->row, cx->col,\n"
@@ -1388,7 +1379,14 @@ static void typedef_emit_init(struct cx_op *op,
 	      "cx_derive_rec(%s, cx_test(cx_get_type(cx, \"%s\", false)));\n",
 	      type_var.id, (*pt)->id);
     }
-    
+
+    cx_do_vec(&t->args, struct cx_type *, at) {
+      fprintf(out,
+	      "cx_type_push_args(&%s->imp, "
+	      "cx_test(cx_get_type(cx, \"%s\", false)));\n",
+	      type_var.id, (*at)->id);
+    }
+
     struct cx_rec_type *rt = cx_baseof(t, struct cx_rec_type, imp);
 
     cx_do_set(&rt->fields, struct cx_field, f) {
@@ -1402,7 +1400,7 @@ static void typedef_emit_init(struct cx_op *op,
   } else if (t->meta == CX_TYPE_TRAIT) {
     fprintf(out,
 	    "struct cx_type *%s = cx_test(cx_add_type(*cx->lib, \"%s\"));\n"
-	    "%s->trait = true;\n",
+	    "%s->meta = CX_TYPE_TRAIT;\n",
 	    type_var.id, t->id, type_var.id);
 
     cx_do_set(&t->children, struct cx_type *, ct) {

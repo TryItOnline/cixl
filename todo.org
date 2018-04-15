@@ -2,16 +2,12 @@
 #define ntohll(x) ((1==ntohl(1)) ? (x) : ((uint64_t)ntohl((x) & 0xFFFFFFFF) << 32) | ntohl((x) >> 32))
 host64 & net64 fns
 
-* remove CX_NARG
-** remove const/special handling
-** add cx param and vararg to cx_narg
-*** generate id and call cx_arg with result of cx_get_type
-** call cx_resolve-arg_refs in fimp_score and return op
+* improve find-if type signature
 * add support for type arg wildcards
 ** use _
 ** forward NULL type
-* add check if nargs >= raw in cx_type_vget
-* change cloning in cx_type_vget to replace NULL with raw arg
+** make sure that nargs == raw in cx_type_vget
+** change cloning in cx_type_vget to replace NULL with raw arg
 * add Stack type args
 ** infer type of literals
 * add Table type args
@@ -30,6 +26,8 @@ host64 & net64 fns
 ** remove lookup flag
 * add cx_call.args
 ** use instead of vars in return op
+* add support for trait type args
+** resolve types and derive in trait type_init
 * add automatic chunking to encrypt/decrypt
 ** add #max-chunk
 ** add int net/host

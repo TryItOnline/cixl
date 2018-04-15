@@ -46,3 +46,8 @@ func: my-sum(start Arg1:0 in Seq<Num>)(_ Arg1:0)
   $start $in &+ for;
 
 0 10 my-sum 45 = check
+
+func: find-ref-or(in Seq<Arg1> x A def Arg1)(_ Ref<Arg1>)
+  $in {$x =} find-if $def or ref;
+
+'abc' @d @z find-ref-or deref @z = check
