@@ -9,9 +9,9 @@ host64 & net64 fns
 ** call cx_resolve-arg_refs in fimp_score and return op
 * add support for type arg wildcards
 ** use _
-** fill in NULL
-** replace with raw arg in cx_type_vget
-** check that instantiated nargs >= raw nargs in cx_type_vget
+** forward NULL type
+* forward NULL type in cx_type_vget when instantiated nargs < raw
+* change cloning in cx_type_vget to replace NULL with raw arg
 * add Stack type args
 ** infer type of literals
 * add Table type args
