@@ -1,5 +1,6 @@
 #include <stdlib.h>
 
+#include "cixl/arg.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
 #include "cixl/rec.h"
@@ -113,6 +114,32 @@ static void deinit_imp(struct cx_box *v) {
   cx_rec_deref(v->as_ptr);
 }
 
+static struct cx_type *type_new_imp(struct cx_type *t,
+				    const char *id,
+				    int nargs, struct cx_type *args[]) {
+  struct cx_rec_type
+    *rt = cx_baseof(t, struct cx_rec_type, imp),
+    *nrt = cx_rec_type_new(t->lib, id);
+
+  cx_do_set(&rt->fields, struct cx_field, f) {
+    cx_add_field(nrt, f->id, f->type, false);
+  }
+
+  return &nrt->imp;
+}
+
+static void type_init_imp(struct cx_type *t, int nargs, struct cx_type *args[]) {
+  struct cx_rec_type *rt = cx_baseof(t, struct cx_rec_type, imp);
+  
+  struct cx_type *on_resolve(int i) {
+    return (i < nargs) ? args[i] : NULL;
+  }
+  
+  cx_do_set(&rt->fields, struct cx_field, f) {
+    f->type = cx_resolve_arg_refs(t->raw, f->type, on_resolve);
+  }
+}
+
 static void *type_deinit_imp(struct cx_type *t) {
   struct cx_rec_type *rt = cx_baseof(t, struct cx_rec_type, imp);
   cx_set_deinit(&rt->fields);
@@ -138,6 +165,8 @@ struct cx_rec_type *cx_rec_type_init(struct cx_rec_type *type,
   type->imp.emit = emit_imp;
   type->imp.deinit = deinit_imp;
 
+  type->imp.type_new = type_new_imp;
+  type->imp.type_init = type_init_imp;
   type->imp.type_deinit = type_deinit_imp;
 
   cx_set_init(&type->fields, sizeof(struct cx_field), cx_cmp_sym);

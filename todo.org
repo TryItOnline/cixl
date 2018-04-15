@@ -2,13 +2,11 @@
 #define ntohll(x) ((1==ntohl(1)) ? (x) : ((uint64_t)ntohl((x) & 0xFFFFFFFF) << 32) | ntohl((x) >> 32))
 host64 & net64 fns
 
-* add support for rec type args
-** add cx_arg_ref with vec indices
-** generate on demand in *lobby from cx_get_type if not found
-*** with type args if provided
-*** search *lobby directly if name starts with 'ArgN'
-** implement type_new method for rec type
-** replace field types in type_init method if CX_TYPE_ARG
+* remove CX_NARG
+** remove const/special handling
+** add cx param and vararg to cx_narg
+*** generate id and call cx_arg with result of cx_get_type
+** call cx_resolve-arg_refs in fimp_score and return op
 * add Stack type args
 ** infer type of literals
 * add Table type args
@@ -23,6 +21,8 @@ host64 & net64 fns
 * move type lookup to id tok compilation
 ** always forward id
 ** remove lookup flag
+* add cx_call.args
+** use instead of vars in return op
 * add automatic chunking to encrypt/decrypt
 ** add #max-chunk
 ** add int net/host

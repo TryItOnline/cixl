@@ -25,6 +25,42 @@ static void update_pos(struct cx *cx, char c) {
   }
 }
 
+struct cx_type *cx_parse_type_arg(struct cx *cx, char **in) {
+  if (!**in) { return NULL; }
+
+  char *i = *in;
+  while (*i == ' ') { i++; }
+  char *j = i+1;
+  int depth = 1;
+  
+  while (*j && (depth > 1 || (*j != ' ' && *j != '>'))) {
+    switch (*j) {
+    case '<':
+      depth++;
+      break;
+    case '>':
+      depth--;
+      break;
+    default:
+      break;
+    }
+    
+    j++;
+  }
+
+  if (j > i) {
+    char tmp = *j;
+    *j = 0;
+    struct cx_type *t = cx_get_type(cx, i, false);
+    *j = tmp;
+    if (*j == '>') { j++; }
+    *in = j;
+    return t;
+  }
+
+  return NULL;
+}
+
 static char *parse_type_args(struct cx *cx, const char *id, FILE *in) {
   int row = cx->row, col = cx->col;
   char c = fgetc(in);
@@ -59,7 +95,7 @@ static char *parse_type_args(struct cx *cx, const char *id, FILE *in) {
       break;
     }
 
-    fputc(c, aid.stream);
+    if (depth) { fputc(c, aid.stream); }
   }
 
   fputc('>', aid.stream);  

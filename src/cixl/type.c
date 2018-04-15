@@ -135,7 +135,6 @@ struct cx_type *cx_type_vget(struct cx_type *t, int nargs, struct cx_type *args[
   
   fputc('>', id.stream);
   cx_mfile_close(&id);
-
   struct cx_type *tt = cx_lib_get_type(t->lib, id.data, true);
 
   if (tt) {
@@ -148,6 +147,7 @@ struct cx_type *cx_type_vget(struct cx_type *t, int nargs, struct cx_type *args[
     : cx_type_new(t->lib, id.data);
 
   free(id.data);
+  tt->meta = t->meta;
   tt->raw = t->raw;
   tt->new = t->new;
   tt->eqval = t->eqval;

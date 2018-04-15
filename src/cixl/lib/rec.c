@@ -94,8 +94,8 @@ static bool rec_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
 
   struct cx_rec_type *rec_type = type
     ? cx_baseof(type, struct cx_rec_type, imp)
-    : cx_test(cx_add_rec_type(*cx->lib, type ? type->id : id.as_ptr));
-
+    : cx_test(cx_add_rec_type(*cx->lib, id.as_ptr));
+  
   if (type) { cx_rec_type_reinit(rec_type); }
 
   struct cx_vec fids, ftypes;
@@ -198,7 +198,7 @@ static bool put_imp(struct cx_scope *scope) {
   struct cx_rec_type *rt = cx_baseof(r.type, struct cx_rec_type, imp);
   struct cx_field *f = cx_set_get(&rt->fields, &fid);
   bool ok = false;
-    
+
   if (!f) {
     cx_error(cx, cx->row, cx->col, "Invalid %s field: %s", rt->imp.id, fid.id);
     cx_box_deinit(&v);

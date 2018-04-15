@@ -42,7 +42,7 @@ Func not applicable: set
 [#f]
 ```
 
-Functions gained support for referring to type arguments by extending the existing syntax for referring to raw types.
+Functions gained support for referring to type arguments:
 
 ```
    /*
@@ -54,6 +54,18 @@ Functions gained support for referring to type arguments by extending the existi
    | 0 10 my-sum
 ...
 [45]
+```
+
+As did user defined types:
+
+```
+rec: Foo<A Seq<A>>()
+  bar Opt<Arg0>
+  baz Arg1:0;
+
+let: foo Foo<Int Str> new;
+$foo `bar 42 put
+$foo `baz @a put
 ```
 
 ### Implementation

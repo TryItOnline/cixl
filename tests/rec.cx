@@ -23,3 +23,11 @@ func: =(a b Foo)(_ Bool)
  
  $bar `y 'abc' put
  $bar $baz = check)
+
+rec: Generic<A Seq<A>>()
+  foo Opt<Arg0>
+  bar Arg1:0;
+
+(let: g Generic<Int Str> new;
+ $g `foo 42 put
+ $g `bar @a put)

@@ -9,6 +9,7 @@
 struct cx;
 struct cx_vec;
 
+struct cx_type *cx_parse_type_arg(struct cx *cx, char **in);
 bool cx_parse_tok(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup);
 bool cx_parse_end(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup);
 bool cx_parse(struct cx *cx, FILE *in, struct cx_vec *out);
