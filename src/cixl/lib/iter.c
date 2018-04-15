@@ -332,7 +332,7 @@ cx_lib(cx_init_iter, "cx/iter") {
   
   cx_add_cfunc(lib, "next",
 	       cx_args(cx_arg("it", cx->iter_type)),
-	       cx_args(cx_arg(NULL, cx->opt_type)),
+	       cx_args(cx_arg(NULL, cx_type_get(cx->opt_type, cx_arg_ref(cx, 0, 0)))),
 	       next_imp);
 
   cx_add_cfunc(lib, "drop", 
@@ -357,7 +357,7 @@ cx_lib(cx_init_iter, "cx/iter") {
   cx_add_cfunc(lib, "find-if",
 	       cx_args(cx_arg("in", cx->seq_type),
 		       cx_arg("pred", cx->any_type)),
-	       cx_args(cx_arg(NULL, cx->opt_type)),
+	       cx_args(cx_arg(NULL, cx_type_get(cx->opt_type, cx_arg_ref(cx, 0, 0)))),
 	       find_if_imp);
   
   return true;
