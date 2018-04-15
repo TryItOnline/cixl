@@ -200,6 +200,8 @@ static void deinit_imp(struct cx_box *v) {
 struct cx_type *cx_init_stack_type(struct cx_lib *lib) {
   struct cx *cx = lib->cx;
   struct cx_type *t = cx_add_type(lib, "Stack", cx->cmp_type, cx->seq_type);
+  cx_type_push_args(t, cx->opt_type);
+
   t->new = new_imp;
   t->eqval = eqval_imp;
   t->equid = equid_imp;

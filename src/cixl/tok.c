@@ -133,7 +133,7 @@ static ssize_t id_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) {
       struct cx_fimp **found = cx_set_get(&f->imps, &imp_id);
       
       if (!found) {
-	cx_error(cx, row, col, "Fimp not found");
+	cx_error(cx, row, col, "Fimp not found: %s<%s>", f->id, imp_id);
 	return -1;
       }
       

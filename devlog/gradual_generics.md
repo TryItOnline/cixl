@@ -11,6 +11,14 @@ I have plenty of scars to show from a previous implementation of generic types i
 I was already neck deeep into C++ by the time Java added support for generic types, which is why I was never very excited about Java's implementation. One thing they got right is wildcards, peppering your class hierarchy with abstract types for any combination of type arguments that need to coexist in the same collection gets old fast. [Cixl](https://github.com/basic-gongfu/cixl) takes an even more gradual approach where you mostly get to choose exactly how specific you want to be. Raw types work more or less as ordinary types; generic types may specify upper bounds for arguments, which are used in place of actual arguments. Generic types are currently used for references, pairs, optionals, sequences and iterators; which greatly increases the value of these features since it's now possible to use them without loosing type information.
 
 ```
+   [1 2] type
+...
+[Stack<Int>]
+
+   [1 1 2 /] type
+...
+[Stack<Num>]
+
    | 42 ref
 ...
 [Ref<Int>(42)r1]

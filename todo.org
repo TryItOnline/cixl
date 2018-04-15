@@ -2,16 +2,14 @@
 #define ntohll(x) ((1==ntohl(1)) ? (x) : ((uint64_t)ntohl((x) & 0xFFFFFFFF) << 32) | ntohl((x) >> 32))
 host64 & net64 fns
 
-* add Stack type args
-** infer type of literals
+* add Table type args
+* add rec type to qdb DBTable
+** update collabri & bookings
 * add support for type arg wildcards
 ** use _
 ** forward NULL type
 ** make sure that nargs == raw in cx_type_vget
 ** change cloning in cx_type_vget to replace NULL with raw arg
-* add Table type args
-* add rec type to qdb DBTable
-** update collabri & bookings
 * update cxcrypt
 * --
 * add implicit lambda scope

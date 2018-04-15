@@ -107,20 +107,28 @@ struct cx_type *cx_type_vget(struct cx_type *t, int nargs, struct cx_type *args[
   struct cx_type
     **ie = cx_vec_end(&t->args),
     **je = args+nargs;
+
+  bool identical = true;
   
   for (struct cx_type
 	 **i = cx_vec_start(&t->args),
 	 **j = args;
        i != ie && j != je;
        i++, j++) {
-    if (!cx_is(*j, *i)) {
-      cx_error(cx, cx->row, cx->col,
-	       "Expected type arg %s, actual: %s", (*i)->id, (*j)->id);
-      
-      return NULL;
+    if (*j != *i) {
+      identical = false;
+    
+      if (!cx_is(*j, *i)) {
+	cx_error(cx, cx->row, cx->col,
+		 "Expected type arg %s, actual: %s", (*i)->id, (*j)->id);
+	
+	return NULL;
+      }
     }
   }
 
+  if (identical) { return t; }
+  
   struct cx_mfile id;
   cx_mfile_open(&id);
   fputs(t->raw->id, id.stream);
@@ -233,9 +241,20 @@ bool cx_is(struct cx_type *child, struct cx_type *parent) {
   return false;
 }
 
-struct cx_type *cx_type_arg(struct cx_type *child,
-			    struct cx_type *parent,
-			    int i) {
+struct cx_type *cx_type_arg(struct cx_type *t, int i) {
+  struct cx *cx = t->lib->cx;
+  
+  if (i >= t->args.count) {
+    cx_error(cx, cx->row, cx->col, "Type arg out of bounds for type %s: %d",
+	     t->id, i);
+  }
+
+  return *(struct cx_type **)cx_vec_get(&t->args, i);
+}
+
+struct cx_type *cx_super_arg(struct cx_type *child,
+			     struct cx_type *parent,
+			     int i) {
   struct cx *cx = child->lib->cx;
   if (child == parent) {
     if (i >= child->args.count) {
@@ -258,12 +277,11 @@ struct cx_type *cx_type_arg(struct cx_type *child,
   for (struct cx_type **c = cx_vec_get(&child->is, parent->raw->tag+1);
        c != ce;
        c++) {
-    if (*c && (*c)->raw == parent->raw && (*c)->args.count > i) {
+    if (*c && (*c)->raw == parent->raw && i < (*c)->args.count) {
       return *(struct cx_type **)cx_vec_get(&(*c)->args, i);
     }
   }
 
-  cx_error(cx, cx->row, cx->col, "Arg not found for type %s: %d", child->id, i);
   return NULL;
 }
 

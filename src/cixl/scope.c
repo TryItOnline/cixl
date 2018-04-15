@@ -112,7 +112,30 @@ void cx_stash(struct cx_scope *s) {
   out->imp = s->stack;
   cx_vec_init(&s->stack, sizeof(struct cx_box));
   s->stack.alloc = &cx->stack_items_alloc;
-  cx_box_init(cx_push(s), cx->stack_type)->as_ptr = out;
+  struct cx_type *t = NULL;
+  
+  if (out->imp.count) {
+    struct cx_box *v = cx_vec_start(&out->imp);
+    t = v->type;
+    
+    for (; v != cx_vec_end(&out->imp); v++) {
+      size_t i = cx_min(cx_min(t->is.count, v->type->is.count), t->tag);
+      
+      for (struct cx_type
+	     **t_is = cx_vec_get(&t->is, i),
+	     **v_is = cx_vec_get(&v->type->is, i);
+	   t_is >= (struct cx_type **)cx_vec_start(&t->is);
+	   t_is--, v_is--) {
+	if (*t_is && *v_is) {
+	  t = *t_is;
+	  break;
+	}
+      }	   
+    }
+  }
+    
+  cx_box_init(cx_push(s),
+	      t ? cx_type_get(cx->stack_type, t) : cx->stack_type)->as_ptr = out;
 }
 
 void cx_reset(struct cx_scope *s) {

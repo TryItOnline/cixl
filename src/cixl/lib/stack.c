@@ -127,7 +127,10 @@ static bool seq_imp(struct cx_scope *scope) {
     *(struct cx_box *)cx_vec_push(&out->imp) = v;
   }
 
-  cx_box_init(cx_push(scope), scope->cx->stack_type)->as_ptr = out;
+  cx_box_init(cx_push(scope),
+	      cx_type_get(scope->cx->stack_type,
+			  cx_type_arg(it.type, 0)))->as_ptr = out;
+  
   cx_box_deinit(&in);
   cx_box_deinit(&it);
   return true;
@@ -349,40 +352,42 @@ cx_lib(cx_init_stack, "cx/stack") {
 	       len_imp);
   
   cx_add_cfunc(lib, "push",
-	       cx_args(cx_arg("s", cx->stack_type), cx_arg("val", cx->opt_type)),
+	       cx_args(cx_arg("s", cx->stack_type),
+		       cx_narg(cx, "val", 0, 0)),
 	       cx_args(),
 	       push_imp);
 
   cx_add_cfunc(lib, "pop",
 	       cx_args(cx_arg("s", cx->stack_type)),
-	       cx_args(cx_arg(NULL, cx->opt_type)),
+	       cx_args(cx_arg(NULL, cx_type_get(cx->opt_type, cx_arg_ref(cx, 0, 0)))),
 	       pop_imp);
 
   cx_add_cfunc(lib, "get",
 	       cx_args(cx_arg("s", cx->stack_type), cx_arg("i", cx->int_type)),
-	       cx_args(cx_arg(NULL, cx->opt_type)),
+	       cx_args(cx_arg(NULL, cx_type_get(cx->opt_type, cx_arg_ref(cx, 0, 0)))),
 	       get_imp);
 
   cx_add_cfunc(lib, "last",
 	       cx_args(cx_arg("s", cx->stack_type)),
-	       cx_args(cx_arg(NULL, cx->opt_type)),
+	       cx_args(cx_arg(NULL, cx_type_get(cx->opt_type, cx_arg_ref(cx, 0, 0)))),
 	       last_imp);
 
   cx_add_cfunc(lib, "put",
 	       cx_args(cx_arg("s", cx->stack_type),
 		       cx_arg("i", cx->int_type),
-		       cx_arg("val", cx->opt_type)),
+		       cx_narg(cx, "val", 0, 0)),
 	       cx_args(),
 	       put_imp);
 
   cx_add_cfunc(lib, "get-rand",
 	       cx_args(cx_arg("s", cx->stack_type)),
-	       cx_args(cx_arg(NULL, cx->opt_type)),
+	       cx_args(cx_arg(NULL, cx_type_get(cx->opt_type, cx_arg_ref(cx, 0, 0)))),
 	       get_rand_imp);
 
   cx_add_cfunc(lib, "stack",
 	       cx_args(cx_arg("in", cx->seq_type)),
-	       cx_args(cx_arg(NULL, cx->stack_type)),
+	       cx_args(cx_arg(NULL, cx_type_get(cx->stack_type,
+						cx_arg_ref(cx, 0, 0)))),
 	       seq_imp);
 
   cx_add_cfunc(lib, "stash",
