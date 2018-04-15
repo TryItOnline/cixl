@@ -10,12 +10,20 @@ host64 & net64 fns
 * add support for type arg wildcards
 ** use _
 ** forward NULL type
-* forward NULL type in cx_type_vget when instantiated nargs < raw
+* add check if nargs >= raw in cx_type_vget
 * change cloning in cx_type_vget to replace NULL with raw arg
 * add Stack type args
 ** infer type of literals
 * add Table type args
+* add rec type to qdb DBTable
+** update collabri & bookings
 * update cxcrypt
+* add slurp types Int../Str../Arg...
+** handle in cx_get_type
+** create on demand
+** tag types with slurp flag
+** handle in cx_type_vget()
+*** slurp all args
 * --
 * add implicit lambda scope
 ** one scope per lambda
