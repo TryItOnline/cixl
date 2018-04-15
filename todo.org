@@ -18,12 +18,6 @@ host64 & net64 fns
 * add rec type to qdb DBTable
 ** update collabri & bookings
 * update cxcrypt
-* add slurp types Int../Str../Arg...
-** handle in cx_get_type
-** create on demand
-** tag types with slurp flag
-** handle in cx_type_vget()
-*** slurp all args
 * --
 * add implicit lambda scope
 ** one scope per lambda
@@ -77,6 +71,14 @@ host64 & net64 fns
 * replace clone fallback to copy with error
 * replace varargs with size/array+macro
 * convert size_t to ssize_t and remove unsigned
+* add slurp types Int*/Str*/Arg*
+** derive from all parent slurp types
+*** hook into derive/underive
+** handle in cx_get_type
+** create on demand
+** tag types with slurp flag
+** handle in cx_type_vget()
+*** slurp all args
 * --- cxcrypt
 * add Pub/PrivKey
 * add README
