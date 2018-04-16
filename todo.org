@@ -2,10 +2,21 @@
 #define ntohll(x) ((1==ntohl(1)) ? (x) : ((uint64_t)ntohl((x) & 0xFFFFFFFF) << 32) | ntohl((x) >> 32))
 host64 & net64 fns
 
+* add cx_call.args
+** add struct cx_call_arg (type & value)
+** move values from stack & init resolved types on call init
+** change OPUTARGS to use call instead of stack
+** use instead of vars for arg refs in ORETURN
+** refill on recall
+* enable using Arg refs inside funcs
+** add bool cx_type_is_ref(type) fn
+*** search all args recursively for CX_TYPE_ARG
+** add OTYPE op
+*** create with imp
+*** resolve type using imp & call args
 * add rec type to qdb DBTable
 ** update qdb funcs
 ** update collabri
-*** create tables manually & calll init-table
 * add support for type arg wildcards
 ** use _
 ** forward NULL type
@@ -22,13 +33,6 @@ host64 & net64 fns
 * move type lookup to id tok compilation
 ** always forward id
 ** remove lookup flag
-* add cx_call.args
-** move values from stack on call init
-** change OPUTARGS to use call instead of stack
-** use instead of vars for arg refs in ORETURN
-** refill on recall
-** add cx_call.arg_types
-*** cache resolved types
 * add support for trait type args
 ** resolve types and derive in trait type_init
 * replace cx_fimp.init with enum cx_fimp_type
