@@ -2,6 +2,16 @@
 #define ntohll(x) ((1==ntohl(1)) ? (x) : ((uint64_t)ntohl((x) & 0xFFFFFFFF) << 32) | ntohl((x) >> 32))
 host64 & net64 fns
 
+* fix throw recovery
+** add separate op eval/emit to run if errors.count
+** replaces new_error magic and catch jump
+** deal with errors in catch ops
+** change catch: to not wrap code
+*** put after within same scope
+** add support for throwing non-errors
+*** store cx_box in throwing
+*** add throwa fn and rename existing to throws
+* --
 * add cx_call.args
 ** add struct cx_call_arg (type & value)
 ** move values from stack & init resolved types on call init
@@ -27,14 +37,6 @@ host64 & net64 fns
 ** change cloning in cx_type_vget to replace NULL with raw arg
 * update cxcrypt
 * --
-* fix throw recovery
-** add separate op eval/emit to run if errrors.count
-** replaces new_error magic and catch jump
-** change case to not wrap caught code
-*** put call after code within same scope
-** add support for thrown values that are not errors
-*** add throw fn and rename existing to throw-unwind
-
 * add support for trait type args
 ** resolve types and derive in trait type_init
 
@@ -43,7 +45,8 @@ host64 & net64 fns
 ** copy trait
 ** declare enc(Str)->Enc<Str> and enc(Int)->Enc<Int> fns
 ** derive Enc<Str> from Str and Enc<Int> from Int
-** add support to OTYPEDEF
+** add support in OTYPEDEF
+** add qdb.DBKey type
 * --
 * add implicit lambda scope
 ** one scope per lambda

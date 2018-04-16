@@ -14,7 +14,7 @@
 	fprintf(stderr,					\
 		"'%s' failed at line %d in %s\n",	\
 		#cond, __LINE__, __FILE__);		\
-	abort();					\
+	exit(-1);					\
       }							\
 							\
       _cond;						\

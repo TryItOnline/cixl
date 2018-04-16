@@ -119,7 +119,7 @@ void cx_stash(struct cx_scope *s) {
     t = v->type;
     
     for (; v != cx_vec_end(&out->imp); v++) {
-      size_t i = cx_min(cx_min(t->is.count, v->type->is.count), t->tag);
+      size_t i = cx_min(cx_min(t->is.count, v->type->is.count)-1, t->tag);
       
       for (struct cx_type
 	     **t_is = cx_vec_get(&t->is, i),

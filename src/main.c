@@ -14,7 +14,11 @@
 #include "cixl/scope.h"
 
 struct cx cx;
-static void deinit_cx() { cx_deinit(&cx); }
+
+static void deinit_cx() {
+  cx_dump_errors(&cx, stderr);
+  cx_deinit(&cx);
+}
 
 struct cx_bin *bin;
 static void deinit_bin() { cx_bin_deref(bin); }

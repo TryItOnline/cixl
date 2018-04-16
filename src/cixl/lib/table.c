@@ -19,7 +19,7 @@ static bool check_key_type(struct cx_table *tbl, struct cx_type *typ) {
   if (tbl->entries.members.count) {
     struct cx_table_entry *e = cx_vec_get(&tbl->entries.members, 0);
     
-    if (typ != e->key.type) {
+    if (!cx_is(typ, e->key.type)) {
       struct cx *cx = tbl->cx;
 
       cx_error(cx, cx->row, cx->col,

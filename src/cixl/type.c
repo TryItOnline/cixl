@@ -265,13 +265,7 @@ struct cx_type *cx_super_arg(struct cx_type *child,
     return *(struct cx_type **)cx_vec_get(&child->args, i);
   }
   
-  if (parent->raw->tag+1 >= child->is.count) {
-    cx_error(cx, cx->row, cx->col, "%s is not compatible with type: %s",
-	     child->id, parent->id);
-    
-    return NULL;
-  }
-  
+  if (parent->raw->tag+1 >= child->is.count) { return NULL; }
   struct cx_type **ce = cx_vec_end(&child->is);
 
   for (struct cx_type **c = cx_vec_get(&child->is, parent->raw->tag+1);
