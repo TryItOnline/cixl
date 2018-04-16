@@ -141,6 +141,7 @@ static void clone_imp(struct cx_box *dst, struct cx_box *src) {
 
 static void iter_imp(struct cx_box *in, struct cx_box *out) {
   struct cx *cx = in->type->lib->cx;
+    
   cx_box_init(out, cx_type_get(cx->iter_type, cx_type_arg(in->type, 0)))->as_iter =
     &cx_stack_iter_new(in->as_ptr)->iter;
 }

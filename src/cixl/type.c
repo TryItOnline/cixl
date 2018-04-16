@@ -115,7 +115,7 @@ struct cx_type *cx_type_vget(struct cx_type *t, int nargs, struct cx_type *args[
 	 **j = args;
        i != ie && j != je;
        i++, j++) {
-    if (*j != *i) {
+    if (*j && *i != *j) {
       is_identical = false;
     
       if (!cx_is(*j, *i)) {

@@ -66,7 +66,7 @@ static void type_init_imp(struct cx_type *t, int nargs, struct cx_type *args[]) 
 
 struct cx_type *cx_init_iter_type(struct cx_lib *lib) {
   struct cx_type *t = cx_add_type(lib, "Iter", lib->cx->seq_type);
-  cx_type_push_args(t, lib->cx->any_type);
+  cx_type_push_args(t, lib->cx->opt_type);
 
   t->equid = equid_imp;
   t->ok = ok_imp;

@@ -400,8 +400,8 @@ bool cx_load_toks(struct cx *cx, const char *path, struct cx_vec *out) {
     return false;
   }
 
-  cx->row = 1;
-  cx->col = 0;
+  int prev_row = cx->row, prev_col = cx->col;
+  cx->row = 1; cx->col = 0;
   char c = fgetc(f);
 
   if (c == '#') {
@@ -420,6 +420,7 @@ bool cx_load_toks(struct cx *cx, const char *path, struct cx_vec *out) {
   
   bool ok = cx_parse(cx, f, out);
   fclose(f);
+  cx->row = prev_row; cx->col = prev_col;
   return ok;
 }
 
