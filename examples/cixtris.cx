@@ -7,7 +7,7 @@
 include: 'ansi.cx';
 
 use:
-  (cx/abc #t #f #nil A Bool Char Int Opt is-nil)
+  (cx/abc #t #f #nil A Bool Char Int Opt Str is-nil)
   (cx/cond ! ? = == < > <= and else if if-else min max or)
   (cx/const define:)
   (cx/error throw)
@@ -141,7 +141,7 @@ let: is-dropping #f ref;
 */
 
 rec: Block()
-  shapes Stack
+  shapes Stack<Stack<Str>>
   i      Int
   color  Color
   x y    Int;
@@ -149,10 +149,10 @@ rec: Block()
 let: block Ref<Block> new;
 let: next-block Ref<Block> new;
 
-func: shape-width(s Stack)(_ Int)
+func: shape-width(s Stack<Str>)(_ Int)
   0 $s {len max} for;
 
-func: shape-height(s Stack)(_ Int)
+func: shape-height(s Stack<Str>)(_ Int)
   $s len;
 
 /*
@@ -178,7 +178,7 @@ func: new-block()(b Block)
    Returns the current shape for the specified block.
 */
 
-func: get-shape(b Block)(_ Stack)
+func: get-shape(b Block)(_ Stack<Str>)
   $b % `shapes get ~ `i get get;
 
 /*
@@ -314,7 +314,7 @@ func: clear-rows(b Block)()
    free.
 */
 
-func: check-tiles(b Block s Stack x y Int)(_ Bool)
+func: check-tiles(b Block s Stack<Str> x y Int)(_ Bool)
   let: o $x $y get-offs ref;
 
   $s {
@@ -333,7 +333,7 @@ func: check-tiles(b Block s Stack x y Int)(_ Bool)
     $o $so $max-x + set
   } find-if !;
 
-func: next-shape(b Block)(_ Stack)
+func: next-shape(b Block)(_ Stack<Str>)
   let: ss $b `shapes get;
   $ss $b `i get ++ $ss len mod get;
 
