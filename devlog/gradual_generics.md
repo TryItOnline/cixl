@@ -8,16 +8,24 @@ One of the games I played growing up is called Plockepinn in Swedish, which lite
 I have plenty of scars to show from a previous implementation of generic types in a precursor to [Cixl](https://github.com/basic-gongfu/cixl), which is why I decided to wait longer before diving in this time around. Last time, I designed the entire language around generic types from the start; which ended up complicating the design and slowing me down to the point where it didn't make any sense to push it further. With Cixl I'm doing the opposite, adding as much support as needed to provide one feature at a time. One notable difference from other generic type systems I've run into is that Cixl doesn't treat type arguments as an orthogonal dimension to raw types; ```Iter<Int>``` is considered to be compatible with ```Seq<Num>```, for example. I would love to get some more details on why this approach is so uncommon, especially given that it seems to be what most people expect when they first encounter generic types.
 
 ### Gradual
-I was already neck deeep into C++ by the time Java added support for generic types, which is why I was never very excited about Java's implementation. One thing they got right is wildcards, peppering your class hierarchy with abstract types for any combination of type arguments that need to coexist in the same collection gets old fast. [Cixl](https://github.com/basic-gongfu/cixl) takes an even more gradual approach where you mostly get to choose exactly how specific you want to be. Raw types work more or less as ordinary types; generic types may specify upper bounds for arguments, which are used in place of actual arguments. Generic types are currently used for references, pairs, optionals, sequences and iterators; which greatly increases the value of these features since it's now possible to use them without loosing type information.
+I was already neck deeep into C++ by the time Java added support for generic types, which is why I was never very excited about Java's implementation. One thing they got right is wildcards, peppering your class hierarchy with abstract types for any combination of type arguments that need to coexist in the same collection gets old fast. [Cixl](https://github.com/basic-gongfu/cixl) takes an even more gradual approach where you mostly get to choose exactly how specific you want to be. Raw types work more or less as ordinary types; generic types may specify upper bounds for arguments, which are used in place of actual arguments. Generic types are currently used for stacks, pairs, tables, references, sequences, iterators and optionals; which greatly increases the value of these features since it's now possible to use them without loosing type information.
 
 ```
-   [1 2] type
+   | [1 2] type
 ...
 [Stack<Int>]
 
-   [1 1 2 /] type
+   | [1 1 2 /] type
 ...
 [Stack<Num>]
+
+   | 42 'foo' . type
+...
+[Pair<Int Str>]
+
+   | [1 'foo'. 2 'bar'.] table type
+...
+[Table<Int Str>]
 
    | 42 ref
 ...
@@ -32,10 +40,6 @@ Func not applicable: set
    _ % 7 set  
 ...
 [Ref<Int>(7)r1]
-
-   | 42 'foo' . type
-...
-[Pair<Int Str>]
 
    | 'foo' iter
 ...
@@ -64,7 +68,7 @@ Functions gained support for referring to type arguments:
 [45]
 ```
 
-As did user defined types:
+As did user defined types. The following type only accepts ```Seq``` types as second argument, ```Str``` derives ```Seq<Char>``` which means that ```baz``` type becomes ```Char```.
 
 ```
 rec: Foo<A Seq<A>>()

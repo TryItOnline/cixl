@@ -141,7 +141,8 @@ static void clone_imp(struct cx_box *dst, struct cx_box *src) {
 
 static void iter_imp(struct cx_box *in, struct cx_box *out) {
   struct cx *cx = in->type->lib->cx;
-  cx_box_init(out, cx->iter_type)->as_iter = &cx_stack_iter_new(in->as_ptr)->iter;
+  cx_box_init(out, cx_type_get(cx->iter_type, cx_type_arg(in->type, 0)))->as_iter =
+    &cx_stack_iter_new(in->as_ptr)->iter;
 }
 
 static void write_imp(struct cx_box *b, FILE *out) {
@@ -197,6 +198,11 @@ static void deinit_imp(struct cx_box *v) {
   cx_stack_deref(v->as_ptr);
 }
 
+static void type_init_imp(struct cx_type *t, int nargs, struct cx_type *args[]) {
+  struct cx *cx = t->lib->cx;
+  cx_derive(t, cx_type_get(cx->seq_type, args[0]));
+}
+
 struct cx_type *cx_init_stack_type(struct cx_lib *lib) {
   struct cx *cx = lib->cx;
   struct cx_type *t = cx_add_type(lib, "Stack", cx->cmp_type, cx->seq_type);
@@ -215,5 +221,7 @@ struct cx_type *cx_init_stack_type(struct cx_lib *lib) {
   t->print = print_imp;
   t->emit = emit_imp;
   t->deinit = deinit_imp;
+  
+  t->type_init = type_init_imp;
   return t;
 }

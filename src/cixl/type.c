@@ -108,7 +108,7 @@ struct cx_type *cx_type_vget(struct cx_type *t, int nargs, struct cx_type *args[
     **ie = cx_vec_end(&t->args),
     **je = args+nargs;
 
-  bool identical = true;
+  bool is_identical = true;
   
   for (struct cx_type
 	 **i = cx_vec_start(&t->args),
@@ -116,7 +116,7 @@ struct cx_type *cx_type_vget(struct cx_type *t, int nargs, struct cx_type *args[
        i != ie && j != je;
        i++, j++) {
     if (*j != *i) {
-      identical = false;
+      is_identical = false;
     
       if (!cx_is(*j, *i)) {
 	cx_error(cx, cx->row, cx->col,
@@ -127,7 +127,7 @@ struct cx_type *cx_type_vget(struct cx_type *t, int nargs, struct cx_type *args[
     }
   }
 
-  if (identical) { return t; }
+  if (is_identical) { return t; }
   
   struct cx_mfile id;
   cx_mfile_open(&id);

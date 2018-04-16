@@ -127,7 +127,7 @@ static bool seq_imp(struct cx_scope *scope) {
   struct cx_table *out = cx_table_new(cx);
   bool ok = false;
   struct cx_box p;
-  
+
   while (cx_iter_next(it.as_iter, &p, scope)) {
     if (!check_key_type(out, p.as_pair->x.type)) {
       cx_table_deref(out);
@@ -138,7 +138,12 @@ static bool seq_imp(struct cx_scope *scope) {
     cx_box_deinit(&p);
   }
 
-  cx_box_init(cx_push(scope), cx->table_type)->as_ptr = out;
+  struct cx_type
+    *pt = cx_type_arg(it.type, 0),
+    *kt = cx_type_arg(pt, 0),
+    *vt = cx_type_arg(pt, 1);
+  
+  cx_box_init(cx_push(scope), cx_type_get(cx->table_type, kt, vt))->as_ptr = out;
   ok = true;
  exit:
   cx_box_deinit(&in);
@@ -157,27 +162,27 @@ cx_lib(cx_init_table, "cx/table") {
   cx->table_type = cx_init_table_type(lib);
     
   cx_add_cfunc(lib, "get",
-	       cx_args(cx_arg("tbl", cx->table_type), cx_arg("key", cx->cmp_type)),
-	       cx_args(cx_arg(NULL, cx->opt_type)),
+	       cx_args(cx_arg("tbl", cx->table_type), cx_narg(cx, "key", 0, 0)),
+	       cx_args(cx_arg(NULL, cx_type_get(cx->opt_type, cx_arg_ref(cx, 0, 1)))),
 	       get_imp);
 
   cx_add_cfunc(lib, "put",
 	       cx_args(cx_arg("tbl", cx->table_type),
-		       cx_arg("key", cx->cmp_type),
-		       cx_arg("val", cx->any_type)),
+		       cx_narg(cx, "key", 0, 0),
+		       cx_narg(cx, "val", 0, 1)),
 	       cx_args(),
 	       put_imp);
 
   cx_add_cfunc(lib, "put-else",
 	       cx_args(cx_arg("tbl", cx->table_type),
-		       cx_arg("key", cx->cmp_type),
+		       cx_narg(cx, "key", 0, 0),
 		       cx_arg("ins", cx->any_type),
 		       cx_arg("upd", cx->any_type)),
 	       cx_args(),
 	       put_else_imp);
 
   cx_add_cfunc(lib, "delete",
-	       cx_args(cx_arg("tbl", cx->table_type), cx_arg("key", cx->cmp_type)),
+	       cx_args(cx_arg("tbl", cx->table_type), cx_narg(cx, "key", 0, 0)),
 	       cx_args(),
 	       delete_imp);
 
@@ -187,8 +192,10 @@ cx_lib(cx_init_table, "cx/table") {
 	       len_imp);
 
   cx_add_cfunc(lib, "table",
-	       cx_args(cx_arg("in", cx->seq_type)),
-	       cx_args(cx_arg(NULL, cx->table_type)),
+	       cx_args(cx_arg("in", cx_type_get(cx->seq_type, cx->pair_type))),
+	       cx_args(cx_arg(NULL, cx_type_get(cx->table_type,
+						cx_arg_ref(cx, 0, 0, 0),
+						cx_arg_ref(cx, 0, 0, 1)))),
 	       seq_imp);
 
   return true;

@@ -85,9 +85,9 @@ static void deinit_imp(struct cx_box *v) {
 }
 
 struct cx_type *cx_init_pair_type(struct cx_lib *lib) {
-  struct cx_type *t = cx_add_type(lib, "Pair", lib->cx->cmp_type);
-  cx_type_push_args(t, lib->cx->opt_type);
-  cx_type_push_args(t, lib->cx->opt_type);
+  struct cx *cx = lib->cx;
+  struct cx_type *t = cx_add_type(lib, "Pair", cx->cmp_type);
+  cx_type_push_args(t, cx->opt_type, cx->opt_type);
 
   t->eqval = eqval_imp;
   t->equid = equid_imp;

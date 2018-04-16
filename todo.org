@@ -2,7 +2,6 @@
 #define ntohll(x) ((1==ntohl(1)) ? (x) : ((uint64_t)ntohl((x) & 0xFFFFFFFF) << 32) | ntohl((x) >> 32))
 host64 & net64 fns
 
-* add Table type args
 * add rec type to qdb DBTable
 ** update collabri & bookings
 * add support for type arg wildcards
@@ -22,17 +21,14 @@ host64 & net64 fns
 ** always forward id
 ** remove lookup flag
 * add cx_call.args
-** use instead of vars in return op
+** move values from stack on call init
+** change OPUTARGS to use call instead of stack
+** use instead of vars for arg refs in ORETURN
+** refill on recall
+** add cx_call.arg_types
+*** cache resolved types
 * add support for trait type args
 ** resolve types and derive in trait type_init
-* add automatic chunking to encrypt/decrypt
-** add #max-chunk
-** add int net/host
-** read/write size prefixed chunks
-** add buf tests
-** seek 0 from end before reading into buffer
-*** remember prev pos and restore
-*** advance pos on write-bytes
 * replace cx_fimp.init with enum cx_fimp_type
 ** CX_FHOST_C, CX_FHOST_CX, CX_FGUEST
 * remove Rec =/?/print overloads
@@ -74,7 +70,19 @@ host64 & net64 fns
 ** tag types with slurp flag
 ** handle in cx_type_vget()
 *** slurp all args
+* add Fix type
+** derive Num
+** fixed precision decimal
+** store as one scaled uint64_t
 * --- cxcrypt
 * add Pub/PrivKey
 * add README
 ** add LICENSE
+* add automatic chunking to encrypt/decrypt
+** add #max-chunk
+** add int net/host
+** read/write size prefixed chunks
+** add buf tests
+** seek 0 from end before reading into buffer
+*** remember prev pos and restore
+*** advance pos on write-bytes

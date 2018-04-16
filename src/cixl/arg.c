@@ -101,7 +101,7 @@ struct cx_arg_ref *cx_arg_ref_init(struct cx_arg_ref *r,
 				   const char *id) {
   cx_type_init(&r->imp, cx->lobby, id);
   r->imp.meta = CX_TYPE_ARG;
-  cx_derive(&r->imp, cx->any_type);
+  cx_derive(&r->imp, cx->cmp_type);
   r->imp.type_new = ref_type_new_imp;
   r->imp.type_deinit = ref_type_deinit_imp;
   cx_vec_init(&r->indices, sizeof(int));
