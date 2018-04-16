@@ -3,7 +3,9 @@
 host64 & net64 fns
 
 * add rec type to qdb DBTable
-** update collabri & bookings
+** update qdb funcs
+** update collabri
+*** create tables manually & calll init-table
 * add support for type arg wildcards
 ** use _
 ** forward NULL type

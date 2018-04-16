@@ -14,7 +14,7 @@ use: cx;
 
 define: db-trans [];
 
-rec: DBTable()
+rec: DBTable<A>()
   file      RWFile
   key       Stack
   recs      Table
@@ -22,8 +22,7 @@ rec: DBTable()
   on-load  
   on-commit Stack;
 
-func: new-db-table(n Str k Stack)(t DBTable)
-  let: t DBTable new;
+func: init-table(t DBTable n Str k Stack)()
   let: f $n `a+ fopen % unblock;
 
   $t `file $f        put

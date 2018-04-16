@@ -12,23 +12,11 @@
 use: cx;
 
 include: 'qdb.cx';
-use: (qdb new-db-table upsert);
+use: (qdb DBTable init-table upsert);
 
 (
 
-let: resources  'resource.db' [`id] new-db-table;
-let: bookings   'booking.db'  [`id] new-db-table;     
-
 let: next-booking-id 1 ref;
-
-/*
-  Resources support tracking availability in time.
-*/
-
-rec: Resource()
-  id       Sym
-  quantity Int
-  calendar Stack;
 
 /*
   Capacities keep track of total and used quantity for a specific resource and
@@ -38,6 +26,15 @@ rec: Resource()
 rec: Capacity()
   start end  Time
   total used Int;
+
+/*
+  Resources support tracking availability in time.
+*/
+
+rec: Resource()
+  id       Sym
+  quantity Int
+  calendar Stack<Capacity>;
 
 func: new-capacity(start end Time total used Int)(c Capacity)
   let: c Capacity new;
@@ -62,7 +59,7 @@ func: new-resource(id Sym q Int)(r Resource)
   Capacities are split as needed during update.
 */
 
-func: update-capacity(in Capacity start end Time total used Int out Stack)()
+func: update-capacity(in Capacity start end Time total used Int out Stack<Capacity>)()
   $in `start get $start < {
     let: head $in %% ~ _;
     $head `end   $start put
@@ -93,8 +90,9 @@ func: intersects(in Capacity start end Time)(_ Bool)
   inconsistent calendars on failure.
 */
 
-func: update-calendar(in Stack start end Time total used Int)(out Stack)
-  let: out [];
+func: update-calendar(in Stack<Capacity> start end Time total used Int)
+                     (out Stack<Capacity>)
+  let: out Stack<Capacity> new;
 
   $in {
     % $start $end intersects {
@@ -129,6 +127,12 @@ func: new-booking(r Resource start end Time q Int)(b Booking)
   $b `quantity $q              put
   $r $start $end 0 $q update-resource
   $bookings $b upsert;
+
+let: resources  DBTable<Resource> new;
+$resources 'resource.db' [`id] init-table
+
+let: bookings DBTable<Booking> new;
+$bookings 'booking.db'  [`id] init-table
 
 /*
   This should fail with an overbook error since it tries to book 11 out of 10 for
