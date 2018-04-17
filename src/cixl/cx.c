@@ -98,7 +98,6 @@ struct cx *cx_init(struct cx *cx) {
   cx->next_sym_tag = cx->next_type_tag = 0;
   cx->bin = NULL;
   cx->pc = 0;
-  cx->stop_pc = -1;
   cx->row = cx->col = -1;
   
   cx_malloc_init(&cx->buf_alloc, CX_SLAB_SIZE, sizeof(struct cx_buf));

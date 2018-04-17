@@ -66,7 +66,6 @@ struct cx {
 
   struct cx_bin *bin;
   size_t pc;
-  ssize_t stop_pc;
   
   int row, col;
   struct cx_vec errors;

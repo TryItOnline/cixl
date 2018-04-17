@@ -20,8 +20,6 @@
 static bool init_emit_bmips(struct cx *cx) {
 bool _eval(struct cx *cx, ssize_t stop_pc) {
   static bool init = true;
-  ssize_t prev_stop_pc = cx->stop_pc;
-  cx->stop_pc = stop_pc;
   bool ok = false;
 
   static struct cx_sym sym_n;
@@ -998,7 +996,6 @@ if (call->recalls) {
  op39:
   ok = true;
 exit:
-  cx->stop_pc = prev_stop_pc;
   return ok;
 }
 

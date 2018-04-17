@@ -14,9 +14,6 @@ struct cx_bin *cx_bin_new() {
 static bool eval(struct cx *cx, ssize_t stop_pc) {
   if (!cx->bin->ops.count) { return true; }
 
-  ssize_t prev_stop_pc = cx->stop_pc;
-  cx->stop_pc = stop_pc;
-  
   while (cx->pc < cx->bin->ops.count && cx->pc != stop_pc) {
     cx_init_ops(cx->bin);
     struct cx_op *op = cx_vec_get(&cx->bin->ops, cx->pc++);
@@ -29,7 +26,6 @@ static bool eval(struct cx *cx, ssize_t stop_pc) {
     }
   }
 
-  cx->stop_pc = prev_stop_pc;
   return !cx->errors.count;
 }
 
@@ -163,8 +159,6 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
   fputs("bool eval(struct cx *cx) {\n"
 	"bool _eval(struct cx *cx, ssize_t stop_pc) {\n"
         "  static bool init = true;\n"
-	"  ssize_t prev_stop_pc = cx->stop_pc;\n"
-	"  cx->stop_pc = stop_pc;\n"
 	"  bool ok = false;\n\n",
 	out);
   
@@ -330,7 +324,6 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
 
   fputs("  ok = true;\n"
 	"exit:\n"
-	"  cx->stop_pc = prev_stop_pc;\n"
 	"  return ok;\n"
 	"}\n\n"
 	
