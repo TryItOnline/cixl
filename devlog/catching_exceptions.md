@@ -6,8 +6,6 @@ One of the itches I've developed over the years is improving on the status quo s
 
 test.cx:
 ```
-#!/usr/local/bin/cixl
-
 use: cx;
 
 /* Any value may be thrown */
