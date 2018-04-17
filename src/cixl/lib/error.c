@@ -104,11 +104,18 @@ static bool check_imp(struct cx_scope *scope) {
   return ok;
 }
 
-static bool throw_imp(struct cx_scope *scope) {
-  struct cx_box v = *cx_test(cx_pop(scope, false));
-  cx_throw(scope->cx, &v);
+static bool throw_imp(struct cx_scope *s) {
+  struct cx_box v = *cx_test(cx_pop(s, false));
+  cx_throw(s->cx, &v);
   cx_box_deinit(&v);
-  return false;
+  return true;
+}
+
+static bool throw_error_imp(struct cx_scope *s) {
+  struct cx_box e = *cx_test(cx_pop(s, false));
+  cx_throw_error(s->cx, e.as_error);  
+  cx_box_deinit(&e);
+  return true;
 }
 
 static bool value_imp(struct cx_scope *s) {
@@ -137,6 +144,10 @@ cx_lib(cx_init_error, "cx/error") {
   cx_add_cfunc(lib, "throw",
 	       cx_args(cx_arg("e", cx->opt_type)), cx_args(),
 	       throw_imp);
+
+  cx_add_cfunc(lib, "throw",
+	       cx_args(cx_arg("e", cx->error_type)), cx_args(),
+	       throw_error_imp);
 
   cx_add_cfunc(lib, "value",
 	       cx_args(cx_arg("e", cx->error_type)),

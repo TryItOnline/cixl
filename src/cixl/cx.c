@@ -138,7 +138,7 @@ struct cx *cx_init(struct cx *cx) {
   cx_vec_init(&cx->load_paths, sizeof(char *));
   cx_vec_init(&cx->scopes, sizeof(struct cx_scope *));
   cx_vec_init(&cx->calls, sizeof(struct cx_call));
-  cx_vec_init(&cx->errors, sizeof(struct cx_error));
+  cx_vec_init(&cx->errors, sizeof(struct cx_error *));
 
   cx->any_type =
     cx->bin_type = cx->bool_type = cx->buf_type = 
@@ -195,7 +195,7 @@ void cx_init_libs(struct cx *cx) {
 struct cx *cx_deinit(struct cx *cx) {
   cx_set_deinit(&cx->separators);
 
-  cx_do_vec(&cx->errors, struct cx_error, e) { cx_error_deinit(e); }
+  cx_do_vec(&cx->errors, struct cx_error *, e) { cx_error_deref(*e); }
   cx_vec_deinit(&cx->errors);
 
   cx_do_vec(&cx->calls, struct cx_call, c) { cx_call_deinit(c); }
@@ -463,9 +463,9 @@ bool cx_dlinit(struct cx *cx, const char *id) {
 }
 
 void cx_dump_errors(struct cx *cx, FILE *out) {
-  cx_do_vec(&cx->errors, struct cx_error, e) {
-    cx_error_dump(e, out);
-    cx_error_deinit(e);
+  cx_do_vec(&cx->errors, struct cx_error *, e) {
+    cx_error_dump(*e, out);
+    cx_error_deref(*e);
   }
 
   cx_vec_clear(&cx->errors);

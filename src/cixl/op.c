@@ -101,20 +101,17 @@ cx_op_type(CX_OBEGIN, {
 
 static bool catch_error_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
   if (!op->as_catch.type) {
-    struct cx_error e = *(struct cx_error *)cx_vec_pop(&cx->errors);
+    struct cx_error *e = *(struct cx_error **)cx_vec_pop(&cx->errors);
     bool ok = cx_eval(bin, cx->pc, cx->pc+op->as_catch.nops, cx);
-    *(struct cx_error *)cx_vec_push(&cx->errors) = e;
+    *(struct cx_error **)cx_vec_push(&cx->errors) = e;
     return ok;
   }
   
-  struct cx_error *e = cx_vec_peek(&cx->errors, 0);
+  struct cx_error *e = *(struct cx_error **)cx_vec_peek(&cx->errors, 0);
 
   if (cx_is(e->value.type, op->as_catch.type)) {
-    struct cx_error *ee = malloc(sizeof(struct cx_error));
-    *ee = *e;
-
     cx_vec_pop(&cx->errors);
-    cx_box_init(cx_push(cx_scope(cx, 0)), cx->error_type)->as_error = ee;
+    cx_box_init(cx_push(cx_scope(cx, 0)), cx->error_type)->as_error = e;
   } else {
     cx->pc += op->as_catch.nops;
   }
@@ -144,24 +141,21 @@ static bool catch_error_emit(struct cx_op *op,
 			     struct cx *cx) {
   if (op->as_catch.type) {
     fprintf(out,
-	    "struct cx_error *e = cx_vec_peek(&cx->errors, 0);\n\n"
+	    "struct cx_error *e = "
+	    "*(struct cx_error **)cx_vec_peek(&cx->errors, 0);\n\n"
 
 	    "if (cx_is(e->value.type, %s())) {\n"
-	    "  struct cx_error *ee = malloc(sizeof(struct cx_error));\n"
-	    "  *ee = *e;\n\n"
-
 	    "  cx_vec_pop(&cx->errors);\n"
-	    "  cx_box_init(cx_push(cx_scope(cx, 0)), cx->error_type)->as_error = "
-	    "ee;\n"
+	    "  cx_box_init(cx_push(cx_scope(cx, 0)), cx->error_type)->as_error = e;\n"
 	    "} else {\n"
 	    "  goto op%zd;\n"
 	    "}\n",
 	    op->as_catch.type->emit_id, op->pc+op->as_catch.nops+1);
   } else {
     fprintf(out,
-	    "struct cx_error e = *(struct cx_error *)cx_vec_pop(&cx->errors);\n"
+	    "struct cx_error *e = *(struct cx_error **)cx_vec_pop(&cx->errors);\n"
 	    "cx_eval(cx->bin, %zd, %zd, cx);\n"
-	    "*(struct cx_error *)cx_vec_push(&cx->errors) = e;\n",
+	    "*(struct cx_error **)cx_vec_push(&cx->errors) = e;\n",
 	    op->pc+1, op->pc+1+op->as_catch.nops);
   }
   

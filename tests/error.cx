@@ -36,3 +36,15 @@
     
   - 42 = check
 )
+
+(
+1 throw
+
+catch:
+  (Int _ 2 throw)
+  (Int _ 3 throw)
+  (Int throw);
+  
+catch: Int value;
+3 = check
+)
