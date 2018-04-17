@@ -12,14 +12,14 @@ use: cx;
 
 42 throw
 
-/* Catching _ always succeeds. */
+/* Catching _ always succeeds */
 
 catch: _
   'Cleaning up...' say;
 
 'What, no exceptions?' say
 
-/* The first matching clause is executed with the exception pushed on stack. */
+/* The first matching clause is executed with the exception pushed on stack */
 
 catch:
   (Int
