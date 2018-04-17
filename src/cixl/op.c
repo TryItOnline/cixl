@@ -1301,13 +1301,6 @@ cx_op_type(CX_OSTASH, {
     type.emit = stash_emit;
   });
 
-static bool typedef_emit(struct cx_op *op,
-			 struct cx_bin *bin,
-			 FILE *out,
-			 struct cx *cx) {
-  return true;
-}
-
 static void typedef_emit_init(struct cx_op *op,
 			      struct cx_bin *bin,
 			      FILE *out,
@@ -1360,16 +1353,8 @@ static void typedef_emit_init(struct cx_op *op,
 }
 
 cx_op_type(CX_OTYPEDEF, {
-    type.emit = typedef_emit;
     type.emit_init = typedef_emit_init;
   });
-
-static bool use_emit(struct cx_op *op,
-			 struct cx_bin *bin,
-			 FILE *out,
-			 struct cx *cx) {
-  return true;
-}
 
 static void use_emit_init(struct cx_op *op,
 			  struct cx_bin *bin,
@@ -1420,7 +1405,6 @@ static void use_emit_libs(struct cx_op *op,
 }
 
 cx_op_type(CX_OUSE, {
-    type.emit = use_emit;
     type.emit_init = use_emit_init;
     type.emit_libs = use_emit_libs;
   });
