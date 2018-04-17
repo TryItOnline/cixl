@@ -81,7 +81,7 @@ static bool rec_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
 
     struct cx_type *pt = cx_get_type(cx, t->as_ptr, false);
     
-    if (pt->meta != CX_TYPE_TRAIT && pt->meta != CX_TYPE_REC) {
+    if (pt->meta != CX_TYPE_ID && pt->meta != CX_TYPE_REC) {
       cx_error(cx, t->row, t->col, "Invalid rec parent: %s", pt->id);
       goto exit3;
     }

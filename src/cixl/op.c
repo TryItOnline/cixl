@@ -1333,10 +1333,10 @@ static void typedef_emit_init(struct cx_op *op,
 	      "        false));\n",
 	      type_var.id, f->id.id, f->type->id);
     }
-  } else if (t->meta == CX_TYPE_TRAIT) {
+  } else if (t->meta == CX_TYPE_ID) {
     fprintf(out,
 	    "struct cx_type *%s = cx_test(cx_add_type(*cx->lib, \"%s\"));\n"
-	    "%s->meta = CX_TYPE_TRAIT;\n",
+	    "%s->meta = CX_TYPE_ID;\n",
 	    type_var.id, t->id, type_var.id);
 
     cx_do_set(&t->children, struct cx_type *, ct) {

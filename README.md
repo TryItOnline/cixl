@@ -38,6 +38,27 @@ Contrary to the current trend of stacking abstractions in the name of portabilit
 ### No GC
 Cixl doesn't use a garbage collector, which leads to more predictable performance and resource usage. Values are either automatically copied or reference counted, and references are decremented instantly as values are popped from the stack and variables go out of scope.
 
+### Stack Basics
+Cixl expects arguments before operations and provides direct access to the stack. Basic stack operations have dedicated operators; ```%``` for copying the last value, ```_``` for dropping it, ```~``` for flipping the last two values and ```|``` for clearing the stack.
+
+```
+   | 1 2 3 %
+
+[1 2 3 3]
+
+   _
+
+[1 2 3]
+
+   ~
+
+[1 3 2]
+
+   |
+
+[]
+```
+
 ### Scripting
 When launched with arguments; Cixl interprets the first argument as filename to load code from, and pushes remaining on ```#args```.
 
@@ -174,25 +195,65 @@ All types and functions belong to a library, ```lib``` may be used to find out w
 [Lib(cx/rec)]
 ```
 
-### Stack Basics
-Cixl expects arguments before operations and provides direct access to the stack. Basic stack operations have dedicated operators; ```%``` for copying the last value, ```_``` for dropping it, ```~``` for flipping the last two values and ```|``` for clearing the stack.
+### Types
+Cixl is statically and strongly typed; but since it's approach to typing is gradual, it allows you to be exactly as precise as you feel like. All types have capitalized names, the following are defined out of the box:
+
+| Type      | Parents     | Lib         |
+| --------- | ----------- |-------------|
+| A         | Opt         | cx/abc      |
+| Bin       | A           | cx/bin      |
+| Buf       | A           | cx/io/buf   |
+| Bool      | A           | cx/abc      |
+| Cmp       | A           | cx/abc      |
+| File      | Cmp         | cx/io       |  
+| Fimp      | Seq         | cx/abc      |
+| Func      | Seq         | cx/abc      |
+| Int       | Num Seq     | cx/abc      |
+| Iter      | Seq         | cx/abc      |
+| Lambda    | Seq         | cx/abc      |
+| Nil       | Opt         | cx/abc      |
+| Num       | Cmp         | cx/abc      |
+| Opt       |             | cx/abc      |
+| Pair      | Cmp         | cx/pair     |
+| Poll      | A           | cx/io/poll  |
+| Proc      | Cmp         | cx/proc     |
+| Rat       | Num         | cx/math     |
+| Rec       | Cmp         | cx/rec      |
+| Ref       | A           | cx/ref      |
+| RFile     | File        | cx/io       |
+| RWFile    | RFile WFile | cx/io       |
+| Seq       | A           | cx/abc      |
+| Stack     | Cmp Seq     | cx/abc      |
+| Str       | Cmp Seq     | cx/abc      |
+| Sym       | A           | cx/abc      |  
+| Table     | Seq         | cx/table    |
+| TCPClient | RWFile      | cx/net      |
+| TCPServer | RFile       | cx/net      |
+| Time      | Cmp         | cx/time     |
+| Type      | A           | cx/abc      |
+| WFile     | File        | cx/io       |
 
 ```
-   | 1 2 3 %
+   | 42 type
 
-[1 2 3 3]
+[Int]
 
-   _
+   A is
 
-[1 2 3]
+[#t]
 
-   ~
+   | 42 Str is
 
-[1 3 2]
+[#f]
+```
 
-   |
+New type ids may be defined for existing types using ```type-id:```. 
 
-[]
+```
+   type-id: StrInt Str Int;
+   | Str StrInt is Int StrInt is Sym StrInt is
+
+[#t #t #f]
 ```
 
 ### Variables
@@ -1092,58 +1153,6 @@ and scaled.
 [Time(0/3/3)]
 ```
 
-### Types
-Cixl is statically and strongly typed; but since it's approach to typing is gradual, it allows you to be exactly as precise as you feel like. All types have capitalized names, the following are defined out of the box:
-
-| Type      | Parents     | Lib         |
-| --------- | ----------- |-------------|
-| A         | Opt         | cx/abc      |
-| Bin       | A           | cx/bin      |
-| Buf       | A           | cx/io/buf   |
-| Bool      | A           | cx/abc      |
-| Cmp       | A           | cx/abc      |
-| File      | Cmp         | cx/io       |  
-| Fimp      | Seq         | cx/abc      |
-| Func      | Seq         | cx/abc      |
-| Int       | Num Seq     | cx/abc      |
-| Iter      | Seq         | cx/abc      |
-| Lambda    | Seq         | cx/abc      |
-| Nil       | Opt         | cx/abc      |
-| Num       | Cmp         | cx/abc      |
-| Opt       |             | cx/abc      |
-| Pair      | Cmp         | cx/pair     |
-| Poll      | A           | cx/io/poll  |
-| Proc      | Cmp         | cx/proc     |
-| Rat       | Num         | cx/math     |
-| Rec       | Cmp         | cx/rec      |
-| Ref       | A           | cx/ref      |
-| RFile     | File        | cx/io       |
-| RWFile    | RFile WFile | cx/io       |
-| Seq       | A           | cx/abc      |
-| Stack     | Cmp Seq     | cx/abc      |
-| Str       | Cmp Seq     | cx/abc      |
-| Sym       | A           | cx/abc      |  
-| Table     | Seq         | cx/table    |
-| TCPClient | RWFile      | cx/net      |
-| TCPServer | RFile       | cx/net      |
-| Time      | Cmp         | cx/time     |
-| Type      | A           | cx/abc      |
-| WFile     | File        | cx/io       |
-
-```
-   | 42 type
-
-[Int]
-
-   A is
-
-[#t]
-
-   | 42 Str is
-
-[#f]
-```
-
 ### Records
 Records map finite sets of typed fields to values. Record types are required to specify an (optionally empty) list of parent types and traits; and will inherit any fields that don't clash with its own. Record definitions are allowed anywhere, but are processed in order of appearance during compilation. ```new``` may be used to create new record instances. Getting and putting field values is accomplished using symbols, uninitialized fields return ```#nil```.
 
@@ -1184,16 +1193,6 @@ Records support full deep equality by default, but ```=``` may be implemented to
    | $bar $baz =
 
 [#t]
-```
-
-### Traits
-Traits are abstract types that may be used to simplify type checking and/or function dispatch. Besides the standard offering; ```A```, ```Cmp```, ```Num```, ```Opt```, ```Rec``` and ```Seq```; new traits may be defined using the ```trait:``` macro. Trait definitions are allowed anywhere, but are processed in order of appearance during compilation.
-
-```
-   trait: StrInt Str Int;
-   | Str StrInt is Int StrInt is Sym StrInt is
-
-[#t #t #f]
 ```
 
 ### Binaries

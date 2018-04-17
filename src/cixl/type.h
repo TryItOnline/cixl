@@ -22,7 +22,7 @@ struct cx_box;
 struct cx_iter;
 struct cx_scope;
 
-enum cx_meta_type {CX_TYPE_ARG, CX_TYPE_IMP, CX_TYPE_REC, CX_TYPE_TRAIT};
+enum cx_meta_type {CX_TYPE_ARG, CX_TYPE_ID, CX_TYPE_IMP, CX_TYPE_REC};
 
 struct cx_type {
   struct cx_lib *lib;

@@ -9,10 +9,10 @@
 #include "cixl/op.h"
 #include "cixl/scope.h"
 
-static ssize_t trait_eval(struct cx_macro_eval *eval,
-			  struct cx_bin *bin,
-			  size_t tok_idx,
-			  struct cx *cx) {
+static ssize_t type_id_eval(struct cx_macro_eval *eval,
+			    struct cx_bin *bin,
+			    size_t tok_idx,
+			    struct cx *cx) {
   struct cx_tok *t = cx_vec_get(&eval->toks, 0);
   
   cx_op_init(bin,
@@ -22,39 +22,39 @@ static ssize_t trait_eval(struct cx_macro_eval *eval,
   return tok_idx+1;
 }
 
-static bool trait_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
+static bool type_id_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   struct cx_vec toks;
   cx_vec_init(&toks, sizeof(struct cx_tok));
   int row = cx->row, col = cx->col;
   bool ok = false;
   
   if (!cx_parse_tok(cx, in, &toks)) {
-    cx_error(cx, row, col, "Missing trait id");
+    cx_error(cx, row, col, "Missing type id");
     goto exit2;
   }
 
   struct cx_tok id_tok = *(struct cx_tok *)cx_vec_pop(&toks);
 
   if (id_tok.type != CX_TID()) {
-    cx_error(cx, row, col, "Invalid trait id: %s", id_tok.type->id);
+    cx_error(cx, row, col, "Invalid type id: %s", id_tok.type->id);
     goto exit1;
   }
 
   struct cx_type *type = cx_get_type(cx, id_tok.as_ptr, true);
   
-  if (type && type->meta != CX_TYPE_TRAIT) {
-    cx_error(cx, row, col, "Attempt to redefine %s as trait", type->id);
+  if (type && type->meta != CX_TYPE_ID) {
+    cx_error(cx, row, col, "Attempt to redefine %s as type id", type->id);
     goto exit1;
   }
   
   if (!cx_parse_end(cx, in, &toks)) {
-    if (!cx->errors.count) { cx_error(cx, cx->row, cx->col, "Missing trait end"); }
+    if (!cx->errors.count) { cx_error(cx, cx->row, cx->col, "Missing type id end"); }
     goto exit1;
   }
 
   cx_do_vec(&toks, struct cx_tok, t) {
     if (t->type != CX_TID()) {
-      cx_error(cx, row, col, "Invalid trait arg");
+      cx_error(cx, row, col, "Invalid type id arg");
       goto exit1;
     }
   }
@@ -64,7 +64,7 @@ static bool trait_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   } else {
     type = cx_add_type(*cx->lib, id_tok.as_ptr);
     if (!type) { goto exit1; }
-    type->meta = CX_TYPE_TRAIT;
+    type->meta = CX_TYPE_ID;
   }
   
   cx_do_vec(&toks, struct cx_tok, t) {
@@ -73,7 +73,7 @@ static bool trait_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
     cx_derive(child, type);
   }
 
-  struct cx_macro_eval *eval = cx_macro_eval_new(trait_eval);
+  struct cx_macro_eval *eval = cx_macro_eval_new(type_id_eval);
   cx_tok_init(cx_vec_push(&eval->toks), CX_TTYPE(), row, col)->as_ptr = type;
   cx_tok_init(cx_vec_push(out), CX_TMACRO(), row, col)->as_ptr = eval;
   ok = true;
@@ -140,7 +140,7 @@ cx_lib(cx_init_type, "cx/type") {
     return false;
   }
 
-  cx_add_macro(lib, "trait:", trait_parse);
+  cx_add_macro(lib, "type-id:", type_id_parse);
 
   cx_add_cfunc(lib, "type",
 	       cx_args(cx_arg("v", cx->opt_type)),

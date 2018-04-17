@@ -14,6 +14,11 @@ host64 & net64 fns
 ** add support in OTYPEDEF
 ** add qdb.DBKey type
 * --
+* add support for type arg wildcards
+** use _
+** forward NULL type
+** make sure that nargs == raw in cx_type_vget
+** change cloning in cx_type_vget to replace NULL with raw arg
 * add cx_call.args
 ** add struct cx_call_arg (type & value)
 ** move values from stack & init resolved types on call init
@@ -32,13 +37,7 @@ host64 & net64 fns
 ** update qdb funcs
 ** update collabri
 *** use init-table
-* add support for type arg wildcards
-** use _
-** forward NULL type
-** make sure that nargs == raw in cx_type_vget
-** change cloning in cx_type_vget to replace NULL with raw arg
 * update cxcrypt
-* --
 * --
 * add implicit lambda scope
 ** one scope per lambda
@@ -76,7 +75,6 @@ host64 & net64 fns
 *** change eval to push value
 * replace clone fallback to copy with error
 * replace varargs with size/array+macro
-* convert size_t to ssize_t and remove unsigned
 * add slurp types Int*/Str*/Arg*
 ** derive from all parent slurp types
 *** hook into derive/underive

@@ -16,5 +16,5 @@ Int Opt<Num> is check
 
 #nil Opt<Int> is check
 
-trait: StrInt Str Int;
+type-id: StrInt Str Int;
 42 StrInt is check
