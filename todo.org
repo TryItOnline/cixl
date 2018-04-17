@@ -4,6 +4,17 @@ host64 & net64 fns
 
 * add throw(Error) fn
 ** add rethrow test
+* add support for trait type args
+** rename trait: to type-id:
+** resolve types and derive in type_init
+* add type: macro
+** add CX_TYPE
+** type: Enc Str Int;
+** copy type-id
+** declare enc(Str)->Enc<Str> and enc(Int)->Enc<Int> fns
+** derive Enc<Str> from Str and Enc<Int> from Int
+** add support in OTYPEDEF
+** add qdb.DBKey type
 * --
 * add cx_call.args
 ** add struct cx_call_arg (type & value)
@@ -30,16 +41,6 @@ host64 & net64 fns
 ** change cloning in cx_type_vget to replace NULL with raw arg
 * update cxcrypt
 * --
-* add support for trait type args
-** rename trait: to type-id:
-** resolve types and derive in trait type_init
-* add type: macro
-** type: Enc Str Int;
-** copy trait
-** declare enc(Str)->Enc<Str> and enc(Int)->Enc<Int> fns
-** derive Enc<Str> from Str and Enc<Int> from Int
-** add support in OTYPEDEF
-** add qdb.DBKey type
 * --
 * add implicit lambda scope
 ** one scope per lambda
