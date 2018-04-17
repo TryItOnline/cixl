@@ -56,6 +56,7 @@ host64 & net64 fns
 * remove Rec =/?/print overloads
 ** handle in type methods
 *** check if user defined func exists
+* move poll/term/buf libs out of io
 * add Table emit support
 ** copy Rec
 * replace box.as_ptr with as_func/fimp/etc
@@ -89,10 +90,6 @@ host64 & net64 fns
 ** tag types with slurp flag
 ** handle in cx_type_vget()
 *** slurp all args
-* add Fix type
-** derive Num
-** fixed precision decimal
-** store as one scaled uint64_t
 * --- cxcrypt
 * add Pub/PrivKey
 * add README
