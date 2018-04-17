@@ -9,7 +9,7 @@
 #include "cixl/set.h"
 #include "cixl/type.h"
 
-#define CX_VERSION "0.9.6"
+#define CX_VERSION "0.9.7"
 #define CX_SLAB_SIZE 20				  
 
 struct cx_arg;

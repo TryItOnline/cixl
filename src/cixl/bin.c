@@ -304,15 +304,23 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
 	    "cx->row = %d; cx->col = %d;\n",
 	    op->pc, op->pc, cx->row, cx->col);
 
-    if (op->type->error_emit) {
+    if (op->type->emit && op->type->emit == op->type->error_emit) {
+      if (!op->type->emit(op, bin, out, cx)) { return false; }      
+    } else if (op->type->error_emit) {
       fputs("if (cx->errors.count) {\n", out);
       if (!op->type->error_emit(op, bin, out, cx)) { return false; }
-      fputs("} else {\n", out);
+      fputc('}', out);
+
+      if (op->type->emit) { 
+	fputs(" else {\n", out);
+      } else {
+	fputc('\n', out);
+      }
     } else if (op->type->emit) {
       fputs("if (!cx->errors.count) {\n", out);
     }
 
-    if (op->type->emit) {
+    if (op->type->emit && op->type->emit != op->type->error_emit) {
       if (!op->type->emit(op, bin, out, cx)) { return false; }
       fputs("}\n", out);
     } 
