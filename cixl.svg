@@ -24,24 +24,24 @@
      id="defs4">
     <linearGradient
        inkscape:collect="always"
-       id="linearGradient3395">
+       id="linearGradient4180">
       <stop
-         style="stop-color:#550000;stop-opacity:1;"
+         style="stop-color:#800000;stop-opacity:1;"
          offset="0"
-         id="stop3397" />
+         id="stop4182" />
       <stop
-         style="stop-color:#550000;stop-opacity:0;"
+         style="stop-color:#800000;stop-opacity:0;"
          offset="1"
-         id="stop3399" />
+         id="stop4184" />
     </linearGradient>
     <linearGradient
        inkscape:collect="always"
-       xlink:href="#linearGradient3395"
-       id="linearGradient3401"
-       x1="153.92857"
-       y1="424.14792"
-       x2="290"
-       y2="424.14792"
+       xlink:href="#linearGradient4180"
+       id="linearGradient4186"
+       x1="285.3681"
+       y1="445.76559"
+       x2="143.44167"
+       y2="404.85443"
        gradientUnits="userSpaceOnUse" />
   </defs>
   <sodipodi:namedview
@@ -51,9 +51,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="2.8"
-     inkscape:cx="191.20192"
-     inkscape:cy="651.07512"
+     inkscape:zoom="1.979899"
+     inkscape:cx="91.641429"
+     inkscape:cy="718.54447"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -111,7 +111,7 @@
          x="133.34013"
          y="68.473625" /></text>
     <path
-       style="font-style:normal;font-weight:normal;font-size:30.79379082px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:url(#linearGradient3401);fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       style="font-style:normal;font-weight:normal;font-size:30.79379082px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:url(#linearGradient4186);fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        d="M 198.88477 402.09375 C 185.09598 402.09375 174.30378 404.0093 166.50781 407.83984 C 158.76488 411.67039 154.89258 416.97483 154.89258 423.75195 C 154.89258 430.52908 158.76488 435.83351 166.50781 439.66406 C 174.30378 443.49461 185.09598 445.41016 198.88477 445.41016 C 201.84665 445.41016 204.7542 445.27834 207.61523 445.0332 L 222.2832 445.0332 L 245.91016 429.57422 L 269.37695 445.0332 L 285.84375 445.0332 L 253.94531 424.57422 L 288.94727 402.2832 L 272.00195 402.2832 L 245.91016 419.42188 L 219.89648 402.2832 L 205.04102 402.2832 C 203.01252 402.15999 200.96164 402.09375 198.88477 402.09375 z M 198.88477 407.83984 C 203.97601 407.83984 208.53584 408.19611 212.56641 408.9082 C 212.96751 408.98151 213.35272 409.07712 213.74805 409.1582 L 237.95508 424.57422 L 218.60352 436.98633 C 216.44034 437.65444 214.26938 438.20023 212.08984 438.5957 C 208.21838 439.30779 203.81691 439.66406 198.88477 439.66406 C 189.70992 439.66406 182.65675 438.2892 177.72461 435.53906 C 172.79247 432.78893 170.32617 428.85935 170.32617 423.75195 C 170.32617 418.66911 172.79247 414.73954 177.72461 411.96484 C 182.70979 409.21471 189.76295 407.83984 198.88477 407.83984 z "
        id="text3352"
        inkscape:export-xdpi="90"
