@@ -1,3 +1,5 @@
+#include <string.h>
+
 #include "cixl/arg.h"
 #include "cixl/bin.h"
 #include "cixl/cx.h"
@@ -18,8 +20,14 @@ static ssize_t catch_eval(struct cx_macro_eval *eval,
     size_t i = bin->ops.count;
     struct cx_op *op = cx_op_init(bin, CX_OCATCH(), tok_idx);
     struct cx_tok *t = cx_vec_get(toks, 0);
-    struct cx_type *type = cx_get_type(cx, t->as_ptr, false);
-    if (!type) { return false; }
+    char *id = t->as_ptr;
+    struct cx_type *type = NULL;
+
+    if (strcmp(id, "_") != 0) {
+      type = cx_get_type(cx, id, false);
+      if (!type) { return false; }
+    }
+    
     op->as_catch.type = type;
     if (!cx_compile(cx, cx_vec_get(toks, 1), cx_vec_end(toks), bin)) { return false; }
     op = cx_vec_get(&bin->ops, i);

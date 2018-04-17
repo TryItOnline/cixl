@@ -100,7 +100,7 @@ cx_op_type(CX_OBEGIN, {
   });
 
 static bool catch_error_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
-  if (op->as_catch.type == cx->nil_type) {
+  if (!op->as_catch.type) {
     struct cx_error e = *(struct cx_error *)cx_vec_pop(&cx->errors);
     bool ok = cx_eval(bin, cx->pc, cx->pc+op->as_catch.nops, cx);
     *(struct cx_error *)cx_vec_push(&cx->errors) = e;
@@ -123,7 +123,7 @@ static bool catch_error_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx
 }
 
 static bool catch_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
-  if (op->as_catch.type != cx->nil_type) { cx->pc += op->as_catch.nops; }
+  if (op->as_catch.type) { cx->pc += op->as_catch.nops; }
   return true;
 }
 
@@ -131,7 +131,7 @@ static bool catch_emit(struct cx_op *op,
 			struct cx_bin *bin,
 			FILE *out,
 			struct cx *cx) {
-  if (op->as_catch.type != cx->nil_type) {
+  if (op->as_catch.type) {
     fprintf(out, "goto op%zd;\n", op->pc+op->as_catch.nops+1);
   }
   
@@ -142,13 +142,7 @@ static bool catch_error_emit(struct cx_op *op,
 			     struct cx_bin *bin,
 			     FILE *out,
 			     struct cx *cx) {
-  if (op->as_catch.type == cx->nil_type) {
-    fprintf(out,
-	    "struct cx_error e = *(struct cx_error *)cx_vec_pop(&cx->errors);\n"
-	    "cx_eval(cx->bin, %zd, %zd, cx);\n"
-	    "*(struct cx_error *)cx_vec_push(&cx->errors) = e;\n",
-	    op->pc+1, op->pc+1+op->as_catch.nops);
-  } else {
+  if (op->as_catch.type) {
     fprintf(out,
 	    "struct cx_error *e = cx_vec_peek(&cx->errors, 0);\n\n"
 
@@ -163,17 +157,24 @@ static bool catch_error_emit(struct cx_op *op,
 	    "  goto op%zd;\n"
 	    "}\n",
 	    op->as_catch.type->emit_id, op->pc+op->as_catch.nops+1);
+  } else {
+    fprintf(out,
+	    "struct cx_error e = *(struct cx_error *)cx_vec_pop(&cx->errors);\n"
+	    "cx_eval(cx->bin, %zd, %zd, cx);\n"
+	    "*(struct cx_error *)cx_vec_push(&cx->errors) = e;\n",
+	    op->pc+1, op->pc+1+op->as_catch.nops);
   }
   
   return true;
 }
 
 static void catch_emit_types(struct cx_op *op, struct cx_set *out, struct cx *cx) {
-  struct cx_type
-    *t = op->as_catch.type,
-    **ok = cx_set_insert(out, &t);
+  struct cx_type *t = op->as_catch.type;
 
-  if (ok) { *ok = t; }
+  if (t) {
+    struct cx_type **ok = cx_set_insert(out, &t);
+    if (ok) { *ok = t; }
+  }
 }
 
 cx_op_type(CX_OCATCH, {

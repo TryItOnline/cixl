@@ -16,13 +16,13 @@
 
 (
   49
-  catch: Nil 7;
+  catch: _ 7;
   - 42 = check
 )
 
 (
   7 throw
-  catch: Nil 49;
+  catch: _ 49;
   catch: Int value;
   - 42 = check
 )
@@ -31,7 +31,7 @@
   7 throw
   
   catch:
-    (Nil 49)
+    (_ 49)
     (Int value);
     
   - 42 = check

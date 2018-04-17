@@ -2,13 +2,13 @@
 <a href="https://paypal.me/basicgongfu"><img alt="Donate using PayPal" src="paypal.png?raw=true"></a><a href="https://liberapay.com/basic-gongfu/donate"><img alt="Donate using Liberapay" src="https://liberapay.com/assets/widgets/donate.svg"></a>
 #### Cixl - a Lispy Forth in C
 
-Cixl shares many ideas with C, Forth and Common Lisp; as well as the hacker mindset that unites them. The language is implemented as a straight forward 3-stage (parse/compile/eval) interpreter that is designed to be as fast as possible without compromising on simplicity, transparency and flexibility; combined with a C code generator for compiling native executables. The codebase has no external dependencies and is currently hovering around 13 kloc including tests and standard library.
+Cixl shares many ideas with C, Forth and Common Lisp; as well as the hacker mindset that unites them. The language is implemented as a straight forward VM-based interpreter that is designed to be as fast as possible without compromising on simplicity and flexibility; combined with a code generator for compiling native executables. The codebase has no external dependencies and is currently hovering around 15 kloc including tests and standard library.
 
 ### Status
-Examples should work in the most recent version and run clean in ```valgrind```. Current work is focused on profiling and filling obvious gaps in functionality.
+Examples should work in the most recent version and run clean in ```valgrind```. The first version of the language is more or less feature complete, current work is focused on cleaning up the code, dotting i's and crossing t's.
 
 ### Getting Started
-You may try Cixl online [here](https://tio.run/#cixl). A Linux/64 binary may be found [here](https://github.com/basic-gongfu/cxbin/tree/master/linux64/cixl). To build Cixl yourself, you'll need a reasonably modern GCC and CMake installed. Building on macOS unfortunately doesn't work because of lacking POSIX support. A basic REPL is included, it's highly recommended to run it through ```rlwrap``` for a less nerve wrecking experience.
+You may try Cixl online [here](https://tio.run/#cixl), and a Linux/64 binary may be found [over there](https://github.com/basic-gongfu/cxbin/tree/master/linux64/cixl). To build Cixl yourself, you'll need a reasonably modern GCC and CMake installed. Building on macOS unfortunately doesn't work because of lacking POSIX support. A basic REPL is included, it's highly recommended to run it through ```rlwrap``` for a less nerve wrecking experience.
 
 ```
 $ git clone https://github.com/basic-gongfu/cixl.git
@@ -33,7 +33,7 @@ $
 ```
 
 ### Unix Native
-Rather than stacking abstractions in the name of portability, Cixl embraces the chosen requirement and limitation of running on top of a reasonably POSIX compliant Unix derivative; by integrating deep into the C tool chain, and by providing abstractions optimized for Unix feature set.
+Contrary to the current trend of stacking abstractions in the name of portability, Cixl embraces the chosen requirement and limitation of running on top of a reasonably POSIX compliant Unix derivative; by integrating deep into the C tool chain, and by providing features optimized for Unix feature set.
 
 ### No GC
 Cixl doesn't use a garbage collector, which leads to more predictable performance and resource usage. Values are either automatically copied or reference counted, and references are decremented instantly as values are popped from the stack and variables go out of scope.
@@ -558,15 +558,12 @@ Thrown values may be caught using ```catch:```, the first matching clause is eva
 [42]
 ```
 
-Catching ```Nil``` executes the specified actions on exit regardless of any errors.
+Catching ```_``` executes the specified actions regardless of any errors.
 
 ```
-   | 'Going down!' throw
-   catch: Nil 'Cleaning up...' say;   
+   | catch: _ 'Cleaning up...' say;   
 
 Cleaning up...
-Error in row 1, col 17:
-Going down!
 []
 ```
 
