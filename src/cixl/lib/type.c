@@ -58,7 +58,7 @@ static bool type_id_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
       goto exit1;
     }
   }
-
+  
   if (type) {
     cx_type_reinit(type);
   } else {
