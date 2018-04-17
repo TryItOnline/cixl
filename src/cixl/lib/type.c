@@ -28,7 +28,7 @@ static bool trait_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   int row = cx->row, col = cx->col;
   bool ok = false;
   
-  if (!cx_parse_tok(cx, in, &toks, false)) {
+  if (!cx_parse_tok(cx, in, &toks)) {
     cx_error(cx, row, col, "Missing trait id");
     goto exit2;
   }
@@ -47,7 +47,7 @@ static bool trait_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
     goto exit1;
   }
   
-  if (!cx_parse_end(cx, in, &toks, false)) {
+  if (!cx_parse_end(cx, in, &toks)) {
     if (!cx->errors.count) { cx_error(cx, cx->row, cx->col, "Missing trait end"); }
     goto exit1;
   }

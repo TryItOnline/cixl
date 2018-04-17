@@ -1,3 +1,4 @@
+#include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -115,25 +116,32 @@ static ssize_t id_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) {
 	       tok_idx)->as_getconst.id = cx_sym(cx, id+1);    
   } else if (id[0] == '$') {
     cx_op_init(bin, CX_OGETVAR(), tok_idx)->as_getvar.id = cx_sym(cx, id+1);
+  } else if (isupper(id[0])) {
+    struct cx_type *t = cx_get_type(cx, id, false);
+    if (!t) { return -1; }
+    struct cx_box *v = &cx_op_init(bin, CX_OPUSH(), tok_idx)->as_push.value;
+    cx_box_init(v, cx->meta_type)->as_ptr = t;
   } else {
     bool ref = id[0] == '&';
-    char *imp_id = strchr(id, ' ');
+    if (ref) { id++; }
+    char *imp_id = strchr(id, '<');
 
-    if (imp_id) {
+    if (imp_id > id) {      
       *imp_id = 0;
       imp_id++;
+      imp_id[strlen(imp_id)-1] = 0;
     }
     
     int row = cx->row, col = cx->col;
-    struct cx_func *f = cx_get_func(cx, ref ? id+1 : id, false);
+    struct cx_func *f = cx_get_func(cx, id, false);
     if (!f) { return -1; }
     struct cx_fimp *imp = NULL;
     
-    if (imp_id) {
+    if (imp_id > id) {
       struct cx_fimp **found = cx_set_get(&f->imps, &imp_id);
       
       if (!found) {
-	cx_error(cx, row, col, "Fimp not found: %s<%s>", f->id, imp_id);
+	cx_error(cx, row, col, "Fimp not found: %s", imp_id);
 	return -1;
       }
       

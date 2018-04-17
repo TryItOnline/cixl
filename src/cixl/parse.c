@@ -103,92 +103,6 @@ static char *parse_type_args(struct cx *cx, const char *id, FILE *in) {
   return aid.data;
 }
 
-static bool parse_type(struct cx *cx,
-		       const char *id,
-		       FILE *in,
-		       struct cx_vec *out,
-		       bool lookup) {
-  if (lookup) {
-    char *aid = parse_type_args(cx, id, in);
-    struct cx_type *t = cx_get_type(cx, aid ? aid : id, false);
-    if (aid) { free(aid); }
-    if (!t) { return false; }
-    
-    cx_tok_init(cx_vec_push(out),
-		CX_TTYPE(),
-		cx->row, cx->col)->as_ptr = t;
-  } else {
-    char *aid = parse_type_args(cx, id, in);
-
-    cx_tok_init(cx_vec_push(out),
-		CX_TID(),
-		cx->row, cx->col)->as_ptr = aid ? aid : strdup(id);
-  }
-
-  return true;
-}
-
-static bool parse_const(struct cx *cx, const char *id, struct cx_vec *out) {
-  if (!cx_get_const(cx, cx_sym(cx, id+1), false)) { return false; }
-
-  cx_tok_init(cx_vec_push(out),
-	      CX_TID(),
-	      cx->row, cx->col)->as_ptr = strdup(id);
-  
-  return true;
-}
-
-static char *parse_fimp(struct cx *cx, FILE *in) {
-  int row = cx->row, col = cx->col;
-  char c = fgetc(in);
-
-  if (c != '<') {
-    ungetc(c, in);
-    return NULL;
-  }
-
-  cx->col++;
-  struct cx_mfile aid;
-  cx_mfile_open(&aid);
-  int depth = 1;
-
-  while (depth) {
-    c = fgetc(in);
-    update_pos(cx, c);
-    
-    switch (c) {
-    case EOF:
-      cx_error(cx, row, col, "Open fimp arg list");
-      return NULL;
-    case '<':
-      depth++;
-      break;
-    case '>':
-      depth--;
-      break;
-    default:
-      break;
-    }
-
-    if (depth) { fputc(c, aid.stream); }
-  }
-
-  cx_mfile_close(&aid);
-  return aid.data;
-}
-
-static bool parse_func(struct cx *cx, const char *id, FILE *in, struct cx_vec *out) {
-  int row = cx->row, col = cx->col;
-  char *imp_id = parse_fimp(cx, in);
-
-  cx_tok_init(cx_vec_push(out), CX_TID(), row, col)->as_ptr = imp_id
-    ? cx_fmt("%s %s", id, imp_id)
-    : strdup(id);
-  
-  if (imp_id) { free(imp_id); }
-  return true;
-}
-
 static bool parse_line_comment(struct cx *cx, FILE *in) {
   bool done = false;
   
@@ -228,11 +142,11 @@ static bool parse_block_comment(struct cx *cx, FILE *in) {
   return true;
 }
 
-static bool parse_id(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
+static bool parse_id(struct cx *cx, FILE *in, struct cx_vec *out) {
   struct cx_mfile id;
   cx_mfile_open(&id);
   bool ok = true;
-  int col = cx->col;
+  int row = cx->row, col = cx->col;
   char pc = 0;
   
   while (true) {
@@ -240,15 +154,15 @@ static bool parse_id(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
     if (c == EOF) { goto done; }
     bool sep = cx_is_separator(cx, c);
 
-    if (col != cx->col &&
-	(col-cx->col > 2 || pc != '&') &&
+    if (cx->col != col &&
+	(cx->col-col > 2 || pc != '&') &&
 	(sep || c == '<')) {
       ok = ungetc(c, in) != EOF;
       goto done;
     }
 
+    update_pos(cx, c);
     fputc(c, id.stream);
-    col++;
     if (sep) { break; }
     pc = c;
   }
@@ -258,31 +172,22 @@ static bool parse_id(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
     if (ok) {
       char *s = id.data;
 
-      if (isupper(s[0])) {
-	ok = parse_type(cx, s, in, out, lookup);
-      } else if (lookup && s[0] == '#') {
-	ok = parse_const(cx, s, out);
-      } else if (!lookup || s[0] == '$') {
-	cx_tok_init(cx_vec_push(out),
-		    CX_TID(),
-		    cx->row, cx->col)->as_ptr = strdup(s);
-      } else {
-	if (lookup) {
-	  struct cx_macro *m = cx_get_macro(cx, s, true);
-	  
-	  if (m) {
-	    cx->col = col;
-	    ok = m->imp(cx, in, out);
-	    goto exit;
-	  }
-	}
+      if (s[0] != '#' && s[0] != '$' && !isupper(s[0])) {
+	struct cx_macro *m = cx_get_macro(cx, s, true);
 	
-	ok = parse_func(cx, s, in, out);
+	if (m) {
+	  ok = m->imp(cx, in, out);
+	  goto exit;
+	}
       }
 
-      cx->col = col;
+      char *args = parse_type_args(cx, s, in);
+      
+      cx_tok_init(cx_vec_push(out),
+		  CX_TID(),
+		  row, col)->as_ptr = args ? args : strdup(s);
     } else {
-      cx_error(cx, cx->row, cx->col, "Failed parsing id");
+      cx_error(cx, row, col, "Failed parsing id");
     }
 
   exit:
@@ -486,7 +391,7 @@ static bool parse_sym(struct cx *cx, FILE *in, struct cx_vec *out) {
 }
 
 
-static bool parse_group(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
+static bool parse_group(struct cx *cx, FILE *in, struct cx_vec *out) {
   cx->col++;
   struct cx_vec *body = &cx_tok_init(cx_vec_push(out),
 				     CX_TGROUP(),
@@ -494,7 +399,7 @@ static bool parse_group(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup
   cx_vec_init(body, sizeof(struct cx_tok));
 
   while (true) {
-    if (!cx_parse_tok(cx, in, body, lookup)) { return false; }
+    if (!cx_parse_tok(cx, in, body)) { return false; }
 
     if (body->count) {
       struct cx_tok *tok = cx_vec_peek(body, 0);
@@ -509,7 +414,7 @@ static bool parse_group(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup
   return true;
 }
 
-static bool parse_stack(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
+static bool parse_stack(struct cx *cx, FILE *in, struct cx_vec *out) {
   cx->col++;
   struct cx_vec *body = &cx_tok_init(cx_vec_push(out),
 				     CX_TSTACK(),
@@ -517,7 +422,7 @@ static bool parse_stack(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup
   cx_vec_init(body, sizeof(struct cx_tok));
 
   while (true) {
-    if (!cx_parse_tok(cx, in, body, lookup)) { return false; }
+    if (!cx_parse_tok(cx, in, body)) { return false; }
 
     if (body->count) {
       struct cx_tok *tok = cx_vec_peek(body, 0);
@@ -532,7 +437,7 @@ static bool parse_stack(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup
   return true;
 }
 
-static bool parse_lambda(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
+static bool parse_lambda(struct cx *cx, FILE *in, struct cx_vec *out) {
   int row = cx->row, col = cx->col;
   cx->col++;
   
@@ -542,7 +447,7 @@ static bool parse_lambda(struct cx *cx, FILE *in, struct cx_vec *out, bool looku
   cx_vec_init(body, sizeof(struct cx_tok));
 
   while (true) {
-    if (!cx_parse_tok(cx, in, body, lookup)) { return false; }
+    if (!cx_parse_tok(cx, in, body)) { return false; }
 
     if (body->count) {
       struct cx_tok *tok = cx_vec_peek(body, 0);
@@ -557,7 +462,7 @@ static bool parse_lambda(struct cx *cx, FILE *in, struct cx_vec *out, bool looku
   return true;
 }
 
-bool cx_parse_tok(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
+bool cx_parse_tok(struct cx *cx, FILE *in, struct cx_vec *out) {
   int row = cx->row, col = cx->col;
   bool done = false;
 
@@ -577,17 +482,17 @@ bool cx_parse_tok(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
       cx_tok_init(cx_vec_push(out), CX_TEND(), row, col);
       return true;
     case '(':
-      return parse_group(cx, in, out, lookup);
+      return parse_group(cx, in, out);
     case ')':
       cx_tok_init(cx_vec_push(out), CX_TUNGROUP(), row, col);
       return true;	
     case '[':
-      return parse_stack(cx, in, out, lookup);
+      return parse_stack(cx, in, out);
     case ']':
       cx_tok_init(cx_vec_push(out), CX_TUNSTACK(), row, col);
       return true;	
     case '{':
-      return parse_lambda(cx, in, out, lookup);
+      return parse_lambda(cx, in, out);
     case '}':
       cx_tok_init(cx_vec_push(out), CX_TUNLAMBDA(), row, col);
       return true;
@@ -606,7 +511,7 @@ bool cx_parse_tok(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
       if (isdigit(c1)) {
 	return parse_int(cx, in, out);
       } else {
-	return parse_id(cx, in, out, lookup);
+	return parse_id(cx, in, out);
       }
 	
       break;
@@ -634,18 +539,18 @@ bool cx_parse_tok(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
       
       ungetc(c, in);
       cx->col--;
-      return parse_id(cx, in, out, lookup);
+      return parse_id(cx, in, out);
     }
   }
 
   return false;
 }
 
-bool cx_parse_end(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
+bool cx_parse_end(struct cx *cx, FILE *in, struct cx_vec *out) {
   int depth = 1;
   
   while (depth) {
-    if (!cx_parse_tok(cx, in, out, lookup)) { return false; }
+    if (!cx_parse_tok(cx, in, out)) { return false; }
     struct cx_tok *tok = cx_vec_peek(out, 0);
 
     if (tok->type == CX_TID()) {
@@ -661,7 +566,7 @@ bool cx_parse_end(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
 }
 
 bool cx_parse(struct cx *cx, FILE *in, struct cx_vec *out) {  
-  while (!feof(in)) { cx_parse_tok(cx, in, out, true); }
+  while (!feof(in)) { cx_parse_tok(cx, in, out); }
   return !cx->errors.count;
 }
 

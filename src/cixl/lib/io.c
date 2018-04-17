@@ -36,7 +36,7 @@ static bool include_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   struct cx_vec fns;
   cx_vec_init(&fns, sizeof(struct cx_tok));
   
-  if (!cx_parse_end(cx, in, &fns, false)) {
+  if (!cx_parse_end(cx, in, &fns)) {
     if (!cx->errors.count) { cx_error(cx, row, col, "Missing include: end"); }
     goto exit1;
   }
@@ -200,7 +200,7 @@ static bool read_next(struct cx_iter *iter,
   cx_do_vec(&it->toks, struct cx_tok, t) { cx_tok_deinit(t); }
   cx_vec_clear(&it->toks);
   
-  if (!cx_parse_tok(cx, fptr, &it->toks, true)) {
+  if (!cx_parse_tok(cx, fptr, &it->toks)) {
     if (errno == EAGAIN) {
       cx_box_init(out, cx->nil_type);
       return true;

@@ -87,7 +87,7 @@ static bool func_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   cx_vec_init(&toks, sizeof(struct cx_tok));
   int row = cx->row, col = cx->col;
   
-  if (!cx_parse_tok(cx, in, &toks, false)) {
+  if (!cx_parse_tok(cx, in, &toks)) {
     cx_error(cx, row, col, "Missing func id");
     cx_do_vec(&toks, struct cx_tok, t) { cx_tok_deinit(t); }
     cx_vec_deinit(&toks);
@@ -104,7 +104,7 @@ static bool func_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
     return false;
   }
 
-  if (!cx_parse_tok(cx, in, &toks, false)) {
+  if (!cx_parse_tok(cx, in, &toks)) {
     cx_error(cx, row, col, "Missing func args");
     cx_tok_deinit(&id);
     cx_do_vec(&toks, struct cx_tok, t) { cx_tok_deinit(t); }
@@ -137,7 +137,7 @@ static bool func_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   
   cx_tok_deinit(&args);
   
-  if (!cx_parse_tok(cx, in, &toks, false)) {
+  if (!cx_parse_tok(cx, in, &toks)) {
     cx_error(cx, row, col, "Missing func rets");
     cx_tok_deinit(&id);
     cx_do_vec(&toks, struct cx_tok, t) { cx_tok_deinit(t); }
@@ -188,7 +188,7 @@ static bool func_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
     return false;
   }
 
-  if (!cx_parse_end(cx, in, &toks, true)) {
+  if (!cx_parse_end(cx, in, &toks)) {
     if (!cx->errors.count) { cx_error(cx, cx->row, cx->col, "Missing func end"); }
 
     cx_do_vec(&toks, struct cx_tok, t) { cx_tok_deinit(t); }

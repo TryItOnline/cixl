@@ -23,7 +23,7 @@ static bool link_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   struct cx_vec fns;
   cx_vec_init(&fns, sizeof(struct cx_tok));
   
-  if (!cx_parse_end(cx, in, &fns, false)) {
+  if (!cx_parse_end(cx, in, &fns)) {
     if (!cx->errors.count) { cx_error(cx, row, col, "Missing link end"); }
     goto exit;
   }
@@ -74,7 +74,7 @@ static bool init_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   cx_vec_init(&toks, sizeof(struct cx_tok));
   bool ok = false;
   
-  if (!cx_parse_end(cx, in, &toks, false)) {
+  if (!cx_parse_end(cx, in, &toks)) {
     if (!cx->errors.count) { cx_error(cx, row, col, "Missing init end"); }
     goto exit;
   }

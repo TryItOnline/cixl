@@ -43,7 +43,7 @@ static bool lib_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   int row = cx->row, col = cx->col;
   struct cx_macro_eval *eval = cx_macro_eval_new(lib_eval);
 
-  if (!cx_parse_tok(cx, in, &eval->toks, false)) {
+  if (!cx_parse_tok(cx, in, &eval->toks)) {
     cx_error(cx, row, col, "Missing lib id");
     cx_macro_eval_deref(eval);
     return false;
@@ -64,7 +64,7 @@ static bool lib_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   cx_push_lib(cx, lib);
   cx_lib_use(prev);
   
-  if (!cx_parse_end(cx, in, &eval->toks, true)) {
+  if (!cx_parse_end(cx, in, &eval->toks)) {
     if (!cx->errors.count) { cx_error(cx, row, col, "Missing lib: end"); }
     
     cx_pop_lib(cx);
@@ -89,7 +89,7 @@ static bool use_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   int row = cx->row, col = cx->col;
   struct cx_macro_eval *eval = cx_macro_eval_new(use_eval);
   
-  if (!cx_parse_end(cx, in, &eval->toks, false)) {
+  if (!cx_parse_end(cx, in, &eval->toks)) {
     if (!cx->errors.count) { cx_error(cx, row, col, "Missing use: end"); }
     cx_macro_eval_deref(eval);
     return false;

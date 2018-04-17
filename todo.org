@@ -2,12 +2,9 @@
 #define ntohll(x) ((1==ntohl(1)) ? (x) : ((uint64_t)ntohl((x) & 0xFFFFFFFF) << 32) | ntohl((x) >> 32))
 host64 & net64 fns
 
-* move type lookup to id tok compilation
-** always forward id
-** remove lookup flag
-** switch catch: finally marker to _
-*** store NULL type in op
-**** handle in OCATCH
+* switch catch: finally marker to _
+** store NULL type in op
+*** handle in OCATCH
 * --
 * add cx_call.args
 ** add struct cx_call_arg (type & value)

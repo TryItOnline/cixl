@@ -18,7 +18,9 @@ static ssize_t catch_eval(struct cx_macro_eval *eval,
     size_t i = bin->ops.count;
     struct cx_op *op = cx_op_init(bin, CX_OCATCH(), tok_idx);
     struct cx_tok *t = cx_vec_get(toks, 0);
-    op->as_catch.type = t->as_ptr;
+    struct cx_type *type = cx_get_type(cx, t->as_ptr, false);
+    if (!type) { return false; }
+    op->as_catch.type = type;
     if (!cx_compile(cx, cx_vec_get(toks, 1), cx_vec_end(toks), bin)) { return false; }
     op = cx_vec_get(&bin->ops, i);
     op->as_catch.nops = bin->ops.count-i-1;
@@ -27,7 +29,7 @@ static ssize_t catch_eval(struct cx_macro_eval *eval,
 
   struct cx_tok *t = cx_vec_get(&eval->toks, 0);
 
-  if (t->type == CX_TTYPE()) {
+  if (t->type == CX_TID()) {
     if (!compile(&eval->toks)) { return -1; }
   } else {
     for (struct cx_tok *tt = cx_vec_start(&eval->toks);
@@ -44,7 +46,7 @@ static bool catch_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   int row = cx->row, col = cx->col;
   struct cx_macro_eval *eval = cx_macro_eval_new(catch_eval);
   
-  if (!cx_parse_end(cx, in, &eval->toks, true)) {
+  if (!cx_parse_end(cx, in, &eval->toks)) {
     if (!cx->errors.count) { cx_error(cx, row, col, "Missing catch end"); }
     cx_macro_eval_deref(eval);
     return false;
@@ -52,7 +54,7 @@ static bool catch_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
 
   struct cx_tok *t = cx_vec_get(&eval->toks, 0);
 
-  if (t->type == CX_TTYPE()) {
+  if (t->type == CX_TID()) {
     // Skip
   } else if (t->type == CX_TGROUP()) {
     cx_do_vec(&eval->toks, struct cx_tok, tt) {
@@ -64,7 +66,7 @@ static bool catch_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
       
       tt = cx_vec_get(&t->as_vec, 0);
 
-      if (tt->type != CX_TTYPE()) {
+      if (tt->type != CX_TID()) {
 	cx_error(cx, tt->row, tt->col, "Invalid catch type: %s", tt->type->id);
 	cx_macro_eval_deref(eval);
 	return false;
