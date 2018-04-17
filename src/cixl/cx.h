@@ -41,6 +41,7 @@ struct cx {
   struct cx_type *any_type,
     *bin_type, *bool_type, *buf_type,
     *char_type, *cmp_type,
+    *error_type,
     *file_type, *fimp_type, *func_type,
     *int_type, *iter_type,
     *lambda_type, *lib_type,
@@ -68,7 +69,7 @@ struct cx {
   ssize_t stop_pc;
   
   int row, col;
-  struct cx_vec throwing, errors;
+  struct cx_vec errors;
 };
 
 struct cx *cx_init(struct cx *cx);

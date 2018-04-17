@@ -19,7 +19,6 @@ struct cx_scope *cx_scope_new(struct cx *cx, struct cx_scope *parent) {
   cx_vec_init(&scope->stack, sizeof(struct cx_box));
   scope->stack.alloc = &cx->stack_items_alloc;
   cx_env_init(&scope->vars, &cx->var_alloc);
-  cx_vec_init(&scope->catches, sizeof(struct cx_catch));
   scope->safe = cx->scopes.count ? cx_scope(cx, 0)->safe : true;
   scope->nrefs = 0;
   return scope;
@@ -39,9 +38,6 @@ void cx_scope_deref(struct cx_scope *scope) {
 
     cx_do_vec(&scope->stack, struct cx_box, b) { cx_box_deinit(b); }
     cx_vec_deinit(&scope->stack);
-    
-    cx_do_vec(&scope->catches, struct cx_catch, c) { cx_catch_deinit(c); }
-    cx_vec_deinit(&scope->catches);
     
     cx_do_vec(&scope->parents, struct cx_scope *, ps) { cx_scope_deref(*ps); }
     cx_vec_deinit(&scope->parents);
@@ -141,24 +137,4 @@ void cx_stash(struct cx_scope *s) {
 void cx_reset(struct cx_scope *s) {
   cx_do_vec(&s->stack, struct cx_box, v) { cx_box_deinit(v); }
   cx_vec_clear(&s->stack);
-}
-
-bool cx_pop_catch(struct cx_scope *scope, int n) {
-  struct cx *cx = scope->cx;
-  
-  if (!n) { return true; }
-  
-  if (scope->catches.count < n) {
-    cx_error(cx, cx->row, cx->col, "Failed popping catch");
-    return false;
-  }
-  
-  for (struct cx_catch *c = cx_vec_peek(&scope->catches, 0);
-       n > 0;
-       n--, c--, scope->catches.count--) {
-    if (c->type == cx->nil_type) { cx_catch_eval(c); }
-    cx_catch_deinit(c);
-  }
-
-  return true;
 }

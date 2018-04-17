@@ -2,15 +2,13 @@
 #define ntohll(x) ((1==ntohl(1)) ? (x) : ((uint64_t)ntohl((x) & 0xFFFFFFFF) << 32) | ntohl((x) >> 32))
 host64 & net64 fns
 
-* fix throw recovery
-** add separate op eval/emit to run if errors.count
-** replaces new_error magic and catch jump
-** deal with errors in catch ops
-** change catch: to not wrap code
-*** put after within same scope
-** add support for throwing non-errors
-*** store cx_box in throwing
-*** add throwa fn and rename existing to throws
+* try removing cx->stop_pc
+* move type lookup to id tok compilation
+** always forward id
+** remove lookup flag
+** switch catch: finally marker to _
+*** store NULL type in op
+**** handle in OCATCH
 * --
 * add cx_call.args
 ** add struct cx_call_arg (type & value)
@@ -54,9 +52,6 @@ host64 & net64 fns
 ** install on call
 ** shuffle all values on stack back and forth
 ** replace scope.parents with plain parent ptr
-* move type lookup to id tok compilation
-** always forward id
-** remove lookup flag
 * replace cx_fimp.init with enum cx_fimp_type
 ** CX_FHOST_C, CX_FHOST_CX, CX_FGUEST
 * remove Rec =/?/print overloads

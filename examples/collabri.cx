@@ -15,7 +15,7 @@ use:
     is-nil)
   (cx/cond ! = == and else if if-else or switch:)
   (cx/const define:)
-  (cx/error catch: throw dump)
+  (cx/error catch: throw value)
   (cx/func func: recall)
   (cx/io
     File RFile WFile
@@ -26,7 +26,7 @@ use:
   (cx/io/term
     Color
     #clear-screen #clear-screen-end #reset-style
-    ask move-to new-color set-fg say)
+    ask move-to new-color set-fg say yelp)
   (cx/iter Iter for is-done iter next while)
   (cx/math ++)
   (cx/net
@@ -408,17 +408,17 @@ func: new-client(io TCPClient)(_ Client)
 
     $in is-nil {
       $ils is-done {$c disconnect} if
-    } {
-      catch: (A
-          $c ~ push-error
-	  $c % push-prompt poll-out
-	  dump
-	  rollback
-	)
-	
+    } {	
 	$c % `state get $in handle-in
 	$c poll-out
-	$poll commit;
+	$poll commit
+
+        catch: A
+	  let: e;
+          $c $e value push-error
+	  $c % push-prompt poll-out
+	  $e yelp
+	  rollback;
     } if-else
   } on-read
 

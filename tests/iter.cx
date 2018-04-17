@@ -2,6 +2,6 @@
 
 0 5 &++ map &+ for 15 = check
 
-'abc' {_ #nil} find-if is-nil check
+'abc' {_ #f} find-if is-nil check
 
-'abc' {@b = @b #nil if-else} find-if @b = check 
+'abc' {@b =} find-if @b = check 

@@ -13,7 +13,6 @@ struct cx_scope {
   struct cx_vec parents;
   struct cx_vec stack;
   struct cx_env vars;
-  struct cx_vec catches;
   
   bool safe;
   unsigned int nrefs;
@@ -32,7 +31,5 @@ struct cx_box *cx_put_var(struct cx_scope *scope, struct cx_sym id);
 
 void cx_stash(struct cx_scope *s);
 void cx_reset(struct cx_scope *s);
-
-bool cx_pop_catch(struct cx_scope *scope, int n);
 
 #endif

@@ -9,6 +9,7 @@
 #include "cixl/sym.h"
 #include "cixl/time.h"
 
+struct cx_error;
 struct cx_file;
 struct cx_func;
 struct cx_iter;
@@ -30,6 +31,7 @@ struct cx_box {
   union {
     bool             as_bool;
     unsigned char    as_char;
+    struct cx_error *as_error;
     struct cx_file  *as_file;
     int64_t          as_int;
     struct cx_iter  *as_iter;

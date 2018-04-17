@@ -14,14 +14,6 @@ static ssize_t catch_eval(struct cx_macro_eval *eval,
 			struct cx_bin *bin,
 			size_t tok_idx,
 			struct cx *cx) {
-  size_t start_pc = bin->ops.count;
-  
-  struct cx_tok
-    *ts = cx_vec_get(&eval->toks, 0),
-    *tt = cx_vec_get(&ts->as_vec, 0);
-
-  unsigned int ncatch = 0;
-  
   bool compile(struct cx_vec *toks) {
     size_t i = bin->ops.count;
     struct cx_op *op = cx_op_init(bin, CX_OCATCH(), tok_idx);
@@ -31,25 +23,21 @@ static ssize_t catch_eval(struct cx_macro_eval *eval,
     cx_op_init(bin, CX_OJUMP(), tok_idx)->as_jump.pc = -1;
     op = cx_vec_get(&bin->ops, i);
     op->as_catch.nops = bin->ops.count-i-1;
-    ncatch++;
     return true;
   } 
-    
-  if (tt->type == CX_TTYPE()) {
-    if (!compile(&ts->as_vec)) { return -1; }
+
+  size_t start_pc = bin->ops.count;
+  struct cx_tok *t = cx_vec_get(&eval->toks, 0);
+
+  if (t->type == CX_TTYPE()) {
+    if (!compile(&eval->toks)) { return -1; }
   } else {
-    for (struct cx_tok *t = cx_vec_peek(&ts->as_vec, 0);
-	 t >= (struct cx_tok *)cx_vec_start(&ts->as_vec);
-	 t--) {
-      if (!compile(&t->as_vec)) { return -1; }
+    for (struct cx_tok *tt = cx_vec_start(&eval->toks);
+	 tt != cx_vec_end(&eval->toks) ;
+	 tt++) {
+      if (!compile(&tt->as_vec)) { return -1; }
     }
   }
-
-  if (!cx_compile(cx, cx_vec_get(&eval->toks, 1), cx_vec_end(&eval->toks), bin)) {
-    return -1;
-  }
-
-  cx_op_init(bin, CX_OPOPCATCH(), tok_idx)->as_popcatch.n = ncatch;
 
   for (struct cx_op *op = cx_vec_get(&bin->ops, start_pc);
        op != cx_vec_end(&bin->ops);
@@ -72,16 +60,14 @@ static bool catch_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
     return false;
   }
 
-  struct cx_tok
-    *ts = cx_vec_get(&eval->toks, 0),
-    *tt = cx_vec_get(&ts->as_vec, 0);
+  struct cx_tok *t = cx_vec_get(&eval->toks, 0);
 
-  if (tt->type == CX_TTYPE()) {
+  if (t->type == CX_TTYPE()) {
     // Skip
-  } else if (tt->type == CX_TGROUP()) {
-    cx_do_vec(&ts->as_vec, struct cx_tok, t) {
-      if (t->type != CX_TGROUP()) {
-	cx_error(cx, tt->row, tt->col, "Invalid catch clause: %s", t->type->id);
+  } else if (t->type == CX_TGROUP()) {
+    cx_do_vec(&eval->toks, struct cx_tok, tt) {
+      if (tt->type != CX_TGROUP()) {
+	cx_error(cx, tt->row, tt->col, "Invalid catch clause: %s", tt->type->id);
 	cx_macro_eval_deref(eval);
 	return false;
       }
@@ -95,7 +81,7 @@ static bool catch_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
       }
     }
   } else {
-    cx_error(cx, tt->row, tt->col, "Invalid catch clause: %s", tt->type->id);
+    cx_error(cx, t->row, t->col, "Invalid catch clause: %s", t->type->id);
     cx_macro_eval_deref(eval);
     return false;
   }
@@ -125,15 +111,10 @@ static bool throw_imp(struct cx_scope *scope) {
   return false;
 }
 
-static bool dump_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  
-  if (!cx->throwing.count) {
-    cx_error(cx, cx->row, cx->col, "Nothing to dump");
-    return false;
-  }
-
-  cx_do_vec(&cx->throwing, struct cx_error, e) { cx_error_dump(e, stdout); }
+static bool value_imp(struct cx_scope *s) {
+  struct cx_box e = *cx_test(cx_pop(s, false));
+  cx_copy(cx_push(s), &e.as_error->value);
+  cx_box_deinit(&e);
   return true;
 }
 
@@ -145,6 +126,8 @@ cx_lib(cx_init_error, "cx/error") {
     return false;
   }
 
+  cx->error_type = cx_init_error_type(lib);
+  
   cx_add_macro(lib, "catch:", catch_parse);
 
   cx_add_cfunc(lib, "check",
@@ -152,12 +135,13 @@ cx_lib(cx_init_error, "cx/error") {
 	       check_imp);
     
   cx_add_cfunc(lib, "throw",
-	       cx_args(cx_arg("e", cx->any_type)), cx_args(),
+	       cx_args(cx_arg("e", cx->opt_type)), cx_args(),
 	       throw_imp);
 
-  cx_add_cfunc(lib, "dump",
-	       cx_args(), cx_args(),
-	       dump_imp);
+  cx_add_cfunc(lib, "value",
+	       cx_args(cx_arg("e", cx->error_type)),
+	       cx_args(cx_arg(NULL, cx->opt_type)),
+	       value_imp);
 
   return true;
 }

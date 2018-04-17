@@ -35,9 +35,15 @@ struct cx_error *cx_error_init(struct cx_error *e,
 			       struct cx_box *v);
 
 struct cx_error *cx_error_deinit(struct cx_error *e);
+
+struct cx_error *cx_error_ref(struct cx_error *e);
+void cx_error_deref(struct cx_error *e);
+
 void cx_error_dump(struct cx_error *e, FILE *out);
 
 struct cx_error *cx_error(struct cx *cx, int row, int col, const char *spec, ...);
 struct cx_error *cx_throw(struct cx *cx, struct cx_box *v);
+
+struct cx_type *cx_init_error_type(struct cx_lib *lib);
 
 #endif

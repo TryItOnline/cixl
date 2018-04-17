@@ -48,6 +48,17 @@ struct cx_error *cx_error_deinit(struct cx_error *e) {
   return e;
 }
 
+struct cx_error *cx_error_ref(struct cx_error *e) {
+  e->nrefs++;
+  return e;
+}
+
+void cx_error_deref(struct cx_error *e) {
+  cx_test(e->nrefs);
+  e->nrefs--;
+  if (!e->nrefs) { free(cx_error_deinit(e)); }
+}
+
 void cx_error_dump(struct cx_error *e, FILE *out) {
   cx_do_vec(&e->calls, struct cx_call, c) {
     fprintf(out, "While calling %s<%s> from row %d, col %d\n",
@@ -63,46 +74,7 @@ void cx_error_dump(struct cx_error *e, FILE *out) {
 }
 
 struct cx_error *new_error(struct cx *cx, int row, int col, struct cx_box *v) {
-  struct cx_error *e = cx_error_init(cx_vec_push(&cx->throwing), cx, row, col, v);
-
-  while (true) {
-    struct cx_scope *s = cx_scope(cx, 0);
-      
-    if (s->catches.count) {  
-      for (struct cx_catch *c = cx_vec_peek(&s->catches, 0);
-	   s->catches.count;
-	   c--, s->catches.count--) {	
-	if (c->type == cx->nil_type) {
-	  cx_catch_eval(c);
-	} else if (cx_is(v->type, c->type)) {
-	  s->catches.count--;
-
-	  for (struct cx_catch *cc = c-1;
-	       s->catches.count && cc->tok_idx == c->tok_idx;
-	       cx_catch_deinit(cc), s->catches.count--, cc--) {
-	    if (cc->type == cx->nil_type) { cx_catch_eval(cc); }
-	  }
-	  
-	  cx_copy(cx_push(s), v);
-	  cx_catch_eval(c);
-	  cx_catch_deinit(c);
-	  cx_error_deinit(e);
-	  cx_vec_pop(&cx->throwing);
-	  return NULL;	  
-	}
-
-	cx_catch_deinit(c);
-      }
-    }
-    
-    if (s == cx->root_scope) { break; }
-    cx_end(cx);
-  }
-
-  struct cx_error *ep = cx_vec_push(&cx->errors);
-  cx_vec_pop(&cx->throwing);
-  *ep = *e;
-  return ep;
+  return cx_error_init(cx_vec_push(&cx->errors), cx, row, col, v);
 }
 
 struct cx_error *cx_error(struct cx *cx, int row, int col, const char *spec, ...) {
@@ -122,4 +94,37 @@ struct cx_error *cx_error(struct cx *cx, int row, int col, const char *spec, ...
 
 struct cx_error *cx_throw(struct cx *cx, struct cx_box *v) {
   return new_error(cx, cx->row, cx->col, v);
+}
+
+static bool equid_imp(struct cx_box *x, struct cx_box *y) {
+  return x->as_error == y->as_error;
+}
+
+static void copy_imp(struct cx_box *dst, const struct cx_box *src) {
+  dst->as_error = cx_error_ref(src->as_error);
+}
+
+static void dump_imp(struct cx_box *v, FILE *out) {
+  fprintf(out, "Error(");
+  cx_dump(&v->as_error->value, out);
+  fprintf(out, ")r%d", v->as_error->nrefs);
+}
+
+static void print_imp(struct cx_box *v, FILE *out) {
+  cx_error_dump(v->as_error, out);
+}
+
+static void deinit_imp(struct cx_box *v) {
+  cx_error_deref(v->as_error);
+}
+
+struct cx_type *cx_init_error_type(struct cx_lib *lib) {
+    struct cx_type *t = cx_add_type(lib, "Error", lib->cx->any_type);
+    
+    t->equid = equid_imp;
+    t->copy = copy_imp;
+    t->dump = dump_imp;
+    t->print = print_imp;
+    t->deinit = deinit_imp;
+    return t;
 }

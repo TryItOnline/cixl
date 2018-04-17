@@ -139,12 +139,12 @@ struct cx *cx_init(struct cx *cx) {
   cx_vec_init(&cx->load_paths, sizeof(char *));
   cx_vec_init(&cx->scopes, sizeof(struct cx_scope *));
   cx_vec_init(&cx->calls, sizeof(struct cx_call));
-  cx_vec_init(&cx->throwing, sizeof(struct cx_error));
   cx_vec_init(&cx->errors, sizeof(struct cx_error));
 
   cx->any_type =
     cx->bin_type = cx->bool_type = cx->buf_type = 
     cx->char_type = cx->cmp_type =
+    cx->error_type =
     cx->file_type = cx->fimp_type = cx->func_type =
     cx->int_type = cx->iter_type =
     cx->lambda_type = cx->lib_type = 
@@ -195,9 +195,6 @@ void cx_init_libs(struct cx *cx) {
 
 struct cx *cx_deinit(struct cx *cx) {
   cx_set_deinit(&cx->separators);
-
-  cx_do_vec(&cx->throwing, struct cx_error, e) { cx_error_deinit(e); }
-  cx_vec_deinit(&cx->throwing);
 
   cx_do_vec(&cx->errors, struct cx_error, e) { cx_error_deinit(e); }
   cx_vec_deinit(&cx->errors);

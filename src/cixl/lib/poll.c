@@ -93,7 +93,7 @@ static bool wait_imp(struct cx_scope *scope) {
   int n = cx_poll_wait(p.as_poll, ms.as_int, scope);
   cx_box_deinit(&p);
 
-  if (n == -1 && errno != EAGAIN && errno != EEXIST) {
+  if (n == -1 && errno != EAGAIN) {
     cx_error(cx, cx->row, cx->col, "Failed polling: %d", errno);
     return false;
   }
