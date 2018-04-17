@@ -20,13 +20,11 @@ static ssize_t catch_eval(struct cx_macro_eval *eval,
     struct cx_tok *t = cx_vec_get(toks, 0);
     op->as_catch.type = t->as_ptr;
     if (!cx_compile(cx, cx_vec_get(toks, 1), cx_vec_end(toks), bin)) { return false; }
-    cx_op_init(bin, CX_OJUMP(), tok_idx)->as_jump.pc = -1;
     op = cx_vec_get(&bin->ops, i);
     op->as_catch.nops = bin->ops.count-i-1;
     return true;
   } 
 
-  size_t start_pc = bin->ops.count;
   struct cx_tok *t = cx_vec_get(&eval->toks, 0);
 
   if (t->type == CX_TTYPE()) {
@@ -36,14 +34,6 @@ static ssize_t catch_eval(struct cx_macro_eval *eval,
 	 tt != cx_vec_end(&eval->toks) ;
 	 tt++) {
       if (!compile(&tt->as_vec)) { return -1; }
-    }
-  }
-
-  for (struct cx_op *op = cx_vec_get(&bin->ops, start_pc);
-       op != cx_vec_end(&bin->ops);
-       op++) {
-    if (op->type == CX_OJUMP() && op->as_jump.pc == -1) {
-      op->as_jump.pc = bin->ops.count;
     }
   }
 

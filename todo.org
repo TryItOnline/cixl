@@ -35,7 +35,7 @@ host64 & net64 fns
 * update cxcrypt
 * --
 * add support for trait type args
-** rename trait to alias
+** rename trait: to type-id:
 ** resolve types and derive in trait type_init
 * add type: macro
 ** type: Enc Str Int;

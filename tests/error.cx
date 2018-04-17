@@ -26,3 +26,13 @@
   catch: Int value;
   - 42 = check
 )
+
+(
+  7 throw
+  
+  catch:
+    (Nil 49)
+    (Int value);
+    
+  - 42 = check
+)
