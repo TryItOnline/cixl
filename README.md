@@ -20,7 +20,7 @@ $ sudo make install
 $ sudo ldconfig /usr/local/lib
 $ rlwrap cixl
 
-Cixl v0.9.6, 18571/29582 bmips
+Cixl v0.9.7, 18571/29582 bmips
 
 Press Return twice to evaluate.
 
