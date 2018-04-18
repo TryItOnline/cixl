@@ -2,23 +2,12 @@
 #define ntohll(x) ((1==ntohl(1)) ? (x) : ((uint64_t)ntohl((x) & 0xFFFFFFFF) << 32) | ntohl((x) >> 32))
 host64 & net64 fns
 
-* add support for type-id type args
-** add support for type args to add_type
-*** get types and push as args
-*** truncate id
-** resolve type-id args and derive in type_init
-*** add bool cx_type_is_arg(t)
-**** scan type recursively for CX_TYPE_ARG
-*** skip derive in macro parse if cx_type_is_arg()
-** check typedef emit
-* add type: macro
-** add CX_TYPE
-** type: Enc Str Int;
-** copy type-id
-** declare enc(Str)->Enc<Str> and enc(Int)->Enc<Int> fns
-** derive Enc<Str> from Str and Enc<Int> from Int
+* finish type: macro
+** extract type_set struct to type_set.h/c
+*** add print_method, equid etc to type_set
+**** forward to args[0]
 ** add support in OTYPEDEF
-** add qdb.DBKey type
+* add qdb.DBKey type-id
 * --
 * add support for type arg wildcards
 ** use _

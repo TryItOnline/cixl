@@ -96,7 +96,7 @@ struct cx_type *_cx_add_type(struct cx_lib *lib, const char *id, ...) {
 }
 
 bool cx_lib_push_type(struct cx_lib *l, struct cx_type *t) {
-  struct cx_type **p = cx_test(cx_set_insert(&l->types, &t->id));
+  struct cx_type **p = cx_set_insert(&l->types, &t->id);
 
   if (!p) {
     cx_error(l->cx, l->cx->row, l->cx->col, "Duplicate type: '%s'", t->id);
@@ -110,13 +110,14 @@ bool cx_lib_push_type(struct cx_lib *l, struct cx_type *t) {
 }
 
 struct cx_type *cx_vadd_type(struct cx_lib *l, const char *id, va_list parents) {
-  struct cx_type *t = cx_type_new(l, id);
+  struct cx_type *t = NULL;
+  t = cx_type_new(l, id);
 
   if (!cx_lib_push_type(l, t)) {
     free(t);
     return NULL;
   }
-
+  
   struct cx_type *pt = NULL;
   while ((pt = va_arg(parents, struct cx_type *))) { cx_derive(t, pt); }
   return t;

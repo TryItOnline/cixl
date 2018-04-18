@@ -22,7 +22,7 @@ struct cx_box;
 struct cx_iter;
 struct cx_scope;
 
-enum cx_meta_type {CX_TYPE_ARG, CX_TYPE_ID, CX_TYPE_IMP, CX_TYPE_REC};
+enum cx_meta_type {CX_TYPE, CX_TYPE_ARG, CX_TYPE_ID, CX_TYPE_IMP, CX_TYPE_REC};
 
 struct cx_type {
   struct cx_lib *lib;
@@ -52,7 +52,7 @@ struct cx_type {
 			      const char *id,
 			      int nargs, struct cx_type *args[]);
 
-  void (*type_init)(struct cx_type *, int nargs, struct cx_type *args[]);
+  bool (*type_init)(struct cx_type *, int nargs, struct cx_type *args[]);
   void *(*type_deinit)(struct cx_type *);
 };
 
@@ -75,6 +75,8 @@ struct cx_type *cx_type_arg(struct cx_type *t, int i);
 struct cx_type *cx_super_arg(struct cx_type *child,
 			     struct cx_type *parent,
 			     int i);
+
+bool cx_type_has_refs(struct cx_type *t);
 
 struct cx_type *cx_init_meta_type(struct cx_lib *lib);
 

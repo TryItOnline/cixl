@@ -3,13 +3,15 @@
 #include "cixl/opt.h"
 #include "cixl/type.h"
 
-static void type_init_imp(struct cx_type *t, int nargs, struct cx_type *args[]) {
+static bool type_init_imp(struct cx_type *t, int nargs, struct cx_type *args[]) {
   struct cx *cx = t->lib->cx;
   
   if (cx->nil_type) {
     cx_derive(args[0], t);
     cx_derive(cx->nil_type, t);
   }
+
+  return true;
 }
 
 struct cx_type *cx_init_opt_type(struct cx_lib *lib) {

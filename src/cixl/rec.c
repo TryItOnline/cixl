@@ -128,7 +128,7 @@ static struct cx_type *type_new_imp(struct cx_type *t,
   return &nrt->imp;
 }
 
-static void type_init_imp(struct cx_type *t, int nargs, struct cx_type *args[]) {
+static bool type_init_imp(struct cx_type *t, int nargs, struct cx_type *args[]) {
   struct cx_rec_type *rt = cx_baseof(t, struct cx_rec_type, imp);
   
   struct cx_type *get_raw(int i) {
@@ -142,8 +142,11 @@ static void type_init_imp(struct cx_type *t, int nargs, struct cx_type *args[]) 
   }
   
   cx_do_set(&rt->fields, struct cx_field, f) {
-    f->type = cx_resolve_arg_refs(f->type, get_raw, get_arg);
+    struct cx_type *rt = cx_resolve_arg_refs(f->type, get_raw, get_arg);
+    if (rt) { f->type = rt; }
   }
+
+  return true;
 }
 
 static void *type_deinit_imp(struct cx_type *t) {

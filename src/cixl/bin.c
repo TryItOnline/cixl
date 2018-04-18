@@ -84,6 +84,7 @@ bool cx_compile(struct cx *cx,
   
   while (tok_idx < stop) {
     struct cx_tok *tok = cx_vec_get(&out->toks, tok_idx);
+    cx->row = tok->row; cx->col = tok->col;
     
     if (!tok->type->compile) {
       cx_error(cx, tok->row, tok->col, "Invalid token: %s", tok->type->id);

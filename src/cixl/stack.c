@@ -199,9 +199,10 @@ static void deinit_imp(struct cx_box *v) {
   cx_stack_deref(v->as_ptr);
 }
 
-static void type_init_imp(struct cx_type *t, int nargs, struct cx_type *args[]) {
+static bool type_init_imp(struct cx_type *t, int nargs, struct cx_type *args[]) {
   struct cx *cx = t->lib->cx;
   cx_derive(t, cx_type_get(cx->seq_type, args[0]));
+  return true;
 }
 
 struct cx_type *cx_init_stack_type(struct cx_lib *lib) {

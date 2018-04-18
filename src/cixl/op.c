@@ -1339,10 +1339,12 @@ static void typedef_emit_init(struct cx_op *op,
 	    "%s->meta = CX_TYPE_ID;\n",
 	    type_var.id, t->id, type_var.id);
 
-    cx_do_set(&t->children, struct cx_type *, ct) {
-      fprintf(out,
-	      "cx_derive(cx_test(cx_get_type(cx, \"%s\", false)), %s);\n",
-	      (*ct)->id, type_var.id);
+    cx_do_set(&t->raw->children, struct cx_type *, ct) {
+      if (*ct != t->raw && *ct != t) {
+	fprintf(out,
+		"cx_derive(cx_test(cx_get_type(cx, \"%s\", false)), %s);\n",
+		(*ct)->id, type_var.id);
+      }
     }
   }
 }

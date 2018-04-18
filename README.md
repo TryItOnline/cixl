@@ -250,10 +250,10 @@ Cixl is statically and strongly typed; but since it's approach to typing is grad
 New type ids may be defined for existing types using ```type-id:```. 
 
 ```
-   type-id: StrInt Str Int;
-   | Str StrInt is
-     Int StrInt is
-     Sym StrInt is
+   type-id: StackIter<A> Stack<Arg0> Iter<Arg0>;
+   [1 2 3] StackIter<Int> is
+   'foo' iter StackIter<Char> is
+   42 StackIter is
 
 [#t #t #f]
 ```

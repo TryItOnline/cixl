@@ -12,14 +12,14 @@ use: cx;
 
 42 throw
 
-/* Catching _ always succeeds */
+/* Catching _ always succeeds and rethrows */
 
 catch: _
   'Cleaning up...' say;
 
 'What, no exceptions?' say
 
-/* The first matching clause is executed with the exception pushed on stack */
+/* The first matching clause is executed with the exception on stack */
 
 catch:
   (Int
@@ -40,6 +40,6 @@ Back to normal!
 ```
 
 ### Implementation
-One reason trying before catching is so popular is that most languages need to register handlers before the exception is thrown, which may then be jumped to. [Cixl](https://github.com/basic-gongfu/cixl) doesn't jump any more than usual when an exception is thrown; as long as exceptions are in flight, it will fast forward through the same instructions as otherwise without executing any user code except ```catch:```. While this approach may be slightly slower when throwing, I consider that a small price to pay for the simplicity and added flexibility.
+[Cixl](https://github.com/basic-gongfu/cixl) doesn't jump any more than usual when an exception is thrown; as long as exceptions are in flight, it will fast forward through the same instructions as otherwise without executing any user code except ```catch:```. While this approach may be slightly slower when throwing, I consider that a small price to pay for the simplicity and added flexibility.
 
 Give me a yell if something is unclear, wrong or missing. And please consider helping out with a donation via [paypal](https://paypal.me/basicgongfu) or [liberapay](https://liberapay.com/basic-gongfu/donate) if you find this worthwhile, every contribution counts. You may find more posts in the same spirit [here](https://github.com/basic-gongfu/cixl/tree/master/devlog).

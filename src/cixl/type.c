@@ -156,7 +156,7 @@ struct cx_type *cx_type_vget(struct cx_type *t, int nargs, struct cx_type *args[
 
   free(id.data);
   tt->meta = t->meta;
-  tt->raw = t->raw;
+  tt->raw = t->raw;  
   tt->new = t->new;
   tt->eqval = t->eqval;
   tt->equid = t->equid;
@@ -174,10 +174,16 @@ struct cx_type *cx_type_vget(struct cx_type *t, int nargs, struct cx_type *args[
   tt->type_new = t->type_new;
   tt->type_init = t->type_init;
   tt->type_deinit = t->type_deinit;
+
   cx_derive(tt, t);
   cx_type_vpush_args(tt, nargs, args);
+
+  if (t->type_init && !t->type_init(tt, nargs, args)) {
+    cx_type_deinit(tt);
+    return NULL;
+  }
+
   cx_lib_push_type(t->lib, tt);
-  if (t->type_init) { t->type_init(tt, nargs, args); }
   return tt;
 }
 
@@ -185,8 +191,13 @@ static void derive(struct cx_type *child, struct cx_type *parent) {
   *(struct cx_type **)cx_vec_put(&child->is, parent->tag) = parent;
   child->level = cx_max(child->level, parent->level+1);
   
-  cx_do_set(&parent->parents, struct cx_type *, t) { derive(child, *t); }
-  cx_do_set(&child->children, struct cx_type *, t) { derive(*t, parent); }
+  cx_do_set(&parent->parents, struct cx_type *, t) {
+    if (*t != child && *t != parent) { derive(child, *t); }
+  }
+  
+  cx_do_set(&child->children, struct cx_type *, t) {
+    if (*t != child && *t != parent) { derive(*t, parent); }
+  }
 }
 
 void cx_derive(struct cx_type *child, struct cx_type *parent) {
@@ -277,6 +288,16 @@ struct cx_type *cx_super_arg(struct cx_type *child,
   }
 
   return NULL;
+}
+
+bool cx_type_has_refs(struct cx_type *t) {
+  if (t->meta == CX_TYPE_ARG) { return true; }
+
+  cx_do_vec(&t->args, struct cx_type *, at) {
+    if (cx_type_has_refs(*at)) { return true; }
+  }
+
+  return false;
 }
 
 static bool equid_imp(struct cx_box *x, struct cx_box *y) {

@@ -1,15 +1,83 @@
+#include <ctype.h>
+#include <string.h>
+
 #include "cixl/arg.h"
 #include "cixl/box.h"
+#include "cixl/call.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
 #include "cixl/fimp.h"
 #include "cixl/func.h"
 #include "cixl/lib.h"
 #include "cixl/lib/type.h"
+#include "cixl/mfile.h"
 #include "cixl/op.h"
 #include "cixl/scope.h"
 
-static ssize_t type_id_eval(struct cx_macro_eval *eval,
+struct cx_type_set {
+  struct cx_type imp;
+  struct cx_set set;
+};
+
+static struct cx_type_set *type_set_new(struct cx_lib *lib,
+					const char *id,
+					bool raw) {
+  struct cx_type_set *ts = malloc(sizeof(struct cx_type_set));
+  
+  const char *i = strchr(id, '<');
+  
+  if (i && raw) {
+    char tid[i-id+1];
+    strncpy(tid, id, i-id);
+    tid[i-id] = 0;
+    cx_type_init(&ts->imp, lib, tid);
+  } else {
+    cx_type_init(&ts->imp, lib, id);
+  }
+
+  cx_set_init(&ts->set, sizeof(struct cx_type *), cx_cmp_ptr);
+
+  struct cx_type *new_imp(struct cx_type *t,
+			  const char *id,
+			  int nargs, struct cx_type *args[]) {
+    struct cx_type_set
+      *ts = cx_baseof(t, struct cx_type_set, imp),
+      *nts = type_set_new(t->lib, id, false);
+
+    cx_do_set(&ts->set, struct cx_type *, mt) {
+      *(struct cx_type **)cx_vec_push(&nts->set.members) = *mt;
+    }
+    
+    return &nts->imp;
+  }
+
+  void *deinit_imp(struct cx_type *t) {
+    struct cx_type_set *ts = cx_baseof(t, struct cx_type_set, imp);
+    cx_set_deinit(&ts->set);
+    return ts;
+  }
+
+  ts->imp.type_new = new_imp;
+  ts->imp.type_deinit = deinit_imp;
+
+  if (i) {
+    i++;
+    
+    char args[strlen(i)+1];
+    strcpy(args, i);
+    char *j = args;
+
+    while (true) {
+      struct cx_type *tt = cx_parse_type_arg(lib->cx, &j);
+      if (!tt) { break; }
+      *(struct cx_type **)cx_vec_push(&ts->imp.args) = tt;
+    }
+  }
+
+  return ts;
+}
+
+static ssize_t type_set_eval(struct cx_macro_eval *eval,
 			    struct cx_bin *bin,
 			    size_t tok_idx,
 			    struct cx *cx) {
@@ -20,6 +88,172 @@ static ssize_t type_id_eval(struct cx_macro_eval *eval,
 	     tok_idx)->as_typedef.type = t->as_ptr;
 
   return tok_idx+1;
+}
+
+static char *type_conv_id(const char *in) {
+  struct cx_mfile out;
+  cx_mfile_open(&out);
+
+  for (const char *c = in; *c; c++) {
+    if (isupper(*c)) {
+      if (c != in) { fputc('-', out.stream); }
+      fputc(tolower(*c), out.stream);
+    } else {
+      fputc(*c, out.stream);
+    }
+  }
+  
+  cx_mfile_close(&out);
+  return out.data;
+}
+
+static bool type_conv_imp(struct cx_scope *s) {
+  struct cx_box *v = cx_test(cx_peek(s, false));
+  struct cx_call *call = cx_vec_peek(&s->cx->calls, 0);
+  struct cx_arg *ret = cx_vec_start(&call->target->rets);
+  v->type = ret->type;
+  return true;
+}
+
+static bool type_init_imp(struct cx_type *t,
+			  int nargs,
+			  struct cx_type *args[]) {
+  struct cx *cx = t->lib->cx;
+  struct cx_type_set *ts = cx_baseof(t, struct cx_type_set, imp);
+  struct cx_type *at = args[0];
+  struct cx_type *mt = NULL;
+
+  cx_do_set(&ts->set, struct cx_type *, tt) {
+    if (cx_is(at, *tt)) { mt = *tt; }
+  }
+  
+  if (!mt) {
+    cx_error(cx, cx->row, cx->col,
+	     "Type is not a member of %s: %s", t->raw->id, at->id);
+
+    return false;
+  }
+  
+  return true;
+}
+
+static bool type_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
+  struct cx_vec toks;
+  cx_vec_init(&toks, sizeof(struct cx_tok));
+  int row = cx->row, col = cx->col;
+  bool ok = false;
+  
+  if (!cx_parse_tok(cx, in, &toks)) {
+    cx_error(cx, row, col, "Missing type id");
+    goto exit2;
+  }
+
+  struct cx_tok id_tok = *(struct cx_tok *)cx_vec_pop(&toks);
+
+  if (id_tok.type != CX_TID()) {
+    cx_error(cx, row, col, "Invalid type: %s", id_tok.type->id);
+    goto exit1;
+  }
+
+  struct cx_type *type = cx_get_type(cx, id_tok.as_ptr, true);
+  
+  if (type && type->meta != CX_TYPE) {
+    cx_error(cx, row, col, "Attempt to redefine %s as type", type->id);
+    goto exit1;
+  }
+  
+  if (!cx_parse_end(cx, in, &toks)) {
+    if (!cx->errors.count) { cx_error(cx, cx->row, cx->col, "Missing type end"); }
+    goto exit1;
+  }
+
+  cx_do_vec(&toks, struct cx_tok, t) {
+    if (t->type != CX_TID()) {
+      cx_error(cx, row, col, "Invalid type arg");
+      goto exit1;
+    }
+  }
+
+  struct cx_type_set *ts = NULL;
+  
+  if (type) {
+    cx_type_reinit(type);
+    ts = cx_baseof(type, struct cx_type_set, imp);
+    cx_set_clear(&ts->set);
+  } else {
+    ts = type_set_new(*cx->lib, id_tok.as_ptr, true);
+    type = &ts->imp;
+    cx_type_push_args(type, cx->opt_type);
+    if (!cx_lib_push_type(*cx->lib, type)) { goto exit1; }
+    type->meta = CX_TYPE;
+    type->type_init = type_init_imp;
+  }
+
+  cx_do_vec(&toks, struct cx_tok, t) {
+    struct cx_type *mt = cx_get_type(cx, t->as_ptr, false);
+    if (!mt) { goto exit1; }
+
+    struct cx_type **ok = cx_set_insert(&ts->set, &mt->id);
+    
+    if (!ok) {
+      cx_error(cx, t->row, t->col, "Duplicate member in type %s: %s",
+	       type->id, mt->id);
+      
+      goto exit1;
+    }
+
+    *ok = mt;
+
+    struct cx_type *tt = cx_type_get(type, mt);
+    cx_derive(tt, mt);
+    char *conv_id = type_conv_id(type->id);
+    
+    cx_add_cfunc(type->lib, conv_id,
+		 cx_args(cx_arg("in", mt)),
+		 cx_args(cx_arg(NULL, tt)),
+		 type_conv_imp);
+    
+    free(conv_id);
+  }
+
+  struct cx_macro_eval *eval = cx_macro_eval_new(type_set_eval);
+  cx_tok_init(cx_vec_push(&eval->toks), CX_TTYPE(), row, col)->as_ptr = type;
+  cx_tok_init(cx_vec_push(out), CX_TMACRO(), row, col)->as_ptr = eval;
+  ok = true;
+ exit1:
+  cx_tok_deinit(&id_tok);
+ exit2: {
+    cx_do_vec(&toks, struct cx_tok, t) { cx_tok_deinit(t); }
+    cx_vec_deinit(&toks);
+    return ok;
+  }
+}
+
+static bool type_id_type_init_imp(struct cx_type *t,
+				  int nargs,
+				  struct cx_type *args[]) {
+  struct cx_type *get_raw(int i) {
+    return (i < t->raw->args.count)
+      ? *(struct cx_type **)cx_vec_get(&t->raw->args, i)
+      : NULL;
+  }
+
+  struct cx_type *get_arg(int i) {
+    return (i < nargs) ? args[i] : NULL;
+  }
+  
+  struct cx_type_set *ts = cx_baseof(t->raw, struct cx_type_set, imp);
+
+  for (struct cx_type **c = cx_vec_start(&ts->set.members);
+       c != cx_vec_end(&ts->set.members);
+       c++) {
+    if (*c != t->raw && *c != t) {
+      struct cx_type *ct = cx_resolve_arg_refs(*c, get_raw, get_arg);
+      if (ct && ct != *c) { cx_derive(ct, t); }
+    }
+  }
+
+  return true;
 }
 
 static bool type_id_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
@@ -58,22 +292,39 @@ static bool type_id_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
       goto exit1;
     }
   }
-  
+
+  struct cx_type_set *ts = NULL;
+
   if (type) {
     cx_type_reinit(type);
+    ts = cx_baseof(type, struct cx_type_set, imp);
+    cx_set_clear(&ts->set);
   } else {
-    type = cx_add_type(*cx->lib, id_tok.as_ptr);
-    if (!type) { goto exit1; }
+    ts = type_set_new(*cx->lib, id_tok.as_ptr, true);
+    type = &ts->imp;
+    cx_type_push_args(type, cx->opt_type);
+    if (!cx_lib_push_type(*cx->lib, type)) { goto exit1; }
     type->meta = CX_TYPE_ID;
+    type->type_init = type_id_type_init_imp;
   }
   
   cx_do_vec(&toks, struct cx_tok, t) {
-    struct cx_type *child = cx_get_type(cx, t->as_ptr, false);
-    if (!child) { goto exit1; }
-    cx_derive(child, type);
+    struct cx_type *ct = cx_get_type(cx, t->as_ptr, false);
+    if (!ct) { goto exit1; }
+    struct cx_type **ok = cx_set_insert(&ts->set, &ct->id);
+    
+    if (!ok) {
+      cx_error(cx, t->row, t->col, "Duplicate member in type id %s: %s",
+	       type->id, ct->id);
+      
+      goto exit1;
+    }
+
+    *ok = ct;
+    if (!cx_type_has_refs(ct)) { cx_derive(ct, type); }
   }
 
-  struct cx_macro_eval *eval = cx_macro_eval_new(type_id_eval);
+  struct cx_macro_eval *eval = cx_macro_eval_new(type_set_eval);
   cx_tok_init(cx_vec_push(&eval->toks), CX_TTYPE(), row, col)->as_ptr = type;
   cx_tok_init(cx_vec_push(out), CX_TMACRO(), row, col)->as_ptr = eval;
   ok = true;
@@ -89,6 +340,7 @@ static bool type_id_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
 static bool type_imp(struct cx_scope *scope) {
   struct cx_box v = *cx_test(cx_pop(scope, false));
   cx_box_init(cx_push(scope), scope->cx->meta_type)->as_ptr = v.type;
+  cx_box_deinit(&v);
   return true;
 }
 
@@ -140,6 +392,7 @@ cx_lib(cx_init_type, "cx/type") {
     return false;
   }
 
+  cx_add_macro(lib, "type:", type_parse);
   cx_add_macro(lib, "type-id:", type_id_parse);
 
   cx_add_cfunc(lib, "type",
