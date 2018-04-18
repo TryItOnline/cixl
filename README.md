@@ -5,7 +5,7 @@
 Cixl shares many ideas with C, Forth and Common Lisp; as well as the hacker mindset that unites them. The language is implemented as a straight forward VM-based interpreter that is designed to be as fast as possible without compromising on simplicity and flexibility; combined with a code generator for compiling native executables. The codebase has no external dependencies and is currently hovering around 15 kloc including tests and standard library.
 
 ### Status
-Examples should work in the most recent version and run clean in ```valgrind```. The first version of the language is more or less feature complete, current work is focused on cleaning up the code, dotting i's and crossing t's.
+Examples should work in the most recent version and run clean in ```valgrind```. The first version of the language is more or less feature complete; current work is focused on cleaning up the code, dotting i's and crossing t's.
 
 ### Getting Started
 You may try Cixl online [here](https://tio.run/#cixl), and a Linux/64 binary may be found [over there](https://github.com/basic-gongfu/cxbin/tree/master/linux64/cixl). To build Cixl yourself, you'll need a reasonably modern GCC and CMake installed. Building on macOS unfortunately doesn't work because of lacking POSIX support. A basic REPL is included, it's highly recommended to run it through ```rlwrap``` for a less nerve wrecking experience.
@@ -251,7 +251,9 @@ New type ids may be defined for existing types using ```type-id:```.
 
 ```
    type-id: StrInt Str Int;
-   | Str StrInt is Int StrInt is Sym StrInt is
+   | Str StrInt is
+     Int StrInt is
+     Sym StrInt is
 
 [#t #t #f]
 ```
