@@ -8,5 +8,19 @@ use:
   (cx/time    clock)
   (cx/type    unsafe);
 
-{10000000 {`error throw 'skipped' say catch: A _;} times}
+{10000000 {
+  `error throw
+  'skipped' say
+  'skipped' say
+  'skipped' say
+  'skipped' say
+  'skipped' say
+  'skipped' say
+  'skipped' say
+  'skipped' say
+  'skipped' say
+  'skipped' say
+  catch: A _;
+} times}
+
 clock 1000000 / int say

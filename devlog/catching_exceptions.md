@@ -48,15 +48,27 @@ Cixl generally performs slightly worse than Python3 in interpreted mode and slig
 ```
 use: cx;
 
-{10000000 {`error throw 'skipped' say catch: A _;} times}
+{10000000 {
+  `error throw
+  'skipped' say
+  'skipped' say
+  'skipped' say
+  'skipped' say
+  'skipped' say
+  'skipped' say
+  'skipped' say
+  'skipped' say
+  'skipped' say
+  'skipped' say
+  catch: A _;} times}
 clock 1000000 / int say
 
 $ ./cixl ../perf/bench4.cx
-3851
+4771
 
 $ cixl -e cixl/perf/bench4.cx -o bench4
 $ ./bench4
-2734
+3531
 ```
 
 ```
@@ -66,6 +78,15 @@ def test():
     for i in range(10000000):
         try:
             raise Exception('error')
+            print('skipped')
+            print('skipped')
+            print('skipped')
+            print('skipped')
+            print('skipped')
+            print('skipped')
+            print('skipped')
+            print('skipped')
+            print('skipped')
             print('skipped')
         except Exception as e:
             pass
