@@ -2,7 +2,7 @@
 #### 2018-04-17
 
 ### Intro
-One of the itches I've developed over the years is improving on the status quo surrounding exceptions. None of the alternatives really solve the same problems, they all shuffle the task to user code in one way or other. Exceptions are a tool, the fact that its possible to write code without them doesn't make them useless. One of the issues with exceptions is that they like to control the call stack, even Common Lisp doesn't support catching exceptions without putting the offending code in a try block. [Cixl](https://github.com/basic-gongfu/cixl) breaks with this tradition by allowing exceptions to be caught anywhere.
+One of the itches I've developed over the years is improving on the status quo surrounding exceptions. None of the alternatives really solve the same problems, they all shuffle the task to user code in one way or other. And one of the issues with exceptions is that they like to manage the call stack, even Common Lisp doesn't support catching exceptions without putting the offending code in a try block. [Cixl](https://github.com/basic-gongfu/cixl) breaks with this tradition by allowing exceptions to be caught anywhere.
 
 test.cx:
 ```
