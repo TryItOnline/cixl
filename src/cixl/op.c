@@ -53,6 +53,11 @@ static bool begin_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
   return true;
 }
 
+static bool begin_error_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
+  cx->pc += op->as_begin.nops;
+  return true;
+}
+
 static bool begin_emit(struct cx_op *op,
 		       struct cx_bin *bin,
 		       FILE *out,
@@ -71,6 +76,14 @@ static bool begin_emit(struct cx_op *op,
   }
 
   fputs("cx_begin(cx, parent);\n", out);
+  return true;
+}
+
+static bool begin_error_emit(struct cx_op *op,
+			     struct cx_bin *bin,
+			     FILE *out,
+			     struct cx *cx) {
+  fprintf(out, "goto op%zd;\n", op->pc+1+op->as_begin.nops);
   return true;
 }
 
@@ -93,8 +106,10 @@ static void begin_emit_fimps(struct cx_op *op, struct cx_set *out, struct cx *cx
 }
 
 cx_op_type(CX_OBEGIN, {
-    type.eval = type.error_eval = begin_eval;
-    type.emit = type.error_emit = begin_emit;
+    type.eval = begin_eval;
+    type.error_eval = begin_error_eval;
+    type.emit = begin_emit;
+    type.error_emit = begin_error_emit;
     type.emit_funcs = begin_emit_funcs;
     type.emit_fimps = begin_emit_fimps;
   });
@@ -393,8 +408,8 @@ static void funcdef_emit_syms(struct cx_op *op, struct cx_set *out, struct cx *c
 }
 
 cx_op_type(CX_OFUNCDEF, {
-    type.eval = funcdef_eval;
-    type.emit = funcdef_emit;
+    type.eval = type.error_eval = funcdef_eval;
+    type.emit = type.error_emit = funcdef_emit;
     type.emit_init = funcdef_emit_init;
     type.emit_syms = funcdef_emit_syms;
   });

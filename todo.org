@@ -2,6 +2,8 @@
 #define ntohll(x) ((1==ntohl(1)) ? (x) : ((uint64_t)ntohl((x) & 0xFFFFFFFF) << 32) | ntohl((x) >> 32))
 host64 & net64 fns
 
+* add bench4
+** compare throw performance to Python3
 * finish type: macro
 ** add CX_TYPE support in OTYPEDEF
 ** test emit
@@ -46,11 +48,6 @@ host64 & net64 fns
 * change cx_type to use ref counting
 ** add nrefs
 ** replace reinit with deref & new
-* add ssize_t obegin.nops
-** test catch in nested scope
-** specify for scopes
-** set to -1 otherwise
-** use to jump in error mode
 * replace cx_tok.as_ptr with as_id, as_literal etc.
 ** use cx_sym for CX_TID?
 * convert type id to sym

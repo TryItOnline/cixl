@@ -48,3 +48,10 @@ catch:
 catch: Int value;
 3 = check
 )
+
+(
+  42 throw
+  (catch: A _ 7 throw;)
+  catch: A value;
+  42 = check
+)

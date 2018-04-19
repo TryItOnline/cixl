@@ -48,6 +48,7 @@ static ssize_t group_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) 
   struct cx_vec *toks = &tok->as_vec;
 
   if (toks->count) {
+    ssize_t i = bin->ops.count;
     struct cx_op *op = cx_op_init(bin, CX_OBEGIN(), tok_idx);
     op->as_begin.child = true;
     op->as_begin.fimp = NULL;
@@ -59,6 +60,8 @@ static ssize_t group_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) 
     }
     
     cx_op_init(bin, CX_OEND(), tok_idx);
+    op = cx_vec_get(&bin->ops, i);
+    op->as_begin.nops = bin->ops.count-i-1;
   }
 
  exit:
@@ -270,6 +273,7 @@ static ssize_t stack_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) 
   struct cx_vec *toks = &tok->as_vec;
 
   if (toks->count) {
+    ssize_t i = bin->ops.count;    
     struct cx_op *op = cx_op_init(bin, CX_OBEGIN(), tok_idx);
     op->as_begin.child = true;
     op->as_begin.fimp = NULL;
@@ -282,6 +286,8 @@ static ssize_t stack_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) 
 
     cx_op_init(bin, CX_OSTASH(), tok_idx);
     cx_op_init(bin, CX_OEND(), tok_idx);
+    op = cx_vec_get(&bin->ops, i);
+    op->as_begin.nops = bin->ops.count-i-1;
   } else {
     struct cx_box *v = &cx_op_init(bin, CX_OPUSH(), tok_idx)->as_push.value;
     cx_box_init(v, cx->stack_type)->as_ptr = cx_stack_new(cx);

@@ -120,7 +120,10 @@ static bool compile(struct cx_fimp *imp, size_t tok_idx, struct cx_bin *out) {
   
   op = cx_op_init(out, CX_ORETURN(), tok_idx);
   op->as_return.imp = imp;
-  op->as_return.pc = start_pc;  
+  op->as_return.pc = start_pc;
+  
+  op = cx_vec_get(&out->ops, start_pc);
+  op->as_begin.nops = out->ops.count-start_pc-1;
   return true;
 }
 

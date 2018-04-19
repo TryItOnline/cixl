@@ -51,15 +51,16 @@ struct cx_op_type *cx_op_type_init(struct cx_op_type *type, const char *id);
 struct cx_begin_op {
   bool child;
   struct cx_fimp *fimp;
+  ssize_t nops;
 };
 
 struct cx_catch_op {
   struct cx_type *type;
-  size_t nops;
+  ssize_t nops;
 };
 
 struct cx_else_op {
-  size_t nops;
+  ssize_t nops;
 };
 
 struct cx_fimp_op {
@@ -89,12 +90,12 @@ struct cx_jump_op {
 };
 
 struct cx_lambda_op {
-  size_t start_op, nops;
+  ssize_t start_op, nops;
 };
 
 struct cx_libdef_op {
   struct cx_lib *lib;
-  size_t init;
+  ssize_t init;
 };
 
 struct cx_push_op {
@@ -121,7 +122,7 @@ struct cx_putvar_op {
 
 struct cx_return_op {
   struct cx_fimp *imp;
-  size_t pc;
+  ssize_t pc;
 };
 
 struct cx_typedef_op {
@@ -130,7 +131,7 @@ struct cx_typedef_op {
 
 struct cx_op {
   struct cx_op_type *type;
-  size_t tok_idx, pc;
+  ssize_t tok_idx, pc;
   int row, col;
   
   union {
