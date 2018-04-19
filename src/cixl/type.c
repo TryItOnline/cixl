@@ -294,7 +294,7 @@ bool cx_type_has_refs(struct cx_type *t) {
   if (t->meta == CX_TYPE_ARG) { return true; }
 
   cx_do_vec(&t->args, struct cx_type *, at) {
-    if (cx_type_has_refs(*at)) { return true; }
+    if (*at != t && cx_type_has_refs(*at)) { return true; }
   }
 
   return false;

@@ -22,6 +22,8 @@ rec: DBTable<A>()
   on-load  
   on-commit Stack;
 
+type-id: DBKey Stack;
+
 func: init-table(t DBTable n Str k Stack)()
   let: f $n `a+ fopen % unblock;
 
@@ -30,7 +32,7 @@ func: init-table(t DBTable n Str k Stack)()
   $t `recs Table new put
   $t `buf  Buf new   put;
 
-func: get-rec-key(t DBTable r A)(_ Stack)
+func: get-rec-key(t DBTable r A)(_ DBKey)
   $t `key get {$r ~ get} map stack;
 
 func: load-rec(t DBTable in Pair)()
@@ -66,7 +68,7 @@ func: on-commit(t DBTable fn A)()
     $s
   } or $fn push;
 
-func: find-key(t DBTable k Stack)(_ Opt)
+func: find-key(t DBTable k DBKey)(_ Opt)
   $t `recs get $k get;
 
 func: len(t DBTable)(_ Int)

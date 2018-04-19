@@ -5,8 +5,6 @@ host64 & net64 fns
 * finish type: macro
 ** add CX_TYPE support in OTYPEDEF
 ** test emit
-** add to README
-* add qdb.DBKey type-id
 * ---
 * add cx_call.args
 ** add struct cx_call_arg (type & value)

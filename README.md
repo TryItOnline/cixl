@@ -247,7 +247,16 @@ Cixl is statically and strongly typed; but since it's approach to typing is grad
 [#f]
 ```
 
-New type ids may be defined for existing types using ```type-id:```. 
+New type ids may be defined for existing types using ```type-id:```:
+
+```
+   type-id: Pos Pair<Int Int>;
+   1 2. Pos is
+
+[#t]
+```
+
+The id may optionally be parameterized and/or refer to one of several different types:
 
 ```
    type-id: StackIter<A> Stack<Arg0> Iter<Arg0>;
@@ -256,6 +265,16 @@ New type ids may be defined for existing types using ```type-id:```.
    42 StackIter is
 
 [#t #t #f]
+```
+
+Type safe wrappers for existing types may be created using ```type:```, functions for wrapping/unwrapping are automatically created:
+
+```
+   type: IntStr Int Str;
+   42 int-str type
+   'foo' int-str str
+
+[IntStr<Int> 'foo'r1]
 ```
 
 ### Variables
