@@ -4,7 +4,6 @@
 #include "cixl/bin.h"
 #include "cixl/box.h"
 #include "cixl/call.h"
-#include "cixl/catch.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
 #include "cixl/func.h"

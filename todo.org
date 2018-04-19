@@ -3,17 +3,11 @@
 host64 & net64 fns
 
 * finish type: macro
-** extract type_set struct to type_set.h/c
-*** add print_method, equid etc to type_set
-**** forward to args[0]
-** add support in OTYPEDEF
+** add CX_TYPE support in OTYPEDEF
+** test emit
+** add to README
 * add qdb.DBKey type-id
-* --
-* add support for type arg wildcards
-** use _
-** forward NULL type
-** make sure that nargs == raw in cx_type_vget
-** change cloning in cx_type_vget to replace NULL with raw arg
+* ---
 * add cx_call.args
 ** add struct cx_call_arg (type & value)
 ** move values from stack & init resolved types on call init
@@ -52,10 +46,11 @@ host64 & net64 fns
 * change cx_type to use ref counting
 ** add nrefs
 ** replace reinit with deref & new
-* add cxtls project
-** use gnutls
-** integrate into poll framework
-** https://github.com/abligh/tlsproxy
+* add ssize_t obegin.nops
+** test catch in nested scope
+** specify for scopes
+** set to -1 otherwise
+** use to jump in error mode
 * replace cx_tok.as_ptr with as_id, as_literal etc.
 ** use cx_sym for CX_TID?
 * convert type id to sym

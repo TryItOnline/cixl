@@ -13,69 +13,7 @@
 #include "cixl/mfile.h"
 #include "cixl/op.h"
 #include "cixl/scope.h"
-
-struct cx_type_set {
-  struct cx_type imp;
-  struct cx_set set;
-};
-
-static struct cx_type_set *type_set_new(struct cx_lib *lib,
-					const char *id,
-					bool raw) {
-  struct cx_type_set *ts = malloc(sizeof(struct cx_type_set));
-  
-  const char *i = strchr(id, '<');
-  
-  if (i && raw) {
-    char tid[i-id+1];
-    strncpy(tid, id, i-id);
-    tid[i-id] = 0;
-    cx_type_init(&ts->imp, lib, tid);
-  } else {
-    cx_type_init(&ts->imp, lib, id);
-  }
-
-  cx_set_init(&ts->set, sizeof(struct cx_type *), cx_cmp_ptr);
-
-  struct cx_type *new_imp(struct cx_type *t,
-			  const char *id,
-			  int nargs, struct cx_type *args[]) {
-    struct cx_type_set
-      *ts = cx_baseof(t, struct cx_type_set, imp),
-      *nts = type_set_new(t->lib, id, false);
-
-    cx_do_set(&ts->set, struct cx_type *, mt) {
-      *(struct cx_type **)cx_vec_push(&nts->set.members) = *mt;
-    }
-    
-    return &nts->imp;
-  }
-
-  void *deinit_imp(struct cx_type *t) {
-    struct cx_type_set *ts = cx_baseof(t, struct cx_type_set, imp);
-    cx_set_deinit(&ts->set);
-    return ts;
-  }
-
-  ts->imp.type_new = new_imp;
-  ts->imp.type_deinit = deinit_imp;
-
-  if (i) {
-    i++;
-    
-    char args[strlen(i)+1];
-    strcpy(args, i);
-    char *j = args;
-
-    while (true) {
-      struct cx_type *tt = cx_parse_type_arg(lib->cx, &j);
-      if (!tt) { break; }
-      *(struct cx_type **)cx_vec_push(&ts->imp.args) = tt;
-    }
-  }
-
-  return ts;
-}
+#include "cixl/type_set.h"
 
 static ssize_t type_set_eval(struct cx_macro_eval *eval,
 			    struct cx_bin *bin,
@@ -107,17 +45,16 @@ static char *type_conv_id(const char *in) {
   return out.data;
 }
 
-static bool type_conv_imp(struct cx_scope *s) {
-  struct cx_box *v = cx_test(cx_peek(s, false));
+static bool conv_imp(struct cx_scope *s) {
+  struct cx_box *in = cx_test(cx_peek(s, false));
   struct cx_call *call = cx_vec_peek(&s->cx->calls, 0);
-  struct cx_arg *ret = cx_vec_start(&call->target->rets);
-  v->type = ret->type;
+  struct cx_arg *ret = cx_test(cx_vec_start(&call->target->rets));
+  in->type = ret->type;
   return true;
 }
 
 static bool type_init_imp(struct cx_type *t,
-			  int nargs,
-			  struct cx_type *args[]) {
+			  int nargs, struct cx_type *args[]) {
   struct cx *cx = t->lib->cx;
   struct cx_type_set *ts = cx_baseof(t, struct cx_type_set, imp);
   struct cx_type *at = args[0];
@@ -181,19 +118,19 @@ static bool type_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
     ts = cx_baseof(type, struct cx_type_set, imp);
     cx_set_clear(&ts->set);
   } else {
-    ts = type_set_new(*cx->lib, id_tok.as_ptr, true);
+    ts = cx_type_set_new(*cx->lib, id_tok.as_ptr, true);
     type = &ts->imp;
     cx_type_push_args(type, cx->opt_type);
     if (!cx_lib_push_type(*cx->lib, type)) { goto exit1; }
     type->meta = CX_TYPE;
-    type->type_init = type_init_imp;
+    ts->type_init = type_init_imp;
   }
 
   cx_do_vec(&toks, struct cx_tok, t) {
     struct cx_type *mt = cx_get_type(cx, t->as_ptr, false);
     if (!mt) { goto exit1; }
 
-    struct cx_type **ok = cx_set_insert(&ts->set, &mt->id);
+    struct cx_type **ok = cx_set_insert(&ts->set, &mt);
     
     if (!ok) {
       cx_error(cx, t->row, t->col, "Duplicate member in type %s: %s",
@@ -203,7 +140,6 @@ static bool type_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
     }
 
     *ok = mt;
-
     struct cx_type *tt = cx_type_get(type, mt);
     cx_derive(tt, mt);
     char *conv_id = type_conv_id(type->id);
@@ -211,7 +147,15 @@ static bool type_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
     cx_add_cfunc(type->lib, conv_id,
 		 cx_args(cx_arg("in", mt)),
 		 cx_args(cx_arg(NULL, tt)),
-		 type_conv_imp);
+		 conv_imp);
+    
+    free(conv_id);
+    conv_id = type_conv_id(mt->id);
+    
+    cx_add_cfunc(type->lib, conv_id,
+		 cx_args(cx_arg("in", tt)),
+		 cx_args(cx_arg(NULL, mt)),
+		 conv_imp);
     
     free(conv_id);
   }
@@ -227,33 +171,6 @@ static bool type_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
     cx_vec_deinit(&toks);
     return ok;
   }
-}
-
-static bool type_id_type_init_imp(struct cx_type *t,
-				  int nargs,
-				  struct cx_type *args[]) {
-  struct cx_type *get_raw(int i) {
-    return (i < t->raw->args.count)
-      ? *(struct cx_type **)cx_vec_get(&t->raw->args, i)
-      : NULL;
-  }
-
-  struct cx_type *get_arg(int i) {
-    return (i < nargs) ? args[i] : NULL;
-  }
-  
-  struct cx_type_set *ts = cx_baseof(t->raw, struct cx_type_set, imp);
-
-  for (struct cx_type **c = cx_vec_start(&ts->set.members);
-       c != cx_vec_end(&ts->set.members);
-       c++) {
-    if (*c != t->raw && *c != t) {
-      struct cx_type *ct = cx_resolve_arg_refs(*c, get_raw, get_arg);
-      if (ct && ct != *c) { cx_derive(ct, t); }
-    }
-  }
-
-  return true;
 }
 
 static bool type_id_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
@@ -300,18 +217,17 @@ static bool type_id_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
     ts = cx_baseof(type, struct cx_type_set, imp);
     cx_set_clear(&ts->set);
   } else {
-    ts = type_set_new(*cx->lib, id_tok.as_ptr, true);
+    ts = cx_type_set_new(*cx->lib, id_tok.as_ptr, true);
     type = &ts->imp;
-    cx_type_push_args(type, cx->opt_type);
     if (!cx_lib_push_type(*cx->lib, type)) { goto exit1; }
     type->meta = CX_TYPE_ID;
-    type->type_init = type_id_type_init_imp;
+    ts->type_init = cx_type_id_init_imp;
   }
   
   cx_do_vec(&toks, struct cx_tok, t) {
     struct cx_type *ct = cx_get_type(cx, t->as_ptr, false);
     if (!ct) { goto exit1; }
-    struct cx_type **ok = cx_set_insert(&ts->set, &ct->id);
+    struct cx_type **ok = cx_set_insert(&ts->set, &ct);
     
     if (!ok) {
       cx_error(cx, t->row, t->col, "Duplicate member in type id %s: %s",

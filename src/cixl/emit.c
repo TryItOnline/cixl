@@ -107,7 +107,8 @@ bool cx_emit_file(struct cx *cx, struct cx_bin *bin, FILE *out) {
 	"#include \"cixl/op.h\"\n"
 	"#include \"cixl/scope.h\"\n"
 	"#include \"cixl/stack.h\"\n"
-	"#include \"cixl/str.h\"\n\n",
+	"#include \"cixl/str.h\"\n"
+	"#include \"cixl/type_set.h\"\n\n",
 	out);
 
   cx_do_vec(&cx->inits, struct cx_str *, i) {

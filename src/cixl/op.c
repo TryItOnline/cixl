@@ -1,7 +1,6 @@
 #include "cixl/arg.h"
 #include "cixl/bin.h"
 #include "cixl/call.h"
-#include "cixl/catch.h"
 #include "cixl/cx.h"
 #include "cixl/emit.h"
 #include "cixl/error.h"
@@ -14,6 +13,7 @@
 #include "cixl/stack.h"
 #include "cixl/str.h"
 #include "cixl/tok.h"
+#include "cixl/type_set.h"
 
 struct cx_op_type *cx_op_type_init(struct cx_op_type *type, const char *id) {
   type->id = id;
@@ -1301,26 +1301,26 @@ static void typedef_emit_init(struct cx_op *op,
 			      FILE *out,
 			      struct cx *cx) {
   struct cx_type *t = op->as_typedef.type;
-  struct cx_sym type_var = cx_gsym(cx, "type");
+  struct cx_sym t_var = cx_gsym(cx, "type");
   
   if (t->meta == CX_TYPE_REC) {
     fprintf(out,
 	    "struct cx_rec_type *%s = cx_test(cx_add_rec_type(*cx->lib, \"%s\"));\n",
-	    type_var.id, t->id);
+	    t_var.id, t->id);
 
     cx_do_set(&t->parents, struct cx_type *, pt) {
       if (*pt == cx->rec_type) { continue; }
       
       fprintf(out,
 	      "cx_derive_rec(%s, cx_test(cx_get_type(cx, \"%s\", false)));\n",
-	      type_var.id, (*pt)->id);
+	      t_var.id, (*pt)->id);
     }
 
     cx_do_vec(&t->args, struct cx_type *, at) {
       fprintf(out,
 	      "cx_type_push_args(&%s->imp, "
 	      "cx_test(cx_get_type(cx, \"%s\", false)));\n",
-	      type_var.id, (*at)->id);
+	      t_var.id, (*at)->id);
     }
 
     struct cx_rec_type *rt = cx_baseof(t, struct cx_rec_type, imp);
@@ -1331,20 +1331,32 @@ static void typedef_emit_init(struct cx_op *op,
 	      "        cx_sym(cx, \"%s\"),\n"
 	      "        cx_test(cx_get_type(cx, \"%s\", false)),\n"
 	      "        false));\n",
-	      type_var.id, f->id.id, f->type->id);
+	      t_var.id, f->id.id, f->type->id);
     }
   } else if (t->meta == CX_TYPE_ID) {
     fprintf(out,
-	    "struct cx_type *%s = cx_test(cx_add_type(*cx->lib, \"%s\"));\n"
-	    "%s->meta = CX_TYPE_ID;\n",
-	    type_var.id, t->id, type_var.id);
+	    "struct cx_type_set *%s = cx_type_set_new(*cx->lib, \"%s\", true);\n"
+	    "if (!cx_lib_push_type(*cx->lib, &%s->imp)) { goto op%zd; }\n"
+	    "%s->imp.meta = CX_TYPE_ID;\n"
+	    "%s->type_init = cx_type_id_init_imp;\n",
+	    t_var.id, t->id, t_var.id, op->pc+1, t_var.id, t_var.id);
 
-    cx_do_set(&t->raw->children, struct cx_type *, ct) {
-      if (*ct != t->raw && *ct != t) {
-	fprintf(out,
-		"cx_derive(cx_test(cx_get_type(cx, \"%s\", false)), %s);\n",
-		(*ct)->id, type_var.id);
+    struct cx_type_set *ts = cx_baseof(t, struct cx_type_set, imp);
+    
+    cx_do_set(&ts->set, struct cx_type *, mt) {
+      struct cx_sym mt_var = cx_gsym(cx, "mt");
+      
+      fprintf(out,
+	      "struct cx_type *%s = cx_get_type(cx, \"%s\", false);\n",
+	      mt_var.id, (*mt)->id);
+	      
+      if (!cx_type_has_refs(*mt)) {
+	fprintf(out, "cx_derive(%s, %s);\n", mt_var.id, t_var.id);
       }
+      
+      fprintf(out,
+	      "*(struct cx_type **)cx_vec_push(&%s->set.members) = %s;\n",
+	      t_var.id, mt_var.id);
     }
   }
 }

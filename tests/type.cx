@@ -20,3 +20,9 @@ type-id: StackIter<A> Stack<Arg0> Iter<Arg0>;
 [1 2 3] StackIter<Int> is check
 'foo' iter StackIter<Char> is check
 42 StackIter is !check
+
+type: IntStr Int Str;
+IntStr<Int> Int is check
+42 IntStr<Int> is !check
+42 int-str IntStr<Int> is check
+'foo' int-str str 'foo' = check
