@@ -42,4 +42,38 @@ Back to normal!
 ### Implementation
 [Cixl](https://github.com/basic-gongfu/cixl) doesn't jump any more than usual when an exception is thrown; as long as exceptions are in flight, it will fast forward through the same instructions as otherwise without executing any user code except ```catch:```. While this approach may be slightly slower when throwing, I consider that a small price to pay for the simplicity and added flexibility.
 
+### Performance
+If you're anything like me, one question on your mind by now is what kind of performance to expect. Cixl generally performs slightly worse than Python3 in interpreted mode and slightly better when compiled. The following benchmark compares the time it takes to run a loop with throw and catch for 10000000 iterations in interpreted/compiled [Cixl](https://github.com/basic-gongfu/cixl) and Python3. 
+
+```
+use: cx;
+
+{10000000 {`error throw 'skipped' say catch: A _;} times}
+clock 1000000 / int say
+
+$ ./cixl ../perf/bench4.cx
+3851
+
+$ cixl -e cixl/perf/bench4.cx -o bench4
+$ ./bench4
+2734
+```
+
+```
+from timeit import timeit
+
+def test():
+    for i in range(10000000):
+        try:
+            raise Exception('error')
+            print('skipped')
+        except Exception as e:
+            pass
+
+print(int(timeit(test, number=1) * 1000))
+
+$ python3 cixl/perf/bench3.py
+3813
+```
+
 Give me a yell if something is unclear, wrong or missing. And please consider helping out with a donation via [paypal](https://paypal.me/basicgongfu) or [liberapay](https://liberapay.com/basic-gongfu/donate) if you find this worthwhile, every contribution counts. You may find more posts in the same spirit [here](https://github.com/basic-gongfu/cixl/tree/master/devlog).

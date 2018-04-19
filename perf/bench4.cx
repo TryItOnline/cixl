@@ -1,0 +1,12 @@
+use:
+  (cx/abc     A)
+  (cx/error   catch: throw)
+  (cx/math    / int)
+  (cx/io/term say)
+  (cx/iter    times)
+  (cx/stack   _)
+  (cx/time    clock)
+  (cx/type    unsafe);
+
+{10000000 {`error throw 'skipped' say catch: A _;} times}
+clock 1000000 / int say

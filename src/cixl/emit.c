@@ -97,7 +97,6 @@ bool cx_emit_file(struct cx *cx, struct cx_bin *bin, FILE *out) {
 	"#include \"cixl/arg.h\"\n"
 	"#include \"cixl/bin.h\"\n"
 	"#include \"cixl/call.h\"\n"
-	"#include \"cixl/catch.h\"\n"
 	"#include \"cixl/cx.h\"\n"
 	"#include \"cixl/emit.h\"\n"
 	"#include \"cixl/error.h\"\n"

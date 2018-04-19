@@ -1223,7 +1223,7 @@ Type checking may be partly disabled for the current scope by calling ```unsafe`
 ### Performance
 There is still plenty of work remaining in the profiling and benchmarking department, but preliminary indications puts compiled Cixl at slightly faster to twice as slow as Python3. Measured time is displayed in milliseconds.
 
-We'll start with a tail-recursive fibonacci to exercise the interpreter loop, it's worth mentioning that Cixl uses 64-bit integers while Python settles for 32-bit.
+We'll start with a tail-recursive fibonacci to exercise the interpreter loop:
 
 ```
 use: cx;
@@ -1260,7 +1260,7 @@ $ python3 cixl/perf/bench1.py
 118
 ```
 
-Next up is consing a stack.
+Next up is consing a stack:
 
 ```
 use: cx;
@@ -1287,7 +1287,7 @@ $ python3 cixl/perf/bench2.py
 1348
 ```
 
-Moving on to instantiating records.
+Moving on to instantiating records:
 
 ```
 use: cx;
@@ -1317,6 +1317,39 @@ print(int(timeit(test, number=1) * 1000))
 
 $ python3 cixl/perf/bench3.py
 3213
+```
+
+And last but not least, exception handling:
+
+```
+use: cx;
+
+{10000000 {`error throw 'skipped' say catch: A _;} times}
+clock 1000000 / int say
+
+$ ./cixl ../perf/bench4.cx
+3851
+
+$ cixl -e cixl/perf/bench4.cx -o bench4
+$ ./bench4
+2734
+```
+
+```
+from timeit import timeit
+
+def test():
+    for i in range(10000000):
+        try:
+            raise Exception('error')
+            print('skipped')
+        except Exception as e:
+            pass
+
+print(int(timeit(test, number=1) * 1000))
+
+$ python3 cixl/perf/bench3.py
+3813
 ```
 
 ### Zen
