@@ -3,11 +3,12 @@
 host64 & net64 fns
 
 * add cx_call.args
-** add struct cx_call_arg (type & value)
-** move values from stack & init resolved types on call init
-** change OPUTARGS to use call instead of stack
-** use instead of vars for arg refs in ORETURN
-** refill on recall
+** store boxes
+** add cx_call_pop_args()
+*** move values from stack
+** change OPUTARGS to use call args
+** change ORETURN to use call args to resolve refs
+** call cx_call_pop_args() on recall
 * enable using Arg refs inside funcs
 ** add bool cx_is_arg_ref(type) fn
 *** search all args recursively for CX_TYPE_ARG
