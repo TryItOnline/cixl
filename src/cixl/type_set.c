@@ -1,10 +1,15 @@
+#include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "cixl/arg.h"
+#include "cixl/call.h"
+#include "cixl/cx.h"
 #include "cixl/error.h"
 #include "cixl/lib.h"
+#include "cixl/mfile.h"
 #include "cixl/parse.h"
+#include "cixl/scope.h"
 #include "cixl/type_set.h"
 
 static void dump_imp(struct cx_box *v, FILE *out) {
@@ -124,4 +129,68 @@ bool cx_type_id_init_imp(struct cx_type *t, int nargs, struct cx_type *args[]) {
   }
 
   return true;
+}
+
+bool cx_type_init_imp(struct cx_type *t, int nargs, struct cx_type *args[]) {
+  struct cx *cx = t->lib->cx;
+  struct cx_type_set *ts = cx_baseof(t, struct cx_type_set, imp);
+  struct cx_type *at = args[0];
+  struct cx_type *mt = NULL;
+
+  cx_do_set(&ts->set, struct cx_type *, tt) {
+    if (cx_is(at, *tt)) { mt = *tt; }
+  }
+  
+  if (!mt) {
+    cx_error(cx, cx->row, cx->col,
+	     "Type is not a member of %s: %s", t->raw->id, at->id);
+
+    return false;
+  }
+  
+  return true;
+}
+
+static char *conv_id(const char *in) {
+  struct cx_mfile out;
+  cx_mfile_open(&out);
+
+  for (const char *c = in; *c; c++) {
+    if (isupper(*c)) {
+      if (c != in) { fputc('-', out.stream); }
+      fputc(tolower(*c), out.stream);
+    } else {
+      fputc(*c, out.stream);
+    }
+  }
+  
+  cx_mfile_close(&out);
+  return out.data;
+}
+
+static bool conv_imp(struct cx_scope *s) {
+  struct cx_box *in = cx_test(cx_peek(s, false));
+  struct cx_call *call = cx_vec_peek(&s->cx->calls, 0);
+  struct cx_arg *ret = cx_test(cx_vec_start(&call->target->rets));
+  in->type = ret->type;
+  return true;
+}
+
+void cx_type_define_conv(struct cx_type *t, struct cx_type *mt) {
+  char *cid = conv_id(t->raw->id);
+  
+  cx_add_cfunc(t->lib, cid,
+	       cx_args(cx_arg("in", mt)),
+	       cx_args(cx_arg(NULL, t)),
+	       conv_imp);
+  
+  free(cid);
+  cid = conv_id(mt->id);
+  
+  cx_add_cfunc(t->lib, cid,
+	       cx_args(cx_arg("in", t)),
+	       cx_args(cx_arg(NULL, mt)),
+	       conv_imp);
+  
+  free(cid);
 }

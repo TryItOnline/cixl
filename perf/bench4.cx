@@ -11,15 +11,6 @@ use:
 {10000000 {
   `error throw
   'skipped' say
-  'skipped' say
-  'skipped' say
-  'skipped' say
-  'skipped' say
-  'skipped' say
-  'skipped' say
-  'skipped' say
-  'skipped' say
-  'skipped' say
   catch: A _;
 } times}
 

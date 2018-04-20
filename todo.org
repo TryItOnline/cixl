@@ -2,10 +2,6 @@
 #define ntohll(x) ((1==ntohl(1)) ? (x) : ((uint64_t)ntohl((x) & 0xFFFFFFFF) << 32) | ntohl((x) >> 32))
 host64 & net64 fns
 
-* finish type: macro
-** add CX_TYPE support in OTYPEDEF
-** test emit
-* ---
 * add cx_call.args
 ** add struct cx_call_arg (type & value)
 ** move values from stack & init resolved types on call init

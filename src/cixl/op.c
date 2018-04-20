@@ -1311,6 +1311,20 @@ cx_op_type(CX_OSTASH, {
     type.emit = stash_emit;
   });
 
+static void emit_type_args_init(struct cx_type *t,
+				struct cx_sym t_var,
+				FILE *out,
+				struct cx *cx) {
+  cx_do_vec(&t->args, struct cx_type *, at) {
+    struct cx_sym at_var = cx_gsym(cx, "at");
+    
+    fprintf(out,
+	    "struct cx_type *%s = cx_get_type(cx, \"%s\", false);\n"
+	    "*(struct cx_type **)cx_vec_push(&%s->imp.args) = %s;\n",
+	    at_var.id, (*at)->id, t_var.id, at_var.id);
+    }
+}
+
 static void typedef_emit_init(struct cx_op *op,
 			      struct cx_bin *bin,
 			      FILE *out,
@@ -1331,12 +1345,7 @@ static void typedef_emit_init(struct cx_op *op,
 	      t_var.id, (*pt)->id);
     }
 
-    cx_do_vec(&t->args, struct cx_type *, at) {
-      fprintf(out,
-	      "cx_type_push_args(&%s->imp, "
-	      "cx_test(cx_get_type(cx, \"%s\", false)));\n",
-	      t_var.id, (*at)->id);
-    }
+    emit_type_args_init(t, t_var, out, cx);
 
     struct cx_rec_type *rt = cx_baseof(t, struct cx_rec_type, imp);
 
@@ -1357,7 +1366,8 @@ static void typedef_emit_init(struct cx_op *op,
 	    t_var.id, t->id, t_var.id, op->pc+1, t_var.id, t_var.id);
 
     struct cx_type_set *ts = cx_baseof(t, struct cx_type_set, imp);
-    
+    emit_type_args_init(t, t_var, out, cx);
+
     cx_do_set(&ts->set, struct cx_type *, mt) {
       struct cx_sym mt_var = cx_gsym(cx, "mt");
       
@@ -1373,7 +1383,36 @@ static void typedef_emit_init(struct cx_op *op,
 	      "*(struct cx_type **)cx_vec_push(&%s->set.members) = %s;\n",
 	      t_var.id, mt_var.id);
     }
+  } else if (t->meta == CX_TYPE) {
+    fprintf(out,
+	    "struct cx_type_set *%s = cx_type_set_new(*cx->lib, \"%s\", true);\n"
+	    "if (!cx_lib_push_type(*cx->lib, &%s->imp)) { goto op%zd; }\n"
+	    "%s->imp.meta = CX_TYPE;\n"
+	    "%s->type_init = cx_type_init_imp;\n",
+	    t_var.id, t->id, t_var.id, op->pc+1, t_var.id, t_var.id);
+
+    struct cx_type_set *ts = cx_baseof(t, struct cx_type_set, imp);
+    emit_type_args_init(t, t_var, out, cx);
+
+    cx_do_set(&ts->set, struct cx_type *, mt) {
+      struct cx_sym
+	mt_var = cx_gsym(cx, "mt"),
+	tt_var = cx_gsym(cx, "tt");
+      
+      fprintf(out,
+	      "struct cx_type *%s = cx_get_type(cx, \"%s\", false);\n"
+	      "*(struct cx_type **)cx_vec_push(&%s->set.members) = %s;\n"
+	      "struct cx_type *%s = cx_type_get(&%s->imp, %s);\n"
+	      "cx_derive(%s, %s);\n"
+	      "cx_type_define_conv(%s, %s);\n",
+	      mt_var.id, (*mt)->id,
+	      t_var.id, mt_var.id,
+	      tt_var.id, t_var.id, mt_var.id,
+	      tt_var.id, mt_var.id,
+	      tt_var.id, mt_var.id);
+    }
   }
+  
 }
 
 cx_op_type(CX_OTYPEDEF, {

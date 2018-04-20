@@ -159,8 +159,7 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
 
   fputs("bool eval(struct cx *cx) {\n"
 	"bool _eval(struct cx *cx, ssize_t stop_pc) {\n"
-        "  static bool init = true;\n"
-	"  bool ok = false;\n\n",
+        "  static bool init = true;\n\n",
 	out);
   
   struct cx_set libs, types, funcs, fimps, syms;
@@ -295,13 +294,8 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
     fprintf(out, "op%zd: { /* %s %s */\n", op->pc, tok->type->id, op->type->id);
 
     fprintf(out,
-	    "cx->pc = %zd;\n\n"
-	    
-  	    "if (stop_pc == %zd) {\n"
-            "  ok = true;\n"
-            "  goto exit;\n"
-            "}\n\n"
-	    
+	    "cx->pc = %zd;\n"
+  	    "if (stop_pc == %zd) { goto exit; }\n"
 	    "cx->row = %d; cx->col = %d;\n",
 	    op->pc, op->pc, cx->row, cx->col);
 
@@ -331,9 +325,8 @@ bool cx_emit(struct cx_bin *bin, FILE *out, struct cx *cx) {
 
   fprintf(out, " op%zd:\n", bin->ops.count);
 
-  fputs("  ok = true;\n"
-	"exit:\n"
-	"  return ok;\n"
+  fputs("exit:\n"
+	"  return !cx->errors.count;\n"
 	"}\n\n"
 	
 	"  struct cx_bin *bin = cx_bin_new();\n"

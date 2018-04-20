@@ -28,52 +28,6 @@ static ssize_t type_set_eval(struct cx_macro_eval *eval,
   return tok_idx+1;
 }
 
-static char *type_conv_id(const char *in) {
-  struct cx_mfile out;
-  cx_mfile_open(&out);
-
-  for (const char *c = in; *c; c++) {
-    if (isupper(*c)) {
-      if (c != in) { fputc('-', out.stream); }
-      fputc(tolower(*c), out.stream);
-    } else {
-      fputc(*c, out.stream);
-    }
-  }
-  
-  cx_mfile_close(&out);
-  return out.data;
-}
-
-static bool conv_imp(struct cx_scope *s) {
-  struct cx_box *in = cx_test(cx_peek(s, false));
-  struct cx_call *call = cx_vec_peek(&s->cx->calls, 0);
-  struct cx_arg *ret = cx_test(cx_vec_start(&call->target->rets));
-  in->type = ret->type;
-  return true;
-}
-
-static bool type_init_imp(struct cx_type *t,
-			  int nargs, struct cx_type *args[]) {
-  struct cx *cx = t->lib->cx;
-  struct cx_type_set *ts = cx_baseof(t, struct cx_type_set, imp);
-  struct cx_type *at = args[0];
-  struct cx_type *mt = NULL;
-
-  cx_do_set(&ts->set, struct cx_type *, tt) {
-    if (cx_is(at, *tt)) { mt = *tt; }
-  }
-  
-  if (!mt) {
-    cx_error(cx, cx->row, cx->col,
-	     "Type is not a member of %s: %s", t->raw->id, at->id);
-
-    return false;
-  }
-  
-  return true;
-}
-
 static bool type_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   struct cx_vec toks;
   cx_vec_init(&toks, sizeof(struct cx_tok));
@@ -123,7 +77,7 @@ static bool type_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
     cx_type_push_args(type, cx->opt_type);
     if (!cx_lib_push_type(*cx->lib, type)) { goto exit1; }
     type->meta = CX_TYPE;
-    ts->type_init = type_init_imp;
+    ts->type_init = cx_type_init_imp;
   }
 
   cx_do_vec(&toks, struct cx_tok, t) {
@@ -142,22 +96,7 @@ static bool type_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
     *ok = mt;
     struct cx_type *tt = cx_type_get(type, mt);
     cx_derive(tt, mt);
-    char *conv_id = type_conv_id(type->id);
-    
-    cx_add_cfunc(type->lib, conv_id,
-		 cx_args(cx_arg("in", mt)),
-		 cx_args(cx_arg(NULL, tt)),
-		 conv_imp);
-    
-    free(conv_id);
-    conv_id = type_conv_id(mt->id);
-    
-    cx_add_cfunc(type->lib, conv_id,
-		 cx_args(cx_arg("in", tt)),
-		 cx_args(cx_arg(NULL, mt)),
-		 conv_imp);
-    
-    free(conv_id);
+    cx_type_define_conv(tt, mt);
   }
 
   struct cx_macro_eval *eval = cx_macro_eval_new(type_set_eval);

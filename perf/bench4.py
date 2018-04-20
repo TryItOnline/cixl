@@ -5,15 +5,6 @@ def test():
         try:
             raise Exception('error')
             print('skipped')
-            print('skipped')
-            print('skipped')
-            print('skipped')
-            print('skipped')
-            print('skipped')
-            print('skipped')
-            print('skipped')
-            print('skipped')
-            print('skipped')
         except Exception as e:
             pass
 
