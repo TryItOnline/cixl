@@ -18,6 +18,7 @@ struct cx_call *cx_call_init(struct cx_call *c,
   c->scope = cx_scope_ref(scope);
   c->recalls = 0;
   cx_vec_init(&c->args, sizeof(struct cx_box));
+  c->args.alloc = &scope->cx->stack_items_alloc;
   return c;
 }
 
@@ -58,13 +59,13 @@ bool cx_call_pop_args(struct cx_call *c) {
   }
 
   clear_args(c);
-  if (!nargs) { return true; }
+  if (!nargs) { return true; }  
   cx_vec_grow(&c->args, nargs);
 
   memcpy(c->args.items,
 	 cx_vec_peek(s, nargs-1),
 	 nargs*sizeof(struct cx_box));
-
+  
   s->count -= nargs;
   c->args.count = nargs;
   return true;

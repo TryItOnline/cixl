@@ -2,7 +2,8 @@
 #define ntohll(x) ((1==ntohl(1)) ? (x) : ((uint64_t)ntohl((x) & 0xFFFFFFFF) << 32) | ntohl((x) >> 32))
 host64 & net64 fns
 
-* profile call args
+* optimize OPUTARGS emit
+** step pointer to arg instead of calling cx_call_arg
 * change ORETURN to use call args to resolve refs
 * enable using Arg refs inside funcs
 ** add bool cx_is_arg_ref(type) fn
