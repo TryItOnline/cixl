@@ -4,7 +4,6 @@ host64 & net64 fns
 
 * profile call args
 * change ORETURN to use call args to resolve refs
-*** call cx_call_pop_args() on recall
 * enable using Arg refs inside funcs
 ** add bool cx_is_arg_ref(type) fn
 *** search all args recursively for CX_TYPE_ARG
@@ -59,14 +58,6 @@ host64 & net64 fns
 *** change eval to push value
 * replace clone fallback to copy with error
 * replace varargs with size/array+macro
-* add slurp types Int*/Str*/Arg*
-** derive from all parent slurp types
-*** hook into derive/underive
-** handle in cx_get_type
-** create on demand
-** tag types with slurp flag
-** handle in cx_type_vget()
-*** slurp all args
 * --- cxcrypt
 * add Pub/PrivKey
 * add README
