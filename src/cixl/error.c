@@ -30,6 +30,7 @@ struct cx_error *cx_error_init(struct cx_error *e,
   struct cx_scope *s = cx_scope(cx, 0);
 
   cx_vec_init(&e->stack, sizeof(struct cx_box));
+  e->stack.alloc = &cx->stack_items_alloc;
   cx_vec_grow(&e->stack, s->stack.count);
   cx_do_vec(&s->stack, struct cx_box, v) { cx_copy(cx_vec_push(&e->stack), v); }
 
