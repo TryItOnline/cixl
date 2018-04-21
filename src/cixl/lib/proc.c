@@ -3,6 +3,7 @@
 #include <unistd.h>
 
 #include "cixl/arg.h"
+#include "cixl/call.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
 #include "cixl/fimp.h"
@@ -15,20 +16,19 @@
 #include "cixl/stack.h"
 #include "cixl/str.h"
 
-static bool fork_imp(struct cx_scope *s) {
-  bool ok = false;
-
+static bool fork_imp(struct cx_call *call) {
   struct cx_box 
-    error = *cx_test(cx_pop(s, false)),
-    out = *cx_test(cx_pop(s, false)),
-    in = *cx_test(cx_pop(s, false));
+    *error = cx_test(cx_call_arg(call, 2)),
+    *out = cx_test(cx_call_arg(call, 1)),
+    *in = cx_test(cx_call_arg(call, 0));
 
+  struct cx_scope *s = call->scope;
   struct cx_proc *p = cx_proc_new(s->cx);
   
   struct cx_file
-    *in_file = (in.type == s->cx->nil_type) ? NULL : in.as_file,
-    *out_file = (out.type == s->cx->nil_type) ? NULL : out.as_file,
-    *error_file = (error.type == s->cx->nil_type) ? NULL : error.as_file;
+    *in_file = (in->type == s->cx->nil_type) ? NULL : in->as_file,
+    *out_file = (out->type == s->cx->nil_type) ? NULL : out->as_file,
+    *error_file = (error->type == s->cx->nil_type) ? NULL : error->as_file;
   
   switch(cx_proc_fork(p, in_file, out_file, error_file)) {
   case 0:
@@ -37,28 +37,24 @@ static bool fork_imp(struct cx_scope *s) {
     break;
   case -1:
     cx_proc_deref(p);
-    goto exit;
+    return false;
   default:
     cx_box_init(cx_push(s), s->cx->proc_type)->as_proc = p;
     break;
   }
 
-  ok = true;
- exit:
-  cx_box_deinit(&error);
-  cx_box_deinit(&out);
-  cx_box_deinit(&in);
-  return ok;
+  return true;
 }
 
-static bool exec_imp(struct cx_scope *s) {
+static bool exec_imp(struct cx_call *call) {
   struct cx_box
-    argsv = *cx_test(cx_pop(s, false)),
-    cmd = *cx_test(cx_pop(s, false));
+    *argsv = cx_test(cx_call_arg(call, 1)),
+    *cmd = cx_test(cx_call_arg(call, 0));
 
-  struct cx_stack *args = argsv.as_ptr;
+  struct cx_scope *s = call->scope;
+  struct cx_stack *args = argsv->as_ptr;
   char *as[args->imp.count+2];
-  as[0] = cmd.as_str->data;
+  as[0] = cmd->as_str->data;
   as[args->imp.count+1] = NULL;
   char **asp = as+1;
   
@@ -71,24 +67,19 @@ static bool exec_imp(struct cx_scope *s) {
     *asp++ = a->as_str->data;
   }
 
-  execvp(cmd.as_str->data, as);
+  execvp(cmd->as_str->data, as);
   cx_error(s->cx, s->cx->row, s->cx->col, "Failed executing command: %d", errno);
   return false;
 }
 
-static bool no_exec_imp(struct cx_scope *s) {
-  bool ok = false;
-  struct cx_box f = *cx_test(cx_pop(s, false));
-  if (!cx_noexec(s->cx, f.as_file->fd)) { goto exit; }
-  ok = true;
- exit:
-  cx_box_deinit(&f);
-  return ok;
+static bool no_exec_imp(struct cx_call *call) {
+  struct cx_box *f = cx_test(cx_call_arg(call, 0));
+  return cx_noexec(call->scope->cx, f->as_file->fd);
 }
 
-static bool in_imp(struct cx_scope *s) {
-  struct cx_box pv = *cx_test(cx_pop(s, false));
-  struct cx_proc *p = pv.as_proc;
+static bool in_imp(struct cx_call *call) {
+  struct cx_proc *p = cx_test(cx_call_arg(call, 0))->as_proc;
+  struct cx_scope *s = call->scope;
   if (!p->in && p->in_fd != -1) { p->in = cx_file_new(s->cx, p->in_fd, "w", NULL); }
 
   if (p->in) {
@@ -97,14 +88,13 @@ static bool in_imp(struct cx_scope *s) {
     cx_box_init(cx_push(s), s->cx->nil_type);
   }
   
-  cx_box_deinit(&pv);
   return true;
 }
 
-static bool out_imp(struct cx_scope *s) {
-  struct cx_box pv = *cx_test(cx_pop(s, false));
-  struct cx_proc *p = pv.as_proc;
-
+static bool out_imp(struct cx_call *call) {
+  struct cx_proc *p = cx_test(cx_call_arg(call, 0))->as_proc;
+  struct cx_scope *s = call->scope;
+  
   if (!p->out && p->out_fd != -1) {
     p->out = cx_file_new(s->cx, p->out_fd, "r", NULL);
   }
@@ -115,14 +105,13 @@ static bool out_imp(struct cx_scope *s) {
     cx_box_init(cx_push(s), s->cx->nil_type);
   }
   
-  cx_box_deinit(&pv);
   return true;
 }
 
-static bool error_imp(struct cx_scope *s) {
-  struct cx_box pv = *cx_test(cx_pop(s, false));
-  struct cx_proc *p = pv.as_proc;
-
+static bool error_imp(struct cx_call *call) {
+  struct cx_proc *p = cx_test(cx_call_arg(call, 0))->as_proc;
+  struct cx_scope *s = call->scope;
+  
   if (!p->error && p->error_fd != -1) {
     p->error = cx_file_new(s->cx, p->error_fd, "r", NULL);
   }
@@ -133,48 +122,48 @@ static bool error_imp(struct cx_scope *s) {
     cx_box_init(cx_push(s), s->cx->nil_type);
   }
   
-  cx_box_deinit(&pv);
   return true;
 }
 
-static bool wait_imp(struct cx_scope *s) {
+static bool wait_imp(struct cx_call *call) {
   struct cx_box
-    ms = *cx_test(cx_pop(s, false)),
-    p = *cx_test(cx_pop(s, false));
+    *ms = cx_test(cx_call_arg(call, 1)),
+    *p = cx_test(cx_call_arg(call, 0));
 
-  bool ok = false;
-  struct cx_box status;
-  if (!cx_proc_wait(p.as_proc, ms.as_int, &status)) { goto exit; }
-  *cx_push(s) = status;
-  ok = true;
- exit:
-  cx_box_deinit(&p);
-  return ok;
-}
-
-static bool kill_imp(struct cx_scope *s) {
-  struct cx_box
-    ms = *cx_test(cx_pop(s, false)),
-    p = *cx_test(cx_pop(s, false));
-
-  bool ok = false;
+  struct cx_scope *s = call->scope;
   struct cx_box status;
   
-  if (!cx_proc_kill(p.as_proc, ms.as_int, &status)) {
+  if (!cx_proc_wait(p->as_proc, ms->as_int, &status)) {
     cx_box_init(cx_push(s), s->cx->nil_type);
-    goto exit;
+    return true;
   }
   
   *cx_push(s) = status;
-  ok = true;
- exit:
-  cx_box_deinit(&p);
-  return ok;
+  return true;
 }
 
-static bool exit_imp(struct cx_scope *s) {
-  struct cx_box status = *cx_test(cx_pop(s, false));
-  exit(status.as_int);
+static bool kill_imp(struct cx_call *call) {
+  struct cx_box
+    *ms = cx_test(cx_call_arg(call, 1)),
+    *p = cx_test(cx_call_arg(call, 0));
+
+  struct cx_scope *s = call->scope;
+  struct cx_box status;
+  
+  if (!cx_proc_kill(p->as_proc, ms->as_int, &status)) {
+    cx_box_init(cx_push(s), s->cx->nil_type);
+    return true;
+  }
+  
+  *cx_push(s) = status;
+  return true;
+}
+
+static bool exit_imp(struct cx_call *call) {
+  struct cx_box *status = cx_test(cx_call_arg(call, 0));
+  struct cx_scope *s = call->scope;
+  
+  exit(status->as_int);
   cx_error(s->cx, s->cx->row, s->cx->col, "Failed exiting");
   return false;
 }
@@ -225,12 +214,12 @@ cx_lib(cx_init_proc, "cx/proc") {
 
   cx_add_cfunc(lib, "wait",
 	       cx_args(cx_arg("p", cx->proc_type), cx_arg("ms", cx->int_type)),
-	       cx_args(cx_arg(NULL, cx->int_type)),
+	       cx_args(cx_arg(NULL, cx_type_get(cx->opt_type, cx->int_type))),
 	       wait_imp);
 
   cx_add_cfunc(lib, "kill",
 	       cx_args(cx_arg("p", cx->proc_type), cx_arg("ms", cx->int_type)),
-	       cx_args(cx_arg(NULL, cx->int_type)),
+	       cx_args(cx_arg(NULL, cx_type_get(cx->opt_type, cx->int_type))),
 	       kill_imp);
 
   cx_add_cxfunc(lib, "popen",

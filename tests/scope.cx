@@ -1,5 +1,5 @@
 'Testing scopes...' say
 
-(7 14 21) stash [7 14 21] = check
+| (7 14 21) stash [7 14 21] = check
 
-1 (2 3 stash % 4) push [2 3 4] = check _
+| 1 (2 3 stash % 4) push [2 3 4] = check _

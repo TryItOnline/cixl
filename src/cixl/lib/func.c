@@ -203,77 +203,74 @@ static bool func_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   return true;
 }
 
-static bool func_id_imp(struct cx_scope *scope) {
-  struct cx_func *f = cx_test(cx_pop(scope, false))->as_ptr;
-  cx_box_init(cx_push(scope), scope->cx->sym_type)->as_sym = cx_sym(scope->cx, f->id);
+static bool func_id_imp(struct cx_call *call) {
+  struct cx_func *f = cx_test(cx_call_arg(call, 0))->as_ptr;
+  struct cx_scope *s = call->scope;
+  cx_box_init(cx_push(s), s->cx->sym_type)->as_sym = cx_sym(s->cx, f->id);
   return true;
 }
 
-static bool func_lib_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  struct cx_func *f = cx_test(cx_pop(scope, false))->as_ptr;
-  cx_box_init(cx_push(scope), cx->lib_type)->as_lib = f->lib;
+static bool func_lib_imp(struct cx_call *call) {
+  struct cx_func *f = cx_test(cx_call_arg(call, 0))->as_ptr;
+  struct cx_scope *s = call->scope;
+  cx_box_init(cx_push(s), s->cx->lib_type)->as_lib = f->lib;
   return true;
 }
 
-static bool fimp_lib_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  struct cx_fimp *f = cx_test(cx_pop(scope, false))->as_ptr;
-  cx_box_init(cx_push(scope), cx->lib_type)->as_lib = f->lib;
+static bool fimp_lib_imp(struct cx_call *call) {
+  struct cx_fimp *f = cx_test(cx_call_arg(call, 0))->as_ptr;
+  struct cx_scope *s = call->scope;
+  cx_box_init(cx_push(s), s->cx->lib_type)->as_lib = f->lib;
   return true;
 }
 
-static bool imps_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  struct cx_func *f = cx_test(cx_pop(scope, false))->as_ptr;
-  struct cx_stack *is = cx_stack_new(cx);
+static bool imps_imp(struct cx_call *call) {
+  struct cx_func *f = cx_test(cx_call_arg(call, 0))->as_ptr;
+  struct cx_scope *s = call->scope;
+  struct cx_stack *is = cx_stack_new(s->cx);
 
   cx_do_set(&f->imps, struct cx_fimp *, i) {
-    cx_box_init(cx_vec_push(&is->imp), cx->fimp_type)->as_ptr = *i;
+    cx_box_init(cx_vec_push(&is->imp), s->cx->fimp_type)->as_ptr = *i;
   }
   
-  cx_box_init(cx_push(scope), scope->cx->stack_type)->as_ptr = is;
+  cx_box_init(cx_push(s), s->cx->stack_type)->as_ptr = is;
   return true;
 }
 
-static bool call_imp(struct cx_scope *scope) {
-  struct cx_box v = *cx_test(cx_pop(scope, false));
-  bool ok = cx_call(&v, scope);
-  cx_box_deinit(&v);
-  return ok;
+static bool call_imp(struct cx_call *call) {
+  struct cx_box *v = cx_test(cx_call_arg(call, 0));
+  return cx_call(v, call->scope);
 }
 
-static struct cx_call *get_fimp_call(struct cx *cx) {
-  for (struct cx_call *c = cx_vec_peek(&cx->calls, 0);
-       c >= (struct cx_call *)cx->calls.items;
-       c--) {
-    if (!c->target->ptr) { return c; }
+static bool recall_imp(struct cx_call *call) {
+  struct cx_scope *s = call->scope;  
+  struct cx_call *c = cx_vec_peek(&s->cx->calls, 0);
+  bool ok = false;
+  
+  for (; c >= (struct cx_call *)s->cx->calls.items; c--) {
+    if (!c->fimp->ptr) {
+      ok = true;
+      break;
+    }
   }
 
-  return NULL;
-}
-
-static bool recall_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  struct cx_call *call = get_fimp_call(cx);
-  
-  if (!call) {
-    cx_error(cx, cx->row, cx->col, "Nothing to recall");
+  if (!ok) {
+    cx_error(s->cx, s->cx->row, s->cx->col, "Nothing to recall");
     return false;
   }
 
-  call->recalls++;  
+  c->recalls++;  
   return true;
 }
 
-static bool this_fimp_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
+static bool this_fimp_imp(struct cx_call *call) {
+  struct cx_scope *s = call->scope;
   
-  if (cx->calls.count > 1) {
-    struct cx_call *c = cx_vec_peek(&cx->calls, 1);
-    cx_box_init(cx_push(scope), cx->fimp_type)->as_ptr = c->target;
+  if (s->cx->calls.count > 1) {
+    struct cx_call *c = cx_vec_peek(&s->cx->calls, 1);
+    cx_box_init(cx_push(s), s->cx->fimp_type)->as_ptr = c->fimp;
   } else {
-    cx_box_init(cx_push(scope), cx->nil_type);
+    cx_box_init(cx_push(s), s->cx->nil_type);
   }
   
   return true;

@@ -3,6 +3,7 @@
 #include <unistd.h>
 
 #include "cixl/arg.h"
+#include "cixl/call.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
 #include "cixl/fimp.h"
@@ -14,99 +15,77 @@
 #include "cixl/scope.h"
 #include "cixl/str.h"
 
-static bool on_read_imp(struct cx_scope *scope) {
+static bool on_read_imp(struct cx_call *call) {
   struct cx_box
-    a = *cx_test(cx_pop(scope, false)),
-    f = *cx_test(cx_pop(scope, false)),
-    p = *cx_test(cx_pop(scope, false));
+    *a = cx_test(cx_call_arg(call, 2)),
+    *f = cx_test(cx_call_arg(call, 1)),
+    *p = cx_test(cx_call_arg(call, 0));
   
-  struct cx_poll_file *pf = cx_poll_read(p.as_poll, f.as_file->fd);
-  cx_copy(&pf->read_value, &a);
-
-  cx_box_deinit(&a);
-  cx_box_deinit(&f);
-  cx_box_deinit(&p);
+  struct cx_poll_file *pf = cx_poll_read(p->as_poll, f->as_file->fd);
+  cx_copy(&pf->read_value, a);
   return true;
 }
 
-static bool no_read_imp(struct cx_scope *scope) {
+static bool no_read_imp(struct cx_call *call) {
   struct cx_box
-    f = *cx_test(cx_pop(scope, false)),
-    p = *cx_test(cx_pop(scope, false));
+    *f = cx_test(cx_call_arg(call, 1)),
+    *p = cx_test(cx_call_arg(call, 0));
   
-  bool ok = cx_poll_no_read(p.as_poll, f.as_file->fd);
-
-  cx_box_deinit(&f);
-  cx_box_deinit(&p);
-  return ok;
+  return cx_poll_no_read(p->as_poll, f->as_file->fd);
 }
 
-static bool on_write_imp(struct cx_scope *scope) {
+static bool on_write_imp(struct cx_call *call) {
   struct cx_box
-    a = *cx_test(cx_pop(scope, false)),
-    f = *cx_test(cx_pop(scope, false)),
-    p = *cx_test(cx_pop(scope, false));
+    *a = cx_test(cx_call_arg(call, 2)),
+    *f = cx_test(cx_call_arg(call, 1)),
+    *p = cx_test(cx_call_arg(call, 0));
   
-  struct cx_poll_file *pf = cx_poll_write(p.as_poll, f.as_file->fd);
-  cx_copy(&pf->write_value, &a);
-
-  cx_box_deinit(&a);
-  cx_box_deinit(&f);
-  cx_box_deinit(&p);
+  struct cx_poll_file *pf = cx_poll_write(p->as_poll, f->as_file->fd);
+  cx_copy(&pf->write_value, a);
   return true;
 }
 
-static bool no_write_imp(struct cx_scope *scope) {
+static bool no_write_imp(struct cx_call *call) {
   struct cx_box
-    f = *cx_test(cx_pop(scope, false)),
-    p = *cx_test(cx_pop(scope, false));
+    *f = cx_test(cx_call_arg(call, 1)),
+    *p = cx_test(cx_call_arg(call, 0));
   
-  bool ok = cx_poll_no_write(p.as_poll, f.as_file->fd);
+  return cx_poll_no_write(p->as_poll, f->as_file->fd);
+}
 
-  cx_box_deinit(&f);
-  cx_box_deinit(&p);
+static bool delete_imp(struct cx_call *call) {
+  struct cx_box
+    *f = cx_test(cx_call_arg(call, 1)),
+    *p = cx_test(cx_call_arg(call, 0));
+
+  struct cx_scope *s = call->scope;
+  bool ok = cx_poll_delete(p->as_poll, f->as_file->fd);
+  if (!ok) { cx_error(s->cx, s->cx->row, s->cx->col, "File is not polled"); }
   return ok;
 }
 
-static bool delete_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-
+static bool wait_imp(struct cx_call *call) {
   struct cx_box
-    f = *cx_test(cx_pop(scope, false)),
-    p = *cx_test(cx_pop(scope, false));
+    *ms = cx_test(cx_call_arg(call, 1)),
+    *p = cx_test(cx_call_arg(call, 0));
 
-  bool ok = cx_poll_delete(p.as_poll, f.as_file->fd);
-  if (!ok) { cx_error(cx, cx->row, cx->col, "File is not polled"); }
-  cx_box_deinit(&f);
-  cx_box_deinit(&p);
-  return ok;
-}
-
-static bool wait_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-
-  struct cx_box
-    ms = *cx_test(cx_pop(scope, false)),
-    p = *cx_test(cx_pop(scope, false));
-
-  if (ms.type == cx->nil_type) { ms.as_int = -1; }
-  int n = cx_poll_wait(p.as_poll, ms.as_int, scope);
-  cx_box_deinit(&p);
+  struct cx_scope *s = call->scope;
+  if (ms->type == s->cx->nil_type) { ms->as_int = -1; }
+  int n = cx_poll_wait(p->as_poll, ms->as_int, s);
 
   if (n == -1 && errno != EAGAIN) {
-    cx_error(cx, cx->row, cx->col, "Failed polling: %d", errno);
+    cx_error(s->cx, s->cx->row, s->cx->col, "Failed polling: %d", errno);
     return false;
   }
 
-  cx_box_init(cx_push(scope), cx->int_type)->as_int = n;
+  cx_box_init(cx_push(s), s->cx->int_type)->as_int = n;
   return true;
 }
 
-static bool len_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  struct cx_box p = *cx_test(cx_pop(scope, false));
-  cx_box_init(cx_push(scope), cx->int_type)->as_int = p.as_poll->files.members.count;
-  cx_box_deinit(&p);
+static bool len_imp(struct cx_call *call) {
+  struct cx_box *p = cx_test(cx_call_arg(call, 0));
+  struct cx_scope *s = call->scope;
+  cx_box_init(cx_push(s), s->cx->int_type)->as_int = p->as_poll->files.members.count;
   return true;
 }
 

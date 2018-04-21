@@ -2,13 +2,9 @@
 #define ntohll(x) ((1==ntohl(1)) ? (x) : ((uint64_t)ntohl((x) & 0xFFFFFFFF) << 32) | ntohl((x) >> 32))
 host64 & net64 fns
 
-* add cx_call.args
-** store boxes
-** add cx_call_pop_args()
-*** move values from stack
-** change OPUTARGS to use call args
-** change ORETURN to use call args to resolve refs
-** call cx_call_pop_args() on recall
+* profile call args
+* change ORETURN to use call args to resolve refs
+*** call cx_call_pop_args() on recall
 * enable using Arg refs inside funcs
 ** add bool cx_is_arg_ref(type) fn
 *** search all args recursively for CX_TYPE_ARG
@@ -21,6 +17,10 @@ host64 & net64 fns
 ** update qdb funcs
 ** update collabri
 *** use init-table
+* update pair lib
+** add result with switched type to pair rezip imp
+** specialize func types
+** update tests/examples
 * update cxcrypt
 * --
 * add implicit lambda scope
@@ -29,6 +29,10 @@ host64 & net64 fns
 ** install on call
 ** shuffle all values on stack back and forth
 ** replace scope.parents with plain parent ptr
+* add cx_abort()/cx_exit(int code)/cx_on_exit(void (void *data))
+** use in cx_test
+** use in exit-fn
+** use on_exit instead of atexit
 * replace cx_fimp.init with enum cx_fimp_type
 ** CX_FHOST_C, CX_FHOST_CX, CX_FGUEST
 * remove Rec =/?/print overloads

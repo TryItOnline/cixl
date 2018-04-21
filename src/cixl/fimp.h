@@ -4,12 +4,13 @@
 #include <cixl/vec.h>
 
 struct cx;
+struct cx_call;
 struct cx_bin;
 struct cx_func;
 struct cx_scope;
 struct cx_type;
 
-typedef bool (*cx_fimp_ptr_t)(struct cx_scope *);
+typedef bool (*cx_fimp_ptr_t)(struct cx_call *);
 
 struct cx_fimp {
   struct cx_lib *lib;

@@ -4,6 +4,7 @@
 
 #include "cixl/arg.h"
 #include "cixl/box.h"
+#include "cixl/call.h"
 #include "cixl/char.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
@@ -204,13 +205,13 @@ static struct cx_iter *hex_decoder_new(struct cx_iter *in) {
 
 bool split_lines(unsigned char c) { return c == '\r' || c == '\n'; }
 
-static bool lines_imp(struct cx_scope *scope) {
-  struct cx_box in = *cx_test(cx_pop(scope, false)), in_it;
-  cx_iter(&in, &in_it);
+static bool lines_imp(struct cx_call *call) {
+  struct cx_box *in = cx_test(cx_call_arg(call, 0)), in_it;
+  struct cx_scope *s = call->scope;
+  cx_iter(in, &in_it);
   struct cx_split_iter *it = cx_split_iter_new(in_it.as_iter);
   it->split_fn = split_lines;
-  cx_box_init(cx_push(scope), scope->cx->iter_type)->as_iter = &it->iter;
-  cx_box_deinit(&in);
+  cx_box_init(cx_push(s), s->cx->iter_type)->as_iter = &it->iter;
   return true;
 }
 
@@ -218,247 +219,234 @@ bool split_words(unsigned char c) {
   return !isalpha(c);
 }
 
-static bool words_imp(struct cx_scope *scope) {
-  struct cx_box in = *cx_test(cx_pop(scope, false)), in_it;
-  cx_iter(&in, &in_it);
+static bool words_imp(struct cx_call *call) {
+  struct cx_box *in = cx_test(cx_call_arg(call, 0)), in_it;
+  struct cx_scope *s = call->scope;
+  cx_iter(in, &in_it);
   struct cx_split_iter *it = cx_split_iter_new(in_it.as_iter);
   it->split_fn = split_words;
-  cx_box_init(cx_push(scope), scope->cx->iter_type)->as_iter = &it->iter;
-  cx_box_deinit(&in);
+  cx_box_init(cx_push(s), s->cx->iter_type)->as_iter = &it->iter;
   return true;
 }
 
-static bool split_imp(struct cx_scope *scope) {
+static bool split_imp(struct cx_call *call) {
   struct cx_box
-    s = *cx_test(cx_pop(scope, false)),
-    in = *cx_test(cx_pop(scope, false)),
+    *split = cx_test(cx_call_arg(call, 1)),
+    *in = cx_test(cx_call_arg(call, 0)),
     in_it;
 
-  cx_iter(&in, &in_it);
+  struct cx_scope *s = call->scope;
+  cx_iter(in, &in_it);
   struct cx_split_iter *it = cx_split_iter_new(in_it.as_iter);
-  it->split = s;
-  cx_box_init(cx_push(scope), scope->cx->iter_type)->as_iter = &it->iter;
-  cx_box_deinit(&in);
+  cx_copy(&it->split, split);
+  cx_box_init(cx_push(s), s->cx->iter_type)->as_iter = &it->iter;
   return true;
 }
 
-static bool is_graph_imp(struct cx_scope *scope) {
-  struct cx_box *v = cx_test(cx_peek(scope, false));
-  bool ig = isgraph(v->as_char);
-  cx_box_init(v, scope->cx->bool_type)->as_bool = ig;
+static bool is_graph_imp(struct cx_call *call) {
+  struct cx_box *v = cx_test(cx_call_arg(call, 0));
+  struct cx_scope *s = call->scope;
+  cx_box_init(cx_push(s), s->cx->bool_type)->as_bool = isgraph(v->as_char);;
   return true;
 }
 
-static bool char_upper_imp(struct cx_scope *scope) {
-  struct cx_box *v = cx_test(cx_peek(scope, false));
-  v->as_char = toupper(v->as_char);
+static bool char_upper_imp(struct cx_call *call) {
+  struct cx_box *v = cx_test(cx_call_arg(call, 0));
+  struct cx_scope *s = call->scope;
+  cx_box_init(cx_push(s), s->cx->char_type)->as_char = toupper(v->as_char);
   return true;
 }
 
-static bool char_lower_imp(struct cx_scope *scope) {
-  struct cx_box *v = cx_test(cx_peek(scope, false));
-  v->as_char = tolower(v->as_char);
+static bool char_lower_imp(struct cx_call *call) {
+  struct cx_box *v = cx_test(cx_call_arg(call, 0));
+  struct cx_scope *s = call->scope;
+  cx_box_init(cx_push(s), s->cx->char_type)->as_char = tolower(v->as_char);
   return true;
 }
 
-static bool char_int_imp(struct cx_scope *scope) {
-  struct cx_box *v = cx_test(cx_peek(scope, false));
-  cx_box_init(v, scope->cx->int_type)->as_int = v->as_char;
+static bool char_int_imp(struct cx_call *call) {
+  struct cx_box *v = cx_test(cx_call_arg(call, 0));
+  struct cx_scope *s = call->scope;
+  cx_box_init(cx_push(s), s->cx->int_type)->as_int = v->as_char;
   return true;
 }
 
-static bool int_char_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  struct cx_box *v = cx_test(cx_peek(scope, false));
+static bool int_char_imp(struct cx_call *call) {
+  struct cx_box *v = cx_test(cx_call_arg(call, 0));
+  struct cx_scope *s = call->scope;
   
   if (v->as_int < 0 || v->as_int > 255) {
-    cx_error(cx, cx->row, cx->col, "Invalid char: %" PRId64, v->as_int);
+    cx_error(s->cx, s->cx->row, s->cx->col, "Invalid char: %" PRId64, v->as_int);
     return false;
   }
   
-  cx_box_init(v, cx->char_type)->as_char = v->as_int;
+  cx_box_init(cx_push(s), s->cx->char_type)->as_char = v->as_int;
   return true;
 }
 
-static bool int_str_imp(struct cx_scope *scope) {
-  struct cx_box *v = cx_test(cx_peek(scope, false));
-  char *s = cx_fmt("%" PRId64, v->as_int);
-  cx_box_init(v, scope->cx->str_type)->as_str = cx_str_new(s, strlen(s));
-  free(s);
+static bool int_str_imp(struct cx_call *call) {
+  struct cx_box *v = cx_test(cx_call_arg(call, 0));
+  struct cx_scope *s = call->scope;
+  char *sv = cx_fmt("%" PRId64, v->as_int);
+  cx_box_init(cx_push(s), s->cx->str_type)->as_str = cx_str_new(sv, strlen(sv));
+  free(sv);
   return true;
 }
 
-static bool len_imp(struct cx_scope *scope) {
-  struct cx_box *v = cx_test(cx_peek(scope, false));
-  size_t len = v->as_str->len;
-  cx_box_deinit(v);
-  cx_box_init(v, scope->cx->int_type)->as_int = len;
+static bool len_imp(struct cx_call *call) {
+  struct cx_box *v = cx_test(cx_call_arg(call, 0));
+  struct cx_scope *s = call->scope;
+  cx_box_init(cx_push(s), s->cx->int_type)->as_int = v->as_str->len;
   return true;
 }
 
-static bool get_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  
+static bool get_imp(struct cx_call *call) {
   struct cx_box
-    i = *cx_test(cx_pop(scope, false)),
-    s = *cx_test(cx_pop(scope, false));
+    *i = cx_test(cx_call_arg(call, 1)),
+    *v = cx_test(cx_call_arg(call, 0));
 
-  bool ok = false;
+  struct cx_scope *s = call->scope;
   
-  if (i.as_int < 0 || i.as_int >= s.as_str->len) {
-    cx_error(cx, cx->row, cx->col, "Index out of bounds: %" PRId64, i.as_int);
-    goto exit;
+  if (i->as_int < 0 || i->as_int >= v->as_str->len) {
+    cx_error(s->cx, s->cx->row, s->cx->col,
+	     "Index out of bounds: %" PRId64, i->as_int);
+    
+    return false;
   }
   
-  cx_box_init(cx_push(scope), cx->char_type)->as_char = *(s.as_str->data+i.as_int);
-  ok = true;
- exit:
-  cx_box_deinit(&s);
-  return ok;
-}
-
-static bool pop_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  struct cx_box in = *cx_test(cx_pop(scope, false));
-  struct cx_str *s = in.as_str;
-  
-  if (s->len) {
-    cx_box_init(cx_push(scope), cx->char_type)->as_char = s->data[s->len-1];
-    s->len--;
-    s->data[s->len] = 0;
-  } else {
-    cx_box_init(cx_push(scope), cx->nil_type);
-  }
-
-  cx_box_deinit(&in);
+  cx_box_init(cx_push(s), s->cx->char_type)->as_char = *(v->as_str->data+i->as_int);
   return true;
 }
 
-static bool seq_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  struct cx_box in = *cx_test(cx_pop(scope, false)), it;
-  cx_iter(&in, &it);
+static bool pop_imp(struct cx_call *call) {
+  struct cx_str *v = cx_test(cx_call_arg(call, 0))->as_str;
+  struct cx_scope *s = call->scope;
+  
+  if (v->len) {
+    cx_box_init(cx_push(s), s->cx->char_type)->as_char = v->data[v->len-1];
+    v->len--;
+    v->data[v->len] = 0;
+  } else {
+    cx_box_init(cx_push(s), s->cx->nil_type);
+  }
+  
+  return true;
+}
+
+static bool seq_imp(struct cx_call *call) {
+  struct cx_box *in = cx_test(cx_call_arg(call, 0)), it;
+  struct cx_scope *s = call->scope;
+  cx_iter(in, &it);
   struct cx_mfile out;
   cx_mfile_open(&out);
   struct cx_box c;
   
-  while (cx_iter_next(it.as_iter, &c, scope)) {
-    if (c.type == cx->nil_type) { continue; }
+  while (cx_iter_next(it.as_iter, &c, s)) {
+    if (c.type == s->cx->nil_type) { continue; }
     fputc(c.as_char, out.stream);
   }
   
   fflush(out.stream);
-  cx_box_init(cx_push(scope), cx->str_type)->as_str =
+  cx_box_init(cx_push(s), s->cx->str_type)->as_str =
     cx_str_new(out.data, ftell(out.stream));
   cx_mfile_close(&out);
   free(out.data);
-  cx_box_deinit(&in);
   cx_box_deinit(&it);
   return true;
 }
 
-static bool str_int_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  struct cx_box v = *cx_test(cx_pop(scope, false));
-  struct cx_str *s = v.as_str;
-  int64_t iv = strtoimax(s->data, NULL, 10);
+static bool str_int_imp(struct cx_call *call) {
+  struct cx_str *v = cx_test(cx_call_arg(call, 0))->as_str;
+  struct cx_scope *s = call->scope;
+  int64_t iv = strtoimax(v->data, NULL, 10);
   
-  if (!iv && s->data[0] != '0') {
-    cx_box_init(cx_push(scope), cx->nil_type);
+  if (!iv && v->data[0] != '0') {
+    cx_box_init(cx_push(s), s->cx->nil_type);
   } else {
-    cx_box_init(cx_push(scope), cx->int_type)->as_int = iv;
+    cx_box_init(cx_push(s), s->cx->int_type)->as_int = iv;
   }
   
-  cx_box_deinit(&v);
   return true;
 }
 
-static bool str_sub_imp(struct cx_scope *scope) {
+static bool str_sub_imp(struct cx_call *call) {
   struct cx_box
-    x = *cx_test(cx_pop(scope, false)),
-    y = *cx_test(cx_pop(scope, false));
+    *x = cx_test(cx_call_arg(call, 0)),
+    *y = cx_test(cx_call_arg(call, 1));
+
+  struct cx_scope *s = call->scope;
   
-  cx_box_init(cx_push(scope),
-	      scope->cx->int_type)->as_int = cx_str_dist(x.as_str->data,
-							 y.as_str->data);
+  cx_box_init(cx_push(s),
+	      s->cx->int_type)->as_int = cx_str_dist(x->as_str->data,
+						     y->as_str->data);
   
-  cx_box_deinit(&x);
-  cx_box_deinit(&y);
   return true;
 }
 
-static bool str_upper_imp(struct cx_scope *scope) {
-  struct cx_box v = *cx_test(cx_pop(scope, false));
-  struct cx_str *s = v.as_str;
-  for (char *c = s->data; c < s->data+s->len; c++) { *c = toupper(*c); }
-  cx_box_deinit(&v);
+static bool str_upper_imp(struct cx_call *call) {
+  struct cx_str *v = cx_test(cx_call_arg(call, 0))->as_str;
+  for (char *c = v->data; c < v->data+v->len; c++) { *c = toupper(*c); }
   return true;
 }
 
-static bool str_lower_imp(struct cx_scope *scope) {
-  struct cx_box v = *cx_test(cx_pop(scope, false));
-  struct cx_str *s = v.as_str;
-  for (char *c = s->data; c < s->data+s->len; c++) { *c = tolower(*c); }
-  cx_box_deinit(&v);
+static bool str_lower_imp(struct cx_call *call) {
+  struct cx_str *v = cx_test(cx_call_arg(call, 0))->as_str;
+  for (char *c = v->data; c < v->data+v->len; c++) { *c = tolower(*c); }
   return true;
 }
 
-static bool str_reverse_imp(struct cx_scope *scope) {
-  struct cx_box s = *cx_test(cx_pop(scope, false));
-  cx_reverse(s.as_str->data, s.as_str->len);
-  cx_box_deinit(&s);
+static bool str_reverse_imp(struct cx_call *call) {
+  struct cx_box *v = cx_test(cx_call_arg(call, 0));
+  cx_reverse(v->as_str->data, v->as_str->len);
   return true;
 }
 
-static bool join_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  
+static bool join_imp(struct cx_call *call) {
   struct cx_box
-    sep = *cx_test(cx_pop(scope, false)),
-    in = *cx_test(cx_pop(scope, false)),
+    *sep = cx_test(cx_call_arg(call, 1)),
+    *in = cx_test(cx_call_arg(call, 0)),
     it;
 
-  cx_iter(&in, &it);
+  struct cx_scope *s = call->scope;
+  cx_iter(in, &it);
   struct cx_mfile out;
   cx_mfile_open(&out);
   struct cx_box v;
   bool print_sep = false;
   
-  while (cx_iter_next(it.as_iter, &v, scope)) {
-    if (print_sep) { cx_print(&sep, out.stream); }
+  while (cx_iter_next(it.as_iter, &v, s)) {
+    if (print_sep) { cx_print(sep, out.stream); }
     cx_print(&v, out.stream);
     cx_box_deinit(&v);
-    print_sep = sep.type != cx->nil_type;
+    print_sep = sep->type != s->cx->nil_type;
   }
 
   cx_box_deinit(&it);
   cx_mfile_close(&out);
-  cx_box_init(cx_push(scope), cx->str_type)->as_str = cx_str_new(out.data, out.size);
+  cx_box_init(cx_push(s), s->cx->str_type)->as_str = cx_str_new(out.data, out.size);
   free(out.data);
-  cx_box_deinit(&sep);
-  cx_box_deinit(&in);
   return true;
 }
 
-static bool hex_coder_imp(struct cx_scope *s) {
-  struct cx_box in = *cx_test(cx_pop(s, false)), it;
-  cx_iter(&in, &it);
+static bool hex_coder_imp(struct cx_call *call) {
+  struct cx_box *in = cx_test(cx_call_arg(call, 0)), it;
+  struct cx_scope *s = call->scope;
+  cx_iter(in, &it);
 
   cx_box_init(cx_push(s), cx_type_get(s->cx->iter_type, s->cx->char_type))->as_iter =
     hex_coder_new(it.as_iter);
-  
-  cx_box_deinit(&in);
+
   return true;
 }
 
-static bool hex_decoder_imp(struct cx_scope *s) {
-  struct cx_box in = *cx_test(cx_pop(s, false)), it;
-  cx_iter(&in, &it);
+static bool hex_decoder_imp(struct cx_call *call) {
+  struct cx_box *in = cx_test(cx_call_arg(call, 0)), it;
+  struct cx_scope *s = call->scope;
+  cx_iter(in, &it);
   
   cx_box_init(cx_push(s), cx_type_get(s->cx->iter_type, s->cx->char_type))->as_iter =
     hex_decoder_new(it.as_iter);
 
-  cx_box_deinit(&in);
   return true;
 }
 

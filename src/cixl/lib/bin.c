@@ -4,6 +4,7 @@
 #include "cixl/arg.h"
 #include "cixl/bin.h"
 #include "cixl/box.h"
+#include "cixl/call.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
 #include "cixl/fimp.h"
@@ -14,44 +15,41 @@
 #include "cixl/scope.h"
 #include "cixl/str.h"
 
-static bool compile_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  
+static bool compile_imp(struct cx_call *call) {  
   struct cx_box
-    in = *cx_test(cx_pop(scope, false)),
-    out = *cx_test(cx_pop(scope, false));
+    *in = cx_test(cx_call_arg(call, 1)),
+    *out = cx_test(cx_call_arg(call, 0));
 
+  struct cx_scope *s = call->scope;
   struct cx_vec toks;
   cx_vec_init(&toks, sizeof(struct cx_tok));
-  bool ok = cx_parse_str(cx, in.as_str->data, &toks);
+  bool ok = cx_parse_str(s->cx, in->as_str->data, &toks);
   if (!ok) { goto exit; }
   
-  struct cx_bin *bin = out.as_ptr;
+  struct cx_bin *bin = out->as_ptr;
 
-  if (!(ok = cx_compile(cx, cx_vec_start(&toks), cx_vec_end(&toks), bin))) {
+  if (!(ok = cx_compile(s->cx, cx_vec_start(&toks), cx_vec_end(&toks), bin))) {
     goto exit;
   }
- exit:
-  cx_box_deinit(&in);
-  cx_box_deinit(&out);
-  cx_do_vec(&toks, struct cx_tok, t) { cx_tok_deinit(t); }
-  cx_vec_deinit(&toks);
-  return ok;
+ exit: {
+    cx_do_vec(&toks, struct cx_tok, t) { cx_tok_deinit(t); }
+    cx_vec_deinit(&toks);
+    return ok;
+  }
 }
 
-static bool emit_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  struct cx_box in = *cx_test(cx_pop(scope, false));
-  struct cx_bin *bin = in.as_ptr;
+static bool emit_imp(struct cx_call *call) {
+  struct cx_scope *s = call->scope;
+  struct cx_box *in = cx_test(cx_call_arg(call, 0));
+  struct cx_bin *bin = in->as_ptr;
   struct cx_mfile out;
   cx_mfile_open(&out);  
-  bool ok = cx_emit(bin, out.stream, cx);
+  bool ok = cx_emit(bin, out.stream, s->cx);
   if (!ok) { goto exit; }
   fflush(out.stream);
-  cx_box_init(cx_push(scope), cx->str_type)->as_str = cx_str_new(out.data, out.size);
+  cx_box_init(cx_push(s), s->cx->str_type)->as_str = cx_str_new(out.data, out.size);
   ok = true;
  exit:
-  cx_box_deinit(&in);
   cx_mfile_close(&out);
   free(out.data);
   return ok;

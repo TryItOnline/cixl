@@ -5,6 +5,7 @@
 
 #include "cixl/set.h"
 
+struct cx_arg;
 struct cx_fimp;
 struct cx_scope;
 struct cx_type;

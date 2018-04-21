@@ -1,6 +1,7 @@
 #include "cixl/arg.h"
 #include "cixl/bin.h"
 #include "cixl/box.h"
+#include "cixl/call.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
 #include "cixl/fimp.h"
@@ -73,34 +74,30 @@ static bool switch_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   return false;  
 }
 
-static bool int_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  struct cx_box v = *cx_test(cx_pop(scope, false));
-  cx_box_init(cx_push(scope), cx->int_type)->as_int = v.as_bool ? 1 : 0;
+static bool int_imp(struct cx_call *call) {
+  struct cx_box *v = cx_test(cx_call_arg(call, 0));
+  struct cx_scope *s = call->scope;
+  cx_box_init(cx_push(s), s->cx->int_type)->as_int = v->as_bool ? 1 : 0;
   return true;
 }
 
-static bool eqval_imp(struct cx_scope *scope) {
+static bool eqval_imp(struct cx_call *call) {
   struct cx_box
-    y = *cx_test(cx_pop(scope, false)),
-    x = *cx_test(cx_pop(scope, false));
-  
-  cx_box_init(cx_push(scope),
-	      scope->cx->bool_type)->as_bool = cx_eqval(&x, &y);
-  
-  cx_box_deinit(&x);
-  cx_box_deinit(&y);
+    *y = cx_test(cx_call_arg(call, 1)),
+    *x = cx_test(cx_call_arg(call, 0));
+
+  struct cx_scope *s = call->scope;
+  cx_box_init(cx_push(s), s->cx->bool_type)->as_bool = cx_eqval(x, y);
   return true;
 }
 
-static bool equid_imp(struct cx_scope *scope) {
+static bool equid_imp(struct cx_call *call) {
   struct cx_box
-    y = *cx_test(cx_pop(scope, false)),
-    x = *cx_test(cx_pop(scope, false));
-  
-  cx_box_init(cx_push(scope), scope->cx->bool_type)->as_bool = cx_equid(&x, &y);
-  cx_box_deinit(&x);
-  cx_box_deinit(&y);
+    *y = cx_test(cx_call_arg(call, 1)),
+    *x = cx_test(cx_call_arg(call, 0));
+
+  struct cx_scope *s = call->scope;
+  cx_box_init(cx_push(s), s->cx->bool_type)->as_bool = cx_equid(x, y);
   return true;
 }
 
@@ -117,272 +114,199 @@ static struct cx_sym cmp_sym(struct cx *cx, enum cx_cmp cmp) {
   return cx_sym(cx, ">");
 }
 
-static bool cmp_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  
+static bool cmp_imp(struct cx_call *call) {
   struct cx_box
-    y = *cx_test(cx_pop(scope, false)),
-    x = *cx_test(cx_pop(scope, false));
+    *y = cx_test(cx_call_arg(call, 1)),
+    *x = cx_test(cx_call_arg(call, 0));
 
-  cx_box_init(cx_push(scope), cx->sym_type)->as_sym = cmp_sym(cx, cx_cmp(&x, &y));
+  struct cx_scope *s = call->scope;
+  cx_box_init(cx_push(s), s->cx->sym_type)->as_sym = cmp_sym(s->cx, cx_cmp(x, y));
   return true;
 }
 
-static bool lt_imp(struct cx_scope *scope) {
+static bool lt_imp(struct cx_call *call) {
   struct cx_box
-    y = *cx_test(cx_pop(scope, false)),
-    x = *cx_test(cx_pop(scope, false));
+    *y = cx_test(cx_call_arg(call, 1)),
+    *x = cx_test(cx_call_arg(call, 0));
 
-  cx_box_init(cx_push(scope),
-	      scope->cx->bool_type)->as_bool = cx_cmp(&x, &y) == CX_CMP_LT;
-  
-  cx_box_deinit(&x);
-  cx_box_deinit(&y);
+  struct cx_scope *s = call->scope;
+  cx_box_init(cx_push(s), s->cx->bool_type)->as_bool = cx_cmp(x, y) == CX_CMP_LT;
   return true;
 }
 
-static bool gt_imp(struct cx_scope *scope) {
+static bool gt_imp(struct cx_call *call) {
   struct cx_box
-    y = *cx_test(cx_pop(scope, false)),
-    x = *cx_test(cx_pop(scope, false));
+    *y = cx_test(cx_call_arg(call, 1)),
+    *x = cx_test(cx_call_arg(call, 0));
 
-  cx_box_init(cx_push(scope),
-	      scope->cx->bool_type)->as_bool = cx_cmp(&x, &y) == CX_CMP_GT;
-  
-  cx_box_deinit(&x);
-  cx_box_deinit(&y);
+  struct cx_scope *s = call->scope;
+  cx_box_init(cx_push(s), s->cx->bool_type)->as_bool = cx_cmp(x, y) == CX_CMP_GT;
   return true;
 }
 
-static bool lte_imp(struct cx_scope *scope) {
+static bool lte_imp(struct cx_call *call) {
   struct cx_box
-    y = *cx_test(cx_pop(scope, false)),
-    x = *cx_test(cx_pop(scope, false));
+    *y = cx_test(cx_call_arg(call, 1)),
+    *x = cx_test(cx_call_arg(call, 0));
 
-  enum cx_cmp cmp = cx_cmp(&x, &y);
-  
-  cx_box_init(cx_push(scope),
-	      scope->cx->bool_type)->as_bool = cmp == CX_CMP_LT || cmp == CX_CMP_EQ;
-  
-  cx_box_deinit(&x);
-  cx_box_deinit(&y);
+  struct cx_scope *s = call->scope;
+  enum cx_cmp cmp = cx_cmp(x, y);
+
+  cx_box_init(cx_push(s), s->cx->bool_type)->as_bool =
+    cmp == CX_CMP_LT || cmp == CX_CMP_EQ;
+
   return true;
 }
 
-static bool gte_imp(struct cx_scope *scope) {
+static bool gte_imp(struct cx_call *call) {
   struct cx_box
-    y = *cx_test(cx_pop(scope, false)),
-    x = *cx_test(cx_pop(scope, false));
+    *y = cx_test(cx_call_arg(call, 1)),
+    *x = cx_test(cx_call_arg(call, 0));
 
-  enum cx_cmp cmp = cx_cmp(&x, &y);
+  struct cx_scope *s = call->scope;
+  enum cx_cmp cmp = cx_cmp(x, y);
   
-  cx_box_init(cx_push(scope),
-	      scope->cx->bool_type)->as_bool = cmp == CX_CMP_GT || cmp == CX_CMP_EQ;
-  
-  cx_box_deinit(&x);
-  cx_box_deinit(&y);
+  cx_box_init(cx_push(s), s->cx->bool_type)->as_bool =
+    cmp == CX_CMP_GT || cmp == CX_CMP_EQ;
+
   return true;
 }
 
-static bool ok_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  struct cx_box v = *cx_test(cx_peek(scope, false));
-  if (v.type == cx->bool_type) { return true; }
-  cx_pop(scope, false);
-  cx_box_init(cx_push(scope), cx->bool_type)->as_bool = cx_ok(&v);
-  cx_box_deinit(&v);
+static bool ok_imp(struct cx_call *call) {
+  struct cx_box *v = cx_test(cx_call_arg(call, 0));  
+  struct cx_scope *s = call->scope;
+
+  cx_box_init(cx_push(s), s->cx->bool_type)->as_bool =
+    (v->type == s->cx->bool_type) ? v->as_bool : cx_ok(v);
+
   return true;
 }
 
-static bool not_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  struct cx_box v = *cx_test(cx_pop(scope, false));
+static bool not_imp(struct cx_call *call) {
+  struct cx_box *v = cx_test(cx_call_arg(call, 0));
+  struct cx_scope *s = call->scope;
   bool ok = false;
 
-  if (v.type == cx->bool_type) {
-    ok = v.as_bool;
-  } else if (v.type != cx->nil_type) {
-    ok = cx_ok(&v);
+  if (v->type == s->cx->bool_type) {
+    ok = v->as_bool;
+  } else if (v->type != s->cx->nil_type) {
+    ok = cx_ok(v);
   }
   
-  cx_box_init(cx_push(scope), cx->bool_type)->as_bool = !ok;
-  cx_box_deinit(&v);
+  cx_box_init(cx_push(s), s->cx->bool_type)->as_bool = !ok;
   return true;
 }
 
-static bool and_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  
+static bool and_imp(struct cx_call *call) {
   struct cx_box
-    y = *cx_test(cx_pop(scope, false)),
-    x = *cx_test(cx_pop(scope, false));
-  
-  if (!cx_call(&x, scope)) {
-    cx_box_deinit(&y);
-    return false;
-  }
-  
-  cx_box_deinit(&x);
-  struct cx_box *xc = cx_pop(scope, false);
+    *y = cx_test(cx_call_arg(call, 1)),
+    *x = cx_test(cx_call_arg(call, 0));
+
+  struct cx_scope *s = call->scope;
+  if (!cx_call(x, s)) { return false; }
+  struct cx_box *xc = cx_pop(s, false);
   
   if (!xc) {
-    cx_error(cx, cx->row, cx->col, "Missing argument");
-    cx_box_deinit(&y);
+    cx_error(s->cx, s->cx->row, s->cx->col, "Missing arg");
     return false;    
   }
 
   struct cx_box xcv = *xc;
   
   if (!cx_ok(&xcv)) {
-    cx_box_deinit(&y);
-    *cx_push(scope) = xcv;
+    *cx_push(s) = xcv;
     return true;
   }
   
   cx_box_deinit(&xcv);
-  
-  if (!cx_call(&y, scope)) {
-    cx_box_deinit(&y);
-    return false;
-  }
-  
-  cx_box_deinit(&y);
-  struct cx_box *yc = cx_pop(scope, false);
+  if (!cx_call(y, s)) { return false; }
+  struct cx_box *yc = cx_pop(s, false);
 
   if (!yc) {
-    cx_error(cx, cx->row, cx->col, "Missing argument");
+    cx_error(s->cx, s->cx->row, s->cx->col, "Missing argument");
     return false;    
   }
 
   struct cx_box ycv = *yc;
-  *cx_push(scope) = ycv;
+  *cx_push(s) = ycv;
   return true;
 }
 
-static bool or_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-
+static bool or_imp(struct cx_call *call) {
   struct cx_box
-    y = *cx_test(cx_pop(scope, false)),
-    x = *cx_test(cx_pop(scope, false));
-  
-  if (!cx_call(&x, scope)) {
-    cx_box_deinit(&x);
-    cx_box_deinit(&y);
-    return false;
-  }
-  
-  cx_box_deinit(&x);
-  struct cx_box *xc = cx_pop(scope, false);
+    *y = cx_test(cx_call_arg(call, 1)),
+    *x = cx_test(cx_call_arg(call, 0));
+
+  struct cx_scope *s = call->scope;
+  if (!cx_call(x, s)) { return false; }
+  struct cx_box *xc = cx_pop(s, false);
 
   if (!xc) {
-    cx_error(cx, cx->row, cx->col, "Missing argument");
-    cx_box_deinit(&y);
+    cx_error(s->cx, s->cx->row, s->cx->col, "Missing argument");
     return false;    
   }
 
   struct cx_box xcv = *xc;
   
   if (cx_ok(&xcv)) {
-    cx_box_deinit(&y);
-    *cx_push(scope) = xcv;
+    *cx_push(s) = xcv;
     return true;
   }
   
-  cx_box_deinit(&xcv);
-  
-  if (!cx_call(&y, scope)) {
-    cx_box_deinit(&y);
+  cx_box_deinit(&xcv);  
+  if (!cx_call(y, s)) { return false; }
+  struct cx_box *yc = cx_pop(s, false);
+
+  if (!yc) {
+    cx_error(s->cx, s->cx->row, s->cx->col, "Missing argument");
     return false;
   }
   
-  cx_box_deinit(&y);
-  struct cx_box *yc = cx_pop(scope, false);
-
-  if (!yc) {
-    cx_error(cx, cx->row, cx->col, "Missing argument");
-    return false;    
-  }
-  
   struct cx_box ycv = *yc;
-  *cx_push(scope) = ycv;
+  *cx_push(s) = ycv;
   return true;
 }
 
-static bool if_imp(struct cx_scope *scope) {
+static bool if_imp(struct cx_call *call) {
   struct cx_box
-    x = *cx_test(cx_pop(scope, false)),
-    c = *cx_test(cx_pop(scope, false));
+    *x = cx_test(cx_call_arg(call, 1)),
+    *c = cx_test(cx_call_arg(call, 0));
 
-  bool ok = false;
-  if (cx_ok(&c) && !cx_call(&x, scope)) { goto exit; }
-  ok = true;
- exit:
-  cx_box_deinit(&x);
-  cx_box_deinit(&c);
-  return ok;
+  return cx_ok(c) && cx_call(x, call->scope);
 }
 
-static bool else_imp(struct cx_scope *scope) {
+static bool else_imp(struct cx_call *call) {
   struct cx_box
-    x = *cx_test(cx_pop(scope, false)),
-    c = *cx_test(cx_pop(scope, false));
+    *x = cx_test(cx_call_arg(call, 1)),
+    *c = cx_test(cx_call_arg(call, 0));
 
-  bool ok = false;
-  if (!cx_ok(&c) && !cx_call(&x, scope)) { goto exit; }
-  ok = true;
- exit:
-  cx_box_deinit(&x);
-  cx_box_deinit(&c);
-  return ok;
+  return !cx_ok(c) && cx_call(x, call->scope);
 }
 
-static bool if_else_imp(struct cx_scope *scope) {
+static bool if_else_imp(struct cx_call *call) {
   struct cx_box
-    y = *cx_test(cx_pop(scope, false)),
-    x = *cx_test(cx_pop(scope, false)),
-    c = *cx_test(cx_pop(scope, false));
+    *y = cx_test(cx_call_arg(call, 2)),
+    *x = cx_test(cx_call_arg(call, 1)),
+    *c = cx_test(cx_call_arg(call, 0));
   
-  bool ok = cx_call(cx_ok(&c) ? &x : &y, scope);
-  cx_box_deinit(&x);
-  cx_box_deinit(&y);
-  cx_box_deinit(&c);
-  return ok;
+  return cx_call(cx_ok(c) ? x : y, call->scope);
 }
 
-static bool min_imp(struct cx_scope *scope) {
+static bool min_imp(struct cx_call *call) {
   struct cx_box
-    x = *cx_test(cx_pop(scope, false)),
-    y = *cx_test(cx_pop(scope, false));
+    *x = cx_test(cx_call_arg(call, 1)),
+    *y = cx_test(cx_call_arg(call, 0));
 
-  enum cx_cmp cmp = cx_cmp(&x, &y);
-  
-  if (cmp == CX_CMP_GT) {
-    *cx_push(scope) = y;
-    cx_box_deinit(&x);
-  } else {
-    *cx_push(scope) = x;
-    cx_box_deinit(&y);
-  }
-
+  cx_copy(cx_push(call->scope), (cx_cmp(x, y) == CX_CMP_GT) ? y : x);
   return true;
 }
 
-static bool max_imp(struct cx_scope *scope) {
+static bool max_imp(struct cx_call *call) {
   struct cx_box
-    x = *cx_test(cx_pop(scope, false)),
-    y = *cx_test(cx_pop(scope, false));
+    *x = cx_test(cx_call_arg(call, 1)),
+    *y = cx_test(cx_call_arg(call, 0));
 
-  enum cx_cmp cmp = cx_cmp(&x, &y);
-  
-  if (cmp == CX_CMP_LT) {
-    *cx_push(scope) = y;
-    cx_box_deinit(&x);
-  } else {
-    *cx_push(scope) = x;
-    cx_box_deinit(&y);
-  }
-
+  cx_copy(cx_push(call->scope), (cx_cmp(x, y) == CX_CMP_LT) ? y : x);
   return true;
 }
 

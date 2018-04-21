@@ -2,6 +2,7 @@
 
 #include "cixl/arg.h"
 #include "cixl/bin.h"
+#include "cixl/call.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
 #include "cixl/fimp.h"
@@ -90,38 +91,28 @@ static bool catch_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   return true;
 }
 
-static bool check_imp(struct cx_scope *scope) {
-  struct cx_box v = *cx_test(cx_pop(scope, false));
-  struct cx *cx = scope->cx;
-  bool ok = true;
-  
-  if (!cx_ok(&v)) {
-    cx_error(cx, cx->row, cx->col, "Check failed");
-    ok = false;
-  }
-
-  cx_box_deinit(&v);
-  return ok;
-}
-
-static bool throw_imp(struct cx_scope *s) {
-  struct cx_box v = *cx_test(cx_pop(s, false));
-  cx_throw(s->cx, &v);
-  cx_box_deinit(&v);
+static bool check_imp(struct cx_call *call) {
+  struct cx_box *v = cx_test(cx_call_arg(call, 0));
+  struct cx_scope *s = call->scope;
+  if (!cx_ok(v)) { cx_error(s->cx, s->cx->row, s->cx->col, "Check failed"); }
   return true;
 }
 
-static bool throw_error_imp(struct cx_scope *s) {
-  struct cx_box e = *cx_test(cx_pop(s, false));
-  cx_throw_error(s->cx, e.as_error);  
-  cx_box_deinit(&e);
+static bool throw_imp(struct cx_call *call) {
+  struct cx_box *v = cx_test(cx_call_arg(call, 0));
+  cx_throw(call->scope->cx, v);
   return true;
 }
 
-static bool value_imp(struct cx_scope *s) {
-  struct cx_box e = *cx_test(cx_pop(s, false));
-  cx_copy(cx_push(s), &e.as_error->value);
-  cx_box_deinit(&e);
+static bool throw_error_imp(struct cx_call *call) {
+  struct cx_box *e = cx_test(cx_call_arg(call, 0));
+  cx_throw_error(call->scope->cx, e->as_error);  
+  return true;
+}
+
+static bool value_imp(struct cx_call *call) {
+  struct cx_box *e = cx_test(cx_call_arg(call, 0));
+  cx_copy(cx_push(call->scope), &e->as_error->value);
   return true;
 }
 

@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-#define CX_USEC 1000L
+#define CX_USEC 1000LL
 #define CX_MSEC (1000*CX_USEC)
 #define CX_SEC (1000*CX_MSEC)
 #define CX_MIN (60*CX_SEC)

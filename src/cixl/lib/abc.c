@@ -1,5 +1,6 @@
 #include "cixl/arg.h"
 #include "cixl/bool.h"
+#include "cixl/call.h"
 #include "cixl/char.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
@@ -17,11 +18,10 @@
 #include "cixl/str.h"
 #include "cixl/sym.h"
 
-static bool is_nil_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  struct cx_box v = *cx_test(cx_pop(scope, false));
-  cx_box_init(cx_push(scope), cx->bool_type)->as_bool = v.type == cx->nil_type;
-  cx_box_deinit(&v);
+static bool is_nil_imp(struct cx_call *call) {
+  struct cx_scope *s = call->scope;
+  struct cx_box *v = cx_test(cx_call_arg(call, 0));
+  cx_box_init(cx_push(s), s->cx->bool_type)->as_bool = v->type == s->cx->nil_type;
   return true;
 }
 

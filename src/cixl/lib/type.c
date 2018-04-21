@@ -192,51 +192,52 @@ static bool type_id_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   }
 }
 
-static bool type_imp(struct cx_scope *scope) {
-  struct cx_box v = *cx_test(cx_pop(scope, false));
-  cx_box_init(cx_push(scope), scope->cx->meta_type)->as_ptr = v.type;
-  cx_box_deinit(&v);
+static bool type_imp(struct cx_call *call) {
+  struct cx_box *v = cx_test(cx_call_arg(call, 0));
+  struct cx_scope *s = call->scope;
+  cx_box_init(cx_push(s), s->cx->meta_type)->as_ptr = v->type;
   return true;
 }
 
-static bool is_imp(struct cx_scope *scope) {
+static bool is_imp(struct cx_call *call) {
   struct cx_type
-    *y = cx_test(cx_pop(scope, false))->as_ptr,
-    *x = cx_test(cx_pop(scope, false))->as_ptr;
-
-  cx_box_init(cx_push(scope), scope->cx->bool_type)->as_bool = cx_is(x, y);
+    *y = cx_test(cx_call_arg(call, 1))->as_ptr,
+    *x = cx_test(cx_call_arg(call, 0))->as_ptr;
+  
+  struct cx_scope *s = call->scope;
+  cx_box_init(cx_push(s), s->cx->bool_type)->as_bool = cx_is(x, y);
   return true;
 }
 
-static bool new_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  struct cx_type *t = cx_test(cx_pop(scope, false))->as_ptr;
-
+static bool new_imp(struct cx_call *call) {
+  struct cx_type *t = cx_test(cx_call_arg(call, 0))->as_ptr;
+  struct cx_scope *s = call->scope;
+  
   if (!t->new) {
-    cx_error(cx, cx->row, cx->col, "%s does not implement new", t->id);
+    cx_error(s->cx, s->cx->row, s->cx->col, "%s does not implement new", t->id);
     return false;
   }
   
-  struct cx_box *v = cx_push(scope);
+  struct cx_box *v = cx_push(s);
   v->type = t;
   t->new(v);
   return true;
 }
 
-static bool lib_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  struct cx_type *t = cx_test(cx_pop(scope, false))->as_ptr;
-  cx_box_init(cx_push(scope), cx->lib_type)->as_lib = t->lib;
+static bool lib_imp(struct cx_call *call) {
+  struct cx_type *t = cx_test(cx_call_arg(call, 0))->as_ptr;
+  struct cx_scope *s = call->scope;
+  cx_box_init(cx_push(s), s->cx->lib_type)->as_lib = t->lib;
   return true;
 }
 
-static bool safe_imp(struct cx_scope *scope) {
-  scope->safe = true;
+static bool safe_imp(struct cx_call *call) {
+  call->scope->safe = true;
   return true;
 }
 
-static bool unsafe_imp(struct cx_scope *scope) {
-  scope->safe = false;
+static bool unsafe_imp(struct cx_call *call) {
+  call->scope->safe = false;
   return true;
 }
 

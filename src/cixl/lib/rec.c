@@ -3,6 +3,7 @@
 
 #include "cixl/arg.h"
 #include "cixl/box.h"
+#include "cixl/call.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
 #include "cixl/file.h"
@@ -164,140 +165,133 @@ static bool rec_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   }
 }
 
-static bool get_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  struct cx_sym f = cx_test(cx_pop(scope, false))->as_sym;
-  struct cx_box r = *cx_test(cx_pop(scope, false));
-  struct cx_rec_type *rt = cx_baseof(r.type, struct cx_rec_type, imp);
-  bool ok = false;
+static bool get_imp(struct cx_call *call) {
+  struct cx_sym *f = &cx_test(cx_call_arg(call, 1))->as_sym;
+  struct cx_box *r = cx_test(cx_call_arg(call, 0));
+  struct cx_scope *s = call->scope;
+  struct cx_rec_type *rt = cx_baseof(r->type, struct cx_rec_type, imp);
   
-  if (!cx_set_get(&rt->fields, &f)) {
-    cx_error(cx, cx->row, cx->col, "Invalid %s field: %s", rt->imp.id, f.id);
-    goto exit;
+  if (!cx_set_get(&rt->fields, f)) {
+    cx_error(s->cx, s->cx->row, s->cx->col,
+	     "Invalid %s field: %s",
+	     rt->imp.id, f->id);
+    
+    return false;
   }
   
-  struct cx_box *v = cx_rec_get(r.as_ptr, f);
+  struct cx_box *v = cx_rec_get(r->as_ptr, *f);
 
   if (v) {
-    cx_copy(cx_push(scope), v);
+    cx_copy(cx_push(s), v);
   } else {
-    cx_box_init(cx_push(scope), cx->nil_type);
+    cx_box_init(cx_push(s), s->cx->nil_type);
   }
 
-  ok = true;
- exit:
-  cx_box_deinit(&r);
-  return ok;
+  return true;
 }
 
-static bool put_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  struct cx_box v = *cx_test(cx_pop(scope, false));
-  struct cx_sym fid = cx_test(cx_pop(scope, false))->as_sym;
-  struct cx_box r = *cx_test(cx_pop(scope, false));
-  struct cx_rec_type *rt = cx_baseof(r.type, struct cx_rec_type, imp);
-  struct cx_field *f = cx_set_get(&rt->fields, &fid);
-  bool ok = false;
+static bool put_imp(struct cx_call *call) {
+  struct cx_box *v = cx_test(cx_call_arg(call, 2));
+  struct cx_sym *fid = &cx_test(cx_call_arg(call, 1))->as_sym;
+  struct cx_box *r = cx_test(cx_call_arg(call, 0));
+
+  struct cx_scope *s = call->scope;
+  struct cx_rec_type *rt = cx_baseof(r->type, struct cx_rec_type, imp);
+  struct cx_field *f = cx_set_get(&rt->fields, fid);
 
   if (!f) {
-    cx_error(cx, cx->row, cx->col, "Invalid %s field: %s", rt->imp.id, fid.id);
-    cx_box_deinit(&v);
-    goto exit;
+    cx_error(s->cx, s->cx->row, s->cx->col,
+	     "Invalid %s field: %s",
+	     rt->imp.id, fid->id);
+    
+    return false;
   }
 
-  if (v.type != cx->nil_type && !cx_is(v.type, f->type)) {
-    cx_error(cx, cx->row, cx->col, "Expected %s, was %s", f->type->id, v.type->id);
-    cx_box_deinit(&v);
-    goto exit;
+  if (v->type != s->cx->nil_type && !cx_is(v->type, f->type)) {
+    cx_error(s->cx, s->cx->row, s->cx->col,
+	     "Expected %s, was %s",
+	     f->type->id, v->type->id);
+    
+    return false;
   }
 
-  *cx_rec_put(r.as_ptr, fid) = v;
-  ok = true;
- exit:
-  cx_box_deinit(&r);
-  return ok;
+  cx_copy(cx_rec_put(r->as_ptr, *fid), v);
+  return true;
 }
 
-static bool put_call_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  struct cx_box act = *cx_test(cx_pop(scope, false));
-  struct cx_sym fid = cx_test(cx_pop(scope, false))->as_sym;
-  struct cx_box r = *cx_test(cx_pop(scope, false));
-  struct cx_rec_type *rt = cx_baseof(r.type, struct cx_rec_type, imp);
-  struct cx_field *f = cx_set_get(&rt->fields, &fid);
-  bool ok = false;
+static bool put_call_imp(struct cx_call *call) {
+  struct cx_box *act = cx_test(cx_call_arg(call, 2));
+  struct cx_sym *fid = &cx_test(cx_call_arg(call, 1))->as_sym;
+  struct cx_box *r = cx_test(cx_call_arg(call, 0));
+  struct cx_scope *s = call->scope;
+  struct cx_rec_type *rt = cx_baseof(r->type, struct cx_rec_type, imp);
+  struct cx_field *f = cx_set_get(&rt->fields, fid);
     
   if (!f) {
-    cx_error(cx, cx->row, cx->col, "Invalid %s field: %s", rt->imp.id, fid.id);
-    goto exit;
+    cx_error(s->cx, s->cx->row, s->cx->col,
+	     "Invalid %s field: %s",
+	     rt->imp.id, fid->id);
+    
+    return false;
   }
 
-  struct cx_box *v = cx_rec_get(r.as_ptr, fid);
+  struct cx_box *v = cx_rec_get(r->as_ptr, *fid);
 
   if (v) {
-    cx_copy(cx_push(scope), v);
+    cx_copy(cx_push(s), v);
   } else {
-    cx_box_init(cx_push(scope), cx->nil_type);
+    cx_box_init(cx_push(s), s->cx->nil_type);
   }
       
-  if (!cx_call(&act, scope)) { goto exit; }
-  v = cx_pop(scope, false);
-  if (!v) { goto exit; }
+  if (!cx_call(act, s)) { return false; }
+  v = cx_pop(s, false);
+  if (!v) { return false; }
   
-  if (v->type != cx->nil_type && !cx_is(v->type, f->type)) {
-    cx_error(cx, cx->row, cx->col, "Expected %s, was %s", f->type->id, v->type->id);
+  if (v->type != s->cx->nil_type && !cx_is(v->type, f->type)) {
+    cx_error(s->cx, s->cx->row, s->cx->col,
+	     "Expected %s, was %s",
+	     f->type->id, v->type->id);
+    
     cx_box_deinit(v);
-    goto exit;
+    return false;
   }
 
-  *cx_rec_put(r.as_ptr, fid) = *v;
-  ok = true;
- exit:
-  cx_box_deinit(&act);
-  cx_box_deinit(&r);
-  return ok;
+  *cx_rec_put(r->as_ptr, *fid) = *v;
+  return true;
 }
 
-static bool eqval_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  
-  struct cx_box
-    x = *cx_test(cx_pop(scope, false)),
-    y = *cx_test(cx_pop(scope, false));
+static bool eqval_imp(struct cx_call *call) {
+  struct cx_rec
+    *x = cx_test(cx_call_arg(call, 1))->as_ptr,
+    *y = cx_test(cx_call_arg(call, 0))->as_ptr;
 
-  struct cx_rec *xr = x.as_ptr, *yr = y.as_ptr;
+  struct cx_scope *s = call->scope;
   bool ok = false;
+  if (x->fields.count != y->fields.count) { goto exit; }
 
-  if (xr->fields.count != yr->fields.count) { goto exit; }
-
-  cx_do_env(&xr->fields, xv) {
-    struct cx_box *yv = cx_rec_get(yr, xv->id);
+  cx_do_env(&x->fields, xv) {
+    struct cx_box *yv = cx_rec_get(y, xv->id);
     if (!yv || !cx_eqval(&xv->value, yv)) { goto exit; }
   }
 
   ok = true;
  exit:
-  cx_box_init(cx_push(scope), cx->bool_type)->as_bool = ok;
-  cx_box_deinit(&x);
-  cx_box_deinit(&y);
+  cx_box_init(cx_push(s), s->cx->bool_type)->as_bool = ok;
   return true;
 }
 
-static bool ok_imp(struct cx_scope *scope) {
-  struct cx_box v = *cx_test(cx_pop(scope, false));
-  struct cx_rec *r = v.as_ptr;
-  cx_box_init(cx_push(scope), scope->cx->bool_type)->as_bool = r->fields.count;
-  cx_box_deinit(&v);
+static bool ok_imp(struct cx_call *call) {
+  struct cx_rec *r = cx_test(cx_call_arg(call, 0))->as_ptr;
+  struct cx_scope *s = call->scope;
+  cx_box_init(cx_push(s), s->cx->bool_type)->as_bool = r->fields.count;
   return true;
 }
 
-static bool print_imp(struct cx_scope *scope) {
+static bool print_imp(struct cx_call *call) {
   struct cx_box
-    r = *cx_test(cx_pop(scope, false)),
-    out = *cx_test(cx_pop(scope, false));
-  cx_dump(&r, cx_file_ptr(out.as_file));
-  cx_box_deinit(&r);
-  cx_box_deinit(&out);
+    *r = cx_test(cx_call_arg(call, 1)),
+    *out = cx_test(cx_call_arg(call, 0));
+  cx_dump(r, cx_file_ptr(out->as_file));
   return true;
 }
 

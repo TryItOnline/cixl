@@ -3,6 +3,7 @@
 #include <unistd.h>
 
 #include "cixl/arg.h"
+#include "cixl/call.h"
 #include "cixl/cx.h"
 #include "cixl/box.h"
 #include "cixl/buf.h"
@@ -17,92 +18,79 @@
 #include "cixl/scope.h"
 #include "cixl/str.h"
 
-static bool clear_imp(struct cx_scope *scope) {
-  struct cx_box in = *cx_test(cx_pop(scope, false));
-  cx_buf_clear(cx_baseof(in.as_file, struct cx_buf, file));
-  cx_box_deinit(&in);
+static bool clear_imp(struct cx_call *call) {
+  struct cx_box *in = cx_test(cx_call_arg(call, 0));
+  cx_buf_clear(cx_baseof(in->as_file, struct cx_buf, file));
   return true;
 }
 
-static bool len_imp(struct cx_scope *scope) {
-  struct cx_box in = *cx_test(cx_pop(scope, false));
-  struct cx_buf *b = cx_baseof(in.as_file, struct cx_buf, file);
-  cx_box_init(cx_push(scope), scope->cx->int_type)->as_int = cx_buf_len(b);
-  cx_box_deinit(&in);
+static bool len_imp(struct cx_call *call) {
+  struct cx_box *in = cx_test(cx_call_arg(call, 0));
+
+  struct cx_scope *s = call->scope;
+  struct cx_buf *b = cx_baseof(in->as_file, struct cx_buf, file);
+  cx_box_init(cx_push(s), s->cx->int_type)->as_int = cx_buf_len(b);
   return true;
 }
 
-static bool str_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  struct cx_box in = *cx_test(cx_pop(scope, false));
-  struct cx_buf *b = cx_baseof(in.as_file, struct cx_buf, file);
+static bool str_imp(struct cx_call *call) {
+  struct cx_box *in = cx_test(cx_call_arg(call, 0));
+
+  struct cx_scope *s = call->scope;
+  struct cx_buf *b = cx_baseof(in->as_file, struct cx_buf, file);
   fflush(b->file._ptr);
-  cx_box_init(cx_push(scope), cx->str_type)->as_str =
+  cx_box_init(cx_push(s), s->cx->str_type)->as_str =
     cx_str_new(b->data+b->pos, b->len-b->pos);
-  cx_box_deinit(&in);
   return true;
 }
 
-static bool read_bytes_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  bool ok = false;
-
+static bool read_bytes_imp(struct cx_call *call) {
   struct cx_box
-    nbytes = *cx_test(cx_pop(scope, false)),
-    in = *cx_test(cx_pop(scope, false)),
-    buf = *cx_test(cx_pop(scope, false));
+    *nbytes = cx_test(cx_call_arg(call, 2)),
+    *in = cx_test(cx_call_arg(call, 1)),
+    *buf = cx_test(cx_call_arg(call, 0));
 
-  struct cx_buf *b = cx_baseof(buf.as_file, struct cx_buf, file);
+  struct cx_scope *s = call->scope;
+  struct cx_buf *b = cx_baseof(buf->as_file, struct cx_buf, file);
   size_t offs = ftell(b->file._ptr);
-  fseek(b->file._ptr, nbytes.as_int, SEEK_CUR);
+  fseek(b->file._ptr, nbytes->as_int, SEEK_CUR);
   fflush(b->file._ptr);
-  int rbytes = read(in.as_file->fd, b->data+offs, nbytes.as_int);
+  int rbytes = read(in->as_file->fd, b->data+offs, nbytes->as_int);
 
   if (!rbytes ||
       (rbytes == -1 && (errno == ECONNREFUSED || errno == ECONNRESET))) {
-    cx_box_init(cx_push(scope), cx->nil_type);
+    cx_box_init(cx_push(s), s->cx->nil_type);
     fseek(b->file._ptr, offs, SEEK_SET);
-    ok = true;
-    goto exit;
+    return true;
   }
 
   if (rbytes == -1 && errno != EAGAIN) {
-    cx_error(cx, cx->row, cx->col, "Failed reading: %d", errno);
-    goto exit;
+    cx_error(s->cx, s->cx->row, s->cx->col, "Failed reading: %d", errno);
+    return false;
   }
 
-  cx_box_init(cx_push(scope), cx->int_type)->as_int = rbytes;
-  ok = true;
- exit:
-  cx_box_deinit(&buf);
-  cx_box_deinit(&in);
-  return ok;
+  cx_box_init(cx_push(s), s->cx->int_type)->as_int = rbytes;
+  return true;
 }
 
-static bool write_bytes_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  bool ok = false;
-
+static bool write_bytes_imp(struct cx_call *call) {
   struct cx_box
-    out = *cx_test(cx_pop(scope, false)),
-    buf = *cx_test(cx_pop(scope, false));
+    *out = cx_test(cx_call_arg(call, 1)),
+    *buf = cx_test(cx_call_arg(call, 0));
 
-  struct cx_buf *b = cx_baseof(buf.as_file, struct cx_buf, file);  
-  int wbytes = write(out.as_file->fd, b->data+b->pos, b->len-b->pos);
+  struct cx_scope *s = call->scope;
+  struct cx_buf *b = cx_baseof(buf->as_file, struct cx_buf, file);  
+  int wbytes = write(out->as_file->fd, b->data+b->pos, b->len-b->pos);
 
   if (wbytes == -1 && errno != EAGAIN) {
-    cx_error(cx, cx->row, cx->col, "Failed writing: %d", errno);
-    goto exit;
+    cx_error(s->cx, s->cx->row, s->cx->col, "Failed writing: %d", errno);
+    return false;
   }
 
   b->pos += wbytes;
-  cx_box_init(cx_push(scope), cx->bool_type)->as_bool = b->pos == b->len;
+  cx_box_init(cx_push(s), s->cx->bool_type)->as_bool = b->pos == b->len;
   if (b->pos == b->len) { cx_buf_clear(b); }
-  ok = true;
- exit:
-  cx_box_deinit(&buf);
-  cx_box_deinit(&out);
-  return ok;
+  return true;
 }
 
 cx_lib(cx_init_buf, "cx/io/buf") {    

@@ -7,6 +7,7 @@
 #include <unistd.h>
 
 #include "cixl/arg.h"
+#include "cixl/call.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
 #include "cixl/file.h"
@@ -15,108 +16,103 @@
 #include "cixl/scope.h"
 #include "cixl/str.h"
 
-static bool listen_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  
+static bool listen_imp(struct cx_call *call) {
   struct cx_box
-    backlog = *cx_test(cx_pop(scope, false)),
-    port = *cx_test(cx_pop(scope, false)),
-    host = *cx_test(cx_pop(scope, false));
+    *backlog = cx_test(cx_call_arg(call, 2)),
+    *port = cx_test(cx_call_arg(call, 1)),
+    *host = cx_test(cx_call_arg(call, 0));
 
+  struct cx_scope *s = call->scope;
   int fd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0);
   bool ok = false;
   
   if (fd == -1) {
-    cx_error(cx, cx->row, cx->col, "Failed creating socket: %d", errno);
+    cx_error(s->cx, s->cx->row, s->cx->col, "Failed creating socket: %d", errno);
     goto exit;
   }
 
   if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &(int){1}, sizeof(int)) == -1) {
-    cx_error(cx, cx->row, cx->col, "Failed enabling socket reuse: %d", errno);
+    cx_error(s->cx, s->cx->row, s->cx->col,
+	     "Failed enabling socket reuse: %d",
+	     errno);
+    
     goto exit;
   }
   
   struct sockaddr_in addr = {0};
   addr.sin_family = AF_INET;
-  addr.sin_port = htons(port.as_int);
-  addr.sin_addr.s_addr = (host.type == cx->nil_type)
+  addr.sin_port = htons(port->as_int);
+  addr.sin_addr.s_addr = (host->type == s->cx->nil_type)
     ? INADDR_ANY
-    : inet_addr(host.as_str->data);
+    : inet_addr(host->as_str->data);
   
   if (bind(fd, (struct sockaddr *)&addr, sizeof(addr)) == -1) {
-    cx_error(cx, cx->row, cx->col, "Failed binding socket: %d", errno);
+    cx_error(s->cx, s->cx->row, s->cx->col, "Failed binding socket: %d", errno);
     goto exit;
   }
 
-  if (listen(fd, backlog.as_int) == -1) {
-    cx_error(cx, cx->row, cx->col, "Failed listening on socket: %d", errno);
+  if (listen(fd, backlog->as_int) == -1) {
+    cx_error(s->cx, s->cx->row, s->cx->col, "Failed listening on socket: %d", errno);
     goto exit;
   }
     
-  struct cx_file *f = cx_file_new(cx, fd, "r", NULL);
-  cx_box_init(cx_push(scope), scope->cx->tcp_server_type)->as_file = f;
+  struct cx_file *f = cx_file_new(s->cx, fd, "r", NULL);
+  cx_box_init(cx_push(s), s->cx->tcp_server_type)->as_file = f;
   ok = true;
  exit:
   if (!ok) { close(fd); }
-  cx_box_deinit(&host);
   return ok;
 }
 
-static bool accept_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  struct cx_box server = *cx_test(cx_pop(scope, false));
-  int fd = accept(server.as_file->fd, NULL, NULL);
-  bool ok = false;
+static bool accept_imp(struct cx_call *call) {
+  struct cx_box *server = cx_test(cx_call_arg(call, 0));
+  struct cx_scope *s = call->scope;
+  int fd = accept(server->as_file->fd, NULL, NULL);
 
   if (fd == -1 && errno == EAGAIN) {
-    cx_box_init(cx_push(scope), cx->nil_type);
+    cx_box_init(cx_push(s), s->cx->nil_type);
   } else if (fd == -1) {
-    cx_error(cx, cx->row, cx->col, "Failed accepting: %d", errno);
-    goto exit;
+    cx_error(s->cx, s->cx->row, s->cx->col, "Failed accepting: %d", errno);
+    return false;
   } else {
-    struct cx_file *f = cx_file_new(cx, fd, "r+", NULL);
-    if (!cx_file_unblock(f)) { goto exit; }
-    cx_box_init(cx_push(scope), cx->tcp_client_type)->as_file = f;
+    struct cx_file *f = cx_file_new(s->cx, fd, "r+", NULL);
+    if (!cx_file_unblock(f)) { return false; }
+    cx_box_init(cx_push(s), s->cx->tcp_client_type)->as_file = f;
   }
 
-  ok = true;
- exit:
-  cx_box_deinit(&server);
-  return ok;
+  return true;
 }
 
-static bool connect_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  
+static bool connect_imp(struct cx_call *call) {
   struct cx_box
-    port = *cx_test(cx_pop(scope, false)),
-    host = *cx_test(cx_pop(scope, false));
+    *port = cx_test(cx_call_arg(call, 0)),
+    *host = cx_test(cx_call_arg(call, 0));
 
+  struct cx_scope *s = call->scope;
   int fd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0);
   bool ok = false;
   
   if (fd == -1) {
-    cx_error(cx, cx->row, cx->col, "Failed creating socket: %d", errno);
+    cx_error(s->cx, s->cx->row, s->cx->col, "Failed creating socket: %d", errno);
     goto exit;
   }
   
   struct sockaddr_in addr = {0};
   addr.sin_family = AF_INET;
-  addr.sin_port = htons(port.as_int);
-  addr.sin_addr.s_addr = inet_addr(host.as_str->data);
+  addr.sin_port = htons(port->as_int);
+  addr.sin_addr.s_addr = inet_addr(host->as_str->data);
 
   if (connect(fd, (struct sockaddr*)&addr, sizeof(addr)) == -1 &&
       errno != EINPROGRESS) {
-    cx_error(cx, cx->row, cx->col, "Failed connecting: %d", errno);
+    cx_error(s->cx, s->cx->row, s->cx->col, "Failed connecting: %d", errno);
     goto exit;
   }
 
-  struct cx_file *f = cx_file_new(cx, fd, "r+", NULL);
-  cx_box_init(cx_push(scope), scope->cx->tcp_client_type)->as_file = f;
+  struct cx_file *f = cx_file_new(s->cx, fd, "r+", NULL);
+  cx_box_init(cx_push(s), s->cx->tcp_client_type)->as_file = f;
   ok = true;
  exit:
   if (!ok) { close(fd); }
-  cx_box_deinit(&host);
   return ok;
 }
 

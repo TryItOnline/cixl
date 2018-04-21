@@ -151,12 +151,17 @@ struct cx_bin_fimp *cx_fimp_inline(struct cx_fimp *imp,
 
 bool cx_fimp_call(struct cx_fimp *imp, struct cx_scope *scope) {
   struct cx *cx = scope->cx;
-  cx_call_init(cx_vec_push(&cx->calls), cx->row, cx->col, imp);
+  struct cx_call *call = cx_call_init(cx_vec_push(&cx->calls),
+				      cx->row, cx->col,
+				      imp,
+				      scope);
+  
+  if (!cx_call_pop_args(call)) { return false; }
 
   if (imp->ptr) {    
     size_t lib_count = cx->libs.count;
     if (*cx->lib != imp->lib) { cx_push_lib(cx, imp->lib); }
-    bool ok = imp->ptr(scope);
+    bool ok = imp->ptr(call);
     while (cx->libs.count > lib_count) { cx_pop_lib(cx); }
     cx_call_deinit(cx_vec_pop(&cx->calls));
     return ok;

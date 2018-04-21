@@ -4,6 +4,7 @@
 #include "cixl/arg.h"
 #include "cixl/bin.h"
 #include "cixl/box.h"
+#include "cixl/call.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
 #include "cixl/func.h"
@@ -114,23 +115,24 @@ static bool let_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   return false;  
 }
 
-static bool let_imp(struct cx_scope *scope) {
-  struct cx_box v = *cx_test(cx_pop(scope, false));
-  struct cx_sym s = cx_test(cx_pop(scope, false))->as_sym;
-  struct cx_box *var = cx_put_var(scope, s);
-  cx_copy(var, &v);
-  cx_box_deinit(&v);
+static bool let_imp(struct cx_call *call) {
+  struct cx_box *v = cx_test(cx_call_arg(call, 1));
+  struct cx_sym id = cx_test(cx_call_arg(call, 0))->as_sym;
+  struct cx_scope *s = call->scope;
+  struct cx_box *var = cx_put_var(s, id);
+  cx_copy(var, v);
   return true;
 }
 
-static bool var_imp(struct cx_scope *scope) {
-  struct cx_sym s = cx_test(cx_pop(scope, false))->as_sym;
-  struct cx_box *v = cx_get_var(scope, s, true);
+static bool var_imp(struct cx_call *call) {
+  struct cx_sym id = cx_test(cx_call_arg(call, 0))->as_sym;
+  struct cx_scope *s = call->scope;
+  struct cx_box *v = cx_get_var(s, id, true);
 
   if (!v) {
-    cx_box_init(cx_push(scope), scope->cx->nil_type);
+    cx_box_init(cx_push(s), s->cx->nil_type);
   } else {
-    cx_copy(cx_push(scope), v);
+    cx_copy(cx_push(s), v);
   }
   
   return true;

@@ -3,6 +3,7 @@
 
 #include "cixl/arg.h"
 #include "cixl/box.h"
+#include "cixl/call.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
 #include "cixl/func.h"
@@ -32,103 +33,85 @@ static bool check_key_type(struct cx_table *tbl, struct cx_type *typ) {
   return true;
 }
 
-static bool get_imp(struct cx_scope *scope) {
+static bool get_imp(struct cx_call *call) {
   struct cx_box
-    key = *cx_test(cx_pop(scope, false)),
-    tbl = *cx_test(cx_pop(scope, false));
+    *key = cx_test(cx_call_arg(call, 1)),
+    *tbl = cx_test(cx_call_arg(call, 0));
 
-  bool ok = false;
-  if (scope->safe && !check_key_type(tbl.as_table, key.type)) { goto exit; }
-  struct cx_table_entry *e = cx_table_get(tbl.as_table, &key);
+  struct cx_scope *s = call->scope;
+  if (s->safe && !check_key_type(tbl->as_table, key->type)) { return false; }
+  struct cx_table_entry *e = cx_table_get(tbl->as_table, key);
 
   if (e) {
-    cx_copy(cx_push(scope), &e->val);
+    cx_copy(cx_push(s), &e->val);
   } else {
-    cx_box_init(cx_push(scope), scope->cx->nil_type);
+    cx_box_init(cx_push(s), s->cx->nil_type);
   }
 
-  ok = true;
- exit:
-  cx_box_deinit(&key);
-  cx_box_deinit(&tbl);
-  return ok;
-}
-
-static bool put_imp(struct cx_scope *scope) {
-  struct cx_box
-    val = *cx_test(cx_pop(scope, false)),    
-    key = *cx_test(cx_pop(scope, false)),
-    tbl = *cx_test(cx_pop(scope, false));
-
-  bool ok = false;
-  if (scope->safe && !check_key_type(tbl.as_table, key.type)) { goto exit; }
-  cx_table_put(tbl.as_table, &key, &val);
-  ok = true;
- exit:
-  cx_box_deinit(&val);
-  cx_box_deinit(&key);
-  cx_box_deinit(&tbl);
-  return ok;
-}
-
-static bool put_else_imp(struct cx_scope *scope) {
-  struct cx_box
-    upd = *cx_test(cx_pop(scope, false)),    
-    ins = *cx_test(cx_pop(scope, false)),    
-    key = *cx_test(cx_pop(scope, false)),
-    tbl = *cx_test(cx_pop(scope, false));
-
-  bool ok = false;
-  if (scope->safe && !check_key_type(tbl.as_table, key.type)) { goto exit; }
-  
-  struct cx_table_entry *e = cx_table_get(tbl.as_table, &key);
-  if (e) { cx_copy(cx_push(scope), &e->val); }
-  if (!cx_call(e ? &upd : &ins, scope)) { goto exit; }
-
-  struct cx_box *v = cx_pop(scope, false);
-  if (!v) { goto exit; }
-  cx_table_put(tbl.as_table, &key, v);
-  ok = true;
- exit:
-  cx_box_deinit(&ins);
-  cx_box_deinit(&upd);
-  cx_box_deinit(&key);
-  cx_box_deinit(&tbl);
-  return ok;
-}
-
-static bool delete_imp(struct cx_scope *scope) {
-  struct cx_box
-    key = *cx_test(cx_pop(scope, false)),
-    tbl = *cx_test(cx_pop(scope, false));
-
-  bool ok = false;
-  if (!check_key_type(tbl.as_table, key.type)) { goto exit; }
-  cx_table_delete(tbl.as_table, &key);
-  ok = true;
- exit:
-  cx_box_deinit(&key);
-  cx_box_deinit(&tbl);
-  return ok;
-}
-
-static bool len_imp(struct cx_scope *scope) {
-  struct cx_box tbl = *cx_test(cx_pop(scope, false));
-  cx_box_init(cx_push(scope),
-	      scope->cx->int_type)->as_int = tbl.as_table->entries.members.count;
-  cx_box_deinit(&tbl);
   return true;
 }
 
-static bool seq_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  struct cx_box in = *cx_test(cx_pop(scope, false)), it;
-  cx_iter(&in, &it);
-  struct cx_table *out = cx_table_new(cx);
+static bool put_imp(struct cx_call *call) {
+  struct cx_box
+    *val = cx_test(cx_call_arg(call, 2)),    
+    *key = cx_test(cx_call_arg(call, 1)),
+    *tbl = cx_test(cx_call_arg(call, 0));
+
+  struct cx_scope *s = call->scope;
+  if (s->safe && !check_key_type(tbl->as_table, key->type)) { return false; }
+  cx_table_put(tbl->as_table, key, val);
+  return true;
+}
+
+static bool put_else_imp(struct cx_call *call) {
+  struct cx_box
+    *upd = cx_test(cx_call_arg(call, 3)),    
+    *ins = cx_test(cx_call_arg(call, 2)),    
+    *key = cx_test(cx_call_arg(call, 1)),
+    *tbl = cx_test(cx_call_arg(call, 0));
+
+  struct cx_scope *s = call->scope;
+  if (s->safe && !check_key_type(tbl->as_table, key->type)) { return false; }
+  
+  struct cx_table_entry *e = cx_table_get(tbl->as_table, key);
+  if (e) { cx_copy(cx_push(s), &e->val); }
+  if (!cx_call(e ? upd : ins, s)) { return false; }
+
+  struct cx_box *v = cx_pop(s, false);
+  if (!v) { return false; }
+  cx_table_put(tbl->as_table, key, v);
+  return true;
+}
+
+static bool delete_imp(struct cx_call *call) {
+  struct cx_box
+    *key = cx_test(cx_call_arg(call, 1)),
+    *tbl = cx_test(cx_call_arg(call, 0));
+
+  if (!check_key_type(tbl->as_table, key->type)) { return false; }
+  cx_table_delete(tbl->as_table, key);
+  return true;
+}
+
+static bool len_imp(struct cx_call *call) {
+  struct cx_box tbl = *cx_test(cx_call_arg(call, 0));
+  struct cx_scope *s = call->scope;
+  
+  cx_box_init(cx_push(s), s->cx->int_type)->as_int =
+    tbl.as_table->entries.members.count;
+  
+  return true;
+}
+
+static bool seq_imp(struct cx_call *call) {
+  struct cx_box *in = cx_test(cx_call_arg(call, 0)), it;
+  struct cx_scope *s = call->scope;
+  cx_iter(in, &it);
+  struct cx_table *out = cx_table_new(s->cx);
   bool ok = false;
   struct cx_box p;
 
-  while (cx_iter_next(it.as_iter, &p, scope)) {
+  while (cx_iter_next(it.as_iter, &p, s)) {
     if (!check_key_type(out, p.as_pair->x.type)) {
       cx_table_deref(out);
       goto exit;
@@ -143,10 +126,9 @@ static bool seq_imp(struct cx_scope *scope) {
     *kt = cx_type_arg(pt, 0),
     *vt = cx_type_arg(pt, 1);
   
-  cx_box_init(cx_push(scope), cx_type_get(cx->table_type, kt, vt))->as_ptr = out;
+  cx_box_init(cx_push(s), cx_type_get(s->cx->table_type, kt, vt))->as_ptr = out;
   ok = true;
  exit:
-  cx_box_deinit(&in);
   cx_box_deinit(&it);
   return ok;
 }

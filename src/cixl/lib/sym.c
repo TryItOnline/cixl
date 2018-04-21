@@ -1,6 +1,7 @@
 #include <string.h>
 
 #include "cixl/arg.h"
+#include "cixl/call.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
 #include "cixl/fimp.h"
@@ -11,18 +12,17 @@
 #include "cixl/str.h"
 #include "cixl/sym.h"
 
-static bool sym_imp(struct cx_scope *scope) {
-  struct cx_box s = *cx_test(cx_pop(scope, false));
-  cx_box_init(cx_push(scope),
-	      scope->cx->sym_type)->as_sym = cx_sym(scope->cx, s.as_str->data);
-  cx_box_deinit(&s);
+static bool sym_imp(struct cx_call *call) {
+  struct cx_box *v = cx_test(cx_call_arg(call, 0));
+  struct cx_scope *s = call->scope;
+  cx_box_init(cx_push(s), s->cx->sym_type)->as_sym = cx_sym(s->cx, v->as_str->data);
   return true;
 }
 
-static bool str_imp(struct cx_scope *scope) {
-  struct cx_sym s = cx_test(cx_pop(scope, false))->as_sym;
-  cx_box_init(cx_push(scope), scope->cx->str_type)->as_str =
-    cx_str_new(s.id, strlen(s.id));
+static bool str_imp(struct cx_call *call) {
+  struct cx_sym *v = &cx_test(cx_call_arg(call, 0))->as_sym;
+  struct cx_scope *s = call->scope;
+  cx_box_init(cx_push(s), s->cx->str_type)->as_str = cx_str_new(v->id, strlen(v->id));
   return true;
 }
 

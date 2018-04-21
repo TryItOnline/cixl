@@ -1,4 +1,5 @@
 #include "cixl/arg.h"
+#include "cixl/call.h"
 #include "cixl/cx.h"
 #include "cixl/box.h"
 #include "cixl/error.h"
@@ -121,184 +122,167 @@ struct cx_filter_iter *cx_filter_iter_new(struct cx_iter *in, struct cx_box *act
   return it;
 }
 
-static bool new_iter_imp(struct cx_scope *s) {
-  struct cx_box v = *cx_test(cx_pop(s, false));
-  cx_iter(&v, cx_push(s));
-  cx_box_deinit(&v);
+static bool new_iter_imp(struct cx_call *call) {
+  struct cx_box *v = cx_test(cx_call_arg(call, 0));
+  struct cx_scope *s = call->scope;
+  cx_iter(v, cx_push(s));
   return true;
 }
 
-static bool for_imp(struct cx_scope *scope) {
+static bool for_imp(struct cx_call *call) {
   struct cx_box
-    act = *cx_test(cx_pop(scope, false)),
-    in = *cx_test(cx_pop(scope, false));
+    *act = cx_test(cx_call_arg(call, 1)),
+    *in = cx_test(cx_call_arg(call, 0));
 
-  bool ok = false;
+  struct cx_scope *s = call->scope;
   struct cx_box it;
-  cx_iter(&in, &it);
+  cx_iter(in, &it);
   struct cx_box v;
+  bool ok = false;
   
-  while (cx_iter_next(it.as_iter, &v, scope)) {
-    *cx_push(scope) = v; 
-    if (!cx_call(&act, scope)) { goto exit; }
+  while (cx_iter_next(it.as_iter, &v, s)) {
+    *cx_push(s) = v; 
+    if (!cx_call(act, s)) { goto exit; }
   }
 
   ok = true;
  exit:
   cx_box_deinit(&it);
-  cx_box_deinit(&act);
-  cx_box_deinit(&in);
   return ok;
 }
 
-static bool map_imp(struct cx_scope *scope) {
+static bool map_imp(struct cx_call *call) {
   struct cx_box
-    act = *cx_test(cx_pop(scope, false)),
-    in = *cx_test(cx_pop(scope, false));
+    *act = cx_test(cx_call_arg(call, 1)),
+    *in = cx_test(cx_call_arg(call, 0));
 
+  struct cx_scope *s = call->scope;
   struct cx_box in_it;
-  cx_iter(&in, &in_it);
-
-  struct cx_iter *it = &cx_map_iter_new(in_it.as_iter, &act)->iter;
-  cx_box_init(cx_push(scope), scope->cx->iter_type)->as_iter = it;
-  
-  cx_box_deinit(&act);
-  cx_box_deinit(&in);
+  cx_iter(in, &in_it);
+  struct cx_iter *it = &cx_map_iter_new(in_it.as_iter, act)->iter;
+  cx_box_init(cx_push(s), s->cx->iter_type)->as_iter = it;
   return true;
 }
 
-static bool filter_imp(struct cx_scope *scope) {
+static bool filter_imp(struct cx_call *call) {
   struct cx_box
-    act = *cx_test(cx_pop(scope, false)),
-    in = *cx_test(cx_pop(scope, false));
+    *act = cx_test(cx_call_arg(call, 1)),
+    *in = cx_test(cx_call_arg(call, 0));
 
   struct cx_box in_it;
-  cx_iter(&in, &in_it);
-  
-  struct cx_iter *it = &cx_filter_iter_new(in_it.as_iter, &act)->iter;
-  cx_box_init(cx_push(scope), in_it.type)->as_iter = it;
-
-  cx_box_deinit(&act);
-  cx_box_deinit(&in);
+  cx_iter(in, &in_it);
+  struct cx_iter *it = &cx_filter_iter_new(in_it.as_iter, act)->iter;
+  cx_box_init(cx_push(call->scope), in_it.type)->as_iter = it;
   return true;
 }
 
-static bool next_imp(struct cx_scope *scope) {
-  struct cx_box it = *cx_test(cx_pop(scope, false)), v;
-
-  if (cx_iter_next(it.as_iter, &v, scope)) {
-    *cx_push(scope) = v;
+static bool next_imp(struct cx_call *call) {
+  struct cx_box *it = cx_test(cx_call_arg(call, 0)), v;
+  struct cx_scope *s = call->scope;
+  
+  if (cx_iter_next(it->as_iter, &v, s)) {
+    *cx_push(s) = v;
   } else {
-    cx_box_init(cx_push(scope), scope->cx->nil_type);
+    cx_box_init(cx_push(s), s->cx->nil_type);
   }
 
-  cx_box_deinit(&it);
   return true;
 }
 
-static bool drop_imp(struct cx_scope *scope) {
+static bool drop_imp(struct cx_call *call) {
   struct cx_box
-    n = *cx_test(cx_pop(scope, false)),
-    it = *cx_test(cx_pop(scope, false)),
+    *n = cx_test(cx_call_arg(call, 1)),
+    *it = cx_test(cx_call_arg(call, 0)),
     v;
 
-  bool done = false;
+  struct cx_scope *s = call->scope;
   
-  while (!done && n.as_int-- > 0) {
-    done = !cx_iter_next(it.as_iter, &v, scope);
+  while (n->as_int-- > 0) {
+    if (!cx_iter_next(it->as_iter, &v, s)) {
+      cx_error(s->cx, s->cx->row, s->cx->col, "Failed dropping");
+      return false;
+    }
+      
     cx_box_deinit(&v);
   }
 
-  cx_box_deinit(&it);
   return true;
 }
 
-static bool is_done_imp(struct cx_scope *scope) {
-  struct cx_box it = *cx_test(cx_pop(scope, false));
-  cx_box_init(cx_push(scope), scope->cx->bool_type)->as_bool = it.as_iter->done;
-  cx_box_deinit(&it);
+static bool is_done_imp(struct cx_call *call) {
+  struct cx_box *it = cx_test(cx_call_arg(call, 0));
+  struct cx_scope *s = call->scope;
+  cx_box_init(cx_push(s), s->cx->bool_type)->as_bool = it->as_iter->done;
   return true;
 }
 
-static bool times_imp(struct cx_scope *scope) {
+static bool times_imp(struct cx_call *call) {
   struct cx_box
-    v = *cx_test(cx_pop(scope, false)),
-    reps = *cx_test(cx_pop(scope, false));
+    *v = cx_test(cx_call_arg(call, 1)),
+    *reps = cx_test(cx_call_arg(call, 0));
 
-  bool ok = false;
+  struct cx_scope *s = call->scope;
   
-  for (int64_t i = 0; i < reps.as_int; i++) {
-    if (!cx_call(&v, scope)) { goto exit; }
+  for (int64_t i = 0; i < reps->as_int; i++) {
+    if (!cx_call(v, s)) { return false; }
   }
 
-  ok = true;
- exit:
-  cx_box_deinit(&v);
-  return ok;
+  return true;
 }
 
-static bool while_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  struct cx_box a = *cx_test(cx_pop(scope, false));
-  bool ok = false;
+static bool while_imp(struct cx_call *call) {
+  struct cx_box *a = cx_test(cx_call_arg(call, 0));
+  struct cx_scope *s = call->scope;
   
   while (true) {
-    if (!cx_call(&a, scope)) { goto exit; }
-    struct cx_box *vp = cx_pop(scope, false);
+    if (!cx_call(a, s)) { return false; }
+    struct cx_box *vp = cx_pop(s, false);
 
     if (!vp) {
-      cx_error(cx, cx->row, cx->col, "Missing while condition");
-      goto exit;
+      cx_error(s->cx, s->cx->row, s->cx->col, "Missing while condition");
+      return false;
     }
 
     struct cx_box v = *vp;
-    if (!cx_ok(&v)) { break; }
+    bool ok = cx_ok(&v);
     cx_box_deinit(&v);
+    if (!ok) { break; }
   }
 
-  ok = true;
- exit:
-  cx_box_deinit(&a);
-  return ok;
+  return true;
 }
 
-static bool find_if_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  
+static bool find_if_imp(struct cx_call *call) {
   struct cx_box
-    pred = *cx_test(cx_pop(scope, false)),
-    in = *cx_test(cx_pop(scope, false)),
+    *pred = cx_test(cx_call_arg(call, 1)),
+    *in = cx_test(cx_call_arg(call, 0)),
     it;
 
-  cx_iter(&in, &it);
-  bool ok = false;
+  struct cx_scope *s = call->scope;
+  cx_iter(in, &it);
   struct cx_box iv;
+  bool ok = false;
   
-  while (cx_iter_next(it.as_iter, &iv, scope)) {
-    cx_copy(cx_push(scope), &iv);
-    if (!cx_call(&pred, scope)) { goto exit; }
-    struct cx_box *ovp = cx_pop(scope, false);
+  while (cx_iter_next(it.as_iter, &iv, s)) {
+    cx_copy(cx_push(s), &iv);
+    if (!cx_call(pred, s)) { goto exit; }
+    struct cx_box *ovp = cx_pop(s, false);
     if (!ovp) { goto exit; }
     struct cx_box ov = *ovp;
     bool found = cx_ok(&ov);
     cx_box_deinit(&ov);
 
     if (found) {
-      *cx_push(scope) = iv;
-      goto found;
+      *cx_push(s) = iv;
+      ok = true;
+      goto exit;
     }
 
     cx_box_deinit(&iv);
   }
   
-  cx_box_init(cx_push(scope), cx->nil_type);
-  
- found:
-  ok = true;
-  
+  cx_box_init(cx_push(s), s->cx->nil_type);
  exit:
-  cx_box_deinit(&pred);
-  cx_box_deinit(&in);
   cx_box_deinit(&it);
   return ok;
 }

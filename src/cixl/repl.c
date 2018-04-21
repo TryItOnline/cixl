@@ -20,7 +20,6 @@
 static bool init_emit_bmips(struct cx *cx) {
 bool _eval(struct cx *cx, ssize_t stop_pc) {
   static bool init = true;
-  bool ok = false;
 
   static struct cx_sym sym_n;
   static struct cx_sym sym_b;
@@ -195,53 +194,38 @@ bimp98->nops = 15;
 
 op0: { /* CX_TMACRO CX_OFUNCDEF */
 cx->pc = 0;
-
-if (stop_pc == 0) {
-  ok = true;
-  goto exit;
-}
-
+if (stop_pc == 0) { goto exit; }
 cx->row = 1; cx->col = 5;
-if (!cx->errors.count) {
 struct cx_fimp *i = func_emitNbmips_();
 if (!i->scope) { i->scope = cx_scope_ref(cx_scope(cx, 0)); }
-}
 }
 
 op1: { /* CX_TMACRO CX_OFIMP */
 cx->pc = 1;
-
-if (stop_pc == 1) {
-  ok = true;
-  goto exit;
-}
-
+if (stop_pc == 1) { goto exit; }
 cx->row = 1; cx->col = 5;
 goto op39;
 }
 
 op2: { /* CX_TMACRO CX_OBEGIN */
 cx->pc = 2;
-
-if (stop_pc == 2) {
-  ok = true;
-  goto exit;
-}
-
+if (stop_pc == 2) { goto exit; }
 cx->row = 1; cx->col = 5;
+if (cx->errors.count) {
+goto op39;
+} else {
 struct cx_scope *parent = func_emitNbmips_()->scope;
-cx_push_lib(cx, lib_cxEbin());
 cx_begin(cx, parent);
+cx_push_lib(cx, lib_cxEbin());
+struct cx_call *call = cx_test(cx_vec_peek(&cx->calls, 0));
+cx_scope_deref(call->scope);
+call->scope = cx_scope_ref(cx_scope(cx, 0));
+}
 }
 
 op3: { /* CX_TLITERAL CX_OPUSH */
 cx->pc = 3;
-
-if (stop_pc == 3) {
-  ok = true;
-  goto exit;
-}
-
+if (stop_pc == 3) { goto exit; }
 cx->row = 1; cx->col = 39;
 if (!cx->errors.count) {
 cx_box_init(cx_push(cx_scope(cx, 0)), cx->int_type)->as_int = 10000000000;
@@ -250,12 +234,7 @@ cx_box_init(cx_push(cx_scope(cx, 0)), cx->int_type)->as_int = 10000000000;
 
 op4: { /* CX_TLAMBDA CX_OLAMBDA */
 cx->pc = 4;
-
-if (stop_pc == 4) {
-  ok = true;
-  goto exit;
-}
-
+if (stop_pc == 4) { goto exit; }
 cx->row = 1; cx->col = 41;
 if (cx->errors.count) {
 goto op35;
@@ -269,12 +248,7 @@ goto op35;
 
 op5: { /* CX_TLITERAL CX_OPUSH */
 cx->pc = 5;
-
-if (stop_pc == 5) {
-  ok = true;
-  goto exit;
-}
-
+if (stop_pc == 5) { goto exit; }
 cx->row = 1; cx->col = 44;
 if (!cx->errors.count) {
 cx_box_init(cx_push(cx_scope(cx, 0)), cx->int_type)->as_int = 10;
@@ -283,12 +257,7 @@ cx_box_init(cx_push(cx_scope(cx, 0)), cx->int_type)->as_int = 10;
 
 op6: { /* CX_TLAMBDA CX_OLAMBDA */
 cx->pc = 6;
-
-if (stop_pc == 6) {
-  ok = true;
-  goto exit;
-}
-
+if (stop_pc == 6) { goto exit; }
 cx->row = 1; cx->col = 46;
 if (cx->errors.count) {
 goto op34;
@@ -302,12 +271,7 @@ goto op34;
 
 op7: { /* CX_TLITERAL CX_OPUSH */
 cx->pc = 7;
-
-if (stop_pc == 7) {
-  ok = true;
-  goto exit;
-}
-
+if (stop_pc == 7) { goto exit; }
 cx->row = 1; cx->col = 49;
 if (!cx->errors.count) {
 cx_box_init(cx_push(cx_scope(cx, 0)), cx->int_type)->as_int = 50;
@@ -316,57 +280,46 @@ cx_box_init(cx_push(cx_scope(cx, 0)), cx->int_type)->as_int = 50;
 
 op8: { /* CX_TID CX_OFIMP */
 cx->pc = 8;
-
-if (stop_pc == 8) {
-  ok = true;
-  goto exit;
-}
-
+if (stop_pc == 8) { goto exit; }
 cx->row = 1; cx->col = 50;
 goto op32;
 }
 
 op9: { /* CX_TID CX_OBEGIN */
 cx->pc = 9;
-
-if (stop_pc == 9) {
-  ok = true;
-  goto exit;
-}
-
+if (stop_pc == 9) { goto exit; }
 cx->row = 1; cx->col = 50;
+if (cx->errors.count) {
+goto op32;
+} else {
 struct cx_scope *parent = func_fib_Int()->scope;
-cx_push_lib(cx, lib_cxEmath());
 cx_begin(cx, parent);
+cx_push_lib(cx, lib_cxEmath());
+struct cx_call *call = cx_test(cx_vec_peek(&cx->calls, 0));
+cx_scope_deref(call->scope);
+call->scope = cx_scope_ref(cx_scope(cx, 0));
+}
 }
 
 op10: { /* CX_TID CX_OPUTARGS */
 cx->pc = 10;
-
-if (stop_pc == 10) {
-  ok = true;
-  goto exit;
-}
-
+if (stop_pc == 10) { goto exit; }
 cx->row = 1; cx->col = 50;
 if (!cx->errors.count) {
-struct cx_scope
-  *ds = cx_scope(cx, 0),
-  *ss = ds->stack.count ? ds : cx_scope(cx, 1);
+struct cx_call *call = cx_test(cx_vec_peek(&cx->calls, 0));
+struct cx_scope *s = cx_scope(cx, 0);
+if (call->args.count != 1) {
+  cx_error(cx, cx->row, cx->col, "Wrong number of args for fib");
+  goto op11;
+}
 
-*cx_put_var(ds, sym_n) = *(struct cx_box *)cx_vec_peek(&ss->stack, 0);
-cx_vec_delete(&ss->stack, ss->stack.count-1);
+cx_copy(cx_put_var(s, sym_n), cx_call_arg(call, 0));
 }
 }
 
 op11: { /* CX_TLITERAL CX_OPUSH */
 cx->pc = 11;
-
-if (stop_pc == 11) {
-  ok = true;
-  goto exit;
-}
-
+if (stop_pc == 11) { goto exit; }
 cx->row = 1; cx->col = 1;
 if (!cx->errors.count) {
 cx_box_init(cx_push(cx_scope(cx, 0)), cx->int_type)->as_int = 0;
@@ -375,12 +328,7 @@ cx_box_init(cx_push(cx_scope(cx, 0)), cx->int_type)->as_int = 0;
 
 op12: { /* CX_TLITERAL CX_OPUSH */
 cx->pc = 12;
-
-if (stop_pc == 12) {
-  ok = true;
-  goto exit;
-}
-
+if (stop_pc == 12) { goto exit; }
 cx->row = 1; cx->col = 3;
 if (!cx->errors.count) {
 cx_box_init(cx_push(cx_scope(cx, 0)), cx->int_type)->as_int = 1;
@@ -389,12 +337,7 @@ cx_box_init(cx_push(cx_scope(cx, 0)), cx->int_type)->as_int = 1;
 
 op13: { /* CX_TID CX_OGETVAR */
 cx->pc = 13;
-
-if (stop_pc == 13) {
-  ok = true;
-  goto exit;
-}
-
+if (stop_pc == 13) { goto exit; }
 cx->row = 1; cx->col = 4;
 if (!cx->errors.count) {
 struct cx_scope *s = cx_scope(cx, 0);
@@ -406,61 +349,48 @@ cx_copy(cx_push(s), v);
 
 op14: { /* CX_TID CX_OFIMP */
 cx->pc = 14;
-
-if (stop_pc == 14) {
-  ok = true;
-  goto exit;
-}
-
+if (stop_pc == 14) { goto exit; }
 cx->row = 1; cx->col = 7;
 goto op30;
 }
 
 op15: { /* CX_TID CX_OBEGIN */
 cx->pc = 15;
-
-if (stop_pc == 15) {
-  ok = true;
-  goto exit;
-}
-
+if (stop_pc == 15) { goto exit; }
 cx->row = 1; cx->col = 7;
+if (cx->errors.count) {
+goto op30;
+} else {
 struct cx_scope *parent = func_fibNrec_IntIntInt()->scope;
-cx_push_lib(cx, lib_cxEmath());
 cx_begin(cx, parent);
+cx_push_lib(cx, lib_cxEmath());
+struct cx_call *call = cx_test(cx_vec_peek(&cx->calls, 0));
+cx_scope_deref(call->scope);
+call->scope = cx_scope_ref(cx_scope(cx, 0));
+}
 }
 
 op16: { /* CX_TID CX_OPUTARGS */
 cx->pc = 16;
-
-if (stop_pc == 16) {
-  ok = true;
-  goto exit;
-}
-
+if (stop_pc == 16) { goto exit; }
 cx->row = 1; cx->col = 7;
 if (!cx->errors.count) {
-struct cx_scope
-  *ds = cx_scope(cx, 0),
-  *ss = ds->stack.count ? ds : cx_scope(cx, 1);
+struct cx_call *call = cx_test(cx_vec_peek(&cx->calls, 0));
+struct cx_scope *s = cx_scope(cx, 0);
+if (call->args.count != 3) {
+  cx_error(cx, cx->row, cx->col, "Wrong number of args for fib-rec");
+  goto op17;
+}
 
-*cx_put_var(ds, sym_n) = *(struct cx_box *)cx_vec_peek(&ss->stack, 0);
-cx_vec_delete(&ss->stack, ss->stack.count-1);
-*cx_put_var(ds, sym_b) = *(struct cx_box *)cx_vec_peek(&ss->stack, 0);
-cx_vec_delete(&ss->stack, ss->stack.count-1);
-*cx_put_var(ds, sym_a) = *(struct cx_box *)cx_vec_peek(&ss->stack, 0);
-cx_vec_delete(&ss->stack, ss->stack.count-1);
+cx_copy(cx_put_var(s, sym_a), cx_call_arg(call, 0));
+cx_copy(cx_put_var(s, sym_b), cx_call_arg(call, 1));
+cx_copy(cx_put_var(s, sym_n), cx_call_arg(call, 2));
 }
 }
 
 op17: { /* CX_TID CX_OGETVAR */
 cx->pc = 17;
-
-if (stop_pc == 17) {
-  ok = true;
-  goto exit;
-}
-
+if (stop_pc == 17) { goto exit; }
 cx->row = 1; cx->col = 0;
 if (!cx->errors.count) {
 struct cx_scope *s = cx_scope(cx, 0);
@@ -472,12 +402,7 @@ cx_copy(cx_push(s), v);
 
 op18: { /* CX_TID CX_OFUNCALL */
 cx->pc = 18;
-
-if (stop_pc == 18) {
-  ok = true;
-  goto exit;
-}
-
+if (stop_pc == 18) { goto exit; }
 cx->row = 1; cx->col = 2;
 if (!cx->errors.count) {
 struct cx_scope *s = cx_scope(cx, 0);
@@ -497,13 +422,8 @@ if (!cx_fimp_call(imp99, s)) { goto op19; }
 
 op19: { /* CX_TLAMBDA CX_OLAMBDA */
 cx->pc = 19;
-
-if (stop_pc == 19) {
-  ok = true;
-  goto exit;
-}
-
-cx->row = 1; cx->col = 5;
+if (stop_pc == 19) { goto exit; }
+cx->row = 1; cx->col = 10;
 if (cx->errors.count) {
 goto op27;
 } else {
@@ -516,13 +436,8 @@ goto op27;
 
 op20: { /* CX_TID CX_OGETVAR */
 cx->pc = 20;
-
-if (stop_pc == 20) {
-  ok = true;
-  goto exit;
-}
-
-cx->row = 1; cx->col = 6;
+if (stop_pc == 20) { goto exit; }
+cx->row = 1; cx->col = 11;
 if (!cx->errors.count) {
 struct cx_scope *s = cx_scope(cx, 0);
 struct cx_box *v = cx_get_var(s, sym_b, false);
@@ -533,13 +448,8 @@ cx_copy(cx_push(s), v);
 
 op21: { /* CX_TID CX_OGETVAR */
 cx->pc = 21;
-
-if (stop_pc == 21) {
-  ok = true;
-  goto exit;
-}
-
-cx->row = 1; cx->col = 9;
+if (stop_pc == 21) { goto exit; }
+cx->row = 1; cx->col = 14;
 if (!cx->errors.count) {
 struct cx_scope *s = cx_scope(cx, 0);
 struct cx_box *v = cx_get_var(s, sym_a, false);
@@ -550,13 +460,8 @@ cx_copy(cx_push(s), v);
 
 op22: { /* CX_TID CX_OGETVAR */
 cx->pc = 22;
-
-if (stop_pc == 22) {
-  ok = true;
-  goto exit;
-}
-
-cx->row = 1; cx->col = 12;
+if (stop_pc == 22) { goto exit; }
+cx->row = 1; cx->col = 17;
 if (!cx->errors.count) {
 struct cx_scope *s = cx_scope(cx, 0);
 struct cx_box *v = cx_get_var(s, sym_b, false);
@@ -567,13 +472,8 @@ cx_copy(cx_push(s), v);
 
 op23: { /* CX_TID CX_OFUNCALL */
 cx->pc = 23;
-
-if (stop_pc == 23) {
-  ok = true;
-  goto exit;
-}
-
-cx->row = 1; cx->col = 15;
+if (stop_pc == 23) { goto exit; }
+cx->row = 1; cx->col = 20;
 if (!cx->errors.count) {
 struct cx_scope *s = cx_scope(cx, 0);
 static struct cx_fimp *imp100 = NULL;
@@ -592,13 +492,8 @@ if (!cx_fimp_call(imp100, s)) { goto op24; }
 
 op24: { /* CX_TID CX_OGETVAR */
 cx->pc = 24;
-
-if (stop_pc == 24) {
-  ok = true;
-  goto exit;
-}
-
-cx->row = 1; cx->col = 17;
+if (stop_pc == 24) { goto exit; }
+cx->row = 1; cx->col = 31;
 if (!cx->errors.count) {
 struct cx_scope *s = cx_scope(cx, 0);
 struct cx_box *v = cx_get_var(s, sym_n, false);
@@ -609,13 +504,8 @@ cx_copy(cx_push(s), v);
 
 op25: { /* CX_TID CX_OFUNCALL */
 cx->pc = 25;
-
-if (stop_pc == 25) {
-  ok = true;
-  goto exit;
-}
-
-cx->row = 1; cx->col = 20;
+if (stop_pc == 25) { goto exit; }
+cx->row = 1; cx->col = 34;
 if (!cx->errors.count) {
 struct cx_scope *s = cx_scope(cx, 0);
 static struct cx_fimp *imp101 = NULL;
@@ -633,13 +523,8 @@ if (!cx_fimp_call(imp101, s)) { goto op26; }
 
 op26: { /* CX_TID CX_OFUNCALL */
 cx->pc = 26;
-
-if (stop_pc == 26) {
-  ok = true;
-  goto exit;
-}
-
-cx->row = 1; cx->col = 23;
+if (stop_pc == 26) { goto exit; }
+cx->row = 1; cx->col = 37;
 if (!cx->errors.count) {
 struct cx_scope *s = cx_scope(cx, 0);
 static struct cx_fimp *imp102 = NULL;
@@ -657,13 +542,8 @@ if (!cx_fimp_call(imp102, s)) { goto op27; }
 
 op27: { /* CX_TID CX_OGETVAR */
 cx->pc = 27;
-
-if (stop_pc == 27) {
-  ok = true;
-  goto exit;
-}
-
-cx->row = 1; cx->col = 31;
+if (stop_pc == 27) { goto exit; }
+cx->row = 1; cx->col = 45;
 if (!cx->errors.count) {
 struct cx_scope *s = cx_scope(cx, 0);
 struct cx_box *v = cx_get_var(s, sym_a, false);
@@ -674,13 +554,8 @@ cx_copy(cx_push(s), v);
 
 op28: { /* CX_TID CX_OFUNCALL */
 cx->pc = 28;
-
-if (stop_pc == 28) {
-  ok = true;
-  goto exit;
-}
-
-cx->row = 1; cx->col = 34;
+if (stop_pc == 28) { goto exit; }
+cx->row = 1; cx->col = 48;
 if (!cx->errors.count) {
 struct cx_scope *s = cx_scope(cx, 0);
 static struct cx_fimp *imp103 = NULL;
@@ -698,12 +573,7 @@ if (!cx_fimp_call(imp103, s)) { goto op29; }
 
 op29: { /* CX_TID CX_ORETURN */
 cx->pc = 29;
-
-if (stop_pc == 29) {
-  ok = true;
-  goto exit;
-}
-
+if (stop_pc == 29) { goto exit; }
 cx->row = 1; cx->col = 7;
 if (cx->errors.count) {
 cx_end(cx);
@@ -721,6 +591,7 @@ if (call->recalls) {
   }
 
   call->recalls--;
+  cx_call_pop_args(call);
   goto op16;
 } else {
   size_t si = 0;
@@ -780,12 +651,7 @@ struct cx_type *get_arg(int i) {
 
 op30: { /* CX_TID CX_OFUNCALL */
 cx->pc = 30;
-
-if (stop_pc == 30) {
-  ok = true;
-  goto exit;
-}
-
+if (stop_pc == 30) { goto exit; }
 cx->row = 1; cx->col = 7;
 if (!cx->errors.count) {
 struct cx_scope *s = cx_scope(cx, 0);
@@ -804,12 +670,7 @@ if (!cx_fimp_call(imp104, s)) { goto op31; }
 
 op31: { /* CX_TID CX_ORETURN */
 cx->pc = 31;
-
-if (stop_pc == 31) {
-  ok = true;
-  goto exit;
-}
-
+if (stop_pc == 31) { goto exit; }
 cx->row = 1; cx->col = 50;
 if (cx->errors.count) {
 cx_end(cx);
@@ -827,6 +688,7 @@ if (call->recalls) {
   }
 
   call->recalls--;
+  cx_call_pop_args(call);
   goto op10;
 } else {
   size_t si = 0;
@@ -886,12 +748,7 @@ struct cx_type *get_arg(int i) {
 
 op32: { /* CX_TID CX_OFUNCALL */
 cx->pc = 32;
-
-if (stop_pc == 32) {
-  ok = true;
-  goto exit;
-}
-
+if (stop_pc == 32) { goto exit; }
 cx->row = 1; cx->col = 50;
 if (!cx->errors.count) {
 struct cx_scope *s = cx_scope(cx, 0);
@@ -910,12 +767,7 @@ if (!cx_fimp_call(imp105, s)) { goto op33; }
 
 op33: { /* CX_TID CX_OFUNCALL */
 cx->pc = 33;
-
-if (stop_pc == 33) {
-  ok = true;
-  goto exit;
-}
-
+if (stop_pc == 33) { goto exit; }
 cx->row = 1; cx->col = 54;
 if (!cx->errors.count) {
 struct cx_scope *s = cx_scope(cx, 0);
@@ -934,12 +786,7 @@ if (!cx_fimp_call(imp106, s)) { goto op34; }
 
 op34: { /* CX_TID CX_OFUNCALL */
 cx->pc = 34;
-
-if (stop_pc == 34) {
-  ok = true;
-  goto exit;
-}
-
+if (stop_pc == 34) { goto exit; }
 cx->row = 1; cx->col = 57;
 if (!cx->errors.count) {
 struct cx_scope *s = cx_scope(cx, 0);
@@ -958,12 +805,7 @@ if (!cx_fimp_call(imp107, s)) { goto op35; }
 
 op35: { /* CX_TID CX_OFUNCALL */
 cx->pc = 35;
-
-if (stop_pc == 35) {
-  ok = true;
-  goto exit;
-}
-
+if (stop_pc == 35) { goto exit; }
 cx->row = 1; cx->col = 64;
 if (!cx->errors.count) {
 struct cx_scope *s = cx_scope(cx, 0);
@@ -982,12 +824,7 @@ if (!cx_fimp_call(imp108, s)) { goto op36; }
 
 op36: { /* CX_TID CX_OFUNCALL */
 cx->pc = 36;
-
-if (stop_pc == 36) {
-  ok = true;
-  goto exit;
-}
-
+if (stop_pc == 36) { goto exit; }
 cx->row = 1; cx->col = 70;
 if (!cx->errors.count) {
 struct cx_scope *s = cx_scope(cx, 0);
@@ -1006,12 +843,7 @@ if (!cx_fimp_call(imp109, s)) { goto op37; }
 
 op37: { /* CX_TID CX_OFUNCALL */
 cx->pc = 37;
-
-if (stop_pc == 37) {
-  ok = true;
-  goto exit;
-}
-
+if (stop_pc == 37) { goto exit; }
 cx->row = 1; cx->col = 72;
 if (!cx->errors.count) {
 struct cx_scope *s = cx_scope(cx, 0);
@@ -1030,12 +862,7 @@ if (!cx_fimp_call(imp110, s)) { goto op38; }
 
 op38: { /* CX_TMACRO CX_ORETURN */
 cx->pc = 38;
-
-if (stop_pc == 38) {
-  ok = true;
-  goto exit;
-}
-
+if (stop_pc == 38) { goto exit; }
 cx->row = 1; cx->col = 5;
 if (cx->errors.count) {
 cx_end(cx);
@@ -1053,6 +880,7 @@ if (call->recalls) {
   }
 
   call->recalls--;
+  cx_call_pop_args(call);
   goto op3;
 } else {
   size_t si = 0;
@@ -1111,9 +939,8 @@ struct cx_type *get_arg(int i) {
 }
 
  op39:
-  ok = true;
 exit:
-  return ok;
+  return !cx->errors.count;
 }
 
   struct cx_bin *bin = cx_bin_new();

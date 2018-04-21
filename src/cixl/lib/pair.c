@@ -3,6 +3,7 @@
 
 #include "cixl/arg.h"
 #include "cixl/box.h"
+#include "cixl/call.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
 #include "cixl/fimp.h"
@@ -12,54 +13,49 @@
 #include "cixl/lib.h"
 #include "cixl/lib/pair.h"
 
-static bool zip_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  
+static bool zip_imp(struct cx_call *call) {
   struct cx_box
-    y = *cx_test(cx_pop(scope, false)),
-    x = *cx_test(cx_pop(scope, false));
+    *y = cx_test(cx_call_arg(call, 1)),
+    *x = cx_test(cx_call_arg(call, 0));
 
-  struct cx_pair *p = cx_pair_new(cx, NULL, NULL);
-  p->x = x;
-  p->y = y;
+  struct cx_scope *s = call->scope;
+  struct cx_pair *p = cx_pair_new(s->cx, NULL, NULL);
+  cx_copy(&p->x, x);
+  cx_copy(&p->y, y);
 
   struct cx_type
-    *xt = (x.type == cx->nil_type) ? cx->opt_type : x.type,
-    *yt = (y.type == cx->nil_type) ? cx->opt_type : y.type;
+    *xt = (x->type == s->cx->nil_type) ? s->cx->opt_type : x->type,
+    *yt = (y->type == s->cx->nil_type) ? s->cx->opt_type : y->type;
     
-  cx_box_init(cx_push(scope), cx_type_get(cx->pair_type, xt, yt))->as_pair = p;
+  cx_box_init(cx_push(s), cx_type_get(s->cx->pair_type, xt, yt))->as_pair = p;
   return true;
 }
 
-static bool unzip_imp(struct cx_scope *scope) {
-  struct cx_box *p = cx_test(cx_peek(scope, false)), x, y;
-  cx_copy(&x, &p->as_pair->x);
-  cx_copy(&y, &p->as_pair->y);
-  *cx_box_deinit(p) = x;
-  *cx_push(scope) = y;
+static bool unzip_imp(struct cx_call *call) {
+  struct cx_box *p = cx_test(cx_call_arg(call, 0));
+  struct cx_scope *s = call->scope;
+  cx_copy(cx_push(s), &p->as_pair->x);
+  cx_copy(cx_push(s), &p->as_pair->y);
   return true;
 }
 
-static bool x_imp(struct cx_scope *scope) {
-  struct cx_box p = *cx_test(cx_pop(scope, false));
-  cx_copy(cx_push(scope), &p.as_pair->x);
-  cx_box_deinit(&p);
+static bool x_imp(struct cx_call *call) {
+  struct cx_box *p = cx_test(cx_call_arg(call, 0));
+  cx_copy(cx_push(call->scope), &p->as_pair->x);
   return true;
 }
 
-static bool y_imp(struct cx_scope *scope) {
-  struct cx_box p = *cx_test(cx_pop(scope, false));
-  cx_copy(cx_push(scope), &p.as_pair->y);
-  cx_box_deinit(&p);
+static bool y_imp(struct cx_call *call) {
+  struct cx_box *p = cx_test(cx_call_arg(call, 0));
+  cx_copy(cx_push(call->scope), &p->as_pair->y);
   return true;
 }
 
-static bool rezip_imp(struct cx_scope *scope) {
-  struct cx_box p = *cx_test(cx_pop(scope, false));
-  struct cx_box tmp = p.as_pair->x;
-  p.as_pair->x = p.as_pair->y;
-  p.as_pair->y = tmp;
-  cx_box_deinit(&p);
+static bool rezip_imp(struct cx_call *call) {
+  struct cx_pair *p = cx_test(cx_call_arg(call, 0))->as_pair;
+  struct cx_box tmp = p->x;
+  p->x = p->y;
+  p->y = tmp;
   return true;
 }
 

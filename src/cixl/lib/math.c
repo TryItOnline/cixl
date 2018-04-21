@@ -2,6 +2,7 @@
 
 #include "cixl/arg.h"
 #include "cixl/box.h"
+#include "cixl/call.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
 #include "cixl/fimp.h"
@@ -11,115 +12,138 @@
 #include "cixl/scope.h"
 #include "cixl/lib/math.h"
 
-static bool inc_imp(struct cx_scope *scope) {
-  struct cx_box *v = cx_test(cx_peek(scope, false));
-  v->as_int++;
+static bool inc_imp(struct cx_call *call) {
+  struct cx_box *v = cx_test(cx_call_arg(call, 0));
+  struct cx_scope *s = call->scope;
+  cx_box_init(cx_push(s), s->cx->int_type)->as_int = v->as_int+1;
   return true;
 }
 
-static bool dec_imp(struct cx_scope *scope) {
-  struct cx_box *v = cx_test(cx_peek(scope, false));
-  v->as_int--;
+static bool dec_imp(struct cx_call *call) {
+  struct cx_box *v = cx_test(cx_call_arg(call, 0));
+  struct cx_scope *s = call->scope;
+  cx_box_init(cx_push(s), s->cx->int_type)->as_int = v->as_int-1;
   return true;
 }
 
-static bool int_add_imp(struct cx_scope *scope) {
+static bool int_add_imp(struct cx_call *call) {
   struct cx_box
-    y = *cx_test(cx_pop(scope, false)),
-    *x = cx_test(cx_peek(scope, false));
+    *y = cx_test(cx_call_arg(call, 1)),
+    *x = cx_test(cx_call_arg(call, 0));
 
-  x->as_int += y.as_int;
+  struct cx_scope *s = call->scope;
+  cx_box_init(cx_push(s), s->cx->int_type)->as_int = x->as_int+y->as_int;
   return true;
 }
 
-static bool int_sub_imp(struct cx_scope *scope) {
+static bool int_sub_imp(struct cx_call *call) {
   struct cx_box
-    y = *cx_test(cx_pop(scope, false)),
-    *x = cx_test(cx_peek(scope, false));
+    *y = cx_test(cx_call_arg(call, 1)),
+    *x = cx_test(cx_call_arg(call, 0));
 
-  x->as_int -= y.as_int;
+  struct cx_scope *s = call->scope;
+  cx_box_init(cx_push(s), s->cx->int_type)->as_int = x->as_int-y->as_int;
   return true;
 }
 
-static bool int_mul_imp(struct cx_scope *scope) {
+static bool int_mul_imp(struct cx_call *call) {
   struct cx_box
-    y = *cx_test(cx_pop(scope, false)),
-    *x = cx_test(cx_peek(scope, false));
+    *y = cx_test(cx_call_arg(call, 1)),
+    *x = cx_test(cx_call_arg(call, 0));
 
-  x->as_int *= y.as_int;
+  struct cx_scope *s = call->scope;
+  cx_box_init(cx_push(s), s->cx->int_type)->as_int = x->as_int*y->as_int;
   return true;
 }
 
-static bool int_div_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
+static bool int_div_imp(struct cx_call *call) {
+  struct cx_box
+    *y = cx_test(cx_call_arg(call, 1)),
+    *x = cx_test(cx_call_arg(call, 0));
+
+  struct cx_scope *s = call->scope;
   
-  struct cx_box
-    y = *cx_test(cx_pop(scope, false)),
-    x = *cx_test(cx_pop(scope, false));
-
-  if (!y.as_int) {
-    cx_error(cx, cx->row, cx->col, "Division by zero");
+  if (!y->as_int) {
+    cx_error(s->cx, s->cx->row, s->cx->col, "Division by zero");
     return false;
   }
   
-  cx_rat_init(&cx_box_init(cx_push(scope), cx->rat_type)->as_rat,
-	      cx_abs(x.as_int), cx_abs(y.as_int),
-	      (x.as_int >= 0 || y.as_int > 0) && (x.as_int < 0 || y.as_int < 0));
+  cx_rat_init(&cx_box_init(cx_push(s), s->cx->rat_type)->as_rat,
+	      cx_abs(x->as_int),
+	      cx_abs(y->as_int),
+	      (x->as_int >= 0 || y->as_int > 0) &&
+	      (x->as_int < 0 || y->as_int < 0));
   
   return true;
 }
 
-static bool int_mod_imp(struct cx_scope *scope) {
+static bool int_mod_imp(struct cx_call *call) {
   struct cx_box
-    y = *cx_test(cx_pop(scope, false)),
-    *x = cx_test(cx_peek(scope, false));
+    *y = cx_test(cx_call_arg(call, 1)),
+    *x = cx_test(cx_call_arg(call, 0));
 
-  x->as_int = x->as_int % y.as_int;
+  struct cx_scope *s = call->scope;
+  cx_box_init(cx_push(s), s->cx->int_type)->as_int = x->as_int % y->as_int;
   return true;
 }
 
-static bool int_abs_imp(struct cx_scope *scope) {
-  struct cx_box *n = cx_test(cx_peek(scope, false));
-  if (n->as_int < 0) { n->as_int = -n->as_int; }
+static bool int_abs_imp(struct cx_call *call) {
+  struct cx_box *n = cx_test(cx_call_arg(call, 0));
+  struct cx_scope *s = call->scope;
+  
+  cx_box_init(cx_push(s), s->cx->int_type)->as_int =
+    (n->as_int < 0) ? -n->as_int : n->as_int;
+  
   return true;
 }
 
-static bool rand_imp(struct cx_scope *scope) {
-  struct cx_box max = *cx_test(cx_pop(scope, false));
-  cx_box_init(cx_push(scope), scope->cx->int_type)->as_int = cx_rand(max.as_int);
+static bool rand_imp(struct cx_call *call) {
+  struct cx_box *max = cx_test(cx_call_arg(call, 0));
+  struct cx_scope *s = call->scope;
+  cx_box_init(cx_push(s), s->cx->int_type)->as_int = cx_rand(max->as_int);
   return true;
 }
 
-static bool rat_add_imp(struct cx_scope *scope) {
+static bool rat_add_imp(struct cx_call *call) {
   struct cx_box
-    y = *cx_test(cx_pop(scope, false)),
-    *x = cx_test(cx_peek(scope, false));
+    *y = cx_test(cx_call_arg(call, 1)),
+    *x = cx_test(cx_call_arg(call, 0));
 
-  cx_rat_add(&x->as_rat, &y.as_rat);
+  struct cx_scope *s = call->scope;
+  struct cx_rat v = x->as_rat;
+  cx_rat_add(&v, &y->as_rat);
+  cx_box_init(cx_push(s), s->cx->rat_type)->as_rat = v;
   return true;
 }
 
-static bool rat_mul_imp(struct cx_scope *scope) {
+static bool rat_mul_imp(struct cx_call *call) {
   struct cx_box
-    y = *cx_test(cx_pop(scope, false)),
-    *x = cx_test(cx_peek(scope, false));
+    *y = cx_test(cx_call_arg(call, 1)),
+    *x = cx_test(cx_call_arg(call, 0));
 
-  cx_rat_mul(&x->as_rat, &y.as_rat);
+  struct cx_scope *s = call->scope;
+  struct cx_rat v = x->as_rat;
+  cx_rat_mul(&v, &y->as_rat);
+  cx_box_init(cx_push(s), s->cx->rat_type)->as_rat = v;
   return true;
 }
 
-static bool rat_scale_imp(struct cx_scope *scope) {
+static bool rat_scale_imp(struct cx_call *call) {
   struct cx_box
-    y = *cx_test(cx_pop(scope, false)),
-    *x = cx_test(cx_peek(scope, false));
+    *y = cx_test(cx_call_arg(call, 1)),
+    *x = cx_test(cx_call_arg(call, 0));
 
-  x->as_rat.num *= y.as_int;
+  struct cx_scope *s = call->scope;
+  struct cx_rat v = x->as_rat;
+  v.num *= y->as_int;
+  cx_box_init(cx_push(s), s->cx->rat_type)->as_rat = v;
   return true;
 }
 
-static bool rat_int_imp(struct cx_scope *scope) {
-  struct cx_box v = *cx_test(cx_pop(scope, false));
-  cx_box_init(cx_push(scope), scope->cx->int_type)->as_int = cx_rat_int(&v.as_rat);
+static bool rat_int_imp(struct cx_call *call) {
+  struct cx_box *v = cx_test(cx_call_arg(call, 0));
+  struct cx_scope *s = call->scope;
+  cx_box_init(cx_push(s), s->cx->int_type)->as_int = cx_rat_int(&v->as_rat);
   return true;
 }
 

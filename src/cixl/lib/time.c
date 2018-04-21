@@ -4,6 +4,7 @@
 #include <time.h>
 
 #include "cixl/arg.h"
+#include "cixl/call.h"
 #include "cixl/cx.h"
 #include "cixl/box.h"
 #include "cixl/error.h"
@@ -34,101 +35,99 @@ static int days_in_month(int year, int month) {
   return 30;
 }
 
-static bool years_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  struct cx_box n = *cx_test(cx_pop(scope, false));
-
-  cx_time_init(&cx_box_init(cx_push(scope), cx->time_type)->as_time,
-	       n.as_int*12, 0);
-
-  return true;
-}
-
-static bool months_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  struct cx_box n = *cx_test(cx_pop(scope, false));
-
-  cx_time_init(&cx_box_init(cx_push(scope), cx->time_type)->as_time,
-	       n.as_int, 0);
+static bool years_imp(struct cx_call *call) {
+  struct cx_box *n = cx_test(cx_call_arg(call, 0));
+  struct cx_scope *s = call->scope;
+  
+  cx_time_init(&cx_box_init(cx_push(s), s->cx->time_type)->as_time,
+	       n->as_int*12, 0);
 
   return true;
 }
 
-static bool days_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  struct cx_box n = *cx_test(cx_pop(scope, false));
-
-  cx_time_init(&cx_box_init(cx_push(scope), cx->time_type)->as_time,
-	       0, n.as_int*CX_DAY);
-
-  return true;
-}
-
-static bool h_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  struct cx_box n = *cx_test(cx_pop(scope, false));
-
-  cx_time_init(&cx_box_init(cx_push(scope), cx->time_type)->as_time,
-	       0, n.as_int*CX_HOUR);
+static bool months_imp(struct cx_call *call) {
+  struct cx_box *n = cx_test(cx_call_arg(call, 0));
+  struct cx_scope *s = call->scope;
+  
+  cx_time_init(&cx_box_init(cx_push(s), s->cx->time_type)->as_time,
+	       n->as_int, 0);
 
   return true;
 }
 
-static bool m_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  struct cx_box n = *cx_test(cx_pop(scope, false));
-
-  cx_time_init(&cx_box_init(cx_push(scope), cx->time_type)->as_time,
-	       0, n.as_int*CX_MIN);
-
-  return true;
-}
-
-static bool s_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  struct cx_box n = *cx_test(cx_pop(scope, false));
-
-  cx_time_init(&cx_box_init(cx_push(scope), cx->time_type)->as_time,
-	       0, n.as_int*CX_SEC);
+static bool days_imp(struct cx_call *call) {
+  struct cx_box *n = cx_test(cx_call_arg(call, 0));
+  struct cx_scope *s = call->scope;
+  
+  cx_time_init(&cx_box_init(cx_push(s), s->cx->time_type)->as_time,
+	       0, n->as_int*CX_DAY);
 
   return true;
 }
 
-static bool ms_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  struct cx_box n = *cx_test(cx_pop(scope, false));
-
-  cx_time_init(&cx_box_init(cx_push(scope), cx->time_type)->as_time,
-	       0, n.as_int*CX_MSEC);
-
-  return true;
-}
-
-static bool us_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  struct cx_box n = *cx_test(cx_pop(scope, false));
-
-  cx_time_init(&cx_box_init(cx_push(scope), cx->time_type)->as_time,
-	       0, n.as_int*CX_USEC);
-
-  return true;
-}
-
-static bool ns_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  struct cx_box n = *cx_test(cx_pop(scope, false));
-
-  cx_time_init(&cx_box_init(cx_push(scope), cx->time_type)->as_time,
-	       0, n.as_int);
+static bool h_imp(struct cx_call *call) {
+  struct cx_box *n = cx_test(cx_call_arg(call, 0));
+  struct cx_scope *s = call->scope;
+  
+  cx_time_init(&cx_box_init(cx_push(s), s->cx->time_type)->as_time,
+	       0, n->as_int*CX_HOUR);
   
   return true;
 }
 
-static bool stack_time_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  struct cx_box in = *cx_test(cx_pop(scope, false));
-  struct cx_stack *vs = in.as_ptr;
+static bool m_imp(struct cx_call *call) {
+  struct cx_box *n = cx_test(cx_call_arg(call, 0));
+  struct cx_scope *s = call->scope;
+  
+  cx_time_init(&cx_box_init(cx_push(s), s->cx->time_type)->as_time,
+	       0, n->as_int*CX_MIN);
 
+  return true;
+}
+
+static bool s_imp(struct cx_call *call) {
+  struct cx_box *n = cx_test(cx_call_arg(call, 0));
+  struct cx_scope *s = call->scope;
+  
+  cx_time_init(&cx_box_init(cx_push(s), s->cx->time_type)->as_time,
+	       0, n->as_int*CX_SEC);
+
+  return true;
+}
+
+static bool ms_imp(struct cx_call *call) {
+  struct cx_box *n = cx_test(cx_call_arg(call, 0));
+  struct cx_scope *s = call->scope;
+  
+  cx_time_init(&cx_box_init(cx_push(s), s->cx->time_type)->as_time,
+	       0, n->as_int*CX_MSEC);
+
+  return true;
+}
+
+static bool us_imp(struct cx_call *call) {
+  struct cx_box *n = cx_test(cx_call_arg(call, 0));
+  struct cx_scope *s = call->scope;
+  
+  cx_time_init(&cx_box_init(cx_push(s), s->cx->time_type)->as_time,
+	       0, n->as_int*CX_USEC);
+
+  return true;
+}
+
+static bool ns_imp(struct cx_call *call) {
+  struct cx_box *n = cx_test(cx_call_arg(call, 0));
+  struct cx_scope *s = call->scope;
+  
+  cx_time_init(&cx_box_init(cx_push(s), s->cx->time_type)->as_time,
+	       0, n->as_int);
+  
+  return true;
+}
+
+static bool stack_time_imp(struct cx_call *call) {
+  struct cx_stack *vs = cx_test(cx_call_arg(call, 0))->as_ptr;
+  struct cx_scope *s = call->scope;
   struct cx_time t;
   cx_time_init(&t, 0, 0);
   
@@ -160,23 +159,21 @@ static bool stack_time_imp(struct cx_scope *scope) {
     }
   }
 
-  cx_box_init(cx_push(scope), cx->time_type)->as_time = t;
-  cx_box_deinit(&in);  
+  cx_box_init(cx_push(s), s->cx->time_type)->as_time = t;
   return true;
 }
 
-static bool now_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-
+static bool now_imp(struct cx_call *call) {
+  struct cx_scope *s = call->scope;
   struct timespec ts;
   clock_gettime(CLOCK_REALTIME, &ts);
   struct tm tm;
   
   if (!localtime_r(&ts.tv_sec, &tm)) {
-    cx_error(cx, cx->row, cx->col, "Failed destructuring time: %d", errno);
+    cx_error(s->cx, s->cx->row, s->cx->col, "Failed destructuring time: %d", errno);
   }
   
-  struct cx_time *t = &cx_box_init(cx_push(scope), cx->time_type)->as_time;
+  struct cx_time *t = &cx_box_init(cx_push(s), s->cx->time_type)->as_time;
 
   cx_time_init(t,
 	       (tm.tm_year+1900)*12 + tm.tm_mon,
@@ -189,52 +186,55 @@ static bool now_imp(struct cx_scope *scope) {
   return true;
 }
 
-static bool time_date_imp(struct cx_scope *scope) {
-  struct cx_time *t = &cx_test(cx_peek(scope, false))->as_time;
-  t->ns = t->ns / CX_DAY * CX_DAY;
+static bool time_date_imp(struct cx_call *call) {
+  struct cx_time t = cx_test(cx_call_arg(call, 0))->as_time;
+  struct cx_scope *s = call->scope;
+  t.ns /= CX_DAY;
+  cx_box_init(cx_push(s), s->cx->time_type)->as_time = t;
   return true;
 }
 
-static bool time_time_imp(struct cx_scope *scope) {
-  struct cx_time *t = &cx_test(cx_peek(scope, false))->as_time;
-  t->months = 0;
-  t->ns %= CX_DAY;
+static bool time_time_imp(struct cx_call *call) {
+  struct cx_time t = cx_test(cx_call_arg(call, 0))->as_time;
+  struct cx_scope *s = call->scope;
+  t.months = 0;
+  t.ns %= CX_DAY;
+  cx_box_init(cx_push(s), s->cx->time_type)->as_time = t;  
   return true;
 }
 
-static bool time_years_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  struct cx_box t = *cx_test(cx_pop(scope, false));
-  cx_box_init(cx_push(scope), cx->int_type)->as_int = t.as_time.months / 12;
+static bool time_years_imp(struct cx_call *call) {
+  struct cx_box *t = cx_test(cx_call_arg(call, 0));
+  struct cx_scope *s = call->scope;
+  cx_box_init(cx_push(s), s->cx->int_type)->as_int = t->as_time.months / 12;
   return true;
 }
 
-static bool month_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  struct cx_box t = *cx_test(cx_pop(scope, false));
-  cx_box_init(cx_push(scope), cx->int_type)->as_int = t.as_time.months % 12;
+static bool month_imp(struct cx_call *call) {
+  struct cx_box *t = cx_test(cx_call_arg(call, 0));
+  struct cx_scope *s = call->scope;
+  cx_box_init(cx_push(s), s->cx->int_type)->as_int = t->as_time.months % 12;
   return true;
 }
 
-static bool time_months_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  struct cx_box t = *cx_test(cx_pop(scope, false));
-  cx_box_init(cx_push(scope), cx->int_type)->as_int = t.as_time.months;
+static bool time_months_imp(struct cx_call *call) {
+  struct cx_box *t = cx_test(cx_call_arg(call, 0));
+  struct cx_scope *s = call->scope;
+  cx_box_init(cx_push(s), s->cx->int_type)->as_int = t->as_time.months;
   return true;
 }
 
-static bool time_day_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  struct cx_box t = *cx_test(cx_pop(scope, false));
-  cx_box_init(cx_push(scope), cx->int_type)->as_int = t.as_time.ns / CX_DAY;
+static bool time_day_imp(struct cx_call *call) {
+  struct cx_box *t = cx_test(cx_call_arg(call, 0));
+  struct cx_scope *s = call->scope;
+  cx_box_init(cx_push(s), s->cx->int_type)->as_int = t->as_time.ns / CX_DAY;
   return true;
 }
 
-static bool time_days_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  struct cx_time t = cx_test(cx_pop(scope, false))->as_time;
-
-  int y_max = cx_abs(t.months/12), m_max = cx_abs(t.months%12);
+static bool time_days_imp(struct cx_call *call) {
+  struct cx_time *t = &cx_test(cx_call_arg(call, 0))->as_time;
+  struct cx_scope *s = call->scope;
+  int y_max = cx_abs(t->months/12), m_max = cx_abs(t->months%12);
   int64_t days = 0;
 
   for (int y = 0, m = 0; y < y_max || m < m_max;) {
@@ -248,136 +248,150 @@ static bool time_days_imp(struct cx_scope *scope) {
     }
   }
 
-  if (t.months < 0) { days *= -1; }
-  days += t.ns / CX_DAY;
-  cx_box_init(cx_push(scope), cx->int_type)->as_int = days;
+  if (t->months < 0) { days *= -1; }
+  days += t->ns / CX_DAY;
+  cx_box_init(cx_push(s), s->cx->int_type)->as_int = days;
   return true;
 }
 
-static bool hour_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  struct cx_box t = *cx_test(cx_pop(scope, false));
-  cx_box_init(cx_push(scope),
-	      cx->int_type)->as_int = (t.as_time.ns % CX_DAY) / CX_HOUR;
-  return true;
-}
-
-static bool minute_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  struct cx_box t = *cx_test(cx_pop(scope, false));
-  cx_box_init(cx_push(scope),
-	      cx->int_type)->as_int = (t.as_time.ns % CX_HOUR) / CX_MIN;
-  return true;
-}
-
-static bool second_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  struct cx_box t = *cx_test(cx_pop(scope, false));
-  cx_box_init(cx_push(scope),
-	      cx->int_type)->as_int = (t.as_time.ns % CX_MIN) / CX_SEC;
-  return true;
-}
-
-static bool nsecond_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  struct cx_box t = *cx_test(cx_pop(scope, false));
-  cx_box_init(cx_push(scope), cx->int_type)->as_int = (t.as_time.ns % CX_SEC);
-  return true;
-}
-
-static bool time_h_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  struct cx_box t = *cx_test(cx_pop(scope, false));
-  cx_box_init(cx_push(scope), cx->int_type)->as_int = t.as_time.ns / CX_HOUR;
-  return true;
-}
-
-static bool time_m_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  struct cx_box t = *cx_test(cx_pop(scope, false));
-  cx_box_init(cx_push(scope), cx->int_type)->as_int = t.as_time.ns / CX_MIN;
-  return true;
-}
-
-static bool time_s_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  struct cx_box t = *cx_test(cx_pop(scope, false));
-  cx_box_init(cx_push(scope), cx->int_type)->as_int = t.as_time.ns / CX_SEC;
-  return true;
-}
-
-static bool time_ms_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  struct cx_box t = *cx_test(cx_pop(scope, false));
-  cx_box_init(cx_push(scope), cx->int_type)->as_int = t.as_time.ns / CX_MSEC;
-  return true;
-}
-
-static bool time_us_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  struct cx_box t = *cx_test(cx_pop(scope, false));
-  cx_box_init(cx_push(scope), cx->int_type)->as_int = t.as_time.ns / CX_USEC;
-  return true;
-}
-
-static bool time_ns_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  struct cx_box t = *cx_test(cx_pop(scope, false));
-  cx_box_init(cx_push(scope), cx->int_type)->as_int = t.as_time.ns;
-  return true;
-}
-
-static bool add_imp(struct cx_scope *scope) {
-  struct cx_box
-    y = *cx_test(cx_pop(scope, false)),
-    *x = cx_test(cx_peek(scope, false));
+static bool hour_imp(struct cx_call *call) {
+  struct cx_box *t = cx_test(cx_call_arg(call, 0));
+  struct cx_scope *s = call->scope;
   
-  x->as_time.months += y.as_time.months;
-  x->as_time.ns += y.as_time.ns;
-  return true;
-}
-
-static bool sub_imp(struct cx_scope *scope) {
-  struct cx_box
-    y = *cx_test(cx_pop(scope, false)),
-    *x = cx_test(cx_peek(scope, false));
+  cx_box_init(cx_push(s),
+	      s->cx->int_type)->as_int = (t->as_time.ns % CX_DAY) / CX_HOUR;
   
-  x->as_time.months -= y.as_time.months;
-  x->as_time.ns -= y.as_time.ns;
   return true;
 }
 
-static bool mul_imp(struct cx_scope *scope) {
-  struct cx_box
-    y = *cx_test(cx_pop(scope, false)),
-    *x = cx_test(cx_peek(scope, false));
+static bool minute_imp(struct cx_call *call) {
+  struct cx_box *t = cx_test(cx_call_arg(call, 0));
+  struct cx_scope *s = call->scope;
   
-  x->as_time.months *= y.as_int;
-  x->as_time.ns *= y.as_int;
+  cx_box_init(cx_push(s), s->cx->int_type)->as_int =
+    (t->as_time.ns % CX_HOUR) / CX_MIN;
+
   return true;
 }
 
-static bool clock_imp(struct cx_scope *scope) {
-  struct cx_box v = *cx_test(cx_pop(scope, false));
-  cx_timer_t timer;
-  cx_timer_reset(&timer);
-  bool ok = cx_call(&v, scope);
-  cx_box_deinit(&v);
-  cx_box_init(cx_push(scope), scope->cx->int_type)->as_int = cx_timer_ns(&timer);
+static bool second_imp(struct cx_call *call) {
+  struct cx_box *t = cx_test(cx_call_arg(call, 0));
+  struct cx_scope *s = call->scope;
+  
+  cx_box_init(cx_push(s), s->cx->int_type)->as_int =
+    (t->as_time.ns % CX_MIN) / CX_SEC;
+  
+  return true;
+}
+
+static bool nsecond_imp(struct cx_call *call) {
+  struct cx_box *t = cx_test(cx_call_arg(call, 0));
+  struct cx_scope *s = call->scope;
+  cx_box_init(cx_push(s), s->cx->int_type)->as_int = (t->as_time.ns % CX_SEC);
+  return true;
+}
+
+static bool time_h_imp(struct cx_call *call) {
+  struct cx_box *t = cx_test(cx_call_arg(call, 0));
+  struct cx_scope *s = call->scope;
+  cx_box_init(cx_push(s), s->cx->int_type)->as_int = t->as_time.ns / CX_HOUR;
+  return true;
+}
+
+static bool time_m_imp(struct cx_call *call) {
+  struct cx_box *t = cx_test(cx_call_arg(call, 0));
+  struct cx_scope *s = call->scope;
+  cx_box_init(cx_push(s), s->cx->int_type)->as_int = t->as_time.ns / CX_MIN;
+  return true;
+}
+
+static bool time_s_imp(struct cx_call *call) {
+  struct cx_box *t = cx_test(cx_call_arg(call, 0));
+  struct cx_scope *s = call->scope;
+  cx_box_init(cx_push(s), s->cx->int_type)->as_int = t->as_time.ns / CX_SEC;
+  return true;
+}
+
+static bool time_ms_imp(struct cx_call *call) {
+  struct cx_box *t = cx_test(cx_call_arg(call, 0));
+  struct cx_scope *s = call->scope;
+  cx_box_init(cx_push(s), s->cx->int_type)->as_int = t->as_time.ns / CX_MSEC;
+  return true;
+}
+
+static bool time_us_imp(struct cx_call *call) {
+  struct cx_box *t = cx_test(cx_call_arg(call, 0));
+  struct cx_scope *s = call->scope;
+  cx_box_init(cx_push(s), s->cx->int_type)->as_int = t->as_time.ns / CX_USEC;
+  return true;
+}
+
+static bool time_ns_imp(struct cx_call *call) {
+  struct cx_box *t = cx_test(cx_call_arg(call, 0));
+  struct cx_scope *s = call->scope;
+  cx_box_init(cx_push(s), s->cx->int_type)->as_int = t->as_time.ns;
+  return true;
+}
+
+static bool add_imp(struct cx_call *call) {
+  struct cx_box
+    *y = cx_test(cx_call_arg(call, 1)),
+    *x = cx_test(cx_call_arg(call, 0));
+
+  struct cx_scope *s = call->scope;
+  struct cx_time t = x->as_time;
+  t.months += y->as_time.months;
+  t.ns += y->as_time.ns;
+  cx_box_init(cx_push(s), s->cx->time_type)->as_time = t;
+  return true;
+}
+
+static bool sub_imp(struct cx_call *call) {
+  struct cx_box
+    *y = cx_test(cx_call_arg(call, 1)),
+    *x = cx_test(cx_call_arg(call, 0));
+
+  struct cx_scope *s = call->scope;
+  struct cx_time t = x->as_time;
+  t.months -= y->as_time.months;
+  t.ns -= y->as_time.ns;
+  cx_box_init(cx_push(s), s->cx->time_type)->as_time = t;
+  return true;
+}
+
+static bool mul_imp(struct cx_call *call) {
+  struct cx_box
+    *y = cx_test(cx_call_arg(call, 1)),
+    *x = cx_test(cx_call_arg(call, 0));
+
+  struct cx_scope *s = call->scope;
+  struct cx_time t = x->as_time;
+  t.months *= y->as_int;
+  t.ns *= y->as_int;
+  cx_box_init(cx_push(s), s->cx->time_type)->as_time = t;
+  return true;
+}
+
+static bool clock_imp(struct cx_call *call) {
+  struct cx_box *v = cx_test(cx_call_arg(call, 0));
+  struct cx_scope *s = call->scope;
+  
+  cx_timer_t t;
+  cx_timer_reset(&t);
+  bool ok = cx_call(v, s);
+  cx_box_init(cx_push(s), s->cx->int_type)->as_int = cx_timer_ns(&t);
   return ok;
 }
 
-static bool fmt_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
+static bool fmt_imp(struct cx_call *call) {
   struct cx_box
-    f = *cx_test(cx_pop(scope, false)),
-    t = *cx_test(cx_pop(scope, false));
+    *f = cx_test(cx_call_arg(call, 1)),
+    *t = cx_test(cx_call_arg(call, 0));
 
-  char *s = cx_time_fmt(&t.as_time, f.as_str->data);
-  cx_box_init(cx_push(scope), cx->str_type)->as_str = cx_str_new(s, strlen(s));
-  free(s);
-  
-  cx_box_deinit(&f);
+  struct cx_scope *s = call->scope;
+  char *ts = cx_time_fmt(&t->as_time, f->as_str->data);
+  cx_box_init(cx_push(s), s->cx->str_type)->as_str = cx_str_new(ts, strlen(ts));
+  free(ts);
   return true;
 }
 

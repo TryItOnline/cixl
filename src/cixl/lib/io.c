@@ -4,6 +4,7 @@
 #include <unistd.h>
 
 #include "cixl/arg.h"
+#include "cixl/call.h"
 #include "cixl/cx.h"
 #include "cixl/bin.h"
 #include "cixl/box.h"
@@ -248,223 +249,196 @@ static struct cx_iter *read_iter_new(struct cx_box *in) {
   return &it->iter;
 }
 
-static bool print_imp(struct cx_scope *scope) {
+static bool print_imp(struct cx_call *call) {
   struct cx_box
-    v = *cx_test(cx_pop(scope, false)),
-    out = *cx_test(cx_pop(scope, false));
+    *v = cx_test(cx_call_arg(call, 1)),
+    *out = cx_test(cx_call_arg(call, 0));
   
-  cx_print(&v, cx_file_ptr(out.as_file));
-  cx_box_deinit(&v);
-  cx_box_deinit(&out);
+  cx_print(v, cx_file_ptr(out->as_file));
   return true;
 }
 
-static bool load_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  struct cx_box p = *cx_test(cx_pop(scope, false));
+static bool load_imp(struct cx_call *call) {
+  struct cx_box *p = cx_test(cx_call_arg(call, 0));
+  struct cx_scope *s = call->scope;
   struct cx_bin *bin = cx_bin_new();
-  struct cx_lib *lib = cx_pop_lib(cx);
-  bool ok = cx_load(cx, p.as_str->data, bin) && cx_eval(bin, 0, -1, cx);
-  cx_push_lib(cx, lib);
+  struct cx_lib *lib = cx_pop_lib(s->cx);
+  bool ok = cx_load(s->cx, p->as_str->data, bin) && cx_eval(bin, 0, -1, s->cx);
+  cx_push_lib(s->cx, lib);
   cx_bin_deref(bin);
-  cx_box_deinit(&p);
   return ok;
 }
 
-static bool fopen_imp(struct cx_scope *scope) {
+static bool fopen_imp(struct cx_call *call) {
   struct cx_box
-    m = *cx_test(cx_pop(scope, false)),
-    p = *cx_test(cx_pop(scope, false));
+    *m = cx_test(cx_call_arg(call, 1)),
+    *p = cx_test(cx_call_arg(call, 0));
 
+  struct cx_scope *s = call->scope;
   struct cx_type *ft = NULL;
-  struct cx *cx = scope->cx;
-  bool ok = false;
 
-  if (strchr(m.as_sym.id, 'r')) {
-    ft = strchr(m.as_sym.id, '+') ? cx->rwfile_type : cx->rfile_type;
-  } else if (strchr(m.as_sym.id, 'w') || strchr(m.as_sym.id, 'a')) {
-    ft = strchr(m.as_sym.id, '+') ? cx->rwfile_type : cx->wfile_type;
+  if (strchr(m->as_sym.id, 'r')) {
+    ft = strchr(m->as_sym.id, '+') ? s->cx->rwfile_type : s->cx->rfile_type;
+  } else if (strchr(m->as_sym.id, 'w') || strchr(m->as_sym.id, 'a')) {
+    ft = strchr(m->as_sym.id, '+') ? s->cx->rwfile_type : s->cx->wfile_type;
   } else {
-    cx_error(cx, cx->row, cx->col, "Invalid fopen mode: %s", m.as_ptr);
-    goto exit;
+    cx_error(s->cx, s->cx->row, s->cx->col, "Invalid fopen mode: %s", m->as_sym.id);
+    return false;
   }
 
-  FILE *f = fopen(p.as_str->data, m.as_sym.id);
+  FILE *f = fopen(p->as_str->data, m->as_sym.id);
 
   if (f) {
-    cx_box_init(cx_push(scope), ft)->as_file = cx_file_new(cx, fileno(f), NULL, f);
+    cx_box_init(cx_push(s), ft)->as_file = cx_file_new(s->cx, fileno(f), NULL, f);
   } else {
     if (errno != ENOENT) {
-      cx_error(cx, cx->row, cx->col,
+      cx_error(s->cx, s->cx->row, s->cx->col,
 	       "Failed opening file '%s': %d",
-	       p.as_str->data, errno);
+	       p->as_str->data, errno);
       
-      goto exit;
+      return false;
     }
 
-    cx_box_init(cx_push(scope), cx->nil_type);
+    cx_box_init(cx_push(s), s->cx->nil_type);
   }
   
-  ok = true;
- exit:
-  cx_box_deinit(&p);
-  return ok;
+  return true;
 }
 
-static bool unblock_imp(struct cx_scope *scope) {
-  struct cx_box *f = cx_test(cx_pop(scope, false));
+static bool unblock_imp(struct cx_call *call) {
+  struct cx_box *f = cx_test(cx_call_arg(call, 0));
   bool ok = cx_file_unblock(f->as_file);
-  cx_box_deinit(f);
   return ok;
 }
 
-static bool attach_imp(struct cx_scope *s) {
+static bool attach_imp(struct cx_call *call) {
   struct cx_box
-    dst = *cx_test(cx_pop(s, false)),
-    src = *cx_test(cx_pop(s, false));
+    *dst = cx_test(cx_call_arg(call, 1)),
+    *src = cx_test(cx_call_arg(call, 0));
 
-  bool ok = true;
+  struct cx_scope *s = call->scope;
   
-  if (dup2(dst.as_file->fd, src.as_file->fd) == -1) {
+  if (dup2(dst->as_file->fd, src->as_file->fd) == -1) {
     cx_error(s->cx, s->cx->row, s->cx->col, "Failed attaching file: %d", errno);
-    ok = false;
+    return false;
   }
 
-  cx_box_deinit(&dst);
-  cx_box_deinit(&src);
-  return ok;
+  return true;
 }
 
-static bool flush_imp(struct cx_scope *scope) {
-  struct cx_box *f = cx_test(cx_pop(scope, false));
-  bool ok = false;
+static bool flush_imp(struct cx_call *call) {
+  struct cx_box *f = cx_test(cx_call_arg(call, 0));
+  struct cx_scope *s = call->scope;
   
   if (f->as_file->_ptr && fflush(f->as_file->_ptr)) {
-    struct cx *cx = scope->cx;
-    cx_error(cx, cx->row, cx->col, "Failed flushing file: %d", errno);
-    goto exit;
+    cx_error(s->cx, s->cx->row, s->cx->col, "Failed flushing file: %d", errno);
+    return false;
   }
 
-  ok = true;
- exit:
-  cx_box_deinit(f);
-  return ok;
+  return true;
 }
 
-static bool seek_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  bool ok = false;
-  
+static bool seek_imp(struct cx_call *call) {
   struct cx_box
-    pos = *cx_test(cx_pop(scope, false)),
-    f = *cx_test(cx_pop(scope, false));
+    *pos = cx_test(cx_call_arg(call, 1)),
+    *f = cx_test(cx_call_arg(call, 0));
+
+  struct cx_scope *s = call->scope;
   
-  if (fseek(cx_file_ptr(f.as_file), pos.as_int, SEEK_SET) == -1) {
-    cx_error(cx, cx->row, cx->col, "Failed seeking: %d", errno);
-    goto exit;
+  if (fseek(cx_file_ptr(f->as_file), pos->as_int, SEEK_SET) == -1) {
+    cx_error(s->cx, s->cx->row, s->cx->col, "Failed seeking: %d", errno);
+    return false;
   }
 
-  ok = true;
- exit:
-  cx_box_deinit(&f);
-  return ok;
+  return true;
 }
 
-static bool tell_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  bool ok = false;
-  
-  struct cx_box f = *cx_test(cx_pop(scope, false));
-  off_t pos = ftell(cx_file_ptr(f.as_file));
+static bool tell_imp(struct cx_call *call) {
+  struct cx_box *f = cx_test(cx_call_arg(call, 0));
+  struct cx_scope *s = call->scope;
+  off_t pos = ftell(cx_file_ptr(f->as_file));
   
   if (pos == -1) {
-    cx_error(cx, cx->row, cx->col, "Failed telling: %d", errno);
-    goto exit;
+    cx_error(s->cx, s->cx->row, s->cx->col, "Failed telling: %d", errno);
+    return false;
   }
 
-  cx_box_init(cx_push(scope), cx->int_type)->as_int = pos;
-  ok = true;
- exit:
-  cx_box_deinit(&f);
-  return ok;
-}
-
-static bool eof_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  struct cx_box f = *cx_test(cx_pop(scope, false));
-  cx_box_init(cx_push(scope), cx->bool_type)->as_bool = feof(cx_file_ptr(f.as_file));
-  cx_box_deinit(&f);
+  cx_box_init(cx_push(s), s->cx->int_type)->as_int = pos;
   return true;
 }
 
-static bool close_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  struct cx_box *f = cx_test(cx_pop(scope, false));
-  bool ok = cx_file_close(f->as_file);
-  if (!ok) { cx_error(cx, cx->row, cx->col, "File not open"); }
-  cx_box_deinit(f);
-  return ok;
-}
-
-static bool read_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  struct cx_box in = *cx_test(cx_pop(scope, false));
-  cx_box_init(cx_push(scope), cx->iter_type)->as_iter = read_iter_new(&in);
-  cx_box_deinit(&in);
+static bool eof_imp(struct cx_call *call) {
+  struct cx_box *f = cx_test(cx_call_arg(call, 0));
+  struct cx_scope *s = call->scope;
+  cx_box_init(cx_push(s), s->cx->bool_type)->as_bool = feof(cx_file_ptr(f->as_file));
   return true;
 }
 
-static bool read_char_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  struct cx_box f = *cx_test(cx_pop(scope, false));
-  int c = fgetc(cx_file_ptr(f.as_file));
-  bool ok = false;
+static bool close_imp(struct cx_call *call) {
+  struct cx_box *f = cx_test(cx_call_arg(call, 0));
+  struct cx_scope *s = call->scope;
+  
+  if (!cx_file_close(f->as_file)) {
+    cx_error(s->cx, s->cx->row, s->cx->col, "File not open");
+    return false;
+  }
+
+  return true;
+}
+
+static bool read_imp(struct cx_call *call) {
+  struct cx_box *in = cx_test(cx_call_arg(call, 0));
+  struct cx_scope *s = call->scope;
+  cx_box_init(cx_push(s), s->cx->iter_type)->as_iter = read_iter_new(in);
+  return true;
+}
+
+static bool read_char_imp(struct cx_call *call) {
+  struct cx_file *f = cx_test(cx_call_arg(call, 0))->as_file;
+  struct cx_scope *s = call->scope;
+  int c = fgetc(cx_file_ptr(f));
   
   if (c == EOF) {
     if (errno == EAGAIN) {
-      cx_box_init(cx_push(scope), cx->nil_type);
-      ok = true;
-    } else {
-      cx_error(cx, cx->row, cx->col, "Failed reading char: %d", errno);
+      cx_box_init(cx_push(s), s->cx->nil_type);
+      return true;
     }
-    
-    goto exit;
+
+    cx_error(s->cx, s->cx->row, s->cx->col, "Failed reading char: %d", errno);
+    return false;
   }
 
-  cx_box_init(cx_push(scope), cx->int_type)->as_int = c;
-  ok = true;
- exit:
-  cx_box_deinit(&f);
-  return ok;
-}
-
-static bool write_imp(struct cx_scope *scope) {
-  struct cx_box
-    v = *cx_test(cx_pop(scope, false)),
-    out = *cx_test(cx_pop(scope, false));
-
-  FILE *f = cx_file_ptr(out.as_file);
-  bool ok = cx_write(&v, f);
-  cx_box_deinit(&v);
-  cx_box_deinit(&out);
-  return ok;
-}
-
-static bool lines_imp(struct cx_scope *s) {
-  struct cx_box in = *cx_test(cx_pop(s, false));
-  struct cx_iter *it = line_iter_new(in.as_file);
-  cx_box_init(cx_push(s),
-	      cx_type_get(s->cx->iter_type, s->cx->str_type))->as_iter = it;
-  cx_box_deinit(&in);
+  cx_box_init(cx_push(s), s->cx->int_type)->as_int = c;
   return true;
 }
 
-static bool reverse_imp(struct cx_scope *s) {
-  struct cx_box in = *cx_test(cx_pop(s, false));
-  struct cx_iter *it = reverse_iter_new(in.as_file);
+static bool write_imp(struct cx_call *call) {
+  struct cx_box
+    *v = cx_test(cx_call_arg(call, 1)),
+    *out = cx_test(cx_call_arg(call, 0));
+
+  return cx_write(v, cx_file_ptr(out->as_file));
+}
+
+static bool lines_imp(struct cx_call *call) {
+  struct cx_file *in = cx_test(cx_call_arg(call, 0))->as_file;
+  struct cx_scope *s = call->scope;
+  struct cx_iter *it = line_iter_new(in);
+  
+  cx_box_init(cx_push(s),
+	      cx_type_get(s->cx->iter_type, s->cx->str_type))->as_iter = it;
+
+  return true;
+}
+
+static bool reverse_imp(struct cx_call *call) {
+  struct cx_file *in = cx_test(cx_call_arg(call, 0))->as_file;
+  struct cx_scope *s = call->scope;
+  struct cx_iter *it = reverse_iter_new(in);
+  
   cx_box_init(cx_push(s),
 	      cx_type_get(s->cx->iter_type, s->cx->char_type))->as_iter = it;
-  cx_box_deinit(&in);
+
   return true;
 }
 

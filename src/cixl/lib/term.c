@@ -5,6 +5,7 @@
 #include <unistd.h>
 
 #include "cixl/arg.h"
+#include "cixl/call.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
 #include "cixl/lib.h"
@@ -12,81 +13,79 @@
 #include "cixl/scope.h"
 #include "cixl/str.h"
 
-static bool ask_imp(struct cx_scope *scope) {
-  struct cx_box p = *cx_test(cx_pop(scope, false));
-  fputs(p.as_str->data, stdout);
-  cx_box_deinit(&p);
+static bool ask_imp(struct cx_call *call) {
+  struct cx_box *p = cx_test(cx_call_arg(call, 0));
+  struct cx_scope *s = call->scope;
+  fputs(p->as_str->data, stdout);
   char *line = NULL;
   size_t len = 0;
-  
   if (!cx_get_line(&line, &len, stdin)) { return false; }
-  cx_box_init(cx_push(scope), scope->cx->str_type)->as_str =
-    cx_str_new(line, strlen(line));
-  
+  cx_box_init(cx_push(s), s->cx->str_type)->as_str = cx_str_new(line, strlen(line));
   free(line);
   return true;
 }
 
-static bool screen_size_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
+static bool screen_size_imp(struct cx_call *call) {
+  struct cx_scope *s = call->scope;
   struct winsize w;
   
   if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &w) == -1) {
-    cx_error(cx, cx->row, cx->col, "Failed getting screen size: %d", errno);
+    cx_error(s->cx, s->cx->row, s->cx->col, "Failed getting screen size: %d", errno);
     return false;
   }
 
-  cx_box_init(cx_push(scope), cx->int_type)->as_int = w.ws_col;
-  cx_box_init(cx_push(scope), cx->int_type)->as_int = w.ws_row;
+  cx_box_init(cx_push(s), s->cx->int_type)->as_int = w.ws_col;
+  cx_box_init(cx_push(s), s->cx->int_type)->as_int = w.ws_row;
   return true;
 }
 
-static bool raw_mode_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
+static bool raw_mode_imp(struct cx_call *call) {
+  struct cx_scope *s = call->scope;
   static struct termios tio;
 
   if (tcgetattr(STDIN_FILENO, &tio) == -1) {
-    cx_error(cx, cx->row, cx->col, "Failed getting attribute: %d", errno);
+    cx_error(s->cx, s->cx->row, s->cx->col, "Failed getting attribute: %d", errno);
     return false;
   }
   
   tio.c_lflag &= ~(ICANON | ECHO);
 
   if (tcsetattr(STDIN_FILENO, TCSANOW, &tio) == -1) {
-    cx_error(cx, cx->row, cx->col, "Failed setting attribute: %d", errno);
+    cx_error(s->cx, s->cx->row, s->cx->col, "Failed setting attribute: %d", errno);
     return false;
   }
   
   return true;
 }
 
-static bool normal_mode_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
+static bool normal_mode_imp(struct cx_call *call) {
+  struct cx_scope *s = call->scope;
   static struct termios tio;
 
   if (tcgetattr(STDIN_FILENO, &tio) == -1) {
-    cx_error(cx, cx->row, cx->col, "Failed getting attribute: %d", errno);
+    cx_error(s->cx, s->cx->row, s->cx->col, "Failed getting attribute: %d", errno);
     return false;
   }
   
   tio.c_lflag |= ICANON | ECHO;
 
   if (tcsetattr(STDIN_FILENO, TCSANOW, &tio) == -1) {
-    cx_error(cx, cx->row, cx->col, "Failed setting attribute: %d", errno);
+    cx_error(s->cx, s->cx->row, s->cx->col, "Failed setting attribute: %d", errno);
     return false;
   }
   
   return true;
 }
 
-static bool ctrl_char_imp(struct cx_scope *scope) {
-  struct cx_box c = *cx_test(cx_pop(scope, false));
-  int cc = cx_ctrl_char(c.as_int);
+static bool ctrl_char_imp(struct cx_call *call) {
+  struct cx_box *c = cx_test(cx_call_arg(call, 0));
+  struct cx_scope *s = call->scope;
+  int cc = cx_ctrl_char(c->as_int);
 
   if (cc) {
-    cx_box_init(cx_push(scope), scope->cx->int_type)->as_int = cc;
+    cx_box_init(cx_push(s), s->cx->int_type)->as_int = cc;
   } else {
-    cx_box_init(cx_push(scope), scope->cx->nil_type);
+    cx_box_init(cx_push(s), s->cx->nil_type);
   }
   
   return true;

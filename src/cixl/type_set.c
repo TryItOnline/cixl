@@ -168,11 +168,14 @@ static char *conv_id(const char *in) {
   return out.data;
 }
 
-static bool conv_imp(struct cx_scope *s) {
-  struct cx_box *in = cx_test(cx_peek(s, false));
-  struct cx_call *call = cx_vec_peek(&s->cx->calls, 0);
-  struct cx_arg *ret = cx_test(cx_vec_start(&call->target->rets));
-  in->type = ret->type;
+static bool conv_imp(struct cx_call *call) {
+  struct cx_box *in = cx_test(cx_call_arg(call, 0));
+  struct cx_scope *s = call->scope;
+  struct cx_box *out = cx_push(s);
+  cx_copy(out, in);
+
+  struct cx_arg *ret = cx_test(cx_vec_start(&call->fimp->rets));
+  out->type = ret->type;
   return true;
 }
 

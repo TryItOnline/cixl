@@ -67,7 +67,7 @@ void cx_error_deref(struct cx_error *e) {
 void cx_error_dump(struct cx_error *e, FILE *out) {
   cx_do_vec(&e->calls, struct cx_call, c) {
     fprintf(out, "While calling %s<%s> from row %d, col %d\n",
-	    c->target->func->id, c->target->id,
+	    c->fimp->func->id, c->fimp->id,
 	    c->row, c->col);
   }
   

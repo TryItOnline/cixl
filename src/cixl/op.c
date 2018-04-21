@@ -47,9 +47,17 @@ static bool begin_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
   struct cx_scope *parent = op->as_begin.child
     ? cx_scope(cx, 0)
     : op->as_begin.fimp->scope;
-
-  if (op->as_begin.fimp) { cx_push_lib(cx, op->as_begin.fimp->lib); }  
+  
   cx_begin(cx, parent);
+
+  if (op->as_begin.fimp) {
+    cx_push_lib(cx, op->as_begin.fimp->lib);
+
+    struct cx_call *call = cx_test(cx_vec_peek(&cx->calls, 0));
+    cx_scope_deref(call->scope);
+    call->scope = cx_scope_ref(cx_scope(cx, 0));
+  }
+
   return true;
 }
 
@@ -62,20 +70,26 @@ static bool begin_emit(struct cx_op *op,
 		       struct cx_bin *bin,
 		       FILE *out,
 		       struct cx *cx) {
+  struct cx_fimp *imp = op->as_begin.fimp;
   fputs("struct cx_scope *parent = ", out);
   
-  if (op->as_begin.child) {
-    fputs("cx_scope(cx, 0);\n", out);
+  if (imp) {
+    fprintf(out, "%s()->scope;\n", imp->emit_id);    
   } else {
-    struct cx_fimp *imp = op->as_begin.fimp;
-
-    fprintf(out,
-	    "%s()->scope;\n"
-	    "cx_push_lib(cx, %s());\n",
-	    imp->emit_id, imp->lib->emit_id);
+    fputs("cx_scope(cx, 0);\n", out);
   }
 
   fputs("cx_begin(cx, parent);\n", out);
+
+  if (imp) {
+    fprintf(out,
+	    "cx_push_lib(cx, %s());\n"
+	    "struct cx_call *call = cx_test(cx_vec_peek(&cx->calls, 0));\n"
+	    "cx_scope_deref(call->scope);\n"
+	    "call->scope = cx_scope_ref(cx_scope(cx, 0));\n",
+	    imp->lib->emit_id);
+  }
+  
   return true;
 }
 
@@ -793,32 +807,22 @@ cx_op_type(CX_OPUSHLIB, {
 
 static bool putargs_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
   struct cx_fimp *imp = op->as_putargs.imp;
-  struct cx_scope *ds = cx_scope(cx, 0), *ss = ds->stack.count ? ds : cx_scope(cx, 1);
-  int nargs = imp->args.count;
+  struct cx_call *call = cx_test(cx_vec_peek(&cx->calls, 0));
+  int nargs = imp->func->nargs;
   
-  struct cx_box *v = cx_vec_peek(&ss->stack, 0);
-  ssize_t i = ss->stack.count-1;
-  
-  for (struct cx_arg *a = cx_vec_peek(&imp->args, 0);
-       a >= (struct cx_arg *)cx_vec_start(&imp->args);
-       a--, v--, i--) {
-    if (a->id || a->arg_type == CX_VARG) {
-      if (a->id) { *cx_put_var(ds, a->sym_id) = *v; }
-      cx_vec_delete(&ss->stack, i);
-      nargs--;
-    }
+  if (call->args.count != nargs) {
+    cx_error(cx, cx->row, cx->col, "Wrong number of args for %s", imp->func->id);
+    return false;
   }
 
-  if (nargs && ds != ss) {
-    struct cx_box *v = cx_vec_peek(&ss->stack, nargs-1);
-    
-    for (struct cx_arg *a = cx_vec_start(&imp->args);
-	 a != cx_vec_end(&imp->args);
-	 a++) {    
-      if (!a->id) { *cx_push(ds) = *v++; }
+  struct cx_arg *a = cx_vec_start(&imp->args);
+  struct cx_box *v = cx_vec_start(&call->args);
+  struct cx_scope *s = cx_scope(cx, 0);
+  
+  for(; nargs--; a++, v++) {
+    if (a->arg_type != CX_VARG) {
+      cx_copy(a->id ? cx_put_var(s, a->sym_id) : cx_push(s), v);
     }
-    
-    ss->stack.count -= nargs;
   }
   
   return true;
@@ -830,57 +834,29 @@ static bool putargs_emit(struct cx_op *op,
 			 struct cx *cx) {
   struct cx_fimp *imp = op->as_putargs.imp;
 
-  fputs("struct cx_scope\n"
-	"  *ds = cx_scope(cx, 0),\n"
-	"  *ss = ds->stack.count ? ds : cx_scope(cx, 1);\n\n",
-	out);
+  fprintf(out,
+	  "struct cx_call *call = cx_test(cx_vec_peek(&cx->calls, 0));\n"
+	  "struct cx_scope *s = cx_scope(cx, 0);\n"
+	  "if (call->args.count != %d) {\n"
+	  "  cx_error(cx, cx->row, cx->col, \"Wrong number of args for %s\");\n"
+	  "  goto op%zd;\n"
+	  "}\n\n",
+	  imp->func->nargs, imp->func->id, op->pc+1);
 
-  int nargs = imp->args.count;
-  size_t i = 0;
+  struct cx_arg *a = cx_vec_start(&imp->args);
   
-  for (struct cx_arg *a = cx_vec_peek(&imp->args, 0);
-       a >= (struct cx_arg *)cx_vec_start(&imp->args);
-       a--) {
-    if (a->id || a->arg_type == CX_VARG) {
+  for(int i=0; i < imp->func->nargs; i++, a++) {
+    if (a->arg_type != CX_VARG) {
       if (a->id) {
 	fprintf(out,
-		"*cx_put_var(ds, %s) = "
-		"*(struct cx_box *)cx_vec_peek(&ss->stack, %zd);\n",
+		"cx_copy(cx_put_var(s, %s), cx_call_arg(call, %d));\n",
 		a->sym_id.emit_id, i);
-      }
-
-      fprintf(out,
-	      "cx_vec_delete(&ss->stack, ss->stack.count-%zd);\n",
-	      i+1);
-      
-      nargs--;
-    } else {
-      i++;
-    }
-  }
-
-  if (nargs) {
-    fputs("\n"
-	  "if (ds != ss) {\n",
-	  out);
-    
-    i = nargs-1;
-
-    for (struct cx_arg *a = cx_vec_start(&imp->args);
-	 a != cx_vec_end(&imp->args);
-	 a++) {
-      if (!a->id) {
+      } else {
 	fprintf(out,
-		"  *cx_push(ds) = "
-		"*(struct cx_box *)cx_vec_peek(&ss->stack, %zd);\n",
-		i--);
+		"cx_copy(cx_push(s), cx_call_arg(call, %d));\n",
+		i);
       }
     }
-
-    fprintf(out,
-	    "  ss->stack.count -= %d;\n"
-	    "}\n\n",
-	    nargs);
   }
   
   return true;
@@ -1038,7 +1014,8 @@ static bool return_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
       cx_error(cx, cx->row, cx->col, "Recall not applicable");
       return false;
     }
-    
+
+    cx_call_pop_args(call);
     cx->pc = op->as_return.pc+1;
   } else {
     struct cx_scope *ss = cx_scope(cx, 0);
@@ -1147,6 +1124,7 @@ static bool return_emit(struct cx_op *op,
 	  "  }\n\n"
 	  
 	  "  call->recalls--;\n"
+	  "  cx_call_pop_args(call);\n"
 	  "  goto op%zd;\n"
 	  "} else {\n"
 	  "  size_t si = 0;\n",

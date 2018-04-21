@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "cixl/arg.h"
+#include "cixl/call.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
 #include "cixl/file.h"
@@ -103,17 +104,16 @@ static bool init_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   }
 }
 
-static bool home_dir_imp(struct cx_scope *scope) {
+static bool home_dir_imp(struct cx_call *call) {
+  struct cx_scope *s = call->scope;
   const char *d = cx_home_dir();
-  cx_box_init(cx_push(scope), scope->cx->str_type)->as_str = cx_str_new(d, strlen(d));
+  cx_box_init(cx_push(s), s->cx->str_type)->as_str = cx_str_new(d, strlen(d));
   return true;
 }
 
-static bool make_dir_imp(struct cx_scope *scope) {
-  struct cx_box p = *cx_test(cx_pop(scope, false));
-  bool ok = cx_make_dir(p.as_str->data);
-  cx_box_deinit(&p);
-  return ok;
+static bool make_dir_imp(struct cx_call *call) {
+  struct cx_box *p = cx_test(cx_call_arg(call, 0));
+  return cx_make_dir(p->as_str->data);
 }
 
 cx_lib(cx_init_sys, "cx/sys") {

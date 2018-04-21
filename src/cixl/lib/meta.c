@@ -2,6 +2,7 @@
 
 #include "cixl/arg.h"
 #include "cixl/bin.h"
+#include "cixl/call.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
 #include "cixl/fimp.h"
@@ -148,26 +149,28 @@ static bool use_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   return true;
 }
 
-static bool cx_this_lib_imp(struct cx_scope *scope) {
-  cx_box_init(cx_push(scope), scope->cx->lib_type)->as_lib = *(scope->cx->lib-1);
+static bool this_lib_imp(struct cx_call *call) {
+  struct cx_scope *s = call->scope;
+  cx_box_init(cx_push(s), s->cx->lib_type)->as_lib = *(s->cx->lib-1);
   return true;
 }
 
-static bool lib_id_imp(struct cx_scope *scope) {
-  struct cx_box lib = *cx_test(cx_pop(scope, false));
-  cx_box_init(cx_push(scope), scope->cx->sym_type)->as_sym = lib.as_lib->id;
+static bool lib_id_imp(struct cx_call *call) {
+  struct cx_box *lib = cx_test(cx_call_arg(call, 0));
+  struct cx_scope *s = call->scope;
+  cx_box_init(cx_push(s), s->cx->sym_type)->as_sym = lib->as_lib->id;
   return true;
 }
 
-static bool get_lib_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  struct cx_box id = *cx_test(cx_pop(scope, false));
-  struct cx_lib *lib = cx_get_lib(cx, id.as_sym.id, true);
-
+static bool get_lib_imp(struct cx_call *call) {
+  struct cx_box *id = cx_test(cx_call_arg(call, 0));
+  struct cx_scope *s = call->scope;
+  struct cx_lib *lib = cx_get_lib(s->cx, id->as_sym.id, true);
+  
   if (lib) {
-    cx_box_init(cx_push(scope), cx->lib_type)->as_lib = lib;
+    cx_box_init(cx_push(s), s->cx->lib_type)->as_lib = lib;
   } else {
-    cx_box_init(cx_push(scope), cx->nil_type);
+    cx_box_init(cx_push(s), s->cx->nil_type);
   }
   
   return true;
@@ -186,7 +189,7 @@ cx_lib(cx_init_meta, "cx/meta") {
   cx_add_cfunc(lib, "this-lib",
 	       cx_args(),
 	       cx_args(cx_arg(NULL, cx->lib_type)),
-	       cx_this_lib_imp);
+	       this_lib_imp);
 
   cx_add_cfunc(lib, "id",
 	       cx_args(cx_arg("lib", cx->lib_type)),

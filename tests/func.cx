@@ -13,7 +13,7 @@ func: named-result()(out Str) let: out 'foo';;
 named-result 'foo' = check
 
 func: literal-result()(_ Int 'foo') 42;
-literal-result stash [42 'foo'] = check
+| literal-result stash [42 'foo'] = check
 
 func: fortytwo(_ Int)(#f) _;
 func: fortytwo(42)(#t);
