@@ -830,6 +830,7 @@ static bool putargs_emit(struct cx_op *op,
   struct cx_fimp *imp = op->as_putargs.imp;
 
   fputs("struct cx_call *call = cx_test(cx_vec_peek(&cx->calls, 0));\n"
+	"struct cx_box *a = call->args;\n"
 	"struct cx_scope *s = cx_scope(cx, 0);\n",
 	out);
 
@@ -839,14 +840,14 @@ static bool putargs_emit(struct cx_op *op,
     if (a->arg_type != CX_VARG) {
       if (a->id) {
 	fprintf(out,
-		"cx_copy(cx_put_var(s, %s), cx_call_arg(call, %d));\n",
-		a->sym_id.emit_id, i);
+		"cx_copy(cx_put_var(s, %s), a);\n",
+		a->sym_id.emit_id);
       } else {
-	fprintf(out,
-		"cx_copy(cx_push(s), cx_call_arg(call, %d));\n",
-		i);
+	fputs("cx_copy(cx_push(s), a);\n", out);
       }
     }
+
+    fputs("a++;\n", out);
   }
   
   return true;

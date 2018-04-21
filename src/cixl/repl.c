@@ -307,9 +307,10 @@ if (stop_pc == 10) { goto exit; }
 cx->row = 1; cx->col = 50;
 if (!cx->errors.count) {
 struct cx_call *call = cx_test(cx_vec_peek(&cx->calls, 0));
+struct cx_box *a = call->args;
 struct cx_scope *s = cx_scope(cx, 0);
-
-cx_copy(cx_put_var(s, sym_n), cx_call_arg(call, 0));
+cx_copy(cx_put_var(s, sym_n), a);
+a++;
 }
 }
 
@@ -372,11 +373,14 @@ if (stop_pc == 16) { goto exit; }
 cx->row = 1; cx->col = 7;
 if (!cx->errors.count) {
 struct cx_call *call = cx_test(cx_vec_peek(&cx->calls, 0));
+struct cx_box *a = call->args;
 struct cx_scope *s = cx_scope(cx, 0);
-
-cx_copy(cx_put_var(s, sym_a), cx_call_arg(call, 0));
-cx_copy(cx_put_var(s, sym_b), cx_call_arg(call, 1));
-cx_copy(cx_put_var(s, sym_n), cx_call_arg(call, 2));
+cx_copy(cx_put_var(s, sym_a), a);
+a++;
+cx_copy(cx_put_var(s, sym_b), a);
+a++;
+cx_copy(cx_put_var(s, sym_n), a);
+a++;
 }
 }
 
@@ -583,6 +587,7 @@ if (call->recalls) {
   }
 
   call->recalls--;
+  cx_call_deinit_args(call);
   cx_call_pop_args(call);
   goto op16;
 } else {
@@ -680,6 +685,7 @@ if (call->recalls) {
   }
 
   call->recalls--;
+  cx_call_deinit_args(call);
   cx_call_pop_args(call);
   goto op10;
 } else {
@@ -872,6 +878,7 @@ if (call->recalls) {
   }
 
   call->recalls--;
+  cx_call_deinit_args(call);
   cx_call_pop_args(call);
   goto op3;
 } else {
