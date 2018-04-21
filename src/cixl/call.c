@@ -17,25 +17,17 @@ struct cx_call *cx_call_init(struct cx_call *c,
   c->fimp = fimp;
   c->scope = cx_scope_ref(scope);
   c->recalls = 0;
-  cx_vec_init(&c->args, sizeof(struct cx_box));
-  c->args.alloc = &scope->cx->stack_items_alloc;
   return c;
-}
-
-static void clear_args(struct cx_call *c) {
-  cx_do_vec(&c->args, struct cx_box, v) { cx_box_deinit(v); }
-  cx_vec_clear(&c->args);
 }
 
 struct cx_call *cx_call_deinit(struct cx_call *c) {
-  clear_args(c);
+  cx_call_deinit_args(c);
   cx_scope_deref(c->scope);
-  cx_vec_deinit(&c->args);
   return c;
 }
 
-struct cx_box *cx_call_arg(struct cx_call *c, int i) {  
-  if (i < 0 || i > c->args.count) {
+struct cx_box *cx_call_arg(struct cx_call *c, unsigned int i) {  
+  if (i > c->fimp->func->nargs) {
     struct cx *cx = c->scope->cx;
 
     cx_error(cx, cx->row, cx->col,
@@ -45,7 +37,7 @@ struct cx_box *cx_call_arg(struct cx_call *c, int i) {
     return NULL;
   }
 
-  return cx_vec_get(&c->args, i);
+  return c->args+i;
 }
 
 bool cx_call_pop_args(struct cx_call *c) {
@@ -58,15 +50,16 @@ bool cx_call_pop_args(struct cx_call *c) {
     return false;
   }
 
-  clear_args(c);
   if (!nargs) { return true; }  
-  cx_vec_grow(&c->args, nargs);
 
-  memcpy(c->args.items,
+  memcpy(c->args,
 	 cx_vec_peek(s, nargs-1),
 	 nargs*sizeof(struct cx_box));
   
   s->count -= nargs;
-  c->args.count = nargs;
   return true;
+}
+
+void cx_call_deinit_args(struct cx_call *c) {
+  for (unsigned int i=0; i < c->fimp->func->nargs; i++) { cx_box_deinit(c->args+i); }
 }

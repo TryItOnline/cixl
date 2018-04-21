@@ -308,10 +308,6 @@ cx->row = 1; cx->col = 50;
 if (!cx->errors.count) {
 struct cx_call *call = cx_test(cx_vec_peek(&cx->calls, 0));
 struct cx_scope *s = cx_scope(cx, 0);
-if (call->args.count != 1) {
-  cx_error(cx, cx->row, cx->col, "Wrong number of args for fib");
-  goto op11;
-}
 
 cx_copy(cx_put_var(s, sym_n), cx_call_arg(call, 0));
 }
@@ -377,10 +373,6 @@ cx->row = 1; cx->col = 7;
 if (!cx->errors.count) {
 struct cx_call *call = cx_test(cx_vec_peek(&cx->calls, 0));
 struct cx_scope *s = cx_scope(cx, 0);
-if (call->args.count != 3) {
-  cx_error(cx, cx->row, cx->col, "Wrong number of args for fib-rec");
-  goto op17;
-}
 
 cx_copy(cx_put_var(s, sym_a), cx_call_arg(call, 0));
 cx_copy(cx_put_var(s, sym_b), cx_call_arg(call, 1));

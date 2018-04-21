@@ -8,6 +8,8 @@
 #include "cixl/type.h"
 #include "cixl/vec.h"
 
+#define CX_MAX_ARGS 8
+
 #define cx_args(...)				\
   sizeof((struct cx_arg[]){__VA_ARGS__}) /	\
   sizeof(struct cx_arg),			\

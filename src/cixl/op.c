@@ -810,13 +810,8 @@ static bool putargs_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
   struct cx_call *call = cx_test(cx_vec_peek(&cx->calls, 0));
   int nargs = imp->func->nargs;
   
-  if (call->args.count != nargs) {
-    cx_error(cx, cx->row, cx->col, "Wrong number of args for %s", imp->func->id);
-    return false;
-  }
-
   struct cx_arg *a = cx_vec_start(&imp->args);
-  struct cx_box *v = cx_vec_start(&call->args);
+  struct cx_box *v = call->args;
   struct cx_scope *s = cx_scope(cx, 0);
   
   for(; nargs--; a++, v++) {
@@ -834,14 +829,9 @@ static bool putargs_emit(struct cx_op *op,
 			 struct cx *cx) {
   struct cx_fimp *imp = op->as_putargs.imp;
 
-  fprintf(out,
-	  "struct cx_call *call = cx_test(cx_vec_peek(&cx->calls, 0));\n"
-	  "struct cx_scope *s = cx_scope(cx, 0);\n"
-	  "if (call->args.count != %d) {\n"
-	  "  cx_error(cx, cx->row, cx->col, \"Wrong number of args for %s\");\n"
-	  "  goto op%zd;\n"
-	  "}\n\n",
-	  imp->func->nargs, imp->func->id, op->pc+1);
+  fputs("struct cx_call *call = cx_test(cx_vec_peek(&cx->calls, 0));\n"
+	"struct cx_scope *s = cx_scope(cx, 0);\n",
+	out);
 
   struct cx_arg *a = cx_vec_start(&imp->args);
   
@@ -1015,6 +1005,7 @@ static bool return_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
       return false;
     }
 
+    cx_call_deinit_args(call);
     cx_call_pop_args(call);
     cx->pc = op->as_return.pc+1;
   } else {
@@ -1124,6 +1115,7 @@ static bool return_emit(struct cx_op *op,
 	  "  }\n\n"
 	  
 	  "  call->recalls--;\n"
+	  "  cx_call_deinit_args(call);\n"
 	  "  cx_call_pop_args(call);\n"
 	  "  goto op%zd;\n"
 	  "} else {\n"

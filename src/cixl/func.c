@@ -48,9 +48,15 @@ bool cx_ensure_fimp(struct cx_func *func, struct cx_fimp *imp) {
 struct cx_fimp *cx_add_fimp(struct cx_func *func,
 			    int nargs, struct cx_arg *args,
 			    int nrets, struct cx_arg *rets) {
+  struct cx *cx = func->lib->cx;
+
+  if (nargs > CX_MAX_ARGS) {
+    cx_error(cx, cx->row, cx->col, "Max argument limit exceeded");
+    return NULL;
+  }
+
   struct cx_vec imp_args;
   cx_vec_init(&imp_args, sizeof(struct cx_arg));
-  struct cx *cx = func->lib->cx;
   
   struct cx_mfile id;
   cx_mfile_open(&id);
