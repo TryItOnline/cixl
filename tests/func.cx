@@ -3,6 +3,9 @@
 func: anon0()(_ Int) 42;
 anon0 42 = check
 
+func: anon-ref(_ Int)(_ Arg0) ++;
+41 anon-ref 42 = check
+
 func: untyped2(x y)(_ Int) $x $y +;
 1 2 untyped2 3 = check
 

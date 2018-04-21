@@ -2,7 +2,14 @@
 #define ntohll(x) ((1==ntohl(1)) ? (x) : ((uint64_t)ntohl((x) & 0xFFFFFFFF) << 32) | ntohl((x) >> 32))
 host64 & net64 fns
 
-* change ORETURN to use call args to resolve refs
+* add implicit lambda scope
+** one scope per lambda
+** set parent
+** install on call
+** replace scope.parents with plain parent ptr
+** copy all values on entry
+** pop_scope to copy back
+* ---
 * enable using Arg refs inside funcs
 ** add bool cx_is_arg_ref(type) fn
 *** search all args recursively for CX_TYPE_ARG
@@ -21,12 +28,6 @@ host64 & net64 fns
 ** update tests/examples
 * update cxcrypt
 * --
-* add implicit lambda scope
-** one scope per lambda
-** set parent
-** install on call
-** shuffle all values on stack back and forth
-** replace scope.parents with plain parent ptr
 * add cx_abort()/cx_exit(int code)/cx_on_exit(void (void *data))
 ** use in cx_test
 ** use in exit-fn

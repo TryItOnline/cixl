@@ -1021,12 +1021,8 @@ static bool return_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
       }
       
       struct cx_type *get_arg(int i) {
-	if (i >= imp->args.count) { return NULL; }
-	struct cx_arg *a = cx_vec_get(&imp->args, i);
-	if (!a->id) { return NULL; }
-	struct cx_box *v = cx_get_var(ss, a->sym_id, false);
-	if (!v) { return NULL; }
-	return v->type;
+	struct cx_box *v = cx_call_arg(call, i);
+	return v ? v->type : NULL;
       }
       
       struct cx_scope *ds = cx_scope(cx, 1);
@@ -1132,12 +1128,8 @@ static bool return_emit(struct cx_op *op,
       "}\n\n"
       
       "struct cx_type *get_arg(int i) {\n"
-      "  if (i >= imp->args.count) { return NULL; }\n"
-      "  struct cx_arg *a = cx_vec_get(&imp->args, i);\n"
-      "  if (!a->id) { return NULL; }\n"
-      "  struct cx_box *v = cx_get_var(s, a->sym_id, false);\n"
-      "  if (!v) { return NULL; }\n"
-      "  return v->type;\n"
+      "  struct cx_box *v = cx_call_arg(call, i);\n"
+      "  return v ? v->type : NULL;\n"
       "}\n\n",
       out);
     

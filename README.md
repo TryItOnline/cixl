@@ -836,7 +836,7 @@ Overriding existing implementations is as easy as defining a function with the s
 [42]
 ```
 
-```recall``` may be used to call the current function recursively in the same scope. The call may be placed anywhere, but the actual calling doesn't take place until the current call exits.
+```recall``` may be used to call the current function recursively in the same scope. The call may be placed anywhere, but doesn't take place until execution reaches the end of the function.
 
 ```  
    func: fib-rec(a b n Int)(_ Int)
@@ -848,7 +848,7 @@ Overriding existing implementations is as easy as defining a function with the s
 [12586269025]
 ```
 
-Argument types may be specified in angle brackets to select a specific function implementation. Besides documentation and type checking, this allows disambiguating calls and helps the compiler inline the definition in cases where more than one implementation share the same name.
+Argument types may be specified in angle brackets to select a specific function implementation. Besides documentation and type checking, this allows disambiguating calls and helps the compiler inline in cases where more than one implementation share the same name.
 
 ```
    | &+<Int Int>
