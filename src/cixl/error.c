@@ -36,10 +36,10 @@ struct cx_error *cx_error_init(struct cx_error *e,
 
   cx_vec_init(&e->calls, sizeof(struct cx_call));
 
-  if (cx->calls.count > 1) {
-    size_t n = cx->calls.count-1;
+  if (cx->ncalls > 1) {
+    size_t n = cx->ncalls-1;
     cx_vec_grow(&e->calls, n);
-    memcpy(e->calls.items, cx->calls.items, n*sizeof(struct cx_call));
+    memcpy(e->calls.items, cx->calls, n*sizeof(struct cx_call));
     e->calls.count = n;
   }
 

@@ -20,7 +20,7 @@ use:
   (cx/io
     File RFile WFile
     #out
-    close flush fopen include: lines print reverse tell unblock)
+    close flush fopen lines print reverse tell unblock)
   (cx/io/buf Buf write-bytes)
   (cx/io/poll Poll delete no-write on-read on-write wait)
   (cx/io/term

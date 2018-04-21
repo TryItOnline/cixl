@@ -1,6 +1,7 @@
 #ifndef CX_H
 #define CX_H
 
+#include "cixl/call.h"
 #include "cixl/env.h"
 #include "cixl/fimp.h"
 #include "cixl/lib.h"
@@ -11,6 +12,7 @@
 
 #define CX_VERSION "0.9.7"
 #define CX_SLAB_SIZE 20				  
+#define CX_MAX_CALLS 64
 
 struct cx_arg;
 struct cx_catch;
@@ -62,8 +64,9 @@ struct cx {
   struct cx_vec scopes;
   struct cx_scope *root_scope, **scope;
 
-  struct cx_vec calls;
-
+  struct cx_call calls[CX_MAX_CALLS];
+  unsigned int ncalls;
+  
   struct cx_bin *bin;
   size_t pc;
   
@@ -95,6 +98,14 @@ struct cx_scope *cx_begin(struct cx *cx, struct cx_scope *parent);
 void cx_end(struct cx *cx);
 
 bool cx_funcall(struct cx *cx, const char *id);
+
+struct cx_call *cx_push_call(struct cx *cx,
+			     int row, int col,
+			     struct cx_fimp *fimp,
+			     struct cx_scope *scope);
+
+bool cx_pop_call(struct cx *cx);
+struct cx_call *cx_peek_call(struct cx *cx);
 
 char *cx_get_path(struct cx *cx, const char *path);
 bool cx_load_toks(struct cx *cx, const char *path, struct cx_vec *out);

@@ -10,7 +10,7 @@ struct cx_scan;
 
 struct cx_scope {
   struct cx *cx;
-  struct cx_vec parents;
+  struct cx_scope *parent;
   struct cx_vec stack;
   struct cx_env vars;
   

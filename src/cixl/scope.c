@@ -8,13 +8,7 @@
 struct cx_scope *cx_scope_new(struct cx *cx, struct cx_scope *parent) {
   struct cx_scope *scope = cx_malloc(&cx->scope_alloc);
   scope->cx = cx;
-
-  cx_vec_init(&scope->parents, sizeof(struct cx_scope *));
-
-  if (parent) {
-    *(struct cx_scope **)cx_vec_push(&scope->parents) = cx_scope_ref(parent);
-  }
-
+  scope->parent = parent ? cx_scope_ref(parent) : NULL;
   cx_vec_init(&scope->stack, sizeof(struct cx_box));
   scope->stack.alloc = &cx->stack_items_alloc;
   cx_env_init(&scope->vars, &cx->var_alloc);
@@ -38,9 +32,7 @@ void cx_scope_deref(struct cx_scope *scope) {
     cx_do_vec(&scope->stack, struct cx_box, b) { cx_box_deinit(b); }
     cx_vec_deinit(&scope->stack);
     
-    cx_do_vec(&scope->parents, struct cx_scope *, ps) { cx_scope_deref(*ps); }
-    cx_vec_deinit(&scope->parents);
-
+    if (scope->parent) { cx_scope_deref(scope->parent); }
     cx_free(&scope->cx->scope_alloc, scope);
   }
 }
@@ -74,10 +66,7 @@ struct cx_box *cx_get_var(struct cx_scope *scope, struct cx_sym id, bool silent)
   struct cx_var *v = cx_env_get(&scope->vars, id);
 
   if (!v) {
-    cx_do_vec(&scope->parents, struct cx_scope *, ps) {
-      struct cx_box *v = cx_get_var(*ps, id, true);
-      if (v) { return v; }
-    }
+    if (scope->parent) { return cx_get_var(scope->parent, id, silent); }
 
     if (!silent) {
       struct cx *cx = scope->cx;

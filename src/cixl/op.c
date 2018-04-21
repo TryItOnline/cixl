@@ -53,7 +53,7 @@ static bool begin_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
   if (op->as_begin.fimp) {
     cx_push_lib(cx, op->as_begin.fimp->lib);
 
-    struct cx_call *call = cx_test(cx_vec_peek(&cx->calls, 0));
+    struct cx_call *call = cx_test(cx_peek_call(cx));
     cx_scope_deref(call->scope);
     call->scope = cx_scope_ref(cx_scope(cx, 0));
   }
@@ -84,7 +84,7 @@ static bool begin_emit(struct cx_op *op,
   if (imp) {
     fprintf(out,
 	    "cx_push_lib(cx, %s());\n"
-	    "struct cx_call *call = cx_test(cx_vec_peek(&cx->calls, 0));\n"
+	    "struct cx_call *call = cx_test(cx_peek_call(cx));\n"
 	    "cx_scope_deref(call->scope);\n"
 	    "call->scope = cx_scope_ref(cx_scope(cx, 0));\n",
 	    imp->lib->emit_id);
@@ -807,7 +807,8 @@ cx_op_type(CX_OPUSHLIB, {
 
 static bool putargs_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
   struct cx_fimp *imp = op->as_putargs.imp;
-  struct cx_call *call = cx_test(cx_vec_peek(&cx->calls, 0));
+  struct cx_call *call = cx_test(cx_peek_call(cx));
+  if (!call) { return false; }
   int nargs = imp->func->nargs;
   
   struct cx_arg *a = cx_vec_start(&imp->args);
@@ -829,7 +830,7 @@ static bool putargs_emit(struct cx_op *op,
 			 struct cx *cx) {
   struct cx_fimp *imp = op->as_putargs.imp;
 
-  fputs("struct cx_call *call = cx_test(cx_vec_peek(&cx->calls, 0));\n"
+  fputs("struct cx_call *call = cx_test(cx_peek_call(cx));\n"
 	"struct cx_box *a = call->args;\n"
 	"struct cx_scope *s = cx_scope(cx, 0);\n",
 	out);
@@ -995,7 +996,7 @@ cx_op_type(CX_OPUTVAR, {
 
 static bool return_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
   struct cx_fimp *imp = op->as_return.imp;
-  struct cx_call *call = cx_test(cx_vec_peek(&cx->calls, 0));
+  struct cx_call *call = cx_test(cx_peek_call(cx));
 
   if (call->recalls) {
     call->recalls--;
@@ -1014,7 +1015,7 @@ static bool return_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
     size_t si = 0;
     
     if (imp->rets.count) {
-      struct cx_type *get_imp_arg(int i) {
+      struct cx_type *get_imp_arg(int i) {	
 	return (i < imp->args.count)
 	  ? ((struct cx_arg *)cx_vec_get(&imp->args, i))->type
 	  : NULL;
@@ -1076,7 +1077,7 @@ static bool return_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
     cx_vec_clear(&ss->stack);
     cx_end(cx);
     cx_pop_lib(cx);
-    cx_call_deinit(cx_vec_pop(&cx->calls));
+    if (!cx_pop_call(cx)) { return false; }
   }
   
   return true;
@@ -1085,7 +1086,7 @@ static bool return_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
 static bool return_error_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
   cx_end(cx);
   cx_pop_lib(cx);
-  cx_call_deinit(cx_vec_pop(&cx->calls));
+  if (!cx_pop_call(cx)) { return false; }
   return true;
 }
 
@@ -1099,7 +1100,7 @@ static bool return_emit(struct cx_op *op,
 	  "struct cx_fimp *imp = %s();\n",
 	  imp->emit_id);
 
-  fputs("struct cx_call *call = cx_test(cx_vec_peek(&cx->calls, 0));\n"
+  fputs("struct cx_call *call = cx_test(cx_peek_call(cx));\n"
 	"struct cx_scope *s = cx_scope(cx, 0);\n\n"
 	  
 	"if (call->recalls) {\n",
@@ -1198,9 +1199,9 @@ static bool return_emit(struct cx_op *op,
 	  "  cx_vec_clear(&s->stack);\n"
 	  "  cx_end(cx);\n"
 	  "  cx_pop_lib(cx);\n"
-	  "  cx_call_deinit(cx_vec_pop(&cx->calls));\n"
+	  "  if (!cx_pop_call(cx)) { goto op%zd; }\n"
 	  "}\n",
-	  op->pc+1);
+	  op->pc+1, op->pc+1);
   
   return true;  
 }
@@ -1209,10 +1210,11 @@ static bool return_error_emit(struct cx_op *op,
 			      struct cx_bin *bin,
 			      FILE *out,
 			      struct cx *cx) {
-  fputs("cx_end(cx);\n"
-	"cx_pop_lib(cx);\n"
-	"cx_call_deinit(cx_vec_pop(&cx->calls));\n",
-	out);
+  fprintf(out,
+	  "cx_end(cx);\n"
+	  "cx_pop_lib(cx);\n"
+	  "if (!cx_pop_call(cx)) { goto op%zd; }\n",
+	  op->pc+1);
 
   return true;
 }

@@ -11,7 +11,6 @@
 #include "cixl/box.h"
 #include "cixl/bool.h"
 #include "cixl/buf.h"
-#include "cixl/call.h"
 #include "cixl/cx.h"
 #include "cixl/env.h"
 #include "cixl/error.h"
@@ -96,6 +95,7 @@ cx_lib(cx_init_world, "cx") {
 
 struct cx *cx_init(struct cx *cx) {
   cx->next_sym_tag = cx->next_type_tag = 0;
+  cx->ncalls = 0;
   cx->bin = NULL;
   cx->pc = 0;
   cx->row = cx->col = -1;
@@ -137,7 +137,6 @@ struct cx *cx_init(struct cx *cx) {
   
   cx_vec_init(&cx->load_paths, sizeof(char *));
   cx_vec_init(&cx->scopes, sizeof(struct cx_scope *));
-  cx_vec_init(&cx->calls, sizeof(struct cx_call));
   cx_vec_init(&cx->errors, sizeof(struct cx_error *));
 
   cx->any_type =
@@ -198,9 +197,10 @@ struct cx *cx_deinit(struct cx *cx) {
   cx_do_vec(&cx->errors, struct cx_error *, e) { cx_error_deref(*e); }
   cx_vec_deinit(&cx->errors);
 
-  cx_do_vec(&cx->calls, struct cx_call, c) { cx_call_deinit(c); }
-  cx_vec_deinit(&cx->calls);
-
+  for (unsigned int i=0; i < cx->ncalls; i++) {
+    cx_call_deinit(cx->calls+i);
+  }
+  
   cx_do_vec(&cx->scopes, struct cx_scope *, s) {
     cx_env_clear(&(*s)->vars);
     cx_scope_deref(*s);
@@ -368,6 +368,36 @@ bool cx_funcall(struct cx *cx, const char *id) {
   }
   
   return cx_fimp_call(imp, s);
+}
+
+struct cx_call *cx_push_call(struct cx *cx,
+			     int row, int col,
+			     struct cx_fimp *fimp,
+			     struct cx_scope *scope) {
+  if (cx->ncalls == CX_MAX_CALLS) {
+    cx_error(cx, cx->row, cx->col, "Max calls exceeded");
+    return NULL;
+  }
+  
+  struct cx_call *c = cx->calls+cx->ncalls;
+  cx->ncalls++;
+  return cx_call_init(c, row, col, fimp, scope);
+}
+
+
+bool cx_pop_call(struct cx *cx) {
+  if (!cx->ncalls) {
+    cx_error(cx, cx->row, cx->col, "Failed popping call");
+    return false;
+  }
+  
+  cx->ncalls--;
+  cx_call_deinit(cx->calls+cx->ncalls);
+  return true;
+}
+
+struct cx_call *cx_peek_call(struct cx *cx) {
+  return cx->ncalls ? cx->calls+cx->ncalls-1 : NULL;
 }
 
 char *cx_get_path(struct cx *cx, const char *path) {

@@ -2,14 +2,6 @@
 #define ntohll(x) ((1==ntohl(1)) ? (x) : ((uint64_t)ntohl((x) & 0xFFFFFFFF) << 32) | ntohl((x) >> 32))
 host64 & net64 fns
 
-* add implicit lambda scope
-** one scope per lambda
-** set parent
-** install on call
-** replace scope.parents with plain parent ptr
-** copy all values on entry
-** pop_scope to copy back
-* ---
 * enable using Arg refs inside funcs
 ** add bool cx_is_arg_ref(type) fn
 *** search all args recursively for CX_TYPE_ARG

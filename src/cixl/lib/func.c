@@ -244,10 +244,10 @@ static bool call_imp(struct cx_call *call) {
 
 static bool recall_imp(struct cx_call *call) {
   struct cx_scope *s = call->scope;  
-  struct cx_call *c = cx_vec_peek(&s->cx->calls, 0);
+  struct cx_call *c = cx_test(cx_peek_call(s->cx));
   bool ok = false;
   
-  for (; c >= (struct cx_call *)s->cx->calls.items; c--) {
+  for (; c >= s->cx->calls; c--) {
     if (!c->fimp->ptr) {
       ok = true;
       break;
@@ -266,8 +266,8 @@ static bool recall_imp(struct cx_call *call) {
 static bool this_fimp_imp(struct cx_call *call) {
   struct cx_scope *s = call->scope;
   
-  if (s->cx->calls.count > 1) {
-    struct cx_call *c = cx_vec_peek(&s->cx->calls, 1);
+  if (s->cx->ncalls > 1) {
+    struct cx_call *c = cx_peek_call(s->cx)-1;
     cx_box_init(cx_push(s), s->cx->fimp_type)->as_ptr = c->fimp;
   } else {
     cx_box_init(cx_push(s), s->cx->nil_type);

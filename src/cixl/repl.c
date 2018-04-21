@@ -217,7 +217,7 @@ goto op39;
 struct cx_scope *parent = func_emitNbmips_()->scope;
 cx_begin(cx, parent);
 cx_push_lib(cx, lib_cxEbin());
-struct cx_call *call = cx_test(cx_vec_peek(&cx->calls, 0));
+struct cx_call *call = cx_test(cx_peek_call(cx));
 cx_scope_deref(call->scope);
 call->scope = cx_scope_ref(cx_scope(cx, 0));
 }
@@ -295,7 +295,7 @@ goto op32;
 struct cx_scope *parent = func_fib_Int()->scope;
 cx_begin(cx, parent);
 cx_push_lib(cx, lib_cxEmath());
-struct cx_call *call = cx_test(cx_vec_peek(&cx->calls, 0));
+struct cx_call *call = cx_test(cx_peek_call(cx));
 cx_scope_deref(call->scope);
 call->scope = cx_scope_ref(cx_scope(cx, 0));
 }
@@ -306,7 +306,7 @@ cx->pc = 10;
 if (stop_pc == 10) { goto exit; }
 cx->row = 1; cx->col = 50;
 if (!cx->errors.count) {
-struct cx_call *call = cx_test(cx_vec_peek(&cx->calls, 0));
+struct cx_call *call = cx_test(cx_peek_call(cx));
 struct cx_box *a = call->args;
 struct cx_scope *s = cx_scope(cx, 0);
 cx_copy(cx_put_var(s, sym_n), a);
@@ -361,7 +361,7 @@ goto op30;
 struct cx_scope *parent = func_fibNrec_IntIntInt()->scope;
 cx_begin(cx, parent);
 cx_push_lib(cx, lib_cxEmath());
-struct cx_call *call = cx_test(cx_vec_peek(&cx->calls, 0));
+struct cx_call *call = cx_test(cx_peek_call(cx));
 cx_scope_deref(call->scope);
 call->scope = cx_scope_ref(cx_scope(cx, 0));
 }
@@ -372,7 +372,7 @@ cx->pc = 16;
 if (stop_pc == 16) { goto exit; }
 cx->row = 1; cx->col = 7;
 if (!cx->errors.count) {
-struct cx_call *call = cx_test(cx_vec_peek(&cx->calls, 0));
+struct cx_call *call = cx_test(cx_peek_call(cx));
 struct cx_box *a = call->args;
 struct cx_scope *s = cx_scope(cx, 0);
 cx_copy(cx_put_var(s, sym_a), a);
@@ -574,10 +574,10 @@ cx->row = 1; cx->col = 7;
 if (cx->errors.count) {
 cx_end(cx);
 cx_pop_lib(cx);
-cx_call_deinit(cx_vec_pop(&cx->calls));
+if (!cx_pop_call(cx)) { goto op30; }
 } else {
 struct cx_fimp *imp = func_fibNrec_IntIntInt();
-struct cx_call *call = cx_test(cx_vec_peek(&cx->calls, 0));
+struct cx_call *call = cx_test(cx_peek_call(cx));
 struct cx_scope *s = cx_scope(cx, 0);
 
 if (call->recalls) {
@@ -599,12 +599,8 @@ struct cx_type *get_imp_arg(int i) {
 }
 
 struct cx_type *get_arg(int i) {
-  if (i >= imp->args.count) { return NULL; }
-  struct cx_arg *a = cx_vec_get(&imp->args, i);
-  if (!a->id) { return NULL; }
-  struct cx_box *v = cx_get_var(s, a->sym_id, false);
-  if (!v) { return NULL; }
-  return v->type;
+  struct cx_box *v = cx_call_arg(call, i);
+  return v ? v->type : NULL;
 }
 
   struct cx_scope *ds = cx_scope(cx, 1);
@@ -641,7 +637,7 @@ struct cx_type *get_arg(int i) {
   cx_vec_clear(&s->stack);
   cx_end(cx);
   cx_pop_lib(cx);
-  cx_call_deinit(cx_vec_pop(&cx->calls));
+  if (!cx_pop_call(cx)) { goto op30; }
 }
 }
 }
@@ -672,10 +668,10 @@ cx->row = 1; cx->col = 50;
 if (cx->errors.count) {
 cx_end(cx);
 cx_pop_lib(cx);
-cx_call_deinit(cx_vec_pop(&cx->calls));
+if (!cx_pop_call(cx)) { goto op32; }
 } else {
 struct cx_fimp *imp = func_fib_Int();
-struct cx_call *call = cx_test(cx_vec_peek(&cx->calls, 0));
+struct cx_call *call = cx_test(cx_peek_call(cx));
 struct cx_scope *s = cx_scope(cx, 0);
 
 if (call->recalls) {
@@ -697,12 +693,8 @@ struct cx_type *get_imp_arg(int i) {
 }
 
 struct cx_type *get_arg(int i) {
-  if (i >= imp->args.count) { return NULL; }
-  struct cx_arg *a = cx_vec_get(&imp->args, i);
-  if (!a->id) { return NULL; }
-  struct cx_box *v = cx_get_var(s, a->sym_id, false);
-  if (!v) { return NULL; }
-  return v->type;
+  struct cx_box *v = cx_call_arg(call, i);
+  return v ? v->type : NULL;
 }
 
   struct cx_scope *ds = cx_scope(cx, 1);
@@ -739,7 +731,7 @@ struct cx_type *get_arg(int i) {
   cx_vec_clear(&s->stack);
   cx_end(cx);
   cx_pop_lib(cx);
-  cx_call_deinit(cx_vec_pop(&cx->calls));
+  if (!cx_pop_call(cx)) { goto op32; }
 }
 }
 }
@@ -865,10 +857,10 @@ cx->row = 1; cx->col = 5;
 if (cx->errors.count) {
 cx_end(cx);
 cx_pop_lib(cx);
-cx_call_deinit(cx_vec_pop(&cx->calls));
+if (!cx_pop_call(cx)) { goto op39; }
 } else {
 struct cx_fimp *imp = func_emitNbmips_();
-struct cx_call *call = cx_test(cx_vec_peek(&cx->calls, 0));
+struct cx_call *call = cx_test(cx_peek_call(cx));
 struct cx_scope *s = cx_scope(cx, 0);
 
 if (call->recalls) {
@@ -890,12 +882,8 @@ struct cx_type *get_imp_arg(int i) {
 }
 
 struct cx_type *get_arg(int i) {
-  if (i >= imp->args.count) { return NULL; }
-  struct cx_arg *a = cx_vec_get(&imp->args, i);
-  if (!a->id) { return NULL; }
-  struct cx_box *v = cx_get_var(s, a->sym_id, false);
-  if (!v) { return NULL; }
-  return v->type;
+  struct cx_box *v = cx_call_arg(call, i);
+  return v ? v->type : NULL;
 }
 
   struct cx_scope *ds = cx_scope(cx, 1);
@@ -932,7 +920,7 @@ struct cx_type *get_arg(int i) {
   cx_vec_clear(&s->stack);
   cx_end(cx);
   cx_pop_lib(cx);
-  cx_call_deinit(cx_vec_pop(&cx->calls));
+  if (!cx_pop_call(cx)) { goto op39; }
 }
 }
 }
