@@ -21,8 +21,8 @@ static bool init_emit_bmips(struct cx *cx) {
 bool _eval(struct cx *cx, ssize_t stop_pc) {
   static bool init = true;
 
-  static struct cx_sym sym_n;
   static struct cx_sym sym_b;
+  static struct cx_sym sym_n;
   static struct cx_sym sym_a;
 
   struct cx_lib *lib_cxEbin() {
@@ -103,12 +103,6 @@ bool _eval(struct cx *cx, ssize_t stop_pc) {
     return f;
   }
 
-  struct cx_func *func_int() {
-    static struct cx_func *f = NULL;
-    if (!f) { f = cx_test(cx_get_func(cx, "int", false)); }
-    return f;
-  }
-
   struct cx_func *func_recall() {
     static struct cx_func *f = NULL;
     if (!f) { f = cx_test(cx_get_func(cx, "recall", false)); }
@@ -127,6 +121,12 @@ bool _eval(struct cx *cx, ssize_t stop_pc) {
     return f;
   }
 
+  struct cx_fimp *func_fib_Int() {
+    static struct cx_fimp *f = NULL;
+    if (!f) { f = cx_test(cx_get_fimp(func_fib(), "Int", false)); }
+    return f;
+  }
+
   struct cx_fimp *func_A_IntInt() {
     static struct cx_fimp *f = NULL;
     if (!f) { f = cx_test(cx_get_fimp(func_A(), "Int Int", false)); }
@@ -136,12 +136,6 @@ bool _eval(struct cx *cx, ssize_t stop_pc) {
   struct cx_fimp *func_fibNrec_IntIntInt() {
     static struct cx_fimp *f = NULL;
     if (!f) { f = cx_test(cx_get_fimp(func_fibNrec(), "Int Int Int", false)); }
-    return f;
-  }
-
-  struct cx_fimp *func_fib_Int() {
-    static struct cx_fimp *f = NULL;
-    if (!f) { f = cx_test(cx_get_fimp(func_fib(), "Int", false)); }
     return f;
   }
 
@@ -155,40 +149,40 @@ bool _eval(struct cx *cx, ssize_t stop_pc) {
   if (init) {
     init = false;
 
-    sym_n = cx_sym(cx, "n");
     sym_b = cx_sym(cx, "b");
+    sym_n = cx_sym(cx, "n");
     sym_a = cx_sym(cx, "a");
 
-struct cx_arg args91[0] = {
+struct cx_arg args97[0] = {
 };
 
-struct cx_arg rets92[1] = {
+struct cx_arg rets98[1] = {
 cx_arg(NULL, cx_get_type(cx, "Int", false))};
 
-struct cx_fimp *imp93 = cx_test(cx_add_func(*cx->lib, "emit-bmips", 0, args91, 1, rets92));
-struct cx_bin_fimp *bimp94 = cx_test(cx_set_insert(&cx->bin->fimps, &imp93));
-imp93->bin = cx_bin_ref(cx->bin);
-bimp94->imp = imp93;
-bimp94->start_pc = 2;
-bimp94->nops = 37;
+struct cx_fimp *imp99 = cx_test(cx_add_func(*cx->lib, "emit-bmips", 0, args97, 1, rets98));
+struct cx_bin_fimp *bimp100 = cx_test(cx_set_insert(&cx->bin->fimps, &imp99));
+imp99->bin = cx_bin_ref(cx->bin);
+bimp100->imp = imp99;
+bimp100->start_pc = 2;
+bimp100->nops = 36;
 cx_push_lib(cx, lib_cxEmath());
-struct cx_fimp *imp95 = func_fib_Int();
+struct cx_fimp *imp101 = func_fib_Int();
 cx_pop_lib(cx);
-struct cx_bin_fimp *bimp96 = cx_test(cx_set_insert(&cx->bin->fimps, &imp95));
-bimp96->imp = imp95;
-bimp96->start_pc = 9;
-bimp96->nops = 23;
+struct cx_bin_fimp *bimp102 = cx_test(cx_set_insert(&cx->bin->fimps, &imp101));
+bimp102->imp = imp101;
+bimp102->start_pc = 9;
+bimp102->nops = 23;
 cx_push_lib(cx, lib_cxEmath());
-struct cx_fimp *imp97 = func_fibNrec_IntIntInt();
+struct cx_fimp *imp103 = func_fibNrec_IntIntInt();
 cx_pop_lib(cx);
-struct cx_bin_fimp *bimp98 = cx_test(cx_set_insert(&cx->bin->fimps, &imp97));
-bimp98->imp = imp97;
-bimp98->start_pc = 15;
-bimp98->nops = 15;
+struct cx_bin_fimp *bimp104 = cx_test(cx_set_insert(&cx->bin->fimps, &imp103));
+bimp104->imp = imp103;
+bimp104->start_pc = 15;
+bimp104->nops = 15;
   }
 
-  static void *op_labels[40] = {
-    &&op0, &&op1, &&op2, &&op3, &&op4, &&op5, &&op6, &&op7, &&op8, &&op9, &&op10, &&op11, &&op12, &&op13, &&op14, &&op15, &&op16, &&op17, &&op18, &&op19, &&op20, &&op21, &&op22, &&op23, &&op24, &&op25, &&op26, &&op27, &&op28, &&op29, &&op30, &&op31, &&op32, &&op33, &&op34, &&op35, &&op36, &&op37, &&op38, &&op39};
+  static void *op_labels[39] = {
+    &&op0, &&op1, &&op2, &&op3, &&op4, &&op5, &&op6, &&op7, &&op8, &&op9, &&op10, &&op11, &&op12, &&op13, &&op14, &&op15, &&op16, &&op17, &&op18, &&op19, &&op20, &&op21, &&op22, &&op23, &&op24, &&op25, &&op26, &&op27, &&op28, &&op29, &&op30, &&op31, &&op32, &&op33, &&op34, &&op35, &&op36, &&op37, &&op38};
 
   goto *op_labels[cx->pc];
 
@@ -204,7 +198,7 @@ op1: { /* CX_TMACRO CX_OFIMP */
 cx->pc = 1;
 if (stop_pc == 1) { goto exit; }
 cx->row = 1; cx->col = 5;
-goto op39;
+goto op38;
 }
 
 op2: { /* CX_TMACRO CX_OBEGIN */
@@ -212,7 +206,7 @@ cx->pc = 2;
 if (stop_pc == 2) { goto exit; }
 cx->row = 1; cx->col = 5;
 if (cx->errors.count) {
-goto op39;
+goto op38;
 } else {
 struct cx_scope *parent = func_emitNbmips_()->scope;
 cx_begin(cx, parent);
@@ -402,17 +396,17 @@ if (stop_pc == 18) { goto exit; }
 cx->row = 1; cx->col = 2;
 if (!cx->errors.count) {
 struct cx_scope *s = cx_scope(cx, 0);
-static struct cx_fimp *imp99 = NULL;
-if (!imp99) { imp99 = func_M_Opt(); }
-if (imp99 && s->safe && !cx_fimp_match(imp99, s)) { imp99 = NULL; }
-if (!imp99) { imp99 = cx_func_match(func_M(), s); }
+static struct cx_fimp *imp105 = NULL;
+if (!imp105) { imp105 = func_M_Opt(); }
+if (imp105 && s->safe && !cx_fimp_match(imp105, s)) { imp105 = NULL; }
+if (!imp105) { imp105 = cx_func_match(func_M(), s); }
 
-if (!imp99) {
+if (!imp105) {
   cx_error(cx, cx->row, cx->col, "Func not applicable: ?");
   goto op19;
 }
 
-if (!cx_fimp_call(imp99, s)) { goto op19; }
+if (!cx_fimp_call(imp105, s)) { goto op19; }
 }
 }
 
@@ -472,17 +466,17 @@ if (stop_pc == 23) { goto exit; }
 cx->row = 1; cx->col = 20;
 if (!cx->errors.count) {
 struct cx_scope *s = cx_scope(cx, 0);
-static struct cx_fimp *imp100 = NULL;
-if (!imp100) { imp100 = func_A_IntInt(); }
-if (imp100 && s->safe && !cx_fimp_match(imp100, s)) { imp100 = NULL; }
-if (!imp100) { imp100 = cx_func_match(func_A(), s); }
+static struct cx_fimp *imp106 = NULL;
+if (!imp106) { imp106 = func_A_IntInt(); }
+if (imp106 && s->safe && !cx_fimp_match(imp106, s)) { imp106 = NULL; }
+if (!imp106) { imp106 = cx_func_match(func_A(), s); }
 
-if (!imp100) {
+if (!imp106) {
   cx_error(cx, cx->row, cx->col, "Func not applicable: +");
   goto op24;
 }
 
-if (!cx_fimp_call(imp100, s)) { goto op24; }
+if (!cx_fimp_call(imp106, s)) { goto op24; }
 }
 }
 
@@ -504,16 +498,16 @@ if (stop_pc == 25) { goto exit; }
 cx->row = 1; cx->col = 34;
 if (!cx->errors.count) {
 struct cx_scope *s = cx_scope(cx, 0);
-static struct cx_fimp *imp101 = NULL;
-if (imp101 && s->safe && !cx_fimp_match(imp101, s)) { imp101 = NULL; }
-if (!imp101) { imp101 = cx_func_match(func_NN(), s); }
+static struct cx_fimp *imp107 = NULL;
+if (imp107 && s->safe && !cx_fimp_match(imp107, s)) { imp107 = NULL; }
+if (!imp107) { imp107 = cx_func_match(func_NN(), s); }
 
-if (!imp101) {
+if (!imp107) {
   cx_error(cx, cx->row, cx->col, "Func not applicable: --");
   goto op26;
 }
 
-if (!cx_fimp_call(imp101, s)) { goto op26; }
+if (!cx_fimp_call(imp107, s)) { goto op26; }
 }
 }
 
@@ -523,16 +517,16 @@ if (stop_pc == 26) { goto exit; }
 cx->row = 1; cx->col = 37;
 if (!cx->errors.count) {
 struct cx_scope *s = cx_scope(cx, 0);
-static struct cx_fimp *imp102 = NULL;
-if (imp102 && s->safe && !cx_fimp_match(imp102, s)) { imp102 = NULL; }
-if (!imp102) { imp102 = cx_func_match(func_recall(), s); }
+static struct cx_fimp *imp108 = NULL;
+if (imp108 && s->safe && !cx_fimp_match(imp108, s)) { imp108 = NULL; }
+if (!imp108) { imp108 = cx_func_match(func_recall(), s); }
 
-if (!imp102) {
+if (!imp108) {
   cx_error(cx, cx->row, cx->col, "Func not applicable: recall");
   goto op27;
 }
 
-if (!cx_fimp_call(imp102, s)) { goto op27; }
+if (!cx_fimp_call(imp108, s)) { goto op27; }
 }
 }
 
@@ -554,16 +548,16 @@ if (stop_pc == 28) { goto exit; }
 cx->row = 1; cx->col = 48;
 if (!cx->errors.count) {
 struct cx_scope *s = cx_scope(cx, 0);
-static struct cx_fimp *imp103 = NULL;
-if (imp103 && s->safe && !cx_fimp_match(imp103, s)) { imp103 = NULL; }
-if (!imp103) { imp103 = cx_func_match(func_ifNelse(), s); }
+static struct cx_fimp *imp109 = NULL;
+if (imp109 && s->safe && !cx_fimp_match(imp109, s)) { imp109 = NULL; }
+if (!imp109) { imp109 = cx_func_match(func_ifNelse(), s); }
 
-if (!imp103) {
+if (!imp109) {
   cx_error(cx, cx->row, cx->col, "Func not applicable: if-else");
   goto op29;
 }
 
-if (!cx_fimp_call(imp103, s)) { goto op29; }
+if (!cx_fimp_call(imp109, s)) { goto op29; }
 }
 }
 
@@ -648,16 +642,16 @@ if (stop_pc == 30) { goto exit; }
 cx->row = 1; cx->col = 7;
 if (!cx->errors.count) {
 struct cx_scope *s = cx_scope(cx, 0);
-static struct cx_fimp *imp104 = NULL;
-if (imp104 && s->safe && !cx_fimp_match(imp104, s)) { imp104 = NULL; }
-if (!imp104) { imp104 = cx_func_match(func_fibNrec(), s); }
+static struct cx_fimp *imp110 = NULL;
+if (imp110 && s->safe && !cx_fimp_match(imp110, s)) { imp110 = NULL; }
+if (!imp110) { imp110 = cx_func_match(func_fibNrec(), s); }
 
-if (!imp104) {
+if (!imp110) {
   cx_error(cx, cx->row, cx->col, "Func not applicable: fib-rec");
   goto op31;
 }
 
-if (!cx_fimp_call(imp104, s)) { goto op31; }
+if (!cx_fimp_call(imp110, s)) { goto op31; }
 }
 }
 
@@ -742,16 +736,16 @@ if (stop_pc == 32) { goto exit; }
 cx->row = 1; cx->col = 50;
 if (!cx->errors.count) {
 struct cx_scope *s = cx_scope(cx, 0);
-static struct cx_fimp *imp105 = NULL;
-if (imp105 && s->safe && !cx_fimp_match(imp105, s)) { imp105 = NULL; }
-if (!imp105) { imp105 = cx_func_match(func_fib(), s); }
+static struct cx_fimp *imp111 = NULL;
+if (imp111 && s->safe && !cx_fimp_match(imp111, s)) { imp111 = NULL; }
+if (!imp111) { imp111 = cx_func_match(func_fib(), s); }
 
-if (!imp105) {
+if (!imp111) {
   cx_error(cx, cx->row, cx->col, "Func not applicable: fib");
   goto op33;
 }
 
-if (!cx_fimp_call(imp105, s)) { goto op33; }
+if (!cx_fimp_call(imp111, s)) { goto op33; }
 }
 }
 
@@ -761,16 +755,16 @@ if (stop_pc == 33) { goto exit; }
 cx->row = 1; cx->col = 54;
 if (!cx->errors.count) {
 struct cx_scope *s = cx_scope(cx, 0);
-static struct cx_fimp *imp106 = NULL;
-if (imp106 && s->safe && !cx_fimp_match(imp106, s)) { imp106 = NULL; }
-if (!imp106) { imp106 = cx_func_match(func__(), s); }
+static struct cx_fimp *imp112 = NULL;
+if (imp112 && s->safe && !cx_fimp_match(imp112, s)) { imp112 = NULL; }
+if (!imp112) { imp112 = cx_func_match(func__(), s); }
 
-if (!imp106) {
+if (!imp112) {
   cx_error(cx, cx->row, cx->col, "Func not applicable: _");
   goto op34;
 }
 
-if (!cx_fimp_call(imp106, s)) { goto op34; }
+if (!cx_fimp_call(imp112, s)) { goto op34; }
 }
 }
 
@@ -780,16 +774,16 @@ if (stop_pc == 34) { goto exit; }
 cx->row = 1; cx->col = 57;
 if (!cx->errors.count) {
 struct cx_scope *s = cx_scope(cx, 0);
-static struct cx_fimp *imp107 = NULL;
-if (imp107 && s->safe && !cx_fimp_match(imp107, s)) { imp107 = NULL; }
-if (!imp107) { imp107 = cx_func_match(func_times(), s); }
+static struct cx_fimp *imp113 = NULL;
+if (imp113 && s->safe && !cx_fimp_match(imp113, s)) { imp113 = NULL; }
+if (!imp113) { imp113 = cx_func_match(func_times(), s); }
 
-if (!imp107) {
+if (!imp113) {
   cx_error(cx, cx->row, cx->col, "Func not applicable: times");
   goto op35;
 }
 
-if (!cx_fimp_call(imp107, s)) { goto op35; }
+if (!cx_fimp_call(imp113, s)) { goto op35; }
 }
 }
 
@@ -799,16 +793,16 @@ if (stop_pc == 35) { goto exit; }
 cx->row = 1; cx->col = 64;
 if (!cx->errors.count) {
 struct cx_scope *s = cx_scope(cx, 0);
-static struct cx_fimp *imp108 = NULL;
-if (imp108 && s->safe && !cx_fimp_match(imp108, s)) { imp108 = NULL; }
-if (!imp108) { imp108 = cx_func_match(func_clock(), s); }
+static struct cx_fimp *imp114 = NULL;
+if (imp114 && s->safe && !cx_fimp_match(imp114, s)) { imp114 = NULL; }
+if (!imp114) { imp114 = cx_func_match(func_clock(), s); }
 
-if (!imp108) {
+if (!imp114) {
   cx_error(cx, cx->row, cx->col, "Func not applicable: clock");
   goto op36;
 }
 
-if (!cx_fimp_call(imp108, s)) { goto op36; }
+if (!cx_fimp_call(imp114, s)) { goto op36; }
 }
 }
 
@@ -818,46 +812,27 @@ if (stop_pc == 36) { goto exit; }
 cx->row = 1; cx->col = 70;
 if (!cx->errors.count) {
 struct cx_scope *s = cx_scope(cx, 0);
-static struct cx_fimp *imp109 = NULL;
-if (imp109 && s->safe && !cx_fimp_match(imp109, s)) { imp109 = NULL; }
-if (!imp109) { imp109 = cx_func_match(func_E(), s); }
+static struct cx_fimp *imp115 = NULL;
+if (imp115 && s->safe && !cx_fimp_match(imp115, s)) { imp115 = NULL; }
+if (!imp115) { imp115 = cx_func_match(func_E(), s); }
 
-if (!imp109) {
+if (!imp115) {
   cx_error(cx, cx->row, cx->col, "Func not applicable: /");
   goto op37;
 }
 
-if (!cx_fimp_call(imp109, s)) { goto op37; }
+if (!cx_fimp_call(imp115, s)) { goto op37; }
 }
 }
 
-op37: { /* CX_TID CX_OFUNCALL */
+op37: { /* CX_TMACRO CX_ORETURN */
 cx->pc = 37;
 if (stop_pc == 37) { goto exit; }
-cx->row = 1; cx->col = 72;
-if (!cx->errors.count) {
-struct cx_scope *s = cx_scope(cx, 0);
-static struct cx_fimp *imp110 = NULL;
-if (imp110 && s->safe && !cx_fimp_match(imp110, s)) { imp110 = NULL; }
-if (!imp110) { imp110 = cx_func_match(func_int(), s); }
-
-if (!imp110) {
-  cx_error(cx, cx->row, cx->col, "Func not applicable: int");
-  goto op38;
-}
-
-if (!cx_fimp_call(imp110, s)) { goto op38; }
-}
-}
-
-op38: { /* CX_TMACRO CX_ORETURN */
-cx->pc = 38;
-if (stop_pc == 38) { goto exit; }
 cx->row = 1; cx->col = 5;
 if (cx->errors.count) {
 cx_end(cx);
 cx_pop_lib(cx);
-if (!cx_pop_call(cx)) { goto op39; }
+if (!cx_pop_call(cx)) { goto op38; }
 } else {
 struct cx_fimp *imp = func_emitNbmips_();
 struct cx_call *call = cx_test(cx_peek_call(cx));
@@ -866,7 +841,7 @@ struct cx_scope *s = cx_scope(cx, 0);
 if (call->recalls) {
   if (s->safe && !cx_fimp_match(imp, s)) {
     cx_error(cx, cx->row, cx->col, "Recall not applicable");
-    goto op39;
+    goto op38;
   }
 
   call->recalls--;
@@ -893,7 +868,7 @@ struct cx_type *get_arg(int i) {
     struct cx_box v;
     if (si == s->stack.count) {
       cx_error(cx, cx->row, cx->col, "Not enough return values on stack");
-      goto op39;
+      goto op38;
     }
 
     v = *(struct cx_box *)cx_vec_get(&s->stack, si++);
@@ -905,7 +880,7 @@ struct cx_type *get_arg(int i) {
                  "Invalid return type.\n"
                  "Expected %s, actual: %s",
                  t->id, v.type->id);
-        goto op39;
+        goto op38;
       }
     }
 
@@ -914,18 +889,18 @@ struct cx_type *get_arg(int i) {
 
   if (si < s->stack.count) {
     cx_error(cx, cx->row, cx->col, "Stack not empty on return");
-    goto op39;
+    goto op38;
   }
 
   cx_vec_clear(&s->stack);
   cx_end(cx);
   cx_pop_lib(cx);
-  if (!cx_pop_call(cx)) { goto op39; }
+  if (!cx_pop_call(cx)) { goto op38; }
 }
 }
 }
 
- op39:
+ op38:
 exit:
   return !cx->errors.count;
 }
@@ -944,7 +919,7 @@ void cx_repl(struct cx *cx, FILE *in, FILE *out) {
 
   cx_eval_str(cx,
 	      "func: bmips()(_ Int)\n"
-	      "  10000000000 {10 {50 fib _} times} clock / int;\n"
+	      "  10000000000 {10 {50 fib _} times} clock /;\n"
 	      "[bmips @/ emit-bmips ' bmips' @@n] say");
 
   fputs("Press Return twice to evaluate.\n\n", out);
