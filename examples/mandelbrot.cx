@@ -8,7 +8,7 @@ let: max-cx $max-x float 2 /;
 let: max-cy $max-y float 2 /;
 let: rows Stack<Str> new;
 let: buf Buf new;
-let: zoom 1 ref;
+let: zoom 0 ref;
 
 func: p(_ A)()
   $buf ~ print;
@@ -54,14 +54,14 @@ let: poll Poll new;
 let: is-done #f ref;
 
 $poll #in {
-  $is-done #t set
   #in read-char _
+  $is-done #t set
 } on-read
 
 {
+  $zoom &++ set-call
   render
   $poll 0 wait _
-  $zoom &++ set-call
   $is-done deref !
 } while
 
