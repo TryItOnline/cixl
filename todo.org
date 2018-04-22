@@ -4,8 +4,11 @@ host64 & net64 fns
 
 * switch pair symbol to ,
 ** update separators
-** update examples/tests/readme
+** update examples/tests/rea
 * add float parsing with .
+* rename splat to ..
+** update rosettacode/earthquake
+** update examples/tests
 * improve ref lib types
 * move remaining ansi func into term
 * move term out of io

@@ -22,9 +22,6 @@ let: rows Stack<Str> new;
 let: buf Buf new;
 let: zoom 0 ref;
 
-func: p(_ A)()
-  $buf ~ print;
-
 func: render()()
   $rows clear
   
@@ -48,8 +45,8 @@ func: render()()
       } while
 
       let: c $i deref % -7 bsh bor 256 mod;
-      $c {$x 256 mod $y 256 mod} {0 0} if-else $c new-rgb set-bg p
-      @@s p
+      $buf $c {$x 256 mod $y 256 mod} {0 0} if-else $c new-rgb set-bg print
+      $buf @@s print
     } for
 
     $rows $buf str push   
