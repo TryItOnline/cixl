@@ -7,7 +7,7 @@ host64 & net64 fns
 ** update examples/tests/rea
 * add float parsing with .
 * rename splat to ..
-** update rosettacode/earthquake
+** update rosetta/earthquake
 ** update examples/tests
 * improve ref lib types
 * move remaining ansi func into term

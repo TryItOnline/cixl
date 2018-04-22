@@ -208,6 +208,7 @@ Cixl is statically and strongly typed; but since it's approach to typing is grad
 | Cmp       | A           | cx/abc      |
 | File      | Cmp         | cx/io       |  
 | Fimp      | Seq         | cx/abc      |
+| Float     | Num         | cx/abc      |
 | Func      | Seq         | cx/abc      |
 | Int       | Num Seq     | cx/abc      |
 | Iter      | Seq         | cx/abc      |
@@ -218,7 +219,6 @@ Cixl is statically and strongly typed; but since it's approach to typing is grad
 | Pair      | Cmp         | cx/pair     |
 | Poll      | A           | cx/io/poll  |
 | Proc      | Cmp         | cx/proc     |
-| Rat       | Num         | cx/math     |
 | Rec       | Cmp         | cx/rec      |
 | Ref       | A           | cx/ref      |
 | RFile     | File        | cx/io       |
@@ -873,7 +873,7 @@ A stack containing all implementations for a specific function may be retrieved 
 ```
    | &+ imps
 
-[[Fimp(+ Rat Rat) Fimp(+ Int Int)]r1]
+[[Fimp(+ Float Float) Fimp(+ Int Int)]r1]
 ```
 
 Prefixing a function name with ```&``` pushes a reference on the stack.
