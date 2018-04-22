@@ -136,6 +136,7 @@ The entire language is split into libraries to enable building custom languages 
 * cx/const
 * cx/error
 * cx/func
+* cx/gfx
 * cx/io
 * cx/io/buf
 * cx/io/poll
@@ -221,6 +222,7 @@ Cixl is statically and strongly typed; but since it's approach to typing is grad
 | Rec       | Cmp         | cx/rec      |
 | Ref       | A           | cx/ref      |
 | RFile     | File        | cx/io       |
+| RGB       | A           | cx/gfx      |
 | RWFile    | RFile WFile | cx/io       |
 | Seq       | A           | cx/abc      |
 | Stack     | Cmp Seq     | cx/abc      |

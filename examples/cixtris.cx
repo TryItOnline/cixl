@@ -12,12 +12,12 @@ use:
   (cx/const define:)
   (cx/error throw)
   (cx/func func:)
+  (cx/gfx RGB new-rgb)
   (cx/io #in #out flush read-char print unblock)
   (cx/io/term
-    Color
     #clear-row #clear-screen #hide-cursor #key-esc #reset-style #restore-pos
     #reverse-colors #save-pos #show-cursor
-    hline move-down move-left move-right move-to new-color normal-mode raw-mode
+    hline move-down move-left move-right move-to normal-mode raw-mode
     screen-size set-bg vline)
   (cx/io/poll Poll new on-read wait)
   (cx/iter find-if for map times while)
@@ -113,7 +113,7 @@ define: colors [
   [255 0 255]
   [0 255 0]
   [255 0 0]
-] {splat new-color} map stack;
+] {splat new-rgb} map stack;
 
 define: key-rotate @i;
 define: key-left   @j;
@@ -143,7 +143,7 @@ let: is-dropping #f ref;
 rec: Block()
   shapes Stack<Stack<Str>>
   i      Int
-  color  Color
+  color  RGB
   x y    Int;
 
 let: block Ref<Block> new;
@@ -196,7 +196,7 @@ func: get-offs(x y Int)(_ Int)
    color.
 */
 
-func: print-shape(b Block c Opt<Color>)()
+func: print-shape(b Block c Opt<RGB>)()
   #save-pos p
   $c {$c set-bg p} {#reset-style p} if-else
   

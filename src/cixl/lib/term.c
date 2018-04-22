@@ -98,7 +98,7 @@ static bool move_to_imp(struct cx_call *call) {
   
   struct cx_scope *s = call->scope;
 
-  char *data = cx_fmt(CX_CSI_ESC "%d;%dH", x->as_int, y->as_int);
+  char *data = cx_fmt(CX_CSI_ESC "%d;%dH", y->as_int, x->as_int);
   cx_box_init(cx_push(s), s->cx->str_type)->as_str = cx_str_new(data, -1);
   free(data);
   return true;

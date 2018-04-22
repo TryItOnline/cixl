@@ -17,6 +17,7 @@ use:
   (cx/const define:)
   (cx/error catch: throw value)
   (cx/func func: recall)
+  (cx/gfx new-rgb)
   (cx/io
     File RFile WFile
     #out
@@ -24,9 +25,8 @@ use:
   (cx/io/buf Buf write-bytes)
   (cx/io/poll Poll delete no-write on-read on-write wait)
   (cx/io/term
-    Color
     #clear-screen #clear-screen-end #reset-style
-    ask move-to new-color set-fg say yelp)
+    ask move-to set-fg say yelp)
   (cx/iter Iter for is-done iter next while)
   (cx/math ++)
   (cx/net
@@ -53,7 +53,7 @@ let: port #args pop {'Missing port' throw} or int;
 define: backlog 3;
 define: tail-default 24;
 
-define: error-color 255 0 0 new-color;
+define: error-color 255 0 0 new-rgb;
 
 func: get-path(n Str)(_ Str)
   [home-dir '.collabri' $n] @/ join;

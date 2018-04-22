@@ -2,8 +2,6 @@
 #define ntohll(x) ((1==ntohl(1)) ? (x) : ((uint64_t)ntohl((x) & 0xFFFFFFFF) << 32) | ntohl((x) >> 32))
 host64 & net64 fns
 
-* update collabri/cixtris to use gfx/RGB
-* push
 * switch pair symbol to ,
 ** update separators
 ** update examples/tests/readme
