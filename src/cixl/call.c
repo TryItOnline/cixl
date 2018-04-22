@@ -44,13 +44,12 @@ bool cx_call_pop_args(struct cx_call *c) {
   struct cx *cx = c->scope->cx;
   struct cx_vec *s = &c->scope->stack;
   int nargs = c->fimp->func->nargs;
+  if (!nargs) { return true; }  
   
   if (s->count < nargs) {
     cx_error(cx, cx->row, cx->col, "Not enough args to call %s", c->fimp->func->id);
     return false;
   }
-
-  if (!nargs) { return true; }  
 
   memcpy(c->args,
 	 cx_vec_peek(s, nargs-1),

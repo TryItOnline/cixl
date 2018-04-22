@@ -14,10 +14,6 @@ host64 & net64 fns
 ** update qdb funcs
 ** update collabri
 *** use init-table
-* update pair lib
-** add result with switched type to pair rezip imp
-** specialize func types
-** update tests/examples
 * update cxcrypt
 * --
 * add cx_abort()/cx_exit(int code)/cx_on_exit(void (void *data))

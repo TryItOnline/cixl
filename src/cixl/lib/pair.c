@@ -52,10 +52,18 @@ static bool y_imp(struct cx_call *call) {
 }
 
 static bool rezip_imp(struct cx_call *call) {
-  struct cx_pair *p = cx_test(cx_call_arg(call, 0))->as_pair;
+  struct cx_box *pv = cx_test(cx_call_arg(call, 0));
+  struct cx_scope *s = call->scope;
+  struct cx_pair *p = pv->as_pair;
   struct cx_box tmp = p->x;
   p->x = p->y;
   p->y = tmp;
+
+  cx_box_init(cx_push(s), cx_type_get(s->cx->pair_type,
+				      cx_type_arg(pv->type, 1),
+				      cx_type_arg(pv->type, 0)))->as_pair =
+    cx_pair_ref(p);
+
   return true;
 }
 
@@ -71,7 +79,9 @@ cx_lib(cx_init_pair, "cx/pair") {
     
   cx_add_cfunc(lib, ".", 
 	       cx_args(cx_arg("x", cx->opt_type), cx_arg("y", cx->opt_type)),
-	       cx_args(cx_arg(NULL, cx->pair_type)),
+	       cx_args(cx_arg(NULL, cx_type_get(cx->pair_type,
+						cx_arg_ref(cx, 0),
+						cx_arg_ref(cx, 1)))),
 	       zip_imp);
 
   cx_add_cfunc(lib, "unzip", 
@@ -91,13 +101,15 @@ cx_lib(cx_init_pair, "cx/pair") {
 
   cx_add_cfunc(lib, "rezip", 
 	       cx_args(cx_arg("p", cx->pair_type)),
-	       cx_args(),
-	       rezip_imp);  
+	       cx_args(cx_arg(NULL, cx_type_get(cx->pair_type,
+						cx_arg_ref(cx, 0, 1),
+						cx_arg_ref(cx, 0, 0)))),
+	       rezip_imp);
 
   cx_add_cxfunc(lib, "rezip", 
 		cx_args(cx_arg("in", cx->seq_type)),
-		cx_args(),
-		"$in &rezip for");
+		cx_args(cx_arg(NULL, cx->iter_type)),
+		"$in &rezip map");
 
   return true;
 }
