@@ -3,8 +3,6 @@
 host64 & net64 fns
 
 * enable using Arg refs inside funcs
-** add bool cx_is_arg_ref(type) fn
-*** search all args recursively for CX_TYPE_ARG
 ** add OARGDEREF op
 *** create with imp
 *** resolve type using imp & call args
@@ -16,10 +14,20 @@ host64 & net64 fns
 *** use init-table
 * update cxcrypt
 * --
+* add cx_call_copy
+** copy args properly
+** use in error
+*** update error print to include args
+*** deinit calls in error_deinit
 * add cx_abort()/cx_exit(int code)/cx_on_exit(void (void *data))
 ** use in cx_test
-** use in exit-fn
+** use in exit fn
 ** use on_exit instead of atexit
+* move macro processing to TID compile
+** remove macro_eval type
+** remove TMACRO type
+** take tok seq as macro input
+** rewrite macros
 * replace cx_fimp.init with enum cx_fimp_type
 ** CX_FHOST_C, CX_FHOST_CX, CX_FGUEST
 * remove Rec =/?/print overloads
@@ -48,13 +56,5 @@ host64 & net64 fns
 * replace varargs with size/array+macro
 * --- cxcrypt
 * add Pub/PrivKey
-* add README
-** add LICENSE
-* add automatic chunking to encrypt/decrypt
-** add #max-chunk
-** add int net/host
-** read/write size prefixed chunks
-** add buf tests
-** seek 0 from end before reading into buffer
-*** remember prev pos and restore
-*** advance pos on write-bytes
+* add README/LICENSE
+
