@@ -25,6 +25,7 @@
 #include "cixl/lib/const.h"
 #include "cixl/lib/error.h"
 #include "cixl/lib/func.h"
+#include "cixl/lib/gfx.h"
 #include "cixl/lib/io.h"
 #include "cixl/lib/iter.h"
 #include "cixl/lib/math.h"
@@ -71,6 +72,7 @@ cx_lib(cx_init_world, "cx") {
     cx_use(cx, "cx/const") &&
     cx_use(cx, "cx/error") &&
     cx_use(cx, "cx/func") &&
+    cx_use(cx, "cx/gfx") &&
     cx_use(cx, "cx/io") &&
     cx_use(cx, "cx/io/buf") &&
     cx_use(cx, "cx/io/term") &&
@@ -116,7 +118,7 @@ struct cx *cx_init(struct cx *cx) {
 		 sizeof(struct cx_box)*CX_VEC_MIN);
 
   cx_set_init(&cx->separators, sizeof(char), cx_cmp_char);
-  cx_add_separators(cx, " \t\n;,.|_?!()[]{}");
+  cx_add_separators(cx, " \t\n;.|?!()[]{}");
 
   cx_set_init(&cx->syms, sizeof(struct cx_sym), cx_cmp_cstr);
   cx->syms.key_offs = offsetof(struct cx_sym, id);
@@ -143,14 +145,14 @@ struct cx *cx_init(struct cx *cx) {
     cx->bin_type = cx->bool_type = cx->buf_type = 
     cx->char_type = cx->cmp_type =
     cx->error_type =
-    cx->file_type = cx->fimp_type = cx->func_type =
+    cx->file_type = cx->fimp_type = cx->float_type = cx->func_type =
     cx->int_type = cx->iter_type =
     cx->lambda_type = cx->lib_type = 
     cx->nil_type = cx->num_type =
     cx->meta_type =
     cx->opt_type =
     cx->pair_type = cx->poll_type = cx->proc_type = 
-    cx->rat_type = cx->rec_type = cx->ref_type = cx->rfile_type = cx->rwfile_type =
+    cx->rec_type = cx->ref_type = cx->rfile_type = cx->rgb_type = cx->rwfile_type =
     cx->seq_type = cx->stack_type = cx->str_type = cx->sym_type =
     cx->table_type = cx->tcp_client_type = cx->tcp_server_type = cx->time_type =
     cx->wfile_type = NULL;
@@ -169,6 +171,7 @@ void cx_init_libs(struct cx *cx) {
   cx_init_const(cx);
   cx_init_error(cx);
   cx_init_func(cx);
+  cx_init_gfx(cx);
   cx_init_io(cx);
   cx_init_iter(cx);
   cx_init_math(cx);

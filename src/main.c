@@ -76,7 +76,7 @@ int main(int argc, char *argv[]) {
 	struct cx_mfile cmd;
 	cx_mfile_open(&cmd);
       
-	fputs("gcc -x c -std=gnu1x -O2 -g "
+	fputs("gcc -x c -std=gnu1x "
 	      "-Wall -Werror "
 	      "-Wno-unused-label -Wno-unused-function -Wno-unused-variable "
 	      "-Wno-unused-but-set-variable "
@@ -91,7 +91,7 @@ int main(int argc, char *argv[]) {
 	  }
 	}
 
-	fputs(" -Bdynamic -ldl", cmd.stream);
+	fputs(" -Bdynamic -ldl -lm", cmd.stream);
 	for (; argi < argc; argi++) { fprintf(cmd.stream, " %s", argv[argi]); }
 	cx_mfile_close(&cmd);
 

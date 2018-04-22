@@ -52,7 +52,8 @@ static struct cx_iter *char_iter_new(struct cx_str *str) {
   return &it->iter;
 }
 
-struct cx_str *cx_str_new(const char *data, size_t len) {
+struct cx_str *cx_str_new(const char *data, ssize_t len) {
+  if (len == -1) { len = strlen(data); }
   struct cx_str *str = malloc(sizeof(struct cx_str)+len+1);
   if (data) { memcpy(str->data, data, len); }
   str->data[len] = 0;

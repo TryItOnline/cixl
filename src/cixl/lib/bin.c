@@ -55,6 +55,27 @@ static bool emit_imp(struct cx_call *call) {
   return ok;
 }
 
+static bool bor_imp(struct cx_call *call) {
+  struct cx_box
+    *x = cx_test(cx_call_arg(call, 1)),
+    *y = cx_test(cx_call_arg(call, 0));
+
+  struct cx_scope *s = call->scope;
+  cx_box_init(cx_push(s), s->cx->int_type)->as_int = x->as_int | y->as_int;
+  return true;
+}
+
+static bool bsh_imp(struct cx_call *call) {
+  struct cx_box
+    *d = cx_test(cx_call_arg(call, 1)),
+    *v = cx_test(cx_call_arg(call, 0));
+
+  struct cx_scope *s = call->scope;
+  cx_box_init(cx_push(s), s->cx->int_type)->as_int =
+    (d->as_int) > 0 ? v->as_int >> d->as_int : v->as_int << -d->as_int;
+  return true;
+}
+
 cx_lib(cx_init_bin, "cx/bin") {
   struct cx *cx = lib->cx;
     
@@ -73,6 +94,16 @@ cx_lib(cx_init_bin, "cx/bin") {
 	       cx_args(cx_arg("in", cx->bin_type)),
 	       cx_args(cx_arg(NULL, cx->str_type)),
 	       emit_imp);
+
+  cx_add_cfunc(lib, "bor",
+	       cx_args(cx_arg("x", cx->int_type), cx_arg("y", cx->int_type)),
+	       cx_args(cx_arg(NULL, cx->int_type)),
+	       bor_imp);
+
+  cx_add_cfunc(lib, "bsh",
+	       cx_args(cx_arg("val", cx->int_type), cx_arg("delta", cx->int_type)),
+	       cx_args(cx_arg(NULL, cx->int_type)),
+	       bsh_imp);
 
   return true;
 }

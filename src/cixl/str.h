@@ -10,7 +10,7 @@ struct cx_str {
   char data[];
 };
 
-struct cx_str *cx_str_new(const char *data, size_t len);
+struct cx_str *cx_str_new(const char *data, ssize_t len);
 struct cx_str *cx_str_ref(struct cx_str *str);
 void cx_str_deref(struct cx_str *str);
 enum cx_cmp cx_cmp_str(const void *x, const void *y);

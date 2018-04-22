@@ -61,6 +61,8 @@ cx_lib(cx_init_abc, "cx/abc") {
   cx_box_init(cx_put_const(lib, cx_sym(cx, "max-int"), false),
 	      cx->int_type)->as_int = INT64_MAX;
 
+  cx->float_type = cx_init_float_type(lib);
+
   cx->char_type = cx_init_char_type(lib);
   cx->str_type = cx_init_str_type(lib);
   cx->sym_type = cx_init_sym_type(lib);

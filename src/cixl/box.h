@@ -5,7 +5,8 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#include "cixl/rat.h"
+#include "cixl/float.h"
+#include "cixl/rgb.h"
 #include "cixl/sym.h"
 #include "cixl/time.h"
 
@@ -33,6 +34,7 @@ struct cx_box {
     unsigned char    as_char;
     struct cx_error *as_error;
     struct cx_file  *as_file;
+    cx_float_t       as_float;
     int64_t          as_int;
     struct cx_iter  *as_iter;
     struct cx_lib   *as_lib;
@@ -41,8 +43,8 @@ struct cx_box {
     struct cx_poll  *as_poll;
     void            *as_ptr;
     struct cx_queue *as_queue;
-    struct cx_rat    as_rat;
     struct cx_ref   *as_ref;
+    struct cx_rgb   as_rgb;
     struct cx_str   *as_str;
     struct cx_sym    as_sym;
     struct cx_table *as_table;

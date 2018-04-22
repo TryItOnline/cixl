@@ -9,7 +9,7 @@
 #include "cixl/cx.h"
 #include "cixl/error.h"
 #include "cixl/lib.h"
-#include "cixl/lib/io.h"
+#include "cixl/lib/term.h"
 #include "cixl/scope.h"
 #include "cixl/str.h"
 
@@ -91,10 +91,44 @@ static bool ctrl_char_imp(struct cx_call *call) {
   return true;
 }
 
+static bool move_to_imp(struct cx_call *call) {
+  struct cx_box
+    *x = cx_test(cx_call_arg(call, 0)),
+    *y = cx_test(cx_call_arg(call, 1));
+  
+  struct cx_scope *s = call->scope;
+
+  char *data = cx_fmt(CX_CSI_ESC "%d;%dH", x->as_int, y->as_int);
+  cx_box_init(cx_push(s), s->cx->str_type)->as_str = cx_str_new(data, -1);
+  free(data);
+  return true;
+}
+
+static bool set_bg_imp(struct cx_call *call) {
+  struct cx_rgb *c = &cx_test(cx_call_arg(call, 0))->as_rgb;
+  struct cx_scope *s = call->scope;
+
+  char *data = cx_fmt(CX_CSI_ESC "48;2;%d;%d;%dm", c->r, c->g, c->b);
+  cx_box_init(cx_push(s), s->cx->str_type)->as_str = cx_str_new(data, -1);
+  free(data);
+  return true;
+}
+
+static bool set_fg_imp(struct cx_call *call) {
+  struct cx_rgb *c = &cx_test(cx_call_arg(call, 0))->as_rgb;
+  struct cx_scope *s = call->scope;
+
+  char *data = cx_fmt(CX_CSI_ESC "38;2;%d;%d;%dm", c->r, c->g, c->b);
+  cx_box_init(cx_push(s), s->cx->str_type)->as_str = cx_str_new(data, -1);
+  free(data);
+  return true;
+}
+
 cx_lib(cx_init_term, "cx/io/term") {    
   struct cx *cx = lib->cx;
     
   if (!cx_use(cx, "cx/abc", "A", "Str") ||
+      !cx_use(cx, "cx/gfx", "RGB") ||
       !cx_use(cx, "cx/io", "#error", "#in", "#out", "print")) {
     return false;
   }
@@ -105,6 +139,18 @@ cx_lib(cx_init_term, "cx/io/term") {
 	      cx->int_type)->as_int = 32;
   cx_box_init(cx_put_const(lib, cx_sym(cx, "key-back"), false),
 	      cx->int_type)->as_int = 127;
+
+  cx_box_init(cx_put_const(lib, cx_sym(cx, "clear-screen"), false),
+	      cx->str_type)->as_str = cx_str_new(CX_CSI_ESC "2J", -1);
+
+  cx_box_init(cx_put_const(lib, cx_sym(cx, "hide-cursor"), false),
+	      cx->str_type)->as_str = cx_str_new(CX_CSI_ESC "?25l", -1);
+  
+  cx_box_init(cx_put_const(lib, cx_sym(cx, "show-cursor"), false),
+	      cx->str_type)->as_str = cx_str_new(CX_CSI_ESC "?25h", -1);
+
+  cx_box_init(cx_put_const(lib, cx_sym(cx, "reset-style"), false),
+	      cx->str_type)->as_str = cx_str_new(CX_CSI_ESC "0m", -1);
 
   cx_add_cxfunc(lib, "say",
 		cx_args(cx_arg("v", cx->any_type)), cx_args(),
@@ -139,6 +185,21 @@ cx_lib(cx_init_term, "cx/io/term") {
 	       cx_args(cx_arg("c", cx->int_type)),
 	       cx_args(cx_arg(NULL, cx_type_get(cx->opt_type, cx->int_type))),
 	       ctrl_char_imp);
-  
+
+  cx_add_cfunc(lib, "move-to",
+	       cx_args(cx_arg("x", cx->int_type), cx_arg("y", cx->int_type)),
+	       cx_args(cx_arg(NULL, cx->str_type)),
+	       move_to_imp);  
+
+  cx_add_cfunc(lib, "set-bg",
+	       cx_args(cx_arg("c", cx->rgb_type)),
+	       cx_args(cx_arg(NULL, cx->str_type)),
+	       set_bg_imp);  
+
+  cx_add_cfunc(lib, "set-fg",
+	       cx_args(cx_arg("c", cx->rgb_type)),
+	       cx_args(cx_arg(NULL, cx->str_type)),
+	       set_fg_imp);  
+
   return true;
 }

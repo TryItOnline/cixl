@@ -275,6 +275,18 @@ static bool move_imp(struct cx_call *call) {
   return true;
 }
 
+static bool riter_imp(struct cx_call *call) {
+  struct cx_box *stv = cx_test(cx_call_arg(call, 0));
+  struct cx_scope *s = call->scope;
+  struct cx_stack *st = stv->as_ptr;
+
+  cx_box_init(cx_push(s), cx_type_get(s->cx->iter_type,
+				      cx_type_arg(stv->type, 0)))->as_iter =
+    cx_stack_iter_new(st, st->imp.count-1, -1, -1);
+  
+  return true;
+}
+
 static bool reset_imp(struct cx_call *call) {
   cx_reset(call->scope);
   return true;
@@ -392,6 +404,12 @@ cx_lib(cx_init_stack, "cx/stack") {
 		       cx_arg("delta", cx->int_type)),
 	       cx_args(),
 	       move_imp);
+
+  cx_add_cfunc(lib, "riter",
+	       cx_args(cx_arg("s", cx->stack_type)),
+	       cx_args(cx_arg(NULL, cx_type_get(cx->iter_type,
+						cx_arg_ref(cx, 0, 0)))),
+	       riter_imp);
 
   cx_add_cfunc(lib, "|", cx_args(), cx_args(), reset_imp);
     

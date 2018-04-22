@@ -11,15 +11,18 @@
 struct cx_stack_iter {
   struct cx_iter iter;
   struct cx_stack *stack;
-  size_t i;
+  ssize_t i, end;
+  int delta;
 };
 
-bool stack_next(struct cx_iter *iter, struct cx_box *out, struct cx_scope *scope) {
+static bool stack_next(struct cx_iter *iter,
+		       struct cx_box *out,
+		       struct cx_scope *scope) {
   struct cx_stack_iter *it = cx_baseof(iter, struct cx_stack_iter, iter);
 
-  if (it->i < it->stack->imp.count) {
+  if (it->i != it->end) {
     cx_copy(out, cx_vec_get(&it->stack->imp, it->i));
-    it->i++;
+    it->i += it->delta;
     return true;
   }
 
@@ -27,23 +30,27 @@ bool stack_next(struct cx_iter *iter, struct cx_box *out, struct cx_scope *scope
   return false;
 }
 
-void *stack_deinit(struct cx_iter *iter) {
+static void *stack_deinit(struct cx_iter *iter) {
   struct cx_stack_iter *it = cx_baseof(iter, struct cx_stack_iter, iter);
   cx_stack_deref(it->stack);
   return it;
 }
 
-cx_iter_type(stack_iter, {
+static cx_iter_type(stack_iter, {
     type.next = stack_next;
     type.deinit = stack_deinit;
   });
 
-struct cx_stack_iter *cx_stack_iter_new(struct cx_stack *stack) {
+struct cx_iter *cx_stack_iter_new(struct cx_stack *stack,
+				  ssize_t start, size_t end,
+				  int delta) {
   struct cx_stack_iter *it = malloc(sizeof(struct cx_stack_iter));
   cx_iter_init(&it->iter, stack_iter());
   it->stack = cx_stack_ref(stack);
-  it->i = 0;
-  return it;
+  it->i = start;
+  it->end = end;
+  it->delta = delta;
+  return &it->iter;
 }
 
 struct cx_stack *cx_stack_new(struct cx *cx) {
@@ -141,9 +148,10 @@ static void clone_imp(struct cx_box *dst, struct cx_box *src) {
 
 static void iter_imp(struct cx_box *in, struct cx_box *out) {
   struct cx *cx = in->type->lib->cx;
-    
+  struct cx_stack *s = in->as_ptr;
+  
   cx_box_init(out, cx_type_get(cx->iter_type, cx_type_arg(in->type, 0)))->as_iter =
-    &cx_stack_iter_new(in->as_ptr)->iter;
+    cx_stack_iter_new(s, 0, s->imp.count, 1);
 }
 
 static void write_imp(struct cx_box *b, FILE *out) {

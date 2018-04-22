@@ -14,7 +14,7 @@ target_link_libraries(libcixl dl)
 
 add_executable(cixl ${sources} src/main.c)
 target_include_directories(cixl PUBLIC src/)
-target_link_libraries(cixl dl)
+target_link_libraries(cixl dl m)
 
 file(GLOB headers src/cixl/*.h)
 install(FILES ${headers} DESTINATION include/cixl)

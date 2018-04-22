@@ -911,19 +911,6 @@ Where conversions to other types make sense, a function named after the target t
 [@7]
 ```
 
-### Rationals
-Basic rational arithmetics is supported out of the box.
-
-```
-   | 1 2 / -42 2 / *
-
-[-21/2]
-
-   int
-
--10
-```
-
 ### Optionals
 The ```#nil``` value may be used to represent missing values. Since ```Nil``` isn't derived from ```A```, stray ```#nil``` values never get far before being trapped in a function call; ```Opt``` may be used instead where ```#nil``` is allowed.
 
