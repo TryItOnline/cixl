@@ -1,5 +1,7 @@
 use: cx;
 
+unsafe
+
 define: max 4 float;
 define: max-iter 570;
 
