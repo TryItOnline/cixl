@@ -6,6 +6,11 @@ host64 & net64 fns
 * rename splat to ..
 ** update rosetta/earthquake
 ** update examples/tests
+** use instead of float in mandelbrot
+* rewrite term ansi fns to work directly with streams
+** remove string result
+** convert constants
+** update cixtris/collabri/mandelbrot
 * improve ref lib types
 * move remaining ansi func into term
 * move term out of io
