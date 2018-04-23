@@ -11,4 +11,4 @@
  $t 2 delete
  $t len 1 = check)
 
-[1 'foo'. 2 'bar'.] table stack len 2 = check
+[1 'foo', 2 'bar',] table stack len 2 = check

@@ -119,7 +119,7 @@ static void copy_imp(struct cx_box *dst, const struct cx_box *src) {
 static void dump_imp(struct cx_box *v, FILE *out) {
   fprintf(out, "Error(");
   cx_dump(&v->as_error->value, out);
-  fprintf(out, ")r%d", v->as_error->nrefs);
+  fputc(')', out);
 }
 
 static void print_imp(struct cx_box *v, FILE *out) {

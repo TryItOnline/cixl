@@ -2,16 +2,16 @@
 
 (
   42 throw 21
-  catch: A `error ~ value.;
-  `error 42. = check
+  catch: A `error ~ value,;
+  `error 42, = check
 )
 
 (
   (42 throw) 21
   catch:
-    (Int `int ~ value.)
-    (A `a ~ value.);
-  `int 42. = check
+    (Int `int ~ value,)
+    (A `a ~ value,);
+  `int 42, = check
 )
 
 (

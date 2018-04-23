@@ -15,7 +15,7 @@ use:
   (cx/io #in)
   (cx/io/term say)
   (cx/math ++)
-  (cx/pair x y)
+  (cx/pair x y unzip)
   (cx/stack | ~ % sort stack)
   (cx/str lower words)
   (cx/table Table put-else)
@@ -28,7 +28,7 @@ use:
 
 | let: ws Table new;
 
-#in words { % lower $ws ~ 1 &++ put-else } for
+#in words {% lower $ws ~ 1 &++ put-else} for
 
 /*
   Convert table to vector of pairs and sort by descending value, pairs are already
@@ -42,6 +42,6 @@ $ws stack % {y ~ y <=>} sort
 */
 
 {
-  % x ~ y let: (x y);
+  let: (x y) unzip;
   [$x @@s $y] say
 } for

@@ -37,7 +37,7 @@ static bool ok_imp(struct cx_box *v) {
 }
 
 static void dump_imp(struct cx_box *v, FILE *out) {
-  fprintf(out, "Buf(%p)r%d", v->as_file, v->as_file->nrefs);
+  fprintf(out, "Buf(%p)", v->as_file);
 }
 
 static void deinit_imp(struct cx_box *v) {

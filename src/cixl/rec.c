@@ -71,7 +71,7 @@ static void write_imp(struct cx_box *v, FILE *out) {
 
 static void dump_imp(struct cx_box *v, FILE *out) {
   struct cx_rec *r = v->as_ptr;
-  fprintf(out, "%s(%p)r%d", v->type->id, r, r->nrefs);
+  fprintf(out, "%s(%p)", v->type->id, r);
 }
 
 static void print_imp(struct cx_box *v, FILE *out) {

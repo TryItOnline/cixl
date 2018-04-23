@@ -211,7 +211,7 @@ static void copy_imp(struct cx_box *dst, const struct cx_box *src) {
 }
 
 static void dump_imp(struct cx_box *v, FILE *out) {
-  fprintf(out, "Proc(%d)r%d", v->as_proc->pid, v->as_proc->nrefs);
+  fprintf(out, "Proc(%d)", v->as_proc->pid);
 }
 
 static void deinit_imp(struct cx_box *v) {

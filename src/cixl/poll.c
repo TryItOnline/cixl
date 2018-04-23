@@ -208,7 +208,7 @@ static void copy_imp(struct cx_box *dst, const struct cx_box *src) {
 
 static void dump_imp(struct cx_box *v, FILE *out) {
   struct cx_poll *p = v->as_poll;
-  fprintf(out, "Poll(%p)r%d", p, p->nrefs);
+  fprintf(out, "Poll(%p)", p);
 }
 
 static void deinit_imp(struct cx_box *v) {

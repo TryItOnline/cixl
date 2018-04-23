@@ -181,15 +181,14 @@ static void dump_imp(struct cx_box *v, FILE *out) {
   
   cx_do_set(&t->entries, struct cx_table_entry, e) {
     if (sep) { fputc(sep, out); }
-    fputc('(', out);
     cx_dump(&e->key, out);
     fputc(' ', out);
     cx_dump(&e->val, out);
-    fputc(')', out);
+    fputc(',', out);
     sep = ' ';
   }
 
-  fprintf(out, ")r%d", t->nrefs);
+  fputc(')', out);
 }
 
 static void deinit_imp(struct cx_box *v) {

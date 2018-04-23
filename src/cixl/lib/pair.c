@@ -77,7 +77,7 @@ cx_lib(cx_init_pair, "cx/pair") {
 
   cx->pair_type = cx_init_pair_type(lib);
     
-  cx_add_cfunc(lib, ".", 
+  cx_add_cfunc(lib, ",", 
 	       cx_args(cx_arg("x", cx->opt_type), cx_arg("y", cx->opt_type)),
 	       cx_args(cx_arg(NULL, cx_type_get(cx->pair_type,
 						cx_arg_ref(cx, 0),

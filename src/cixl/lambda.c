@@ -93,7 +93,7 @@ static void iter_imp(struct cx_box *in, struct cx_box *out) {
 
 static void dump_imp(struct cx_box *value, FILE *out) {
   struct cx_lambda *l = value->as_ptr;
-  fprintf(out, "Lambda(%p)r%d", l, l->nrefs);
+  fprintf(out, "Lambda(%p)", l);
 }
 
 static void deinit_imp(struct cx_box *value) {

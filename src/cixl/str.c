@@ -86,7 +86,7 @@ static bool eqval_imp(struct cx_box *x, struct cx_box *y) {
 static enum cx_cmp cmp_imp(const struct cx_box *x, const struct cx_box *y) {
   struct cx_str *xs = x->as_str, *ys = y->as_str;
   int cmp = strncmp(xs->data, ys->data, cx_min(xs->len, ys->len));
-  if (!cmp) { cmp = cx_cmp_size(&xs->len, &ys->len); }
+  if (!cmp) { return cx_cmp_size(&xs->len, &ys->len); }
   if (cmp < 0) { return CX_CMP_LT; }
   return (cmp > 0) ? CX_CMP_GT : CX_CMP_EQ;
 }
@@ -142,7 +142,7 @@ static void write_imp(struct cx_box *v, FILE *out) {
 
 static void dump_imp(struct cx_box *v, FILE *out) {
   struct cx_str *s = v->as_str;
-  fprintf(out, "'%s'r%d", s->data, s->nrefs);
+  fprintf(out, "'%s'", s->data);
 }
 
 static void print_imp(struct cx_box *v, FILE *out) {

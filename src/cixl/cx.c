@@ -118,7 +118,7 @@ struct cx *cx_init(struct cx *cx) {
 		 sizeof(struct cx_box)*CX_VEC_MIN);
 
   cx_set_init(&cx->separators, sizeof(char), cx_cmp_char);
-  cx_add_separators(cx, " \t\n;.|?!()[]{}");
+  cx_add_separators(cx, " \t\n;,|?!()[]{}");
 
   cx_set_init(&cx->syms, sizeof(struct cx_sym), cx_cmp_cstr);
   cx->syms.key_offs = offsetof(struct cx_sym, id);

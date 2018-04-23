@@ -2,9 +2,6 @@
 #define ntohll(x) ((1==ntohl(1)) ? (x) : ((uint64_t)ntohl((x) & 0xFFFFFFFF) << 32) | ntohl((x) >> 32))
 host64 & net64 fns
 
-* switch pair symbol to ,
-** update separators
-** update examples/tests/rea
 * add float parsing with .
 * rename splat to ..
 ** update rosetta/earthquake
@@ -65,10 +62,6 @@ host64 & net64 fns
 *** change eval to push value
 * replace clone fallback to copy with error
 * replace varargs with size/array+macro
-* switch pair sym to ,
-** switch separator
-** rename splat to ..
-** update readme/examples/tests/rosetta
 * --- cxcrypt
 * add Pub/PrivKey
 * add README/LICENSE

@@ -172,7 +172,6 @@ static void write_imp(struct cx_box *b, FILE *out) {
 static void dump_imp(struct cx_box *b, FILE *out) {
   struct cx_stack *v = b->as_ptr;
   cx_stack_dump(&v->imp, out);
-  fprintf(out, "r%d", v->nrefs);
 }
 
 static void print_imp(struct cx_box *b, FILE *out) {
