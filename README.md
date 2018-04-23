@@ -248,7 +248,11 @@ Cixl is statically and strongly typed; but since it's approach to typing is grad
 
 [Int]
 
-   A is
+   | type
+
+[Type<Int>]
+
+   | Int A is
 
 [#t]
 

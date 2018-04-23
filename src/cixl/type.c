@@ -118,7 +118,7 @@ struct cx_type *cx_type_vget(struct cx_type *t, int nargs, struct cx_type *args[
     if (*j && *i != *j) {
       is_identical = false;
     
-      if (!cx_is(*j, *i)) {
+      if ((*j)->meta != CX_TYPE_ARG && !cx_is(*j, *i)) {
 	cx_error(cx, cx->row, cx->col,
 		 "Expected type arg %s, actual: %s", (*i)->id, (*j)->id);
 	
@@ -311,16 +311,23 @@ static void dump_imp(struct cx_box *value, FILE *out) {
 
 static bool emit_imp(struct cx_box *v, const char *exp, FILE *out) {
   struct cx_type *t = v->as_ptr;
+  struct cx *cx = t->lib->cx;
+  struct cx_sym t_var = cx_gsym(cx, "t"), v_var = cx_gsym(cx, "v");
   
   fprintf(out,
-	  "cx_box_init(%s, cx->meta_type)->as_ptr = %s();\n",
-	  exp, t->emit_id);
+	  "struct cx_type *%s = cx_get_type(cx, \"%s\", false);\n"
+	  "struct cx_box *%s = %s;\n"
+	  "cx_box_init(%s, cx_type_get(cx->meta_type, %s))->as_ptr = %s;\n",
+	  t_var.id, t->id, v_var.id, exp, v_var.id, t_var.id, t_var.id);
   
   return true;
 }
 
 struct cx_type *cx_init_meta_type(struct cx_lib *lib) {
-  struct cx_type *t = cx_add_type(lib, "Type", lib->cx->any_type);
+  struct cx *cx = lib->cx;
+  struct cx_type *t = cx_add_type(lib, "Type", cx->any_type);
+  cx_type_push_args(t, cx->opt_type);
+
   t->equid = equid_imp;
   t->write = dump_imp;
   t->dump = dump_imp;

@@ -441,6 +441,7 @@ $poll #in {
 /*
    Initialize screen.
 */
+
 raw-mode
 #out clear-screen
 #out hide-cursor

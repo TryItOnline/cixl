@@ -187,8 +187,8 @@ static bool emit_imp(struct cx_box *v, const char *exp, FILE *out) {
   
   fprintf(out,
 	  "struct cx_stack *%s = cx_stack_new(cx);\n"
-	  "cx_box_init(%s, cx->stack_type)->as_ptr = %s;\n",
-	  s_var.id, exp, s_var.id);
+	  "cx_box_init(%s, cx_get_type(cx, \"%s\", false))->as_ptr = %s;\n",
+	  s_var.id, exp, v->type->id, s_var.id);
 
   struct cx_sym v_var = cx_gsym(cx, "v");
   fprintf(out, "struct cx_box *%s = NULL;\n", v_var.id);

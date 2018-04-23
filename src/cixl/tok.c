@@ -123,7 +123,7 @@ static ssize_t id_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) {
     struct cx_type *t = cx_get_type(cx, id, false);
     if (!t) { return -1; }
     struct cx_box *v = &cx_op_init(bin, CX_OPUSH(), tok_idx)->as_push.value;
-    cx_box_init(v, cx->meta_type)->as_ptr = t;
+    cx_box_init(v, cx_type_get(cx->meta_type, t))->as_ptr = t;
   } else {
     bool ref = id[0] == '&';
     if (ref) { id++; }

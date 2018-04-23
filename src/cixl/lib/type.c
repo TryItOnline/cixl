@@ -162,6 +162,8 @@ static bool type_id_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
     type->meta = CX_TYPE_ID;
     ts->type_init = cx_type_id_init_imp;
   }
+
+  cx_derive(type, cx->any_type);
   
   cx_do_vec(&toks, struct cx_tok, t) {
     struct cx_type *ct = cx_get_type(cx, t->as_ptr, false);
@@ -195,7 +197,7 @@ static bool type_id_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
 static bool type_imp(struct cx_call *call) {
   struct cx_box *v = cx_test(cx_call_arg(call, 0));
   struct cx_scope *s = call->scope;
-  cx_box_init(cx_push(s), s->cx->meta_type)->as_ptr = v->type;
+  cx_box_init(cx_push(s), cx_type_get(s->cx->meta_type, v->type))->as_ptr = v->type;
   return true;
 }
 
@@ -253,7 +255,8 @@ cx_lib(cx_init_type, "cx/type") {
 
   cx_add_cfunc(lib, "type",
 	       cx_args(cx_arg("v", cx->opt_type)),
-	       cx_args(cx_arg(NULL, cx->meta_type)),
+	       cx_args(cx_arg(NULL, cx_type_get(cx->meta_type,
+						cx_arg_ref(cx, 0, 0)))),
 	       type_imp);
   
   cx_add_cfunc(lib, "is",
@@ -268,7 +271,7 @@ cx_lib(cx_init_type, "cx/type") {
     
   cx_add_cfunc(lib, "new",
 	       cx_args(cx_arg("t", cx->meta_type)),
-	       cx_args(cx_arg(NULL, cx->any_type)),
+	       cx_args(cx_narg(cx, NULL, 0, 0)),
 	       new_imp);
 
   cx_add_cfunc(lib, "lib",
