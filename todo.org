@@ -2,7 +2,6 @@
 #define ntohll(x) ((1==ntohl(1)) ? (x) : ((uint64_t)ntohl((x) & 0xFFFFFFFF) << 32) | ntohl((x) >> 32))
 host64 & net64 fns
 
-* add float parsing with .
 * rename splat to ..
 ** update rosetta/earthquake
 ** update examples/tests

@@ -1,11 +1,11 @@
 use: cx;
 
-define: max 4 float;
+define: max 4.0;
 define: max-iter 570;
 
 let: (max-x max-y) screen-size;
-let: max-cx $max-x float 2 /;
-let: max-cy $max-y float 2 /;
+let: max-cx $max-x 2.0 /;
+let: max-cy $max-y 2.0 /;
 let: rows Stack<Str> new;
 let: buf Buf new;
 let: zoom 0 ref;
@@ -19,7 +19,7 @@ func: render()()
 
     $max-x {
       let: x;
-      let: (zx zy) 0 float ref %%;
+      let: (zx zy) 0.0 ref %%;
       let: cx $x $max-cx - $zoom deref /;
       let: cy $y $max-cy - $zoom deref /;
       let: i #max-iter ref;

@@ -12,12 +12,12 @@ It's easy to get the impression that there are as many ways to draw a Mandelbrot
 ```
 use: cx;
 
-define: max 4 float;
+define: max 4.0;
 define: max-iter 570;
 
 let: (max-x max-y) screen-size;
-let: max-cx $max-x float 2 /;
-let: max-cy $max-y float 2 /;
+let: max-cx $max-x 2.0 /;
+let: max-cy $max-y 2.0 /;
 let: rows Stack<Str> new;
 let: buf Buf new;
 let: zoom 0 ref;
@@ -31,7 +31,7 @@ func: render()()
 
     $max-x {
       let: x;
-      let: (zx zy) 0 float ref %%;
+      let: (zx zy) 0.0 ref %%;
       let: cx $x $max-cx - $zoom deref /;
       let: cy $y $max-cy - $zoom deref /;
       let: i #max-iter ref;
@@ -45,18 +45,18 @@ func: render()()
       } while
 
       let: c $i deref % -7 bsh bor 256 mod;
-      $buf $c {$x 256 mod $y 256 mod} {0 0} if-else $c new-rgb set-bg print
-      $buf @@s print
+      $c {$x 256 mod $y 256 mod} {0 0} if-else $c new-rgb $buf set-bg
+      @@s $buf print
     } for
 
     $rows $buf str push   
   } for
 
-  #out 1 1 move-to print
-  $rows {#out ~ print} for
-  $rows riter {#out ~ print} for;
+  1 1 #out move-to
+  $rows {#out print} for
+  $rows riter {#out print} for;
 
-#out #hide-cursor print
+#out hide-cursor
 raw-mode
 
 let: poll Poll new;
@@ -74,10 +74,10 @@ $poll #in {
   $is-done deref !
 } while
 
-#out #reset-style print
-#out #clear-screen print
-#out 1 1 move-to print
-#out #show-cursor print
+#out reset-style
+#out clear-screen
+1 1 #out move-to
+#out show-cursor
 normal-mode
 ```
 

@@ -173,6 +173,16 @@ static bool float_int_div_imp(struct cx_call *call) {
   return true;
 }
 
+static bool int_float_div_imp(struct cx_call *call) {
+  struct cx_box
+    *y = cx_test(cx_call_arg(call, 1)),
+    *x = cx_test(cx_call_arg(call, 0));
+
+  struct cx_scope *s = call->scope;
+  cx_box_init(cx_push(s), s->cx->float_type)->as_float = x->as_int/y->as_float;
+  return true;
+}
+
 static bool float_pow2_imp(struct cx_call *call) {
   struct cx_box *v = cx_test(cx_call_arg(call, 0));
   struct cx_scope *s = call->scope;
@@ -303,6 +313,11 @@ cx_lib(cx_init_math, "cx/math") {
 	       cx_args(cx_arg("x", cx->float_type), cx_arg("y", cx->int_type)),
 	       cx_args(cx_arg(NULL, cx->float_type)),
 	       float_int_div_imp);
+
+  cx_add_cfunc(lib, "/",
+	       cx_args(cx_arg("x", cx->int_type), cx_arg("y", cx->float_type)),
+	       cx_args(cx_arg(NULL, cx->float_type)),
+	       int_float_div_imp);
 
   cx_add_cfunc(lib, "**",
 	       cx_args(cx_arg("v", cx->float_type)),

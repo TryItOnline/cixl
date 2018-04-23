@@ -1,3 +1,7 @@
 'Testing cx/io...' say
 
-Buf new % 'foo' print % flush str 'foo' = check
+(
+  let: b Buf new;
+  'foo' $b print
+  $b str 'foo' = check
+)

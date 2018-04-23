@@ -197,41 +197,61 @@ static bool parse_id(struct cx *cx, FILE *in, struct cx_vec *out) {
 }
 
 static bool parse_int(struct cx *cx, FILE *in, struct cx_vec *out) {
-  struct cx_mfile value;
-  cx_mfile_open(&value);
-  int col = cx->col;
-  bool ok = true;
+  struct cx_mfile s;
+  cx_mfile_open(&s);
+  int row = cx->row, col = cx->col;
+  bool ok = true, is_float = false;
   
   while (true) {
     char c = fgetc(in);
     if (c == EOF) { goto exit; }
       
-    if (col > cx->col && !isdigit(c)) {
+    if (col > cx->col && !isdigit(c) && c != '.') {
       ok = (ungetc(c, in) != EOF);
       goto exit;
     }
     
-    fputc(c, value.stream);
+    if (c == '.') { is_float = true; }
+    fputc(c, s.stream);
     col++;
   }
   
  exit: {
-    cx_mfile_close(&value);
+    cx_mfile_close(&s);
     
     if (ok) {
-      int64_t int_value = strtoimax(value.data, NULL, 10);
-      free(value.data);
-      
-      if (int_value || !errno) {
+      if (is_float) {
+	cx_float_t v = strtold(s.data, NULL);
+	free(s.data);
+
+	if (errno) {
+	  cx_error(cx, row, col, "Failed parsing float: %d", errno);
+	  return false;
+	}
+	
 	struct cx_box *box = &cx_tok_init(cx_vec_push(out),
 					  CX_TLITERAL(),
-					  cx->row, col)->as_box;
-	cx_box_init(box, cx->int_type)->as_int = int_value;
-	cx->col = col;
+					  row, col)->as_box;
+	
+	cx_box_init(box, cx->float_type)->as_float = v;
+      } else {
+	int64_t v = strtoimax(s.data, NULL, 10);
+	free(s.data);
+
+	if (errno) {
+	  cx_error(cx, row, col, "Failed parsing int: %d", errno);
+	  return false;
+	}
+	
+	struct cx_box *box = &cx_tok_init(cx_vec_push(out),
+					  CX_TLITERAL(),
+					  row, col)->as_box;
+	
+	cx_box_init(box, cx->int_type)->as_int = v;
       }
     } else {
-      cx_error(cx, cx->row, cx->col, "Failed parsing int");
-      free(value.data);
+      cx_error(cx, row, col, "Failed parsing int");
+      free(s.data);
     }
     
     return ok;
