@@ -22,7 +22,7 @@ use:
   (cx/math + - * ++ -- mod rand)
   (cx/rec ? print rec: get put put-call)
   (cx/ref Ref deref new ref set set-call)
-  (cx/stack Stack _ ~ % %% fill get last len move put splat stack)
+  (cx/stack Stack _ ~ % %% .. fill get last len move put stack)
   (cx/str char len)
   (cx/var let:);
 
@@ -111,7 +111,7 @@ define: colors [
   [255 0 255]
   [0 255 0]
   [255 0 0]
-] {splat new-rgb} map stack;
+] {.. new-rgb} map stack;
 
 define: key-rotate @i;
 define: key-left   @j;

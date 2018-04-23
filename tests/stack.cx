@@ -31,3 +31,5 @@
 7 14 % _ + 21 = check
 
 [1 2 3] riter stack [3 2 1] = check
+
+[49 7] .. - 42 = check

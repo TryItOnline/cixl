@@ -250,7 +250,7 @@ static bool parse_int(struct cx *cx, FILE *in, struct cx_vec *out) {
 	cx_box_init(box, cx->int_type)->as_int = v;
       }
     } else {
-      cx_error(cx, row, col, "Failed parsing int");
+      cx_error(cx, row, col, "Failed parsing token");
       free(s.data);
     }
     

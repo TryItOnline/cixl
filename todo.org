@@ -2,10 +2,6 @@
 #define ntohll(x) ((1==ntohl(1)) ? (x) : ((uint64_t)ntohl((x) & 0xFFFFFFFF) << 32) | ntohl((x) >> 32))
 host64 & net64 fns
 
-* rename splat to ..
-** update rosetta/earthquake
-** update examples/tests
-** use instead of float in mandelbrot
 * improve ref lib types
 * ---
 * enable using Arg refs inside funcs
@@ -18,6 +14,7 @@ host64 & net64 fns
 ** update qdb funcs
 ** update collabri
 *** use init-table
+* replace table put-else with put-call
 * update cxcrypt
 * --
 * add cx_call_copy
@@ -25,10 +22,7 @@ host64 & net64 fns
 ** use in error
 *** update error print to include args
 *** deinit calls in error_deinit
-* add cx_abort()/cx_exit(int code)/cx_on_exit(void (void *data))
-** use in cx_test
-** use in exit fn
-** use on_exit instead of atexit
+* trap abort signal and dump errors
 * move macro processing to TID compile
 ** remove macro_eval type
 ** remove TMACRO type

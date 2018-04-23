@@ -376,7 +376,7 @@ cx_lib(cx_init_stack, "cx/stack") {
 	       cx_args(cx_arg(NULL, cx->stack_type)),
 	       stash_imp);
 
-  cx_add_cfunc(lib, "splat",
+  cx_add_cfunc(lib, "..",
 	       cx_args(cx_arg("in", cx->seq_type)),
 	       cx_args(),
 	       splat_imp);
