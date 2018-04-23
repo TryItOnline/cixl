@@ -302,19 +302,7 @@ cx_tok_type(CX_TSTACK, {
     type.deinit = group_deinit;
   });
 
-static ssize_t type_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) {
-  struct cx_tok *tok = cx_vec_get(&bin->toks, tok_idx);
-  struct cx_type *type = tok->as_ptr;
-  tok->type = CX_TLITERAL();
-  cx_box_init(&tok->as_box, cx->meta_type)->as_ptr = type;    
-  cx_copy(&cx_op_init(bin, CX_OPUSH(), tok_idx)->as_push.value, &tok->as_box);
-  return tok_idx+1;
-}
-
-cx_tok_type(CX_TTYPE, {
-    type.compile = type_compile;
-  });
-
+cx_tok_type(CX_TTYPE);
 cx_tok_type(CX_TUNGROUP);
 cx_tok_type(CX_TUNLAMBDA);
 cx_tok_type(CX_TUNSTACK);
