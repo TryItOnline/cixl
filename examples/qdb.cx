@@ -121,7 +121,7 @@ func: commit-change(c DBChange poll Poll)()
 
   $b {$t $poll poll-table} else
   $b $op $arg, write
-  $b @@n print;
+  @@n $b print;
 
 func: commit(poll Poll)()
   #db-trans {$poll commit-change} for

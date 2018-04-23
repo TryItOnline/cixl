@@ -563,7 +563,7 @@ Files may be opened for reading/writing by calling ```fopen```, the type of the 
 Any value may be printed to a ```WFile``` using ```print```.
 
 ```
-   $f ['foo' 42 @@n] print
+   ['foo' 42 @@n] $f print
 
 []
 ```
@@ -1335,15 +1335,6 @@ use: cx;
 {10000000 {
   `error throw
   'skipped' say
-  'skipped' say
-  'skipped' say
-  'skipped' say
-  'skipped' say
-  'skipped' say
-  'skipped' say
-  'skipped' say
-  'skipped' say
-  'skipped' say
   catch: A _;} times}
 clock 1000000 / int say
 
@@ -1362,15 +1353,6 @@ def test():
     for i in range(10000000):
         try:
             raise Exception('error')
-            print('skipped')
-            print('skipped')
-            print('skipped')
-            print('skipped')
-            print('skipped')
-            print('skipped')
-            print('skipped')
-            print('skipped')
-            print('skipped')
             print('skipped')
         except Exception as e:
             pass

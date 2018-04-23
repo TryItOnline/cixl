@@ -289,8 +289,8 @@ static bool ok_imp(struct cx_call *call) {
 
 static bool print_imp(struct cx_call *call) {
   struct cx_box
-    *r = cx_test(cx_call_arg(call, 1)),
-    *out = cx_test(cx_call_arg(call, 0));
+    *r = cx_test(cx_call_arg(call, 0)),
+    *out = cx_test(cx_call_arg(call, 1));
   cx_dump(r, cx_file_ptr(out->as_file));
   return true;
 }
@@ -339,7 +339,7 @@ cx_lib(cx_init_rec, "cx/rec") {
 	       put_call_imp);
 
   cx_add_cfunc(lib, "print",
-	       cx_args(cx_arg("out", cx->wfile_type), cx_arg("rec", cx->rec_type)),
+	       cx_args(cx_arg("rec", cx->rec_type), cx_arg("out", cx->wfile_type)),
 	       cx_args(),
 	       print_imp);
 

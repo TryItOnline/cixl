@@ -231,13 +231,13 @@ cx_lib(cx_init_term, "cx/io/term") {
 
   cx_add_cxfunc(lib, "say",
 		cx_args(cx_arg("v", cx->any_type)), cx_args(),
-		"#out $v print\n"
-		"#out @@n print");
+		"$v #out print\n"
+		"@@n #out print");
 
   cx_add_cxfunc(lib, "yelp",
 		cx_args(cx_arg("v", cx->any_type)), cx_args(),
-		"#error $v print\n"
-		"#error @@n print");
+		"$v #error print\n"
+		"@@n #error print");
 
   cx_add_cfunc(lib, "ask",
 	       cx_args(cx_arg("prompt", cx->str_type)), cx_args(),
@@ -357,7 +357,7 @@ cx_lib(cx_init_term, "cx/io/term") {
 		       cx_arg("n", cx->int_type),
 		       cx_arg("out", cx->wfile_type)),
 	       cx_args(),
-	       "$n {$out $c print} times");  
+	       "$n {$c #out print} times");  
 
   cx_add_cxfunc(lib, "vline",
 		cx_args(cx_arg("c", cx->char_type),
@@ -365,7 +365,7 @@ cx_lib(cx_init_term, "cx/io/term") {
 			cx_arg("out", cx->wfile_type)),
 		cx_args(),
 		"$n {\n"
-		"  $out $c print\n"
+		"  $c #out print\n"
 		"  1 $out move-down\n"
 		"  1 $out move-left\n"
 		"} times");  

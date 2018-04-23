@@ -26,8 +26,8 @@ raw-mode
   let: cc $c ctrl-char;
   1 1 #out move-to
   #out clear-row
-  $cc {#out 'C ' print} if
-  #out $cc $c or print
+  $cc {'C ' #out print} if
+  $cc $c or #out print
   $c #key-space =!
 } while
 

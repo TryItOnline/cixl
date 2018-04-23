@@ -123,7 +123,7 @@ func: push-log(t Topic in Str)()
     } on-write
   } else
   
-  $b $in print;
+  $in $b print;
 
 func: add-topic(pt t Topic)()
   let: pc $pt `children get;
@@ -227,7 +227,7 @@ func: new-topic(c Client n Sym)()
   $c $t join-topic;
 
 func: push-out(c Client v A)()
-  $c `buf get $v print;
+  $v $c `buf get print;
 
 func: poll-out(c Client)()
   let: buf $c `buf get;
@@ -454,7 +454,7 @@ $users len {
 
   `intro 'Intro: ' ask set-option
   let: u '@nUser: ' ask sym new-user;
-  #out 'Password: ' print
+  'Password: ' #out print
   $u `password '' ask put
   $users $u upsert
   $poll commit

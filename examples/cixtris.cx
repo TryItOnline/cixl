@@ -4,8 +4,6 @@
   https://github.com/basic-gongfu/cixl#getting-started
 */
 
-include: 'ansi.cx';
-
 use:
   (cx/abc #t #f #nil A Bool Char Int Opt Str is-nil)
   (cx/cond ! ? = == < > <= and else if if-else min max or)
@@ -186,7 +184,7 @@ func: get-shape(b Block)(_ Stack<Str>)
 */
 
 func: p(_ A)()
-  #out ~ print;
+  #out print;
 
 func: get-offs(x y Int)(_ Int)
   $y -- $max-x * $x -- +;
@@ -344,7 +342,7 @@ func: refresh-speed()()
   #out save-cursor
   $max-x 2 + 3 #out move-to
   #out reset-style
-  #out $speed deref ++ print  
+  $speed deref ++ #out print
   #out restore-cursor;
 
 func: refresh-next-block(b Block)()

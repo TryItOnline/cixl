@@ -1,4 +1,4 @@
-/*
+</*
   Reads binary data from stdin and writes hex to stdout.
 
   Execute "cat IN | cixl examples/binhex.cx > OUT " to convert IN to hex and write
@@ -13,4 +13,4 @@ use:
   (cx/stack ~)
   (cx/str hex-coder);
 
-#in hex-coder {#out ~ print} for
+#in hex-coder {#out print} for

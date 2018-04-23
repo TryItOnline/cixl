@@ -34,15 +34,15 @@ func: render()()
 
       let: c $i deref % -7 bsh bor 256 mod;
       $c {$x 256 mod $y 256 mod} {0 0} if-else $c new-rgb $buf set-bg
-      $buf @@s print
+      @@s $buf print
     } for
 
     $rows $buf str push   
   } for
 
   1 1 #out move-to
-  $rows {#out ~ print} for
-  $rows riter {#out ~ print} for;
+  $rows {#out print} for
+  $rows riter {#out print} for;
 
 #out hide-cursor
 raw-mode

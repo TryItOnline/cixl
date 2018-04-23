@@ -13,4 +13,4 @@ use:
   (cx/stack ~)
   (cx/str hex-decoder);
 
-#in hex-decoder {#out ~ print} for
+#in hex-decoder {#out print} for
