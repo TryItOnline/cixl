@@ -65,10 +65,6 @@ Cixl expects arguments before operations and provides direct access to the stack
    ..
    
 [1 2 3]
-
-   stash
-
-[[1 2 3]]
 ```
 
 ### Scripting
