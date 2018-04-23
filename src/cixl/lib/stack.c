@@ -312,7 +312,7 @@ static bool clone_imp(struct cx_call *call) {
   return true;
 }
 
-static bool flip_imp(struct cx_call *call) {
+static bool swap_imp(struct cx_call *call) {
   struct cx_scope *s = call->scope;
   cx_copy(cx_push(s), cx_call_arg(call, 1));
   cx_copy(cx_push(s), cx_call_arg(call, 0));
@@ -426,7 +426,7 @@ cx_lib(cx_init_stack, "cx/stack") {
   cx_add_cfunc(lib, "~",
 	       cx_args(cx_arg("x", cx->opt_type), cx_arg("y", cx->opt_type)),
 	       cx_args(cx_narg(cx, NULL, 1), cx_narg(cx, NULL, 0)),
-	       flip_imp);
+	       swap_imp);
 
   return true;
 }

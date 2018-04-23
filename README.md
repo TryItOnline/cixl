@@ -39,7 +39,7 @@ Contrary to the current trend of stacking abstractions in the name of portabilit
 Cixl doesn't use a garbage collector, which leads to more predictable performance and resource usage. Values are either automatically copied or reference counted, and references are decremented instantly as values are popped from the stack and variables go out of scope.
 
 ### Stack Basics
-Cixl expects arguments before operations and provides direct access to the stack. Basic stack operations have dedicated operators; ```%``` for copying the last value, ```_``` for dropping it, ```~``` for flipping the last two values and ```|``` for clearing the stack.
+Cixl expects arguments before operations and provides direct access to the parameter stack. Basic stack operations have dedicated operators; ```%``` for copying the last value, ```_``` for dropping it, ```~``` for swapping the last two values and ```|``` for clearing the stack. ```..``` pushes all items in the specified sequence.
 
 ```
    | 1 2 3 %
