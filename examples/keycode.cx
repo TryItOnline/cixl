@@ -5,14 +5,12 @@
   https://github.com/basic-gongfu/cixl#getting-started
 */
 
-include: 'ansi.cx';
-
 use:
   (cx/cond = ! if or)
   (cx/const define:)
   (cx/io #in #out print read-char)
   (cx/io/term
-    #clear-row #clear-screen #key-space
+    clear-row clear-screen #key-space
     ctrl-char move-to normal-mode raw-mode)
   (cx/iter while)
   (cx/stack % ~)
@@ -20,14 +18,14 @@ use:
   (cx/var let:);
 
 raw-mode
-#out #clear-screen print
-#out 1 1 move-to print
+#out clear-screen
+1 1 #out move-to
 
 {
   let: c #in read-char;
   let: cc $c ctrl-char;
-  #out 1 1 move-to print
-  #out #clear-row print
+  1 1 #out move-to
+  #out clear-row
   $cc {#out 'C ' print} if
   #out $cc $c or print
   $c #key-space =!

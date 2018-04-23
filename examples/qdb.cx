@@ -120,7 +120,7 @@ func: commit-change(c DBChange poll Poll)()
   } if-else;
 
   $b {$t $poll poll-table} else
-  $b $op $arg . write
+  $b $op $arg, write
   $b @@n print;
 
 func: commit(poll Poll)()

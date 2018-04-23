@@ -2,18 +2,13 @@
 #define ntohll(x) ((1==ntohl(1)) ? (x) : ((uint64_t)ntohl((x) & 0xFFFFFFFF) << 32) | ntohl((x) >> 32))
 host64 & net64 fns
 
+* switch print fn arg order
 * add float parsing with .
 * rename splat to ..
 ** update rosetta/earthquake
 ** update examples/tests
 ** use instead of float in mandelbrot
-* rewrite term ansi fns to work directly with streams
-** remove string result
-** convert constants
-** update cixtris/collabri/mandelbrot
 * improve ref lib types
-* move remaining ansi func into term
-* move term out of io
 * ---
 * enable using Arg refs inside funcs
 ** add OARGDEREF op

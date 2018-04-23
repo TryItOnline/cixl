@@ -6,7 +6,7 @@
   https://github.com/basic-gongfu/cixl#getting-started
 */
 
-include: 'ansi.cx' 'qdb.cx';
+include: 'qdb.cx';
 
 use:
   (cx/abc
@@ -25,7 +25,7 @@ use:
   (cx/io/buf Buf write-bytes)
   (cx/io/poll Poll delete no-write on-read on-write wait)
   (cx/io/term
-    #clear-screen #clear-screen-end #reset-style
+    clear-screen clear-screen-end reset-style
     ask move-to set-fg say yelp)
   (cx/iter Iter for is-done iter next while)
   (cx/math ++)
@@ -348,10 +348,10 @@ func: handle-in(c Client `auth-user in Str)()
 func: handle-in(c Client `auth-password in Str)()
   let: u $c `user get;
   let: p $u `password get;
-
-  $c `buf get %
-  #clear-screen print
-  1 1 move-to print
+  let: out $c `buf get;
+  
+  $out clear-screen
+  1 1 $out move-to
   
   $p is-nil {
     $u `password $in put
@@ -386,19 +386,20 @@ func: handle-in(c Client `ok in Str)()
 
 func: push-error(c Client e Str)()
   let: b $c `buf get;
-  $b #error-color set-fg print
+  #error-color $b set-fg
   $c ['Error: ' $e @@n @@n] push-out
-  $b #reset-style print;
+  $b reset-style;
 
 func: push-error(c Client e Stack)()
   $c $e #nil join push-error;
 
 func: new-client(io TCPClient)(_ Client)
   let: c Client new;
-
+  let: out Buf new;
+  
   $c `state   `auth-user put
   $c `io      $io        put
-  $c `buf     Buf new    put
+  $c `buf     $out       put
   
   $c $root join-topic
   let: ils $io lines;
@@ -422,17 +423,15 @@ func: new-client(io TCPClient)(_ Client)
     } if-else
   } on-read
 
-  $c `buf get %
-  #clear-screen print
-  1 1 move-to print
+  $out clear-screen
+  1 1 $out move-to
   
   $c [`intro get-option @@n @@n] push-out
   $c poll-out
   $c;
 
-#out %
-1 1 move-to print
-#clear-screen print
+#out clear-screen
+1 1 #out move-to
 
 ['Collabri v0.3' @@n] say
 
@@ -460,9 +459,8 @@ $users len {
   $users $u upsert
   $poll commit
   
-  #out %
-  1 3 move-to print
-  #clear-screen-end print
+  1 3 #out move-to
+  #out clear-screen-end
 } else
 
 let: server #nil $port #backlog listen;

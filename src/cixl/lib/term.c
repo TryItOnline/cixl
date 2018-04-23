@@ -8,6 +8,7 @@
 #include "cixl/call.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
+#include "cixl/file.h"
 #include "cixl/lib.h"
 #include "cixl/lib/term.h"
 #include "cixl/scope.h"
@@ -91,36 +92,123 @@ static bool ctrl_char_imp(struct cx_call *call) {
   return true;
 }
 
+static bool clear_screen_imp(struct cx_call *call) {
+  struct cx_box *out = cx_test(cx_call_arg(call, 0));
+  fputs(CX_CSI_ESC "2J", cx_file_ptr(out->as_file));
+  return true;
+}
+
+static bool clear_screen_end_imp(struct cx_call *call) {
+  struct cx_box *out = cx_test(cx_call_arg(call, 0));
+  fputs(CX_CSI_ESC "0J", cx_file_ptr(out->as_file));
+  return true;
+}
+
+static bool reset_style_imp(struct cx_call *call) {
+  struct cx_box *out = cx_test(cx_call_arg(call, 0));
+  fputs(CX_CSI_ESC "0m", cx_file_ptr(out->as_file));
+  return true;
+}
+
+static bool reverse_colors_imp(struct cx_call *call) {
+  struct cx_box *out = cx_test(cx_call_arg(call, 0));
+  fputs(CX_CSI_ESC "7m", cx_file_ptr(out->as_file));
+  return true;
+}
+
+static bool save_cursor_imp(struct cx_call *call) {
+  struct cx_box *out = cx_test(cx_call_arg(call, 0));
+  fputs(CX_CSI_ESC "s", cx_file_ptr(out->as_file));
+  return true;
+}
+
+static bool restore_cursor_imp(struct cx_call *call) {
+  struct cx_box *out = cx_test(cx_call_arg(call, 0));
+  fputs(CX_CSI_ESC "u", cx_file_ptr(out->as_file));
+  return true;
+}
+
+static bool hide_cursor_imp(struct cx_call *call) {
+  struct cx_box *out = cx_test(cx_call_arg(call, 0));
+  fputs(CX_CSI_ESC "?25l", cx_file_ptr(out->as_file));
+  return true;
+}
+
+static bool show_cursor_imp(struct cx_call *call) {
+  struct cx_box *out = cx_test(cx_call_arg(call, 0));
+  fputs(CX_CSI_ESC "?25h", cx_file_ptr(out->as_file));
+  return true;
+}
+
+static bool clear_row_imp(struct cx_call *call) {
+  struct cx_box *out = cx_test(cx_call_arg(call, 0));
+  fputs(CX_CSI_ESC "2K", cx_file_ptr(out->as_file));
+  return true;
+}
+
+static bool clear_row_end_imp(struct cx_call *call) {
+  struct cx_box *out = cx_test(cx_call_arg(call, 0));
+  fputs(CX_CSI_ESC "0K", cx_file_ptr(out->as_file));
+  return true;
+}
+
+static bool move_up_imp(struct cx_call *call) {
+  struct cx_box
+    *n = cx_test(cx_call_arg(call, 0)),
+    *out = cx_test(cx_call_arg(call, 1));
+  
+  fprintf(cx_file_ptr(out->as_file), CX_CSI_ESC "%ldA", n->as_int);
+  return true;
+}
+
+static bool move_down_imp(struct cx_call *call) {
+  struct cx_box
+    *n = cx_test(cx_call_arg(call, 0)),
+    *out = cx_test(cx_call_arg(call, 1));
+  
+  fprintf(cx_file_ptr(out->as_file), CX_CSI_ESC "%ldB", n->as_int);
+  return true;
+}
+
+static bool move_left_imp(struct cx_call *call) {
+  struct cx_box
+    *n = cx_test(cx_call_arg(call, 0)),
+    *out = cx_test(cx_call_arg(call, 1));
+  
+  fprintf(cx_file_ptr(out->as_file), CX_CSI_ESC "%ldD", n->as_int);
+  return true;
+}
+
+static bool move_right_imp(struct cx_call *call) {
+  struct cx_box
+    *n = cx_test(cx_call_arg(call, 0)),
+    *out = cx_test(cx_call_arg(call, 1));
+  
+  fprintf(cx_file_ptr(out->as_file), CX_CSI_ESC "%ldC", n->as_int);
+  return true;
+}
+
 static bool move_to_imp(struct cx_call *call) {
   struct cx_box
     *x = cx_test(cx_call_arg(call, 0)),
-    *y = cx_test(cx_call_arg(call, 1));
+    *y = cx_test(cx_call_arg(call, 1)),
+    *out = cx_test(cx_call_arg(call, 2));
   
-  struct cx_scope *s = call->scope;
-
-  char *data = cx_fmt(CX_CSI_ESC "%d;%dH", y->as_int, x->as_int);
-  cx_box_init(cx_push(s), s->cx->str_type)->as_str = cx_str_new(data, -1);
-  free(data);
+  fprintf(cx_file_ptr(out->as_file), CX_CSI_ESC "%ld;%ldH", y->as_int, x->as_int);
   return true;
 }
 
 static bool set_bg_imp(struct cx_call *call) {
   struct cx_rgb *c = &cx_test(cx_call_arg(call, 0))->as_rgb;
-  struct cx_scope *s = call->scope;
-
-  char *data = cx_fmt(CX_CSI_ESC "48;2;%d;%d;%dm", c->r, c->g, c->b);
-  cx_box_init(cx_push(s), s->cx->str_type)->as_str = cx_str_new(data, -1);
-  free(data);
+  struct cx_file *out = cx_test(cx_call_arg(call, 1))->as_file;
+  fprintf(cx_file_ptr(out), CX_CSI_ESC "48;2;%d;%d;%dm", c->r, c->g, c->b);
   return true;
 }
 
 static bool set_fg_imp(struct cx_call *call) {
   struct cx_rgb *c = &cx_test(cx_call_arg(call, 0))->as_rgb;
-  struct cx_scope *s = call->scope;
-
-  char *data = cx_fmt(CX_CSI_ESC "38;2;%d;%d;%dm", c->r, c->g, c->b);
-  cx_box_init(cx_push(s), s->cx->str_type)->as_str = cx_str_new(data, -1);
-  free(data);
+  struct cx_file *out = cx_test(cx_call_arg(call, 1))->as_file;
+  fprintf(cx_file_ptr(out), CX_CSI_ESC "38;2;%d;%d;%dm", c->r, c->g, c->b);
   return true;
 }
 
@@ -129,7 +217,8 @@ cx_lib(cx_init_term, "cx/io/term") {
     
   if (!cx_use(cx, "cx/abc", "A", "Str") ||
       !cx_use(cx, "cx/gfx", "RGB") ||
-      !cx_use(cx, "cx/io", "#error", "#in", "#out", "print")) {
+      !cx_use(cx, "cx/io", "WFile", "#error", "#in", "#out", "print") ||
+      !cx_use(cx, "cx/iter", "times")) {
     return false;
   }
 
@@ -139,18 +228,6 @@ cx_lib(cx_init_term, "cx/io/term") {
 	      cx->int_type)->as_int = 32;
   cx_box_init(cx_put_const(lib, cx_sym(cx, "key-back"), false),
 	      cx->int_type)->as_int = 127;
-
-  cx_box_init(cx_put_const(lib, cx_sym(cx, "clear-screen"), false),
-	      cx->str_type)->as_str = cx_str_new(CX_CSI_ESC "2J", -1);
-
-  cx_box_init(cx_put_const(lib, cx_sym(cx, "hide-cursor"), false),
-	      cx->str_type)->as_str = cx_str_new(CX_CSI_ESC "?25l", -1);
-  
-  cx_box_init(cx_put_const(lib, cx_sym(cx, "show-cursor"), false),
-	      cx->str_type)->as_str = cx_str_new(CX_CSI_ESC "?25h", -1);
-
-  cx_box_init(cx_put_const(lib, cx_sym(cx, "reset-style"), false),
-	      cx->str_type)->as_str = cx_str_new(CX_CSI_ESC "0m", -1);
 
   cx_add_cxfunc(lib, "say",
 		cx_args(cx_arg("v", cx->any_type)), cx_args(),
@@ -186,20 +263,112 @@ cx_lib(cx_init_term, "cx/io/term") {
 	       cx_args(cx_arg(NULL, cx_type_get(cx->opt_type, cx->int_type))),
 	       ctrl_char_imp);
 
+  cx_add_cfunc(lib, "clear-screen",
+	       cx_args(cx_arg("out", cx->wfile_type)),
+	       cx_args(),
+	       clear_screen_imp);  
+
+  cx_add_cfunc(lib, "clear-screen-end",
+	       cx_args(cx_arg("out", cx->wfile_type)),
+	       cx_args(),
+	       clear_screen_end_imp);  
+
+  cx_add_cfunc(lib, "reset-style",
+	       cx_args(cx_arg("out", cx->wfile_type)),
+	       cx_args(),
+	       reset_style_imp);  
+
+  cx_add_cfunc(lib, "reverse-colors",
+	       cx_args(cx_arg("out", cx->wfile_type)),
+	       cx_args(),
+	       reverse_colors_imp);  
+  
+  cx_add_cfunc(lib, "save-cursor",
+	       cx_args(cx_arg("out", cx->wfile_type)),
+	       cx_args(),
+	       save_cursor_imp);  
+
+  cx_add_cfunc(lib, "restore-cursor",
+	       cx_args(cx_arg("out", cx->wfile_type)),
+	       cx_args(),
+	       restore_cursor_imp);  
+
+  cx_add_cfunc(lib, "hide-cursor",
+	       cx_args(cx_arg("out", cx->wfile_type)),
+	       cx_args(),
+	       hide_cursor_imp);  
+
+  cx_add_cfunc(lib, "show-cursor",
+	       cx_args(cx_arg("out", cx->wfile_type)),
+	       cx_args(),
+	       show_cursor_imp);  
+
+  cx_add_cfunc(lib, "clear-row",
+	       cx_args(cx_arg("out", cx->wfile_type)),
+	       cx_args(),
+	       clear_row_imp);  
+
+  cx_add_cfunc(lib, "clear-row-end",
+	       cx_args(cx_arg("out", cx->wfile_type)),
+	       cx_args(),
+	       clear_row_end_imp);  
+
+  cx_add_cfunc(lib, "move-up",
+	       cx_args(cx_arg("n", cx->int_type), cx_arg("out", cx->wfile_type)),
+	       cx_args(),
+	       move_up_imp);  
+
+  cx_add_cfunc(lib, "move-down",
+	       cx_args(cx_arg("n", cx->int_type), cx_arg("out", cx->wfile_type)),
+	       cx_args(),
+	       move_down_imp);  
+
+  cx_add_cfunc(lib, "move-left",
+	       cx_args(cx_arg("n", cx->int_type), cx_arg("out", cx->wfile_type)),
+	       cx_args(),
+	       move_left_imp);  
+
+  cx_add_cfunc(lib, "move-right",
+	       cx_args(cx_arg("n", cx->int_type), cx_arg("out", cx->wfile_type)),
+	       cx_args(),
+	       move_right_imp);  
+
   cx_add_cfunc(lib, "move-to",
-	       cx_args(cx_arg("x", cx->int_type), cx_arg("y", cx->int_type)),
-	       cx_args(cx_arg(NULL, cx->str_type)),
+	       cx_args(cx_arg("x", cx->int_type),
+		       cx_arg("y", cx->int_type),
+		       cx_arg("out", cx->wfile_type)),
+	       cx_args(),
 	       move_to_imp);  
 
   cx_add_cfunc(lib, "set-bg",
-	       cx_args(cx_arg("c", cx->rgb_type)),
-	       cx_args(cx_arg(NULL, cx->str_type)),
+	       cx_args(cx_arg("c", cx->rgb_type),
+		       cx_arg("out", cx->wfile_type)),
+	       cx_args(),
 	       set_bg_imp);  
 
   cx_add_cfunc(lib, "set-fg",
-	       cx_args(cx_arg("c", cx->rgb_type)),
-	       cx_args(cx_arg(NULL, cx->str_type)),
+	       cx_args(cx_arg("c", cx->rgb_type),
+		       cx_arg("out", cx->wfile_type)),
+	       cx_args(),
 	       set_fg_imp);  
 
+  cx_add_cxfunc(lib, "hline",
+	       cx_args(cx_arg("c", cx->char_type),
+		       cx_arg("n", cx->int_type),
+		       cx_arg("out", cx->wfile_type)),
+	       cx_args(),
+	       "$n {$out $c print} times");  
+
+  cx_add_cxfunc(lib, "vline",
+		cx_args(cx_arg("c", cx->char_type),
+			cx_arg("n", cx->int_type),
+			cx_arg("out", cx->wfile_type)),
+		cx_args(),
+		"$n {\n"
+		"  $out $c print\n"
+		"  1 $out move-down\n"
+		"  1 $out move-left\n"
+		"} times");  
+      
   return true;
 }

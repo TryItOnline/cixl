@@ -33,18 +33,18 @@ func: render()()
       } while
 
       let: c $i deref % -7 bsh bor 256 mod;
-      $buf $c {$x 256 mod $y 256 mod} {0 0} if-else $c new-rgb set-bg print
+      $c {$x 256 mod $y 256 mod} {0 0} if-else $c new-rgb $buf set-bg
       $buf @@s print
     } for
 
     $rows $buf str push   
   } for
 
-  #out 1 1 move-to print
+  1 1 #out move-to
   $rows {#out ~ print} for
   $rows riter {#out ~ print} for;
 
-#out #hide-cursor print
+#out hide-cursor
 raw-mode
 
 let: poll Poll new;
@@ -62,8 +62,8 @@ $poll #in {
   $is-done deref !
 } while
 
-#out #reset-style print
-#out #clear-screen print
-#out 1 1 move-to print
-#out #show-cursor print
+#out reset-style
+#out clear-screen
+1 1 #out move-to
+#out show-cursor
 normal-mode

@@ -15,8 +15,8 @@ use:
   (cx/gfx RGB new-rgb)
   (cx/io #in #out flush read-char print unblock)
   (cx/io/term
-    #clear-row #clear-screen #hide-cursor #key-esc #reset-style #restore-pos
-    #reverse-colors #save-pos #show-cursor
+    clear-screen hide-cursor #key-esc reset-style restore-cursor
+    reverse-colors save-cursor show-cursor
     hline move-down move-left move-right move-to normal-mode raw-mode
     screen-size set-bg vline)
   (cx/io/poll Poll new on-read wait)
@@ -197,8 +197,8 @@ func: get-offs(x y Int)(_ Int)
 */
 
 func: print-shape(b Block c Opt<RGB>)()
-  #save-pos p
-  $c {$c set-bg p} {#reset-style p} if-else
+  #out save-cursor
+  $c {$c #out set-bg} {#out reset-style} if-else
   
   $b get-shape {
     let: l;
@@ -207,16 +207,16 @@ func: print-shape(b Block c Opt<RGB>)()
       @* = {
         @@s p
       } {
-        1 move-right p
+        1 #out move-right
       } if-else
     } for
 
-    1 move-down p
-    $l len move-left p
+    1 #out move-down
+    $l len #out move-left
   } for
   
-  $c {#reset-style p} if
-  #restore-pos p;
+  $c {#out reset-style} if
+  #out restore-cursor;
 
 /*
    Updates tiles for block starting at specified offset.
@@ -242,14 +242,14 @@ func: update-tiles(b Block offs Int v Opt<Block>)()
 */
 
 func: print-marker(b Block)()
-  #save-pos p
-  $b `x get $max-y move-to p
+  #out save-cursor
+  $b `x get $max-y #out move-to
 
   $b get-shape last {
-    @* = @@s {1 move-right} if-else p
+    @* = {@@s p} {1 #out move-right} if-else
   } for
   
-  #restore-pos p;
+  #out restore-cursor;
 
 func: print-block(b Block)()
   $b $b `color get print-shape
@@ -265,23 +265,23 @@ func: erase-block(b Block)()
 */
 
 func: refresh-tiles()()
-  #save-pos p
+  #out save-cursor
   
   $max-y -- {
     let: y ++;
-    1 $y move-to p
+    1 $y #out move-to
     
     $max-x -- {
       let: x ++;
       let: b $tiles $x $y get-offs get;
       
-      $b {$b `color get set-bg} #reset-style if-else p
+      $b {$b `color get #out set-bg} {#out reset-style} if-else
       @@s p
     } for
   } for
 
-  #reset-style p
-  #restore-pos p;
+  #out reset-style
+  #out restore-cursor;
   
 /*
    Clears full rows intersecting current shape of block.
@@ -341,16 +341,16 @@ func: rotate-block(b Block)()
   $b `i {++ $b `shapes get len mod} put-call;
 
 func: refresh-speed()()
-  #save-pos p
-  $max-x 2 + 3 move-to p
-  #reset-style p
+  #out save-cursor
+  $max-x 2 + 3 #out move-to
+  #out reset-style
   #out $speed deref ++ print  
-  #restore-pos p;
+  #out restore-cursor;
 
 func: refresh-next-block(b Block)()
-  #save-pos p
-  $max-x 2 + 6 move-to p
-  #reset-style p
+  #out save-cursor
+  $max-x 2 + 6 #out move-to
+  #out reset-style
 
   $next-block {
     % {#nil print-shape} &_ if-else
@@ -358,7 +358,7 @@ func: refresh-next-block(b Block)()
     $b
   } set-call
   
-  #restore-pos p;
+  #out restore-cursor;
 
 func: handle-key(#key-rotate)()
    let: b $block deref;
@@ -443,39 +443,41 @@ $poll #in {
 /*
    Initialize screen.
 */
-
 raw-mode
-#clear-screen p
-#hide-cursor p
+#out clear-screen
+#out hide-cursor
 
-$max-x 1 move-to p
-#reverse-colors p
-@@s $max-y vline p
-#reset-style p
+$max-x 1 #out move-to
+#out reverse-colors
+@@s $max-y #out vline
+#out reset-style
 
-$max-x 2 + 2 move-to p
+$max-x 2 + 2 #out move-to
 'Speed:' p
 refresh-speed
 
-$max-x 2 + 5 move-to p
+$max-x 2 + 5 #out move-to
 'Next:' p
 $block new-block set
 new-block refresh-next-block
 
-func: k(k A)(_ Stack)
-  [#reverse-colors $k #reset-style];
+func: pk(k A)()
+  #out reverse-colors
+  $k p
+  #out reset-style;
 
-$max-x 2 + $max-y 5 - move-to p
-['Use ' #key-left k ' and ' #key-right k ' to move block horizontally,'] p
+$max-x 2 + $max-y 5 - #out move-to
+'Use ' p #key-left pk ' and ' p #key-right pk ' to move block horizontally,' p
 
-$max-x 2 + $max-y 4 - move-to p
-[#key-rotate k ' rotates and ' #key-drop k ' drops.'] p
+$max-x 2 + $max-y 4 - #out move-to
 
-$max-x 2 + $max-y 2 - move-to p
-[#key-fast k ' and ' #key-slow k ' may be used to change speed.'] p
+#key-rotate pk ' rotates and ' p #key-drop pk ' drops.' p
 
-$max-x 2 + $max-y move-to p
-['Press ' 'Esc' k ' to exit and restore console.'] p
+$max-x 2 + $max-y 2 - #out move-to
+#key-fast pk ' and ' p #key-slow pk ' may be used to change speed.' p
+
+$max-x 2 + $max-y #out move-to
+'Press ' p 'Esc' pk ' to exit and restore console.' p
 
 /*
    Main loop
@@ -486,7 +488,7 @@ $max-x 2 + $max-y move-to p
 
   $key-delay deref {
     $key-delay &-- set-call
-    $b `x get $b `y get move-to p
+    $b `x get $b `y get #out move-to
     $b print-block
   } {
     let: s $b get-shape;
@@ -494,17 +496,17 @@ $max-x 2 + $max-y move-to p
     $ok ! {$b `y get 1 =} and {$is-done #t set} if
     
     $ok {$b `y get $s shape-height + $max-y <} and {
-      $b `x get $b `y get move-to p
+      $b `x get $b `y get #out move-to
       $b erase-block
       $b `y &++ put-call
-      1 move-down p
+      1 #out move-down
       $b print-block
     } {
       $b clear-rows
       let: bb $next-block deref;
       new-block refresh-next-block
       $block $bb set
-      $bb `x get $bb `y get move-to p
+      $bb `x get $bb `y get #out move-to
       $bb print-block
       $is-dropping #f set
     } if-else
@@ -515,10 +517,10 @@ $max-x 2 + $max-y move-to p
   let: sd $is-dropping deref 1 {#speed-delays $speed deref get} if-else;
   $poll $sd wait _
   
-  1 $max-y move-to p
-  #reverse-colors p
-  @@s $max-x hline p
-  #reset-style p
+  1 $max-y #out move-to
+  #out reverse-colors
+  @@s $max-x #out hline
+  #out reset-style
 
   $is-done deref !
 } while
@@ -527,8 +529,8 @@ $max-x 2 + $max-y move-to p
    Restore console
 */
 
-#reset-style p
-#clear-screen p
-1 1 move-to p
+#out reset-style
+#out clear-screen
+1 1 #out move-to
 normal-mode
-#show-cursor p
+#out show-cursor
