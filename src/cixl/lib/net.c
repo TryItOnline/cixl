@@ -85,7 +85,7 @@ static bool accept_imp(struct cx_call *call) {
 
 static bool connect_imp(struct cx_call *call) {
   struct cx_box
-    *port = cx_test(cx_call_arg(call, 0)),
+    *port = cx_test(cx_call_arg(call, 1)),
     *host = cx_test(cx_call_arg(call, 0));
 
   struct cx_scope *s = call->scope;

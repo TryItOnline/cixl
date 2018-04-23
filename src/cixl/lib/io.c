@@ -473,7 +473,7 @@ cx_lib(cx_init_io, "cx/io") {
   cx_add_macro(lib, "include:", include_parse);
 
   cx_add_cfunc(lib, "print",
-	       cx_args(cx_arg("v", cx->any_type), cx_arg("out", cx->wfile_type)),
+	       cx_args(cx_arg("v", cx->opt_type), cx_arg("out", cx->wfile_type)),
 	       cx_args(),
 	       print_imp);
     

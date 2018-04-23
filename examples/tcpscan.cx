@@ -25,7 +25,7 @@ use:
   (cx/net     connect)
   (cx/math    + -)
   (cx/proc    exit)
-  (cx/stack   ~ _ pop)
+  (cx/stack   % ~ _ pop)
   (cx/str     int)
   (cx/sys     #args)
   (cx/type    new)

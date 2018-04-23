@@ -56,7 +56,7 @@ static bool read_bytes_imp(struct cx_call *call) {
   fseek(b->file._ptr, nbytes->as_int, SEEK_CUR);
   fflush(b->file._ptr);
   int rbytes = read(in->as_file->fd, b->data+offs, nbytes->as_int);
-
+  
   if (!rbytes ||
       (rbytes == -1 && (errno == ECONNREFUSED || errno == ECONNRESET))) {
     cx_box_init(cx_push(s), s->cx->nil_type);

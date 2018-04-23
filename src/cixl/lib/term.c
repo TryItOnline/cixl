@@ -230,7 +230,7 @@ cx_lib(cx_init_term, "cx/io/term") {
 	      cx->int_type)->as_int = 127;
 
   cx_add_cxfunc(lib, "say",
-		cx_args(cx_arg("v", cx->any_type)), cx_args(),
+		cx_args(cx_arg("v", cx->opt_type)), cx_args(),
 		"$v #out print\n"
 		"@@n #out print");
 

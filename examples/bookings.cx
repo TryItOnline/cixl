@@ -141,7 +141,7 @@ $bookings 'booking.db'  [`id] init-table
 
 func: run-tests()()
   let: r Sym new 10 new-resource;
-  $r today (today 1 days +) 5 new-booking _
-  $r now   (now 1h +)       6 new-booking _;
+  $r today (now 2h +) 5 new-booking _
+  $r now   (now 1h +) 6 new-booking _;
 
 )

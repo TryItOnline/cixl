@@ -1342,7 +1342,7 @@ static void typedef_emit_init(struct cx_op *op,
 	      mt_var.id, (*mt)->id);
 	      
       if (!cx_type_has_refs(*mt)) {
-	fprintf(out, "cx_derive(%s, %s);\n", mt_var.id, t_var.id);
+	fprintf(out, "cx_derive(%s, &%s->imp);\n", mt_var.id, t_var.id);
       }
       
       fprintf(out,
