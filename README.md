@@ -54,7 +54,11 @@ Cixl expects arguments before operations and provides direct access to the stack
 
 [1 3 2]
 
-   | [1 2 3]
+   |
+
+[]
+
+   [1 2 3]
 
 [[1 2 3]]
 
