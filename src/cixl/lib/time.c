@@ -412,6 +412,10 @@ cx_lib(cx_init_time, "cx/time") {
 			    cx->time_type)->as_time,
 	       INT32_MAX, INT64_MAX);
   
+  cx_time_init(&cx_box_init(cx_put_const(lib, cx_sym(cx, "nil-time"), false),
+			    cx->time_type)->as_time,
+	       0, 0);
+
   cx_add_cfunc(lib, "years",
 	       cx_args(cx_arg("n", cx->int_type)),
 	       cx_args(cx_arg(NULL, cx->time_type)),

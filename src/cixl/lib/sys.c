@@ -1,6 +1,7 @@
 #include <dlfcn.h>
 #include <errno.h>
 #include <string.h>
+#include <time.h>
 
 #include "cixl/arg.h"
 #include "cixl/call.h"
@@ -116,10 +117,33 @@ static bool make_dir_imp(struct cx_call *call) {
   return cx_make_dir(p->as_str->data);
 }
 
+static bool sleep_imp(struct cx_call *call) {
+  struct cx_box *ns = cx_test(cx_call_arg(call, 0));
+  struct cx_scope *s = call->scope;
+  struct timespec req = {0}, rem = {0};
+  req.tv_sec = ns->as_time.ns / CX_SEC;
+  req.tv_nsec = ns->as_time.ns % CX_SEC;
+
+  if (nanosleep(&req, &rem) == -1) {
+    if (errno != EINTR) {
+      cx_error(s->cx, s->cx->row, s->cx->col, "Failed sleeping: %d", errno);
+      return false;
+    }
+    
+    struct cx_time *t = &cx_box_init(cx_push(s), s->cx->time_type)->as_time;
+    cx_time_init(t, 0, rem.tv_sec*CX_SEC + rem.tv_nsec);  
+  } else {
+    cx_box_init(cx_push(s), s->cx->nil_type);
+  }
+  
+  return true;
+}
+
 cx_lib(cx_init_sys, "cx/sys") {
   struct cx *cx = lib->cx;
     
-  if (!cx_use(cx, "cx/abc", "Int", "Stack", "Str")) {
+  if (!cx_use(cx, "cx/abc", "Int", "Stack", "Str") ||
+      !cx_use(cx, "cx/time", "Time")) {
     return false;
   }
 
@@ -139,6 +163,11 @@ cx_lib(cx_init_sys, "cx/sys") {
 	       cx_args(cx_arg("p", cx->str_type)),
 	       cx_args(),
 	       make_dir_imp);
+
+  cx_add_cfunc(lib, "sleep",
+	       cx_args(cx_arg("t", cx->time_type)),
+	       cx_args(cx_arg(NULL, cx_type_get(cx->opt_type, cx->time_type))),
+	       sleep_imp);
 
   return true;
 }

@@ -221,6 +221,7 @@ static bool parse_int(struct cx *cx, FILE *in, struct cx_vec *out) {
     
     if (ok) {
       if (is_float) {
+	errno = 0;
 	cx_float_t v = strtold(s.data, NULL);
 	free(s.data);
 
@@ -235,6 +236,7 @@ static bool parse_int(struct cx *cx, FILE *in, struct cx_vec *out) {
 	
 	cx_box_init(box, cx->float_type)->as_float = v;
       } else {
+	errno = 0;
 	int64_t v = strtoimax(s.data, NULL, 10);
 	free(s.data);
 
