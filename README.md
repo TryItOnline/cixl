@@ -270,10 +270,10 @@ New type ids may be defined for existing types using ```type-id:```:
 [#t]
 ```
 
-The id may optionally be parameterized and/or refer to one of several different types:
+The id may optionally be parameterized and/or refer to one of several different types. A list of constraints may be specified after the id, it serves as documentation that is checked against all specified members and is used to determine compatibility for the generated type.
 
 ```
-   type-id: StackIter<A> Stack<Arg0> Iter<Arg0>;
+   type-id: StackIter<A>(Seq<Arg0>) Stack<Arg0> Iter<Arg0>;
    [1 2 3] StackIter<Int> is
    'foo' iter StackIter<Char> is
    42 StackIter is
@@ -1180,14 +1180,14 @@ Records map finite sets of typed fields to values. Record types are required to 
 
 
 ```
-   rec: Node()
+   rec: Node<A>()
      left right Node
-     value A;
-   | let: n Node new;
+     value Arg0;
+   | let: n Node<Int> new;
    $n `value 42 put
    $n
 
-[Node((value 42))]
+[Node<Int>(0x12ffb28)]
 
    `value get
 
