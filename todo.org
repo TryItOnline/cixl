@@ -2,12 +2,10 @@
 #define ntohll(x) ((1==ntohl(1)) ? (x) : ((uint64_t)ntohl((x) & 0xFFFFFFFF) << 32) | ntohl((x) >> 32))
 host64 & net64 fns
 
-* add rec type to qdb DBTable
-** make DBKey derive from Cmp
-** update qdb funcs
-** test collabri
 * replace table put-else with put-call
+** update examples
 * update cxcrypt
+* add parameterized types to README
 * add lemmings.cx
 ** use anim.cx
 * --
@@ -17,6 +15,10 @@ host64 & net64 fns
 *** update error print to include args
 *** deinit calls in error_deinit
 * trap abort signal and dump errors
+* make rec:/type-id: parents optional
+* finish type-id parents
+** resolve parents with refs and derive
+*** check all types in set against parents
 * move macro processing to TID compile
 ** remove macro_eval type
 ** remove TMACRO type

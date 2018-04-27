@@ -143,7 +143,12 @@ static bool type_id_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   }
 
   struct cx_tok parents = *cx_test((struct cx_tok *)cx_vec_pop(&toks));
-  
+
+  if (parents.type != CX_TGROUP()) {
+    cx_error(cx, row, col, "Invalid type id parents: %s", parents.type->id);
+    goto exit3;
+  }
+
   if (!cx_parse_end(cx, in, &toks)) {
     if (!cx->errors.count) { cx_error(cx, cx->row, cx->col, "Missing type id end"); }
     goto exit3;
@@ -171,7 +176,7 @@ static bool type_id_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   }
 
   cx_derive(type, cx->any_type);
-
+  
   cx_do_vec(&parents.as_vec, struct cx_tok, pt) {
     if (pt->type != CX_TID()) {
       cx_error(cx, row, col, "Invalid parent type: %s", pt->type->id);
@@ -216,6 +221,19 @@ static bool type_id_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
 	  
 	  goto exit3;
 	}
+      }
+    }
+  }
+
+  if (ts->set.members.count == 1) {
+    struct cx_type **mt = cx_vec_get(&ts->set.members, 0);
+
+    if (!cx_type_has_refs(*(struct cx_type **)cx_vec_get(&ts->set.members, 0))) {
+      struct cx_type **ok = cx_set_insert(&ts->parents, mt);
+
+      if (ok) {
+	*ok = *mt;
+	cx_derive(type, *mt);
       }
     }
   }

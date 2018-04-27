@@ -12,8 +12,9 @@ lib: qdb (
 
 use: cx;
 
+type-id: DBKey() Stack;
+
 define: db-trans [];
-type-id: DBKey(Cmp) Stack;
 
 rec: DBTable<A>()
   file      RWFile
@@ -32,7 +33,7 @@ func: init-table(t DBTable<A> n Str k Stack)()
   $t `recs $rs     put
   $t `buf  Buf new put;
 
-func: get-rec-key(t DBTable r A)(_ DBKey)
+func: get-rec-key(t DBTable r Arg0:0)(_ DBKey)
   $t `key get {$r ~ get} map stack;
 
 func: load-rec(t DBTable in Pair)()
@@ -79,14 +80,14 @@ rec: DBChange()
   rec    A
   op     Sym;
 
-func: push-change(t DBTable r A op Sym)()
+func: push-change(t DBTable r Arg0:0 op Sym)()
   let: c DBChange new;
   $c `table $t  put
   $c `rec   $r  put
   $c `op    $op put
   #db-trans $c push;
 
-func: upsert(t DBTable r A)()
+func: upsert(t DBTable r Arg0:0)()
   $t `recs get $t $r get-rec-key {
     $t $r `insert push-change
     $r

@@ -1444,6 +1444,16 @@ static void typedef_emit_init(struct cx_op *op,
 	      "*(struct cx_type **)cx_vec_push(&%s->set.members) = %s;\n",
 	      t_var.id, mt_var.id);
     }
+
+    if (ts->set.members.count == 1 &&
+	!cx_type_has_refs(*(struct cx_type **)cx_vec_get(&ts->set.members, 0))) {
+      struct cx_sym mt_var = cx_gsym(cx, "mt");
+      
+      fprintf(out,
+	      "struct cx_type **%s = cx_vec_get(&ts->set.members, 0);\n"
+	      "cx_derive(type, *%s);\n",
+	      mt_var.id, mt_var.id);
+    }
   } else if (t->meta == CX_TYPE) {
     fprintf(out,
 	    "struct cx_type_set *%s = cx_type_set_new(*cx->lib, \"%s\", true);\n"

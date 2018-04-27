@@ -198,6 +198,11 @@ struct cx_type *cx_type_vget(struct cx_type *t, int nargs, struct cx_type *args[
 }
 
 static void derive(struct cx_type *child, struct cx_type *parent) {
+  if (parent->tag < child->is.count &&
+      *(struct cx_type **)cx_vec_get(&child->is, parent->tag)) {
+    return;
+  }
+
   *(struct cx_type **)cx_vec_put(&child->is, parent->tag) = parent;
   child->level = cx_max(child->level, parent->level+1);
   
