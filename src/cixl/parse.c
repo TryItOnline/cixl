@@ -205,15 +205,15 @@ static bool parse_int(struct cx *cx, FILE *in, struct cx_vec *out) {
   while (true) {
     char c = fgetc(in);
     if (c == EOF) { goto exit; }
-      
+    
     if (col > cx->col && !isdigit(c) && c != '.') {
       ok = (ungetc(c, in) != EOF);
       goto exit;
     }
     
+    update_pos(cx, c);
     if (c == '.') { is_float = true; }
     fputc(c, s.stream);
-    col++;
   }
   
  exit: {
