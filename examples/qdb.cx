@@ -44,7 +44,7 @@ func: load-rec(t DBTable in Pair)()
   } {
     let: r $arg $t `on-load get % {&call for} &_ if-else;
     let: k $t $r get-rec-key;    
-    $t `recs get $k $r {_ $r} put-else
+    $t `recs get $k $r put
   } if-else;
           
 func: load-recs(t DBTable in RFile)()
@@ -89,13 +89,10 @@ func: push-change(t DBTable r Arg0:0 op Sym)()
 
 func: upsert(t DBTable r Arg0:0)()
   $t `recs get $t $r get-rec-key {
-    $t $r `insert push-change
+    let: op is-nil `insert `update;
+    $t $r $op push-change
     $r
-  } {
-    _
-    $t $r `update push-change
-    $r
-  } put-else;
+  } put-call;
 
 func: poll-table(t DBTable poll Poll)()
   let: b $t `buf get;

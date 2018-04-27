@@ -63,10 +63,9 @@ static bool put_imp(struct cx_call *call) {
   return true;
 }
 
-static bool put_else_imp(struct cx_call *call) {
+static bool put_call_imp(struct cx_call *call) {
   struct cx_box
-    *upd = cx_test(cx_call_arg(call, 3)),    
-    *ins = cx_test(cx_call_arg(call, 2)),    
+    *act = cx_test(cx_call_arg(call, 2)),    
     *key = cx_test(cx_call_arg(call, 1)),
     *tbl = cx_test(cx_call_arg(call, 0));
 
@@ -74,9 +73,13 @@ static bool put_else_imp(struct cx_call *call) {
   if (s->safe && !check_key_type(tbl->as_table, key->type)) { return false; }
   
   struct cx_table_entry *e = cx_table_get(tbl->as_table, key);
-  if (e) { cx_copy(cx_push(s), &e->val); }
-  if (!cx_call(e ? upd : ins, s)) { return false; }
-
+  if (e) {
+    cx_copy(cx_push(s), &e->val);
+  } else {
+    cx_box_init(cx_push(s), s->cx->nil_type);
+  }
+  
+  if (!cx_call(act, s)) { return false; }
   struct cx_box *v = cx_pop(s, false);
   if (!v) { return false; }
   cx_table_put(tbl->as_table, key, v);
@@ -155,13 +158,12 @@ cx_lib(cx_init_table, "cx/table") {
 	       cx_args(),
 	       put_imp);
 
-  cx_add_cfunc(lib, "put-else",
+  cx_add_cfunc(lib, "put-call",
 	       cx_args(cx_arg("tbl", cx->table_type),
 		       cx_narg(cx, "key", 0, 0),
-		       cx_arg("ins", cx->any_type),
-		       cx_arg("upd", cx->any_type)),
+		       cx_arg("act", cx->any_type)),
 	       cx_args(),
-	       put_else_imp);
+	       put_call_imp);
 
   cx_add_cfunc(lib, "delete",
 	       cx_args(cx_arg("tbl", cx->table_type), cx_narg(cx, "key", 0, 0)),

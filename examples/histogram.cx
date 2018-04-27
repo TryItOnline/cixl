@@ -10,15 +10,16 @@
 */
 
 use:
-  (cx/cond <=>)
+  (cx/abc is-nil)
+  (cx/cond <=> if-else)
   (cx/iter for)
   (cx/io #in)
   (cx/io/term say)
   (cx/math ++)
   (cx/pair x y unzip)
-  (cx/stack | ~ % sort stack)
+  (cx/stack | _ ~ % sort stack)
   (cx/str lower words)
-  (cx/table Table put-else)
+  (cx/table Table put-call)
   (cx/type new)
   (cx/var let:);
 
@@ -28,7 +29,7 @@ use:
 
 | let: ws Table new;
 
-#in words {% lower $ws ~ 1 &++ put-else} for
+#in words {% lower $ws ~ {% is-nil {_ 1} &++ if-else} put-call} for
 
 /*
   Convert table to vector of pairs and sort by descending value, pairs are already
