@@ -13,24 +13,24 @@ lib: qdb (
 use: cx;
 
 define: db-trans [];
+type-id: DBKey(Cmp) Stack;
 
 rec: DBTable<A>()
   file      RWFile
   key       Stack
-  recs      Table
+  recs      Table<DBKey Arg0>
   buf       Buf
   on-load  
   on-commit Stack;
 
-type-id: DBKey Stack;
-
-func: init-table(t DBTable n Str k Stack)()
+func: init-table(t DBTable<A> n Str k Stack)()
   let: f $n `a+ fopen % unblock;
-
-  $t `file $f        put
-  $t `key  $k        put
-  $t `recs Table new put
-  $t `buf  Buf new   put;
+  let: rs Table<DBKey Arg0:0> new;
+  
+  $t `file $f      put
+  $t `key  $k      put
+  $t `recs $rs     put
+  $t `buf  Buf new put;
 
 func: get-rec-key(t DBTable r A)(_ DBKey)
   $t `key get {$r ~ get} map stack;

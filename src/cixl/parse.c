@@ -206,7 +206,7 @@ static bool parse_int(struct cx *cx, FILE *in, struct cx_vec *out) {
     char c = fgetc(in);
     if (c == EOF) { goto exit; }
     
-    if (col > cx->col && !isdigit(c) && c != '.') {
+    if (cx->col > col && !isdigit(c) && c != '.') {
       ok = (ungetc(c, in) != EOF);
       goto exit;
     }

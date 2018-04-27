@@ -16,7 +16,7 @@ Int Opt<Num> is check
 
 #nil Opt<Int> is check
 
-type-id: StackIter<A> Stack<Arg0> Iter<Arg0>;
+type-id: StackIter<A>(Seq<Arg0>) Stack<Arg0> Iter<Arg0>;
 [1 2 3] StackIter<Int> is check
 'foo' iter StackIter<Char> is check
 42 StackIter is !check

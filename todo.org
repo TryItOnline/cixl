@@ -3,10 +3,9 @@
 host64 & net64 fns
 
 * add rec type to qdb DBTable
-** set recs type from table
+** make DBKey derive from Cmp
 ** update qdb funcs
-** update collabri
-*** use init-table
+** test collabri
 * replace table put-else with put-call
 * update cxcrypt
 * add lemmings.cx

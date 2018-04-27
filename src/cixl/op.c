@@ -1370,7 +1370,7 @@ static void typedef_emit_init(struct cx_op *op,
 			      FILE *out,
 			      struct cx *cx) {
   struct cx_type *t = op->as_typedef.type;
-  struct cx_sym t_var = cx_gsym(cx, "type");
+  struct cx_sym t_var = cx_gsym(cx, "t"), tp_var = cx_gsym(cx, "tp");
   
   if (t->meta == CX_TYPE_REC) {
     fprintf(out,
@@ -1400,15 +1400,35 @@ static void typedef_emit_init(struct cx_op *op,
   } else if (t->meta == CX_TYPE_ID) {
     fprintf(out,
 	    "struct cx_type_set *%s = cx_type_set_new(*cx->lib, \"%s\", true);\n"
-	    "if (!cx_lib_push_type(*cx->lib, &%s->imp)) { goto op%zd; }\n"
-	    "%s->imp.meta = CX_TYPE_ID;\n"
+	    "struct cx_type *%s = &%s->imp;\n"
+	    "if (!cx_lib_push_type(*cx->lib, %s)) { goto op%zd; }\n"
+	    "%s->meta = CX_TYPE_ID;\n"
 	    "%s->type_init = cx_type_id_init_imp;\n"
-	    "cx_derive(&%s->imp, cx->any_type);\n",
-	    t_var.id, t->id, t_var.id, op->pc+1, t_var.id, t_var.id, t_var.id);
+	    "cx_derive(%s, cx->any_type);\n",
+	    t_var.id, t->id,
+	    tp_var.id, t_var.id,
+            tp_var.id, op->pc+1,
+	    tp_var.id,
+	    t_var.id,
+	    tp_var.id);
 
     struct cx_type_set *ts = cx_baseof(t, struct cx_type_set, imp);
     emit_type_args_init(t, t_var, out, cx);
 
+    cx_do_set(&ts->parents, struct cx_type *, pt) {
+      struct cx_sym pt_var = cx_gsym(cx, "pt");
+      
+      fprintf(out,
+	      "struct cx_type *%s = cx_get_type(cx, \"%s\", false);\n"
+	      "*(struct cx_type **)cx_set_insert(&%s->parents, &%s) = %s;\n",
+	      pt_var.id, (*pt)->id,
+	      t_var.id, tp_var.id, tp_var.id);
+
+      if (!cx_type_has_refs(*pt)) {
+	fprintf(out, "cx_derive(%s->imp, %s);\n", t_var.id, pt_var.id);
+      }
+    }
+    
     cx_do_set(&ts->set, struct cx_type *, mt) {
       struct cx_sym mt_var = cx_gsym(cx, "mt");
       

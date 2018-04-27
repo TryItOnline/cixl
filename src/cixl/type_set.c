@@ -62,6 +62,7 @@ static bool type_init_imp(struct cx_type *t,
   
 static void *type_deinit_imp(struct cx_type *t) {
   struct cx_type_set *ts = cx_baseof(t, struct cx_type_set, imp);
+  cx_set_deinit(&ts->parents);
   cx_set_deinit(&ts->set);
   return ts;
 }
@@ -82,6 +83,7 @@ struct cx_type_set *cx_type_set_new(struct cx_lib *lib,
     cx_type_init(&ts->imp, lib, id);
   }
   
+  cx_set_init(&ts->parents, sizeof(struct cx_type *), cx_cmp_ptr);
   cx_set_init(&ts->set, sizeof(struct cx_type *), cx_cmp_ptr);
   
   ts->type_init = NULL;
