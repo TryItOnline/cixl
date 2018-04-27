@@ -54,3 +54,9 @@ func: find-ref-or(in Seq<Arg1> x A def Arg1)(_ Ref<Arg1>)
   $in {$x =} find-if $def or ref;
 
 'abc' @d @z find-ref-or deref @z = check
+
+func: body-ref(x Seq<A>)(_ Type)
+  Arg0:0;
+
+'foo' body-ref Char = check
+42 iter body-ref Int = check

@@ -20,7 +20,7 @@ static ssize_t define_eval(struct cx_macro_eval *eval,
   for (struct cx_tok *t = cx_vec_start(&eval->toks);
        t != cx_vec_end(&eval->toks);
        t++) {
-    struct cx_op *op = cx_op_init(bin, CX_OPUTCONST(), tok_idx);
+    struct cx_op *op = cx_op_new(bin, CX_OPUTCONST(), tok_idx);
     op->as_putconst.id = cx_sym(cx, t->as_ptr);
     op->as_putconst.lib = *cx->lib;
   }

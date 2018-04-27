@@ -32,16 +32,91 @@ struct cx_op_type *cx_op_type_init(struct cx_op_type *type, const char *id) {
   return type;
 }
 
-struct cx_op *cx_op_init(struct cx_bin *bin,
+struct cx_op *cx_op_init(struct cx_op *op,
 			 struct cx_op_type *type,
-			 size_t tok_idx) {
-  struct cx_op *op = cx_vec_push(&bin->ops);
+			 ssize_t tok_idx,
+			 ssize_t pc) {
   op->type = type;
   op->tok_idx = tok_idx;
-  op->pc = bin->ops.count-1;
+  op->pc = pc;
   op->row = -1; op->col = -1;
   return op;
 }
+
+struct cx_op *cx_op_new(struct cx_bin *bin,
+			struct cx_op_type *type,
+			ssize_t tok_idx) {
+  struct cx_op *o = cx_vec_push(&bin->ops);
+  return cx_op_init(o, type, tok_idx, bin->ops.count-1);
+}
+
+struct cx_op *cx_op_deinit(struct cx_op *o) {
+  if (o->type->deinit) { o->type->deinit(o); }
+  return o;
+}
+
+static bool argref_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
+  struct cx_call *call = cx_test(cx_peek_call(cx));
+
+  struct cx_type *get_imp_arg(int i) {	
+    return (i < call->fimp->args.count)
+      ? ((struct cx_arg *)cx_vec_get(&call->fimp->args, i))->type
+      : NULL;
+  }
+      
+  struct cx_type *get_arg(int i) {
+    struct cx_box *v = cx_call_arg(call, i);
+    return v ? v->type : NULL;
+  }
+
+  struct cx_type *t = cx_resolve_arg_refs(op->as_argref.type, get_imp_arg, get_arg);
+  if (!t) { return false; }
+  cx_box_init(cx_push(cx_scope(cx, 0)), cx_type_get(cx->meta_type, t))->as_ptr = t;
+  return true;
+}
+
+static bool argref_emit(struct cx_op *op,
+			struct cx_bin *bin,
+			FILE *out,
+			struct cx *cx) {
+
+  fputs("struct cx_call *call = cx_test(cx_peek_call(cx));\n\n"
+
+	"struct cx_type *get_imp_arg(int i) {\n"
+	"  return (i < call->fimp->args.count)\n"
+	"    ? ((struct cx_arg *)cx_vec_get(&call->fimp->args, i))->type\n"
+	"    : NULL;\n"
+	"}\n\n"
+      
+	"struct cx_type *get_arg(int i) {\n"
+	"  struct cx_box *v = cx_call_arg(call, i);\n"
+	"  return v ? v->type : NULL;\n"
+	"}\n",
+	out);
+
+  fprintf(out,
+	  "struct cx_type *t = cx_resolve_arg_refs(%s(), get_imp_arg, get_arg);\n"
+	  "if (!t) { return false; }\n"
+	  "cx_box_init(cx_push(cx_scope(cx, 0)), "
+	  "cx_type_get(cx->meta_type, t))->as_ptr = t\n;",
+	  op->as_argref.type->emit_id);
+
+  return true;
+}
+
+static void argref_emit_types(struct cx_op *op, struct cx_set *out, struct cx *cx) {
+  struct cx_type
+    *t = op->as_argref.type,
+    **ok = cx_set_insert(out, &t);
+
+  if (ok) { *ok = t; }
+}
+
+cx_op_type(CX_OARGREF, {
+    type.eval = argref_eval;
+    type.emit = argref_emit;
+    type.emit_types = argref_emit_types;
+  });
 
 static bool begin_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
   struct cx_scope *parent = op->as_begin.child

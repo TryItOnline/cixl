@@ -143,7 +143,7 @@ struct cx *cx_init(struct cx *cx) {
 
   cx->any_type =
     cx->bin_type = cx->bool_type = cx->buf_type = 
-    cx->char_type = cx->cmp_type =
+    cx->char_type = cx->cmp_type = cx->color_type = 
     cx->error_type =
     cx->file_type = cx->fimp_type = cx->float_type = cx->func_type =
     cx->int_type = cx->iter_type =

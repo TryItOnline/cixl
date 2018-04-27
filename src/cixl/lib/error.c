@@ -19,7 +19,7 @@ static ssize_t catch_eval(struct cx_macro_eval *eval,
 			struct cx *cx) {
   bool compile(struct cx_vec *toks) {
     size_t i = bin->ops.count;
-    struct cx_op *op = cx_op_init(bin, CX_OCATCH(), tok_idx);
+    struct cx_op *op = cx_op_new(bin, CX_OCATCH(), tok_idx);
     struct cx_tok *t = cx_vec_get(toks, 0);
     char *id = t->as_ptr;
     struct cx_type *type = NULL;

@@ -21,9 +21,9 @@ static ssize_t type_set_eval(struct cx_macro_eval *eval,
 			    struct cx *cx) {
   struct cx_tok *t = cx_vec_get(&eval->toks, 0);
   
-  cx_op_init(bin,
-	     CX_OTYPEDEF(),
-	     tok_idx)->as_typedef.type = t->as_ptr;
+  cx_op_new(bin,
+	    CX_OTYPEDEF(),
+	    tok_idx)->as_typedef.type = t->as_ptr;
 
   return tok_idx+1;
 }

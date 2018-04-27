@@ -95,22 +95,40 @@ bool cx_fimp_match(struct cx_fimp *imp, struct cx_scope *scope) {
   return cx_fimp_score(imp, scope, -1) > -1;
 }
 
+static void resolve_refs(size_t i, struct cx_bin *out, struct cx *cx) {
+  for (; i < out->ops.count; i++) {
+    struct cx_op *op = cx_vec_get(&out->ops, i);
+    
+    if (op->type == CX_OPUSH() && op->as_push.value.type->raw == cx->meta_type) {
+      struct cx_type *t = op->as_push.value.as_ptr;
+      
+      if (cx_type_has_refs(t)) {
+	cx_op_deinit(op);
+	cx_op_init(op, CX_OARGREF(), op->tok_idx, op->pc);
+	op->as_argref.type = t;
+      }
+    }
+  }
+}
+
 static bool compile(struct cx_fimp *imp, size_t tok_idx, struct cx_bin *out) {
   struct cx *cx = imp->func->lib->cx;
   size_t start_pc = out->ops.count;
   
-  struct cx_op *op = cx_op_init(out, CX_OBEGIN(), tok_idx);
+  struct cx_op *op = cx_op_new(out, CX_OBEGIN(), tok_idx);
   op->as_begin.child = false;
   op->as_begin.fimp = imp;
 
   if (imp->args.count) {
-    cx_op_init(out, CX_OPUTARGS(), tok_idx)->as_putargs.imp = imp;
+    cx_op_new(out, CX_OPUTARGS(), tok_idx)->as_putargs.imp = imp;
   }
 
   if (imp->toks.count) {
+    size_t i = out->ops.count;
     cx_push_lib(cx, imp->lib);
     bool ok = cx_compile(cx, cx_vec_start(&imp->toks), cx_vec_end(&imp->toks), out);
     cx_pop_lib(cx);
+    resolve_refs(i, out, cx);
     
     if (!ok) {
       cx_error(cx, cx->row, cx->col, "Failed compiling fimp");
@@ -118,7 +136,7 @@ static bool compile(struct cx_fimp *imp, size_t tok_idx, struct cx_bin *out) {
     }
   }
   
-  op = cx_op_init(out, CX_ORETURN(), tok_idx);
+  op = cx_op_new(out, CX_ORETURN(), tok_idx);
   op->as_return.imp = imp;
   op->as_return.pc = start_pc;
   
@@ -138,7 +156,7 @@ struct cx_bin_fimp *cx_fimp_inline(struct cx_fimp *imp,
     bf->imp = imp;
     bf->start_pc = out->ops.count+1;
     bf->nops = -1;
-    struct cx_op *op = cx_op_init(out, CX_OFIMP(), tok_idx);
+    struct cx_op *op = cx_op_new(out, CX_OFIMP(), tok_idx);
     op->as_fimp.imp = imp;
     op->as_fimp.init = imp->init;
     if (!compile(imp, tok_idx, out)) { return NULL; }

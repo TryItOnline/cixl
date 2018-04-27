@@ -30,6 +30,9 @@ cx_lib(cx_init_gfx, "cx/gfx") {
     return false;
   }
 
+  cx->color_type = cx_add_type(lib, "Color", cx->any_type);
+  cx->color_type->meta = CX_TYPE_ID;
+
   cx->rgb_type = cx_init_rgb_type(lib);
   
   cx_add_cfunc(lib, "new-rgb",

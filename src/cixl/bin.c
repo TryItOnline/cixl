@@ -52,10 +52,7 @@ void cx_bin_clear(struct cx_bin *bin) {
   cx_do_vec(&bin->toks, struct cx_tok, t) { cx_tok_deinit(t); }
   cx_vec_clear(&bin->toks);  
 
-  cx_do_vec(&bin->ops, struct cx_op, o) {
-    if (o->type->deinit) { o->type->deinit(o); }
-  }
-  
+  cx_do_vec(&bin->ops, struct cx_op, o) { cx_op_deinit(o); }
   cx_vec_clear(&bin->ops);
 }
 

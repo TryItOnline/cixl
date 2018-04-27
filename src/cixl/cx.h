@@ -42,7 +42,7 @@ struct cx {
 
   struct cx_type *any_type,
     *bin_type, *bool_type, *buf_type,
-    *char_type, *cmp_type,
+    *char_type, *cmp_type, *color_type,
     *error_type,
     *file_type, *fimp_type, *float_type, *func_type,
     *int_type, *iter_type,

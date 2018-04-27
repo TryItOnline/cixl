@@ -104,16 +104,26 @@ void cx_type_vpush_args(struct cx_type *t, int nargs, struct cx_type *args[]) {
 struct cx_type *cx_type_vget(struct cx_type *t, int nargs, struct cx_type *args[]) {
   struct cx *cx = t->lib->cx;
 
-  struct cx_type
-    **ie = cx_vec_end(&t->args),
-    **je = args+nargs;
+  if (!t->args.count) {
+    cx_error(cx, cx->row, cx->col, "Type does not take args: %s", t->id);
+    return NULL;
+  }
 
+  if (nargs != t->args.count) {
+	cx_error(cx, cx->row, cx->col,
+		 "Wrong nr of args for type %s: %d (%d)",
+		 t->id, nargs, t->args.count);
+	
+	return NULL;
+  }
+
+  struct cx_type **ie = cx_vec_end(&t->args);
   bool is_identical = true;
   
   for (struct cx_type
 	 **i = cx_vec_start(&t->args),
 	 **j = args;
-       i != ie && j != je;
+       i != ie;
        i++, j++) {
     if (*j && *i != *j) {
       is_identical = false;

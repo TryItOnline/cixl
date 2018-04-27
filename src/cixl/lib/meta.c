@@ -19,11 +19,11 @@ static ssize_t lib_eval(struct cx_macro_eval *eval,
 			    struct cx *cx) {
   struct cx_tok *t = cx_vec_start(&eval->toks);
   struct cx_lib *lib = t->as_lib;
-  struct cx_op *op = cx_op_init(bin, CX_OLIBDEF(), tok_idx);
+  struct cx_op *op = cx_op_new(bin, CX_OLIBDEF(), tok_idx);
   op->as_libdef.lib = lib;
   op->as_libdef.init = lib->inits.count;
   size_t start_pc = bin->ops.count;
-  cx_op_init(bin, CX_OPUSHLIB(), tok_idx)->as_pushlib.lib = lib;
+  cx_op_new(bin, CX_OPUSHLIB(), tok_idx)->as_pushlib.lib = lib;
   t++;
 
   cx_push_lib(cx, lib);
@@ -35,7 +35,7 @@ static ssize_t lib_eval(struct cx_macro_eval *eval,
     return -1;
   }
 
-  cx_op_init(bin, CX_OPOPLIB(), tok_idx);
+  cx_op_new(bin, CX_OPOPLIB(), tok_idx);
   cx_lib_push_init(lib, cx_lib_ops(bin, start_pc, bin->ops.count-start_pc));  
   return tok_idx+1;
 }
@@ -82,7 +82,7 @@ static ssize_t use_eval(struct cx_macro_eval *eval,
 			struct cx_bin *bin,
 			size_t tok_idx,
 			struct cx *cx) {
-  cx_op_init(bin, CX_OUSE(), tok_idx);
+  cx_op_new(bin, CX_OUSE(), tok_idx);
   return tok_idx+1;
 }
 

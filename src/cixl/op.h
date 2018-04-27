@@ -48,6 +48,10 @@ struct cx_op_type {
 
 struct cx_op_type *cx_op_type_init(struct cx_op_type *type, const char *id);
 
+struct cx_argref_op {
+  struct cx_type *type;
+};
+
 struct cx_begin_op {
   bool child;
   struct cx_fimp *fimp;
@@ -135,29 +139,41 @@ struct cx_op {
   int row, col;
   
   union {
-    struct cx_begin_op as_begin;
-    struct cx_catch_op as_catch;
-    struct cx_else_op as_else;
-    struct cx_fimp_op as_fimp;
-    struct cx_funcdef_op as_funcdef;
-    struct cx_funcall_op as_funcall;
+    struct cx_argref_op   as_argref;
+    struct cx_begin_op    as_begin;
+    struct cx_catch_op    as_catch;
+    struct cx_else_op     as_else;
+    struct cx_fimp_op     as_fimp;
+    struct cx_funcdef_op  as_funcdef;
+    struct cx_funcall_op  as_funcall;
     struct cx_getconst_op as_getconst;
-    struct cx_getvar_op as_getvar;
-    struct cx_jump_op as_jump;
-    struct cx_lambda_op as_lambda;
-    struct cx_libdef_op as_libdef;
-    struct cx_push_op as_push;
-    struct cx_pushlib_op as_pushlib;
-    struct cx_putargs_op as_putargs;
+    struct cx_getvar_op   as_getvar;
+    struct cx_jump_op     as_jump;
+    struct cx_lambda_op   as_lambda;
+    struct cx_libdef_op   as_libdef;
+    struct cx_push_op     as_push;
+    struct cx_pushlib_op  as_pushlib;
+    struct cx_putargs_op  as_putargs;
     struct cx_putconst_op as_putconst;
-    struct cx_putvar_op as_putvar;
-    struct cx_return_op as_return;
-    struct cx_typedef_op as_typedef;
+    struct cx_putvar_op   as_putvar;
+    struct cx_return_op   as_return;
+    struct cx_typedef_op  as_typedef;
   };
 };
 
-struct cx_op *cx_op_init(struct cx_bin *bin, struct cx_op_type *type, size_t tok_idx);
+struct cx_op *cx_op_new(struct cx_bin *bin,
+			struct cx_op_type *type,
+			ssize_t tok_idx);
 
+struct cx_op *cx_op_init(struct cx_op *op,
+			 struct cx_op_type *type,
+			 ssize_t tok_idx,
+			 ssize_t pc);
+
+struct cx_op *cx_op_deinit(struct cx_op *o);
+
+
+struct cx_op_type *CX_OARGREF();
 struct cx_op_type *CX_OBEGIN();
 struct cx_op_type *CX_OCATCH();
 struct cx_op_type *CX_OEND();

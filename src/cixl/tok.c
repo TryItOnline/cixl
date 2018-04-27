@@ -49,7 +49,7 @@ static ssize_t group_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) 
 
   if (toks->count) {
     ssize_t i = bin->ops.count;
-    struct cx_op *op = cx_op_init(bin, CX_OBEGIN(), tok_idx);
+    struct cx_op *op = cx_op_new(bin, CX_OBEGIN(), tok_idx);
     op->as_begin.child = true;
     op->as_begin.fimp = NULL;
     
@@ -59,7 +59,7 @@ static ssize_t group_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) 
       goto exit;
     }
     
-    cx_op_init(bin, CX_OEND(), tok_idx);
+    cx_op_new(bin, CX_OEND(), tok_idx);
     op = cx_vec_get(&bin->ops, i);
     op->as_begin.nops = bin->ops.count-i-1;
   }
@@ -101,7 +101,7 @@ static ssize_t lib_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) {
   struct cx_lib *lib = tok->as_lib;
   tok->type = CX_TLITERAL();
   cx_box_init(&tok->as_box, cx->lib_type)->as_lib = lib;    
-  cx_copy(&cx_op_init(bin, CX_OPUSH(), tok_idx)->as_push.value, &tok->as_box);
+  cx_copy(&cx_op_new(bin, CX_OPUSH(), tok_idx)->as_push.value, &tok->as_box);
   return tok_idx+1;
 }
 
@@ -114,15 +114,15 @@ static ssize_t id_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) {
   char *id = tok->as_ptr;
   
   if (id[0] == '#') {
-    cx_op_init(bin,
-	       CX_OGETCONST(),
-	       tok_idx)->as_getconst.id = cx_sym(cx, id+1);    
+    cx_op_new(bin,
+	      CX_OGETCONST(),
+	      tok_idx)->as_getconst.id = cx_sym(cx, id+1);    
   } else if (id[0] == '$') {
-    cx_op_init(bin, CX_OGETVAR(), tok_idx)->as_getvar.id = cx_sym(cx, id+1);
+    cx_op_new(bin, CX_OGETVAR(), tok_idx)->as_getvar.id = cx_sym(cx, id+1);
   } else if (isupper(id[0])) {
     struct cx_type *t = cx_get_type(cx, id, false);
     if (!t) { return -1; }
-    struct cx_box *v = &cx_op_init(bin, CX_OPUSH(), tok_idx)->as_push.value;
+    struct cx_box *v = &cx_op_new(bin, CX_OPUSH(), tok_idx)->as_push.value;
     cx_box_init(v, cx_type_get(cx->meta_type, t))->as_ptr = t;
   } else {
     bool ref = id[0] == '&';
@@ -152,7 +152,7 @@ static ssize_t id_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) {
     }
     
     if (ref) {
-      struct cx_box *v = &cx_op_init(bin, CX_OPUSH(), tok_idx)->as_push.value;
+      struct cx_box *v = &cx_op_new(bin, CX_OPUSH(), tok_idx)->as_push.value;
 
       if (imp) {
 	cx_box_init(v, cx->fimp_type)->as_ptr = imp;
@@ -172,9 +172,9 @@ static ssize_t id_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) {
 	}
       }
 
-      struct cx_funcall_op *op = &cx_op_init(bin,
-					     CX_OFUNCALL(),
-					     tok_idx)->as_funcall;
+      struct cx_funcall_op *op = &cx_op_new(bin,
+					    CX_OFUNCALL(),
+					    tok_idx)->as_funcall;
       op->func = f;
       op->imp = imp;
     }
@@ -201,9 +201,9 @@ static ssize_t lambda_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx)
   struct cx_tok *tok = cx_vec_get(&bin->toks, tok_idx);
 
   size_t i = bin->ops.count;
-  cx_op_init(bin,
-	     CX_OLAMBDA(),
-	     tok_idx)->as_lambda.start_op = i+1;
+  cx_op_new(bin,
+	    CX_OLAMBDA(),
+	    tok_idx)->as_lambda.start_op = i+1;
   
   struct cx_vec *toks = &tok->as_vec;
 
@@ -230,7 +230,7 @@ cx_tok_type(CX_TLAMBDA, {
 
 static ssize_t literal_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) {
   struct cx_tok *t = cx_vec_get(&bin->toks, tok_idx);
-  cx_copy(&cx_op_init(bin, CX_OPUSH(), tok_idx)->as_push.value, &t->as_box);
+  cx_copy(&cx_op_new(bin, CX_OPUSH(), tok_idx)->as_push.value, &t->as_box);
   return tok_idx+1;
 }
 
@@ -274,7 +274,7 @@ static ssize_t stack_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) 
 
   if (toks->count) {
     ssize_t i = bin->ops.count;    
-    struct cx_op *op = cx_op_init(bin, CX_OBEGIN(), tok_idx);
+    struct cx_op *op = cx_op_new(bin, CX_OBEGIN(), tok_idx);
     op->as_begin.child = true;
     op->as_begin.fimp = NULL;
     
@@ -284,12 +284,12 @@ static ssize_t stack_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) 
       return -1;
     }
 
-    cx_op_init(bin, CX_OSTASH(), tok_idx);
-    cx_op_init(bin, CX_OEND(), tok_idx);
+    cx_op_new(bin, CX_OSTASH(), tok_idx);
+    cx_op_new(bin, CX_OEND(), tok_idx);
     op = cx_vec_get(&bin->ops, i);
     op->as_begin.nops = bin->ops.count-i-1;
   } else {
-    struct cx_box *v = &cx_op_init(bin, CX_OPUSH(), tok_idx)->as_push.value;
+    struct cx_box *v = &cx_op_new(bin, CX_OPUSH(), tok_idx)->as_push.value;
     cx_box_init(v, cx->stack_type)->as_ptr = cx_stack_new(cx);
   }
   

@@ -26,7 +26,7 @@ static ssize_t let_eval(struct cx_macro_eval *eval,
   }
   
   void put(const char *id, struct cx_type *type) {
-    struct cx_op * op = cx_op_init(bin, CX_OPUTVAR(), tok_idx);
+    struct cx_op * op = cx_op_new(bin, CX_OPUTVAR(), tok_idx);
     op->as_putvar.id = cx_sym(cx, id);
     op->as_putvar.type = type;
   }

@@ -2,11 +2,6 @@
 #define ntohll(x) ((1==ntohl(1)) ? (x) : ((uint64_t)ntohl((x) & 0xFFFFFFFF) << 32) | ntohl((x) >> 32))
 host64 & net64 fns
 
-* enable using Arg refs inside funcs
-** add OARGDEREF op
-*** create with imp
-*** resolve type using imp & call args
-** walk fimp ops after compile & switch type OPUSH(Type) to OARGDEREF
 * add rec type to qdb DBTable
 ** set recs type from table
 ** update qdb funcs
@@ -14,6 +9,8 @@ host64 & net64 fns
 *** use init-table
 * replace table put-else with put-call
 * update cxcrypt
+* add lemmings.cx
+** use anim.cx
 * --
 * add cx_call_copy
 ** copy args properly
