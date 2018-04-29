@@ -7,6 +7,7 @@ host64 & net64 fns
 * add second walker in dynamic.cx
 * move multiple walkers horizontally in dynamic
 ** switch direction at edges
+** moon walk / regular
 * make rec:/type-id: parents optional
 ** update examples/tests/readme
 * first post

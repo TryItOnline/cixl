@@ -81,7 +81,7 @@ ssize_t cx_fimp_score(struct cx_fimp *imp, struct cx_scope *scope, ssize_t max) 
       continue;
     }
 
-    struct cx_type *t = cx_resolve_arg_refs(i->type, get_imp_arg, get_stack);    
+    struct cx_type *t = cx_resolve_arg_refs(i->type, get_imp_arg, get_stack);
     if (!t) { return -1; }
     score += cx_abs((ssize_t)(j->type->level - t->level));
     if (max > -1 && score >= max) { return -1; }

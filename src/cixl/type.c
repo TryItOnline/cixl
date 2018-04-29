@@ -231,13 +231,6 @@ void cx_derive(struct cx_type *child, struct cx_type *parent) {
 
 bool cx_is(struct cx_type *child, struct cx_type *parent) {
   if (child == parent) { return true; }
-
-  if (!parent->args.count) {
-    return (parent->tag < child->is.count)
-      ? *(struct cx_type **)cx_vec_get(&child->is, parent->tag)
-      : false;
-  }
-  
   if (parent->raw->tag >= child->is.count) { return false; }
   struct cx_type **ce = cx_vec_end(&child->is);
 

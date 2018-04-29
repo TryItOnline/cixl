@@ -125,6 +125,27 @@ static bool stack_imp(struct cx_call *call) {
   return true;
 }
 
+static bool into_imp(struct cx_call *call) {
+  struct cx_box
+    *in = cx_test(cx_call_arg(call, 0)),
+    *out = cx_test(cx_call_arg(call, 1)),
+    it;
+  
+  struct cx_scope *s = call->scope;
+  cx_iter(in, &it);
+  struct cx_stack *outs = out->as_ptr;
+  struct cx_box v;
+  struct cx_type *t = NULL;
+  
+  while (cx_iter_next(it.as_iter, &v, s)) {
+    *(struct cx_box *)cx_vec_push(&outs->imp) = v;
+    t = t ? cx_supertype(t, v.type) : v.type;
+  }
+
+  cx_box_deinit(&it);
+  return true;
+}
+
 static bool stash_imp(struct cx_call *call) {
   cx_stash(call->scope);
   return true;
@@ -376,6 +397,11 @@ cx_lib(cx_init_stack, "cx/stack") {
 	       cx_args(cx_arg(NULL, cx_type_get(cx->stack_type,
 						cx_arg_ref(cx, 0, 0)))),
 	       stack_imp);
+
+  cx_add_cfunc(lib, "into",
+	       cx_args(cx_arg("in", cx->seq_type), cx_arg("out", cx->stack_type)),
+	       cx_args(),
+	       into_imp);
 
   cx_add_cfunc(lib, "stash",
 	       cx_args(),
