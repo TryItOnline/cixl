@@ -6,7 +6,6 @@ host64 & net64 fns
 * change stack fn to infer type like stack literals
 ** change for loops to maps
 * grep and change cx_type_arg to cx_super_arg
-* add cx_test on type in cx_box_init
 * add second walker in dynamic.cx
 * move multiple walkers horizontally in dynamic
 ** switch direction at edges

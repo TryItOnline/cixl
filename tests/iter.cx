@@ -4,4 +4,6 @@
 
 'abc' {_ #f} find-if is-nil check
 
-'abc' {@b =} find-if @b = check 
+'abc' {@b =} find-if @b = check
+
+[1 2 3] &float map stack type Stack<Float> = check

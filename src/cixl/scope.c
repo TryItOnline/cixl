@@ -99,22 +99,10 @@ void cx_stash(struct cx_scope *s) {
   struct cx_type *t = NULL;
   
   if (out->imp.count) {
-    struct cx_box *v = cx_vec_start(&out->imp);
-    t = v->type;
-    
-    for (; v != cx_vec_end(&out->imp); v++) {
-      size_t i = cx_min(cx_min(t->is.count, v->type->is.count)-1, t->tag);
-      
-      for (struct cx_type
-	     **t_is = cx_vec_get(&t->is, i),
-	     **v_is = cx_vec_get(&v->type->is, i);
-	   t_is >= (struct cx_type **)cx_vec_start(&t->is);
-	   t_is--, v_is--) {
-	if (*t_is && *v_is) {
-	  t = *t_is;
-	  break;
-	}
-      }	   
+    for (struct cx_box *v = cx_vec_start(&out->imp);
+	 v != cx_vec_end(&out->imp);
+	 v++) {
+      t = t ? cx_super(t, v->type) : v->type;
     }
   }
     

@@ -104,20 +104,22 @@ static bool get_rand_imp(struct cx_call *call) {
   return true;
 }
 
-static bool seq_imp(struct cx_call *call) {
+static bool stack_imp(struct cx_call *call) {
   struct cx_box *in = cx_test(cx_call_arg(call, 0)), it;
   struct cx_scope *s = call->scope;
   cx_iter(in, &it);
   struct cx_stack *out = cx_stack_new(s->cx);
   struct cx_box v;
+  struct cx_type *t = NULL;
   
   while (cx_iter_next(it.as_iter, &v, s)) {
     *(struct cx_box *)cx_vec_push(&out->imp) = v;
+    t = t ? cx_super(t, v.type) : v.type;
   }
 
   cx_box_init(cx_push(s),
-	      cx_type_get(s->cx->stack_type,
-			  cx_type_arg(it.type, 0)))->as_ptr = out;
+	      t ? cx_type_get(s->cx->stack_type, t) : s->cx->stack_type)->as_ptr =
+    out;
   
   cx_box_deinit(&it);
   return true;
@@ -370,7 +372,7 @@ cx_lib(cx_init_stack, "cx/stack") {
 	       cx_args(cx_arg("in", cx->seq_type)),
 	       cx_args(cx_arg(NULL, cx_type_get(cx->stack_type,
 						cx_arg_ref(cx, 0, 0)))),
-	       seq_imp);
+	       stack_imp);
 
   cx_add_cfunc(lib, "stash",
 	       cx_args(),

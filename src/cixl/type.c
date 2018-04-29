@@ -271,6 +271,23 @@ bool cx_is(struct cx_type *child, struct cx_type *parent) {
   return false;
 }
 
+struct cx_type *cx_super(struct cx_type *t, struct cx_type *in) {
+  size_t i = cx_min(cx_min(t->is.count, in->is.count)-1, t->tag);
+  
+  for (struct cx_type
+	 **t_is = cx_vec_get(&t->is, i),
+	 **in_is = cx_vec_get(&in->is, i);
+       t_is >= (struct cx_type **)cx_vec_start(&t->is);
+       t_is--, in_is--) {
+    if (*t_is && *in_is) {
+      t = *t_is;
+      break;
+    }
+  }
+
+  return t;
+}
+
 struct cx_type *cx_type_arg(struct cx_type *t, int i) {
   struct cx *cx = t->lib->cx;
   
