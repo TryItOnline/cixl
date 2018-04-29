@@ -9,7 +9,7 @@ struct cx_box *cx_box_new(struct cx_type *type) {
 }
 
 struct cx_box *cx_box_init(struct cx_box *box, struct cx_type *type) {
-  box->type = type;
+  box->type = cx_test(type);
   return box;
 }
 

@@ -5,15 +5,16 @@ host64 & net64 fns
 * --- walker
 * change stack fn to infer type like stack literals
 ** change for loops to maps
+* grep and change cx_type_arg to cx_super_arg
+* add cx_test on type in cx_box_init
 * add second walker in dynamic.cx
-** walk in from bottom right corner
-* add straight.cx
-** move multiple walkers horizontally
+* move multiple walkers horizontally in dynamic
 ** switch direction at edges
+* make rec:/type-id: parents optional
+** update examples/tests/readme
 * first post
 * add slopes/climbing
 * ---
-* make rec:/type-id: parents optional
 * add cx_type.has_refs
 ** fill in when args are pushed
 ** replaces cx_type_has_refs fn
