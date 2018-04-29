@@ -3,10 +3,10 @@
 host64 & net64 fns
 
 * --- walker
-* get one static walker up and running with poll loop
-** copy mandelbrot
 * move walker horizontally
 ** switch direction at edges
+* first post
+* add slopes/climbing
 * ---
 * make rec:/type-id: parents optional
 * add cx_type.has_refs
