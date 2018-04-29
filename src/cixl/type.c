@@ -103,7 +103,7 @@ void cx_type_vpush_args(struct cx_type *t, int nargs, struct cx_type *args[]) {
 
 struct cx_type *cx_type_vget(struct cx_type *t, int nargs, struct cx_type *args[]) {
   struct cx *cx = t->lib->cx;
-
+    
   if (!t->args.count) {
     cx_error(cx, cx->row, cx->col, "Type does not take args: %s", t->id);
     return NULL;
@@ -138,7 +138,7 @@ struct cx_type *cx_type_vget(struct cx_type *t, int nargs, struct cx_type *args[
   }
 
   if (is_identical) { return t; }
-  
+
   struct cx_mfile id;
   cx_mfile_open(&id);
   fputs(t->raw->id, id.stream);
@@ -159,7 +159,7 @@ struct cx_type *cx_type_vget(struct cx_type *t, int nargs, struct cx_type *args[
     free(id.data);
     return tt;
   }
-    
+
   tt = t->type_new
     ? t->type_new(t, id.data, nargs, args)
     : cx_type_new(t->lib, id.data);

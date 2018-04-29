@@ -30,7 +30,7 @@
 
 #define cx_abs(x) ({				\
       typeof(x) _x = x;				\
-      _x < 0 ? -_x : _x;			\
+      (_x < 0) ? (-_x) : _x;			\
     })						\
 
 #define cx_baseof(ptr, typ, fld) ({			\

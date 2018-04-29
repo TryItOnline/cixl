@@ -23,6 +23,17 @@ static bool new_rgb_imp(struct cx_call *call) {
   return true;
 }
 
+static bool rgb_float_scale_imp(struct cx_call *call) {
+  struct cx_rgb *in = &cx_test(cx_call_arg(call, 0))->as_rgb;
+  struct cx_box *f = cx_test(cx_call_arg(call, 1));
+  struct cx_scope *s = call->scope;
+  struct cx_rgb *out = &cx_box_init(cx_push(s), s->cx->rgb_type)->as_rgb;
+  out->r = cx_max(cx_min(in->r*f->as_float, 255), 0);
+  out->g = cx_max(cx_min(in->g*f->as_float, 255), 0);
+  out->b = cx_max(cx_min(in->b*f->as_float, 255), 0);
+  return true;
+}
+
 cx_lib(cx_init_gfx, "cx/gfx") {    
   struct cx *cx = lib->cx;
     
@@ -41,6 +52,12 @@ cx_lib(cx_init_gfx, "cx/gfx") {
 		       cx_arg("b", cx->int_type)),
 	       cx_args(cx_arg(NULL, cx->rgb_type)),
 	       new_rgb_imp);
+
+  cx_add_cfunc(lib, "*",
+	       cx_args(cx_arg("c", cx->rgb_type),
+		       cx_arg("f", cx->float_type)),
+	       cx_args(cx_arg(NULL, cx->rgb_type)),
+	       rgb_float_scale_imp);
 
   return true;
 }

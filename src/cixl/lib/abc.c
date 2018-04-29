@@ -40,7 +40,7 @@ cx_lib(cx_init_abc, "cx/abc") {
   cx->cmp_type->meta = CX_TYPE_ID;
 
   cx->seq_type = cx_add_type(lib, "Seq", cx->any_type);
-  cx_type_push_args(cx->seq_type, cx->any_type);
+  cx_type_push_args(cx->seq_type, cx->opt_type);
   cx->seq_type->meta = CX_TYPE_ID;
 
   cx->num_type = cx_add_type(lib, "Num", cx->cmp_type);

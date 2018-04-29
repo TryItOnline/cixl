@@ -2,15 +2,21 @@
 #define ntohll(x) ((1==ntohl(1)) ? (x) : ((uint64_t)ntohl((x) & 0xFFFFFFFF) << 32) | ntohl((x) >> 32))
 host64 & net64 fns
 
-* add lemmings.cx
-** use anim.cx
+* --- walkers
+* add buf var
+** print to buf instead of #out
+* remove Walker type
+** replace with Stack<Frame>
+** change frame fn to take color table
+* get one static walker up and running with poll loop
+* move walker horizontally
+* ---
+* make rec:/type-id: parents optional
 * add cx_call_copy
 ** copy args properly
 ** use in error
 *** update error print to include args
 *** deinit calls in error_deinit
-* trap abort signal and dump errors
-* make rec:/type-id: parents optional
 * finish type-id parents
 ** resolve parents with refs and derive
 *** check all types in set against parents

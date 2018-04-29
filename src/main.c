@@ -1,6 +1,7 @@
 #include <errno.h>
 #include <string.h>
 #include <time.h>
+#include <signal.h>
 #include <sys/stat.h>
 
 #include "cixl/bin.h"
@@ -20,6 +21,11 @@ static void deinit_cx() {
   cx_deinit(&cx);
 }
 
+static void on_abort(int _) {
+  cx_dump_errors(&cx, stderr);
+  raise(SIGTERM);
+}
+
 struct cx_bin *bin;
 static void deinit_bin() { cx_bin_deref(bin); }
 
@@ -29,6 +35,16 @@ int main(int argc, char *argv[]) {
   cx_init(&cx);
   cx_test(atexit(deinit_cx) == 0);
   
+  if (signal(SIGABRT, on_abort) == SIG_ERR) {
+    cx_error(&cx, cx.row, cx.col, "Failed installing ABRT handler: %d", errno);
+    return -1;
+  }
+
+  if (signal(SIGSEGV, on_abort) == SIG_ERR) {
+    cx_error(&cx, cx.row, cx.col, "Failed installing SEGV handler: %d", errno);
+    return -1;
+  }
+
   cx_init_libs(&cx);
   cx_use(&cx, "cx/io", "include:");
   cx_use(&cx, "cx/meta", "lib:", "use:");

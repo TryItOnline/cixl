@@ -1145,7 +1145,10 @@ static bool return_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
     }
 
     if (si < ss->stack.count) {
-      cx_error(cx, cx->row, cx->col, "Stack not empty on return");
+      cx_error(cx, cx->row, cx->col,
+	       "Stack not empty on return: %s<%s>",
+	       imp->func->id, imp->id);
+      
       return false;
     }
 

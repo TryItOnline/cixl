@@ -318,6 +318,52 @@ static bool get_imp(struct cx_call *call) {
   return true;
 }
 
+static bool last_imp(struct cx_call *call) {
+  struct cx_str *v = cx_test(cx_call_arg(call, 0))->as_str;
+  struct cx_scope *s = call->scope;
+  
+  if (v->len) {
+    cx_box_init(cx_push(s), s->cx->char_type)->as_char = v->data[v->len-1];
+  } else {
+    cx_box_init(cx_push(s), s->cx->nil_type);
+  }
+  
+  return true;
+}
+
+static bool fill_imp(struct cx_call *call) {
+  struct cx_box
+    *v = cx_test(cx_call_arg(call, 0)),
+    *n = cx_test(cx_call_arg(call, 1)),
+    *a = cx_test(cx_call_arg(call, 2));
+  
+  struct cx_scope *s = call->scope;
+  struct cx_mfile out;
+  cx_mfile_open(&out);
+  fputs(v->as_str->data, out.stream);
+  bool ok = false;
+  
+  for (int64_t i=v->as_str->len; i<n->as_int; i++) {
+    if (a->type == s->cx->char_type) {
+      fputc(a->as_char, out.stream);
+    } else {
+      if (!cx_call(a, s)) { goto exit; }
+      struct cx_box *v = cx_pop(s, false);
+      if (!v) { goto exit; }
+      cx_print(v, out.stream);
+    }
+  }
+
+  fflush(out.stream);
+  cx_box_init(cx_push(s), s->cx->str_type)->as_str =
+    cx_str_new(out.data, ftell(out.stream));
+  ok = true;
+ exit:
+  cx_mfile_close(&out);
+  free(out.data);
+  return ok;
+}
+
 static bool pop_imp(struct cx_call *call) {
   struct cx_str *v = cx_test(cx_call_arg(call, 0))->as_str;
   struct cx_scope *s = call->scope;
@@ -514,6 +560,18 @@ cx_lib(cx_init_str, "cx/str") {
 	       cx_args(cx_arg(NULL, cx->char_type)),
 	       get_imp);
 
+  cx_add_cfunc(lib, "last",
+	       cx_args(cx_arg("s", cx->str_type)),
+	       cx_args(cx_arg(NULL, cx_type_get(cx->opt_type, cx->char_type))),
+	       last_imp);
+
+  cx_add_cfunc(lib, "fill",
+	       cx_args(cx_arg("s", cx->str_type),
+		       cx_arg("n", cx->int_type),
+		       cx_arg("a", cx->any_type)),
+	       cx_args(cx_arg(NULL, cx->str_type)),
+	       fill_imp);
+  
   cx_add_cfunc(lib, "pop",
 	       cx_args(cx_arg("s", cx->str_type)),
 	       cx_args(cx_arg(NULL, cx_type_get(cx->opt_type, cx->char_type))),

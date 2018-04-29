@@ -59,7 +59,7 @@ ssize_t cx_fimp_score(struct cx_fimp *imp, struct cx_scope *scope, ssize_t max) 
   
   struct cx_arg *i = (struct cx_arg *)cx_vec_peek(&imp->args, 0);
   struct cx_box *j = (struct cx_box *)cx_vec_peek(stack, 0);
-  size_t score = 0;
+  ssize_t score = 0;
 
   struct cx_type *get_imp_arg(int i) {
     return (i < imp->func->nargs)
@@ -80,10 +80,10 @@ ssize_t cx_fimp_score(struct cx_fimp *imp, struct cx_scope *scope, ssize_t max) 
       if (j->type != i->value.type || !cx_eqval(&i->value, j)) { return -1; }
       continue;
     }
-    
-    struct cx_type *t = cx_resolve_arg_refs(i->type, get_imp_arg, get_stack);
+
+    struct cx_type *t = cx_resolve_arg_refs(i->type, get_imp_arg, get_stack);    
     if (!t) { return -1; }
-    score += cx_abs((ssize_t)j->type->level - t->level);
+    score += cx_abs((ssize_t)(j->type->level - t->level));
     if (max > -1 && score >= max) { return -1; }
     if (!cx_is(j->type, t)) { return -1; }
   }
