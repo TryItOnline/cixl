@@ -58,10 +58,11 @@ static bool rezip_imp(struct cx_call *call) {
   struct cx_box tmp = p->x;
   p->x = p->y;
   p->y = tmp;
-
+  struct cx_type *pt = cx_test(cx_subtype(pv->type, s->cx->pair_type));
+      
   cx_box_init(cx_push(s), cx_type_get(s->cx->pair_type,
-				      cx_type_arg(pv->type, 1),
-				      cx_type_arg(pv->type, 0)))->as_pair =
+				      cx_type_arg(pt, 1),
+				      cx_type_arg(pt, 0)))->as_pair =
     cx_pair_ref(p);
 
   return true;

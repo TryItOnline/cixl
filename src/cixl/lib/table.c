@@ -106,14 +106,15 @@ static bool len_imp(struct cx_call *call) {
   return true;
 }
 
-static bool seq_imp(struct cx_call *call) {
+static bool table_imp(struct cx_call *call) {
   struct cx_box *in = cx_test(cx_call_arg(call, 0)), it;
   struct cx_scope *s = call->scope;
   cx_iter(in, &it);
   struct cx_table *out = cx_table_new(s->cx);
   bool ok = false;
   struct cx_box p;
-
+  struct cx_type *kt = NULL, *vt = NULL;
+  
   while (cx_iter_next(it.as_iter, &p, s)) {
     if (!check_key_type(out, p.as_pair->x.type)) {
       cx_table_deref(out);
@@ -121,15 +122,16 @@ static bool seq_imp(struct cx_call *call) {
     }
     
     cx_table_put(out, &p.as_pair->x, &p.as_pair->y);
+    kt = kt ? cx_supertype(kt, p.as_pair->x.type) : p.as_pair->x.type;
+    vt = vt ? cx_supertype(vt, p.as_pair->y.type) : p.as_pair->y.type;
     cx_box_deinit(&p);
   }
 
-  struct cx_type
-    *pt = cx_type_arg(it.type, 0),
-    *kt = cx_type_arg(pt, 0),
-    *vt = cx_type_arg(pt, 1);
+  cx_box_init(cx_push(s),
+	      kt
+	        ? s->cx->table_type
+	        : cx_type_get(s->cx->table_type, kt, vt))->as_ptr = out;
   
-  cx_box_init(cx_push(s), cx_type_get(s->cx->table_type, kt, vt))->as_ptr = out;
   ok = true;
  exit:
   cx_box_deinit(&it);
@@ -180,7 +182,7 @@ cx_lib(cx_init_table, "cx/table") {
 	       cx_args(cx_arg(NULL, cx_type_get(cx->table_type,
 						cx_arg_ref(cx, 0, 0, 0),
 						cx_arg_ref(cx, 0, 0, 1)))),
-	       seq_imp);
+	       table_imp);
 
   return true;
 }

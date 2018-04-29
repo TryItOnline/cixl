@@ -3,9 +3,7 @@
 host64 & net64 fns
 
 * --- walker
-* change stack fn to infer type like stack literals
-** change for loops to maps
-* grep and change cx_type_arg to cx_super_arg
+* update walker to use map instead of for where possible
 * add second walker in dynamic.cx
 * move multiple walkers horizontally in dynamic
 ** switch direction at edges

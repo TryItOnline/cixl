@@ -145,8 +145,9 @@ struct cx_type *cx_resolve_arg_refs(struct cx_type *t,
     if (i+1 != cx_vec_end(&ar->indices)) {
       struct cx_type *pt = get_parent(*i);
       if (!pt) { return NULL; }
-      
-      tt = cx_super_arg(tt, pt, *(i+1));
+      struct cx_type *st = cx_subtype(tt, pt);
+      if (!st) { return NULL; }
+      tt = cx_type_arg(st, *(i+1));
       i += 2;
 		       
       while (i != cx_vec_end(&ar->indices)) {

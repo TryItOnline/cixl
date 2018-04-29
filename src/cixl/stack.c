@@ -151,7 +151,8 @@ static void iter_imp(struct cx_box *in, struct cx_box *out) {
   struct cx_stack *s = in->as_ptr;
   
   cx_box_init(out, cx_type_get(cx->iter_type,
-			       cx_super_arg(in->type, cx->stack_type, 0)))->as_iter =
+			       cx_type_arg(cx_subtype(in->type, cx->stack_type),
+					   0)))->as_iter =
     cx_stack_iter_new(s, 0, s->imp.count, 1);
 }
 

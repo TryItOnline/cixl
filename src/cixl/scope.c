@@ -102,7 +102,7 @@ void cx_stash(struct cx_scope *s) {
     for (struct cx_box *v = cx_vec_start(&out->imp);
 	 v != cx_vec_end(&out->imp);
 	 v++) {
-      t = t ? cx_super(t, v->type) : v->type;
+      t = t ? cx_supertype(t, v->type) : v->type;
     }
   }
     

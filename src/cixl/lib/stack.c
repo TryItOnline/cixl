@@ -114,7 +114,7 @@ static bool stack_imp(struct cx_call *call) {
   
   while (cx_iter_next(it.as_iter, &v, s)) {
     *(struct cx_box *)cx_vec_push(&out->imp) = v;
-    t = t ? cx_super(t, v.type) : v.type;
+    t = t ? cx_supertype(t, v.type) : v.type;
   }
 
   cx_box_init(cx_push(s),
@@ -282,9 +282,12 @@ static bool riter_imp(struct cx_call *call) {
   struct cx_box *stv = cx_test(cx_call_arg(call, 0));
   struct cx_scope *s = call->scope;
   struct cx_stack *st = stv->as_ptr;
-
-  cx_box_init(cx_push(s), cx_type_get(s->cx->iter_type,
-				      cx_type_arg(stv->type, 0)))->as_iter =
+  
+  cx_box_init(cx_push(s),
+	      cx_type_get(s->cx->iter_type,
+			  cx_type_arg(cx_test(cx_supertype(stv->type,
+							   s->cx->stack_type)),
+				      0)))->as_iter =
     cx_stack_iter_new(st, st->imp.count-1, -1, -1);
   
   return true;

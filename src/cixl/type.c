@@ -271,21 +271,32 @@ bool cx_is(struct cx_type *child, struct cx_type *parent) {
   return false;
 }
 
-struct cx_type *cx_super(struct cx_type *t, struct cx_type *in) {
-  size_t i = cx_min(cx_min(t->is.count, in->is.count)-1, t->tag);
+struct cx_type *cx_supertype(struct cx_type *t, struct cx_type *pt) {
+  size_t i = cx_min(cx_min(t->is.count, pt->is.count)-1, t->tag);
   
   for (struct cx_type
 	 **t_is = cx_vec_get(&t->is, i),
-	 **in_is = cx_vec_get(&in->is, i);
+	 **pt_is = cx_vec_get(&pt->is, i);
        t_is >= (struct cx_type **)cx_vec_start(&t->is);
-       t_is--, in_is--) {
-    if (*t_is && *in_is) {
-      t = *t_is;
-      break;
-    }
+       t_is--, pt_is--) {
+    if (*t_is && *pt_is) { return *t_is; }
   }
 
-  return t;
+  return NULL;
+}
+
+struct cx_type *cx_subtype(struct cx_type *t, struct cx_type *pt) {
+  if (t == pt) { return t; }
+  if (pt->raw->tag+1 >= t->is.count) { return NULL; }
+  struct cx_type **ce = cx_vec_end(&t->is);
+
+  for (struct cx_type **c = cx_vec_get(&t->is, pt->raw->tag+1);
+       c != ce;
+       c++) {
+    if (*c && (*c)->raw == pt->raw) { return *c; }
+  }
+
+  return NULL;
 }
 
 struct cx_type *cx_type_arg(struct cx_type *t, int i) {
@@ -297,33 +308,6 @@ struct cx_type *cx_type_arg(struct cx_type *t, int i) {
   }
 
   return *(struct cx_type **)cx_vec_get(&t->args, i);
-}
-
-struct cx_type *cx_super_arg(struct cx_type *child,
-			     struct cx_type *parent,
-			     int i) {
-  struct cx *cx = child->lib->cx;
-  if (child == parent) {
-    if (i >= child->args.count) {
-      cx_error(cx, cx->row, cx->col, "Not enough arguments for type: %s",
-	       child->id);
-    }
-      
-    return *(struct cx_type **)cx_vec_get(&child->args, i);
-  }
-  
-  if (parent->raw->tag+1 >= child->is.count) { return NULL; }
-  struct cx_type **ce = cx_vec_end(&child->is);
-
-  for (struct cx_type **c = cx_vec_get(&child->is, parent->raw->tag+1);
-       c != ce;
-       c++) {
-    if (*c && (*c)->raw == parent->raw && i < (*c)->args.count) {
-      return *(struct cx_type **)cx_vec_get(&(*c)->args, i);
-    }
-  }
-
-  return NULL;
 }
 
 bool cx_type_has_refs(struct cx_type *t) {

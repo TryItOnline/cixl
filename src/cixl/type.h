@@ -70,12 +70,10 @@ struct cx_type *cx_type_vget(struct cx_type *t, int nargs, struct cx_type *args[
 void cx_type_copy(struct cx_type *dst, struct cx_type *src);
 void cx_derive(struct cx_type *child, struct cx_type *parent);
 bool cx_is(struct cx_type *child, struct cx_type *parent);
-struct cx_type *cx_super(struct cx_type *t, struct cx_type *in);
-struct cx_type *cx_type_arg(struct cx_type *t, int i);
+struct cx_type *cx_supertype(struct cx_type *t, struct cx_type *in);
+struct cx_type *cx_subtype(struct cx_type *t, struct cx_type *pt);
 
-struct cx_type *cx_super_arg(struct cx_type *child,
-			     struct cx_type *parent,
-			     int i);
+struct cx_type *cx_type_arg(struct cx_type *t, int i);
 
 bool cx_type_has_refs(struct cx_type *t);
 
