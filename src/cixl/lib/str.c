@@ -340,7 +340,7 @@ static bool fill_imp(struct cx_call *call) {
   struct cx_scope *s = call->scope;
   
   if (!n->as_int) {
-    cx_box_init(cx_push(s), s->cx->str_type)->as_str = cx_str_ref(v->as_str);
+    cx_copy(cx_push(s), v);
     return true;
   }
   
@@ -357,6 +357,7 @@ static bool fill_imp(struct cx_call *call) {
       struct cx_box *v = cx_pop(s, false);
       if (!v) { goto exit; }
       cx_print(v, out.stream);
+      cx_box_deinit(v);
     }
   }
 

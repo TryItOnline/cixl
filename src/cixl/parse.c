@@ -361,17 +361,19 @@ static bool parse_str(struct cx *cx, FILE *in, struct cx_vec *out) {
   }
 
   ok = true;
- exit: {
-    cx_mfile_close(&value);
-    
+ exit: {    
     if (ok) {
       struct cx_box *box = &cx_tok_init(cx_vec_push(out),
 					CX_TLITERAL(),
 					row, col)->as_box;
 
-      cx_box_init(box, cx->str_type)->as_str = cx_str_new(value.data, value.size);
+      fflush(value.stream);
+      
+      cx_box_init(box, cx->str_type)->as_str =
+	cx_str_new(value.data, ftell(value.stream));
     }
 
+    cx_mfile_close(&value);
     free(value.data);
     return ok;
   }

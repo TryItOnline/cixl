@@ -3,7 +3,12 @@
 host64 & net64 fns
 
 * --- walker
-* move walker horizontally
+* change stack fn to infer type like stack literals
+** change for loops to maps
+* add second walker in dynamic.cx
+** walk in from bottom right corner
+* add straight.cx
+** move multiple walkers horizontally
 ** switch direction at edges
 * first post
 * add slopes/climbing
