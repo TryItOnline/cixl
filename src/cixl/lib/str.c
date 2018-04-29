@@ -338,12 +338,18 @@ static bool fill_imp(struct cx_call *call) {
     *a = cx_test(cx_call_arg(call, 2));
   
   struct cx_scope *s = call->scope;
+  
+  if (!n->as_int) {
+    cx_box_init(cx_push(s), s->cx->str_type)->as_str = cx_str_ref(v->as_str);
+    return true;
+  }
+  
   struct cx_mfile out;
   cx_mfile_open(&out);
   fputs(v->as_str->data, out.stream);
   bool ok = false;
   
-  for (int64_t i=v->as_str->len; i<n->as_int; i++) {
+  for (int64_t i=0; i<n->as_int; i++) {
     if (a->type == s->cx->char_type) {
       fputc(a->as_char, out.stream);
     } else {

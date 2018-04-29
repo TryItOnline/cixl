@@ -6,8 +6,6 @@
 struct cx_type_set {
   struct cx_type imp;
   struct cx_set  parents, set;
-
-  bool (*type_init)(struct cx_type *, int nargs, struct cx_type *args[]);
 };
 
 struct cx_type_set *cx_type_set_new(struct cx_lib *lib,

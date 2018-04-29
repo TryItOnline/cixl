@@ -28,6 +28,40 @@ static ssize_t type_set_eval(struct cx_macro_eval *eval,
   return tok_idx+1;
 }
 
+
+static void dump_imp(struct cx_box *v, FILE *out) {
+  fprintf(out, "%s(", v->type->raw->id);
+  struct cx_type *at = *(struct cx_type **)cx_test(cx_vec_start(&v->type->args));
+  at->dump(v, out);
+  fputc(')', out);
+}
+
+static bool type_init_imp(struct cx_type *t,
+			  int nargs, struct cx_type *args[]) {  
+  cx_test(nargs);
+  struct cx_type *at = args[0];
+
+  cx_type_copy(t, at);
+  t->dump = dump_imp;
+
+  struct cx *cx = t->lib->cx;
+  struct cx_type_set *ts = cx_baseof(t, struct cx_type_set, imp);
+  struct cx_type *mt = NULL;
+
+  cx_do_set(&ts->set, struct cx_type *, tt) {
+    if (cx_is(at, *tt)) { mt = *tt; }
+  }
+  
+  if (!mt) {
+    cx_error(cx, cx->row, cx->col,
+	     "Type is not a member of %s: %s", t->raw->id, at->id);
+
+    return false;
+  }
+  
+  return true;
+}
+
 static bool type_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   struct cx_vec toks;
   cx_vec_init(&toks, sizeof(struct cx_tok));
@@ -77,7 +111,7 @@ static bool type_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
     cx_type_push_args(type, cx->opt_type);
     if (!cx_lib_push_type(*cx->lib, type)) { goto exit1; }
     type->meta = CX_TYPE;
-    ts->type_init = cx_type_init_imp;
+    type->type_init = type_init_imp;
   }
 
   cx_do_vec(&toks, struct cx_tok, t) {
@@ -110,6 +144,32 @@ static bool type_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
     cx_vec_deinit(&toks);
     return ok;
   }
+}
+
+static bool type_id_init_imp(struct cx_type *t,
+			     int nargs, struct cx_type *args[]) {  
+  struct cx_type *get_raw(int i) {
+    return (i < t->raw->args.count)
+      ? *(struct cx_type **)cx_vec_get(&t->raw->args, i)
+      : NULL;
+  }
+
+  struct cx_type *get_arg(int i) {
+    return (i < nargs) ? args[i] : NULL;
+  }
+  
+  struct cx_type_set *ts = cx_baseof(t->raw, struct cx_type_set, imp);
+
+  for (struct cx_type **m = cx_vec_start(&ts->set.members);
+       m != cx_vec_end(&ts->set.members);
+       m++) {
+    if (*m != t->raw && *m != t) {
+      struct cx_type *mt = cx_resolve_arg_refs(*m, get_raw, get_arg);
+      if (mt && mt != *m) { cx_derive(mt, t); }
+    }
+  }
+
+  return true;
 }
 
 static bool type_id_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
@@ -172,7 +232,7 @@ static bool type_id_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
     type = &ts->imp;
     if (!cx_lib_push_type(*cx->lib, type)) { goto exit3; }
     type->meta = CX_TYPE_ID;
-    ts->type_init = cx_type_id_init_imp;
+    type->type_init = type_id_init_imp;
   }
 
   cx_derive(type, cx->any_type);
@@ -229,12 +289,10 @@ static bool type_id_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
     struct cx_type **mt = cx_vec_get(&ts->set.members, 0);
 
     if (!cx_type_has_refs(*(struct cx_type **)cx_vec_get(&ts->set.members, 0))) {
-      struct cx_type **ok = cx_set_insert(&ts->parents, mt);
-
-      if (ok) {
-	*ok = *mt;
-	cx_derive(type, *mt);
-      }
+      struct cx_type **ok = cx_test(cx_set_insert(&ts->parents, mt));
+      *ok = *mt;
+      cx_type_copy(type, *mt);
+      cx_derive(type, *mt);
     }
   }
 

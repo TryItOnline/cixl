@@ -67,6 +67,7 @@ void *cx_type_deinit(struct cx_type *type);
 void cx_type_vpush_args(struct cx_type *t, int nargs, struct cx_type *args[]);
 struct cx_type *cx_type_vget(struct cx_type *t, int nargs, struct cx_type *args[]);
 
+void cx_type_copy(struct cx_type *dst, struct cx_type *src);
 void cx_derive(struct cx_type *child, struct cx_type *parent);
 bool cx_is(struct cx_type *child, struct cx_type *parent);
 

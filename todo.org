@@ -2,14 +2,11 @@
 #define ntohll(x) ((1==ntohl(1)) ? (x) : ((uint64_t)ntohl((x) & 0xFFFFFFFF) << 32) | ntohl((x) >> 32))
 host64 & net64 fns
 
-* --- walkers
-* add buf var
-** print to buf instead of #out
-* remove Walker type
-** replace with Stack<Frame>
-** change frame fn to take color table
+* --- walker
+* add support for type-id new
 * get one static walker up and running with poll loop
 * move walker horizontally
+** switch direction at edges
 * ---
 * make rec:/type-id: parents optional
 * add cx_call_copy

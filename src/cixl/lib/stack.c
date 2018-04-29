@@ -210,6 +210,7 @@ static bool fill_imp(struct cx_call *call) {
 
   struct cx_stack *st = cx_test(cx_call_arg(call, 0))->as_ptr;
   struct cx_scope *s = call->scope;
+  if (!n->as_int) { return true; }
   cx_vec_grow(&st->imp, st->imp.count+n->as_int);
   
   for (int64_t i=0; i<n->as_int; i++) {

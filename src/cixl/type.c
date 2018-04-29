@@ -167,20 +167,7 @@ struct cx_type *cx_type_vget(struct cx_type *t, int nargs, struct cx_type *args[
   free(id.data);
   tt->meta = t->meta;
   tt->raw = t->raw;  
-  tt->new = t->new;
-  tt->eqval = t->eqval;
-  tt->equid = t->equid;
-  tt->cmp = t->cmp;
-  tt->ok = t->ok;
-  tt->call = t->call;
-  tt->copy = t->copy;
-  tt->clone = t->clone;
-  tt->iter = t->iter;
-  tt->write = t->write;
-  tt->dump = t->dump;
-  tt->print = t->print;
-  tt->emit = t->emit;
-  tt->deinit = t->deinit;
+  cx_type_copy(tt, t);
   tt->type_new = t->type_new;
   tt->type_init = t->type_init;
   tt->type_deinit = t->type_deinit;
@@ -195,6 +182,23 @@ struct cx_type *cx_type_vget(struct cx_type *t, int nargs, struct cx_type *args[
 
   cx_lib_push_type(t->lib, tt);
   return tt;
+}
+
+void cx_type_copy(struct cx_type *dst, struct cx_type *src) {
+  dst->write = src->write;
+  dst->dump = src->dump;
+  dst->print = src->print;
+  dst->emit = src->emit;
+  dst->deinit = src->deinit;
+  dst->eqval = src->eqval;
+  dst->equid = src->equid;
+  dst->cmp = src->cmp;
+  dst->ok = src->ok;
+  dst->call = src->call;
+  dst->new = src->new;
+  dst->iter = src->iter;
+  dst->copy = src->copy;
+  dst->clone = src->clone;
 }
 
 static void derive(struct cx_type *child, struct cx_type *parent) {
