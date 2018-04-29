@@ -3,12 +3,16 @@
 host64 & net64 fns
 
 * --- walker
-* add support for type-id new
 * get one static walker up and running with poll loop
+** copy mandelbrot
 * move walker horizontally
 ** switch direction at edges
 * ---
 * make rec:/type-id: parents optional
+* add cx_type.has_refs
+** fill in when args are pushed
+** replaces cx_type_has_refs fn
+** check as fast path in resolve
 * add cx_call_copy
 ** copy args properly
 ** use in error

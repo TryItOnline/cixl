@@ -165,7 +165,11 @@ static bool type_id_init_imp(struct cx_type *t,
        m++) {
     if (*m != t->raw && *m != t) {
       struct cx_type *mt = cx_resolve_arg_refs(*m, get_raw, get_arg);
-      if (mt && mt != *m) { cx_derive(mt, t); }
+      if (mt && mt != *m) {
+	cx_derive(mt, t);
+	cx_derive(t, mt);
+	cx_type_copy(t, mt);
+      }
     }
   }
 
