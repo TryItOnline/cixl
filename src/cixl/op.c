@@ -1454,8 +1454,9 @@ static void typedef_emit_init(struct cx_op *op,
       
       fprintf(out,
 	      "struct cx_type **%s = cx_vec_get(&ts->set.members, 0);\n"
+	      "cx_type_copy(type, *%s);\n"
 	      "cx_derive(type, *%s);\n",
-	      mt_var.id, mt_var.id);
+	      mt_var.id, mt_var.id, mt_var.id);
     }
   } else if (t->meta == CX_TYPE) {
     fprintf(out,
