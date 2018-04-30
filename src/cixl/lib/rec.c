@@ -9,9 +9,11 @@
 #include "cixl/file.h"
 #include "cixl/fimp.h"
 #include "cixl/func.h"
+#include "cixl/iter.h"
 #include "cixl/lib.h"
 #include "cixl/lib/rec.h"
 #include "cixl/op.h"
+#include "cixl/pair.h"
 #include "cixl/parse.h"
 #include "cixl/rec.h"
 #include "cixl/scope.h"
@@ -261,6 +263,58 @@ static bool put_call_imp(struct cx_call *call) {
   return true;
 }
 
+static bool into_imp(struct cx_call *call) {
+  struct cx_box
+    *in = cx_test(cx_call_arg(call, 0)),
+    *outv = cx_test(cx_call_arg(call, 1)),
+    it;
+  
+  struct cx_scope *s = call->scope;
+  struct cx_rec_type *rt = cx_baseof(outv->type, struct cx_rec_type, imp);
+  cx_iter(in, &it);
+  struct cx_rec *out = outv->as_ptr;
+  bool ok = false;
+  struct cx_box p;
+
+  while (cx_iter_next(it.as_iter, &p, s)) {
+    if (!cx_is(p.as_pair->x.type, s->cx->sym_type)) {
+      cx_error(s->cx, s->cx->row, s->cx->col,
+	       "Expected Sym field id, actual type: %s",
+	       p.as_pair->x.type->id);
+      
+      goto exit;
+    }
+
+    struct cx_sym *fid = &p.as_pair->x.as_sym;
+    struct cx_field *f = cx_set_get(&rt->fields, fid);
+    
+    if (!f) {
+      cx_error(s->cx, s->cx->row, s->cx->col,
+	       "Invalid %s field: %s",
+	       rt->imp.id, fid->id);
+      
+      goto exit;
+    }
+
+    if (!cx_is(p.as_pair->y.type, f->type)) {
+      cx_error(s->cx, s->cx->row, s->cx->col,
+	       "Expected type %s, actual: %s",
+	       f->type->id, p.as_pair->y.type->id);
+      
+      goto exit;
+    }
+
+    cx_copy(cx_rec_put(out, *fid), &p.as_pair->y);
+    cx_box_deinit(&p);
+  }
+
+  cx_copy(cx_push(s), outv);
+  ok = true;
+ exit:
+  cx_box_deinit(&it);
+  return ok;
+}
+
 static bool eqval_imp(struct cx_call *call) {
   struct cx_rec
     *x = cx_test(cx_call_arg(call, 1))->as_ptr,
@@ -338,6 +392,12 @@ cx_lib(cx_init_rec, "cx/rec") {
 		       cx_arg("act", cx->any_type)),
 	       cx_args(),
 	       put_call_imp);
+
+  cx_add_cfunc(lib, "->",
+	       cx_args(cx_arg("in", cx_type_get(cx->seq_type, cx->pair_type)),
+		       cx_arg("out", cx->rec_type)),
+	       cx_args(cx_narg(cx, NULL, 1)),
+	       into_imp);
 
   cx_add_cfunc(lib, "print",
 	       cx_args(cx_arg("rec", cx->rec_type), cx_arg("out", cx->wfile_type)),
