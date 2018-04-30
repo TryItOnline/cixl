@@ -67,7 +67,7 @@ The ```?```-operator may be overloaded for user defined types, which allows hook
 
 ```
    |
-...rec: Foo() bar Int;
+...rec: Foo bar Int;
 ...func: ?(x Foo)(_ Bool) $x `bar get 42 =;
 ...let: foo Foo new %, $ `bar 21 put;
 ...$foo?

@@ -83,7 +83,7 @@ let: options 'options.db' get-path [`id]   new-db-table;
 Each client is tagged with a user once authenticated. New users are created automagically on login with a new name. Output is buffered in ```buf``` until the client is ready to receive it. New clients start their life in the root topic and register a read callback in the event loop. ```poll-out``` registers the client for write polling and is called when output is ready to be sent.
 
 ```
-rec: Client ()
+rec: Client
   state   Sym
   user    User
   topic   Topic
@@ -139,7 +139,7 @@ func: new-client(io TCPClient)(_ Client)
 Collabri supports organizing feeds, or topics, into hierarchies. This enables interacting with a tree of topics on different levels depending on current needs, moving back and forth between observing multiple topics and drilling down to have a closer look or engage in a discussion.
 
 ```
-rec: Topic ()
+rec: Topic
   id name   Sym
   parent-id Sym
   parent    Topic

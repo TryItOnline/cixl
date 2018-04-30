@@ -71,7 +71,7 @@ Functions gained support for referring to type arguments:
 As did user defined types. The following type only accepts ```Seq``` types as second argument, ```Str``` derives ```Seq<Char>``` which means that ```baz``` type becomes ```Char```.
 
 ```
-rec: Foo<A Seq<A>>()
+rec: Foo<A Seq<A>>
   bar Opt<Arg0>
   baz Arg1:0;
 
