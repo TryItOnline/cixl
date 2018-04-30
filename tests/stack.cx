@@ -33,3 +33,5 @@
 [1 2 3] riter stack [3 2 1] = check
 
 [49 7] .. - 42 = check
+
+3 &float map Stack<Float> new into [0.0 1.0 2.0] = check

@@ -143,6 +143,7 @@ static bool into_imp(struct cx_call *call) {
   }
 
   cx_box_deinit(&it);
+  cx_copy(cx_push(s), out);
   return true;
 }
 
@@ -400,7 +401,7 @@ cx_lib(cx_init_stack, "cx/stack") {
 
   cx_add_cfunc(lib, "into",
 	       cx_args(cx_arg("in", cx->seq_type), cx_arg("out", cx->stack_type)),
-	       cx_args(),
+	       cx_args(cx_narg(cx, NULL, 1)),
 	       into_imp);
 
   cx_add_cfunc(lib, "stash",
