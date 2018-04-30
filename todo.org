@@ -3,14 +3,18 @@
 host64 & net64 fns
 
 * --- walker
+* add type check in stack into fn
 * fix static/dynamic emit
 ** implement table emit
 *** copy Rec
 ** add walker binary
 * finish post
 * ---
-* add record iter like table
-** test README example
+* throw error on dup rec field
+** update README
+* add support for empty rec: definitions
+* generate rec pair seq into fns
+** use in examples
 * add cx_type.has_refs
 ** fill in when args are pushed
 ** replaces cx_type_has_refs fn

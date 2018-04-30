@@ -1198,21 +1198,21 @@ Records map finite sets of typed fields to values. Record definitions are allowe
 [#nil]
 ```
 
-Record types may specify a list of parent types, and will inherit any fields that don't clash with its own.
+Record types may specify a list of parent types, duplicate fields are not allowed.
 
 ```
    rec: Foo
-     x y Int;
+     x Int;
      
    rec: Bar(Foo)
-     x z Str;
+     y Str;
 
-   Bar new % `x 'abc' put % `y 42 put stack
+   | Bar new % `x 42 put % `y 'abc' put
 
-[`x 'abc', `y 42,]
+[Bar(0xb289f8)]
 ```
 
-Records support full deep equality by default, but ```=``` may be implemented to customize the behavior.
+Records provide full deep equality by default, but ```=``` may be implemented to customize the behavior.
 
 ```
    rec: Foo x Int y Str;

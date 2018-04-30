@@ -138,6 +138,51 @@ static bool table_imp(struct cx_call *call) {
   return ok;
 }
 
+static bool into_imp(struct cx_call *call) {
+  struct cx_box
+    *in = cx_test(cx_call_arg(call, 0)),
+    *outv = cx_test(cx_call_arg(call, 1)),
+    it;
+  
+  struct cx_scope *s = call->scope;
+  cx_iter(in, &it);
+  struct cx_table *out = outv->as_ptr;
+  bool ok = false;
+  struct cx_box p;
+
+  struct cx_type
+    *st = cx_test(cx_subtype(outv->type, s->cx->table_type)),
+    *kt = cx_type_arg(st, 0),
+    *vt = cx_type_arg(st, 1);
+  
+  while (cx_iter_next(it.as_iter, &p, s)) {
+    if (!cx_is(p.as_pair->x.type, kt)) {
+      cx_error(s->cx, s->cx->row, s->cx->col,
+	       "Expected key type %s, actual: %s",
+	       kt->id, p.as_pair->x.type->id);
+      
+      goto exit;
+    }
+
+    if (!cx_is(p.as_pair->y.type, vt)) {
+      cx_error(s->cx, s->cx->row, s->cx->col,
+	       "Expected value type %s, actual: %s",
+	       vt->id, p.as_pair->y.type->id);
+      
+      goto exit;
+    }
+
+    cx_table_put(out, &p.as_pair->x, &p.as_pair->y);
+    cx_box_deinit(&p);
+  }
+
+  cx_copy(cx_push(s), outv);
+  ok = true;
+ exit:
+  cx_box_deinit(&it);
+  return ok;
+}
+
 cx_lib(cx_init_table, "cx/table") {
   struct cx *cx = lib->cx;
     
@@ -183,6 +228,12 @@ cx_lib(cx_init_table, "cx/table") {
 						cx_arg_ref(cx, 0, 0, 0),
 						cx_arg_ref(cx, 0, 0, 1)))),
 	       table_imp);
+
+  cx_add_cfunc(lib, "->",
+	       cx_args(cx_arg("in", cx_type_get(cx->seq_type, cx->pair_type)),
+		       cx_arg("out", cx->table_type)),
+	       cx_args(cx_narg(cx, NULL, 1)),
+	       into_imp);
 
   return true;
 }

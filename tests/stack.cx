@@ -34,4 +34,4 @@
 
 [49 7] .. - 42 = check
 
-3 &float map Stack<Float> new into [0.0 1.0 2.0] = check
+3 &float map Stack<Float> new -> [0.0 1.0 2.0] = check

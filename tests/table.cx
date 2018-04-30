@@ -1,14 +1,21 @@
 'Testing cx/table...' say
 
-(let: t Table new;
- $t 1 'foo' put
- $t 2 'bar' put
- $t 1 'baz' put
+(
+  let: t Table new;
+  $t 1 'foo' put
+  $t 2 'bar' put
+  $t 1 'baz' put
  
- $t 1 get 'baz' = check
- $t len 2 = check
+  $t 1 get 'baz' = check
+  $t len 2 = check
  
- $t 2 delete
- $t len 1 = check)
+  $t 2 delete
+  $t len 1 = check
+)
 
 [1 'foo', 2 'bar',] table stack len 2 = check
+
+(
+  let: t ['abc' 1, 'def' 2,] Table<Str Int> new ->;
+  $t stack ['abc' 1, 'def' 2,] = check
+)
