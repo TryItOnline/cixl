@@ -17,7 +17,7 @@ Int Opt<Num> is check
 #nil Opt<Int> is check
 
 (
-  type-id: OptStack<A>() Stack<Opt<Arg0>>;
+  type-id: OptStack<A> Stack<Opt<Arg0>>;
   let: s OptStack<Int> new;
   $s Stack<Opt<Int>> is check
 )

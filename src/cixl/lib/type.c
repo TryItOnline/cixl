@@ -206,11 +206,25 @@ static bool type_id_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
     goto exit2;
   }
 
-  struct cx_tok parents = *cx_test((struct cx_tok *)cx_vec_pop(&toks));
+  struct cx_vec parents;
+  cx_vec_init(&parents, sizeof(struct cx_type *));
+  struct cx_tok parents_tok = *cx_test((struct cx_tok *)cx_vec_peek(&toks, 0));
 
-  if (parents.type != CX_TGROUP()) {
-    cx_error(cx, row, col, "Invalid type id parents: %s", parents.type->id);
-    goto exit3;
+  if (parents_tok.type == CX_TGROUP()) {
+    cx_do_vec(&parents_tok.as_vec, struct cx_tok, t) {
+      if (t->type != CX_TID()) {
+	cx_error(cx, row, col, "Invalid type id parent: %s", t->type->id);
+	goto exit3;
+      }
+
+      struct cx_type *pt = cx_get_type(cx, t->as_ptr, false);
+      if (!pt) { goto exit3; }
+
+      *(struct cx_type **)cx_vec_push(&parents) = pt;
+    }
+
+    cx_vec_pop(&toks);
+    cx_tok_deinit(&parents_tok);
   }
 
   if (!cx_parse_end(cx, in, &toks)) {
@@ -220,11 +234,11 @@ static bool type_id_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
 
   cx_do_vec(&toks, struct cx_tok, t) {
     if (t->type != CX_TID()) {
-      cx_error(cx, row, col, "Invalid type id arg");
+      cx_error(cx, row, col, "Invalid type id arg: %s", t->type->id);
       goto exit3;
     }
   }
-
+  
   struct cx_type_set *ts = NULL;
 
   if (type) {
@@ -241,23 +255,16 @@ static bool type_id_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
 
   cx_derive(type, cx->any_type);
   
-  cx_do_vec(&parents.as_vec, struct cx_tok, pt) {
-    if (pt->type != CX_TID()) {
-      cx_error(cx, row, col, "Invalid parent type: %s", pt->type->id);
-      goto exit3;
-    }
-    
-    struct cx_type *p = cx_get_type(cx, pt->as_ptr, false);
-    if (!p) { goto exit3; }
-    struct cx_type **ok = cx_set_insert(&ts->parents, &p);
+  cx_do_vec(&parents, struct cx_type *, pt) {
+    struct cx_type **ok = cx_set_insert(&ts->parents, pt);
 
     if (!ok) {
-      cx_error(cx, row, col, "Duplicate parent type: %s", p->id);
+      cx_error(cx, row, col, "Duplicate parent type: %s", (*pt)->id);
       goto exit3;
     }
 
-    *ok = p;
-    if (!cx_type_has_refs(p)) { cx_derive(type, p); }
+    *ok = *pt;
+    if (!cx_type_has_refs(*pt)) { cx_derive(type, *pt); }
   }
   
   cx_do_vec(&toks, struct cx_tok, t) {
@@ -305,7 +312,7 @@ static bool type_id_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   cx_tok_init(cx_vec_push(out), CX_TMACRO(), row, col)->as_ptr = eval;
   ok = true;
  exit3:
-  cx_tok_deinit(&parents);
+  cx_vec_deinit(&parents);
  exit2:
   cx_tok_deinit(&id_tok);
  exit1: {

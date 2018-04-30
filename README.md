@@ -264,8 +264,8 @@ Cixl is statically and strongly typed; but since it's approach to typing is grad
 New type ids may be defined for existing types using ```type-id:```:
 
 ```
-   type-id: Pos() Pair<Int Int>;
-   1 2. Pos is
+   type-id: Pos Pair<Int Int>;
+   1 2, Pos is
 
 [#t]
 ```

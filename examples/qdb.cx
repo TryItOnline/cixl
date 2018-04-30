@@ -12,7 +12,7 @@ lib: qdb (
 
 use: cx;
 
-type-id: DBKey() Stack;
+type-id: DBKey Stack;
 
 define: db-trans [];
 

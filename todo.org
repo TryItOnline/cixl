@@ -3,8 +3,6 @@
 host64 & net64 fns
 
 * --- walker
-* make rec:/type-id: parents optional
-** update examples/tests/readme
 * fix static/dynamic emit
 ** implement table emit
 *** copy Rec
