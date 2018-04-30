@@ -23,7 +23,7 @@ let: next-booking-id 1 ref;
   interval. They are used as building blocks for calendars.
 */
 
-rec: Capacity()
+rec: Capacity
   start end  Time
   total used Int;
 
@@ -31,7 +31,7 @@ rec: Capacity()
   Resources support tracking availability in time.
 */
 
-rec: Resource()
+rec: Resource
   id       Sym
   quantity Int
   calendar Stack<Capacity>;
@@ -108,7 +108,7 @@ func: update-resource(r Resource start end Time total used Int)()
   Bookings represent used quantity for a specific resource and interval.
 */
 
-rec: Booking()
+rec: Booking
   id        Int   
   resource  Resource
   start end Time

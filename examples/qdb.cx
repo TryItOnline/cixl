@@ -16,7 +16,7 @@ type-id: DBKey() Stack;
 
 define: db-trans [];
 
-rec: DBTable<A>()
+rec: DBTable<A>
   file      RWFile
   key       Stack
   recs      Table<DBKey Arg0>
@@ -75,7 +75,7 @@ func: find-key(t DBTable k DBKey)(_ Opt)
 func: len(t DBTable)(_ Int)
   $t `recs get len;
 
-rec: DBChange()
+rec: DBChange
   table  DBTable
   rec    A
   op     Sym;

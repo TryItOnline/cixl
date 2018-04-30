@@ -1176,11 +1176,11 @@ and scaled.
 ```
 
 ### Records
-Records map finite sets of typed fields to values. Record types are required to specify an (optionally empty) list of parent types and traits; and will inherit any fields that don't clash with its own. Record definitions are allowed anywhere, but are processed in order of appearance during compilation. ```new``` may be used to create new record instances. Getting and putting field values is accomplished using symbols, uninitialized fields return ```#nil```.
+Records map finite sets of typed fields to values. Record definitions are allowed anywhere, but are processed in order of appearance during compilation. ```new``` may be used to create new record instances. Getting and putting field values is accomplished using symbols, uninitialized fields return ```#nil```.
 
 
 ```
-   rec: Node<A>()
+   rec: Node<A>
      left right Node
      value Arg0;
    | let: n Node<Int> new;
@@ -1198,10 +1198,24 @@ Records map finite sets of typed fields to values. Record types are required to 
 [#nil]
 ```
 
+Record types may specify a list of parent types, and will inherit any fields that don't clash with its own.
+
+```
+   rec: Foo
+     x y Int;
+     
+   rec: Bar(Foo)
+     x z Str;
+
+   Bar new % `x 'abc' put % `y 42 put stack
+
+[`x 'abc', `y 42,]
+```
+
 Records support full deep equality by default, but ```=``` may be implemented to customize the behavior.
 
 ```
-   rec: Foo() x Int y Str;
+   rec: Foo x Int y Str;
    | let: (bar baz) Foo new %%;
    $bar `x 42 put
    $bar `y 'bar' put
@@ -1311,7 +1325,7 @@ Moving on to instantiating records:
 
 ```
 use: cx;
-rec: Foo() x Int y Str;
+rec: Foo x Int y Str;
 
 {10000000 {Foo new % `x 42 put<Rec Sym A> `y 'bar' put<Rec Sym A>} times}
 clock 1000000 / int say

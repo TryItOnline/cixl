@@ -61,31 +61,35 @@ static bool rec_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
       cx_error(cx, id.row, id.col, "Attempt to redefine %s as rec", type->id);
       goto exit2;
   }
-
+  
   if (!cx_parse_tok(cx, in, &toks)) {
     cx_error(cx, cx->row, cx->col, "Missing rec parents");
     goto exit2;
   }
+  
+  struct cx_vec parents;
+  cx_vec_init(&parents, sizeof(struct cx_type *));
+  struct cx_tok parents_tok = *(struct cx_tok *)cx_vec_peek(&toks, 0);
 
-  struct cx_tok parents = *(struct cx_tok *)cx_vec_pop(&toks);
+  if (parents_tok.type == CX_TGROUP()) {
+    cx_do_vec(&parents_tok.as_vec, struct cx_tok, t) {
+      if (t->type != CX_TID()) {
+	cx_error(cx, t->row, t->col, "Invalid rec parent");
+	goto exit3;
+      }
+      
+      struct cx_type *pt = cx_get_type(cx, t->as_ptr, false);
+      
+      if (pt->meta != CX_TYPE_ID && pt->meta != CX_TYPE_REC) {
+	cx_error(cx, t->row, t->col, "Invalid rec parent: %s", pt->id);
+	goto exit3;
+      }
 
-  if (parents.type != CX_TGROUP()) {
-    cx_error(cx, parents.row, parents.col, "Invalid rec parents");
-    goto exit3;
-  }
-
-  cx_do_vec(&parents.as_vec, struct cx_tok, t) {
-    if (t->type != CX_TID()) {
-      cx_error(cx, t->row, t->col, "Invalid rec parent");
-      goto exit3;
+      *(struct cx_type **)cx_vec_push(&parents) = pt;
     }
 
-    struct cx_type *pt = cx_get_type(cx, t->as_ptr, false);
-    
-    if (pt->meta != CX_TYPE_ID && pt->meta != CX_TYPE_REC) {
-      cx_error(cx, t->row, t->col, "Invalid rec parent: %s", pt->id);
-      goto exit3;
-    }
+    cx_vec_pop(&toks);
+    cx_tok_deinit(&parents_tok);
   }
   
   if (!cx_parse_end(cx, in, &toks)) {
@@ -143,10 +147,7 @@ static bool rec_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
     }
   }
 
-  cx_do_vec(&parents.as_vec, struct cx_tok, t) {
-    cx_derive_rec(rec_type, t->as_ptr);
-  }
-
+  cx_do_vec(&parents, struct cx_type *, pt) { cx_derive_rec(rec_type, *pt); }
   struct cx_macro_eval *eval = cx_macro_eval_new(rec_eval);
   cx_tok_init(cx_vec_push(&eval->toks), CX_TTYPE(), row, col)->as_ptr = rec_type;
   cx_tok_init(cx_vec_push(out), CX_TMACRO(), row, col)->as_ptr = eval;
@@ -155,7 +156,7 @@ static bool rec_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   cx_vec_deinit(&fids);	      
   cx_vec_deinit(&ftypes);	      
  exit3:
-  cx_tok_deinit(&parents);
+  cx_vec_deinit(&parents);
  exit2:
   cx_tok_deinit(&id);
  exit1: {

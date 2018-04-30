@@ -62,7 +62,7 @@ func: get-path(n Str)(_ Str)
 
 let: poll Poll new;
 
-rec: User ()
+rec: User
   name     Sym
   password Str;
 
@@ -74,7 +74,7 @@ func: new-user (n Sym)(_ User)
   $u `name $n put
   $u;
 
-rec: Topic ()
+rec: Topic
   id name
   parent-id Sym
   parent    Topic
@@ -159,7 +159,7 @@ func: commit-topic(in Topic pos Int)(out Topic)
   $out `parent-id $in `parent   get `id get put
   $out `log-path  $in `log-path get         put;
 
-rec: Option ()
+rec: Option
   id    Sym
   value A;
 
@@ -173,7 +173,7 @@ func: set-option(id Sym value A)()
   $o `value $value put
   $options $o upsert;
 
-rec: Client ()
+rec: Client
   state   Sym
   user    User
   topic   Topic

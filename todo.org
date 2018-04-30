@@ -5,9 +5,14 @@ host64 & net64 fns
 * --- walker
 * make rec:/type-id: parents optional
 ** update examples/tests/readme
+* fix static/dynamic emit
+** implement table emit
+*** copy Rec
+** add walker binary
 * finish post
-* add slopes/climbing
 * ---
+* add record iter like table
+** test README example
 * add cx_type.has_refs
 ** fill in when args are pushed
 ** replaces cx_type_has_refs fn
@@ -20,6 +25,7 @@ host64 & net64 fns
 * finish type-id parents
 ** resolve parents with refs and derive
 *** check all types in set against parents
+* resolve rec/type-id parent types using type args
 * move macro processing to TID compile
 ** remove macro_eval type
 ** remove TMACRO type
@@ -31,8 +37,6 @@ host64 & net64 fns
 ** handle in type methods
 *** check if user defined func exists
 * move poll/term/buf libs out of io
-* add Table emit support
-** copy Rec
 * replace box.as_ptr with as_func/fimp/etc
 * change cx_type to use ref counting
 ** add nrefs

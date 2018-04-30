@@ -1,6 +1,6 @@
 'Testing cx/rec...' say
 
-rec: Foo()
+rec: Foo
   x Int y Str;
 
 (let: foo Foo new;
@@ -24,7 +24,7 @@ func: =(a b Foo)(_ Bool)
  $bar `y 'abc' put
  $bar $baz = check)
 
-rec: Generic<A Seq<A>>()
+rec: Generic<A Seq<A>>
   foo Opt<Arg0>
   bar Arg1:0;
 

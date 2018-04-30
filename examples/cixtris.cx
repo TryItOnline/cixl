@@ -138,7 +138,7 @@ let: is-dropping #f ref;
    Each block keeps track of its shapes, shape index, color and position.
 */
 
-rec: Block()
+rec: Block
   shapes Stack<Stack<Str>>
   i      Int
   color  RGB
