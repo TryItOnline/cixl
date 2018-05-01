@@ -1,9 +1,13 @@
 include: 'walker.cx';
 
+define: nwalkers 10;
 define: delay-ms 150;
 define: (r-stride l-stride) 4 -4;
 
-let: (max-x max-y) screen-size;
+let: (screen-x screen-y) screen-size;
+let: max-x $screen-x #l-clip `width get -;
+let: max-y $screen-y #l-clip `height get -;
+
 let: scripts Stack new;
 let: buf Buf new;
 
@@ -14,44 +18,45 @@ func: render()()
   $buf str #out print
   #out flush;
 
-func: start-script(start-x stride Int clip Clip)()
-  let: ch $clip `height get;
-  let: cw $clip `width get;
-  let: w $clip new-walker;
-  let: x $start-x ref;
-  let: dx $stride ref;
+func: start-script()()
+  let: start-x $max-x rand ++;
+  let: start-y $max-y rand ++;
+  let: left 2 rand 1 =;
+  let: w $start-x $start-y $left #l-clip #r-clip if-else new-walker;
+  let: dx $left #l-stride #r-stride if-else ref;
 
   {
-    $x deref $max-y $ch - $buf move-to
+    let: x $w `x get;
+    $x $w `y get $buf move-to
     $w next-frame $buf print
-    $x {$dx deref +} set-call
+    let: nx $x $dx deref +;
+    $w `x $nx put
 
-    $x deref 0 > {
-      $x deref $max-x $cw - > {
+    $nx 0 > {
+      $nx $max-x > {
         $dx #l-stride set
         $w `clip #l-clip put
-	$x $max-x $cw - set
+	$w `x $max-x put
       } if
     } {
       $dx #r-stride set
       $w `clip #r-clip put
-      $x 1 set
+      $w `x 1 put
     } if-else
   } $scripts ~ push;
 
-1 #r-stride #r-clip start-script
-$max-x #l-clip `width get - #l-stride #l-clip start-script
+let: poll Poll new;
+let: is-done #f ref;
 
 #out hide-cursor
 raw-mode
-
-let: poll Poll new;
-let: is-done #f ref;
 
 $poll #in {
   #in read-char _
   $is-done #t set
 } on-read
+
+#nwalkers {start-script} times
 
 {
   render

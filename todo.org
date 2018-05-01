@@ -3,7 +3,6 @@
 host64 & net64 fns
 
 * throw error on dup rec field
-** update README
 * add support for empty rec: defs
 * add cx_type.has_refs
 ** fill in when args are pushed

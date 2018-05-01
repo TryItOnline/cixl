@@ -1,27 +1,25 @@
 use: cx;
 
-type-id: Shape() Stack<Str>;
-type-id: Reel() Stack<Shape>;
-type-id: Palette() Table<Char Color>;
+type-id: Shape Stack<Str>;
+type-id: Reel Stack<Shape>;
+type-id: Palette Table<Char Color>;
 
 define: body 36 38 252 new-rgb;
 define: skin 252 186 148 new-rgb;
 define: hair 56 104 56 new-rgb;
 define: hlf 1.1;
 
-define: palette (
-  let: p Palette new;
-  $p @b #body put
-  $p @B #body #hlf * put
-  $p @s #skin put
-  $p @S #skin #hlf * put
-  $p @h #hair put
-  $p @H #hair #hlf * put
-  $p
-);
+define: palette [
+  @b #body,
+  @B #body #hlf *,
+  @s #skin,
+  @S #skin #hlf *,
+  @h #hair,
+  @H #hair #hlf *,
+] Palette new ->;
 
 func: new-shape(w Int d Stack<Str>) (_ Shape)
-  $d {% len $w ~ - @@s fill} map Shape new into;
+  $d {% len $w ~ - @@s fill} map Shape new ->;
 
 func: load-reel(fname Str)(out Reel)
   let: out Reel new;
@@ -50,37 +48,21 @@ func: h-mirror(s Shape)(ms Shape)
 
 define: l-reel #r-reel &h-mirror map stack;
 
-rec: Frame()
+rec: Frame
   height
   width  Int
   data   Stack<Opt<Color>>;
 
-func: new-frame(h w Int)(f Frame)
-  let: f Frame new;
-  $f `height $h put
-  $f `width $w put
-  $f `data Stack<Opt<Color>> new put;
+func: new-frame(h w Int)(_ Frame) [
+  `height $h,
+  `width $w,
+  `data Stack<Opt<Color>> new,
+] Frame new ->;
 
-rec: Clip()
+rec: Clip
   height
   width  Int
   frames Stack<Frame>;
-
-rec: Walker()
-  clip  Clip
-  i     Int;
-
-func: new-walker(c Clip)(w Walker)
-  let: w Walker new;  
-  $w `clip $c put
-  $w `i 0 put;
-  
-func: next-frame(w Walker)(f Frame)
-  let: i $w `i get;
-  let: c $w `clip get;
-  let: fs $c `frames get;
-  let: f $fs $i get;
-  $w `i $i ++ $fs len mod put;
 
 func: frame(s Shape p Palette)(f Frame)
   let: f $s len $s 0 get len new-frame;
@@ -101,7 +83,7 @@ func: clip(r Reel p Palette)(c Clip)
     $c `height {$f `height get max} put-call
     $c `width {$f `width get max} put-call
     $f
-  } map Stack<Frame> new into put;
+  } map Stack<Frame> new -> put;
 
 define: r-clip #r-reel #palette clip;
 define: l-clip #l-reel #palette clip;
@@ -126,3 +108,20 @@ func: print(f Frame out WFile)()
   } times
 
   $out reset-style;
+
+rec: Walker
+  x y i Int
+  clip  Clip;
+
+func: new-walker(x y Int c Clip)(_ Walker) [
+  `i 0,
+  `x $x, `y $y,
+  `clip $c,
+] Walker new ->;
+  
+func: next-frame(w Walker)(f Frame)
+  let: i $w `i get;
+  let: c $w `clip get;
+  let: fs $c `frames get;
+  let: f $fs $i get;
+  $w `i $i ++ $fs len mod put;
