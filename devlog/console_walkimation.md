@@ -184,8 +184,6 @@ We're using lambdas to represent scripts for now, since the only thing they care
 
 [dynamic.cx](https://github.com/basic-gongfu/cixl/blob/master/devlog/console_walkimation/dynamic.cx)
 ```
-define: nwalkers 10;
-define: delay-ms 150;
 define: (r-stride l-stride) 4 -4;
 
 let: (screen-x screen-y) screen-size;
