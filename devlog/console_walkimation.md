@@ -180,7 +180,7 @@ func: next-frame(w Walker)(f Frame)
   $w `i $i ++ $fs len mod put;
 ```
 
-We're using lambdas to represent scripts for now, since the only thing they care about is execution:
+We'll use lambdas to represent scripts for now, since the only thing they care about is execution:
 
 [dynamic.cx](https://github.com/basic-gongfu/cixl/blob/master/devlog/console_walkimation/dynamic.cx)
 ```
@@ -229,6 +229,6 @@ func: render()()
 ```
 
 ### Future
-The goal is to eventually pull basic animation support into the standard library, but there is plenty of experimentation left to be done. I would like to add support for timing to enable running scripts at different speeds, extract a sprite concept with terrain and collision tracking and more. And as retro cool as it is to pretend the console is a frame buffer, a more realistic output medium wouldn't hurt; but I'm still searching for the perfect pixel pushing library.
+The goal is to eventually pull basic animation support into the standard library, but there is plenty of experimentation left to be done. I would like to add support for timing to enable running scripts at different speeds, extract a sprite concept with terrain and collision tracking and more. And as retro cool as it is to pretend the console is a frame buffer, a more expressive output medium wouldn't hurt; but I'm still searching for the perfect pixel pushing library.
 
 Give me a yell if something is unclear, wrong or missing. And please consider helping out with a donation via [paypal](https://paypal.me/basicgongfu) or [liberapay](https://liberapay.com/basic-gongfu/donate) if you find this worthwhile, every contribution counts.

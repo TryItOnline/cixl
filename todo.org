@@ -22,6 +22,7 @@ host64 & net64 fns
 ** remove TMACRO type
 ** take tok seq as macro input
 ** rewrite macros
+* ---
 * replace cx_fimp.init with enum cx_fimp_type
 ** CX_FHOST_C, CX_FHOST_CX, CX_FGUEST
 * remove Rec =/?/print overloads
