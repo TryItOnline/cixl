@@ -1,0 +1,27 @@
+include: 'walker.cx';
+
+let: y 1 ref;
+
+func: print(c Clip out WFile)()
+  let: x 1 ref;
+  let: max-height 0 ref;
+  
+  $c `frames get {
+    let: f;
+    $x deref $y deref $out move-to
+    $f $out print
+    $x {$f `width get +} set-call
+    $max-height {$f `height get max} set-call
+  } for
+
+  $y {$max-height deref +} set-call;
+
+let: buf Buf new;
+#r-clip $buf print
+$y &++ set-call
+#l-clip $buf print
+$y &++ set-call
+Stack<Shape> Reel is say
+#out clear-screen
+$buf str #out print
+1 $y deref #out move-to

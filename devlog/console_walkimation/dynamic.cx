@@ -1,0 +1,65 @@
+include: 'walker.cx';
+
+define: delay-ms 150;
+define: (r-stride l-stride) 4 -4;
+
+let: (max-x max-y) screen-size;
+let: scripts Stack new;
+let: buf Buf new;
+
+func: render()()
+  $buf 0 seek
+  $scripts &call for
+  #out clear-screen
+  $buf str #out print
+  #out flush;
+
+func: start-script(start-x stride Int clip Clip)()
+  let: ch $clip `height get;
+  let: cw $clip `width get;
+  let: w $clip new-walker;
+  let: x $start-x ref;
+  let: dx $stride ref;
+
+  {
+    $x deref $max-y $ch - $buf move-to
+    $w next-frame $buf print
+    $x {$dx deref +} set-call
+
+    $x deref 0 > {
+      $x deref $max-x $cw - > {
+        $dx #l-stride set
+        $w `clip #l-clip put
+	$x $max-x $cw - set
+      } if
+    } {
+      $dx #r-stride set
+      $w `clip #r-clip put
+      $x 1 set
+    } if-else
+  } $scripts ~ push;
+
+1 #r-stride #r-clip start-script
+$max-x #l-clip `width get - #l-stride #l-clip start-script
+
+#out hide-cursor
+raw-mode
+
+let: poll Poll new;
+let: is-done #f ref;
+
+$poll #in {
+  #in read-char _
+  $is-done #t set
+} on-read
+
+{
+  render
+  $poll #delay-ms wait _
+  $is-done deref !
+} while
+
+#out clear-screen
+1 1 #out move-to
+#out show-cursor
+normal-mode

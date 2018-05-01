@@ -1,0 +1,128 @@
+use: cx;
+
+type-id: Shape() Stack<Str>;
+type-id: Reel() Stack<Shape>;
+type-id: Palette() Table<Char Color>;
+
+define: body 36 38 252 new-rgb;
+define: skin 252 186 148 new-rgb;
+define: hair 56 104 56 new-rgb;
+define: hlf 1.1;
+
+define: palette (
+  let: p Palette new;
+  $p @b #body put
+  $p @B #body #hlf * put
+  $p @s #skin put
+  $p @S #skin #hlf * put
+  $p @h #hair put
+  $p @H #hair #hlf * put
+  $p
+);
+
+func: new-shape(w Int d Stack<Str>) (_ Shape)
+  $d {% len $w ~ - @@s fill} map Shape new into;
+
+func: load-reel(fname Str)(out Reel)
+  let: out Reel new;
+  let: d Stack<Str> new;
+  let: width 0 ref;
+
+  $fname `r fopen lines {
+    let: l;
+    
+    $l len {
+      $l last @, = {$l pop _} if
+      $d $l push
+      $width {$l len max} set-call
+    } {
+      $out $width deref $d new-shape push
+      $d clear
+      $width 0 set
+    } if-else
+  } for;
+
+define: r-reel 'walk.dat' load-reel;
+
+func: h-mirror(s Shape)(ms Shape)
+  let: ms $s %% ~ _;
+  $ms &reverse for;
+
+define: l-reel #r-reel &h-mirror map stack;
+
+rec: Frame()
+  height
+  width  Int
+  data   Stack<Opt<Color>>;
+
+func: new-frame(h w Int)(f Frame)
+  let: f Frame new;
+  $f `height $h put
+  $f `width $w put
+  $f `data Stack<Opt<Color>> new put;
+
+rec: Clip()
+  height
+  width  Int
+  frames Stack<Frame>;
+
+rec: Walker()
+  clip  Clip
+  i     Int;
+
+func: new-walker(c Clip)(w Walker)
+  let: w Walker new;  
+  $w `clip $c put
+  $w `i 0 put;
+  
+func: next-frame(w Walker)(f Frame)
+  let: i $w `i get;
+  let: c $w `clip get;
+  let: fs $c `frames get;
+  let: f $fs $i get;
+  $w `i $i ++ $fs len mod put;
+
+func: frame(s Shape p Palette)(f Frame)
+  let: f $s len $s 0 get len new-frame;
+  let: d $f `data get;
+  
+  $s {{
+    let: c;
+    $d $c @@s = #nil {$p $c get} if-else push
+  } for} for;
+
+func: clip(r Reel p Palette)(c Clip)
+  let: c Clip new;
+  $c `height 0 put
+  $c `width 0 put
+  
+  $c `frames $r {
+    let: f $p frame;
+    $c `height {$f `height get max} put-call
+    $c `width {$f `width get max} put-call
+    $f
+  } map Stack<Frame> new into put;
+
+define: r-clip #r-reel #palette clip;
+define: l-clip #l-reel #palette clip;
+
+func: print(f Frame out WFile)()
+  let: i $f `data get iter;
+  let: w $f `width get;
+  
+  $f `height get {
+    $w {
+      let: c $i next;
+      $c is-nil {
+        1 $out move-right
+      } {
+        $c $out set-bg
+        @@s $out print
+      } if-else
+    } times
+
+    1 $out move-down
+    $w $out move-left
+  } times
+
+  $out reset-style;
