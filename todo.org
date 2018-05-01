@@ -2,13 +2,6 @@
 #define ntohll(x) ((1==ntohl(1)) ? (x) : ((uint64_t)ntohl((x) & 0xFFFFFFFF) << 32) | ntohl((x) >> 32))
 host64 & net64 fns
 
-* --- walker
-* fix static/dynamic emit
-** implement table emit
-*** copy Rec
-** add walker binary
-* finish post
-* ---
 * throw error on dup rec field
 ** update README
 * add support for empty rec: defs

@@ -16,4 +16,7 @@ bool cx_type_id_init_imp(struct cx_type *t, int nargs, struct cx_type *args[]);
 bool cx_type_init_imp(struct cx_type *t, int nargs, struct cx_type *args[]);
 void cx_type_define_conv(struct cx_type *t, struct cx_type *mt);
 
+bool cx_type_id_init_imp(struct cx_type *t, int nargs, struct cx_type *args[]);
+bool cx_type_init_imp(struct cx_type *t, int nargs, struct cx_type *args[]);
+
 #endif

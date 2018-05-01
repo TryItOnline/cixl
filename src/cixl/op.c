@@ -993,10 +993,19 @@ static void putconst_emit_syms(struct cx_op *op, struct cx_set *out, struct cx *
   if (ok) { *ok = id; }
 }
 
+static void putconst_emit_types(struct cx_op *op, struct cx_set *out, struct cx *cx) {
+  struct cx_box *v = cx_test(cx_lib_get_const(op->as_putconst.lib,
+					      op->as_putconst.id,
+					      false));
+  struct cx_type **ok = cx_set_insert(out, &v->type);
+  if (ok) { *ok = v->type; }
+}
+
 cx_op_type(CX_OPUTCONST, {
     type.eval = putconst_eval;
     type.emit = putconst_emit;
     type.emit_syms = putconst_emit_syms;
+    type.emit_types = putconst_emit_types;
   });
 
 static bool putvar_eval(struct cx_op *op, struct cx_bin *bin, struct cx *cx) {
@@ -1412,7 +1421,7 @@ static void typedef_emit_init(struct cx_op *op,
 	    tp_var.id, t_var.id,
             tp_var.id, op->pc+1,
 	    tp_var.id,
-	    t_var.id,
+	    tp_var.id,
 	    tp_var.id);
 
     struct cx_type_set *ts = cx_baseof(t, struct cx_type_set, imp);
@@ -1428,7 +1437,7 @@ static void typedef_emit_init(struct cx_op *op,
 	      t_var.id, tp_var.id, tp_var.id);
 
       if (!cx_type_has_refs(*pt)) {
-	fprintf(out, "cx_derive(%s->imp, %s);\n", t_var.id, pt_var.id);
+	fprintf(out, "cx_derive(%s, %s);\n", tp_var.id, pt_var.id);
       }
     }
     
@@ -1453,18 +1462,20 @@ static void typedef_emit_init(struct cx_op *op,
       struct cx_sym mt_var = cx_gsym(cx, "mt");
       
       fprintf(out,
-	      "struct cx_type **%s = cx_vec_get(&ts->set.members, 0);\n"
-	      "cx_type_copy(type, *%s);\n"
-	      "cx_derive(type, *%s);\n",
-	      mt_var.id, mt_var.id, mt_var.id);
+	      "struct cx_type **%s = cx_vec_get(&%s->set.members, 0);\n"
+	      "cx_type_copy(%s, *%s);\n"
+	      "cx_derive(%s, *%s);\n",
+	      mt_var.id, t_var.id,
+	      tp_var.id, mt_var.id,
+	      tp_var.id, mt_var.id);
     }
   } else if (t->meta == CX_TYPE) {
     fprintf(out,
 	    "struct cx_type_set *%s = cx_type_set_new(*cx->lib, \"%s\", true);\n"
 	    "if (!cx_lib_push_type(*cx->lib, &%s->imp)) { goto op%zd; }\n"
-	    "%s->imp.meta = CX_TYPE;\n"
+	    "%s->meta = CX_TYPE;\n"
 	    "%s->type_init = cx_type_init_imp;\n",
-	    t_var.id, t->id, t_var.id, op->pc+1, t_var.id, t_var.id);
+	    t_var.id, t->id, t_var.id, op->pc+1, tp_var.id, tp_var.id);
 
     struct cx_type_set *ts = cx_baseof(t, struct cx_type_set, imp);
     emit_type_args_init(t, t_var, out, cx);
@@ -1477,12 +1488,12 @@ static void typedef_emit_init(struct cx_op *op,
       fprintf(out,
 	      "struct cx_type *%s = cx_get_type(cx, \"%s\", false);\n"
 	      "*(struct cx_type **)cx_vec_push(&%s->set.members) = %s;\n"
-	      "struct cx_type *%s = cx_type_get(&%s->imp, %s);\n"
+	      "struct cx_type *%s = cx_type_get(%s, %s);\n"
 	      "cx_derive(%s, %s);\n"
 	      "cx_type_define_conv(%s, %s);\n",
 	      mt_var.id, (*mt)->id,
 	      t_var.id, mt_var.id,
-	      tt_var.id, t_var.id, mt_var.id,
+	      tt_var.id, tp_var.id, mt_var.id,
 	      tt_var.id, mt_var.id,
 	      tt_var.id, mt_var.id);
     }

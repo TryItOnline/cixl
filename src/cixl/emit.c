@@ -110,6 +110,7 @@ bool cx_emit_file(struct cx *cx, struct cx_bin *bin, FILE *out) {
 	"#include \"cixl/scope.h\"\n"
 	"#include \"cixl/stack.h\"\n"
 	"#include \"cixl/str.h\"\n"
+	"#include \"cixl/table.h\"\n"
 	"#include \"cixl/type_set.h\"\n\n",
 	out);
 

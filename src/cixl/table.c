@@ -191,6 +191,45 @@ static void dump_imp(struct cx_box *v, FILE *out) {
   fputc(')', out);
 }
 
+static bool emit_imp(struct cx_box *v, const char *exp, FILE *out) {
+  struct cx *cx = v->type->lib->cx;
+  struct cx_table *t = v->as_table;
+  struct cx_sym t_var = cx_gsym(cx, "t");
+  
+  fprintf(out,
+	  "struct cx_table *%s = cx_table_new(cx);\n"
+	  "cx_box_init(%s, %s())->as_table = %s;\n",
+	  t_var.id,
+	  exp, v->type->emit_id, t_var.id);
+
+  cx_do_set(&t->entries, struct cx_table_entry, e) {
+    struct cx_sym
+      k_var = cx_gsym(cx, "k"),
+      kp_var = cx_gsym(cx, "kp"),
+      v_var = cx_gsym(cx, "v"),
+      vp_var = cx_gsym(cx, "vp");
+
+    fprintf(out,
+	    "struct cx_box %s, *%s = &%s, %s, *%s = &%s;\n",
+	    k_var.id, kp_var.id, k_var.id, v_var.id, vp_var.id, v_var.id);
+
+    if (!cx_box_emit(&e->key, kp_var.id, out) ||
+	!cx_box_emit(&e->val, vp_var.id, out)) {
+      return false;
+    }
+
+    fprintf(out,
+	    "cx_table_put(%s, %s, %s);\n"
+	    "cx_box_deinit(%s);\n"
+	    "cx_box_deinit(%s);\n",
+	    t_var.id, kp_var.id, vp_var.id,
+	    kp_var.id,
+	    vp_var.id);
+  }
+  
+  return true;
+}
+
 static void deinit_imp(struct cx_box *v) {
   cx_table_deref(v->as_table);
 }
@@ -210,6 +249,7 @@ struct cx_type *cx_init_table_type(struct cx_lib *lib) {
   t->iter = iter_imp;
   t->write = write_imp;
   t->dump = dump_imp;
+  t->emit = emit_imp;
   t->deinit = deinit_imp;
   return t;
 }

@@ -118,3 +118,65 @@ void cx_type_define_conv(struct cx_type *t, struct cx_type *mt) {
   
   free(cid);
 }
+
+
+bool cx_type_id_init_imp(struct cx_type *t, int nargs, struct cx_type *args[]) {  
+  struct cx_type *get_raw(int i) {
+    return (i < t->raw->args.count)
+      ? *(struct cx_type **)cx_vec_get(&t->raw->args, i)
+      : NULL;
+  }
+
+  struct cx_type *get_arg(int i) {
+    return (i < nargs) ? args[i] : NULL;
+  }
+  
+  struct cx_type_set *ts = cx_baseof(t->raw, struct cx_type_set, imp);
+
+  for (struct cx_type **m = cx_vec_start(&ts->set.members);
+       m != cx_vec_end(&ts->set.members);
+       m++) {
+    if (*m != t->raw && *m != t) {
+      struct cx_type *mt = cx_resolve_arg_refs(*m, get_raw, get_arg);
+      if (mt && mt != *m) {
+	cx_derive(mt, t);
+	cx_derive(t, mt);
+	cx_type_copy(t, mt);
+      }
+    }
+  }
+
+  return true;
+}
+
+static void dump_imp(struct cx_box *v, FILE *out) {
+  fprintf(out, "%s(", v->type->raw->id);
+  struct cx_type *at = *(struct cx_type **)cx_test(cx_vec_start(&v->type->args));
+  at->dump(v, out);
+  fputc(')', out);
+}
+
+bool cx_type_init_imp(struct cx_type *t, int nargs, struct cx_type *args[]) {  
+  cx_test(nargs);
+  struct cx_type *at = args[0];
+
+  cx_type_copy(t, at);
+  t->dump = dump_imp;
+
+  struct cx *cx = t->lib->cx;
+  struct cx_type_set *ts = cx_baseof(t, struct cx_type_set, imp);
+  struct cx_type *mt = NULL;
+
+  cx_do_set(&ts->set, struct cx_type *, tt) {
+    if (cx_is(at, *tt)) { mt = *tt; }
+  }
+  
+  if (!mt) {
+    cx_error(cx, cx->row, cx->col,
+	     "Type is not a member of %s: %s", t->raw->id, at->id);
+
+    return false;
+  }
+  
+  return true;
+}
