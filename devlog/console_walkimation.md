@@ -2,7 +2,7 @@
 #### 2018-04-29
 
 ### Intro
-When I started out on the C64 and Amiga, putting something on the screen that you owned was definitely less involved than ever after. Owning meaning that the only interaction is between programmer and screen, pixels and code; with no wiggly abstraction towers to balance. These days, it's all about the money; and you can't sell the past. Unfortunately, since anyone who was there will tell you that messing around with the latest JS framework just doesn't compare. One of the goals of [Cixl](https://github.com/basic-gongfu/cixl) is to provide the simplicity and directness of yesterdays tools in a modern package. You may find an archived version of everything mention in this post [here](https://github.com/basic-gongfu/cixl/tree/master/devlog/console_walkimation) and the current master for the project over [there](https://github.com/basic-gongfu/walker).
+When I started out on the C64 and Amiga, putting something on the screen that you owned was definitely less involved than ever after. Owning meaning that the only interaction is between programmer and screen, pixels and code; with no wiggly abstraction towers to balance. These days, it's all about the money; and you can't sell the past. Unfortunately, since anyone who was there will tell you that messing around with the latest JS framework just doesn't compare. One of the goals of [Cixl](https://github.com/basic-gongfu/cixl) is to provide the simplicity and directness of yesterdays tools in a modern package. You may find an archived version of everything mention in this post [here](https://github.com/basic-gongfu/cixl/tree/master/devlog/console_walkimation) and the master repo over [there](https://github.com/basic-gongfu/walker).
 
 ### Console
 Modern Unix consoles may be treated as a buffer of 24-bit pixels, which allows a quick and convenient way to basic graphic capabilities. [Cixl](https://github.com/basic-gongfu/cixl) prefers powerful tools on top of a small number of universal abstractions to elaborate hierarchies and special cases. Except for a thin layer of features to output ANSI graphics, the general goal is to provide tools that are orthogonal to the chosen output medium. Since we've already checked [Tetris](https://github.com/basic-gongfu/cixl/blob/master/devlog/all_work_no_tetris.md) and Mandelbrot [fractals](https://github.com/basic-gongfu/cixl/blob/master/devlog/mandel_zoom.md) off the list, I figured it was time to have a look at animation.
@@ -96,7 +96,7 @@ func: h-mirror(s Shape)(ms Shape)
 define: l-reel #r-reel &h-mirror map stack;
 ```
 
-The loaded reels are then combined with palettes into frames, and finally clips.
+The loaded reels are then combined with palettes into frames, and finally clips:
 
 [walker.cx](https://github.com/basic-gongfu/cixl/blob/master/devlog/console_walkimation/walker.cx)
 ```
