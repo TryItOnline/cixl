@@ -1472,10 +1472,15 @@ static void typedef_emit_init(struct cx_op *op,
   } else if (t->meta == CX_TYPE) {
     fprintf(out,
 	    "struct cx_type_set *%s = cx_type_set_new(*cx->lib, \"%s\", true);\n"
-	    "if (!cx_lib_push_type(*cx->lib, &%s->imp)) { goto op%zd; }\n"
+	    "struct cx_type *%s = &%s->imp;\n"
+	    "if (!cx_lib_push_type(*cx->lib, %s)) { goto op%zd; }\n"
 	    "%s->meta = CX_TYPE;\n"
 	    "%s->type_init = cx_type_init_imp;\n",
-	    t_var.id, t->id, t_var.id, op->pc+1, tp_var.id, tp_var.id);
+	    t_var.id, t->id,
+	    tp_var.id, t_var.id,
+	    tp_var.id, op->pc+1,
+	    tp_var.id,
+	    tp_var.id);
 
     struct cx_type_set *ts = cx_baseof(t, struct cx_type_set, imp);
     emit_type_args_init(t, t_var, out, cx);

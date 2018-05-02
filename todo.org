@@ -2,6 +2,12 @@
 #define ntohll(x) ((1==ntohl(1)) ? (x) : ((uint64_t)ntohl((x) & 0xFFFFFFFF) << 32) | ntohl((x) >> 32))
 host64 & net64 fns
 
+* mandelbrot improvements
+** freeze in devlog/mandelbrot & update post
+** convert to use image/Frame
+** keep track of black columns in stack (put)
+*** skip calculation if ?
+* --
 * throw error on dup rec field
 * add support for empty rec: defs
 * add cx_type.has_refs
@@ -47,7 +53,6 @@ host64 & net64 fns
 *** change eval to push value
 * replace clone fallback to copy with error
 * replace varargs with size/array+macro
-* convert mandelbrot to use image/Frame
 * --- cxcrypt
 * add Pub/PrivKey
 * add README/LICENSE
