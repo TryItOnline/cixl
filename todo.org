@@ -2,16 +2,8 @@
 #define ntohll(x) ((1==ntohl(1)) ? (x) : ((uint64_t)ntohl((x) & 0xFFFFFFFF) << 32) | ntohl((x) >> 32))
 host64 & net64 fns
 
-* add cximage plugin
-** convert walker to use cximage/Frame
-*** add missing term fns for print(Frame)
-*** test walker
-** add Image type
-*** keep frame reference
-** add new-image fn to create Image 
-** add console image viewer example
-*** imgv.cx
-*** scale image to fit screen
+* generate pngans binary
+* post
 * ---
 * throw error on dup rec field
 * add support for empty rec: defs
@@ -58,6 +50,7 @@ host64 & net64 fns
 *** change eval to push value
 * replace clone fallback to copy with error
 * replace varargs with size/array+macro
+* convert mandelbrot to use image/Frame
 * --- cxcrypt
 * add Pub/PrivKey
 * add README/LICENSE

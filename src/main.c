@@ -96,7 +96,7 @@ int main(int argc, char *argv[]) {
 	      "-Wall -Werror "
 	      "-Wno-unused-label -Wno-unused-function -Wno-unused-variable "
 	      "-Wno-unused-but-set-variable "
-	      "- -Bstatic -lcixl",
+	      "- -Bstatic",
 	      cmd.stream);
 
 	if (cx.links.count) {
@@ -106,8 +106,8 @@ int main(int argc, char *argv[]) {
 	    fprintf(cmd.stream, " -l%s", l->id+3);
 	  }
 	}
-
-	fputs(" -Bdynamic -ldl -lm", cmd.stream);
+	
+	fputs(" -lcixl -Bdynamic -ldl -lm", cmd.stream);
 	for (; argi < argc; argi++) { fprintf(cmd.stream, " %s", argv[argi]); }
 	cx_mfile_close(&cmd);
 
