@@ -2,7 +2,7 @@
 #### 2018-04-22
 
 ### Intro
-As far back as I can remember, I've been fascinated by all kinds of fractals; but it wasn't until now that I finally found a reason to write one. I was browsing Rosettacode when I came across the Mandelbrot [task](https://rosettacode.org/wiki/Mandelbrot_set), which looked doable in [Cixl](https://github.com/basic-gongfu/cixl) given a handful of new features that were already waiting to be added. The implementation described here uses ANSI graphics and supports zooming. You may find the code [here](https://github.com/basic-gongfu/cixl/blob/master/examples/mandelbrot.cx) and a Linux/64 binary [over there](https://github.com/basic-gongfu/cxbin/blob/master/linux64/mandelbrot).
+As far back as I can remember, I've been fascinated by all kinds of fractals; but it wasn't until now that I finally found a reason to write one. I was browsing Rosettacode when I came across the Mandelbrot [task](https://rosettacode.org/wiki/Mandelbrot_set), which looked doable in [Cixl](https://github.com/basic-gongfu/cixl) given a handful of new features that were already waiting to be added. The implementation described here uses ANSI graphics and supports zooming. You may find the code [here](https://github.com/basic-gongfu/cixl/blob/master/devlog/mandel_zoom/mandelbrot.cx) and a Linux/64 binary [over there](https://github.com/basic-gongfu/cxbin/blob/master/linux64/mandelbrot).
 
 ![Screenshot](https://raw.github.com/basic-gongfu/cixl/master/devlog/mandelbrot.png)
 
