@@ -2,6 +2,13 @@
 #define ntohll(x) ((1==ntohl(1)) ? (x) : ((uint64_t)ntohl((x) & 0xFFFFFFFF) << 32) | ntohl((x) >> 32))
 host64 & net64 fns
 
+* mandelbrot improvements
+** add is-black stack
+*** store y-pos
+*** clear on each render
+** switch to using image frame
+*** add fold-down(Frame y1 y2 n) fn
+* ---
 * throw error on dup rec field
 * add support for empty rec: defs
 * add cx_type.has_refs
