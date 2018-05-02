@@ -33,7 +33,7 @@ func: render()()
       } while
 
       let: c $i deref % -7 bsh bor 256 mod;
-      $c {$x 256 mod $y 256 mod} {0 0} if-else $c new-rgb $buf set-bg
+      $c {$x 256 mod $y 256 mod} {0 0} if-else $c 255 new-color $buf set-bg
       @@s $buf print
     } for
 

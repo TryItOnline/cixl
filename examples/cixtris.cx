@@ -10,7 +10,7 @@ use:
   (cx/const define:)
   (cx/error throw)
   (cx/func func:)
-  (cx/gfx RGB new-rgb)
+  (cx/gfx Color new-color)
   (cx/io #in #out flush read-char print unblock)
   (cx/io/term
     clear-screen hide-cursor #key-esc reset-style restore-cursor
@@ -104,14 +104,14 @@ define: shapes [
 */
 
 define: colors [
-  [255 255 0]
-  [0 255 255]
-  [255 128 0]
-  [0 0 255]
-  [255 0 255]
-  [0 255 0]
-  [255 0 0]
-] {.. new-rgb} map stack;
+  [255 255 0 255]
+  [0 255 255 255]
+  [255 128 0 255]
+  [0 0 255 255]
+  [255 0 255 255]
+  [0 255 0 255]
+  [255 0 0 255]
+] {.. new-color} map stack;
 
 define: key-rotate @i;
 define: key-left   @j;
@@ -141,7 +141,7 @@ let: is-dropping #f ref;
 rec: Block
   shapes Stack<Stack<Str>>
   i      Int
-  color  RGB
+  color  Color
   x y    Int;
 
 let: block Ref<Block> new;
@@ -194,7 +194,7 @@ func: get-offs(x y Int)(_ Int)
    color.
 */
 
-func: print-shape(b Block c Opt<RGB>)()
+func: print-shape(b Block c Opt<Color>)()
   #out save-cursor
   $c {$c #out set-bg} {#out reset-style} if-else
   

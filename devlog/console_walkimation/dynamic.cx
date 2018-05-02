@@ -25,7 +25,7 @@ func: start-script()()
   let: w $start-x $start-y $left #l-clip #r-clip if-else new-walker;
   let: dx $left #l-stride #r-stride if-else ref;
 
-  {
+  $scripts {
     let: x $w `x get;
     $x $w `y get $buf move-to
     $w next-frame $buf print
@@ -43,7 +43,7 @@ func: start-script()()
       $w `clip #r-clip put
       $w `x 1 put
     } if-else
-  } $scripts ~ push;
+  } push;
 
 let: poll Poll new;
 let: is-done #f ref;
@@ -56,7 +56,7 @@ $poll #in {
   $is-done #t set
 } on-read
 
-#nwalkers {start-script} times
+#nwalkers &start-script times
 
 {
   render

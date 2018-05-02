@@ -13,6 +13,7 @@
 #include "cixl/lib/term.h"
 #include "cixl/scope.h"
 #include "cixl/str.h"
+#include "cixl/term.h"
 
 static bool ask_imp(struct cx_call *call) {
   struct cx_box *p = cx_test(cx_call_arg(call, 0));
@@ -106,7 +107,7 @@ static bool clear_screen_end_imp(struct cx_call *call) {
 
 static bool reset_style_imp(struct cx_call *call) {
   struct cx_box *out = cx_test(cx_call_arg(call, 0));
-  fputs(CX_CSI_ESC "0m", cx_file_ptr(out->as_file));
+  cx_reset_style(cx_file_ptr(out->as_file));
   return true;
 }
 
@@ -165,8 +166,7 @@ static bool move_down_imp(struct cx_call *call) {
   struct cx_box
     *n = cx_test(cx_call_arg(call, 0)),
     *out = cx_test(cx_call_arg(call, 1));
-  
-  fprintf(cx_file_ptr(out->as_file), CX_CSI_ESC "%ldB", n->as_int);
+  cx_move_down(n->as_int, cx_file_ptr(out->as_file));
   return true;
 }
 
@@ -174,8 +174,8 @@ static bool move_left_imp(struct cx_call *call) {
   struct cx_box
     *n = cx_test(cx_call_arg(call, 0)),
     *out = cx_test(cx_call_arg(call, 1));
-  
-  fprintf(cx_file_ptr(out->as_file), CX_CSI_ESC "%ldD", n->as_int);
+
+  cx_move_left(n->as_int, cx_file_ptr(out->as_file));
   return true;
 }
 
@@ -183,8 +183,7 @@ static bool move_right_imp(struct cx_call *call) {
   struct cx_box
     *n = cx_test(cx_call_arg(call, 0)),
     *out = cx_test(cx_call_arg(call, 1));
-  
-  fprintf(cx_file_ptr(out->as_file), CX_CSI_ESC "%ldC", n->as_int);
+  cx_move_right(n->as_int, cx_file_ptr(out->as_file));
   return true;
 }
 
@@ -199,14 +198,14 @@ static bool move_to_imp(struct cx_call *call) {
 }
 
 static bool set_bg_imp(struct cx_call *call) {
-  struct cx_rgb *c = &cx_test(cx_call_arg(call, 0))->as_rgb;
+  struct cx_color *c = &cx_test(cx_call_arg(call, 0))->as_color;
   struct cx_file *out = cx_test(cx_call_arg(call, 1))->as_file;
-  fprintf(cx_file_ptr(out), CX_CSI_ESC "48;2;%d;%d;%dm", c->r, c->g, c->b);
+  cx_set_bg(c->r, c->g, c->b, cx_file_ptr(out));
   return true;
 }
 
 static bool set_fg_imp(struct cx_call *call) {
-  struct cx_rgb *c = &cx_test(cx_call_arg(call, 0))->as_rgb;
+  struct cx_color *c = &cx_test(cx_call_arg(call, 0))->as_color;
   struct cx_file *out = cx_test(cx_call_arg(call, 1))->as_file;
   fprintf(cx_file_ptr(out), CX_CSI_ESC "38;2;%d;%d;%dm", c->r, c->g, c->b);
   return true;
@@ -216,7 +215,7 @@ cx_lib(cx_init_term, "cx/io/term") {
   struct cx *cx = lib->cx;
     
   if (!cx_use(cx, "cx/abc", "A", "Str") ||
-      !cx_use(cx, "cx/gfx", "RGB") ||
+      !cx_use(cx, "cx/gfx", "Color") ||
       !cx_use(cx, "cx/io", "WFile", "#error", "#in", "#out", "print") ||
       !cx_use(cx, "cx/iter", "times")) {
     return false;
@@ -341,13 +340,13 @@ cx_lib(cx_init_term, "cx/io/term") {
 	       move_to_imp);  
 
   cx_add_cfunc(lib, "set-bg",
-	       cx_args(cx_arg("c", cx->rgb_type),
+	       cx_args(cx_arg("c", cx->color_type),
 		       cx_arg("out", cx->wfile_type)),
 	       cx_args(),
 	       set_bg_imp);  
 
   cx_add_cfunc(lib, "set-fg",
-	       cx_args(cx_arg("c", cx->rgb_type),
+	       cx_args(cx_arg("c", cx->color_type),
 		       cx_arg("out", cx->wfile_type)),
 	       cx_args(),
 	       set_fg_imp);  

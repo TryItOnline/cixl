@@ -134,9 +134,9 @@ func: clip(r Reel p Palette)(c Clip)
     $f
   } map Stack<Frame> new into put;
 
-define: body  36  38 252 new-rgb;
-define: skin 252 186 148 new-rgb;
-define: hair  56 104  56 new-rgb;
+define: body  36  38 252 255 new-color;
+define: skin 252 186 148 255 new-color;
+define: hair  56 104  56 255 new-color;
 
 define: hlf 1.1;
 
@@ -200,7 +200,7 @@ func: start-script()()
   let: w $start-x $start-y $left #l-clip #r-clip if-else new-walker;
   let: dx $left #l-stride #r-stride if-else ref;
 
-  {
+  $scripts {
     let: x $w `x get;
     $x $w `y get $buf move-to
     $w next-frame $buf print
@@ -218,7 +218,7 @@ func: start-script()()
       $w `clip #r-clip put
       $w `x 1 put
     } if-else
-  } $scripts ~ push;
+  } push;
 
 func: render()()
   $buf 0 seek

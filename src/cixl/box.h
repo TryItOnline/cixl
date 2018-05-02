@@ -5,8 +5,8 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#include "cixl/color.h"
 #include "cixl/float.h"
-#include "cixl/rgb.h"
 #include "cixl/sym.h"
 #include "cixl/time.h"
 
@@ -32,6 +32,7 @@ struct cx_box {
   union {
     bool             as_bool;
     unsigned char    as_char;
+    struct cx_color  as_color;
     struct cx_error *as_error;
     struct cx_file  *as_file;
     cx_float_t       as_float;
@@ -44,7 +45,6 @@ struct cx_box {
     void            *as_ptr;
     struct cx_queue *as_queue;
     struct cx_ref   *as_ref;
-    struct cx_rgb   as_rgb;
     struct cx_str   *as_str;
     struct cx_sym    as_sym;
     struct cx_table *as_table;

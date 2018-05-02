@@ -4,9 +4,9 @@ type-id: Shape Stack<Str>;
 type-id: Reel Stack<Shape>;
 type-id: Palette Table<Char Color>;
 
-define: body 36 38 252 new-rgb;
-define: skin 252 186 148 new-rgb;
-define: hair 56 104 56 new-rgb;
+define: body 36 38 252 255 new-color;
+define: skin 252 186 148 255 new-color;
+define: hair 56 104 56 255 new-color;
 define: hlf 1.1;
 
 define: palette [
