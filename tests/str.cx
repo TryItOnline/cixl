@@ -30,5 +30,5 @@
 
 'foo@027bar' 3 get @@027 = check
 
-'foo' 2 42 fill 'foo4242' = check
-'foo' 2 'bar' fill 'foobarbar' = check
+'foo' 2 42 repeat 'foo4242' = check
+'foo' 2 'bar' repeat 'foobarbar' = check

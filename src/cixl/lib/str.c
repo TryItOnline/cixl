@@ -331,7 +331,7 @@ static bool last_imp(struct cx_call *call) {
   return true;
 }
 
-static bool fill_imp(struct cx_call *call) {
+static bool repeat_imp(struct cx_call *call) {
   struct cx_box
     *v = cx_test(cx_call_arg(call, 0)),
     *n = cx_test(cx_call_arg(call, 1)),
@@ -572,12 +572,12 @@ cx_lib(cx_init_str, "cx/str") {
 	       cx_args(cx_arg(NULL, cx_type_get(cx->opt_type, cx->char_type))),
 	       last_imp);
 
-  cx_add_cfunc(lib, "fill",
+  cx_add_cfunc(lib, "repeat",
 	       cx_args(cx_arg("s", cx->str_type),
 		       cx_arg("n", cx->int_type),
 		       cx_arg("a", cx->any_type)),
 	       cx_args(cx_arg(NULL, cx->str_type)),
-	       fill_imp);
+	       repeat_imp);
   
   cx_add_cfunc(lib, "pop",
 	       cx_args(cx_arg("s", cx->str_type)),

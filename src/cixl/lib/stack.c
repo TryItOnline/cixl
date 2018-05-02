@@ -238,7 +238,7 @@ static bool sort_imp(struct cx_call *call) {
   return true;
 }
 
-static bool fill_imp(struct cx_call *call) {
+static bool repeat_imp(struct cx_call *call) {
   struct cx_box
     *act = cx_test(cx_call_arg(call, 2)),
     *n = cx_test(cx_call_arg(call, 1));
@@ -434,12 +434,12 @@ cx_lib(cx_init_stack, "cx/stack") {
 	       cx_args(),
 	       sort_imp);
 
-  cx_add_cfunc(lib, "fill",
+  cx_add_cfunc(lib, "repeat",
 	       cx_args(cx_arg("s", cx->stack_type),
 		       cx_arg("n", cx->int_type),
 		       cx_arg("act", cx->opt_type)),
 	       cx_args(),
-	       fill_imp);
+	       repeat_imp);
 
   cx_add_cfunc(lib, "move",
 	       cx_args(cx_arg("s", cx->stack_type),

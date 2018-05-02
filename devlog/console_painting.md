@@ -30,7 +30,7 @@ let: (w h) screen-size --;
 let: i $fn load-png;
 ```
 
-Next we allocate yet another frame to use as destination for scaling and a painter. Once proportional scaling factors are calculated, the loaded image is set as destination brush and painted. Frames support printing ANSI graphics directly to output streams.
+Next we allocate yet another frame to use as destination for scaling and a painter. Once proportional scaling factors are calculated, the loaded image is set as destination brush and painted with full opacity. Frames support printing ANSI graphics directly to output streams.
 
 ```
 let: f $w $h new-frame;
@@ -42,7 +42,7 @@ $p
 min % scale
 
 $p $i 0 0 set-source
-$p paint
+$p #nil paint
 
 #out clear-screen
 1 1 #out move-to
