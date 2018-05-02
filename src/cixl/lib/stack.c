@@ -50,6 +50,27 @@ static bool put_imp(struct cx_call *call) {
   return true;
 }
 
+static bool put_call_imp(struct cx_call *call) {
+  struct cx_stack *st = cx_test(cx_call_arg(call, 0))->as_ptr;
+  int64_t i = cx_test(cx_call_arg(call, 1))->as_int;
+  struct cx_box *a = cx_test(cx_call_arg(call, 2));
+  struct cx_scope *s = call->scope;
+  
+  if (i < 0 || i >= st->imp.count) {
+    cx_error(s->cx, s->cx->row, s->cx->col, "Index out of bounds: %" PRId64, i);
+    return false;
+  }  
+
+  cx_copy(cx_push(s), cx_vec_get(&st->imp, i));
+  if (!cx_call(a, s)) { return false; }
+  struct cx_box *v = cx_pop(s, false);
+  if (!v) { return false; }
+  struct cx_box *p = cx_vec_get(&st->imp, i);
+  cx_box_deinit(p);
+  *p = *v;
+  return true;
+}
+
 static bool pop_imp(struct cx_call *call) {
   struct cx_stack *st = cx_test(cx_call_arg(call, 0))->as_ptr;
   struct cx_scope *s = call->scope;
@@ -398,6 +419,13 @@ cx_lib(cx_init_stack, "cx/stack") {
 		       cx_narg(cx, "val", 0, 0)),
 	       cx_args(),
 	       put_imp);
+
+  cx_add_cfunc(lib, "put-call",
+	       cx_args(cx_arg("s", cx->stack_type),
+		       cx_arg("i", cx->int_type),
+		       cx_arg("a", cx->any_type)),
+	       cx_args(),
+	       put_call_imp);
 
   cx_add_cfunc(lib, "get-rand",
 	       cx_args(cx_arg("s", cx->stack_type)),
