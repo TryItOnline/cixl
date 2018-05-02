@@ -1,4 +1,18 @@
-use: cx;
+/*
+  A Mandelbrot fractal zoom implemented using ANSI graphics.
+  Depends on libcairo and the cximage plugin.
+  The animation may be started by executing "cixl examples/mandelbrot.cx".
+
+  https://github.com/basic-gongfu/cixl#getting-started
+*/
+
+link:
+  'libcairo'
+  'libcximage';
+
+init: 'image';
+
+use: cx cx/image;
 
 define: max 4.0;
 define: max-iter 570;
@@ -7,24 +21,22 @@ define: black 0 0 0 255 new-color;
 let: (max-x max-y) screen-size;
 let: max-cx $max-x 3.0 / 2.0 *;
 let: max-cy $max-y 2.0 /;
-let: rows Stack<Str> new;
-let: buf Buf new;
+let: frame $max-x $max-y new-frame;
 let: is-black Stack<Int> new;
 let: zoom 0 ref;
 
 func: render()()
+  $frame #black fill
   $is-black % clear $max-x 0 repeat
-  $rows clear
   
-  $max-y 2 / {
+  $max-y 2 / ++ {
     let: y;
-    $buf 0 seek
 
     $max-x {
       let: x;
 
       $is-black $x get 1 > {
-        #black $buf set-bg
+        $frame $x $y #black put-xy
       } {
         let: (zx zy) 0.0 ref %%;
         let: cx $x $max-cx - $zoom deref /;
@@ -41,23 +53,19 @@ func: render()()
 
         let: c $i deref % -7 bsh bor 256 mod;
 	
-        $c {
+        $frame $x $y $c {
           $x 256 mod $y 256 mod
         } {
           $is-black $x &++ put-call
           0 0
-        } if-else $c 255 new-color $buf set-bg
+        } if-else $c 255 new-color put-xy
       } if-else
-      
-      @@s $buf print
     } for
-
-    $rows $buf str push   
   } for
 
   1 1 #out move-to
-  $rows {#out print} for
-  $rows riter {#out print} for;
+  $frame 0 $max-y 2 / % vfold
+  $frame #out print;
 
 #out hide-cursor
 raw-mode
