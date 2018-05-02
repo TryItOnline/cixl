@@ -819,8 +819,8 @@ Func not applicable: same-add
 Literal values may used instead of types. Anonymous arguments are pushed on the function stack before evaluation.
 
 ```
-   func: is-fortytwo(_ Int)(#t) _;
-   func: is-fortytwo(42)(#f);
+   func: is-fortytwo(_ Int)(#f) _;
+   func: is-fortytwo(42)(#t);
    | 41 is-fortytwo
 
 [#f]
