@@ -196,7 +196,7 @@ static bool parse_id(struct cx *cx, FILE *in, struct cx_vec *out) {
   }
 }
 
-static bool parse_int(struct cx *cx, FILE *in, struct cx_vec *out) {
+static bool parse_num(struct cx *cx, FILE *in, struct cx_vec *out) {
   struct cx_mfile s;
   cx_mfile_open(&s);
   int row = cx->row, col = cx->col;
@@ -526,6 +526,10 @@ bool cx_parse_tok(struct cx *cx, FILE *in, struct cx_vec *out) {
       return parse_str(cx, in, out);
     case '`':
       return parse_sym(cx, in, out);
+    case '.':
+      cx->col--;
+      ungetc(c, in);
+      return parse_num(cx, in, out);
     case '-': {
       cx->col--;
       char c1 = fgetc(in);
@@ -533,7 +537,7 @@ bool cx_parse_tok(struct cx *cx, FILE *in, struct cx_vec *out) {
       ungetc(c, in);
       
       if (isdigit(c1)) {
-	return parse_int(cx, in, out);
+	return parse_num(cx, in, out);
       } else {
 	return parse_id(cx, in, out);
       }
@@ -544,7 +548,7 @@ bool cx_parse_tok(struct cx *cx, FILE *in, struct cx_vec *out) {
       if (isdigit(c)) {
 	ungetc(c, in);
 	cx->col--;
-	return parse_int(cx, in, out);
+	return parse_num(cx, in, out);
       }
 
       if (c == '/') {

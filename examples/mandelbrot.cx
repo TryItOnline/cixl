@@ -26,7 +26,7 @@ let: is-black Stack<Int> new;
 let: zoom 0 ref;
 
 func: render()()
-  $frame #black fill
+  $frame #black fill-color
   $is-black % clear $max-x 0 repeat
   
   $max-y 2 / ++ {
