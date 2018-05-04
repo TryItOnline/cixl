@@ -528,8 +528,10 @@ bool cx_parse_tok(struct cx *cx, FILE *in, struct cx_vec *out) {
       return parse_sym(cx, in, out);
     case '.':
       cx->col--;
+      char c1 = fgetc(in);
+      ungetc(c1, in);
       ungetc(c, in);
-      return parse_num(cx, in, out);
+      return isdigit(c1) ? parse_num(cx, in, out) : parse_id(cx, in, out);
     case '-': {
       cx->col--;
       char c1 = fgetc(in);

@@ -15,3 +15,5 @@
 50 fib 12586269025 = check
 
 3.14 int 3 = check
+
+.5 0.5 = check
