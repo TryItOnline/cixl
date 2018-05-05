@@ -35,6 +35,9 @@ Press Return twice to evaluate.
 $
 ```
 
+> Are you quite sure that all those bells and whistles, all those wonderful facilities of your so called powerful programming languages, belong to the solution set rather than the problem set?<br/><br/>
+> Edsger W. Dijkstra
+
 ### Unix Native
 Contrary to the current trend of stacking abstractions in the name of portability, Cixl embraces the chosen requirement and limitation of running on top of a reasonably POSIX compliant Unix derivative; by integrating deep into the C tool chain, and by providing features optimized for Unix feature set.
 
