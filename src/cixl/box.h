@@ -7,6 +7,7 @@
 
 #include "cixl/color.h"
 #include "cixl/float.h"
+#include "cixl/point.h"
 #include "cixl/sym.h"
 #include "cixl/time.h"
 
@@ -40,6 +41,7 @@ struct cx_box {
     struct cx_iter  *as_iter;
     struct cx_lib   *as_lib;
     struct cx_pair  *as_pair;
+    struct cx_point  as_point;
     struct cx_proc  *as_proc;
     struct cx_poll  *as_poll;
     void            *as_ptr;
@@ -65,6 +67,7 @@ bool cx_call(struct cx_box *box, struct cx_scope *scope);
 struct cx_box *cx_copy(struct cx_box *dst, const struct cx_box *src);
 struct cx_box *cx_clone(struct cx_box *dst, struct cx_box *src);
 void cx_iter(struct cx_box *in, struct cx_box *out);
+bool cx_sink(struct cx_box *dst, struct cx_box *v);
 bool cx_write(struct cx_box *box, FILE *out);
 void cx_dump(struct cx_box *box, FILE *out);
 void cx_print(struct cx_box *box, FILE *out);

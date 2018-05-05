@@ -42,6 +42,7 @@ struct cx_type {
   void (*copy)(struct cx_box *dst, const struct cx_box *src);
   void (*clone)(struct cx_box *dst, struct cx_box *src);
   void (*iter)(struct cx_box *, struct cx_box *);
+  bool (*sink)(struct cx_box *, struct cx_box *);
   void (*write)(struct cx_box *, FILE *);
   void (*dump)(struct cx_box *, FILE *);
   void (*print)(struct cx_box *, FILE *);

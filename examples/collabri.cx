@@ -17,7 +17,7 @@ use:
   (cx/const define:)
   (cx/error catch: throw value)
   (cx/func func: recall)
-  (cx/gfx new-color)
+  (cx/gfx rgb)
   (cx/io
     File RFile WFile
     #out
@@ -53,7 +53,7 @@ let: port #args pop {'Missing port' throw} or int;
 define: backlog 3;
 define: tail-default 24;
 
-define: error-color 255 0 0 255 new-color;
+define: error-color 255 0 0 rgb;
 
 func: get-path(n Str)(_ Str)
   [home-dir '.collabri' $n] @/ join;

@@ -25,6 +25,14 @@ static bool is_nil_imp(struct cx_call *call) {
   return true;
 }
 
+static bool push_imp(struct cx_call *call) {
+  struct cx_box
+    *s = cx_test(cx_call_arg(call, 0)),
+    *v = cx_test(cx_call_arg(call, 1));
+
+  return cx_sink(s, v);
+}
+
 cx_lib(cx_init_abc, "cx/abc") { 
   struct cx *cx = lib->cx;
 
@@ -42,6 +50,10 @@ cx_lib(cx_init_abc, "cx/abc") {
   cx->seq_type = cx_add_type(lib, "Seq", cx->any_type);
   cx_type_push_args(cx->seq_type, cx->opt_type);
   cx->seq_type->meta = CX_TYPE_ID;
+
+  cx->sink_type = cx_add_type(lib, "Sink", cx->any_type);
+  cx_type_push_args(cx->sink_type, cx->opt_type);
+  cx->sink_type->meta = CX_TYPE_ID;
 
   cx->num_type = cx_add_type(lib, "Num", cx->cmp_type);
   cx->num_type->meta = CX_TYPE_ID;
@@ -77,6 +89,12 @@ cx_lib(cx_init_abc, "cx/abc") {
   cx_add_cfunc(lib, "is-nil",
 	       cx_args(cx_arg("v", cx->opt_type)), cx_args(),
 	       is_nil_imp);
-  
+
+  cx_add_cfunc(lib, "push",
+	       cx_args(cx_arg("s", cx->sink_type),
+		       cx_narg(cx, "v", 0, 0)),
+	       cx_args(),
+	       push_imp);
+
   return true;
 }

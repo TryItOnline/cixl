@@ -134,9 +134,9 @@ func: clip(r Reel p Palette)(c Clip)
     $f
   } map Stack<Frame> new into put;
 
-define: body  36  38 252 255 new-color;
-define: skin 252 186 148 255 new-color;
-define: hair  56 104  56 255 new-color;
+define: body  36  38 252 rgb;
+define: skin 252 186 148 rgb;
+define: hair  56 104  56 rgb;
 
 define: hlf 1.1;
 

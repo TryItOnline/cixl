@@ -75,6 +75,10 @@ void cx_iter(struct cx_box *in, struct cx_box *out) {
   cx_test(in->type->iter)(in, out);
 }
 
+bool cx_sink(struct cx_box *dst, struct cx_box *v) {
+  return cx_test(dst->type->sink)(dst, v);
+}
+
 bool cx_write(struct cx_box *box, FILE *out) {
   if (!box->type->write) {
     struct cx *cx = box->type->lib->cx;

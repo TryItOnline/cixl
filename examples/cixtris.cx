@@ -10,7 +10,7 @@ use:
   (cx/const define:)
   (cx/error throw)
   (cx/func func:)
-  (cx/gfx Color new-color)
+  (cx/gfx Color rgb)
   (cx/io #in #out flush read-char print unblock)
   (cx/io/term
     clear-screen hide-cursor #key-esc reset-style restore-cursor
@@ -104,14 +104,14 @@ define: shapes [
 */
 
 define: colors [
-  [255 255 0 255]
-  [0 255 255 255]
-  [255 128 0 255]
-  [0 0 255 255]
-  [255 0 255 255]
-  [0 255 0 255]
-  [255 0 0 255]
-] {.. new-color} map stack;
+  [255 255 0]
+  [0 255 255]
+  [255 128 0]
+  [0 0 255]
+  [255 0 255]
+  [0 255 0]
+  [255 0 0]
+] {.. rgb} map stack;
 
 define: key-rotate @i;
 define: key-left   @j;

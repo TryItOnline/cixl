@@ -151,9 +151,9 @@ struct cx *cx_init(struct cx *cx) {
     cx->nil_type = cx->num_type =
     cx->meta_type =
     cx->opt_type =
-    cx->pair_type = cx->poll_type = cx->proc_type = 
+    cx->pair_type = cx->point_type = cx->poll_type = cx->proc_type = 
     cx->rec_type = cx->ref_type = cx->rfile_type = cx->rwfile_type =
-    cx->seq_type = cx->stack_type = cx->str_type = cx->sym_type =
+    cx->seq_type = cx->sink_type = cx->stack_type = cx->str_type = cx->sym_type =
     cx->table_type = cx->tcp_client_type = cx->tcp_server_type = cx->time_type =
     cx->wfile_type = NULL;
       

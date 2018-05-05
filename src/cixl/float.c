@@ -9,13 +9,18 @@
 #include "cixl/int.h"
 #include "cixl/util.h"
 
+enum cx_cmp cx_cmp_float(const void *x, const void *y) {
+  cx_float_t xv = *(cx_float_t *)x, yv = *(cx_float_t *)y;
+  if (xv < yv) { return CX_CMP_LT; }
+  return (xv > yv) ? CX_CMP_GT : CX_CMP_EQ;
+}
+
 static bool equid_imp(struct cx_box *x, struct cx_box *y) {
   return x->as_float == y->as_float;
 }
 
 static enum cx_cmp cmp_imp(const struct cx_box *x, const struct cx_box *y) {
-  if (x->as_float < y->as_float) { return CX_CMP_LT; }
-  return (x->as_float > y->as_float) ? CX_CMP_GT : CX_CMP_EQ;
+  return cx_cmp_float(&x->as_float, &y->as_float);
 }
 
 static bool ok_imp(struct cx_box *v) {

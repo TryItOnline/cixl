@@ -41,6 +41,7 @@ struct cx_type *cx_type_init(struct cx_type *type,
   type->copy = NULL;
   type->clone = NULL;
   type->iter = NULL;
+  type->sink = NULL;
   type->write = NULL;
   type->dump = NULL;
   type->print = NULL;
@@ -197,6 +198,7 @@ void cx_type_copy(struct cx_type *dst, struct cx_type *src) {
   dst->call = src->call;
   dst->new = src->new;
   dst->iter = src->iter;
+  dst->sink = src->sink;
   dst->copy = src->copy;
   dst->clone = src->clone;
 }

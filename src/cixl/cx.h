@@ -50,9 +50,9 @@ struct cx {
     *meta_type,
     *nil_type, *num_type,
     *opt_type,
-    *pair_type, *poll_type, *proc_type,
+    *pair_type, *point_type, *poll_type, *proc_type,
     *rec_type, *ref_type, *rfile_type, *rwfile_type,
-    *seq_type, *stack_type, *str_type, *sym_type,
+    *seq_type, *sink_type, *stack_type, *str_type, *sym_type,
     *table_type, *tcp_client_type, *tcp_server_type, *time_type,
     *wfile_type;
 

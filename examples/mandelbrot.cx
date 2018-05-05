@@ -16,7 +16,7 @@ use: cx cx/image;
 
 define: max 4.0;
 define: max-iter 570;
-define: black 0 0 0 255 new-color;
+define: black 0 0 0 rgb;
 
 let: (max-x max-y) screen-size;
 let: max-cx $max-x 3.0 / 2.0 *;
@@ -58,7 +58,7 @@ func: render()()
         } {
           $is-black $x &++ put-call
           0 0
-        } if-else $c 255 new-color put-xy
+        } if-else $c rgb put-xy
       } if-else
     } for
   } for

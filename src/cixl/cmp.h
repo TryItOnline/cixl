@@ -10,7 +10,6 @@ enum cx_cmp cx_cmp_cstr(const void *x, const void *y);
 enum cx_cmp cx_cmp_cint(const void *x, const void *y);
 enum cx_cmp cx_cmp_int(const void *x, const void *y);
 enum cx_cmp cx_cmp_ptr(const void *x, const void *y);
-enum cx_cmp cx_cmp_rat(const void *x, const void *y);
 enum cx_cmp cx_cmp_size(const void *x, const void *y);
 
 #endif

@@ -21,13 +21,6 @@ static bool len_imp(struct cx_call *call) {
   return true;
 }
 
-static bool push_imp(struct cx_call *call) {
-  struct cx_box *val = cx_test(cx_call_arg(call, 1));
-  struct cx_stack *st = cx_test(cx_call_arg(call, 0))->as_ptr;
-  cx_copy(cx_vec_push(&st->imp), val);
-  return true;
-}
-
 static bool put_imp(struct cx_call *call) {
   struct cx_box
     *val = cx_test(cx_call_arg(call, 2)),
@@ -392,12 +385,6 @@ cx_lib(cx_init_stack, "cx/stack") {
 	       cx_args(cx_arg(NULL, cx->int_type)),
 	       len_imp);
   
-  cx_add_cfunc(lib, "push",
-	       cx_args(cx_arg("s", cx->stack_type),
-		       cx_narg(cx, "val", 0, 0)),
-	       cx_args(),
-	       push_imp);
-
   cx_add_cfunc(lib, "pop",
 	       cx_args(cx_arg("s", cx->stack_type)),
 	       cx_args(cx_arg(NULL, cx_type_get(cx->opt_type, cx_arg_ref(cx, 0, 0)))),
