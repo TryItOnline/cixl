@@ -45,7 +45,7 @@ $p $i 0 0 set-source
 $p #nil paint
 
 #out clear-screen
-1 1 #out move-to
+#out 1 1 xy move-to
 $f #out print
 #out flush
 ```
