@@ -63,7 +63,7 @@ func: render()()
     } for
   } for
 
-  1 1 #out move-to
+  #out 1 1 xy move-to
   $frame 0 $max-y 2 / % vfold
   $frame #out print;
 
@@ -87,6 +87,6 @@ $poll #in {
 
 #out reset-style
 #out clear-screen
-1 1 #out move-to
+#out 1 1 xy move-to
 #out show-cursor
 normal-mode

@@ -136,7 +136,7 @@ struct cx_type *cx_resolve_arg_refs(struct cx_type *t,
     struct cx_arg_ref *ar = cx_baseof(t, struct cx_arg_ref, imp);
     int *i = cx_vec_start(&ar->indices);
     tt = get_child(*i);
-
+    
     if (!tt) {
       cx_error(cx, cx->row, cx->col, "Failed resolving type arg");
       return NULL;
@@ -145,6 +145,7 @@ struct cx_type *cx_resolve_arg_refs(struct cx_type *t,
     if (i+1 != cx_vec_end(&ar->indices)) {
       struct cx_type *pt = get_parent(*i);
       if (!pt) { return NULL; }
+      
       struct cx_type *st = cx_subtype(tt, pt);
       if (!st) { return NULL; }
       tt = cx_type_arg(st, *(i+1));

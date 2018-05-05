@@ -188,12 +188,9 @@ static bool move_right_imp(struct cx_call *call) {
 }
 
 static bool move_to_imp(struct cx_call *call) {
-  struct cx_box
-    *x = cx_test(cx_call_arg(call, 0)),
-    *y = cx_test(cx_call_arg(call, 1)),
-    *out = cx_test(cx_call_arg(call, 2));
-  
-  fprintf(cx_file_ptr(out->as_file), CX_CSI_ESC "%ld;%ldH", y->as_int, x->as_int);
+  FILE *out = cx_file_ptr(cx_test(cx_call_arg(call, 0))->as_file);
+  struct cx_point *pos = &cx_test(cx_call_arg(call, 1))->as_point;
+  fprintf(out, CX_CSI_ESC "%ld;%ldH", (int64_t)pos->y, (int64_t)pos->x);
   return true;
 }
 
@@ -333,9 +330,7 @@ cx_lib(cx_init_term, "cx/io/term") {
 	       move_right_imp);  
 
   cx_add_cfunc(lib, "move-to",
-	       cx_args(cx_arg("x", cx->int_type),
-		       cx_arg("y", cx->int_type),
-		       cx_arg("out", cx->wfile_type)),
+	       cx_args(cx_arg("out", cx->wfile_type), cx_arg("pos", cx->point_type)),
 	       cx_args(),
 	       move_to_imp);  
 

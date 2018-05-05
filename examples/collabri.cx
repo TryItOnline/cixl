@@ -17,7 +17,7 @@ use:
   (cx/const define:)
   (cx/error catch: throw value)
   (cx/func func: recall)
-  (cx/gfx rgb)
+  (cx/gfx rgb xy)
   (cx/io
     File RFile WFile
     #out
@@ -38,7 +38,7 @@ use:
   (cx/str int join reverse split str words)
   (cx/sym sym)
   (cx/sys #args home-dir make-dir)
-  (cx/stack _ % ~ get pop push)
+  (cx/stack _ % ~ get pop)
   (cx/table Table put)
   (cx/time fmt now)
   (cx/type new)
@@ -351,7 +351,7 @@ func: handle-in(c Client `auth-password in Str)()
   let: out $c `buf get;
   
   $out clear-screen
-  1 1 $out move-to
+  $out 1 1 xy move-to
   
   $p is-nil {
     $u `password $in put
@@ -424,14 +424,14 @@ func: new-client(io TCPClient)(_ Client)
   } on-read
 
   $out clear-screen
-  1 1 $out move-to
+  $out 1 1 xy move-to
   
   $c [`intro get-option @@n @@n] push-out
   $c poll-out
   $c;
 
 #out clear-screen
-1 1 #out move-to
+#out 1 1 xy move-to
 
 ['Collabri v0.3' @@n] say
 
@@ -459,7 +459,7 @@ $users len {
   $users $u upsert
   $poll commit
   
-  1 3 #out move-to
+  #out 1 3 xy move-to
   #out clear-screen-end
 } else
 

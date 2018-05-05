@@ -282,12 +282,12 @@ struct cx_type *cx_supertype(struct cx_type *t, struct cx_type *pt) {
 
 struct cx_type *cx_subtype(struct cx_type *t, struct cx_type *pt) {
   if (t == pt) { return t; }
-  if (pt->raw->tag+1 >= t->is.count) { return NULL; }
-  struct cx_type **ce = cx_vec_end(&t->is);
+  if (pt->raw->tag >= t->is.count) { return NULL; }
+  struct cx_type **cs = cx_vec_start(&t->is);
 
-  for (struct cx_type **c = cx_vec_get(&t->is, pt->raw->tag+1);
-       c != ce;
-       c++) {
+  for (struct cx_type **c = cx_vec_peek(&t->is, 0);
+       c != cs;
+       c--) {
     if (*c && (*c)->raw == pt->raw) { return *c; }
   }
 

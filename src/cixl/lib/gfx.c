@@ -9,13 +9,37 @@
 #include "cixl/scope.h"
 #include "cixl/str.h"
 
-static bool xy_imp(struct cx_call *call) {
+static bool xy_int_imp(struct cx_call *call) {
+  int64_t
+    x = cx_test(cx_call_arg(call, 0))->as_int,
+    y = cx_test(cx_call_arg(call, 1))->as_int;
+
+  struct cx_scope *s = call->scope;
+  cx_point_init(&cx_box_init(cx_push(s), s->cx->point_type)->as_point, x, y);
+  return true;
+}
+
+static bool xy_float_imp(struct cx_call *call) {
   cx_float_t
     x = cx_test(cx_call_arg(call, 0))->as_float,
     y = cx_test(cx_call_arg(call, 1))->as_float;
 
   struct cx_scope *s = call->scope;
   cx_point_init(&cx_box_init(cx_push(s), s->cx->point_type)->as_point, x, y);
+  return true;
+}
+
+static bool x_imp(struct cx_call *call) {
+  struct cx_point *p = &cx_test(cx_call_arg(call, 0))->as_point;
+  struct cx_scope *s = call->scope;
+  cx_box_init(cx_push(s), s->cx->float_type)->as_float = p->x;
+  return true;
+}
+
+static bool y_imp(struct cx_call *call) {
+  struct cx_point *p = &cx_test(cx_call_arg(call, 0))->as_point;
+  struct cx_scope *s = call->scope;
+  cx_box_init(cx_push(s), s->cx->float_type)->as_float = p->y;
   return true;
 }
 
@@ -77,10 +101,26 @@ cx_lib(cx_init_gfx, "cx/gfx") {
   cx->point_type = cx_init_point_type(lib);
 
   cx_add_cfunc(lib, "xy",
+	       cx_args(cx_arg("x", cx->int_type),
+		       cx_arg("y", cx->int_type)),
+	       cx_args(cx_arg(NULL, cx->point_type)),
+	       xy_int_imp);
+
+  cx_add_cfunc(lib, "xy",
 	       cx_args(cx_arg("x", cx->float_type),
 		       cx_arg("y", cx->float_type)),
 	       cx_args(cx_arg(NULL, cx->point_type)),
-	       xy_imp);
+	       xy_float_imp);
+
+  cx_add_cfunc(lib, "x",
+	       cx_args(cx_arg("p", cx->point_type)),
+	       cx_args(cx_arg(NULL, cx->float_type)),
+	       x_imp);
+
+  cx_add_cfunc(lib, "y",
+	       cx_args(cx_arg("p", cx->point_type)),
+	       cx_args(cx_arg(NULL, cx->float_type)),
+	       y_imp);
 
   cx_add_cfunc(lib, "rgb",
 	       cx_args(cx_arg("r", cx->int_type),

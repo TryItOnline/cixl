@@ -2,9 +2,10 @@
 #define ntohll(x) ((1==ntohl(1)) ? (x) : ((uint64_t)ntohl((x) & 0xFFFFFFFF) << 32) | ntohl((x) >> 32))
 host64 & net64 fns
 
-* also draw button with reverse gradient
-** extract draw func
-* add caption
+* fix push tests
+** test collabri/dynamic walker
+* update devlog/move-to
+* finish button caption
 * add cxgtk plugin
 * ---
 * throw error on dup rec field
@@ -43,6 +44,7 @@ host64 & net64 fns
 * add support for lib ids
 ** change TID compile to scan for '/'
 *** perform lib specific lookup if found
+* switch write fn arg order
 * convert type id to sym
 * convert macro id to sym
 * convert func id to sym

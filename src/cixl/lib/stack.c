@@ -375,7 +375,8 @@ static bool swap_imp(struct cx_call *call) {
 cx_lib(cx_init_stack, "cx/stack") {
   struct cx *cx = lib->cx;
     
-  if (!cx_use(cx, "cx/abc", "A", "Cmp", "Int", "Opt", "Seq", "Stack", "Sym") ||
+  if (!cx_use(cx, "cx/abc",
+	      "A", "Cmp", "Int", "Opt", "Seq", "Stack", "Sym", "push") ||
       !cx_use(cx, "cx/type", "new")) {
     return false;
   }

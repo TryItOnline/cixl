@@ -8,6 +8,7 @@
 use:
   (cx/cond = ! if or)
   (cx/const define:)
+  (cx/gfx xy)
   (cx/io #in #out print read-char)
   (cx/io/term
     clear-row clear-screen #key-space
@@ -19,12 +20,12 @@ use:
 
 raw-mode
 #out clear-screen
-1 1 #out move-to
+#out 1 1 xy move-to
 
 {
   let: c #in read-char;
   let: cc $c ctrl-char;
-  1 1 #out move-to
+  #out 1 1 xy move-to
   #out clear-row
   $cc {'C ' #out print} if
   $cc $c or #out print

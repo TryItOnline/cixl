@@ -10,7 +10,7 @@ use:
   (cx/const define:)
   (cx/error throw)
   (cx/func func:)
-  (cx/gfx Color rgb)
+  (cx/gfx Color rgb xy)
   (cx/io #in #out flush read-char print unblock)
   (cx/io/term
     clear-screen hide-cursor #key-esc reset-style restore-cursor
@@ -241,7 +241,7 @@ func: update-tiles(b Block offs Int v Opt<Block>)()
 
 func: print-marker(b Block)()
   #out save-cursor
-  $b `x get $max-y #out move-to
+  #out $b `x get $max-y xy move-to
 
   $b get-shape last {
     @* = {@@s p} {1 #out move-right} if-else
@@ -267,7 +267,7 @@ func: refresh-tiles()()
   
   $max-y -- {
     let: y ++;
-    1 $y #out move-to
+    #out 1 $y xy move-to
     
     $max-x -- {
       let: x ++;
@@ -340,14 +340,14 @@ func: rotate-block(b Block)()
 
 func: refresh-speed()()
   #out save-cursor
-  $max-x 2 + 3 #out move-to
+  #out $max-x 2 + 3 xy move-to
   #out reset-style
   $speed deref ++ #out print
   #out restore-cursor;
 
 func: refresh-next-block(b Block)()
   #out save-cursor
-  $max-x 2 + 6 #out move-to
+  #out $max-x 2 + 6 xy move-to
   #out reset-style
 
   $next-block {
@@ -446,16 +446,16 @@ raw-mode
 #out clear-screen
 #out hide-cursor
 
-$max-x 1 #out move-to
+#out $max-x 1 xy move-to
 #out reverse-colors
 @@s $max-y #out vline
 #out reset-style
 
-$max-x 2 + 2 #out move-to
+#out $max-x 2 + 2 xy move-to
 'Speed:' p
 refresh-speed
 
-$max-x 2 + 5 #out move-to
+#out $max-x 2 + 5 xy move-to
 'Next:' p
 $block new-block set
 new-block refresh-next-block
@@ -465,17 +465,17 @@ func: pk(k A)()
   $k p
   #out reset-style;
 
-$max-x 2 + $max-y 5 - #out move-to
+#out $max-x 2 + $max-y 5 - xy move-to
 'Use ' p #key-left pk ' and ' p #key-right pk ' to move block horizontally,' p
 
-$max-x 2 + $max-y 4 - #out move-to
+#out $max-x 2 + $max-y 4 - xy move-to
 
 #key-rotate pk ' rotates and ' p #key-drop pk ' drops.' p
 
-$max-x 2 + $max-y 2 - #out move-to
+#out $max-x 2 + $max-y 2 - xy move-to
 #key-fast pk ' and ' p #key-slow pk ' may be used to change speed.' p
 
-$max-x 2 + $max-y #out move-to
+#out $max-x 2 + $max-y xy move-to
 'Press ' p 'Esc' pk ' to exit and restore console.' p
 
 /*
@@ -487,7 +487,7 @@ $max-x 2 + $max-y #out move-to
 
   $key-delay deref {
     $key-delay &-- set-call
-    $b `x get $b `y get #out move-to
+    #out $b `x get $b `y get xy move-to
     $b print-block
   } {
     let: s $b get-shape;
@@ -495,7 +495,7 @@ $max-x 2 + $max-y #out move-to
     $ok ! {$b `y get 1 =} and {$is-done #t set} if
     
     $ok {$b `y get $s shape-height + $max-y <} and {
-      $b `x get $b `y get #out move-to
+      #out $b `x get $b `y get xy move-to
       $b erase-block
       $b `y &++ put-call
       1 #out move-down
@@ -505,7 +505,7 @@ $max-x 2 + $max-y #out move-to
       let: bb $next-block deref;
       new-block refresh-next-block
       $block $bb set
-      $bb `x get $bb `y get #out move-to
+      #out $bb `x get $bb `y get xy move-to
       $bb print-block
       $is-dropping #f set
     } if-else
@@ -516,7 +516,7 @@ $max-x 2 + $max-y #out move-to
   let: sd $is-dropping deref 1 {#speed-delays $speed deref get} if-else;
   $poll $sd wait _
   
-  1 $max-y #out move-to
+  #out 1 $max-y xy move-to
   #out reverse-colors
   @@s $max-x #out hline
   #out reset-style
@@ -530,6 +530,6 @@ $max-x 2 + $max-y #out move-to
 
 #out reset-style
 #out clear-screen
-1 1 #out move-to
+#out 1 1 xy move-to
 normal-mode
 #out show-cursor
