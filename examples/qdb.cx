@@ -37,7 +37,7 @@ func: get-rec-key(t DBTable r Arg0:0)(_ DBKey)
   $t `key get {$r ~ get} map stack;
 
 func: load-rec(t DBTable in Pair)()
-  let: (op arg) $in % x ~ y;
+  let: (op arg) $in % a ~ b;
   
   $op `delete = {
     $t `recs get $arg delete

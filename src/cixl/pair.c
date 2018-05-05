@@ -3,10 +3,10 @@
 #include "cixl/malloc.h"
 #include "cixl/pair.h"
 
-struct cx_pair *cx_pair_new(struct cx *cx, struct cx_box *x, struct cx_box *y) {
+struct cx_pair *cx_pair_new(struct cx *cx, struct cx_box *a, struct cx_box *b) {
   struct cx_pair *pair = cx_malloc(&cx->pair_alloc);
-  if (x) { cx_copy(&pair->x, x); }
-  if (y) { cx_copy(&pair->y, y); }
+  if (a) { cx_copy(&pair->a, a); }
+  if (b) { cx_copy(&pair->b, b); }
   pair->nrefs = 1;
   return pair;
 }
@@ -21,32 +21,32 @@ void cx_pair_deref(struct cx_pair *pair, struct cx *cx) {
   pair->nrefs--;
   
   if (!pair->nrefs) {
-    cx_box_deinit(&pair->x);
-    cx_box_deinit(&pair->y);
+    cx_box_deinit(&pair->a);
+    cx_box_deinit(&pair->b);
     cx_free(&cx->pair_alloc, pair);
   }
 }
 
 static bool equid_imp(struct cx_box *x, struct cx_box *y) {
   return
-    cx_equid(&x->as_pair->x, &y->as_pair->x) &&
-    cx_equid(&x->as_pair->y, &y->as_pair->y);
+    cx_equid(&x->as_pair->a, &y->as_pair->a) &&
+    cx_equid(&x->as_pair->b, &y->as_pair->b);
 }
 
 static bool eqval_imp(struct cx_box *x, struct cx_box *y) {
   return
-    cx_eqval(&x->as_pair->x, &y->as_pair->x) &&
-    cx_eqval(&x->as_pair->y, &y->as_pair->y);
+    cx_eqval(&x->as_pair->a, &y->as_pair->a) &&
+    cx_eqval(&x->as_pair->b, &y->as_pair->b);
 }
 
 static enum cx_cmp cmp_imp(const struct cx_box *x, const struct cx_box *y) {
-  enum cx_cmp res = cx_cmp(&x->as_pair->x, &y->as_pair->x);
-  if (res == CX_CMP_EQ) { res = cx_cmp(&x->as_pair->y, &y->as_pair->y); }
+  enum cx_cmp res = cx_cmp(&x->as_pair->a, &y->as_pair->a);
+  if (res == CX_CMP_EQ) { res = cx_cmp(&x->as_pair->b, &y->as_pair->b); }
   return res;
 }
 
 static bool ok_imp(struct cx_box *v) {
-  return cx_ok(&v->as_pair->x) && cx_ok(&v->as_pair->y);
+  return cx_ok(&v->as_pair->a) && cx_ok(&v->as_pair->b);
 }
 
 static void copy_imp(struct cx_box *dst, const struct cx_box *src) {
@@ -55,28 +55,28 @@ static void copy_imp(struct cx_box *dst, const struct cx_box *src) {
 
 static void clone_imp(struct cx_box *dst, struct cx_box *src) {
   dst->as_pair = cx_pair_new(src->type->lib->cx, NULL, NULL);
-  cx_clone(&dst->as_pair->x, &src->as_pair->x);
-  cx_clone(&dst->as_pair->y, &src->as_pair->y);
+  cx_clone(&dst->as_pair->a, &src->as_pair->a);
+  cx_clone(&dst->as_pair->b, &src->as_pair->b);
 }
 
 static void write_imp(struct cx_box *v, FILE *out) {
   fputc('(', out);
-  cx_write(&v->as_pair->x, out);
+  cx_write(&v->as_pair->a, out);
   fputc(' ', out);
-  cx_write(&v->as_pair->y, out);
+  cx_write(&v->as_pair->b, out);
   fputs(",)", out);
 }
 
 static void dump_imp(struct cx_box *v, FILE *out) {
-  cx_dump(&v->as_pair->x, out);
+  cx_dump(&v->as_pair->a, out);
   fputc(' ', out);
-  cx_dump(&v->as_pair->y, out);
+  cx_dump(&v->as_pair->b, out);
   fputc(',', out);
 }
 
 static void print_imp(struct cx_box *v, FILE *out) {
-  cx_print(&v->as_pair->x, out);
-  cx_print(&v->as_pair->y, out);
+  cx_print(&v->as_pair->a, out);
+  cx_print(&v->as_pair->b, out);
 }
 
 static void deinit_imp(struct cx_box *v) {

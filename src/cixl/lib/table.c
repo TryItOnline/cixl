@@ -116,14 +116,14 @@ static bool table_imp(struct cx_call *call) {
   struct cx_type *kt = NULL, *vt = NULL;
   
   while (cx_iter_next(it.as_iter, &p, s)) {
-    if (!check_key_type(out, p.as_pair->x.type)) {
+    if (!check_key_type(out, p.as_pair->a.type)) {
       cx_table_deref(out);
       goto exit;
     }
     
-    cx_table_put(out, &p.as_pair->x, &p.as_pair->y);
-    kt = kt ? cx_supertype(kt, p.as_pair->x.type) : p.as_pair->x.type;
-    vt = vt ? cx_supertype(vt, p.as_pair->y.type) : p.as_pair->y.type;
+    cx_table_put(out, &p.as_pair->a, &p.as_pair->b);
+    kt = kt ? cx_supertype(kt, p.as_pair->a.type) : p.as_pair->a.type;
+    vt = vt ? cx_supertype(vt, p.as_pair->b.type) : p.as_pair->b.type;
     cx_box_deinit(&p);
   }
 
@@ -156,23 +156,23 @@ static bool into_imp(struct cx_call *call) {
     *vt = cx_type_arg(st, 1);
   
   while (cx_iter_next(it.as_iter, &p, s)) {
-    if (!cx_is(p.as_pair->x.type, kt)) {
+    if (!cx_is(p.as_pair->a.type, kt)) {
       cx_error(s->cx, s->cx->row, s->cx->col,
 	       "Expected key type %s, actual: %s",
-	       kt->id, p.as_pair->x.type->id);
+	       kt->id, p.as_pair->a.type->id);
       
       goto exit;
     }
 
-    if (!cx_is(p.as_pair->y.type, vt)) {
+    if (!cx_is(p.as_pair->b.type, vt)) {
       cx_error(s->cx, s->cx->row, s->cx->col,
 	       "Expected value type %s, actual: %s",
-	       vt->id, p.as_pair->y.type->id);
+	       vt->id, p.as_pair->b.type->id);
       
       goto exit;
     }
 
-    cx_table_put(out, &p.as_pair->x, &p.as_pair->y);
+    cx_table_put(out, &p.as_pair->a, &p.as_pair->b);
     cx_box_deinit(&p);
   }
 

@@ -277,15 +277,15 @@ static bool into_imp(struct cx_call *call) {
   struct cx_box p;
 
   while (cx_iter_next(it.as_iter, &p, s)) {
-    if (!cx_is(p.as_pair->x.type, s->cx->sym_type)) {
+    if (!cx_is(p.as_pair->a.type, s->cx->sym_type)) {
       cx_error(s->cx, s->cx->row, s->cx->col,
 	       "Expected Sym field id, actual type: %s",
-	       p.as_pair->x.type->id);
+	       p.as_pair->a.type->id);
       
       goto exit;
     }
 
-    struct cx_sym *fid = &p.as_pair->x.as_sym;
+    struct cx_sym *fid = &p.as_pair->a.as_sym;
     struct cx_field *f = cx_set_get(&rt->fields, fid);
     
     if (!f) {
@@ -296,15 +296,15 @@ static bool into_imp(struct cx_call *call) {
       goto exit;
     }
 
-    if (!cx_is(p.as_pair->y.type, f->type)) {
+    if (!cx_is(p.as_pair->b.type, f->type)) {
       cx_error(s->cx, s->cx->row, s->cx->col,
 	       "Expected type %s, actual: %s",
-	       f->type->id, p.as_pair->y.type->id);
+	       f->type->id, p.as_pair->b.type->id);
       
       goto exit;
     }
 
-    cx_copy(cx_rec_put(out, *fid), &p.as_pair->y);
+    cx_copy(cx_rec_put(out, *fid), &p.as_pair->b);
     cx_box_deinit(&p);
   }
 

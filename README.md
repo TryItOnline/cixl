@@ -983,14 +983,14 @@ Stacks may be sorted in place by calling ```sort```.
 ```
 
 ### Pairs
-Values may be paired by calling ```,```, the result provides reference semantics and access to parts using ```x``` and ```y```.
+Values may be paired by calling ```,```. Pairs provide reference semantics and access to parts using ```a``` and ```b```.
 
 ```
    | 1 2,
 
 [1 2,]
 
-   % x ~ y
+   % a ~ b
 
 [1 2]
 ```

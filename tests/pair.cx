@@ -1,6 +1,11 @@
 'Testing cx/pair...' say
 
-1 2, rezip unzip - 1 = check
+`foo 42, %
+a `foo = check
+b 42 = check
+
+1 2, rezip .. - 1 = check
+
 'foo' 42, rezip type Pair<Int Str> = check
 
 [1 2, 3 4,] rezip stack [2 1, 4 3,] = check

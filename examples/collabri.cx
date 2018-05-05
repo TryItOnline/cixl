@@ -32,7 +32,7 @@ use:
   (cx/net
     TCPClient TCPServer
     accept listen)
-  (cx/pair x y)
+  (cx/pair a b)
   (cx/rec ? rec: get put)
   (cx/ref deref ref set-call)
   (cx/str int join reverse split str words)
@@ -281,7 +281,7 @@ func: list-topics(c Client t Topic push-id Bool)()
 
   $cts {
     $cts {
-      let: ct y;
+      let: ct b;
       $c $ct #t recall
     } for
   } {
@@ -298,7 +298,7 @@ func: push-post(u User t Topic in Str)()
   $t $in push-log
   
   $t `clients get {
-    let: c x;
+    let: c a;
     $c `state get `ok = {$c `user get $u ==!} and {$c $in push-out} if
   } for
 

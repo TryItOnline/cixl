@@ -43,6 +43,14 @@ static bool y_imp(struct cx_call *call) {
   return true;
 }
 
+static bool point_splat_imp(struct cx_call *call) {
+  struct cx_point *p = &cx_test(cx_call_arg(call, 0))->as_point;
+  struct cx_scope *s = call->scope;
+  cx_box_init(cx_push(s), s->cx->float_type)->as_float = p->x;
+  cx_box_init(cx_push(s), s->cx->float_type)->as_float = p->y;
+  return true;
+}
+
 static bool rgb_imp(struct cx_call *call) {
   struct cx_box
     *r = cx_test(cx_call_arg(call, 0)),
@@ -121,6 +129,11 @@ cx_lib(cx_init_gfx, "cx/gfx") {
 	       cx_args(cx_arg("p", cx->point_type)),
 	       cx_args(cx_arg(NULL, cx->float_type)),
 	       y_imp);
+
+  cx_add_cfunc(lib, "..",
+	       cx_args(cx_arg("p", cx->point_type)),
+	       cx_args(cx_arg(NULL, cx->float_type), cx_arg(NULL, cx->float_type)),
+	       point_splat_imp);
 
   cx_add_cfunc(lib, "rgb",
 	       cx_args(cx_arg("r", cx->int_type),

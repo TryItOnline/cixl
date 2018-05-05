@@ -16,7 +16,7 @@ use:
   (cx/io #in)
   (cx/io/term say)
   (cx/math ++)
-  (cx/pair x y unzip)
+  (cx/pair .. a b)
   (cx/stack | _ ~ % sort stack)
   (cx/str lower words)
   (cx/table Table put-call)
@@ -36,13 +36,13 @@ use:
   sorted alphabetically since the table is sorted by key.
 */
 
-$ws stack % {y ~ y <=>} sort
+$ws stack % {b ~ b <=>} sort
 
 /*
   Print results to stdout.
 */
 
 {
-  let: (x y) unzip;
-  [$x @@s $y] say
+  let: (w c) ..;
+  [$w @@s $c] say
 } for
