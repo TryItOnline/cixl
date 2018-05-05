@@ -2,9 +2,6 @@
 #define ntohll(x) ((1==ntohl(1)) ? (x) : ((uint64_t)ntohl((x) & 0xFFFFFFFF) << 32) | ntohl((x) >> 32))
 host64 & net64 fns
 
-* fix push tests
-** test collabri/dynamic walker
-* update devlog/move-to
 * finish button caption
 * add cxgtk plugin
 * ---
@@ -23,6 +20,7 @@ host64 & net64 fns
 ** resolve parents with refs and derive
 *** check all types in set against parents
 * resolve rec/type-id parent types using type args
+* switch term fn arg order to out first
 * move macro processing to TID compile
 ** remove macro_eval type
 ** remove TMACRO type
