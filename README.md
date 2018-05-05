@@ -2,6 +2,9 @@
 <a href="https://paypal.me/basicgongfu"><img alt="Donate using PayPal" src="paypal.png?raw=true"></a><a href="https://liberapay.com/basic-gongfu/donate"><img alt="Donate using Liberapay" src="https://liberapay.com/assets/widgets/donate.svg"></a>
 #### Cixl - a Lispy Forth in C
 
+> It is time to unmask the computing community as a Secret Society for the Creation and Preservation of Artificial Complexity.
+> ~ Edsger W. Dijkstra
+
 Cixl shares many ideas with C, Forth and Common Lisp; as well as the hacker mindset that unites them. The language is implemented as a straight forward VM-based interpreter that is designed to be as fast as possible without compromising on simplicity and flexibility; combined with a code generator for compiling native executables. The codebase has no external dependencies and is currently hovering around 15 kloc including tests and standard library.
 
 ### Status
