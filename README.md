@@ -35,9 +35,6 @@ Press Return twice to evaluate.
 $
 ```
 
-> Are you quite sure that all those bells and whistles, all those wonderful facilities of your so called powerful programming languages, belong to the solution set rather than the problem set?<br/><br/>
-> Edsger W. Dijkstra
-
 ### Unix Native
 Contrary to the current trend of stacking abstractions in the name of portability, Cixl embraces the chosen requirement and limitation of running on top of a reasonably POSIX compliant Unix derivative; by integrating deep into the C tool chain, and by providing features optimized for Unix feature set.
 
@@ -45,6 +42,10 @@ Contrary to the current trend of stacking abstractions in the name of portabilit
 Cixl doesn't use a garbage collector, which leads to more predictable performance and resource usage. Values are either automatically copied or reference counted, and references are decremented instantly as values are popped from the stack and variables go out of scope.
 
 ### Stack Basics
+
+> Are you quite sure that all those bells and whistles, all those wonderful facilities of your so called powerful programming languages, belong to the solution set rather than the problem set?<br/><br/>
+> Edsger W. Dijkstra
+
 Cixl expects arguments before operations and provides direct access to the parameter stack. Basic stack operations have dedicated operators; ```%``` for copying the last value, ```_``` for dropping it, ```~``` for swapping the last two values and ```|``` for clearing the stack. ```..``` pushes all items in the specified sequence.
 
 ```
