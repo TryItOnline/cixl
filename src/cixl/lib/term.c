@@ -1,4 +1,5 @@
 #include <errno.h>
+#include <inttypes.h>
 #include <string.h>
 #include <sys/ioctl.h>
 #include <termios.h>
@@ -158,7 +159,7 @@ static bool move_up_imp(struct cx_call *call) {
     *n = cx_test(cx_call_arg(call, 0)),
     *out = cx_test(cx_call_arg(call, 1));
   
-  fprintf(cx_file_ptr(out->as_file), CX_CSI_ESC "%ldA", n->as_int);
+  fprintf(cx_file_ptr(out->as_file), CX_CSI_ESC "%" PRId64 "A", n->as_int);
   return true;
 }
 
@@ -190,7 +191,9 @@ static bool move_right_imp(struct cx_call *call) {
 static bool move_to_imp(struct cx_call *call) {
   FILE *out = cx_file_ptr(cx_test(cx_call_arg(call, 0))->as_file);
   struct cx_point *pos = &cx_test(cx_call_arg(call, 1))->as_point;
-  fprintf(out, CX_CSI_ESC "%ld;%ldH", (int64_t)pos->y, (int64_t)pos->x);
+  fprintf(out,
+	  CX_CSI_ESC "%" PRId64 ";%" PRId64 "H",
+	  (int64_t)pos->y, (int64_t)pos->x);
   return true;
 }
 
