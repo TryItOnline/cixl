@@ -23,6 +23,7 @@ struct cx {
   struct cx_set separators;
 
   struct cx_malloc
+    box_alloc,
     buf_alloc,
     file_alloc,
     lambda_alloc,

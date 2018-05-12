@@ -35,6 +35,9 @@ Press Return twice to evaluate.
 $
 ```
 
+### Documentation
+Besides the document you're reading right now, more detailed articles on specific features and design considerations that went into them may be found [here](https://github.com/basic-gongfu/cixl/tree/master/devlog); and a growing library of real worldish examples [here](https://github.com/basic-gongfu/cixl/tree/master/examples).
+
 ### Unix Native
 Contrary to the current trend of stacking abstractions in the name of portability, Cixl embraces the chosen requirement and limitation of running on top of a reasonably POSIX compliant Unix derivative; by integrating deep into the C tool chain, and by providing features optimized for Unix feature set.
 
@@ -1034,7 +1037,7 @@ The ```times``` function may be used to repeat an action N times.
 While ```for``` repeats an action once for each value in any sequence.
 
 ```
-   | 10 {+ 42,} for
+   | 10 {42 +} for
 
 [42 43 44 45 46 47 48 49 50 51]
 ```
@@ -1052,7 +1055,7 @@ Sequences support mapping actions over their values, ```map``` returns an iterat
 
 [Iter(0x545db40)]
 
-   str
+   #nil join
 
 ['gpp']
 ```

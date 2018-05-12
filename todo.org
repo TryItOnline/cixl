@@ -2,8 +2,14 @@
 #define ntohll(x) ((1==ntohl(1)) ? (x) : ((uint64_t)ntohl((x) & 0xFFFFFFFF) << 32) | ntohl((x) >> 32))
 host64 & net64 fns
 
-* finish button caption
-* add cxgtk plugin
+* --- cxgui
+** move start-script calls to window show event
+*** add on-show fn
+** trigger dynamic_gui redraw on timeout
+*** add on-timeout(gui msecs act)
+** add mouse support to widget.cx
+*** show focus rect when focused
+*** animate when clicked
 * ---
 * throw error on dup rec field
 * add support for empty rec: defs
@@ -59,3 +65,4 @@ host64 & net64 fns
 * add Pub/PrivKey
 * add README/LICENSE
 
+'foo' {int ++ char} map #nil join
