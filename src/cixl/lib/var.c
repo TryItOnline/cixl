@@ -16,7 +16,7 @@
 #include "cixl/scope.h"
 #include "cixl/tok.h"
 
-static ssize_t let_eval(struct cx_macro_eval *eval,
+static ssize_t let_eval(struct cx_rmacro_eval *eval,
 			struct cx_bin *bin,
 			size_t tok_idx,
 			struct cx *cx) {
@@ -87,7 +87,7 @@ static ssize_t let_eval(struct cx_macro_eval *eval,
 }
 
 static bool let_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
-  struct cx_macro_eval *eval = cx_macro_eval_new(let_eval);
+  struct cx_rmacro_eval *eval = cx_rmacro_eval_new(let_eval);
 
   int row = cx->row, col = cx->col;
   
@@ -108,10 +108,10 @@ static bool let_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
     goto error;
   }
   
-  cx_tok_init(cx_vec_push(out), CX_TMACRO(), row, col)->as_ptr = eval;
+  cx_tok_init(cx_vec_push(out), CX_TRMACRO(), row, col)->as_ptr = eval;
   return true;
  error:
-  cx_macro_eval_deref(eval);
+  cx_rmacro_eval_deref(eval);
   return false;  
 }
 
@@ -145,7 +145,7 @@ cx_lib(cx_init_var, "cx/var") {
     return false;
   }
     
-  cx_add_macro(lib, "let:", let_parse);
+  cx_add_rmacro(lib, "let:", let_parse);
 
   cx_add_cfunc(lib, "let",
 	       cx_args(cx_arg("id", cx->sym_type), cx_arg("val", cx->any_type)),

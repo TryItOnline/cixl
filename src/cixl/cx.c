@@ -125,7 +125,7 @@ struct cx *cx_init(struct cx *cx) {
   cx->syms.key_offs = offsetof(struct cx_sym, id);
 
   cx_vec_init(&cx->types, sizeof(struct cx_type *));
-  cx_vec_init(&cx->macros, sizeof(struct cx_macro *));
+  cx_vec_init(&cx->rmacros, sizeof(struct cx_rmacro *));
   cx_vec_init(&cx->funcs, sizeof(struct cx_func *));
   cx_vec_init(&cx->fimps, sizeof(struct cx_fimp *));
   cx_vec_init(&cx->links, sizeof(struct cx_link));
@@ -215,8 +215,8 @@ struct cx *cx_deinit(struct cx *cx) {
   cx_do_vec(&cx->load_paths, char *, p) { free(*p); }
   cx_vec_deinit(&cx->load_paths);
   
-  cx_do_vec(&cx->macros, struct cx_macro *, m) { free(cx_macro_deinit(*m)); }
-  cx_vec_deinit(&cx->macros);
+  cx_do_vec(&cx->rmacros, struct cx_rmacro *, m) { free(cx_rmacro_deinit(*m)); }
+  cx_vec_deinit(&cx->rmacros);
 
   cx_do_vec(&cx->funcs, struct cx_func *, f) { free(cx_func_deinit(*f)); }
   cx_vec_deinit(&cx->funcs);

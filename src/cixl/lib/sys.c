@@ -151,8 +151,8 @@ cx_lib(cx_init_sys, "cx/sys") {
 			   cx_sym(cx, "args"), false),
 	      cx->stack_type)->as_ptr = cx_stack_new(cx);
 
-  cx_add_macro(lib, "link:", link_parse);
-  cx_add_macro(lib, "init:", init_parse);
+  cx_add_rmacro(lib, "link:", link_parse);
+  cx_add_rmacro(lib, "init:", init_parse);
 
   cx_add_cfunc(lib, "home-dir",
 	       cx_args(),

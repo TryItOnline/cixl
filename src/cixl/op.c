@@ -1515,7 +1515,7 @@ static void use_emit_init(struct cx_op *op,
 			  FILE *out,
 			  struct cx *cx) {
   struct cx_tok *t = cx_vec_get(&bin->toks, op->tok_idx);
-  struct cx_macro_eval *e = t->as_ptr;
+  struct cx_rmacro_eval *e = t->as_ptr;
 
   cx_do_vec(&e->toks, struct cx_tok, t) {
     if (t->type == CX_TID()) {
@@ -1543,7 +1543,7 @@ static void use_emit_libs(struct cx_op *op,
 			  struct cx_set *out,
 			  struct cx *cx) {
   struct cx_tok *t = cx_vec_get(&bin->toks, op->tok_idx);
-  struct cx_macro_eval *e = t->as_ptr;
+  struct cx_rmacro_eval *e = t->as_ptr;
 
   cx_do_vec(&e->toks, struct cx_tok, tt) {
     if (tt->type == CX_TGROUP()) {

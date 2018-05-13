@@ -7,8 +7,8 @@
 #include "cixl/error.h"
 #include "cixl/fimp.h"
 #include "cixl/func.h"
-#include "cixl/macro.h"
 #include "cixl/op.h"
+#include "cixl/rmacro.h"
 #include "cixl/stack.h"
 #include "cixl/tok.h"
 #include "cixl/vec.h"
@@ -248,24 +248,24 @@ cx_tok_type(CX_TLITERAL, {
     type.deinit = literal_deinit;
   });
 
-static ssize_t macro_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) {
+static ssize_t rmacro_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) {
   struct cx_tok *tok = cx_vec_get(&bin->toks, tok_idx);
-  struct cx_macro_eval *eval = tok->as_ptr;
+  struct cx_rmacro_eval *eval = tok->as_ptr;
   return eval->imp(eval, bin, tok_idx, cx);
 }
 
-static void macro_copy(struct cx_tok *dst, struct cx_tok *src) {
-  dst->as_ptr = cx_macro_eval_ref(src->as_ptr);
+static void rmacro_copy(struct cx_tok *dst, struct cx_tok *src) {
+  dst->as_ptr = cx_rmacro_eval_ref(src->as_ptr);
 }
   
-static void macro_deinit(struct cx_tok *tok) {
-  cx_macro_eval_deref(tok->as_ptr);
+static void rmacro_deinit(struct cx_tok *tok) {
+  cx_rmacro_eval_deref(tok->as_ptr);
 }
 
-cx_tok_type(CX_TMACRO, {
-    type.compile = macro_compile;
-    type.copy = macro_copy;
-    type.deinit = macro_deinit;
+cx_tok_type(CX_TRMACRO, {
+    type.compile = rmacro_compile;
+    type.copy = rmacro_copy;
+    type.deinit = rmacro_deinit;
   });
 
 static ssize_t stack_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) {

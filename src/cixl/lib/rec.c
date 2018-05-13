@@ -19,7 +19,7 @@
 #include "cixl/scope.h"
 #include "cixl/tok.h"
 
-static ssize_t rec_eval(struct cx_macro_eval *eval,
+static ssize_t rec_eval(struct cx_rmacro_eval *eval,
 			struct cx_bin *bin,
 			size_t tok_idx,
 			struct cx *cx) {
@@ -150,9 +150,9 @@ static bool rec_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   }
 
   cx_do_vec(&parents, struct cx_type *, pt) { cx_derive_rec(rec_type, *pt); }
-  struct cx_macro_eval *eval = cx_macro_eval_new(rec_eval);
+  struct cx_rmacro_eval *eval = cx_rmacro_eval_new(rec_eval);
   cx_tok_init(cx_vec_push(&eval->toks), CX_TTYPE(), row, col)->as_ptr = rec_type;
-  cx_tok_init(cx_vec_push(out), CX_TMACRO(), row, col)->as_ptr = eval;
+  cx_tok_init(cx_vec_push(out), CX_TRMACRO(), row, col)->as_ptr = eval;
   ok = true;
  exit4:
   cx_vec_deinit(&fids);	      
@@ -362,7 +362,7 @@ cx_lib(cx_init_rec, "cx/rec") {
   cx->rec_type = cx_add_type(lib, "Rec", cx->cmp_type);
   cx->rec_type->meta = CX_TYPE_REC;
 
-  cx_add_macro(lib, "rec:", rec_parse); 
+  cx_add_rmacro(lib, "rec:", rec_parse); 
 
   cx_add_cfunc(lib, "=",
 	       cx_args(cx_arg("x", cx->rec_type), cx_arg("y", cx->rec_type)),

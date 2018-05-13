@@ -59,7 +59,7 @@ struct cx_tok_type *CX_TID();
 struct cx_tok_type *CX_TLIB();
 struct cx_tok_type *CX_TLAMBDA();
 struct cx_tok_type *CX_TLITERAL();
-struct cx_tok_type *CX_TMACRO();
+struct cx_tok_type *CX_TRMACRO();
 struct cx_tok_type *CX_TSTACK();
 struct cx_tok_type *CX_TTYPE();
 struct cx_tok_type *CX_TUNGROUP();

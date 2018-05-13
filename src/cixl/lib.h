@@ -5,7 +5,7 @@
 
 #include "cixl/env.h"
 #include "cixl/fimp.h"
-#include "cixl/macro.h"
+#include "cixl/rmacro.h"
 #include "cixl/set.h"
 #include "cixl/sym.h"
 
@@ -60,7 +60,7 @@ struct cx_lib {
   char *emit_id;
   struct cx_vec inits;
 
-  struct cx_set types, macros, funcs;
+  struct cx_set types, rmacros, funcs;
   struct cx_env consts;
 };
 
@@ -76,11 +76,11 @@ struct cx_rec_type *cx_add_rec_type(struct cx_lib *lib, const char *id);
 struct cx_type *cx_lib_get_type(struct cx_lib *lib, const char *id, bool silent);
 struct cx_type *cx_get_type(struct cx *cx, const char *id, bool silent);
 
-struct cx_macro *cx_add_macro(struct cx_lib *lib,
-			      const char *id,
-			      cx_macro_parse_t imp);
+struct cx_rmacro *cx_add_rmacro(struct cx_lib *lib,
+				const char *id,
+				cx_rmacro_parse_t imp);
 
-struct cx_macro *cx_get_macro(struct cx *cx, const char *id, bool silent);
+struct cx_rmacro *cx_get_rmacro(struct cx *cx, const char *id, bool silent);
 
 struct cx_fimp *cx_add_func(struct cx_lib *lib,
 			    const char *id,

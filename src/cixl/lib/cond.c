@@ -11,7 +11,7 @@
 #include "cixl/op.h"
 #include "cixl/scope.h"
 
-static ssize_t switch_eval(struct cx_macro_eval *eval,
+static ssize_t switch_eval(struct cx_rmacro_eval *eval,
 			   struct cx_bin *bin,
 			   size_t tok_idx,
 			   struct cx *cx) {
@@ -49,7 +49,7 @@ static ssize_t switch_eval(struct cx_macro_eval *eval,
 }
 
 static bool switch_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
-  struct cx_macro_eval *eval = cx_macro_eval_new(switch_eval);
+  struct cx_rmacro_eval *eval = cx_rmacro_eval_new(switch_eval);
 
   int row = cx->row, col = cx->col;
   
@@ -67,10 +67,10 @@ static bool switch_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
     }
   }
   
-  cx_tok_init(cx_vec_push(out), CX_TMACRO(), row, col)->as_ptr = eval;
+  cx_tok_init(cx_vec_push(out), CX_TRMACRO(), row, col)->as_ptr = eval;
   return true;
  error:
-  cx_macro_eval_deref(eval);
+  cx_rmacro_eval_deref(eval);
   return false;  
 }
 
@@ -317,7 +317,7 @@ cx_lib(cx_init_cond, "cx/cond") {
     return false;
   }
 
-  cx_add_macro(lib, "switch:", switch_parse);
+  cx_add_rmacro(lib, "switch:", switch_parse);
   
   cx_add_cfunc(lib, "int",
 	       cx_args(cx_arg("v", cx->bool_type)),

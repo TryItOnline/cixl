@@ -13,7 +13,7 @@
 #include "cixl/lib.h"
 #include "cixl/lib/error.h"
 
-static ssize_t catch_eval(struct cx_macro_eval *eval,
+static ssize_t catch_eval(struct cx_rmacro_eval *eval,
 			struct cx_bin *bin,
 			size_t tok_idx,
 			struct cx *cx) {
@@ -53,11 +53,11 @@ static ssize_t catch_eval(struct cx_macro_eval *eval,
 
 static bool catch_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   int row = cx->row, col = cx->col;
-  struct cx_macro_eval *eval = cx_macro_eval_new(catch_eval);
+  struct cx_rmacro_eval *eval = cx_rmacro_eval_new(catch_eval);
   
   if (!cx_parse_end(cx, in, &eval->toks)) {
     if (!cx->errors.count) { cx_error(cx, row, col, "Missing catch end"); }
-    cx_macro_eval_deref(eval);
+    cx_rmacro_eval_deref(eval);
     return false;
   }
 
@@ -69,7 +69,7 @@ static bool catch_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
     cx_do_vec(&eval->toks, struct cx_tok, tt) {
       if (tt->type != CX_TGROUP()) {
 	cx_error(cx, tt->row, tt->col, "Invalid catch clause: %s", tt->type->id);
-	cx_macro_eval_deref(eval);
+	cx_rmacro_eval_deref(eval);
 	return false;
       }
       
@@ -77,17 +77,17 @@ static bool catch_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
 
       if (tt->type != CX_TID()) {
 	cx_error(cx, tt->row, tt->col, "Invalid catch type: %s", tt->type->id);
-	cx_macro_eval_deref(eval);
+	cx_rmacro_eval_deref(eval);
 	return false;
       }
     }
   } else {
     cx_error(cx, t->row, t->col, "Invalid catch clause: %s", t->type->id);
-    cx_macro_eval_deref(eval);
+    cx_rmacro_eval_deref(eval);
     return false;
   }
   
-  cx_tok_init(cx_vec_push(out), CX_TMACRO(), row, col)->as_ptr = eval;
+  cx_tok_init(cx_vec_push(out), CX_TRMACRO(), row, col)->as_ptr = eval;
   return true;
 }
 
@@ -126,7 +126,7 @@ cx_lib(cx_init_error, "cx/error") {
 
   cx->error_type = cx_init_error_type(lib);
   
-  cx_add_macro(lib, "catch:", catch_parse);
+  cx_add_rmacro(lib, "catch:", catch_parse);
 
   cx_add_cfunc(lib, "check",
 	       cx_args(cx_arg("v", cx->opt_type)), cx_args(),

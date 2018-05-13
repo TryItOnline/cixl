@@ -13,7 +13,7 @@
 #include "cixl/scope.h"
 #include "cixl/str.h"
 
-static ssize_t define_eval(struct cx_macro_eval *eval,
+static ssize_t define_eval(struct cx_rmacro_eval *eval,
 			   struct cx_bin *bin,
 			   size_t tok_idx,
 			   struct cx *cx) {
@@ -32,7 +32,7 @@ static bool define_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   int row = cx->row, col = cx->col;
   struct cx_vec toks;
   cx_vec_init(&toks, sizeof(struct cx_tok));
-  struct cx_macro_eval *eval = cx_macro_eval_new(define_eval);
+  struct cx_rmacro_eval *eval = cx_rmacro_eval_new(define_eval);
   
   bool ok = false;
   
@@ -143,9 +143,9 @@ static bool define_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
     cx_vec_deinit(&toks);
     
     if (ok) {
-      cx_tok_init(cx_vec_push(out), CX_TMACRO(), row, col)->as_ptr = eval;
+      cx_tok_init(cx_vec_push(out), CX_TRMACRO(), row, col)->as_ptr = eval;
     } else {
-      cx_macro_eval_deref(eval);
+      cx_rmacro_eval_deref(eval);
     }
     
     return ok;
@@ -155,6 +155,6 @@ static bool define_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
 cx_lib(cx_init_const, "cx/const") {
   //struct cx *cx = lib->cx;
     
-  cx_add_macro(lib, "define:", define_parse);
+  cx_add_rmacro(lib, "define:", define_parse);
   return true;
 }

@@ -19,7 +19,7 @@
 #include "cixl/scope.h"
 #include "cixl/str.h"
 
-static ssize_t include_eval(struct cx_macro_eval *eval,
+static ssize_t include_eval(struct cx_rmacro_eval *eval,
 			    struct cx_bin *bin,
 			    size_t tok_idx,
 			    struct cx *cx) {
@@ -42,7 +42,7 @@ static bool include_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
     goto exit1;
   }
 
-  struct cx_macro_eval *eval = cx_macro_eval_new(include_eval);
+  struct cx_rmacro_eval *eval = cx_rmacro_eval_new(include_eval);
 
   cx_do_vec(&fns, struct cx_tok, t) {
     if (t->type != CX_TLITERAL()) {
@@ -63,11 +63,11 @@ static bool include_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
     if (!ok) { goto exit2; }
   }
   
-  cx_tok_init(cx_vec_push(out), CX_TMACRO(), row, col)->as_ptr = eval;
+  cx_tok_init(cx_vec_push(out), CX_TRMACRO(), row, col)->as_ptr = eval;
   ok = true;
   goto exit1;
  exit2:
-  cx_macro_eval_deref(eval);
+  cx_rmacro_eval_deref(eval);
  exit1: {
     cx_do_vec(&fns, struct cx_tok, t) { cx_tok_deinit(t); }
     cx_vec_deinit(&fns);
@@ -470,7 +470,7 @@ cx_lib(cx_init_io, "cx/io") {
 	      cx->wfile_type)->as_file =
     cx_file_new(cx, fileno(stderr), NULL, stderr);
 
-  cx_add_macro(lib, "include:", include_parse);
+  cx_add_rmacro(lib, "include:", include_parse);
 
   cx_add_cfunc(lib, "print",
 	       cx_args(cx_arg("v", cx->opt_type), cx_arg("out", cx->wfile_type)),

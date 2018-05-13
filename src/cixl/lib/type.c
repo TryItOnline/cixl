@@ -15,7 +15,7 @@
 #include "cixl/scope.h"
 #include "cixl/type_set.h"
 
-static ssize_t type_set_eval(struct cx_macro_eval *eval,
+static ssize_t type_set_eval(struct cx_rmacro_eval *eval,
 			    struct cx_bin *bin,
 			    size_t tok_idx,
 			    struct cx *cx) {
@@ -99,9 +99,9 @@ static bool type_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
     cx_type_define_conv(tt, mt);
   }
 
-  struct cx_macro_eval *eval = cx_macro_eval_new(type_set_eval);
+  struct cx_rmacro_eval *eval = cx_rmacro_eval_new(type_set_eval);
   cx_tok_init(cx_vec_push(&eval->toks), CX_TTYPE(), row, col)->as_ptr = type;
-  cx_tok_init(cx_vec_push(out), CX_TMACRO(), row, col)->as_ptr = eval;
+  cx_tok_init(cx_vec_push(out), CX_TRMACRO(), row, col)->as_ptr = eval;
   ok = true;
  exit1:
   cx_tok_deinit(&id_tok);
@@ -243,9 +243,9 @@ static bool type_id_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
     }
   }
 
-  struct cx_macro_eval *eval = cx_macro_eval_new(type_set_eval);
+  struct cx_rmacro_eval *eval = cx_rmacro_eval_new(type_set_eval);
   cx_tok_init(cx_vec_push(&eval->toks), CX_TTYPE(), row, col)->as_ptr = type;
-  cx_tok_init(cx_vec_push(out), CX_TMACRO(), row, col)->as_ptr = eval;
+  cx_tok_init(cx_vec_push(out), CX_TRMACRO(), row, col)->as_ptr = eval;
   ok = true;
  exit3:
   cx_vec_deinit(&parents);
@@ -314,8 +314,8 @@ cx_lib(cx_init_type, "cx/type") {
     return false;
   }
 
-  cx_add_macro(lib, "type:", type_parse);
-  cx_add_macro(lib, "type-id:", type_id_parse);
+  cx_add_rmacro(lib, "type:", type_parse);
+  cx_add_rmacro(lib, "type-id:", type_id_parse);
 
   cx_add_cfunc(lib, "type",
 	       cx_args(cx_arg("v", cx->opt_type)),

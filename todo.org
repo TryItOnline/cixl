@@ -1,3 +1,16 @@
+* add pmacros
+** process in TID compile
+** take tok seq as macro input
+* add lib/coro with coro: macro
+** add Coro type
+*** derive Seq
+*** implement iter & call
+** add is-done fn
+** add yield fn
+** push all values on stack when yielding
+** jump to stored pc (if any) on call
+** convert cx_call sites to support coros
+*** lazy allocation
 * --- cxgui
 ** move start-script calls to window show event
 *** add on-show fn
@@ -23,11 +36,6 @@
 *** check all types in set against parents
 * resolve rec/type-id parent types using type args
 * switch term fn arg order to out first
-* move macro processing to TID compile
-** remove macro_eval type
-** remove TMACRO type
-** take tok seq as macro input
-** rewrite macros
 * ---
 * replace cx_fimp.init with enum cx_fimp_type
 ** CX_FHOST_C, CX_FHOST_CX, CX_FGUEST

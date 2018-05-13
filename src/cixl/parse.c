@@ -173,7 +173,7 @@ static bool parse_id(struct cx *cx, FILE *in, struct cx_vec *out) {
       char *s = id.data;
 
       if (s[0] != '#' && s[0] != '$' && !isupper(s[0])) {
-	struct cx_macro *m = cx_get_macro(cx, s, true);
+	struct cx_rmacro *m = cx_get_rmacro(cx, s, true);
 	
 	if (m) {
 	  ok = m->imp(cx, in, out);
