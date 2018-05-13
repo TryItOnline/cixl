@@ -35,11 +35,6 @@ static const void *get_type_id(const void *value) {
   return &(*type)->id;
 }
 
-static const void *get_pmacro_id(const void *value) {
-  struct cx_pmacro *const *pmacro = value;
-  return &(*pmacro)->id;
-}
-
 static const void *get_rmacro_id(const void *value) {
   struct cx_rmacro *const *rmacro = value;
   return &(*rmacro)->id;
@@ -60,9 +55,6 @@ struct cx_lib *cx_lib_init(struct cx_lib *lib, struct cx *cx, struct cx_sym id) 
   cx_set_init(&lib->types, sizeof(struct cx_type *), cx_cmp_cstr);
   lib->types.key = get_type_id;
 
-  cx_set_init(&lib->pmacros, sizeof(struct cx_pmacro *), cx_cmp_cstr);
-  lib->pmacros.key = get_pmacro_id;
-
   cx_set_init(&lib->rmacros, sizeof(struct cx_rmacro *), cx_cmp_cstr);
   lib->rmacros.key = get_rmacro_id;
 
@@ -81,7 +73,6 @@ static void deinit(struct cx_lib_init *i) {
 struct cx_lib *cx_lib_deinit(struct cx_lib *lib) {
   cx_env_deinit(&lib->consts);
   cx_set_deinit(&lib->funcs);
-  cx_set_deinit(&lib->pmacros);
   cx_set_deinit(&lib->rmacros);
   cx_set_deinit(&lib->types);
 
@@ -225,40 +216,6 @@ struct cx_type *cx_get_type(struct cx *cx, const char *id, bool silent) {
   
   if (!t && !silent) { cx_error(cx, cx->row, cx->col, "Unknown type: '%s'", id); }
   return t;
-}
-
-struct cx_pmacro *cx_add_pmacro(struct cx_lib *lib,
-				const char *id,
-				cx_pmacro_eval_t eval) {
-  struct cx *cx= lib->cx;
-  struct cx_pmacro **m = cx_test(cx_set_insert(&lib->pmacros, &id));
-
-  if (!m) {
-    cx_error(cx, cx->row, cx->col, "Duplicate pmacro: '%s'", id);
-    return NULL;
-  }
-
-  *m = cx_pmacro_init(malloc(sizeof(struct cx_pmacro)), id, eval); 
-  *(struct cx_pmacro **)cx_vec_push(&cx->pmacros) = *m;
-  return *m;
-}
-
-static struct cx_pmacro *lib_get_pmacro(struct cx_lib **lib,
-					const char *id,
-					bool silent) {
-  struct cx *cx = (*lib)->cx;
-  struct cx_pmacro **m = cx_set_get(&(*lib)->pmacros, &id);
-
-  if (!m && lib > (struct cx_lib **)cx->libs.items) {
-    return lib_get_pmacro(lib-1, id, silent);
-  }
-
-  if (!m && !silent) { cx_error(cx, cx->row, cx->col, "Unknown pmacro: '%s'", id); }
-  return m ? *m : NULL;
-}
-
-struct cx_pmacro *cx_get_pmacro(struct cx *cx, const char *id, bool silent) {
-  return lib_get_pmacro(cx->lib, id, silent);
 }
 
 struct cx_rmacro *cx_add_rmacro(struct cx_lib *lib,
@@ -417,11 +374,6 @@ static void use_type(struct cx_type *t, struct cx_lib *dst) {
   if (ok) { *ok = t; }
  }
 
-static void use_pmacro(struct cx_pmacro *m, struct cx_lib *dst) {
-  struct cx_pmacro **ok = cx_set_insert(&dst->pmacros, &m->id);
-  if (ok) { *ok = m; }
-}
-
 static void use_rmacro(struct cx_rmacro *m, struct cx_lib *dst) {
   struct cx_rmacro **ok = cx_set_insert(&dst->rmacros, &m->id);
   if (ok) { *ok = m; }
@@ -458,7 +410,6 @@ static bool use_all(struct cx_lib *lib) {
   struct cx *cx = lib->cx;
   
   cx_do_set(&lib->types, struct cx_type *, t) { use_type(*t, *cx->lib); }
-  cx_do_set(&lib->pmacros, struct cx_pmacro *, m) { use_pmacro(*m, *cx->lib); }
   cx_do_set(&lib->rmacros, struct cx_rmacro *, m) { use_rmacro(*m, *cx->lib); }
   
   cx_do_set(&lib->funcs, struct cx_func *, f) {
@@ -487,13 +438,6 @@ static bool use_id(struct cx_lib *lib, const char *id) {
       return true;
     }
   } else {
-    struct cx_pmacro **pm = cx_set_get(&lib->pmacros, &id);
-
-    if (pm) {
-      use_pmacro(*pm, *cx->lib);
-      return true;
-    }
-
     struct cx_rmacro **rm = cx_set_get(&lib->rmacros, &id);
 
     if (rm) {
