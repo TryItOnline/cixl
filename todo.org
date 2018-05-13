@@ -1,7 +1,7 @@
 * add pmacros
 ** lookup pmacros in TID compile
 ** commit
-* convert let: to pmacro
+* convert cond/switch: to pmacro
 * add lib/coro with coro: macro
 ** add Coro type
 *** pc

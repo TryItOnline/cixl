@@ -91,7 +91,7 @@ static bool let_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
 
   int row = cx->row, col = cx->col;
   
-  if (!cx_parse_tok(cx, in, &eval->toks)) {
+  if (!cx_parse_tok(cx, in, &eval->toks, false)) {
     cx_error(cx, row, col, "Missing let id");
     goto error;
   }
@@ -103,7 +103,7 @@ static bool let_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
     goto error;
   }
 
-  if (!cx_parse_end(cx, in, &eval->toks)) {
+  if (!cx_parse_end(cx, in, &eval->toks, true)) {
     if (!cx->errors.count) { cx_error(cx, row, col, "Missing let end"); }
     goto error;
   }

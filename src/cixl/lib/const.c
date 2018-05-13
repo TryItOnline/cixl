@@ -36,7 +36,7 @@ static bool define_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   
   bool ok = false;
   
-  if (!cx_parse_tok(cx, in, &toks)) {
+  if (!cx_parse_tok(cx, in, &toks, false)) {
     cx_error(cx, row, col, "Missing define id");
     goto exit1;
   }
@@ -48,7 +48,7 @@ static bool define_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
     goto exit1;
   }
 
-  if (!cx_parse_end(cx, in, &toks)) {
+  if (!cx_parse_end(cx, in, &toks, true)) {
     if (!cx->errors.count) { cx_error(cx, row, col, "Missing define end"); }
     goto exit1;
   }

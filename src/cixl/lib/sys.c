@@ -25,7 +25,7 @@ static bool link_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   struct cx_vec fns;
   cx_vec_init(&fns, sizeof(struct cx_tok));
   
-  if (!cx_parse_end(cx, in, &fns)) {
+  if (!cx_parse_end(cx, in, &fns, true)) {
     if (!cx->errors.count) { cx_error(cx, row, col, "Missing link end"); }
     goto exit;
   }
@@ -38,7 +38,7 @@ static bool link_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
 
     if (t->as_box.type != cx->str_type) {
       cx_error(cx, t->row, t->col,
-	       "Invalid link filename: %s", t->as_box.type->id);
+	       "Invalid link: %s", t->as_box.type->id);
       goto exit;
     }
 
@@ -76,7 +76,7 @@ static bool init_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   cx_vec_init(&toks, sizeof(struct cx_tok));
   bool ok = false;
   
-  if (!cx_parse_end(cx, in, &toks)) {
+  if (!cx_parse_end(cx, in, &toks, false)) {
     if (!cx->errors.count) { cx_error(cx, row, col, "Missing init end"); }
     goto exit;
   }

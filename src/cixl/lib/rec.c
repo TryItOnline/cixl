@@ -38,7 +38,7 @@ static bool rec_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   int row = cx->row, col = cx->col;
   bool ok = false;
   
-  if (!cx_parse_tok(cx, in, &toks)) {
+  if (!cx_parse_tok(cx, in, &toks, false)) {
     cx_error(cx, cx->row, cx->col, "Missing rec id");
     goto exit1;
   }
@@ -64,7 +64,7 @@ static bool rec_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
       goto exit2;
   }
   
-  if (!cx_parse_tok(cx, in, &toks)) {
+  if (!cx_parse_tok(cx, in, &toks, false)) {
     cx_error(cx, cx->row, cx->col, "Missing rec parents");
     goto exit2;
   }
@@ -94,7 +94,7 @@ static bool rec_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
     cx_tok_deinit(&parents_tok);
   }
   
-  if (!cx_parse_end(cx, in, &toks)) {
+  if (!cx_parse_end(cx, in, &toks, false)) {
     if (!cx->errors.count) { cx_error(cx, cx->row, cx->col, "Missing rec end"); }
     goto exit3;
   }

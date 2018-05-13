@@ -23,7 +23,7 @@ static bool compile_imp(struct cx_call *call) {
   struct cx_scope *s = call->scope;
   struct cx_vec toks;
   cx_vec_init(&toks, sizeof(struct cx_tok));
-  bool ok = cx_parse_str(s->cx, in->as_str->data, &toks);
+  bool ok = cx_parse_str(s->cx, in->as_str->data, &toks, true);
   if (!ok) { goto exit; }
   
   struct cx_bin *bin = out->as_ptr;

@@ -55,7 +55,7 @@ static bool catch_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   int row = cx->row, col = cx->col;
   struct cx_rmacro_eval *eval = cx_rmacro_eval_new(catch_eval);
   
-  if (!cx_parse_end(cx, in, &eval->toks)) {
+  if (!cx_parse_end(cx, in, &eval->toks, true)) {
     if (!cx->errors.count) { cx_error(cx, row, col, "Missing catch end"); }
     cx_rmacro_eval_deref(eval);
     return false;

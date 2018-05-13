@@ -137,7 +137,7 @@ bool cx_eval_str(struct cx *cx, const char *in) {
   struct cx_vec toks;
   cx_vec_init(&toks, sizeof(struct cx_tok));
   bool ok = false;
-  if (!cx_parse_str(cx, in, &toks)) { goto exit; }
+  if (!cx_parse_str(cx, in, &toks, true)) { goto exit; }
   ok = cx_eval_toks(cx, &toks);
  exit: {
     cx_do_vec(&toks, struct cx_tok, t) { cx_tok_deinit(t); }

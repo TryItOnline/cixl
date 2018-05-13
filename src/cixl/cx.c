@@ -453,7 +453,7 @@ bool cx_load_toks(struct cx *cx, const char *path, struct cx_vec *out) {
     ungetc(c, f);
   }
 
-  bool ok = cx_parse(cx, f, out);
+  bool ok = cx_parse(cx, f, out, true);
   fclose(f);
   cx->row = prev_row; cx->col = prev_col;
   return ok;

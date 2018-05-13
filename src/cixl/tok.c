@@ -125,6 +125,9 @@ static ssize_t id_compile(struct cx_bin *bin, size_t tok_idx, struct cx *cx) {
     struct cx_box *v = &cx_op_new(bin, CX_OPUSH(), tok_idx)->as_push.value;
     cx_box_init(v, cx_type_get(cx->meta_type, t))->as_ptr = t;
   } else {
+    struct cx_pmacro *m = cx_get_pmacro(cx, id, true);
+    if (m) { return m->eval(bin, tok_idx, cx); }
+    
     bool ref = id[0] == '&';
     if (ref) { id++; }
     char *imp_id = strchr(id, '<');

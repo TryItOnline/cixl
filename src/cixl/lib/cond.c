@@ -53,7 +53,7 @@ static bool switch_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
 
   int row = cx->row, col = cx->col;
   
-  if (!cx_parse_end(cx, in, &eval->toks)) {
+  if (!cx_parse_end(cx, in, &eval->toks, true)) {
     if (!cx->errors.count) { cx_error(cx, row, col, "Missing switch end"); }
     goto error;
   }

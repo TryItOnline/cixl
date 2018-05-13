@@ -34,7 +34,7 @@ static bool type_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   int row = cx->row, col = cx->col;
   bool ok = false;
   
-  if (!cx_parse_tok(cx, in, &toks)) {
+  if (!cx_parse_tok(cx, in, &toks, false)) {
     cx_error(cx, row, col, "Missing type id");
     goto exit2;
   }
@@ -53,7 +53,7 @@ static bool type_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
     goto exit1;
   }
   
-  if (!cx_parse_end(cx, in, &toks)) {
+  if (!cx_parse_end(cx, in, &toks, true)) {
     if (!cx->errors.count) { cx_error(cx, cx->row, cx->col, "Missing type end"); }
     goto exit1;
   }
@@ -118,7 +118,7 @@ static bool type_id_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   int row = cx->row, col = cx->col;
   bool ok = false;
   
-  if (!cx_parse_tok(cx, in, &toks)) {
+  if (!cx_parse_tok(cx, in, &toks, false)) {
     cx_error(cx, row, col, "Missing type id");
     goto exit1;
   }
@@ -137,7 +137,7 @@ static bool type_id_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
     goto exit2;
   }
 
-  if (!cx_parse_tok(cx, in, &toks)) {
+  if (!cx_parse_tok(cx, in, &toks, false)) {
     cx_error(cx, row, col, "Missing type-id: parents");
     goto exit2;
   }
@@ -163,7 +163,7 @@ static bool type_id_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
     cx_tok_deinit(&parents_tok);
   }
 
-  if (!cx_parse_end(cx, in, &toks)) {
+  if (!cx_parse_end(cx, in, &toks, true)) {
     if (!cx->errors.count) { cx_error(cx, cx->row, cx->col, "Missing type id end"); }
     goto exit3;
   }
