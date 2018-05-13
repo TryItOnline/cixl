@@ -1,16 +1,24 @@
 * add pmacros
-** process in TID compile
-** take tok seq as macro input
+** lookup pmacros in TID compile
+** commit
+* convert let: to pmacro
 * add lib/coro with coro: macro
 ** add Coro type
+*** pc
+*** separate scope like lambda
+*** libs && calls
+**** backup on yield
+**** restore on call
 *** derive Seq
 *** implement iter & call
+*** capture scope & push coro on macro eval
+**** add CX_OCORO op
 ** add is-done fn
 ** add yield fn
 ** push all values on stack when yielding
 ** jump to stored pc (if any) on call
 ** convert cx_call sites to support coros
-*** lazy allocation
+*** lazy allocate coro if cx_call returns false & cx->is_yielding
 * --- cxgui
 ** move start-script calls to window show event
 *** add on-show fn
@@ -20,6 +28,7 @@
 *** show focus rect when focused
 *** animate when clicked
 * ---
+* add args to readme types
 * throw error on dup rec field
 * add support for empty rec: defs
 * add cx_type.has_refs

@@ -1412,6 +1412,6 @@ $ python3 cixl/perf/bench3.py
 - Duality of syntax is right up there
 
 ### License
-LGPLv3
+[MIT](https://github.com/basic-gongfu/cixl/blob/master/LICENSE.txt)
 
 Give me a yell if something is unclear, wrong or missing. And please consider helping out with a donation via [paypal](https://paypal.me/basicgongfu) or [liberapay](https://liberapay.com/basic-gongfu/donate) if you find this worthwhile, every contribution counts.

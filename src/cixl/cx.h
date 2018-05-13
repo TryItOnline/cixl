@@ -33,7 +33,9 @@ struct cx {
     table_alloc,
     var_alloc;
 
-  struct cx_vec types, rmacros, funcs, fimps;
+  struct cx_vec types,
+    pmacros, rmacros,
+    funcs, fimps;
 
   struct cx_vec links, inits;
   
