@@ -8,7 +8,7 @@ When I started out on the C64 and Amiga, putting something on the screen that yo
 Modern Unix consoles may be treated as a buffer of 24-bit pixels, which allows a quick and convenient way to basic graphic capabilities. [Cixl](https://github.com/basic-gongfu/cixl) prefers powerful tools on top of a small number of universal abstractions to elaborate hierarchies and special cases. Except for a thin layer of features to output ANSI graphics, the general goal is to provide tools that are orthogonal to the chosen output medium. Since we've already checked [Tetris](https://github.com/basic-gongfu/cixl/blob/master/devlog/all_work_no_tetris.md) and Mandelbrot [fractals](https://github.com/basic-gongfu/cixl/blob/master/devlog/mandel_zoom.md) off the list, I figured it was time to have a look at animation.
 
 ### Walkimation
-One of the many captivating details of [Lemmings](https://en.wikipedia.org/wiki/Lemmings_%28video_game%29) is how natural the animations are despite their simplicity, which is why the walker was an easy choice. The entire sequence consists of eight unique frames that are mirrored in code.
+One of the many captivating details of [Lemmings](https://en.wikipedia.org/wiki/Lemmings_%28video_game%29) is how lifelike the animations are despite their simplicity, which is why the walker was an easy choice. The entire sequence consists of eight unique frames that are mirrored in code.
 
 ![Screenshot](https://raw.github.com/basic-gongfu/cixl/master/devlog/walker_static.png)
 

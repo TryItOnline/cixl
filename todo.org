@@ -1,7 +1,3 @@
-#define htonll(x) ((1==htonl(1)) ? (x) : ((uint64_t)htonl((x) & 0xFFFFFFFF) << 32) | htonl((x) >> 32))
-#define ntohll(x) ((1==ntohl(1)) ? (x) : ((uint64_t)ntohl((x) & 0xFFFFFFFF) << 32) | ntohl((x) >> 32))
-host64 & net64 fns
-
 * --- cxgui
 ** move start-script calls to window show event
 *** add on-show fn
@@ -64,5 +60,3 @@ host64 & net64 fns
 * --- cxcrypt
 * add Pub/PrivKey
 * add README/LICENSE
-
-'foo' {int ++ char} map #nil join
