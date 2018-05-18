@@ -1,14 +1,5 @@
-* --- tasks
-* check ucontext return values
-* finish post
+* --- task
 * fix test3 valgrind errors
-* ---
-* add [.. 1 2 3] support
-** splat current stack into literal
-* add support for type params to stack literals<
-** check that items conform
-* add type.compare & <==> fn
-** add Compare trait
 * --- cxgui
 ** move start-script calls to window show event
 *** add on-show fn
@@ -63,6 +54,13 @@
 * replace clone fallback to copy with error
 ** add Clone trait
 * replace varargs with size/array+macro
+* add [.. 1 2 3] support
+** splat current stack into literal
+* add support for type params to stack literals<
+** check that items conform
+* add type.compare & <==> fn
+** add Compare trait
+
 * --- cxcrypt
 * add Pub/PrivKey
 * add README/LICENSE
