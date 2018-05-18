@@ -1,3 +1,4 @@
+#include <errno.h>
 #include <string.h>
 
 #include "cixl/cx.h"
@@ -83,12 +84,16 @@ bool cx_task_resched(struct cx_task *t, struct cx_scope *scope) {
     cx->ncalls -= ncalls;
   }
   
-  swapcontext(&t->context, &t->sched->context);
+  if (swapcontext(&t->context, &t->sched->context) == -1) {
+    cx_error(cx, cx->row, cx->col, "Failed swapping context: %d", errno);
+    return false;
+  }
+  
   return true;
 }
 
-static void on_start(uint32_t t_low, uint32_t t_hi,
-		     uint32_t scope_low, uint32_t scope_hi) {
+static void on_start(int t_low, int t_hi,
+		     int scope_low, int scope_hi) {
   uintptr_t t_ptr = (uintptr_t)t_low | ((uintptr_t)t_hi << 32);
   struct cx_task *t = (struct cx_task *)t_ptr;
   t->state = CX_TASK_RUN;
@@ -121,7 +126,11 @@ bool cx_task_run(struct cx_task *t, struct cx_scope *scope) {
 
   switch (t->state) {
   case CX_TASK_NEW: {
-    getcontext(&t->context);
+    if (getcontext(&t->context) == -1) {
+      cx_error(cx, cx->row, cx->col, "Failed getting context: %d", errno);
+      return false;
+    }
+    
     t->context.uc_stack.ss_sp = t->stack;
     t->context.uc_stack.ss_size = CX_TASK_STACK_SIZE;
     t->context.uc_link = &t->sched->context;
@@ -131,10 +140,14 @@ bool cx_task_run(struct cx_task *t, struct cx_scope *scope) {
     makecontext(&t->context,
 		(void (*)(void))on_start,
 		4,
-		(uint32_t)t_ptr, (uint32_t)(t_ptr >> 32),
-		(uint32_t)scope_ptr, (uint32_t)(scope_ptr >> 32));
+		(int)t_ptr, (int)(t_ptr >> 32),
+		(int)scope_ptr, (int)(scope_ptr >> 32));
     
-    swapcontext(&t->sched->context, &t->context);
+    if (swapcontext(&t->sched->context, &t->context) == -1) {
+      cx_error(cx, cx->row, cx->col, "Failed swapping context: %d", errno);
+      return false;
+    }
+    
     return true;
   }
   case CX_TASK_RUN: {
@@ -171,7 +184,11 @@ bool cx_task_run(struct cx_task *t, struct cx_scope *scope) {
       cx_vec_clear(&t->calls);
     }
     
-    swapcontext(&t->sched->context, &t->context);
+    if (swapcontext(&t->sched->context, &t->context) == -1) {
+      cx_error(cx, cx->row, cx->col, "Failed swapping context: %d", errno);
+      return false;
+    }
+    
     return true;
   }
   default:

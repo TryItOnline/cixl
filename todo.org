@@ -1,7 +1,7 @@
 * --- tasks
-* fix test3 valgrind errors
 * check ucontext return values
 * finish post
+* fix test3 valgrind errors
 * ---
 * add [.. 1 2 3] support
 ** splat current stack into literal
