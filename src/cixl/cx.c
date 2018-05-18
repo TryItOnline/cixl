@@ -41,6 +41,7 @@
 #include "cixl/lib/sym.h"
 #include "cixl/lib/sys.h"
 #include "cixl/lib/table.h"
+#include "cixl/lib/task.h"
 #include "cixl/lib/term.h"
 #include "cixl/lib/time.h"
 #include "cixl/lib/type.h"
@@ -90,6 +91,7 @@ cx_lib(cx_init_world, "cx") {
     cx_use(cx, "cx/sym") &&
     cx_use(cx, "cx/sys") &&
     cx_use(cx, "cx/table") &&
+    cx_use(cx, "cx/task") &&
     cx_use(cx, "cx/time") &&
     cx_use(cx, "cx/type") &&
     cx_use(cx, "cx/var");
@@ -98,6 +100,7 @@ cx_lib(cx_init_world, "cx") {
 struct cx *cx_init(struct cx *cx) {
   cx->next_sym_tag = cx->next_type_tag = 0;
   cx->ncalls = 0;
+  cx->task = NULL;
   cx->bin = NULL;
   cx->pc = 0;
   cx->row = cx->col = -1;
@@ -154,7 +157,8 @@ struct cx *cx_init(struct cx *cx) {
     cx->opt_type =
     cx->pair_type = cx->point_type = cx->poll_type = cx->proc_type = 
     cx->rec_type = cx->ref_type = cx->rfile_type = cx->rwfile_type =
-    cx->seq_type = cx->sink_type = cx->stack_type = cx->str_type = cx->sym_type =
+    cx->sched_type = cx->seq_type = cx->sink_type = cx->stack_type = cx->str_type =
+    cx->sym_type =
     cx->table_type = cx->tcp_client_type = cx->tcp_server_type = cx->time_type =
     cx->wfile_type = NULL;
       
@@ -188,6 +192,7 @@ void cx_init_libs(struct cx *cx) {
   cx_init_sym(cx);
   cx_init_sys(cx);
   cx_init_table(cx);
+  cx_init_task(cx);
   cx_init_term(cx);
   cx_init_time(cx);
   cx_init_type(cx);

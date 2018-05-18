@@ -39,7 +39,12 @@ struct cx_error *cx_error_init(struct cx_error *e,
   if (cx->ncalls > 1) {
     size_t n = cx->ncalls-1;
     cx_vec_grow(&e->calls, n);
-    memcpy(e->calls.items, cx->calls, n*sizeof(struct cx_call));
+    struct cx_call *src = cx->calls, *dst = cx_vec_start(&e->calls);
+    
+    for (unsigned int i=0; i < cx->ncalls; i++, src++, dst++) {
+      cx_call_copy(dst, src);
+    }
+    
     e->calls.count = n;
   }
 
@@ -49,6 +54,7 @@ struct cx_error *cx_error_init(struct cx_error *e,
 struct cx_error *cx_error_deinit(struct cx_error *e) {
   cx_do_vec(&e->stack, struct cx_box, v) { cx_box_deinit(v); }
   cx_vec_deinit(&e->stack);
+  cx_do_vec(&e->calls, struct cx_call, c) { cx_call_deinit(c); }
   cx_vec_deinit(&e->calls);
   cx_box_deinit(&e->value);
   return e;

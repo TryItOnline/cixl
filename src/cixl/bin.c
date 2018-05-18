@@ -71,6 +71,7 @@ bool cx_compile(struct cx *cx,
 		struct cx_tok *start,
 		struct cx_tok *end,
 		struct cx_bin *out) {
+  size_t nerrors = cx->errors.count;
   size_t tok_idx = out->toks.count;
 
   for (struct cx_tok *t = start; t != end; t++) {
@@ -91,7 +92,7 @@ bool cx_compile(struct cx *cx,
     tok_idx = tok->type->compile(out, tok_idx, cx);
   }
 
-  return !cx->errors.count;
+  return cx->errors.count <= nerrors;
 }
 
 void cx_init_ops(struct cx_bin *bin) {

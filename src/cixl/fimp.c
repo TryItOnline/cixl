@@ -131,7 +131,9 @@ static bool compile(struct cx_fimp *imp, size_t tok_idx, struct cx_bin *out) {
     resolve_refs(i, out, cx);
     
     if (!ok) {
-      cx_error(cx, cx->row, cx->col, "Failed compiling fimp");
+      cx_error(cx, cx->row, cx->col,
+	       "Failed compiling fimp: %s<%s>",
+	       imp->func->id, imp->id);
       return false;
     }
   }

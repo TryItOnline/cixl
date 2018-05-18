@@ -62,3 +62,18 @@ bool cx_call_pop_args(struct cx_call *c) {
 void cx_call_deinit_args(struct cx_call *c) {
   for (unsigned int i=0; i < c->fimp->func->nargs; i++) { cx_box_deinit(c->args+i); }
 }
+
+struct cx_call *cx_call_copy(struct cx_call *dst, struct cx_call *src) {
+  dst->row = src->row;
+  dst->col = src->col;
+  dst->fimp = src->fimp;
+  dst->scope = cx_scope_ref(src->scope);
+  dst->recalls = src->recalls;
+  struct cx_box *dv = dst->args, *sv = src->args;
+  
+  for (unsigned int i=0; i < src->fimp->args.count; i++, dv++, sv++) {
+    cx_copy(dv, sv);
+  }
+
+  return dst;
+}

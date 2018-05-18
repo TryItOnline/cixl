@@ -21,5 +21,6 @@ struct cx_call *cx_call_deinit(struct cx_call *c);
 struct cx_box *cx_call_arg(struct cx_call *c, unsigned int i);
 bool cx_call_pop_args(struct cx_call *c);
 void cx_call_deinit_args(struct cx_call *c);
+struct cx_call *cx_call_copy(struct cx_call *dst, struct cx_call *src);
 
 #endif

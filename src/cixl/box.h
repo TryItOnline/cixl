@@ -22,6 +22,7 @@ struct cx_poll;
 struct cx_proc;
 struct cx_queue;
 struct cx_ref;
+struct cx_sched;
 struct cx_scope;
 struct cx_str;
 struct cx_table;
@@ -47,6 +48,7 @@ struct cx_box {
     void            *as_ptr;
     struct cx_queue *as_queue;
     struct cx_ref   *as_ref;
+    struct cx_sched *as_sched;
     struct cx_str   *as_str;
     struct cx_sym    as_sym;
     struct cx_table *as_table;

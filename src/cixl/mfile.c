@@ -5,7 +5,7 @@
 #include "cixl/lib.h"
 #include "cixl/malloc.h"
 #include "cixl/mfile.h"
-#include "cixl/posix/memstream.h"
+#include "cixl/compat/memstream.h"
 #include "cixl/type.h"
 
 FILE *cx_mopen(char **data, size_t *len) {

@@ -1,3 +1,14 @@
+* --- tasks
+* fix test3 valgrind errors
+* check ucontext return values
+* finish post
+* ---
+* add [.. 1 2 3] support
+** splat current stack into literal
+* add support for type params to stack literals<
+** check that items conform
+* add type.compare & <==> fn
+** add Compare trait
 * --- cxgui
 ** move start-script calls to window show event
 *** add on-show fn
@@ -7,6 +18,9 @@
 *** show focus rect when focused
 *** animate when clicked
 * ---
+* add cx_call.return_pc
+** change cixl calls to jump/specify instead of eval
+** change ORETURN to jump if specified
 * add args to readme types
 * throw error on dup rec field
 * add support for empty rec: defs
@@ -14,11 +28,6 @@
 ** fill in when args are pushed
 ** replaces cx_type_has_refs fn
 ** check as fast path in resolve
-* add cx_call_copy
-** copy args properly
-** use in error
-*** update error print to include args
-*** deinit calls in error_deinit
 * finish type-id parents
 ** resolve parents with refs and derive
 *** check all types in set against parents
@@ -52,6 +61,7 @@
 *** set in parse_const
 *** change eval to push value
 * replace clone fallback to copy with error
+** add Clone trait
 * replace varargs with size/array+macro
 * --- cxcrypt
 * add Pub/PrivKey

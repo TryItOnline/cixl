@@ -18,6 +18,7 @@ struct cx_arg;
 struct cx_catch;
 struct cx_scope;
 struct cx_sym;
+struct cx_task;
 
 struct cx {
   struct cx_set separators;
@@ -55,7 +56,7 @@ struct cx {
     *opt_type,
     *pair_type, *point_type, *poll_type, *proc_type,
     *rec_type, *ref_type, *rfile_type, *rwfile_type,
-    *seq_type, *sink_type, *stack_type, *str_type, *sym_type,
+    *sched_type, *seq_type, *sink_type, *stack_type, *str_type, *sym_type,
     *table_type, *tcp_client_type, *tcp_server_type, *time_type,
     *wfile_type;
 
@@ -69,7 +70,8 @@ struct cx {
 
   struct cx_call calls[CX_MAX_CALLS];
   unsigned int ncalls;
-  
+
+  struct cx_task *task;
   struct cx_bin *bin;
   size_t pc;
   

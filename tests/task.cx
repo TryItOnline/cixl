@@ -1,0 +1,45 @@
+'Testing cx/task...' say
+
+(
+  let: s Sched new;
+  let: out [];
+
+  $s {
+    $out 1 push
+    resched
+    $out 2 push
+  } push
+
+  $s {
+    $out 3 push
+    resched
+    $out 4 push
+  } push
+
+  $s run
+  $out [1 3 2 4] = check
+)
+
+(
+  let: s1 Sched new;
+  let: out [];
+
+  $s1 {
+    let: s2 Sched new;
+
+    $s2 {
+      $out `foo push
+      resched
+      $out `bar push
+    } push
+
+    $s2 {
+      $out `baz push
+    } push
+
+    $s2 {$out ~ push} for
+  } push
+
+  $s1 run
+  $out [`foo 2 `baz 1 `bar 0] = check
+)
