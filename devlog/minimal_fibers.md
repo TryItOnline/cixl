@@ -64,7 +64,7 @@ foo, 2, baz, 1, bar, 0
 ### Performance
 To get an idea about what kind of raw performance to expect, I wrote a simple benchmark that runs 2M task switches in Ruby and Cixl. I suspect most of the difference is due to Cixl running the scheduler loop in C. Measured time is displayed in milliseconds.
 
-[bench5.rb]()
+[bench5.rb](https://github.com/basic-gongfu/cixl/blob/master/perf/bench5.rb)
 ```
 n = 1000000
 
@@ -81,7 +81,7 @@ $ ruby bench5.rb
 3546
 ```
 
-[bench5.cx]()
+[bench5.cx](https://github.com/basic-gongfu/cixl/blob/master/perf/bench5.cx)
 ```
 define: n 1000000;
 let: s Sched new;
@@ -96,7 +96,7 @@ $ cixl bench5.cx
 ### Implementation
 Most heavy lifting is delegated to [ucontext.h](http://pubs.opengroup.org/onlinepubs/7908799/xsh/ucontext.h.html), each fiber (or task as Cixl likes to call them) carries its own fixed size C stack. Besides managing the stack, tasks additionally backup and restore Cixl's runtime state when rescheduled and resumed. 
 
-sched.[h]()/[c]()
+sched.[h](https://github.com/basic-gongfu/cixl/blob/master/src/cixl/sched.h)/[c](https://github.com/basic-gongfu/cixl/blob/master/src/cixl/sched.c)
 ```
 struct cx_sched {
   ucontext_t context;
@@ -127,7 +127,7 @@ bool cx_sched_run(struct cx_sched *s, struct cx_scope *scope) {
 }
 ```
 
-task.[h]()/[c]()
+task.[h](https://github.com/basic-gongfu/cixl/blob/master/src/cixl/task.h)/[c](https://github.com/basic-gongfu/cixl/blob/master/src/cixl/task.c)
 ```
 static void on_start(int t_low, int t_hi,
 		     int scope_low, int scope_hi) {
