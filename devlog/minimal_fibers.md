@@ -129,6 +129,22 @@ bool cx_sched_run(struct cx_sched *s, struct cx_scope *scope) {
 
 task.[h](https://github.com/basic-gongfu/cixl/blob/master/src/cixl/task.h)/[c](https://github.com/basic-gongfu/cixl/blob/master/src/cixl/task.c)
 ```
+enum cx_task_state {CX_TASK_NEW, CX_TASK_RUN, CX_TASK_DONE};
+
+struct cx_task {
+  struct cx_sched *sched;
+  struct cx_box action;
+  ucontext_t context;
+  enum cx_task_state state;
+  struct cx_task *prev_task;
+  ssize_t prev_pc, pc;
+  struct cx_bin *prev_bin, *bin;
+  ssize_t prev_nlibs, prev_nscopes, prev_ncalls;
+  struct cx_vec libs, scopes, calls;
+  char stack[CX_TASK_STACK_SIZE];
+  struct cx_ls queue;
+};
+
 static void on_start(int t_lo, int t_hi,
 		     int scope_lo, int scope_hi) {
   uintptr_t t_ptr = (uintptr_t)t_lo | ((uintptr_t)t_hi << 32);
