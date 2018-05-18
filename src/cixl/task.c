@@ -92,13 +92,13 @@ bool cx_task_resched(struct cx_task *t, struct cx_scope *scope) {
   return true;
 }
 
-static void on_start(int t_low, int t_hi,
-		     int scope_low, int scope_hi) {
-  uintptr_t t_ptr = (uintptr_t)t_low | ((uintptr_t)t_hi << 32);
+static void on_start(int t_lo, int t_hi,
+		     int scope_lo, int scope_hi) {
+  uintptr_t t_ptr = (uintptr_t)t_lo | ((uintptr_t)t_hi << 32);
   struct cx_task *t = (struct cx_task *)t_ptr;
   t->state = CX_TASK_RUN;
 
-  uintptr_t scope_ptr = (uintptr_t)scope_low | ((uintptr_t)scope_hi << 32);
+  uintptr_t scope_ptr = (uintptr_t)scope_lo | ((uintptr_t)scope_hi << 32);
   struct cx_scope *scope = (struct cx_scope *)scope_ptr;
   struct cx *cx = scope->cx;
   cx_call(&t->action, scope);

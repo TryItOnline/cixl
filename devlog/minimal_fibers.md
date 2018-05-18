@@ -2,10 +2,10 @@
 #### 2018-05-17
 
 ### Intro
-Fibers, or Green Threads, is one of those features that I knew [Cixl](https://github.com/basic-gongfu/cixl) would have to support eventually; but I wanted to wait until the dust settled before deciding on implementation details. Some languages, like Lua for example; expose raw coroutines and leave scheduling concerns as an excercise. While Cixl may eventually support raw coroutines, I still feel like it makes sense to separate concerns and provide fibers and scheduling as first class concepts. The implementation described here is my best attempt at cutting the concepts down to their core within the framework provided by Cixl; it has much in common with Smalltalk's flavor of cooperative concurrency, but comes with the added twist of first class schedulers.
+Fibers, or Green Threads, is one of those features that I knew [Cixl](https://github.com/basic-gongfu/cixl) would have to support eventually; but I wanted to wait until the dust settled before deciding on implementation details. Some languages, like Lua for example; expose raw coroutines and leave scheduling as an excercise. While Cixl may eventually support raw coroutines, I still feel like it makes sense to separate concerns and provide fibers and scheduling as first class concepts. The implementation described here is my best attempt at cutting the concepts down to their core within the framework provided by Cixl; it has much in common with Smalltalk's flavor of cooperative concurrency, but comes with the added twist of first class schedulers.
 
 ### Examples
-The following example demonstrates how to create a scheduler, push some fibers and run until all are finished:
+The following example demonstrates how to create a scheduler, push some fibers and wait until all are finished:
 
 ```
 #!/usr/local/bin/cixl
@@ -36,7 +36,7 @@ Output:
 1, 3, 2, 4
 ```
 
-The scheduler may alternatively be iterated for more granular control, each iteration triggers one fiber and pushes the number of fibers that are still running on the stack:
+The scheduler may alternatively be iterated for more granular control, each iteration triggers one fiber and pushes the number of fibers that are still active on the stack:
 
 ```
 let: s Sched new;
@@ -129,13 +129,13 @@ bool cx_sched_run(struct cx_sched *s, struct cx_scope *scope) {
 
 task.[h](https://github.com/basic-gongfu/cixl/blob/master/src/cixl/task.h)/[c](https://github.com/basic-gongfu/cixl/blob/master/src/cixl/task.c)
 ```
-static void on_start(int t_low, int t_hi,
-		     int scope_low, int scope_hi) {
-  uintptr_t t_ptr = (uintptr_t)t_low | ((uintptr_t)t_hi << 32);
+static void on_start(int t_lo, int t_hi,
+		     int scope_lo, int scope_hi) {
+  uintptr_t t_ptr = (uintptr_t)t_lo | ((uintptr_t)t_hi << 32);
   struct cx_task *t = (struct cx_task *)t_ptr;
   t->state = CX_TASK_RUN;
 
-  uintptr_t scope_ptr = (uintptr_t)scope_low | ((uintptr_t)scope_hi << 32);
+  uintptr_t scope_ptr = (uintptr_t)scope_lo | ((uintptr_t)scope_hi << 32);
   struct cx_scope *scope = (struct cx_scope *)scope_ptr;
   struct cx *cx = scope->cx;
   cx_call(&t->action, scope);
