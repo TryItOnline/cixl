@@ -8,10 +8,6 @@ Fibers, or Green Threads, is one of those features that I knew [Cixl](https://gi
 The following example demonstrates how to create a scheduler, push some fibers and wait until all are finished:
 
 ```
-#!/usr/local/bin/cixl
-
-use: cx;
-
 let: s Sched new;
 let: out [];
 
@@ -36,7 +32,7 @@ Output:
 1, 3, 2, 4
 ```
 
-The scheduler may alternatively be iterated for more granular control, each iteration triggers one fiber and pushes the number of fibers that are still active on the stack:
+Schedulers may alternatively be iterated for more granular control, each iteration triggers one fiber and pushes the number of active fibers on the stack:
 
 ```
 let: s Sched new;
@@ -94,7 +90,7 @@ $ cixl bench5.cx
 ```
 
 ### Implementation
-Most heavy lifting is delegated to [ucontext.h](http://pubs.opengroup.org/onlinepubs/7908799/xsh/ucontext.h.html), each fiber (or task as Cixl likes to call them) carries its own fixed size C stack. Besides managing the stack, tasks additionally backup and restore Cixl's runtime state when rescheduled and resumed. 
+Most heavy lifting is delegated to [ucontext.h](http://pubs.opengroup.org/onlinepubs/7908799/xsh/ucontext.h.html), each fiber (or task as Cixl likes to call them) carries its own fixed size C stack. Besides managing the stack, tasks additionally backup and restore Cixl's runtime state when scheduled and resumed. 
 
 sched.[h](https://github.com/basic-gongfu/cixl/blob/master/src/cixl/sched.h)/[c](https://github.com/basic-gongfu/cixl/blob/master/src/cixl/sched.c)
 ```
